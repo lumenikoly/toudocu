@@ -484,8 +484,8 @@ func TestUseDocuDocuMetadata(t *testing.T) {
 	metadata := readUseDocuDocuFile(t, filepath.Join("agents", "openai.yaml"))
 	for _, expected := range []string{
 		`display_name: "Use Docu-docu"`,
-		`short_description: "Подключайте, обновляйте и проверяйте Docu-docu"`,
-		`default_prompt: "Используй $use-docu-docu init, чтобы явно подключить Docu-docu к этому проекту."`,
+		`short_description: "Set up, update, and validate Docu-docu documentation"`,
+		`default_prompt: "Use $use-docu-docu init to explicitly set up Docu-docu for this project."`,
 	} {
 		if !strings.Contains(metadata, expected) {
 			t.Errorf("openai.yaml does not contain %q", expected)

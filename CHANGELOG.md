@@ -1,168 +1,20 @@
 # Changelog
 
-## Unreleased
-
-- Лицензия собственного кода изменена с MIT на Apache-2.0. При подготовке
-  release bundle формируется единый `THIRD_PARTY_NOTICES.md` с notices для
-  CodeMirror, Mermaid Tiny, lodash, js-yaml, DOMPurify и `go.yaml.in/yaml/v3`.
-- CLI получил контекстный help для каждой команды и task-группы с применимыми
-  параметрами, примерами, побочными эффектами и exit code `0`.
-- Удалены два синтаксических дубля: сборка требует явного `docu-docu build`, а
-  task-scoped change report вызывается только как `docu-docu task changes` без
-  флага `changes --task`.
-- `task init` и `scaffold` без `--lang` используют поддерживаемый основной язык
-  `project.locale`; fallback остаётся `en`, явный флаг имеет приоритет.
-- Skill `use-docu-docu` сокращён до таблицы маршрутизации операций и общих
-  инвариантов; обязательность `architecture/overview.md` закреплена единообразно.
-- Портал раскрывает только активную группу навигации по умолчанию, показывает
-  до пяти рекомендуемых точек входа, локализует трассируемость и отделяет
-  serve-workspace от действий чтения и документа. Пересборка показывает область,
-  progress, результат и ошибку с повтором; permalink и collapse-кнопки больше
-  не загрязняют accessible name заголовка.
-
 ## 0.0.1
 
-- Поисковый индекс портала стал воспроизводимым: metadata обрабатываются в
-  стабильном порядке, закреплённом регрессионным тестом.
-- Локальный и GitHub release workflows используют единый полный quality gate и
-  формируют одинаковый bundle из пяти бинарников, checksums, notices и
-  лицензий. GitHub workflow дополнительно проверяет совпадение версии с именем
-  тега.
-- `flows/index.html` больше не создаётся: единственный каталог `FLOW-*` —
-  `processes/index.html`, а URL отдельных `flows/FLOW-*.html` сохранены.
-- Портал автоматически показывает корневой `CHANGELOG.md` как «Журнал
-  изменений проекта» по маршруту `project-changelog.html` и включает его в
-  portal search. Файл не меняет `ProjectReport`, task context, semantic model
-  или editor workspace; `docs/changelog.md` остаётся обычным Markdown.
-- Добавлены `docu-docu changes`, `changes file` и `task changes` с Git-backed
-  commit/index/working-tree snapshots, schema-v1 JSON, text/Markdown reports,
-  filters, task impact и exit codes 0–4.
-- `serve` получил `/changes/`, read-only HTTP API, ETag digest polling,
-  unified/CodeMirror merge/rendered/semantic views, OpenAPI compatibility,
-  Mermaid, assets и screen-map overlays. Static `build` не зависит от Git.
-- OpenAPI YAML использует `go.yaml.in/yaml/v3@v3.0.5`, а serve-only merge view
-  — `@codemirror/merge@6.12.2`.
-- `serve` получил live editor workspace с safe source tree, CodeMirror,
-  Markdown preview, diagnostics, typed create, SHA-256 CAS save, external-change
-  watcher и ETag polling; save/create синхронно обновляют модель, HTML и поиск.
-- `build` закреплён как автономный static read-only portal: editor markup,
-  editor API URL, CodeMirror и server-only rebuild code в него не попадают.
-- Добавлен schema-v1 editor HTTP contract со strict JSON, 3 MiB/2 MiB limits,
-  same-origin/action guards, canonical POSIX paths, symlink/output exclusions и
-  atomic platform-specific replace. API не запускает Git, shell или task verify.
-- `task init` и семь scaffold-команд используют один ordered registry, который
-  также формирует browser create; публичная CLI-семантика не изменилась.
-- Карта экранов получила obstacle-aware трассировку переходов и отдельный слой
-  двухстрочных подписей, которые обходят карточки и остаются доступными с
-  клавиатуры без изменения screen model или JSON schema.
-- Skill получил изменяющие workflow `$use-docu-docu refresh` для полного ревью
-  актуальности и `$use-docu-docu refresh diff` для staged, unstaged и untracked
-  изменений относительно `HEAD` с расширением на зависимые документы. Оба
-  режима используют evidence-first updates, semantic gate и условную
-  пересборку tracked portals; Go-команда `docu-docu refresh` не добавлена.
-- Архитектурная документация стала вопросно-ориентированной:
-  `architecture/overview.md` обязателен, имеет тип `Architecture Overview` и
-  напрямую перечисляет каждый подробный ответ; обычный check выдаёт стабильные
-  errors для отсутствующей карты, типа, вопроса, листинга и небезопасных
-  архитектурных ссылок без изменения ProjectReport schema v1.
-- RU/EN architecture template разделён на overview и detail; `$use-docu-docu
-  init` создаёт минимальные `index.md` и architecture overview, но
-  останавливается на legacy-архитектуре. Managed guidance и semantic gate
-  получили правила одного вопроса и проверки `ARCH001`–`ARCH013`.
-- Skill получил явный onboarding-вызов `$use-docu-docu init`: только он создаёт
-  минимальную документацию и устанавливает управляемые правила в `AGENTS.md`;
-  обычные prompt больше не подразумевают автоматическую инициализацию или
-  обязательный новый `TASK-*`.
-- Добавлены опциональные `quality/STD-*`, `runbooks/RB-*`, custom manifests,
-  task-связи `Standards`/`Affected runbooks`, verification target `QUALITY`,
-  RU/EN scaffolds и специализированные каталоги портала.
-- В хедер портала при работе через `serve` добавлена кнопка «Пересобрать
-  документацию»: сервер перегенерирует модель и HTML, а браузер после успеха
-  перезагружает текущую страницу без смены адреса listener.
-- Verification target теперь определяется только по левой части mapping, поэтому
-  команды с `docs`, `ALL` или `AC-*` больше не создают ложную неоднозначность.
-- Readiness принимает существующие безопасные каталоги в documentation impact,
-  сохраняя запрет на выход пути за `repository-root`.
-- Добавлены встроенные темы `classic`, `paper`, `terminal`, фиксированные
-  варианты accent, плотности и ширины, переключатель `system → light → dark` и
-  отдельные выпадающие списки темы и цветовой схемы с локальным сохранением
-  выбора; Mermaid-цвета согласованы с обоими контролами.
-- `.docu-docu/config.yml` настраивает title, hero, footer, logo и favicon через
-  строгий YAML-поднабор; branding assets копируются только из
-  `.docu-docu/assets/`, а runtime-ресурсы остаются offline-first.
-- Добавлены детерминированные `search`, `task init`, `scaffold`, `task ready`,
-  расширенный `task context` и `task verify`; прежняя `task check` удалена.
-- Все публичные JSON-отчёты используют единую schema v1 без legacy-слоя и
-  параллельной выдачи нескольких версий схемы.
-- Readiness проверяет полный task contract, связанные сущности,
-  documentation-impact пути и безопасный scope нового файла.
-- `task verify --run` блокирует Draft и Cancelled; readiness требует module,
-  task context включает явно связанные transitions, а отсутствующий scope-каталог
-  и многострочный scaffold title отклоняются.
-- Зафиксирована граница Agent/Docu-docu: CLI не интерпретирует запрос, не меняет
-  статус и не подтверждает acceptance criteria.
-- `sequenceDiagram` теперь подчиняется общим правилам связи Mermaid-документов:
-  конкретные последовательности запросов можно описывать в связанных `FLOW-*`
-  без обязательной ссылки на архитектуру.
-- Добавлена единая модель экранов из `screens/SC-*.md`: состояния, уникальные
-  `TR-*`, use cases, безопасные raster previews, hotspots и графовая валидация.
-- Портал получил DOM-карту с SVG-связями, режимами по модулю, статусу, use case
-  и sitemap, pan/zoom/fit, инспектором и доступным каталогом.
-- Страницы `UC-*` получили автономный пошаговый режим с действиями,
-  состояниями, ошибками, историей, возвратом, reset, завершением сценария и
-  hotspot fallback.
-- Карточки карты показывают входящие и исходящие переходы; return и external
-  получили отдельную геометрию, hotspots проявляются при hover и focus, а
-  завершение flow ведёт к карте и исходному use case.
-- «Пользовательские сценарии» и «Процессы» разделены на каталоги `UC-*` и
-  `FLOW-*`. Раздел «Экраны» открывает каталог, а карта остаётся отдельным
-  представлением. Канонические документы используют стабильные URL по ID, а
-  страница use case содержит вкладки «Описание», «Карта», «Проиграть»,
-  «Связи».
-- `FLOW-*` поддерживает связь с несколькими сценариями; schema v1 содержит
-  двусторонние связи `UC.flowIds ↔ FLOW.useCaseIds`.
-- `report.json` schema v1 дополнен top-level коллекциями `screens`,
-  `transitions`, `playableFlows`, `hotspots`, `errorDefinitions` и
-  `traceability`.
-- `build` и `serve` поддерживают `--screen-map` и `--no-screen-map`.
-- Добавлена встроенная Mermaid Tiny 11.16.0: автономный рендеринг `flowchart`,
-  `stateDiagram-v2` и `sequenceDiagram`, строгая конфигурация, fallback с
-  исходным кодом и поддержка светлой/тёмной темы.
-- Добавлен тип `flows/*.md` с `FLOW-*`, проверкой связи с use case или
-  архитектурой и необязательным полем `Процесс` у рабочих задач.
-- Документация проекта дополнена схемами сборки, проверки, локального просмотра
-  и workflow рабочей задачи.
-- Добавлены свободные корневые документы `notes.md` и `ideas.md` для заметок,
-  идей функций и планов без обязательных полей, разделов и редакционной
-  валидации.
-- Добавлена dev-команда `serve` со статической HTTP-раздачей, безопасным
-  loopback по умолчанию и пересборкой при обновлении HTML-страницы.
-- Удалены команда `init`, флаг `--force` и встроенные стартовые шаблоны.
-- Для проверки глобально требуются `index.md` и
-  `architecture/overview.md`; остальные типы документов валидируются при их
-  наличии.
-- Dashboard показывает содержимое `index.md` и скрывает отсутствующие
-  необязательные разделы.
-- Исправлена очистка output через символические ссылки на каталог-предок документации.
-- Timeout `task verify --run` завершает всё дерево процессов на Unix и Windows.
-- Добавлена read-only команда `task context` с компактным JSON-контекстом для агентов.
-- Публичные JSON-отчёты стали типизированными; строки в JSON везде 1-based,
-  пустые коллекции имеют вид `[]`.
-- Черновику задачи достаточно раздела `Результат`; полный workflow-контракт применяется с `Готово к работе`, ограничение плана в 3–7 шагов удалено.
-- Рабочие задачи переведены на правило «одна задача — один файл».
-- Добавлены статусы и типы задач, обязательный план, `AC-*`, команды проверки и влияние на документацию.
-- Добавлены проверки чекбоксов, специальных статусов, scope-путей, зависимостей и ссылок roadmap на стабильные ID.
-- `report.json` содержит матрицу критериев и команд проверки.
-- Стартовые документы больше не дублируют чек-листы требований в `status.md` и use case.
-- Прогресс связанных `UC-*` в roadmap вычисляется из статуса use case без изменения Markdown.
-- Dashboard и `status.html` показывают вычисляемые активные задачи, блокеры и следующий результат.
-- Версия генератора установлена в `0.0.1`.
-- Полная реализация генератора на Go.
-- Добавлены `check`, `build`, `version`; создание work item доступно через
-  `task init`, а отдельной top-level команды `init` нет.
-- Сохранён совместимый режим вызова без подкоманды.
-- Встроены HTML/CSS/JS-ресурсы и шаблоны через `go:embed`.
-- Перенесены Markdown-парсер, проектная модель, ссылки, знания, риски и roadmap.
-- Добавлены статический портал, поиск, фильтры, тёмная тема и `report.json`.
-- Добавлены проверки стабильных ID, зависимостей задач, безопасности путей и ссылок.
-- Добавлены Go-тесты, race-проверка и кроссплатформенная сборка.
+- Первый стабильный релиз dependency-free Go CLI для проверки Markdown и
+  построения автономного статического HTML-портала.
+- Команды `check`, `build`, `search`, `changes` и `task changes` обеспечивают
+  валидацию, поиск и Git-backed отчёты об изменениях в JSON, text и Markdown.
+- `serve` предоставляет безопасный локальный workspace с live rebuild,
+  предпросмотром Markdown, редактором и просмотром изменений; результат `build`
+  остаётся статическим и read-only.
+- Документная модель поддерживает архитектурные карты, модули, пользовательские
+  сценарии, Mermaid-процессы, экраны, переходы, интерактивную карту и
+  воспроизводимый портал с поиском, темами, branding и локализацией.
+- Workflow рабочих задач включает typed scaffolds, readiness, контекст, проверку
+  и traceability; все публичные JSON-отчёты используют schema v1.
+- Skill `use-docu-docu` добавляет явные agent-workflow для инициализации,
+  проверки актуальности исходной документации и перевода locale tree.
+- Релиз собирается для пяти платформ с единым quality gate, checksums, лицензией
+  Apache-2.0 и notices для встроенных сторонних компонентов.
