@@ -29,7 +29,7 @@ func createFixture(t *testing.T) (string, string, string) {
 	}
 	writeTestFile(t, docs, "index.md", "# Test Project\n\nОписание тестового проекта.\n\n- [x] Общая задача\n\n[Статус](status.md)\n")
 	writeTestFile(t, docs, "status.md", "# Состояние\n\n- Статус: В работе\n- Этап: MVP\n- Последнее обновление: 2026-07-24\n\nТекущее состояние.\n\n## Краткое состояние\n\nОсновной поток работает.\n")
-	writeTestFile(t, docs, "roadmap.md", "# Roadmap\n\nПлан.\n\n## MVP\n\n- Статус: В работе\n- Плановая дата: 2026-09-01\n\n- [x] Готово\n- [ ] Осталось\n")
+	writeTestFile(t, docs, "roadmap.md", "# Roadmap\n\nПлан.\n\n## MVP\n\n- Статус: В работе\n- Плановая дата: 2026-09-01\n\n- [x] `DLV-DOCS-01` Документация готова.\n- [ ] `UC-AUTH-01` Пользователь входит.\n")
 	writeTestFile(t, docs, "risks.md", "# Риски\n\nОписание рисков.\n\n## RISK-01: Тестовый риск\n\n- Статус: Открыт\n- Вероятность: Высокая\n- Влияние: Среднее\n- Владелец: Team\n\n- [ ] Снизить риск\n")
 	writeTestFile(t, docs, "modules/auth.md", `# Авторизация
 
@@ -232,18 +232,200 @@ func TestCLIArguments(t *testing.T) {
 
 func TestKnowledgeModel(t *testing.T) {
 	_, docs, _ := createFixture(t)
-	content := "# Текущие задачи\n\n" +
-		"## TASK-AUTH-001: Защитить вход\n\n" +
-		"- Статус: Готово\n- Приоритет: Высокий\n- Модуль: MOD-AUTH\n- Сценарий: UC-AUTH-01\n\n" +
-		"### Результат\n\nВход проверяет ограничения.\n\n" +
-		"### Область изменения\n\nМодуль авторизации.\n\n" +
-		"### Не входит в задачу\n\nПрофиль.\n\n" +
-		"### Критерии готовности\n\n- [x] Неверный пароль отклоняется.\n\n" +
-		"### Проверка\n\n`go test ./...`\n"
-	writeTestFile(t, docs, "work/current.md", content)
+	content := "# TASK-AUTH-001: Защитить вход\n\n" +
+		"- Статус: В работе\n- Тип: Feature\n- Приоритет: Высокий\n- Модуль: MOD-AUTH\n- Сценарий: UC-AUTH-01\n\n" +
+		"## Результат\n\nВход проверяет ограничения.\n\n" +
+		"## Область изменения\n\n- `docs/`\n\n" +
+		"## Не входит в задачу\n\nПрофиль.\n\n" +
+		"## Критерии приёмки\n\n- [x] `AC-01` Неверный пароль отклоняется.\n\n" +
+		"## План\n\n1. Проверить поток.\n2. Изменить реализацию.\n3. Запустить тесты и обновить документацию.\n\n" +
+		"## Проверка\n\n- `AC-01` → `go test ./...`\n\n" +
+		"## Влияние на документацию\n\nОбновить сценарий входа.\n"
+	writeTestFile(t, docs, "work/TASK-AUTH-001-login.md", content)
 	model := buildFixture(t, docs)
-	if len(model.Knowledge.Modules) != 1 || len(model.Knowledge.UseCases) != 1 || len(model.Knowledge.BusinessRules) != 1 || len(model.Knowledge.WorkItems) != 1 || model.Knowledge.WorkItems[0].ID != "TASK-AUTH-001" || model.Stats.Errors != 0 {
+	if len(model.Knowledge.Modules) != 1 || len(model.Knowledge.UseCases) != 1 || len(model.Knowledge.BusinessRules) != 1 || len(model.Knowledge.WorkItems) != 1 || model.Knowledge.WorkItems[0].ID != "TASK-AUTH-001" || len(model.Knowledge.WorkItems[0].Verification) != 1 || model.Stats.Errors != 0 {
 		t.Fatalf("knowledge %#v issues %#v", model.Knowledge, model.Issues)
+	}
+}
+
+func issueCodes(model *Model) map[string]bool {
+	result := map[string]bool{}
+	for _, issue := range model.Issues {
+		result[issue.Code] = true
+	}
+	return result
+}
+
+func TestWorkItemValidationRules(t *testing.T) {
+	_, docs, _ := createFixture(t)
+	content := `# TASK-AUTH-002: Некорректная завершённая задача
+
+- Статус: Выполнено
+- Тип: Feature
+- Модуль: MOD-AUTH
+- Сценарий: UC-AUTH-01
+
+## Результат
+
+Результат.
+
+## Область изменения
+
+- ` + "`missing/path.go`" + `
+- ` + "`../outside.go`" + `
+
+## Не входит в задачу
+
+Прочее.
+
+## Критерии приёмки
+
+- [x] ` + "`AC-01`" + ` Первый критерий.
+- [ ] ` + "`AC-01`" + ` Повтор критерия.
+
+## План
+
+1. Первый шаг.
+2. Второй шаг.
+- [ ] Чекбокс в плане.
+
+## Проверка
+
+- ` + "`AC-02`" + ` → ` + "`go test ./...`" + `
+
+## Влияние на документацию
+`
+	writeTestFile(t, docs, "work/TASK-AUTH-002-invalid.md", content)
+	model := buildFixture(t, docs)
+	codes := issueCodes(model)
+	for _, code := range []string{
+		"duplicate-acceptance-criterion-id",
+		"unknown-criterion-verification",
+		"missing-criterion-verification",
+		"task-checkbox-outside-criteria",
+		"incomplete-completed-task",
+		"missing-scope-path",
+		"unsafe-scope-path",
+		"empty-work-section",
+		"invalid-task-plan",
+	} {
+		if !codes[code] {
+			t.Fatalf("missing issue %s in %#v", code, model.Issues)
+		}
+	}
+}
+
+func TestSpecialTaskStatusesAndSingleTaskFile(t *testing.T) {
+	_, docs, _ := createFixture(t)
+	task := func(id, status string) string {
+		return "# " + id + ": Статусная задача\n\n" +
+			"- Статус: " + status + "\n- Тип: Feature\n- Модуль: MOD-AUTH\n- Сценарий: UC-AUTH-01\n\n" +
+			"## Результат\n\nРезультат.\n\n## Область изменения\n\n- `docs/`\n\n" +
+			"## Не входит в задачу\n\nПрочее.\n\n## Критерии приёмки\n\n- [ ] `AC-01` Результат наблюдаем.\n\n" +
+			"## План\n\n1. Проверить.\n2. Реализовать.\n3. Протестировать и обновить документацию.\n\n" +
+			"## Проверка\n\n- `AC-01` → `go test ./...`\n\n## Влияние на документацию\n\nНе требуется: поведение не меняется.\n"
+	}
+	writeTestFile(t, docs, "work/TASK-AUTH-003-blocked.md", task("TASK-AUTH-003", "Заблокировано"))
+	writeTestFile(t, docs, "work/TASK-AUTH-004-cancelled.md", task("TASK-AUTH-004", "Отменено"))
+	writeTestFile(t, docs, "work/two-items.md", "# Список\n\n## TASK-AUTH-005: Первая\n\n## TASK-AUTH-006: Вторая\n")
+	model := buildFixture(t, docs)
+	codes := issueCodes(model)
+	for _, code := range []string{"work-item-count", "missing-work-section"} {
+		if !codes[code] {
+			t.Fatalf("missing issue %s in %#v", code, model.Issues)
+		}
+	}
+	messages := strings.Builder{}
+	for _, issue := range model.Issues {
+		messages.WriteString(issue.Message)
+		messages.WriteByte('\n')
+	}
+	if !strings.Contains(messages.String(), "Блокер") || !strings.Contains(messages.String(), "Причина отмены") {
+		t.Fatalf("special status sections not validated: %s", messages.String())
+	}
+}
+
+func TestTaskTypeAndUseCaseRules(t *testing.T) {
+	_, docs, _ := createFixture(t)
+	task := func(id, status, taskType string) string {
+		return "# " + id + ": Техническая задача\n\n" +
+			"- Статус: " + status + "\n- Тип: " + taskType + "\n- Модуль: MOD-AUTH\n\n" +
+			"## Результат\n\nРезультат.\n\n## Область изменения\n\n- `docs/`\n\n" +
+			"## Не входит в задачу\n\nПрочее.\n\n## Критерии приёмки\n\n- [ ] `AC-01` Результат наблюдаем.\n\n" +
+			"## План\n\n1. Проверить.\n2. Реализовать.\n3. Протестировать и обновить документацию.\n\n" +
+			"## Проверка\n\n- `AC-01` → `go test ./...`\n\n## Влияние на документацию\n\nНе требуется: поведение не меняется.\n"
+	}
+	writeTestFile(t, docs, "work/TASK-AUTH-008-invalid-enums.md", task("TASK-AUTH-008", "Запланировано", "Chore"))
+	writeTestFile(t, docs, "work/TASK-AUTH-009-maintenance.md", task("TASK-AUTH-009", "Готово к работе", "Maintenance"))
+	model := buildFixture(t, docs)
+	codes := issueCodes(model)
+	for _, code := range []string{"invalid-task-status", "invalid-task-type", "missing-use-case-omission-reason"} {
+		if !codes[code] {
+			t.Fatalf("missing issue %s in %#v", code, model.Issues)
+		}
+	}
+}
+
+func TestStatusAndRoadmapConsistency(t *testing.T) {
+	_, docs, _ := createFixture(t)
+	writeTestFile(t, docs, "status.md", "# Состояние\n\n- Статус: В работе\n\n## В работе\n\n- [ ] Сделать авторизацию.\n")
+	writeTestFile(t, docs, "roadmap.md", "# Roadmap\n\n## MVP\n\n- [x] `UC-AUTH-01` Пользователь входит.\n- [ ] Произвольный результат.\n- [ ] `UC-UNKNOWN-01` Неизвестный сценарий.\n")
+	model := buildFixture(t, docs)
+	codes := issueCodes(model)
+	for _, code := range []string{"status-requirement-checklist", "roadmap-use-case-status-mismatch", "invalid-roadmap-item-id", "dangling-roadmap-reference"} {
+		if !codes[code] {
+			t.Fatalf("missing issue %s in %#v", code, model.Issues)
+		}
+	}
+}
+
+func TestVerificationMatrixIsReported(t *testing.T) {
+	_, docs, _ := createFixture(t)
+	content := `# TASK-AUTH-007: Матрица
+
+- Статус: Черновик
+- Тип: Feature
+- Модуль: MOD-AUTH
+- Сценарий: UC-AUTH-01
+
+## Результат
+
+Результат.
+
+## Область изменения
+
+Будет уточнена.
+
+## Не входит в задачу
+
+Прочее.
+
+## Критерии приёмки
+
+- [ ] ` + "`AC-01`" + ` Результат наблюдаем.
+
+## План
+
+Будет уточнён.
+
+## Проверка
+
+- ` + "`AC-01`" + ` → ` + "`go test ./...`" + `
+
+## Влияние на документацию
+
+Не требуется: это тест.
+`
+	writeTestFile(t, docs, "work/TASK-AUTH-007-matrix.md", content)
+	model := buildFixture(t, docs)
+	data, err := json.Marshal(BuildReport(model))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, part := range []string{`"verificationMatrix"`, `"criterionId":"AC-01"`, `"commands":["go test ./..."]`} {
+		if !strings.Contains(string(data), part) {
+			t.Fatalf("report does not contain %s: %s", part, data)
+		}
 	}
 }
 
@@ -266,15 +448,18 @@ func TestRepositoryLinksAndTraversal(t *testing.T) {
 func TestTaskDependencyCycle(t *testing.T) {
 	_, docs, _ := createFixture(t)
 	task := func(id, dep string) string {
-		return "## " + id + ": Цикл\n\n" +
-			"- Статус: В работе\n- Модуль: MOD-AUTH\n- Сценарий: UC-AUTH-01\n- Зависит от: " + dep + "\n\n" +
-			"### Результат\n\nРезультат.\n\n" +
-			"### Область изменения\n\nМодуль.\n\n" +
-			"### Не входит в задачу\n\nПрочее.\n\n" +
-			"### Критерии готовности\n\n- [ ] Проверено.\n\n" +
-			"### Проверка\n\n`go test ./...`\n"
+		return "# " + id + ": Цикл\n\n" +
+			"- Статус: В работе\n- Тип: Feature\n- Модуль: MOD-AUTH\n- Сценарий: UC-AUTH-01\n- Зависит от: " + dep + "\n\n" +
+			"## Результат\n\nРезультат.\n\n" +
+			"## Область изменения\n\n- `docs/`\n\n" +
+			"## Не входит в задачу\n\nПрочее.\n\n" +
+			"## Критерии приёмки\n\n- [ ] `AC-01` Проверено.\n\n" +
+			"## План\n\n1. Исследовать.\n2. Реализовать.\n3. Проверить и обновить документацию.\n\n" +
+			"## Проверка\n\n- `AC-01` → `go test ./...`\n\n" +
+			"## Влияние на документацию\n\nНе требуется: тестовая задача.\n"
 	}
-	writeTestFile(t, docs, "work/current.md", "# Текущие задачи\n\n"+task("TASK-AUTH-001", "TASK-AUTH-002")+"\n"+task("TASK-AUTH-002", "TASK-AUTH-001"))
+	writeTestFile(t, docs, "work/TASK-AUTH-001.md", task("TASK-AUTH-001", "TASK-AUTH-002"))
+	writeTestFile(t, docs, "work/TASK-AUTH-002.md", task("TASK-AUTH-002", "TASK-AUTH-001"))
 	model := buildFixture(t, docs)
 	found := false
 	for _, issue := range model.Issues {

@@ -198,20 +198,30 @@ type BusinessRule struct {
 }
 
 type WorkItem struct {
-	ID              string     `json:"id"`
-	Title           string     `json:"title"`
-	Status          StatusInfo `json:"status"`
-	Priority        string     `json:"priority,omitempty"`
-	Owner           string     `json:"owner,omitempty"`
-	ModuleID        string     `json:"moduleId,omitempty"`
-	UseCaseID       string     `json:"useCaseId,omitempty"`
-	DependsOn       []string   `json:"dependsOn"`
-	Document        string     `json:"document"`
-	Anchor          string     `json:"anchor"`
-	Criteria        []Task     `json:"criteria"`
-	RepositoryPaths []string   `json:"repositoryPaths"`
+	ID              string                  `json:"id"`
+	Title           string                  `json:"title"`
+	Status          StatusInfo              `json:"status"`
+	Type            string                  `json:"type,omitempty"`
+	Priority        string                  `json:"priority,omitempty"`
+	Owner           string                  `json:"owner,omitempty"`
+	ModuleID        string                  `json:"moduleId,omitempty"`
+	UseCaseID       string                  `json:"useCaseId,omitempty"`
+	DependsOn       []string                `json:"dependsOn"`
+	Document        string                  `json:"document"`
+	Anchor          string                  `json:"anchor"`
+	Criteria        []Task                  `json:"criteria"`
+	Verification    []CriterionVerification `json:"verificationMatrix"`
+	RepositoryPaths []string                `json:"repositoryPaths"`
 	line            int
 	ownerDoc        *Document
+	statusName      string
+}
+
+type CriterionVerification struct {
+	CriterionID string   `json:"criterionId"`
+	Criterion   string   `json:"criterion"`
+	Completed   bool     `json:"completed"`
+	Commands    []string `json:"commands"`
 }
 
 type KnowledgeModel struct {

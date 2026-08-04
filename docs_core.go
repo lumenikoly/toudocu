@@ -38,8 +38,8 @@ type statusGroup struct {
 }
 
 var statusGroups = []statusGroup{
-	{Kind: "not-started", Symbol: "○", Values: []string{"не начато", "не начат", "not started", "new"}},
-	{Kind: "planned", Symbol: "◷", Values: []string{"запланировано", "запланирован", "planned", "proposed", "предложено", "предложен"}},
+	{Kind: "not-started", Symbol: "○", Values: []string{"не начато", "не начат", "not started", "new", "черновик", "draft"}},
+	{Kind: "planned", Symbol: "◷", Values: []string{"запланировано", "запланирован", "planned", "proposed", "предложено", "предложен", "готово к работе", "ready"}},
 	{Kind: "in-progress", Symbol: "◐", Values: []string{"в работе", "работа", "in progress", "work in progress", "active", "активен", "снижается"}},
 	{Kind: "blocked", Symbol: "!", Values: []string{"заблокировано", "заблокирован", "blocked"}},
 	{Kind: "paused", Symbol: "Ⅱ", Values: []string{"приостановлено", "приостановлен", "paused", "on hold"}},
@@ -47,6 +47,7 @@ var statusGroups = []statusGroup{
 	{Kind: "open", Symbol: "◇", Values: []string{"открыт", "открыто", "open"}},
 	{Kind: "accepted", Symbol: "✓", Values: []string{"принято", "принят", "accepted"}},
 	{Kind: "rejected", Symbol: "×", Values: []string{"отклонено", "отклонен", "rejected"}},
+	{Kind: "cancelled", Symbol: "×", Values: []string{"отменено", "отменен", "cancelled", "canceled"}},
 	{Kind: "superseded", Symbol: "↪", Values: []string{"заменено", "заменен", "superseded"}},
 	{Kind: "obsolete", Symbol: "⌁", Values: []string{"устарело", "устарел", "deprecated", "obsolete"}},
 	{Kind: "risk-accepted", Symbol: "≈", Values: []string{"риск принят", "risk accepted"}},
@@ -313,26 +314,18 @@ func validateDocumentBasics(model *Model, document *Document) {
 	}
 	rules := map[string][]sectionRule{
 		"use-case": {
-			{[]string{"цель", "goal"}, "Отсутствует раздел «Цель»."},
-			{[]string{"входные данные", "inputs"}, "Отсутствует раздел «Входные данные»."},
-			{[]string{"предусловия", "preconditions"}, "Отсутствует раздел «Предусловия»."},
 			{[]string{"основной сценарий", "main scenario", "основной поток"}, "Отсутствует раздел «Основной сценарий»."},
-			{[]string{"альтернативные сценарии", "alternative scenarios"}, "Отсутствует раздел «Альтернативные сценарии»."},
 			{[]string{"постусловия", "postconditions"}, "Отсутствует раздел «Постусловия»."},
 			{[]string{"бизнес-правила", "business rules"}, "Отсутствует раздел «Бизнес-правила»."},
-			{[]string{"критерии приёмки", "критерии приемки", "acceptance criteria"}, "Отсутствует раздел «Критерии приёмки»."},
 			{[]string{"реализация", "implementation"}, "Отсутствует раздел «Реализация»."},
-			{[]string{"проверка", "verification"}, "Отсутствует раздел «Проверка»."},
 		},
 		"module": {
-			{[]string{"назначение", "purpose"}, "Отсутствует раздел «Назначение»."},
 			{[]string{"расположение в коде", "code location"}, "Отсутствует раздел «Расположение в коде»."},
-			{[]string{"границы модуля", "module boundaries"}, "Отсутствует раздел «Границы модуля»."},
+			{[]string{"границы", "границы модуля", "module boundaries"}, "Отсутствует раздел «Границы»."},
 			{[]string{"бизнес-правила", "business rules"}, "Отсутствует раздел «Бизнес-правила»."},
 			{[]string{"инварианты", "invariants"}, "Отсутствует раздел «Инварианты»."},
 			{[]string{"стабильные интерфейсы", "stable interfaces"}, "Отсутствует раздел «Стабильные интерфейсы»."},
 			{[]string{"связанные сценарии", "related use cases"}, "Отсутствует раздел «Связанные сценарии»."},
-			{[]string{"проверка", "verification"}, "Отсутствует раздел «Проверка»."},
 		},
 		"decision": {
 			{[]string{"контекст", "context"}, "Отсутствует раздел «Контекст»."},

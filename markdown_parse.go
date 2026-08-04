@@ -13,6 +13,8 @@ var fieldAliases = map[string]string{
 	"author": "author", "автор": "author",
 	"actor": "actor", "актор": "actor",
 	"priority": "priority", "приоритет": "priority",
+	"type": "type", "тип": "type",
+	"source": "source", "источник": "source",
 	"criticality": "criticality", "критичность": "criticality",
 	"module": "module", "модуль": "module",
 	"use case": "useCase", "scenario": "useCase", "сценарий": "useCase", "связанный сценарий": "useCase",
@@ -31,7 +33,7 @@ var displayFieldNames = map[string]string{
 	"author": "Автор", "actor": "Актор", "priority": "Приоритет", "criticality": "Критичность",
 	"module": "Модуль", "useCase": "Сценарий", "dependsOn": "Зависит от", "date": "Дата",
 	"plannedDate": "Плановая дата", "updated": "Последнее обновление", "probability": "Вероятность",
-	"impact": "Влияние", "id": "Идентификатор", "tags": "Теги",
+	"impact": "Влияние", "id": "Идентификатор", "tags": "Теги", "type": "Тип", "source": "Источник",
 }
 
 var (
