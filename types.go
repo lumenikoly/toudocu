@@ -330,6 +330,10 @@ type WorkItem struct {
 	Archived            bool                    `json:"archived"`
 	ArchiveYear         string                  `json:"archiveYear,omitempty"`
 	Priority            string                  `json:"priority,omitempty"`
+	Severity            string                  `json:"severity,omitempty"`
+	Reproducibility     string                  `json:"reproducibility,omitempty"`
+	Regression          string                  `json:"regression,omitempty"`
+	Updated             string                  `json:"updated,omitempty"`
 	Owner               string                  `json:"owner,omitempty"`
 	ModuleID            string                  `json:"moduleId,omitempty"`
 	UseCaseID           string                  `json:"useCaseId,omitempty"`
@@ -449,6 +453,12 @@ type Stats struct {
 	Risks                       int            `json:"risks"`
 	OpenRisks                   int            `json:"openRisks"`
 	Decisions                   int            `json:"decisions"`
+	OpenBugs                    int            `json:"openBugs"`
+	CriticalBugs                int            `json:"criticalBugs"`
+	HighSeverityBugs            int            `json:"highSeverityBugs"`
+	RegressionBugs              int            `json:"regressionBugs"`
+	UnreproducedBugs            int            `json:"unreproducedBugs"`
+	BlockedBugs                 int            `json:"blockedBugs"`
 }
 
 type SearchItem struct {

@@ -13,6 +13,9 @@ var fieldAliases = map[string]string{
 	"author": "author", "автор": "author",
 	"actor": "actor", "актор": "actor",
 	"priority": "priority", "приоритет": "priority",
+	"severity": "severity", "серьёзность": "severity", "серьезность": "severity",
+	"reproducibility": "reproducibility", "воспроизводимость": "reproducibility",
+	"regression": "regression", "регрессия": "regression",
 	"type": "type", "тип": "type",
 	"source": "source", "источник": "source",
 	"criticality": "criticality", "критичность": "criticality",
@@ -42,6 +45,7 @@ var fieldAliases = map[string]string{
 var displayFieldNames = map[string]string{
 	"status": "Статус", "stage": "Этап", "version": "Версия", "owner": "Владелец",
 	"author": "Автор", "actor": "Актор", "priority": "Приоритет", "criticality": "Критичность",
+	"severity": "Серьёзность", "reproducibility": "Воспроизводимость", "regression": "Регрессия",
 	"module": "Модуль", "useCase": "Сценарий", "dependsOn": "Зависит от", "date": "Дата",
 	"flow":            "Процесс",
 	"screens":         "Экраны",

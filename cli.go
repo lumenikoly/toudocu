@@ -406,7 +406,7 @@ parseOptions:
 	if options.Command == "task-ready" || options.Command == "task-context" || options.Command == "task-verify" ||
 		options.Command == "task-archive" || options.Command == "task-restore" {
 		if !taskIDRE.MatchString(options.TaskID) {
-			return options, false, false, fmt.Errorf("TASK-ID должен иметь формат TASK-AREA-NNN")
+			return options, false, false, fmt.Errorf("идентификатор рабочего элемента должен иметь формат TASK-AREA-NNN или BUG-AREA-NNN")
 		}
 	}
 	if options.Command == "task-verify" {

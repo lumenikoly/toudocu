@@ -110,8 +110,9 @@ apply typed contracts only when the project uses the corresponding capability.
    docgent task init ./docs --area AREA --title "Title" --type Feature
    ```
 
-   Select and fill entities from evidence. Docgent does not interpret the
-   request or change task status.
+   Select and fill entities from evidence. `--type Bug` allocates a `BUG-*`
+   identifier and uses the bug-specific scaffold. Docgent does not interpret
+   the request or change task status.
 2. Validate the complete Draft with `task ready`; change it to Ready only after
    semantic review.
 3. Start implementation work with read-only context:

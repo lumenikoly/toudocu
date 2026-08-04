@@ -445,7 +445,42 @@ func docCard(current string, document *Document) string {
 		archiveState = "archived"
 		archiveBadge = `<span class="badge">Архив ` + escapeHTML(archiveYear) + `</span>`
 	}
-	return `<article class="document-card" data-filter-item data-search="` + escapeAttr(document.Title+" "+document.Description+" "+document.SourcePath) + `" data-status="` + escapeAttr(document.Status.Kind) + `" data-type="` + escapeAttr(document.Type) + `" data-owner="` + escapeAttr(document.Metadata["owner"]) + `" data-archive="` + archiveState + `"><div class="card-kicker">` + renderStatusChip(document.Status) + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + archiveBadge + `</div><h3><a href="` + escapeAttr(relativeURL(current, document.OutputPath)) + `">` + escapeHTML(document.Title) + `</a></h3><p>` + escapeHTML(truncate(document.Description, 180)) + `</p>` + renderProgress(document.TaskStats, "Задачи") + `<div class="card-path">` + escapeHTML(document.SourcePath) + `</div></article>`
+	workType := ""
+	workDetails := ""
+	if document.Type == "work" {
+		if normalized, ok := taskType(document.Metadata["type"]); ok {
+			workType = strings.ToLower(normalized)
+		}
+		if workType == "bug" {
+			workDetails = `<p class="table-subtext">Серьёзность: ` + escapeHTML(fallbackDash(document.Metadata["severity"])) +
+				` · Приоритет: ` + escapeHTML(fallbackDash(document.Metadata["priority"])) +
+				` · Воспроизводимость: ` + escapeHTML(fallbackDash(document.Metadata["reproducibility"])) +
+				` · Регрессия: ` + escapeHTML(fallbackDash(document.Metadata["regression"])) +
+				` · Модуль: ` + escapeHTML(fallbackDash(document.Metadata["module"])) + `</p>`
+		}
+	}
+	searchText := strings.Join([]string{document.Title, document.Description, document.SourcePath, document.Metadata["module"], document.Metadata["useCase"], document.Metadata["screens"]}, " ")
+	severity, _ := normalizedEnum(document.Metadata["severity"], map[string]string{"критическая": "critical", "critical": "critical", "высокая": "high", "high": "high", "средняя": "medium", "medium": "medium", "низкая": "low", "low": "low"})
+	regression, _ := normalizedEnum(document.Metadata["regression"], map[string]string{"да": "yes", "yes": "yes", "true": "yes", "нет": "no", "no": "no", "false": "no"})
+	reproducibility, _ := normalizedEnum(document.Metadata["reproducibility"], map[string]string{"всегда": "always", "always": "always", "часто": "often", "often": "often", "иногда": "sometimes", "sometimes": "sometimes", "редко": "rarely", "rarely": "rarely", "не воспроизводится": "missing", "not reproduced": "missing", "неизвестно": "missing", "unknown": "missing"})
+	causeState := ""
+	regressionTestState := ""
+	if workType == "bug" {
+		causeState = "missing"
+		regressionTestState = "missing"
+		if items := parseWorkItems(document); len(items) == 1 {
+			cause, found := workSection(items[0], "причина", "cause", "root cause")
+			value := canonicalText(cause.Text)
+			if found && value != "" && value != "не установлена" && value != "unknown" && value != "not established" {
+				causeState = "established"
+			}
+			criteria, _ := workSection(items[0], "критерии приёмки", "критерии приемки", "acceptance criteria")
+			if bugHasRegressionCoverage(items[0], criteria.Tasks) {
+				regressionTestState = "present"
+			}
+		}
+	}
+	return `<article class="document-card" data-filter-item data-search="` + escapeAttr(searchText) + `" data-status="` + escapeAttr(document.Status.Kind) + `" data-type="` + escapeAttr(document.Type) + `" data-work-type="` + escapeAttr(workType) + `" data-severity="` + escapeAttr(severity) + `" data-regression="` + escapeAttr(regression) + `" data-reproducibility="` + escapeAttr(reproducibility) + `" data-cause="` + escapeAttr(causeState) + `" data-regression-test="` + escapeAttr(regressionTestState) + `" data-owner="` + escapeAttr(document.Metadata["owner"]) + `" data-archive="` + archiveState + `"><div class="card-kicker">` + renderStatusChip(document.Status) + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + archiveBadge + `</div><h3><a href="` + escapeAttr(relativeURL(current, document.OutputPath)) + `">` + escapeHTML(document.Title) + `</a></h3><p>` + escapeHTML(truncate(document.Description, 180)) + `</p>` + workDetails + renderProgress(document.TaskStats, "Задачи") + `<div class="card-path">` + escapeHTML(document.SourcePath) + `</div></article>`
 }
 
 func filterControls(includeStatus, includeType bool) string {
@@ -467,6 +502,12 @@ func workFilterControls(includeStatus bool) string {
 	}
 	return `<div class="collection-controls"><input type="search" data-filter-control="search" placeholder="Фильтр" aria-label="Фильтр">` +
 		statusControl +
+		`<select data-filter-control="workType"><option value="all">Все</option><option value="feature">Features</option><option value="bug">Bugs</option><option value="maintenance">Maintenance</option><option value="documentation">Documentation</option><option value="research">Research</option></select>` +
+		`<select data-filter-control="severity"><option value="all">Любая серьёзность</option><option value="critical">Критические</option><option value="high">Высокой серьёзности</option></select>` +
+		`<select data-filter-control="regression"><option value="all">Любая регрессия</option><option value="yes">Регрессии</option></select>` +
+		`<select data-filter-control="reproducibility"><option value="all">Любая воспроизводимость</option><option value="always">Воспроизводятся всегда</option><option value="missing">Без воспроизведения</option></select>` +
+		`<select data-filter-control="cause"><option value="all">Любая причина</option><option value="missing">Без установленной причины</option></select>` +
+		`<select data-filter-control="regressionTest"><option value="all">Любой регрессионный тест</option><option value="missing">Без регрессионного теста</option></select>` +
 		`<select data-filter-control="archive" data-filter-default="active"><option value="active" selected>Активные</option><option value="archived">Архив</option><option value="all">Все</option></select></div>`
 }
 
@@ -587,6 +628,9 @@ func renderDashboard(model *Model) string {
 	}
 	if stats.Risks > 0 {
 		metrics.WriteString(metricCard("Риски", stats.OpenRisks, fmt.Sprintf("%d всего", stats.Risks)))
+	}
+	if stats.OpenBugs > 0 || stats.CriticalBugs > 0 || stats.HighSeverityBugs > 0 {
+		metrics.WriteString(metricCard("Открытые баги", stats.OpenBugs, fmt.Sprintf("критических: %d · высокой серьёзности: %d · регрессий: %d · без воспроизведения: %d · заблокированных: %d", stats.CriticalBugs, stats.HighSeverityBugs, stats.RegressionBugs, stats.UnreproducedBugs, stats.BlockedBugs)))
 	}
 	roadmap := ""
 	if stages.Len() > 0 {

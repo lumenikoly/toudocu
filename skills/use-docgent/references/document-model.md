@@ -43,7 +43,7 @@ types are optional.
 | `screens/SC-*.md` | A significant screen and its outgoing transitions | Parses metadata, states and `TR-*`; validates modules, routes and topology |
 | `screens/hotspots.json` | Optional percentage-based interactive areas | Validates screen and transition references and geometry |
 | `decisions/*.md` | Durable decisions | Requires a unique `ADR-*` |
-| `work/TASK-*.md`, `work/archive/YYYY/TASK-*.md` | Agent- or CI-readable work and terminal history | Requires exactly one task, status-dependent fields, and terminal archive status |
+| `work/TASK-*.md`, `work/BUG-*.md`, and yearly archive paths | Agent- or CI-readable work and terminal history | Requires exactly one work item, status-dependent fields, and terminal archive status |
 | `architecture/`, `contracts/`, `guides/`, `reference/` | Specialized human documentation | Classifies and renders the document |
 | Any other path | Free-form documentation | Renders safely without a typed entity contract |
 
@@ -65,7 +65,7 @@ When opting into a typed entity:
   requirements;
 - give screens unique `SC-<AREA>-<NAME>` IDs and transitions unique
   `TR-<AREA>-<NUMBER>` IDs;
-- give work items unique `TASK-AREA-NNN` IDs;
+- give ordinary work items unique `TASK-AREA-NNN` IDs and bugs unique `BUG-AREA-NNN` IDs;
 - keep IDs stable when titles or filenames change;
 - update all references together when identity genuinely changes;
 - use relative Markdown links that remain inside repository root.
@@ -179,8 +179,8 @@ default topology.
 
 ## Work-item contract
 
-Use one task per `work/TASK-*.md`. Tasks are intentionally stricter because
-their commands may be executed.
+Use one work item per `work/TASK-*.md` or `work/BUG-*.md`. Work items are
+intentionally stricter because their commands may be executed.
 
 For `Draft`/`Черновик`, require valid Status, Type, and a non-empty Result.
 
@@ -194,9 +194,17 @@ For every non-draft status, also require:
 - Verification;
 - Documentation impact.
 
-Feature and Bug tasks require an existing use case. Maintenance,
+Feature tasks require an existing use case. Maintenance,
 Documentation, and Research tasks without a use case require a non-empty
 Use-case omission reason.
+
+Bug work items use `BUG-*` and require severity, priority, reproducibility,
+regression, module, use case, owner, and updated date. They require Symptom,
+Expected behavior, Actual behavior, and either Steps to reproduce or Evidence
+even in Draft. Ready+ bugs additionally require Cause, Scope, Out of scope,
+numbered Plan, Acceptance criteria, Verification, regression-test coverage,
+and Documentation impact. A technical bug may set Use case to Not applicable
+only with a non-empty Relationship to user behavior section.
 
 Tasks may declare an optional `Flow`/`Process` field with an existing `FLOW-*`.
 It adds the flow document to task context but does not replace the use case or
@@ -211,6 +219,9 @@ Checkboxes are allowed in both acceptance criteria and plan. Start every
 acceptance criterion with one unique `AC-*` and give it exactly one verification
 entry. Plan items may be numbered steps, bullets, or checkboxes and do not
 require `AC-*` identifiers or verification entries:
+
+Bug plans are the exception: they use numbered steps without checkboxes, so a
+bug document keeps checkboxes only in acceptance criteria.
 
 ```md
 ## Acceptance criteria

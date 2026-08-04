@@ -14,7 +14,7 @@ import (
 
 var (
 	taskAreaRE = regexp.MustCompile(`^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*$`)
-	taskIDRE   = regexp.MustCompile(`^TASK-[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*-[0-9]{3,}$`)
+	taskIDRE   = regexp.MustCompile(`^(?:TASK|BUG)-[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*-[0-9]{3,}$`)
 	entityIDRE = regexp.MustCompile(`^[A-Z0-9]+(?:-[A-Z0-9]+)*$`)
 )
 
@@ -71,16 +71,16 @@ func scaffoldDate(now time.Time) string {
 	return now.Format("2006-01-02")
 }
 
-func nextTaskNumber(docsDir, area string) (int, error) {
+func nextTaskNumber(docsDir, prefix, area string) (int, error) {
 	workDirectory := filepath.Join(docsDir, "work")
-	prefix := "TASK-" + area + "-"
+	idPrefix := prefix + "-" + area + "-"
 	maximum := 0
 
 	consider := func(value string) {
-		if !strings.HasPrefix(value, prefix) {
+		if !strings.HasPrefix(value, idPrefix) {
 			return
 		}
-		suffix := strings.TrimPrefix(value, prefix)
+		suffix := strings.TrimPrefix(value, idPrefix)
 		end := 0
 		for end < len(suffix) && suffix[end] >= '0' && suffix[end] <= '9' {
 			end++
@@ -122,6 +122,78 @@ func nextTaskNumber(docsDir, area string) (int, error) {
 }
 
 func renderTaskScaffold(id, title, taskType, language, date string) string {
+	if taskType == "Bug" {
+		if language == "ru" {
+			return fmt.Sprintf(`# %s: %s
+
+- Тип: Bug
+- Статус: Черновик
+- Последнее обновление: %s
+
+## Симптом
+
+## Ожидаемое поведение
+
+## Фактическое поведение
+
+## Шаги воспроизведения
+
+## Доказательства
+
+## Причина
+
+Не установлена.
+
+## Область изменения
+
+## Не входит в исправление
+
+## План
+
+## Критерии приёмки
+
+## Проверка
+
+## Регрессионный тест
+
+## Влияние на документацию
+`, id, title, date)
+		}
+		return fmt.Sprintf(`# %s: %s
+
+- Type: Bug
+- Status: Draft
+- Last updated: %s
+
+## Symptom
+
+## Expected behavior
+
+## Actual behavior
+
+## Steps to reproduce
+
+## Evidence
+
+## Cause
+
+Not established.
+
+## Scope
+
+## Out of scope
+
+## Plan
+
+## Acceptance criteria
+
+## Verification
+
+## Regression test
+
+## Documentation impact
+`, id, title, date)
+	}
 	if language == "ru" {
 		return fmt.Sprintf(`# %s: %s
 
@@ -198,12 +270,16 @@ func InitTask(options Options) (TaskInitReport, error) {
 		return TaskInitReport{}, fmt.Errorf("--type должен быть Feature, Bug, Maintenance, Documentation или Research")
 	}
 	taskType := options.TaskType
+	prefix := "TASK"
+	if taskType == "Bug" {
+		prefix = "BUG"
+	}
 	for attempts := 0; attempts < 100; attempts++ {
-		number, err := nextTaskNumber(options.InputDirectory, options.Area)
+		number, err := nextTaskNumber(options.InputDirectory, prefix, options.Area)
 		if err != nil {
 			return TaskInitReport{}, err
 		}
-		id := fmt.Sprintf("TASK-%s-%03d", options.Area, number)
+		id := fmt.Sprintf("%s-%s-%03d", prefix, options.Area, number)
 		relative := filepath.ToSlash(filepath.Join("work", id+".md"))
 		target := filepath.Join(options.InputDirectory, filepath.FromSlash(relative))
 		err = atomicCreateFile(target, renderTaskScaffold(id, options.Title, taskType, options.Language, scaffoldDate(options.Now)))
@@ -218,7 +294,7 @@ func InitTask(options Options) (TaskInitReport, error) {
 			ID: id, Title: options.Title, Type: taskType, Language: options.Language, Path: relative,
 		}, nil
 	}
-	return TaskInitReport{}, fmt.Errorf("не удалось выделить свободный TASK-ID после конкурентных изменений")
+	return TaskInitReport{}, fmt.Errorf("не удалось выделить свободный идентификатор рабочего элемента после конкурентных изменений")
 }
 
 type scaffoldSpec struct {

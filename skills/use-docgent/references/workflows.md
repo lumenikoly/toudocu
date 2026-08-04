@@ -137,8 +137,8 @@ docgent task restore TASK-AREA-001 ./docs --format json
 
 The archive path is `work/archive/YYYY/`. Archive and restore preserve Markdown
 and status, and block when a direct Markdown link would change resolution.
-Relationships by `TASK-*` ID remain valid. Do not delete archived tasks that
-still participate in dependencies or traceability.
+Relationships by `TASK-*` or `BUG-*` ID remain valid. Do not delete archived
+work items that still participate in dependencies or traceability.
 
 Run:
 

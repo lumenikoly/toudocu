@@ -215,6 +215,12 @@ func TestUseDocgentOptionalRelationshipPlaceholders(t *testing.T) {
 				}
 			}
 		}
+		bug := readSkillTemplate(t, language, "work-ready-bug.md")
+		for _, placeholder := range []string{"{{BUG_ID}}", "{{REPRODUCIBILITY}}", "{{REGRESSION_CRITERION}}", "{{OPTIONAL_SCREENS_METADATA}}"} {
+			if !strings.Contains(bug, placeholder) {
+				t.Errorf("%s/work-ready-bug.md does not contain %s", language, placeholder)
+			}
+		}
 		if content := readSkillTemplate(t, language, "use-case.md"); !strings.Contains(content, "{{OPTIONAL_SCREENS_METADATA}}") {
 			t.Errorf("%s/use-case.md does not support screen relationships", language)
 		}

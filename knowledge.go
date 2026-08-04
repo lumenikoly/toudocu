@@ -11,7 +11,7 @@ import (
 
 var (
 	businessRuleHeadingRE   = regexp.MustCompile(`^(BR-[A-Z0-9-]+)\s*[:—-]\s*(.+)$`)
-	workItemHeadingRE       = regexp.MustCompile(`^(TASK-[A-Z0-9-]+)\s*[:—-]\s*(.+)$`)
+	workItemHeadingRE       = regexp.MustCompile(`^((?:TASK|BUG)-[A-Z0-9-]+)\s*[:—-]\s*(.+)$`)
 	riskHeadingRE           = regexp.MustCompile(`^([A-Za-zА-Яа-я]+[-_ ]?\d+)\s*[:—-]\s*(.+)$`)
 	businessRuleReferenceRE = regexp.MustCompile(`\bBR-[A-Z0-9-]+\b`)
 	criterionIDRE           = regexp.MustCompile(`\bAC-[A-Z0-9-]+\b`)
@@ -433,6 +433,103 @@ func documentationPathsFor(model *Model, document *Document, item parsedWorkItem
 	return result
 }
 
+func normalizedEnum(value string, aliases map[string]string) (string, bool) {
+	normalized, ok := aliases[canonicalText(value)]
+	return normalized, ok
+}
+
+func validateRequiredBugMetadata(model *Model, document *Document, item parsedWorkItem) {
+	fields := []struct {
+		key   string
+		label string
+	}{
+		{"severity", "Серьёзность"},
+		{"priority", "Приоритет"},
+		{"reproducibility", "Воспроизводимость"},
+		{"regression", "Регрессия"},
+		{"module", "Модуль"},
+		{"useCase", "Сценарий"},
+		{"owner", "Владелец"},
+		{"updated", "Последнее обновление"},
+	}
+	for _, field := range fields {
+		if strings.TrimSpace(item.Metadata[field.key]) == "" {
+			addKnowledgeIssue(model, document, "error", "missing-bug-field", "Для бага требуется поле «"+field.label+"».", item.Heading.Line+1)
+		}
+	}
+
+	if _, ok := normalizedEnum(item.Metadata["severity"], map[string]string{
+		"критическая": "critical", "critical": "critical",
+		"высокая": "high", "high": "high",
+		"средняя": "medium", "medium": "medium",
+		"низкая": "low", "low": "low",
+	}); item.Metadata["severity"] != "" && !ok {
+		addKnowledgeIssue(model, document, "error", "invalid-bug-severity", "Серьёзность бага должна быть Критическая, Высокая, Средняя или Низкая.", item.Heading.Line+1)
+	}
+	if _, ok := normalizedEnum(item.Metadata["priority"], map[string]string{
+		"срочный": "urgent", "urgent": "urgent",
+		"высокий": "high", "high": "high",
+		"обычный": "normal", "normal": "normal",
+		"низкий": "low", "low": "low",
+	}); item.Metadata["priority"] != "" && !ok {
+		addKnowledgeIssue(model, document, "error", "invalid-bug-priority", "Приоритет бага должен быть Срочный, Высокий, Обычный или Низкий.", item.Heading.Line+1)
+	}
+	if _, ok := normalizedEnum(item.Metadata["reproducibility"], map[string]string{
+		"всегда": "always", "always": "always",
+		"часто": "often", "often": "often",
+		"иногда": "sometimes", "sometimes": "sometimes",
+		"редко": "rarely", "rarely": "rarely",
+		"не воспроизводится": "not-reproduced", "not reproduced": "not-reproduced",
+		"неизвестно": "unknown", "unknown": "unknown",
+	}); item.Metadata["reproducibility"] != "" && !ok {
+		addKnowledgeIssue(model, document, "error", "invalid-bug-reproducibility", "Указано недопустимое значение воспроизводимости бага.", item.Heading.Line+1)
+	}
+	regression, regressionValid := normalizedEnum(item.Metadata["regression"], map[string]string{
+		"да": "yes", "yes": "yes", "true": "yes",
+		"нет": "no", "no": "no", "false": "no",
+	})
+	if item.Metadata["regression"] != "" && !regressionValid {
+		addKnowledgeIssue(model, document, "error", "invalid-bug-regression", "Поле «Регрессия» должно иметь значение Да или Нет.", item.Heading.Line+1)
+	}
+	if item.Metadata["updated"] != "" {
+		if _, ok := parseDate(item.Metadata["updated"]); !ok {
+			addKnowledgeIssue(model, document, "error", "invalid-bug-updated-date", "Поле «Последнее обновление» должно содержать дату YYYY-MM-DD.", item.Heading.Line+1)
+		}
+	}
+	if regression == "yes" {
+		body := strings.ToLower(strings.Join(document.Lines[item.Heading.Line+1:item.EndLine], "\n"))
+		versionOrPeriod := regexp.MustCompile(`(?m)^\s*[-*+]\s*(?:версия|version|период|period)\s*[:：]\s*\S+`).MatchString(body)
+		if !versionOrPeriod {
+			addKnowledgeIssue(model, document, "error", "missing-regression-version", "Для регрессии требуется версия или период, где наблюдался дефект.", item.Heading.Line+1)
+		}
+	}
+}
+
+func bugHasRegressionCoverage(item parsedWorkItem, criteria []Task) bool {
+	for _, criterion := range criteria {
+		text := canonicalText(criterion.Text)
+		if strings.Contains(text, "регрессион") || strings.Contains(text, "regression") {
+			return true
+		}
+	}
+	section, found := workSection(item, "регрессионный тест", "regression test")
+	if !found || strings.TrimSpace(section.Text) == "" {
+		return false
+	}
+	explanation := canonicalText(section.Text)
+	for _, marker := range []string{"невозмож", "cannot", "not possible", "impossible", "not feasible"} {
+		if strings.Contains(explanation, marker) {
+			return true
+		}
+	}
+	return false
+}
+
+func bugUseCaseNotApplicable(value string) bool {
+	value = canonicalText(value)
+	return value == "не применяется" || value == "not applicable" || value == "n/a"
+}
+
 func validateWorkItem(model *Model, document *Document, item parsedWorkItem) WorkItem {
 	match := workItemHeadingRE.FindStringSubmatch(item.Heading.Title)
 	statusName, statusValid := taskStatus(item.Metadata["status"])
@@ -443,25 +540,46 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 	if !typeValid {
 		addKnowledgeIssue(model, document, "error", "invalid-task-type", "Тип задачи должен быть Feature, Bug, Maintenance, Documentation или Research.", item.Heading.Line+1)
 	}
+	isBug := typeValid && typeName == "Bug"
+	if isBug && !strings.HasPrefix(match[1], "BUG-") {
+		addKnowledgeIssue(model, document, "error", "invalid-bug-id", "Идентификатор рабочего элемента типа Bug должен начинаться с BUG-.", item.Heading.Line+1)
+	}
+	if !isBug && strings.HasPrefix(match[1], "BUG-") {
+		addKnowledgeIssue(model, document, "error", "bug-id-type-mismatch", "Идентификатор BUG-* требует поле «Тип: Bug».", item.Heading.Line+1)
+	}
+	if isBug {
+		validateRequiredBugMetadata(model, document, item)
+	}
 
 	type requiredWorkSection struct {
 		names []string
 		label string
 	}
-	requiredSections := []requiredWorkSection{
-		{[]string{"результат", "result"}, "Результат"},
+	requiredSections := []requiredWorkSection{}
+	if isBug {
+		requiredSections = append(requiredSections,
+			requiredWorkSection{[]string{"симптом", "symptom"}, "Симптом"},
+			requiredWorkSection{[]string{"ожидаемое поведение", "expected behavior"}, "Ожидаемое поведение"},
+			requiredWorkSection{[]string{"фактическое поведение", "actual behavior"}, "Фактическое поведение"},
+		)
+	} else {
+		requiredSections = append(requiredSections, requiredWorkSection{[]string{"результат", "result"}, "Результат"})
 	}
 	strictWorkflow := statusValid && statusName != "draft"
 	if strictWorkflow {
 		requiredSections = append(requiredSections,
 			requiredWorkSection{[]string{"область изменения", "scope"}, "Область изменения"},
-			requiredWorkSection{[]string{"не входит в задачу", "out of scope"}, "Не входит в задачу"},
+			requiredWorkSection{[]string{"не входит в задачу", "не входит в исправление", "out of scope"}, "Не входит в исправление"},
 			requiredWorkSection{[]string{"критерии приёмки", "критерии приемки", "acceptance criteria"}, "Критерии приёмки"},
 			requiredWorkSection{[]string{"план", "plan"}, "План"},
 			requiredWorkSection{[]string{"проверка", "verification"}, "Проверка"},
 			requiredWorkSection{[]string{"влияние на документацию", "documentation impact"}, "Влияние на документацию"},
 		)
-		if typeValid && (typeName == "Feature" || typeName == "Bug") {
+		if isBug {
+			requiredSections = append(requiredSections,
+				requiredWorkSection{[]string{"причина", "cause", "root cause"}, "Причина"},
+			)
+		} else if typeValid && typeName == "Feature" {
 			requiredSections = append(requiredSections,
 				requiredWorkSection{[]string{"изменение поведения", "behavior change"}, "Изменение поведения"},
 			)
@@ -473,7 +591,7 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 	}
 
 	criteria, verification, checks := parseCriteriaAndVerification(model, document, item, strictWorkflow)
-	if strictWorkflow && typeValid && (typeName == "Feature" || typeName == "Bug") {
+	if strictWorkflow && typeValid && typeName == "Feature" {
 		behavior, found := workSection(item, "изменение поведения", "behavior change")
 		if found {
 			if nestedWorkSection(behavior, "было", "before") == "" || nestedWorkSection(behavior, "станет", "after") == "" {
@@ -489,12 +607,37 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 	}
 	if planSection, found := workSection(item, "план", "plan"); found {
 		for _, step := range planSection.Tasks {
+			if isBug {
+				addKnowledgeIssue(model, document, "error", "bug-plan-checkbox", "План бага должен быть нумерованным списком без чекбоксов.", step.Line)
+			}
 			checklistLines[step.Line] = struct{}{}
 		}
 	}
 	for _, task := range extractTasks(document.Lines[item.Heading.Line+1:item.EndLine], nil, item.Heading.Line+1) {
 		if _, allowed := checklistLines[task.Line]; !allowed {
-			addKnowledgeIssue(model, document, "error", "task-checkbox-outside-criteria", "Чекбоксы задачи разрешены только в разделах «Критерии приёмки» и «План».", task.Line)
+			message := "Чекбоксы задачи разрешены только в разделах «Критерии приёмки» и «План»."
+			if isBug {
+				message = "В документе бага чекбоксы разрешены только в разделе «Критерии приёмки»."
+			}
+			addKnowledgeIssue(model, document, "error", "task-checkbox-outside-criteria", message, task.Line)
+		}
+	}
+
+	if isBug {
+		steps, stepsFound := workSection(item, "шаги воспроизведения", "steps to reproduce", "reproduction steps")
+		evidence, evidenceFound := workSection(item, "доказательства", "evidence", "подтверждение", "confirmation")
+		if (!stepsFound || strings.TrimSpace(steps.Text) == "") && (!evidenceFound || strings.TrimSpace(evidence.Text) == "") {
+			addKnowledgeIssue(model, document, "error", "missing-bug-reproduction-evidence", "Баг должен содержать шаги воспроизведения либо непустые доказательства.", item.Heading.Line+1)
+		}
+		if strictWorkflow && !bugHasRegressionCoverage(item, criteria) {
+			addKnowledgeIssue(model, document, "error", "missing-bug-regression-test", "Для бага требуется критерий регрессионного теста либо раздел «Регрессионный тест» с объяснением невозможности автоматизации.", item.Heading.Line+1)
+		}
+		if statusName == "done" {
+			cause, found := workSection(item, "причина", "cause", "root cause")
+			unknown := canonicalText(cause.Text)
+			if !found || unknown == "" || unknown == "не установлена" || unknown == "unknown" || unknown == "not established" {
+				addKnowledgeIssue(model, document, "error", "missing-completed-bug-cause", "Для выполненного бага должна быть установлена первопричина.", item.Heading.Line+1)
+			}
 		}
 	}
 
@@ -532,8 +675,18 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 	}
 
 	useCaseID := strings.TrimSpace(item.Metadata["useCase"])
+	useCaseOmitted := isBug && bugUseCaseNotApplicable(useCaseID)
+	if useCaseOmitted {
+		useCaseID = ""
+		relation, found := workSection(item, "связь с пользовательским поведением", "relationship to user behavior")
+		if !found || strings.TrimSpace(relation.Text) == "" {
+			addKnowledgeIssue(model, document, "error", "missing-bug-use-case-explanation", "Для значения «Сценарий: Не применяется» требуется раздел «Связь с пользовательским поведением».", item.Heading.Line+1)
+		}
+	}
 	if strictWorkflow && typeValid && (typeName == "Feature" || typeName == "Bug") && useCaseID == "" {
-		addKnowledgeIssue(model, document, "error", "missing-task-use-case", "Для задачи типа "+typeName+" требуется связанный пользовательский сценарий.", item.Heading.Line+1)
+		if !useCaseOmitted {
+			addKnowledgeIssue(model, document, "error", "missing-task-use-case", "Для задачи типа "+typeName+" требуется связанный пользовательский сценарий.", item.Heading.Line+1)
+		}
 	}
 	if strictWorkflow && typeValid && typeName != "Feature" && typeName != "Bug" && useCaseID == "" {
 		reason, found := workSection(item, "обоснование отсутствия сценария", "use case omission reason")
@@ -544,14 +697,16 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 
 	resultSection, _ := workSection(item, "результат", "result")
 	behaviorSection, _ := workSection(item, "изменение поведения", "behavior change")
-	outOfScopeSection, _ := workSection(item, "не входит в задачу", "out of scope")
+	outOfScopeSection, _ := workSection(item, "не входит в задачу", "не входит в исправление", "out of scope")
 	planSection, _ := workSection(item, "план", "plan")
 	documentationImpactSection, _ := workSection(item, "влияние на документацию", "documentation impact")
 	blockerSection, _ := workSection(item, "блокер", "blocker")
 	repositoryPaths := append([]string{}, validateScopePaths(model, document, item)...)
 	return WorkItem{
 		ID: match[1], Title: match[2], Status: StatusFor(item.Metadata["status"]), Type: typeName,
-		Priority: item.Metadata["priority"], Owner: item.Metadata["owner"], ModuleID: item.Metadata["module"],
+		Priority: item.Metadata["priority"], Severity: item.Metadata["severity"],
+		Reproducibility: item.Metadata["reproducibility"], Regression: item.Metadata["regression"],
+		Updated: item.Metadata["updated"], Owner: item.Metadata["owner"], ModuleID: item.Metadata["module"],
 		UseCaseID: useCaseID, FlowID: strings.TrimSpace(item.Metadata["flow"]),
 		ScreenIDs:     splitReferences(item.Metadata["screens"]),
 		TransitionIDs: splitReferences(item.Metadata["transitions"]),
@@ -699,7 +854,7 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 		if document.Type == "work" {
 			items := parseWorkItems(document)
 			if len(items) != 1 {
-				addKnowledgeIssue(model, document, "error", "work-item-count", fmt.Sprintf("Документ work должен содержать ровно одну задачу TASK-*; найдено: %d.", len(items)), 0)
+				addKnowledgeIssue(model, document, "error", "work-item-count", fmt.Sprintf("Документ work должен содержать ровно один рабочий элемент TASK-* или BUG-*; найдено: %d.", len(items)), 0)
 			}
 			for _, item := range items {
 				validated := validateWorkItem(model, document, item)
@@ -1034,6 +1189,29 @@ func buildStats(model *Model) Stats {
 	for _, risk := range model.Risks {
 		if !containsType([]string{"done", "accepted", "risk-accepted"}, risk.Status.Kind) {
 			stats.OpenRisks++
+		}
+	}
+	for _, item := range model.Knowledge.WorkItems {
+		if item.Type != "Bug" || item.Archived {
+			continue
+		}
+		if item.statusName != "done" && item.statusName != "cancelled" {
+			stats.OpenBugs++
+		}
+		switch canonicalText(item.Severity) {
+		case "критическая", "critical":
+			stats.CriticalBugs++
+		case "высокая", "high":
+			stats.HighSeverityBugs++
+		}
+		if regression, ok := normalizedEnum(item.Regression, map[string]string{"да": "yes", "yes": "yes", "true": "yes"}); ok && regression == "yes" {
+			stats.RegressionBugs++
+		}
+		if containsString([]string{"не воспроизводится", "неизвестно", "not reproduced", "unknown"}, canonicalText(item.Reproducibility)) {
+			stats.UnreproducedBugs++
+		}
+		if item.statusName == "blocked" {
+			stats.BlockedBugs++
 		}
 	}
 	return stats

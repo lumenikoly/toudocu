@@ -16,14 +16,14 @@ Docgent.
 | `build` | записывает output, при `--clean` безопасно очищает его | автономный портал и `report.json` |
 | `serve` | собирает output и запускает локальный HTTP-сервер | портал с пересборкой при обновлении HTML |
 | `search` | отсутствуют | `SearchReport` по свежим Markdown |
-| `task init` | атомарно создаёт новый `TASK-*` | `TaskInitReport` |
+| `task init` | атомарно создаёт новый `TASK-*` или `BUG-*` по типу | `TaskInitReport` |
 | `scaffold` | атомарно создаёт выбранную сущность | `ScaffoldReport` |
 | `task ready` | отсутствуют | `TaskReadyReport` |
 | `task context` | отсутствуют | `TaskContextReport` выбранной Ready+ задачи |
 | `task verify --dry-run` | отсутствуют | план `TaskVerifyReport` |
 | `task verify --run` | исполняет доверенные команды задачи | `TaskVerifyReport` |
-| `task archive` | без перезаписи перемещает один терминальный `TASK-*` в `work/archive/YYYY/` | `TaskMoveReport` |
-| `task restore` | без перезаписи возвращает один архивный `TASK-*` в `work/` | `TaskMoveReport` |
+| `task archive` | без перезаписи перемещает один терминальный work item в `work/archive/YYYY/` | `TaskMoveReport` |
+| `task restore` | без перезаписи возвращает один архивный work item в `work/` | `TaskMoveReport` |
 | `version` | отсутствуют | версия генератора |
 
 Вызов `docgent ./docs ...` эквивалентен `docgent build ./docs ...`.
@@ -45,7 +45,7 @@ docgent task restore TASK-ID [docs-dir] [--repository-root DIR] [--format text|j
 `roadmap.md` и типизированные каталоги необязательны; правила конкретного типа
 применяются, только если соответствующий документ существует.
 
-Статусы, типы, обязательные поля, разделы и команды `TASK-*` описаны в
+Статусы, типы, обязательные поля, разделы и команды `TASK-*`/`BUG-*` описаны в
 [руководстве по рабочим задачам](../guides/work-items.md).
 Значение `--title` для `task init` и `scaffold` всегда однострочное.
 

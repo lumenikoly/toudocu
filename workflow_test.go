@@ -68,6 +68,7 @@ func TestNewCLIFormsAndRemovedTaskCheck(t *testing.T) {
 		{"task", "init", "./docs", "--area", "CLI", "--title", "Title", "--type", "Feature"},
 		{"scaffold", "module", "MOD-CLI", "./docs", "--title", "CLI"},
 		{"task", "ready", "TASK-CLI-001", "./docs", "--strict", "--format", "json"},
+		{"task", "ready", "BUG-CLI-001", "./docs", "--format", "json"},
 		{"task", "context", "TASK-CLI-001", "./docs", "--format", "json"},
 		{"task", "verify", "TASK-CLI-001", "./docs", "--dry-run", "--target", "AC-01"},
 		{"task", "archive", "TASK-CLI-001", "./docs", "--format", "json"},
@@ -121,11 +122,11 @@ func TestTaskInitAndScaffoldAtomicCreate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if report.ID != "TASK-CLI-1201" || report.Path != "work/TASK-CLI-1201.md" {
+	if report.ID != "BUG-CLI-001" || report.Path != "work/BUG-CLI-001.md" {
 		t.Fatalf("allocation: %#v", report)
 	}
 	data, _ := os.ReadFile(filepath.Join(docs, filepath.FromSlash(report.Path)))
-	if !strings.Contains(string(data), "- Status: Draft") || !strings.Contains(string(data), "## Behavior change") {
+	if !strings.Contains(string(data), "- Status: Draft") || !strings.Contains(string(data), "## Symptom") {
 		t.Fatalf("english scaffold: %s", data)
 	}
 	entity, err := Scaffold(Options{InputDirectory: docs, EntityKind: "decision", EntityID: "ADR-002", Title: "Boundary", Language: "ru"})
