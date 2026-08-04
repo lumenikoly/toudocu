@@ -248,25 +248,44 @@
         toggle.type = 'button';
         toggle.className = 'section-toggle';
         toggle.textContent = '▾';
-        toggle.setAttribute('aria-label', `Свернуть раздел ${heading.textContent.replace(/^#/, '').trim()}`);
+        const headingTitle = heading.textContent.replace(/^#/, '').trim();
+        section.dataset.sectionTitle = headingTitle;
+        toggle.setAttribute('aria-label', `Свернуть раздел ${headingTitle}`);
         toggle.setAttribute('aria-expanded', 'true');
         toggle.addEventListener('click', () => {
           const collapsed = section.classList.toggle('is-collapsed');
           toggle.setAttribute('aria-expanded', String(!collapsed));
+          toggle.setAttribute('aria-label', `${collapsed ? 'Развернуть' : 'Свернуть'} раздел ${headingTitle}`);
+          updateCollapseAllButton();
         });
         heading.append(toggle);
       }
     });
 
-    $('[data-collapse-all]')?.addEventListener('click', (event) => {
-      const sections = $$('.doc-section');
+    const collapseAllButton = $('[data-collapse-all]');
+    const sections = $$('.doc-section');
+    function updateCollapseAllButton() {
+      if (!collapseAllButton) return;
+      const hasExpandedSections = sections.some((section) => !section.classList.contains('is-collapsed'));
+      collapseAllButton.dataset.collapseState = hasExpandedSections ? 'expanded' : 'collapsed';
+      collapseAllButton.setAttribute('aria-expanded', String(hasExpandedSections));
+      const label = $('[data-collapse-label]', collapseAllButton);
+      if (label) label.textContent = hasExpandedSections ? 'Свернуть разделы' : 'Развернуть разделы';
+    }
+    if (collapseAllButton && !sections.length) collapseAllButton.hidden = true;
+    collapseAllButton?.addEventListener('click', () => {
       const shouldCollapse = sections.some((section) => !section.classList.contains('is-collapsed'));
       sections.forEach((section) => {
         section.classList.toggle('is-collapsed', shouldCollapse);
-        $('.section-toggle', section)?.setAttribute('aria-expanded', String(!shouldCollapse));
+        const toggle = $('.section-toggle', section);
+        if (!toggle) return;
+        toggle.setAttribute('aria-expanded', String(!shouldCollapse));
+        const headingTitle = section.dataset.sectionTitle || '';
+        toggle.setAttribute('aria-label', `${shouldCollapse ? 'Развернуть' : 'Свернуть'} раздел ${headingTitle}`);
       });
-      event.currentTarget.textContent = shouldCollapse ? 'Развернуть разделы' : 'Свернуть разделы';
+      updateCollapseAllButton();
     });
+    updateCollapseAllButton();
   }
 
   function initializeCodeCopy() {

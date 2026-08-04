@@ -202,7 +202,7 @@ func TestGenerateSite(t *testing.T) {
 	}
 	htmlBytes, _ := os.ReadFile(filepath.Join(output, "modules/auth.html"))
 	html := string(htmlBytes)
-	for _, part := range []string{"Готовность документа", "../use-cases/login.html", `data-task-filter="open"`} {
+	for _, part := range []string{"Готовность документа", "../use-cases/login.html", `class="metadata-grid"`, "<dt>Статус</dt>", `class="document-toolbar task-toolbar"`, `role="group"`, `class="toolbar-button"`, `data-task-filter="open"`, `class="collapse-all-button"`, `data-collapse-label`} {
 		if !strings.Contains(html, part) {
 			t.Fatalf("missing %s", part)
 		}

@@ -204,7 +204,7 @@ func renderDocumentPage(model *Model, document *Document) string {
 	body := renderDocumentMarkdown(document, resolver, taskCompletionByLine)
 	controls := ""
 	if document.TaskStats.Total > 0 {
-		controls = `<div class="task-toolbar"><span>Чек-лист:</span><button type="button" data-task-filter="all">Все</button><button type="button" data-task-filter="open">Невыполненные</button><button type="button" data-task-filter="complete">Выполненные</button></div>`
+		controls = `<div class="document-toolbar task-toolbar"><span class="toolbar-label" id="task-filter-label">Чек-лист</span><div class="task-filter-group" role="group" aria-labelledby="task-filter-label"><button class="toolbar-button" type="button" data-task-filter="all">Все</button><button class="toolbar-button" type="button" data-task-filter="open">Невыполненные</button><button class="toolbar-button" type="button" data-task-filter="complete">Выполненные</button></div></div>`
 	}
 	issues := ""
 	if len(document.Warnings)+len(document.Errors) > 0 {
@@ -214,7 +214,7 @@ func renderDocumentPage(model *Model, document *Document) string {
 	if document.Type == "status" {
 		computedStatus = renderComputedStatus(model, document.OutputPath)
 	}
-	content := breadcrumbs(model, document.OutputPath, document.Title) + `<header class="page-header"><div class="page-kicker">` + renderStatusChip(document.Status) + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + issues + `</div><h1>` + escapeHTML(document.Title) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` + renderMetadata(document) + renderProgress(document.TaskStats, "Готовность документа") + controls + `<div class="page-actions"><button type="button" data-collapse-all>Свернуть разделы</button></div></header>` + computedStatus + `<article class="doc-content">` + body + `</article>` + renderRelated(model, document)
+	content := breadcrumbs(model, document.OutputPath, document.Title) + `<header class="page-header"><div class="page-kicker">` + renderStatusChip(document.Status) + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + issues + `</div><h1>` + escapeHTML(document.Title) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` + renderMetadata(document) + renderProgress(document.TaskStats, "Готовность документа") + controls + `<div class="page-actions"><button class="collapse-all-button" type="button" data-collapse-all data-collapse-state="expanded" aria-expanded="true"><span class="collapse-all-icon" aria-hidden="true"><span class="collapse-icon collapse-icon-up">↑</span><span class="collapse-icon collapse-icon-down">↓</span></span><span data-collapse-label>Свернуть разделы</span></button></div></header>` + computedStatus + `<article class="doc-content">` + body + `</article>` + renderRelated(model, document)
 	return pageShell(model, document.OutputPath, document.Title, document.Description, content, renderTOC(document))
 }
 
