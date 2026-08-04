@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -24,16 +23,7 @@ type commandRunner interface {
 type osCommandRunner struct{}
 
 func (osCommandRunner) Run(ctx context.Context, command, directory string, stdout, stderr io.Writer) (int, error) {
-	var executable string
-	var arguments []string
-	if runtime.GOOS == "windows" {
-		executable = "cmd.exe"
-		arguments = []string{"/S", "/C", command}
-	} else {
-		executable = "sh"
-		arguments = []string{"-c", command}
-	}
-	cmd := exec.CommandContext(ctx, executable, arguments...)
+	cmd := newShellCommand(ctx, command)
 	cmd.Dir = directory
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
@@ -115,20 +105,10 @@ func planTaskCommands(item WorkItem) ([]plannedCommand, bool) {
 }
 
 func taskCheckValidation(model *Model, taskID string, strict bool) (*WorkItem, []Issue) {
-	matches := []*WorkItem{}
-	for index := range model.Knowledge.WorkItems {
-		if model.Knowledge.WorkItems[index].ID == taskID {
-			matches = append(matches, &model.Knowledge.WorkItems[index])
-		}
+	item, err := findWorkItem(model, taskID)
+	if err != nil {
+		return nil, []Issue{{Severity: "error", Code: "task-selection-failed", Message: err.Error()}}
 	}
-	if len(matches) != 1 {
-		message := "Задача " + taskID + " не найдена."
-		if len(matches) > 1 {
-			message = "Идентификатор задачи " + taskID + " неоднозначен."
-		}
-		return nil, []Issue{{Severity: "error", Code: "task-selection-failed", Message: message}}
-	}
-	item := matches[0]
 	issues := []Issue{}
 	for _, issue := range model.Issues {
 		if issue.DocumentPath != item.Document {
@@ -240,9 +220,13 @@ func executeTaskCheck(model *Model, options Options, stdout, stderr io.Writer, r
 	item, validationIssues := taskCheckValidation(model, options.TaskID, options.Strict)
 	report := TaskCheckReport{
 		SchemaVersion: 1, Kind: "task-check",
-		Generator: map[string]string{"name": "Docgent", "version": Version},
+		Generator: GeneratorInfo{Name: "Docgent", Version: Version},
 		Task:      taskSnapshot(item, options.TaskID), StartedAt: startedAt,
-		ValidationIssues: validationIssues, Issues: append([]Issue{}, model.Issues...),
+		ValidationIssues: append([]Issue{}, validationIssues...),
+		Issues:           append([]Issue{}, model.Issues...),
+		Commands:         []CommandExecutionResult{},
+		Criteria:         []CriterionExecutionResult{},
+		Targets:          []TargetExecutionResult{},
 	}
 	if item != nil {
 		_, report.FullVerification = planTaskCommands(*item)

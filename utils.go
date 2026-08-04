@@ -159,6 +159,15 @@ func samePath(a, b string) bool {
 }
 
 func safeRemoveDirectory(directory, protectedDirectory string) error {
+	requested, err := filepath.Abs(directory)
+	if err != nil {
+		return err
+	}
+	if info, statErr := os.Lstat(requested); statErr == nil && info.Mode()&os.ModeSymlink != 0 {
+		return fmt.Errorf("отказ от очистки символической ссылки: %s", requested)
+	} else if statErr != nil && !os.IsNotExist(statErr) {
+		return statErr
+	}
 	resolved, err := resolvePathForSafety(directory)
 	if err != nil {
 		return err
@@ -172,7 +181,7 @@ func safeRemoveDirectory(directory, protectedDirectory string) error {
 	if volume != "" {
 		root = volume + string(filepath.Separator)
 	}
-	if samePath(resolved, protected) || samePath(resolved, root) {
+	if samePath(resolved, protected) || samePath(resolved, root) || ensureInside(resolved, protected) {
 		return fmt.Errorf("отказ от удаления защищённого каталога: %s", resolved)
 	}
 	return os.RemoveAll(resolved)

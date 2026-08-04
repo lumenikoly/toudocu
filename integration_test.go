@@ -176,6 +176,17 @@ func TestModelAndStatistics(t *testing.T) {
 
 func TestGenerateSite(t *testing.T) {
 	_, docs, output := createFixture(t)
+	indexFile, err := os.OpenFile(filepath.Join(docs, "index.md"), os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := indexFile.WriteString("\n[Сценарии](use-cases/)\n"); err != nil {
+		_ = indexFile.Close()
+		t.Fatal(err)
+	}
+	if err := indexFile.Close(); err != nil {
+		t.Fatal(err)
+	}
 	model := buildFixture(t, docs)
 	result, err := GenerateSite(model, Options{OutputDirectory: output, Clean: true})
 	if err != nil {
@@ -200,9 +211,26 @@ func TestGenerateSite(t *testing.T) {
 		t.Fatal("unsafe")
 	}
 	reportBytes, _ := os.ReadFile(filepath.Join(output, "report.json"))
-	var report map[string]any
+	var report ProjectReport
 	if err := json.Unmarshal(reportBytes, &report); err != nil {
 		t.Fatal(err)
+	}
+	if report.SchemaVersion != 1 || report.Documents == nil || report.Issues == nil || report.CurrentStatus.ActiveWork == nil || report.CurrentStatus.Blockers == nil {
+		t.Fatalf("unstable report collections: %#v", report)
+	}
+	foundDirectoryTarget := false
+	for _, document := range report.Documents {
+		if document.SourcePath != "index.md" {
+			continue
+		}
+		for _, link := range document.Links {
+			if link.Destination == "use-cases/" && link.TargetKind == "directory" && link.Target == "use-cases/index.html" {
+				foundDirectoryTarget = true
+			}
+		}
+	}
+	if !foundDirectoryTarget {
+		t.Fatal("generated directory link is missing a typed report target")
 	}
 }
 
@@ -341,11 +369,53 @@ func TestWorkItemValidationRules(t *testing.T) {
 		"missing-scope-path",
 		"unsafe-scope-path",
 		"empty-work-section",
-		"invalid-task-plan",
 	} {
 		if !codes[code] {
 			t.Fatalf("missing issue %s in %#v", code, model.Issues)
 		}
+	}
+}
+
+func TestDraftWorkItemCanBeMinimal(t *testing.T) {
+	_, docs, _ := createFixture(t)
+	writeTestFile(t, docs, "work/TASK-AUTH-030-draft.md", `# TASK-AUTH-030: Исследовать вариант
+
+- Статус: Черновик
+- Тип: Research
+
+## Результат
+
+Понятно, стоит ли продолжать реализацию.
+`)
+	model := buildFixture(t, docs)
+	for _, issue := range model.Issues {
+		if issue.DocumentPath == "work/TASK-AUTH-030-draft.md" {
+			t.Fatalf("minimal draft must be valid: %#v", issue)
+		}
+	}
+	item := model.Knowledge.WorkItems[0]
+	if item.ID != "TASK-AUTH-030" || item.Criteria == nil || item.Verification == nil || item.Checks == nil || item.RepositoryPaths == nil {
+		t.Fatalf("minimal draft has unstable collections: %#v", item)
+	}
+
+	writeTestFile(t, docs, "work/TASK-AUTH-031-ready.md", `# TASK-AUTH-031: Начать реализацию
+
+- Статус: Готово к работе
+- Тип: Feature
+
+## Результат
+
+Результат реализован.
+`)
+	model = buildFixture(t, docs)
+	found := false
+	for _, issue := range model.Issues {
+		if issue.DocumentPath == "work/TASK-AUTH-031-ready.md" && issue.Code == "missing-work-section" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("ready task must require the complete workflow contract")
 	}
 }
 
@@ -531,6 +601,16 @@ func TestVerificationMatrixIsReported(t *testing.T) {
 `
 	writeTestFile(t, docs, "work/TASK-AUTH-007-matrix.md", content)
 	model := buildFixture(t, docs)
+	expectedLine := 0
+	for index, line := range strings.Split(content, "\n") {
+		if strings.Contains(line, "AC-01") && strings.Contains(line, "[ ]") {
+			expectedLine = index + 1
+			break
+		}
+	}
+	if line := model.Knowledge.WorkItems[0].Criteria[0].Line; line != expectedLine {
+		t.Fatalf("criterion line must be 1-based: got %d want %d", line, expectedLine)
+	}
 	data, err := json.Marshal(BuildReport(model))
 	if err != nil {
 		t.Fatal(err)
@@ -618,6 +698,29 @@ func TestOutputSafety(t *testing.T) {
 	model := buildFixture(t, docs)
 	if _, err := GenerateSite(model, Options{OutputDirectory: root, Clean: true}); err == nil || !strings.Contains(err.Error(), "родительским") {
 		t.Fatalf("expected safety error, got %v", err)
+	}
+
+	alias := filepath.Join(t.TempDir(), "output-alias")
+	if err := os.Symlink(root, alias); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+	if _, err := GenerateSite(model, Options{OutputDirectory: alias, Clean: true}); err == nil {
+		t.Fatal("output symlink to documentation parent must be rejected")
+	}
+	if _, err := os.Stat(filepath.Join(docs, "index.md")); err != nil {
+		t.Fatalf("source documentation was changed through output symlink: %v", err)
+	}
+
+	unrelated := filepath.Join(t.TempDir(), "existing-output")
+	if err := os.MkdirAll(unrelated, 0755); err != nil {
+		t.Fatal(err)
+	}
+	directAlias := filepath.Join(t.TempDir(), "direct-output-alias")
+	if err := os.Symlink(unrelated, directAlias); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+	if _, err := GenerateSite(model, Options{OutputDirectory: directAlias, Clean: true}); err == nil || !strings.Contains(err.Error(), "символической ссылки") {
+		t.Fatalf("direct output symlink must be rejected, got %v", err)
 	}
 }
 

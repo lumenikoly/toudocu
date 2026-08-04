@@ -350,10 +350,10 @@ func renderHealthPage(model *Model) string {
 	return pageShell(model, current, "Качество документации", "Проверка проектной документации", content, "")
 }
 
-func BuildReport(model *Model) map[string]any {
-	documents := []map[string]any{}
+func BuildReport(model *Model) ProjectReport {
+	documents := []ReportDocument{}
 	for _, doc := range model.Documents {
-		links := []map[string]any{}
+		links := []ReportLink{}
 		for _, link := range doc.ResolvedLinks {
 			target := ""
 			kind := ""
@@ -366,10 +366,16 @@ func BuildReport(model *Model) map[string]any {
 			} else if link.AssetPath != "" {
 				target = link.AssetPath
 				kind = "asset"
+			} else if link.GeneratedTarget != "" {
+				target = link.GeneratedTarget
+				kind = "directory"
 			} else if link.External {
 				kind = "external"
 			}
-			links = append(links, map[string]any{"destination": link.Destination, "broken": link.Broken, "blocked": link.Blocked, "targetKind": kind, "target": target, "href": link.Href})
+			links = append(links, ReportLink{
+				Destination: link.Destination, Broken: link.Broken, Blocked: link.Blocked,
+				TargetKind: kind, Target: target, Href: link.Href,
+			})
 		}
 		backlinks := []string{}
 		for _, item := range doc.Backlinks {
@@ -379,41 +385,67 @@ func BuildReport(model *Model) map[string]any {
 		for _, item := range doc.RelatedDocuments {
 			related = append(related, item.SourcePath)
 		}
-		documents = append(documents, map[string]any{"id": doc.Metadata["id"], "sourcePath": doc.SourcePath, "outputPath": doc.OutputPath, "type": doc.Type, "title": doc.Title, "description": doc.Description, "metadata": doc.Metadata, "status": doc.Status, "taskStats": doc.TaskStats, "updatedAt": doc.UpdatedAt, "stale": doc.Stale, "warnings": len(doc.Warnings), "errors": len(doc.Errors), "links": links, "backlinks": backlinks, "relatedDocuments": related})
+		documents = append(documents, ReportDocument{
+			ID: doc.Metadata["id"], SourcePath: doc.SourcePath, OutputPath: doc.OutputPath,
+			Type: doc.Type, Title: doc.Title, Description: doc.Description, Metadata: doc.Metadata,
+			Status: doc.Status, TaskStats: doc.TaskStats, UpdatedAt: doc.UpdatedAt, Stale: doc.Stale,
+			Warnings: len(doc.Warnings), Errors: len(doc.Errors), Links: links,
+			Backlinks: backlinks, RelatedDocuments: related,
+		})
 	}
-	roadmap := []map[string]any{}
+	roadmap := []ReportRoadmapStage{}
 	for _, stage := range model.RoadmapStages {
-		roadmap = append(roadmap, map[string]any{"title": stage.Title, "status": stage.Status, "plannedDate": stage.PlannedDate, "taskStats": stage.TaskStats, "items": stage.Items, "document": stage.Document.SourcePath, "anchor": stage.Anchor})
+		roadmap = append(roadmap, ReportRoadmapStage{
+			Title: stage.Title, Status: stage.Status, PlannedDate: stage.PlannedDate,
+			TaskStats: stage.TaskStats, Items: append([]RoadmapItem{}, stage.Items...),
+			Document: stage.Document.SourcePath, Anchor: stage.Anchor,
+		})
 	}
-	risks := []map[string]any{}
+	risks := []ReportRisk{}
 	for _, risk := range model.Risks {
-		risks = append(risks, map[string]any{"id": risk.ID, "title": risk.Title, "status": risk.Status, "probability": risk.Probability, "impact": risk.Impact, "owner": risk.Owner, "taskStats": risk.TaskStats, "document": risk.Document.SourcePath, "anchor": risk.Anchor})
+		risks = append(risks, ReportRisk{
+			ID: risk.ID, Title: risk.Title, Status: risk.Status, Probability: risk.Probability,
+			Impact: risk.Impact, Owner: risk.Owner, TaskStats: risk.TaskStats,
+			Document: risk.Document.SourcePath, Anchor: risk.Anchor,
+		})
 	}
-	project := map[string]any{
-		"title": model.Project.Title, "description": model.Project.Description, "status": model.Project.Status,
-		"stage": model.Project.Stage, "version": model.Project.Version, "owner": model.Project.Owner,
-		"updated": model.Project.Updated, "summary": model.Project.Summary,
+	project := ReportProject{
+		Title: model.Project.Title, Description: model.Project.Description, Status: model.Project.Status,
+		Stage: model.Project.Stage, Version: model.Project.Version, Owner: model.Project.Owner,
+		Updated: model.Project.Updated, Summary: model.Project.Summary,
 	}
-	return map[string]any{"schemaVersion": 1, "generator": map[string]any{"name": "Docgent", "version": Version}, "generatedAt": model.GeneratedAt, "sourceDirectory": pathBase(model.RootDirectory), "staleDays": model.StaleDays, "project": project, "currentStatus": model.CurrentStatus, "stats": model.Stats, "documents": documents, "roadmap": roadmap, "risks": risks, "knowledge": model.Knowledge, "issues": model.Issues}
+	return ProjectReport{
+		SchemaVersion: 1, Generator: GeneratorInfo{Name: "Docgent", Version: Version},
+		GeneratedAt: model.GeneratedAt, SourceDirectory: pathBase(model.RootDirectory),
+		StaleDays: model.StaleDays, Project: project, CurrentStatus: model.CurrentStatus,
+		Stats: model.Stats, Documents: documents, Roadmap: roadmap, Risks: risks,
+		Knowledge: model.Knowledge, Issues: append([]Issue{}, model.Issues...),
+	}
 }
 
 func ensureOutputSafety(inputDirectory, outputDirectory string) error {
 	input, _ := filepath.Abs(inputDirectory)
 	output, _ := filepath.Abs(outputDirectory)
-	if samePath(input, output) {
+	resolvedInput, err := resolvePathForSafety(input)
+	if err != nil {
+		return err
+	}
+	resolvedOutput, err := resolvePathForSafety(output)
+	if err != nil {
+		return err
+	}
+	if samePath(resolvedInput, resolvedOutput) {
 		return fmt.Errorf("выходной каталог не может совпадать с каталогом исходной документации")
 	}
-	resolved, _ := resolvePathForSafety(output)
-	volume := filepath.VolumeName(resolved)
+	volume := filepath.VolumeName(resolvedOutput)
 	root := string(filepath.Separator)
 	if volume != "" {
 		root = volume + string(filepath.Separator)
 	}
-	if samePath(resolved, root) {
+	if samePath(resolvedOutput, root) {
 		return fmt.Errorf("корневой каталог нельзя использовать как выходной")
 	}
-	rel, err := filepath.Rel(output, input)
-	if err == nil && rel != "." && rel != "" && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) && !filepath.IsAbs(rel) {
+	if ensureInside(resolvedOutput, resolvedInput) {
 		return fmt.Errorf("выходной каталог не может быть родительским для каталога исходной документации")
 	}
 	return nil

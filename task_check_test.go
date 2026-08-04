@@ -202,6 +202,36 @@ func TestTaskCheckCLIJSONAndReportFile(t *testing.T) {
 	}
 }
 
+func TestTaskContextCLIJSONDoesNotExecuteCommands(t *testing.T) {
+	root, docs, _ := createFixture(t)
+	commands := map[string]string{
+		"AC-01": "command-that-must-never-execute",
+		"AC-02": "command-that-must-never-execute",
+		"ALL":   "command-that-must-never-execute",
+		"DOCS":  "command-that-must-never-execute",
+	}
+	writeTestFile(t, docs, "work/TASK-AUTH-020-context.md", taskCheckFixture("Черновик", false, commands, ""))
+
+	var stdout, stderr bytes.Buffer
+	code := RunCLI([]string{
+		"task", "context", "TASK-AUTH-020", docs,
+		"--repository-root", root, "--format", "json", "--stale-days", "0",
+	}, &stdout, &stderr)
+	if code != 0 || stderr.Len() != 0 {
+		t.Fatalf("code=%d stderr=%s stdout=%s", code, stderr.String(), stdout.String())
+	}
+	var report TaskContextReport
+	if err := json.Unmarshal(stdout.Bytes(), &report); err != nil {
+		t.Fatalf("stdout is not task context JSON: %v\n%s", err, stdout.String())
+	}
+	if report.Kind != "task-context" || report.Task.ID != "TASK-AUTH-020" || report.Module == nil || report.UseCase == nil {
+		t.Fatalf("context: %#v", report)
+	}
+	if len(report.BusinessRules) != 1 || report.BusinessRules[0].ID != "BR-AUTH-001" || report.Documents == nil || report.Dependencies == nil || report.Dependents == nil || report.Issues == nil {
+		t.Fatalf("incomplete or unstable context: %#v", report)
+	}
+}
+
 func TestOrdinaryCheckDoesNotExecuteTaskCommands(t *testing.T) {
 	root, docs, _ := createFixture(t)
 	commands := map[string]string{

@@ -20,6 +20,7 @@ func PrintHelp(w io.Writer) {
   docgent [build] [каталог-документации] [параметры]
   docgent check [каталог-документации] [параметры]
   docgent task check TASK-ID [каталог-документации] [параметры]
+  docgent task context TASK-ID [каталог-документации] [параметры]
   docgent init [каталог-документации] [--force]
   docgent version
 
@@ -27,6 +28,7 @@ func PrintHelp(w io.Writer) {
   docgent build ./docs --output ./build/project-docs --clean
   docgent check ./docs --strict
   docgent task check TASK-CORE-001 ./docs --format json
+  docgent task context TASK-CORE-001 ./docs --format json
   docgent init ./docs
 
 Параметры:
@@ -40,7 +42,7 @@ func PrintHelp(w io.Writer) {
       --clean                  Очистить выходной каталог
       --open                   Открыть результат в браузере
       --strict                 Предупреждения дают ненулевой exit code
-      --format text|json       Формат check и task check
+      --format text|json       Формат check, task context и task check
       --report <файл>          Сохранить JSON-отчёт task check
       --timeout <duration>     Timeout каждой команды task check, по умолчанию 10m
       --force                  Перезаписать шаблоны при init
@@ -75,10 +77,17 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			help = true
 			args = args[1:]
 		case "task":
-			if len(args) < 3 || args[1] != "check" {
-				return options, false, false, fmt.Errorf("использование: docgent task check TASK-ID [каталог-документации]")
+			if len(args) < 3 {
+				return options, false, false, fmt.Errorf("использование: docgent task check|context TASK-ID [каталог-документации]")
 			}
-			options.Command = "task-check"
+			switch args[1] {
+			case "check":
+				options.Command = "task-check"
+			case "context":
+				options.Command = "task-context"
+			default:
+				return options, false, false, fmt.Errorf("использование: docgent task check|context TASK-ID [каталог-документации]")
+			}
 			options.TaskID = args[2]
 			args = args[3:]
 		}
@@ -245,10 +254,12 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 	if options.Format != "text" && options.Format != "json" {
 		return options, false, false, fmt.Errorf("--format должен быть text или json")
 	}
-	if options.Command == "task-check" {
+	if options.Command == "task-check" || options.Command == "task-context" {
 		if workItemHeadingRE.FindStringSubmatch(options.TaskID+": check") == nil {
 			return options, false, false, fmt.Errorf("TASK-ID должен иметь формат TASK-AREA-NNN")
 		}
+	}
+	if options.Command == "task-check" {
 		if options.ReportPath != "" {
 			report, err := filepath.Abs(options.ReportPath)
 			if err != nil {
@@ -367,6 +378,24 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 		}
 		if report.Status != "passed" || reportWriteFailed {
 			return 1
+		}
+		return 0
+	}
+	if options.Command == "task-context" {
+		report, err := BuildTaskContext(model, options.TaskID)
+		if err != nil {
+			fmt.Fprintln(stderr, "Ошибка:", err)
+			return 1
+		}
+		if options.Format == "json" {
+			data, marshalErr := json.MarshalIndent(report, "", "  ")
+			if marshalErr != nil {
+				fmt.Fprintln(stderr, "Ошибка:", marshalErr)
+				return 1
+			}
+			fmt.Fprintln(stdout, string(data))
+		} else {
+			printTaskContextText(stdout, report)
 		}
 		return 0
 	}

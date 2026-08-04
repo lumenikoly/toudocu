@@ -199,7 +199,7 @@ func extractTasks(lines []string, headings []Heading, lineOffset int) []Task {
 			continue
 		}
 		task := Task{
-			Line:      absoluteLine,
+			Line:      absoluteLine + 1,
 			Indent:    len(strings.ReplaceAll(match[1], "\t", "    ")),
 			Completed: strings.EqualFold(match[2], "x"),
 			Text:      stripInlineMarkdown(match[3]),

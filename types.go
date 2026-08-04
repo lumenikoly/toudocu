@@ -250,68 +250,6 @@ type VerificationCheck struct {
 	Line     int      `json:"line"`
 }
 
-type TaskCheckTask struct {
-	ID       string     `json:"id"`
-	Title    string     `json:"title"`
-	Status   StatusInfo `json:"status"`
-	Type     string     `json:"type,omitempty"`
-	Document string     `json:"document"`
-}
-
-type CommandExecutionResult struct {
-	Sequence        int       `json:"sequence"`
-	Command         string    `json:"command"`
-	Targets         []string  `json:"targets"`
-	Status          string    `json:"status"`
-	ExitCode        *int      `json:"exitCode"`
-	StartedAt       time.Time `json:"startedAt"`
-	FinishedAt      time.Time `json:"finishedAt"`
-	DurationMillis  int64     `json:"durationMillis"`
-	Stdout          string    `json:"stdout"`
-	Stderr          string    `json:"stderr"`
-	StdoutTruncated bool      `json:"stdoutTruncated"`
-	StderrTruncated bool      `json:"stderrTruncated"`
-}
-
-type CriterionExecutionResult struct {
-	ID                string `json:"id"`
-	Description       string `json:"description"`
-	DocumentCompleted bool   `json:"documentCompleted"`
-	Status            string `json:"status"`
-}
-
-type TargetExecutionResult struct {
-	Target string `json:"target"`
-	Status string `json:"status"`
-}
-
-type TaskCheckSummary struct {
-	TotalCommands    int `json:"totalCommands"`
-	PassedCommands   int `json:"passedCommands"`
-	FailedCommands   int `json:"failedCommands"`
-	TimedOutCommands int `json:"timedOutCommands"`
-	CriteriaPassed   int `json:"criteriaPassed"`
-	CriteriaFailed   int `json:"criteriaFailed"`
-}
-
-type TaskCheckReport struct {
-	SchemaVersion    int                        `json:"schemaVersion"`
-	Kind             string                     `json:"kind"`
-	Generator        map[string]string          `json:"generator"`
-	Task             TaskCheckTask              `json:"task"`
-	StartedAt        time.Time                  `json:"startedAt"`
-	FinishedAt       time.Time                  `json:"finishedAt"`
-	DurationMillis   int64                      `json:"durationMillis"`
-	Status           string                     `json:"status"`
-	FullVerification bool                       `json:"fullVerification"`
-	ValidationIssues []Issue                    `json:"validationIssues"`
-	Issues           []Issue                    `json:"issues"`
-	Commands         []CommandExecutionResult   `json:"commands"`
-	Criteria         []CriterionExecutionResult `json:"criteria"`
-	Targets          []TargetExecutionResult    `json:"targets"`
-	Summary          TaskCheckSummary           `json:"summary"`
-}
-
 type KnowledgeModel struct {
 	Modules       []KnowledgeModule  `json:"modules"`
 	UseCases      []KnowledgeUseCase `json:"useCases"`
