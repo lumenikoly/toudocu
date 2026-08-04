@@ -36,6 +36,32 @@
 
   function initializeSidebar() {
     const toggle = $('[data-sidebar-toggle]');
+    let folderState = {};
+    try {
+      const storedFolderState = JSON.parse(localStorage.getItem('project-docs-navigation') || '{}');
+      if (storedFolderState && typeof storedFolderState === 'object' && !Array.isArray(storedFolderState)) {
+        folderState = storedFolderState;
+      }
+    } catch { /* file:// privacy mode */ }
+    $$('[data-nav-folder]').forEach((folder) => {
+      const folderToggle = $('[data-nav-folder-toggle]', folder);
+      const label = $('.nav-folder-link', folder)?.textContent.trim() || 'раздел';
+      const key = folder.dataset.navFolder;
+      const setCollapsed = (collapsed, persist = true) => {
+        folder.classList.toggle('is-collapsed', collapsed);
+        folderToggle?.setAttribute('aria-expanded', String(!collapsed));
+        folderToggle?.setAttribute('aria-label', `${collapsed ? 'Развернуть' : 'Свернуть'} раздел ${label}`);
+        if (folderToggle) folderToggle.title = folderToggle.getAttribute('aria-label');
+        if (!persist) return;
+        folderState[key] = collapsed;
+        try { localStorage.setItem('project-docs-navigation', JSON.stringify(folderState)); } catch { /* file:// privacy mode */ }
+      };
+      setCollapsed(folderState[key] === true, false);
+      folderToggle?.addEventListener('click', (event) => {
+        event.stopPropagation();
+        setCollapsed(!folder.classList.contains('is-collapsed'));
+      });
+    });
     toggle?.addEventListener('click', (event) => {
       event.stopPropagation();
       const open = document.body.classList.toggle('sidebar-open');

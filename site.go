@@ -83,7 +83,9 @@ func renderNavigation(model *Model, current string) string {
 		if target == current {
 			active = " is-active"
 		}
-		fmt.Fprintf(&b, `<li class="nav-item nav-folder"><a class="nav-folder-link%s" href="%s"><span class="nav-icon">▸</span><span>%s</span></a><ul>`, active, escapeAttr(relativeURL(current, target)), escapeHTML(directoryLabel(key)))
+		label := directoryLabel(key)
+		groupID := "nav-group-" + slugify(key)
+		fmt.Fprintf(&b, `<li class="nav-item nav-folder" data-nav-folder="%s"><div class="nav-folder-row"><button class="nav-folder-toggle" type="button" data-nav-folder-toggle aria-expanded="true" aria-controls="%s" aria-label="Свернуть раздел %s"><span aria-hidden="true">▾</span></button><a class="nav-folder-link%s" href="%s"><span>%s</span></a></div><ul id="%s">`, escapeAttr(key), escapeAttr(groupID), escapeAttr(label), active, escapeAttr(relativeURL(current, target)), escapeHTML(label), escapeAttr(groupID))
 		docs := groups[key]
 		sort.SliceStable(docs, func(i, j int) bool { return documentLess(docs[i], docs[j]) })
 		for _, doc := range docs {
@@ -222,8 +224,29 @@ func docCard(current string, document *Document) string {
 	return `<article class="document-card" data-filter-item data-search="` + escapeAttr(document.Title+" "+document.Description+" "+document.SourcePath) + `" data-status="` + escapeAttr(document.Status.Kind) + `" data-type="` + escapeAttr(document.Type) + `" data-owner="` + escapeAttr(document.Metadata["owner"]) + `"><div class="card-kicker">` + renderStatusChip(document.Status) + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span></div><h3><a href="` + escapeAttr(relativeURL(current, document.OutputPath)) + `">` + escapeHTML(document.Title) + `</a></h3><p>` + escapeHTML(truncate(document.Description, 180)) + `</p>` + renderProgress(document.TaskStats, "Задачи") + `<div class="card-path">` + escapeHTML(document.SourcePath) + `</div></article>`
 }
 
-func filterControls(model *Model) string {
-	return `<div class="collection-controls"><input type="search" data-filter-control="search" placeholder="Фильтр" aria-label="Фильтр"><select data-filter-control="status"><option value="all">Все статусы</option><option value="done">Готово</option><option value="in-progress">В работе</option><option value="planned">Запланировано</option><option value="blocked">Заблокировано</option></select><select data-filter-control="type"><option value="all">Все типы</option><option value="module">Модули</option><option value="use-case">Сценарии</option><option value="architecture">Архитектура</option><option value="decision">Решения</option><option value="work">Задачи</option></select></div>`
+func filterControls(includeStatus, includeType bool) string {
+	statusControl := ""
+	if includeStatus {
+		statusControl = `<select data-filter-control="status"><option value="all">Все статусы</option><option value="done">Готово</option><option value="in-progress">В работе</option><option value="planned">Запланировано</option><option value="blocked">Заблокировано</option></select>`
+	}
+	typeControl := ""
+	if includeType {
+		typeControl = `<select data-filter-control="type"><option value="all">Все типы</option><option value="module">Модули</option><option value="use-case">Сценарии</option><option value="architecture">Архитектура</option><option value="decision">Решения</option><option value="work">Задачи</option></select>`
+	}
+	return `<div class="collection-controls"><input type="search" data-filter-control="search" placeholder="Фильтр" aria-label="Фильтр">` + statusControl + typeControl + `</div>`
+}
+
+func documentsHaveDifferentStatuses(documents []*Document) bool {
+	if len(documents) < 2 {
+		return false
+	}
+	first := documents[0].Status.Kind
+	for _, document := range documents[1:] {
+		if document.Status.Kind != first {
+			return true
+		}
+	}
+	return false
 }
 
 func renderComputedStatus(model *Model, current string) string {
@@ -342,7 +365,7 @@ func renderDashboard(model *Model) string {
 	}
 	documentList := `<p class="empty-state">Дополнительных документов нет.</p>`
 	if docs.Len() > 0 {
-		documentList = `<div data-filter-scope>` + filterControls(model) + `<div class="collection-summary">Показано: <strong data-filter-count></strong></div><div class="card-grid">` + docs.String() + `</div><div class="empty-state" data-filter-empty hidden>Ничего не найдено.</div></div>`
+		documentList = `<div data-filter-scope>` + filterControls(true, true) + `<div class="collection-summary">Показано: <strong data-filter-count></strong></div><div class="card-grid">` + docs.String() + `</div><div class="empty-state" data-filter-empty hidden>Ничего не найдено.</div></div>`
 	}
 	content := `<header class="hero">` + status + `<h1>` + escapeHTML(model.Project.Title) + `</h1><p class="page-lead">` + escapeHTML(model.Project.Description) + `</p>` + summary + meta + `</header>` + overview + `<section class="metric-grid">` + metrics.String() + `</section>` + roadmap + computedStatus + riskSection + `<section class="dashboard-section"><div class="section-heading"><div><h2>Документация проекта</h2><p>Поиск, фильтры, статусы и локальные чек-листы.</p></div><a class="section-link" href="` + escapeAttr(model.HealthOutputPath) + `">Качество →</a></div>` + documentList + `</section>`
 	return pageShell(model, "index.html", model.Project.Title, model.Project.Description, content, "")
@@ -371,7 +394,11 @@ func renderDirectoryPage(model *Model, directory string) string {
 	for _, doc := range docs {
 		cards.WriteString(docCard(current, doc))
 	}
-	content := breadcrumbs(model, current, directoryLabel(directory)) + `<header class="page-header"><h1>` + escapeHTML(directoryLabel(directory)) + `</h1><p class="page-lead">Документы раздела: ` + fmt.Sprint(len(docs)) + `.</p></header><section data-filter-scope>` + filterControls(model) + `<div class="collection-summary">Показано: <strong data-filter-count></strong></div><div class="card-grid">` + cards.String() + `</div><div class="empty-state" data-filter-empty hidden>Ничего не найдено.</div></section>`
+	collection := `<div class="card-grid">` + cards.String() + `</div>`
+	if len(docs) > 1 {
+		collection = `<section data-filter-scope>` + filterControls(documentsHaveDifferentStatuses(docs), false) + `<div class="collection-summary">Показано: <strong data-filter-count></strong></div>` + collection + `<div class="empty-state" data-filter-empty hidden>Ничего не найдено.</div></section>`
+	}
+	content := breadcrumbs(model, current, directoryLabel(directory)) + `<header class="page-header"><h1>` + escapeHTML(directoryLabel(directory)) + `</h1><p class="page-lead">Документы раздела: ` + fmt.Sprint(len(docs)) + `.</p></header>` + collection
 	return pageShell(model, current, directoryLabel(directory), directoryLabel(directory), content, "")
 }
 

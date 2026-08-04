@@ -210,6 +210,18 @@ func TestGenerateSite(t *testing.T) {
 	if strings.Contains(html, "<script>alert") {
 		t.Fatal("unsafe")
 	}
+	dashboardBytes, _ := os.ReadFile(filepath.Join(output, "index.html"))
+	if !strings.Contains(string(dashboardBytes), `data-filter-control="type"`) {
+		t.Fatal("dashboard must offer a type filter for its mixed document collection")
+	}
+	directoryBytes, _ := os.ReadFile(filepath.Join(output, "modules/index.html"))
+	directoryHTML := string(directoryBytes)
+	if strings.Contains(directoryHTML, `data-filter-control="type"`) {
+		t.Fatal("typed directory must not offer a redundant type filter")
+	}
+	if strings.Contains(directoryHTML, `data-filter-control="search"`) {
+		t.Fatal("single-document directory must not offer redundant collection filters")
+	}
 	reportBytes, _ := os.ReadFile(filepath.Join(output, "report.json"))
 	var report ProjectReport
 	if err := json.Unmarshal(reportBytes, &report); err != nil {
