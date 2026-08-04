@@ -4,7 +4,7 @@
     "name": "Docgent",
     "version": "1.1.0-go"
   },
-  "generatedAt": "2026-07-31T13:48:21.00172188Z",
+  "generatedAt": "2026-07-31T16:24:11.456035249Z",
   "sourceDirectory": "docs",
   "staleDays": 0,
   "project": {
@@ -1750,7 +1750,7 @@
         "id": "MOD-SITE",
         "owner": "Команда Docgent",
         "status": "Готово",
-        "updated": "2026-07-30"
+        "updated": "2026-07-31"
       },
       "status": {
         "kind": "done",
@@ -1764,7 +1764,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-31T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2002,7 +2002,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T10:03:37.894148212Z",
+      "updatedAt": "2026-07-31T16:21:58.100075453Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,

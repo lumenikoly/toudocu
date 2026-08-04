@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -49,6 +50,75 @@ func TestArchivedTasksAreFilteredFromDefaultPortalSurfaces(t *testing.T) {
 	dashboard := renderDashboard(model)
 	if !strings.Contains(dashboard, "Active portal task") || strings.Contains(dashboard, "Archived portal task") {
 		t.Fatalf("unexpected dashboard archive visibility")
+	}
+}
+
+func TestNavigationIconsReflectDocumentStatus(t *testing.T) {
+	_, docs, _ := createFixture(t)
+	model := buildFixture(t, docs)
+	document := func(sourcePath, documentType, title, status string) *Document {
+		metadata := Metadata{}
+		if status != "" {
+			metadata["status"] = status
+		}
+		return &Document{
+			SourcePath: sourcePath,
+			OutputPath: strings.TrimSuffix(sourcePath, ".md") + ".html",
+			Directory:  path.Dir(sourcePath),
+			FileName:   path.Base(sourcePath),
+			Type:       documentType,
+			Title:      title,
+			Metadata:   metadata,
+			Status:     StatusFor(status),
+		}
+	}
+	model.Documents = append(model.Documents,
+		document("work/TASK-DONE.md", "work", "Done task", "Выполнено"),
+		document("work/TASK-DRAFT.md", "work", "Draft task", "Черновик"),
+		document("work/BUG-BLOCKED.md", "work", "Blocked bug", "Заблокировано"),
+		document("work/TASK-CANCELLED.md", "work", "Cancelled task", "Отменено"),
+		document("modules/done.md", "module", "Done module", "Готово"),
+		document("decisions/accepted.md", "decision", "Accepted decision", "Принято"),
+		document("reference/unknown.md", "reference", "Unknown status", "Новый статус"),
+		document("architecture/no-status.md", "architecture", "No status", ""),
+	)
+
+	navigation := renderNavigation(model, "index.html")
+	for _, expected := range []string{
+		`class="nav-icon status-done" aria-hidden="true" title="Статус: Выполнено">☑`,
+		`class="nav-icon status-not-started" aria-hidden="true" title="Статус: Черновик">☐`,
+		`class="nav-icon status-blocked" aria-hidden="true" title="Статус: Заблокировано">☐`,
+		`class="nav-icon status-cancelled" aria-hidden="true" title="Статус: Отменено">☐`,
+		`class="nav-icon status-done" aria-hidden="true" title="Статус: Готово">▦`,
+		`class="nav-icon status-accepted" aria-hidden="true" title="Статус: Принято">◆`,
+		`class="nav-icon" aria-hidden="true" title="Статус: Новый статус">≡`,
+		`<span class="visually-hidden"> · Статус: Выполнено</span>`,
+	} {
+		if !strings.Contains(navigation, expected) {
+			t.Fatalf("status navigation missing %q: %s", expected, navigation)
+		}
+	}
+	if strings.Contains(navigation, `title="Статус: Не указан"`) {
+		t.Fatal("documents without declared status must keep a neutral icon without status annotation")
+	}
+
+	style, err := EmbeddedFiles.ReadFile("assets/style.css")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, expected := range []string{
+		`.nav-icon.status-done, .nav-icon.status-accepted`,
+		`.nav-icon.status-in-progress`,
+		`.nav-icon.status-blocked, .nav-icon.status-rejected, .nav-icon.status-review-required`,
+		`.nav-icon.status-planned, .nav-icon.status-not-started, .nav-icon.status-open, .nav-icon.status-paused`,
+		`.nav-icon.status-cancelled, .nav-icon.status-superseded, .nav-icon.status-obsolete, .nav-icon.status-risk-accepted`,
+	} {
+		if !strings.Contains(string(style), expected) {
+			t.Fatalf("status icon styles missing %q", expected)
+		}
+	}
+	if strings.Contains(string(style), `.nav-status-dot`) {
+		t.Fatal("navigation must not render a separate status dot")
 	}
 }
 

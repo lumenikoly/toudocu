@@ -14,7 +14,26 @@ const Version = "1.1.0-go"
 
 var fieldOrder = []string{"status", "type", "stage", "version", "owner", "author", "actor", "priority", "criticality", "module", "useCase", "flow", "screens", "transitions", "standards", "runbooks", "startScreen", "terminalScreens", "allowCycle", "route", "preview", "parentScreen", "component", "environment", "risk", "lastVerified", "supersededBy", "errors", "dependsOn", "source", "date", "plannedDate", "updated", "probability", "impact", "scope", "id", "tags"}
 
-var typeIcons = map[string]string{"overview": "⌂", "status": "◐", "roadmap": "→", "risks": "!", "ideas": "✦", "notes": "✎", "changelog": "↻", "use-case": "◎", "module": "▦", "architecture": "◇", "contract": "⇄", "decision": "◆", "flow": "⇢", "screen-map": "⌗", "screen-index": "⌗", "screen": "▣", "guide": "◫", "work": "☑", "reference": "≡", "standard": "✓", "quality-index": "✓", "runbook": "↻", "runbook-index": "↻", "document": "•"}
+var typeIcons = map[string]string{"overview": "⌂", "status": "◐", "roadmap": "→", "risks": "!", "ideas": "✦", "notes": "✎", "changelog": "↻", "use-case": "◎", "module": "▦", "architecture": "◇", "contract": "⇄", "decision": "◆", "flow": "⇢", "screen-map": "⌗", "screen-index": "⌗", "screen": "▣", "guide": "◫", "work": "☐", "reference": "≡", "standard": "✓", "quality-index": "✓", "runbook": "↻", "runbook-index": "↻", "document": "•"}
+
+func navigationDocumentIcon(document *Document) (glyph, statusClass, statusLabel string) {
+	glyph = typeIcons[document.Type]
+	if glyph == "" {
+		glyph = typeIcons["document"]
+	}
+	if document.Type == "work" && document.Status.Kind == "done" {
+		glyph = "☑"
+	}
+
+	if strings.TrimSpace(document.Metadata["status"]) == "" {
+		return glyph, "", ""
+	}
+	statusLabel = document.Status.Label
+	if document.Status.Recognized && document.Status.Kind != "neutral" {
+		statusClass = " status-" + document.Status.Kind
+	}
+	return glyph, statusClass, statusLabel
+}
 
 func renderStatusChip(status StatusInfo) string {
 	return fmt.Sprintf(`<span class="status-chip status-%s" title="%s"><span aria-hidden="true">%s</span><span>%s</span></span>`, escapeAttr(status.Kind), escapeAttr(status.Label), escapeHTML(status.Symbol), escapeHTML(status.Label))
@@ -116,7 +135,14 @@ func renderNavigation(model *Model, current string) string {
 			active = " is-active"
 			aria = ` aria-current="page"`
 		}
-		fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"%s><span class="nav-icon" aria-hidden="true">%s</span><span>%s</span></a></li>`, active, escapeAttr(relativeURL(current, document.OutputPath)), aria, typeIcons[document.Type], escapeHTML(document.Title))
+		glyph, statusClass, statusLabel := navigationDocumentIcon(document)
+		statusTitle := ""
+		accessibleStatus := ""
+		if statusLabel != "" {
+			statusTitle = ` title="` + escapeAttr("Статус: "+statusLabel) + `"`
+			accessibleStatus = `<span class="visually-hidden"> · Статус: ` + escapeHTML(statusLabel) + `</span>`
+		}
+		fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"%s><span class="nav-icon%s" aria-hidden="true"%s>%s</span><span>%s</span>%s</a></li>`, active, escapeAttr(relativeURL(current, document.OutputPath)), aria, escapeAttr(statusClass), statusTitle, escapeHTML(glyph), escapeHTML(document.Title), accessibleStatus)
 	}
 	for _, doc := range rootDocs {
 		writeDoc(doc)

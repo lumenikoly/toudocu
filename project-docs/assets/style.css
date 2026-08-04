@@ -317,19 +317,13 @@ button, a { -webkit-tap-highlight-color: transparent; }
   color: var(--accent-strong);
   font-weight: 700;
 }
-.nav-icon { width: 17px; text-align: center; opacity: 0.9; }
+.nav-icon { flex: 0 0 17px; width: 17px; text-align: center; line-height: 1; opacity: 0.9; }
+.nav-icon.status-done, .nav-icon.status-accepted { color: var(--success); }
+.nav-icon.status-in-progress { color: var(--accent); }
+.nav-icon.status-blocked, .nav-icon.status-rejected, .nav-icon.status-review-required { color: var(--danger); }
+.nav-icon.status-planned, .nav-icon.status-not-started, .nav-icon.status-open, .nav-icon.status-paused { color: var(--warning); }
+.nav-icon.status-cancelled, .nav-icon.status-superseded, .nav-icon.status-obsolete, .nav-icon.status-risk-accepted { color: var(--muted); }
 .nav-playable-item .nav-link { padding-left: 16px; font-size: 13px; }
-.nav-status-dot {
-  width: 7px;
-  height: 7px;
-  margin-left: auto;
-  border-radius: 50%;
-  background: var(--border-strong);
-}
-.nav-status-dot.status-done, .nav-status-dot.status-accepted { background: var(--success); }
-.nav-status-dot.status-in-progress { background: var(--accent); }
-.nav-status-dot.status-blocked { background: var(--danger); }
-.nav-status-dot.status-planned, .nav-status-dot.status-not-started, .nav-status-dot.status-open, .nav-status-dot.status-paused { background: var(--warning); }
 
 .main-area { min-width: 0; }
 .page-grid {
