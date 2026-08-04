@@ -16,8 +16,7 @@
 ## Расположение в коде
 
 - HTML и отчёт: `site.go`, `report_types.go`;
-- встроенные ресурсы: `embed.go`, `assets/`;
-- стартовые документы: `templates/docs/`.
+- встроенные ресурсы: `embed.go`, `assets/`.
 
 ## Границы
 

@@ -2,7 +2,7 @@ package docgent
 
 import "embed"
 
-// EmbeddedFiles contains the browser assets and starter documentation templates.
+// EmbeddedFiles contains the browser assets.
 //
-//go:embed assets templates/docs
+//go:embed assets
 var EmbeddedFiles embed.FS

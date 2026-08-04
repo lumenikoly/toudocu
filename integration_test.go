@@ -256,6 +256,12 @@ func TestCLIArguments(t *testing.T) {
 	if options.Title != "Проект" || options.StaleDays != 30 || len(options.Excludes) != 2 || !options.Clean || !options.Strict || options.RepositoryRef != "abc123" || !filepath.IsAbs(options.InputDirectory) {
 		t.Fatalf("options: %#v", options)
 	}
+	if _, _, _, err := ParseArguments([]string{"init"}); err == nil || !strings.Contains(err.Error(), "неизвестная команда") {
+		t.Fatalf("init must be rejected as an unknown command, got %v", err)
+	}
+	if _, _, _, err := ParseArguments([]string{"./docs", "--force"}); err == nil || !strings.Contains(err.Error(), "неизвестный параметр") {
+		t.Fatalf("--force must be rejected as an unknown option, got %v", err)
+	}
 }
 
 func TestTaskCheckCLIArguments(t *testing.T) {
@@ -724,22 +730,65 @@ func TestOutputSafety(t *testing.T) {
 	}
 }
 
-func TestInitCheckBuild(t *testing.T) {
+func TestMinimalDocumentationCheckAndBuild(t *testing.T) {
 	root := t.TempDir()
 	docs := filepath.Join(root, "docs")
-	count, err := InitDocumentation(docs, false)
-	if err != nil || count == 0 {
-		t.Fatalf("init %d %v", count, err)
-	}
+	writeTestFile(t, docs, "index.md", "# Минимальный проект\n\nКраткое описание проекта.\n\n## Подробности\n\nУникальное содержимое главной страницы.\n")
 	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
 	if err != nil {
 		t.Fatal(err)
+	}
+	if model.Stats.Warnings != 0 || model.Stats.Errors != 0 {
+		t.Fatalf("minimal documentation must be valid: %#v", model.Issues)
+	}
+	var stdout, stderr strings.Builder
+	if code := RunCLI([]string{"check", docs, "--repository-root", root, "--strict", "--stale-days", "0"}, &stdout, &stderr); code != 0 {
+		t.Fatalf("strict check failed: stdout=%s stderr=%s", stdout.String(), stderr.String())
 	}
 	output := filepath.Join(root, "site")
 	if _, err := GenerateSite(model, Options{OutputDirectory: output, Clean: true}); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := os.Stat(filepath.Join(output, "index.html")); err != nil {
+	for _, name := range []string{"index.html", "report.json"} {
+		if _, err := os.Stat(filepath.Join(output, name)); err != nil {
+			t.Fatalf("missing %s: %v", name, err)
+		}
+	}
+	data, err := os.ReadFile(filepath.Join(output, "index.html"))
+	if err != nil {
 		t.Fatal(err)
+	}
+	html := string(data)
+	if !strings.Contains(html, "Уникальное содержимое главной страницы.") {
+		t.Fatalf("index.md body is missing from dashboard: %s", html)
+	}
+	for _, absent := range []string{"Дорожная карта", "Вычисляемое состояние", "Открытые риски", "metric-label\">Модули", "Не указан"} {
+		if strings.Contains(html, absent) {
+			t.Fatalf("minimal dashboard contains optional block %q", absent)
+		}
+	}
+}
+
+func TestMissingIndexRemainsStrictFailure(t *testing.T) {
+	root := t.TempDir()
+	docs := filepath.Join(root, "docs")
+	writeTestFile(t, docs, "notes.md", "# Заметки\n\nОписание заметок.\n")
+	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, issue := range model.Issues {
+		if issue.Code == "missing-index" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("missing-index diagnostic not found: %#v", model.Issues)
+	}
+	var stdout, stderr strings.Builder
+	if code := RunCLI([]string{"check", docs, "--repository-root", root, "--strict", "--stale-days", "0"}, &stdout, &stderr); code == 0 {
+		t.Fatalf("strict check must fail without index.md: stdout=%s stderr=%s", stdout.String(), stderr.String())
 	}
 }

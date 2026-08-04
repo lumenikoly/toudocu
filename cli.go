@@ -21,7 +21,6 @@ func PrintHelp(w io.Writer) {
   docgent check [каталог-документации] [параметры]
   docgent task check TASK-ID [каталог-документации] [параметры]
   docgent task context TASK-ID [каталог-документации] [параметры]
-  docgent init [каталог-документации] [--force]
   docgent version
 
 Примеры:
@@ -29,7 +28,6 @@ func PrintHelp(w io.Writer) {
   docgent check ./docs --strict
   docgent task check TASK-CORE-001 ./docs --format json
   docgent task context TASK-CORE-001 ./docs --format json
-  docgent init ./docs
 
 Параметры:
   -o, --output <каталог>       Выходной каталог
@@ -45,7 +43,6 @@ func PrintHelp(w io.Writer) {
       --format text|json       Формат check, task context и task check
       --report <файл>          Сохранить JSON-отчёт task check
       --timeout <duration>     Timeout каждой команды task check, по умолчанию 10m
-      --force                  Перезаписать шаблоны при init
   -h, --help                   Справка
   -v, --version                Версия
 `, Version)
@@ -67,9 +64,11 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 	args := append([]string{}, argv...)
 	if len(args) > 0 {
 		switch args[0] {
-		case "build", "check", "init":
+		case "build", "check":
 			options.Command = args[0]
 			args = args[1:]
+		case "init":
+			return options, false, false, fmt.Errorf("неизвестная команда: init")
 		case "version":
 			version = true
 			args = args[1:]
@@ -208,8 +207,6 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			options.Open = true
 		case arg == "--strict":
 			options.Strict = true
-		case arg == "--force":
-			options.Force = true
 		case strings.HasPrefix(arg, "-"):
 			return options, false, false, fmt.Errorf("неизвестный параметр: %s", arg)
 		default:
@@ -341,15 +338,6 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	}
 	if version {
 		fmt.Fprintln(stdout, Version)
-		return 0
-	}
-	if options.Command == "init" {
-		count, err := InitDocumentation(options.InputDirectory, options.Force)
-		if err != nil {
-			fmt.Fprintln(stderr, "Ошибка:", err)
-			return 1
-		}
-		fmt.Fprintf(stdout, "Создано файлов: %d\nКаталог: %s\n", count, options.InputDirectory)
 		return 0
 	}
 	model, err := BuildDocumentationModel(options)

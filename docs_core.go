@@ -377,18 +377,8 @@ func buildCollections(documents []*Document) map[string][]*Document {
 }
 
 func validateGlobalStructure(model *Model) {
-	required := []struct{ File, Code, Message string }{
-		{"index.md", "missing-index", "Отсутствует обязательный файл index.md."},
-		{"status.md", "missing-status-document", "Отсутствует файл status.md с текущим состоянием проекта."},
-		{"roadmap.md", "missing-roadmap", "Отсутствует файл roadmap.md."},
-	}
-	for _, item := range required {
-		if model.DocByPath[item.File] == nil {
-			model.Issues = append(model.Issues, newIssue("warning", item.Code, item.Message, "", 0))
-		}
-	}
-	if len(model.Collections["use-case"]) == 0 {
-		model.Issues = append(model.Issues, newIssue("warning", "missing-use-cases", "Не описан ни один пользовательский сценарий.", "", 0))
+	if model.DocByPath["index.md"] == nil {
+		model.Issues = append(model.Issues, newIssue("warning", "missing-index", "Отсутствует обязательный файл index.md.", "", 0))
 	}
 	titles := map[string][]*Document{}
 	for _, document := range model.Documents {

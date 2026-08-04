@@ -2,7 +2,7 @@ BINARY := docgent
 CMD := ./cmd/docgent
 DIST := dist
 
-.PHONY: fmt vet test build demo clean release
+.PHONY: fmt vet test build docs demo clean release
 
 fmt:
 	gofmt -w .
@@ -16,6 +16,9 @@ test: vet
 
 build:
 	CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o $(BINARY) $(CMD)
+
+docs:
+	go run $(CMD) build ./docs --output ./build/project-docs --repository-root . --clean
 
 demo:
 	rm -rf example/site

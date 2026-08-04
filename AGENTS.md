@@ -11,8 +11,7 @@ Docgent — dependency-free Go CLI. Сохраняйте реализацию н
 - HTML и JSON: `site.go`;
 - CLI: `cli.go`, `cmd/docgent/main.go`;
 - поведенческий контракт: `*_test.go`;
-- браузерные ресурсы: `assets/`;
-- стартовые документы: `templates/docs/`.
+- браузерные ресурсы: `assets/`.
 
 ## Правила изменений
 

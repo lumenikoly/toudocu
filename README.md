@@ -8,7 +8,7 @@ Docgent — автономный генератор проектной доку�
 ## Возможности
 
 - один бинарник, сторонние runtime и npm-пакеты не нужны;
-- команды `init`, `check`, `task context`, `task check`, `build`, `version`;
+- команды `check`, `task context`, `task check`, `build`, `version`;
 - проектная сводка, текущее состояние и общий прогресс из `roadmap.md`;
 - модули, пользовательские сценарии, бизнес-правила и атомарные рабочие задачи;
 - roadmap, риски, архитектура, контракты, ADR, руководства и справочник;
@@ -26,7 +26,6 @@ Docgent — автономный генератор проектной доку�
 ### Готовый бинарник
 
 ```bash
-docgent init ./docs
 docgent check ./docs --strict
 docgent build ./docs --output ./build/project-docs --clean
 ```
@@ -39,22 +38,10 @@ docgent build ./docs --output ./build/project-docs --clean
 
 ```bash
 go test ./...
-go run ./cmd/docgent init ./docs
-go run ./cmd/docgent build ./docs --output ./build/project-docs --clean
+make docs
 ```
 
 ## Команды
-
-### `init`
-
-Создаёт согласованный стартовый набор документов. Существующие файлы не перезаписываются.
-
-```bash
-docgent init ./docs
-docgent init ./docs --force
-```
-
-Стартовый комплект проходит `check --strict` без ошибок и предупреждений.
 
 ### `check`
 
@@ -131,10 +118,13 @@ JSON имеет тип `TaskContextReport` и `kind: "task-context"`. Коман
     --format text|json         Формат вывода `check`, `task context` и `task check`
     --report <file>            JSON-отчёт `task check`
     --timeout <duration>       Timeout каждой команды, по умолчанию 10m
-    --force                    Перезаписать шаблоны при `init`
 ```
 
-## Рекомендуемая структура документации
+## Структура документации
+
+Обязателен только `index.md`. Остальные документы и каталоги добавляются по
+необходимости проекта. Если специализированный документ существует, Docgent
+проверяет правила его типа.
 
 ```text
 docs/
@@ -248,10 +238,8 @@ go test -race ./...
 Полный цикл:
 
 ```bash
-rm -rf /tmp/docgent-demo
-go run ./cmd/docgent init /tmp/docgent-demo/docs
-go run ./cmd/docgent check /tmp/docgent-demo/docs --strict --stale-days 0
-go run ./cmd/docgent build /tmp/docgent-demo/docs --output /tmp/docgent-demo/site --clean --strict --stale-days 0
+go run ./cmd/docgent check ./example/docs --strict --stale-days 0
+go run ./cmd/docgent build ./example/docs --output /tmp/docgent-demo-site --clean --strict --stale-days 0
 ```
 
 ## Сборка релиза
@@ -262,7 +250,7 @@ make build
 make release
 ```
 
-Ресурсы интерфейса и шаблоны встроены через `go:embed`, поэтому исполняемый файл не требует соседних каталогов `assets` или `templates`.
+Ресурсы интерфейса встроены через `go:embed`, поэтому исполняемый файл не требует соседнего каталога `assets`.
 
 ## Миграция с Node.js-версии
 

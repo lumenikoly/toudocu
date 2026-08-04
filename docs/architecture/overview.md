@@ -23,7 +23,6 @@ JSON-представления.
 | Модель знаний | Валидация документов, ID и связей | `docs_core.go`, `knowledge.go`, `documentation_links.go` |
 | Task workflow | Контекст и выполнение проверок задачи | `task_context.go`, `task_check.go` |
 | Site | HTML, навигация, поиск и JSON-отчёт | `site.go`, `assets/` |
-| Templates | Начальный документированный проект | `templates/docs/` |
 
 ## Поток данных
 

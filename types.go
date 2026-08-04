@@ -20,7 +20,6 @@ type Options struct {
 	Format          string
 	ReportPath      string
 	Timeout         time.Duration
-	Force           bool
 	Example         bool
 	Now             time.Time
 }

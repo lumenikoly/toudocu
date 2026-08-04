@@ -3,13 +3,11 @@ package docgent
 import (
 	"encoding/json"
 	"fmt"
-	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
 	"sort"
 	"strings"
-	"time"
 )
 
 const Version = "1.1.0-go"
@@ -299,8 +297,54 @@ func renderDashboard(model *Model) string {
 		href := relativeURL("index.html", risk.Document.OutputPath) + "#" + risk.Anchor
 		risks.WriteString(`<article class="risk-card"><div>` + renderStatusChip(risk.Status) + `</div><h3><a href="` + escapeAttr(href) + `">` + escapeHTML(risk.ID+": "+risk.Title) + `</a></h3><p>Вероятность: ` + escapeHTML(risk.Probability) + ` · Влияние: ` + escapeHTML(risk.Impact) + `</p>` + renderProgress(risk.TaskStats, "Снижение риска") + `</article>`)
 	}
-	computedStatus := renderComputedStatus(model, "index.html")
-	content := `<header class="hero"><div class="page-kicker">` + renderStatusChip(model.Project.Status) + `</div><h1>` + escapeHTML(model.Project.Title) + `</h1><p class="page-lead">` + escapeHTML(model.Project.Description) + `</p><p>` + escapeHTML(model.Project.Summary) + `</p><div class="hero-meta">` + escapeHTML(strings.Join(nonEmpty([]string{model.Project.Stage, model.Project.Version, model.Project.Owner, model.Project.Updated}), " · ")) + `</div></header><section class="metric-grid">` + metricCard("Прогресс", fmt.Sprintf("%d%%", percentOrZero(stats.TaskProgress)), fmt.Sprintf("%d из %d задач roadmap", stats.CompletedTasks, stats.TotalTasks)) + metricCard("Документы", stats.Documents, fmt.Sprintf("%d замечаний", stats.Warnings+stats.Errors)) + metricCard("Модули", stats.Modules, fmt.Sprintf("%d сценариев", stats.UseCases)) + metricCard("Риски", stats.OpenRisks, fmt.Sprintf("%d всего", stats.Risks)) + `</section><section class="dashboard-section"><div class="section-heading"><div><h2>Дорожная карта</h2><p>Roadmap определяет охват; состояние UC-элементов вычисляется из связанных сценариев.</p></div></div><div class="timeline-grid">` + stages.String() + `</div></section>` + computedStatus + `<section class="dashboard-section"><div class="section-heading"><div><h2>Открытые риски</h2></div></div><div class="card-grid">` + risks.String() + `</div></section><section class="dashboard-section"><div class="section-heading"><div><h2>Документация проекта</h2><p>Поиск, фильтры, статусы и локальные чек-листы.</p></div><a class="section-link" href="` + escapeAttr(model.HealthOutputPath) + `">Качество →</a></div><div data-filter-scope>` + filterControls(model) + `<div class="collection-summary">Показано: <strong data-filter-count></strong></div><div class="card-grid">` + docs.String() + `</div><div class="empty-state" data-filter-empty hidden>Ничего не найдено.</div></div></section>`
+	status := ""
+	if model.Project.OverviewDocument != nil && model.Project.OverviewDocument.Metadata["status"] != "" ||
+		model.Project.StatusDocument != nil && model.Project.StatusDocument.Metadata["status"] != "" {
+		status = `<div class="page-kicker">` + renderStatusChip(model.Project.Status) + `</div>`
+	}
+	summary := ""
+	if model.Project.Summary != "" {
+		summary = `<p>` + escapeHTML(model.Project.Summary) + `</p>`
+	}
+	meta := ""
+	if values := nonEmpty([]string{model.Project.Stage, model.Project.Version, model.Project.Owner, model.Project.Updated}); len(values) > 0 {
+		meta = `<div class="hero-meta">` + escapeHTML(strings.Join(values, " · ")) + `</div>`
+	}
+	overview := ""
+	if document := model.Project.OverviewDocument; document != nil {
+		body := renderDocumentMarkdown(document, linkResolverFor(model, document), nil)
+		if body != "" {
+			overview = `<article class="doc-content dashboard-overview">` + body + `</article>`
+		}
+	}
+	var metrics strings.Builder
+	if stats.TotalTasks > 0 {
+		metrics.WriteString(metricCard("Прогресс", fmt.Sprintf("%d%%", percentOrZero(stats.TaskProgress)), fmt.Sprintf("%d из %d задач roadmap", stats.CompletedTasks, stats.TotalTasks)))
+	}
+	metrics.WriteString(metricCard("Документы", stats.Documents, fmt.Sprintf("%d замечаний", stats.Warnings+stats.Errors)))
+	if stats.Modules > 0 || stats.UseCases > 0 {
+		metrics.WriteString(metricCard("Модули", stats.Modules, fmt.Sprintf("%d сценариев", stats.UseCases)))
+	}
+	if stats.Risks > 0 {
+		metrics.WriteString(metricCard("Риски", stats.OpenRisks, fmt.Sprintf("%d всего", stats.Risks)))
+	}
+	roadmap := ""
+	if stages.Len() > 0 {
+		roadmap = `<section class="dashboard-section"><div class="section-heading"><div><h2>Дорожная карта</h2><p>Roadmap определяет охват; состояние UC-элементов вычисляется из связанных сценариев.</p></div></div><div class="timeline-grid">` + stages.String() + `</div></section>`
+	}
+	computedStatus := ""
+	if len(model.Knowledge.WorkItems) > 0 || stats.TotalTasks > 0 {
+		computedStatus = renderComputedStatus(model, "index.html")
+	}
+	riskSection := ""
+	if risks.Len() > 0 {
+		riskSection = `<section class="dashboard-section"><div class="section-heading"><div><h2>Открытые риски</h2></div></div><div class="card-grid">` + risks.String() + `</div></section>`
+	}
+	documentList := `<p class="empty-state">Дополнительных документов нет.</p>`
+	if docs.Len() > 0 {
+		documentList = `<div data-filter-scope>` + filterControls(model) + `<div class="collection-summary">Показано: <strong data-filter-count></strong></div><div class="card-grid">` + docs.String() + `</div><div class="empty-state" data-filter-empty hidden>Ничего не найдено.</div></div>`
+	}
+	content := `<header class="hero">` + status + `<h1>` + escapeHTML(model.Project.Title) + `</h1><p class="page-lead">` + escapeHTML(model.Project.Description) + `</p>` + summary + meta + `</header>` + overview + `<section class="metric-grid">` + metrics.String() + `</section>` + roadmap + computedStatus + riskSection + `<section class="dashboard-section"><div class="section-heading"><div><h2>Документация проекта</h2><p>Поиск, фильтры, статусы и локальные чек-листы.</p></div><a class="section-link" href="` + escapeAttr(model.HealthOutputPath) + `">Качество →</a></div>` + documentList + `</section>`
 	return pageShell(model, "index.html", model.Project.Title, model.Project.Description, content, "")
 }
 
@@ -528,42 +572,4 @@ func GenerateSite(model *Model, options Options) (GenerateResult, error) {
 		return GenerateResult{}, err
 	}
 	return GenerateResult{OutputDirectory: output, Pages: pages, Assets: len(model.Assets) + 3}, nil
-}
-
-// InitDocumentation creates starter Markdown files. Existing files are preserved unless force is true.
-func InitDocumentation(target string, force bool) (int, error) {
-	root, err := filepath.Abs(target)
-	if err != nil {
-		return 0, err
-	}
-	if err = mkdirp(root); err != nil {
-		return 0, err
-	}
-	count := 0
-	err = fs.WalkDir(EmbeddedFiles, "templates/docs", func(name string, entry fs.DirEntry, walkErr error) error {
-		if walkErr != nil {
-			return walkErr
-		}
-		if entry.IsDir() {
-			return nil
-		}
-		relative := strings.TrimPrefix(name, "templates/docs/")
-		destination := filepath.Join(root, filepath.FromSlash(relative))
-		if !force {
-			if _, statErr := os.Stat(destination); statErr == nil {
-				return nil
-			}
-		}
-		data, readErr := fs.ReadFile(EmbeddedFiles, name)
-		if readErr != nil {
-			return readErr
-		}
-		data = []byte(strings.ReplaceAll(string(data), "{{DATE}}", time.Now().UTC().Format("2006-01-02")))
-		if writeErr := writeFileEnsured(destination, data); writeErr != nil {
-			return writeErr
-		}
-		count++
-		return nil
-	})
-	return count, err
 }
