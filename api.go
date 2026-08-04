@@ -1,11 +1,11 @@
-// Package docgent exposes the stable Go API for the Docgent CLI.
+// Package docudocu exposes the stable Go API for the Docu-docu CLI.
 //
 // The implementation is kept in internal/app so command and library consumers
 // use this package without coupling to the repository layout.
-package docgent
+package docudocu
 
 import (
-	core "docgent/internal/app"
+	core "docu-docu/internal/app"
 	"io"
 )
 

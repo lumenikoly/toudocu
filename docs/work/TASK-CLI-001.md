@@ -6,7 +6,7 @@
 - Модуль: MOD-CLI
 - Сценарий: UC-TASK-03
 - Процесс: FLOW-TASK-WORKFLOW
-- Владелец: Команда Docgent
+- Владелец: Команда Docu-docu
 - Последнее обновление: 2026-07-29
 
 ## Результат
@@ -38,11 +38,11 @@ CLI предоставляет `search`, `task init`, `scaffold`, `task ready`, 
 - `internal/app/scaffold.go`
 - `internal/app/task_ready.go`
 - `docs/`
-- `skills/use-docgent/`
+- `skills/use-docu-docu/`
 
 ## Не входит в задачу
 
-- интерпретация natural-language запроса внутри Docgent;
+- интерпретация natural-language запроса внутри Docu-docu;
 - автоматический выбор или заполнение сущностей;
 - автоматическое изменение статусов и acceptance checkboxes;
 - новые внешние зависимости.
@@ -71,10 +71,10 @@ CLI предоставляет `search`, `task init`, `scaffold`, `task ready`, 
 - `AC-04` → `go test ./... -run 'TestTaskVerify|TestCommandProcess'`
 - `AC-05` → `go test ./... -run 'TestGenerateSite|TestProjectReport'`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docgent check ./docs --repository-root . --strict`
+- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict`
 
 ## Влияние на документацию
 
 Обновляются `README.md`, `CHANGELOG.md`, `docs/contracts/cli.md`,
 `docs/roadmap.md`, `docs/use-cases/`, `docs/flows/FLOW-TASK-WORKFLOW.md`,
-`docs/decisions/ADR-002.md` и `skills/use-docgent/`.
+`docs/decisions/ADR-002.md` и `skills/use-docu-docu/`.

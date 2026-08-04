@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
   "generator": {
-    "name": "Docgent",
+    "name": "Docu-docu",
     "version": "0.0.1"
   },
-  "generatedAt": "2026-08-03T15:43:25.39143696Z",
+  "generatedAt": "2026-08-03T18:51:50.772187239Z",
   "sourceDirectory": "docs",
-  "staleDays": 0,
+  "staleDays": 90,
   "project": {
-    "title": "Docgent",
-    "description": "Docgent — dependency-free CLI на Go для проверяемой проектной документации в структурированном Markdown и автономного HTML-портала, работающего через file:// .",
+    "title": "Docu-docu",
+    "description": "Docu-docu — dependency-free CLI на Go для проверяемой проектной документации в структурированном Markdown и автономного HTML-портала, работающего через file:// .",
     "status": {
       "kind": "done",
       "symbol": "✓",
@@ -18,7 +18,7 @@
     },
     "stage": "Локально подготовлен стабильный релиз 0.0.1",
     "version": "0.0.1",
-    "owner": "Команда Docgent",
+    "owner": "Команда Docu-docu",
     "updated": "2026-08-03",
     "summary": "CLI проверяет, собирает и локально раздаёт документацию, формирует типизированные JSON-отчёты, выдаёт контекст выбранной задачи и выполняет её проверки только по явной команде. Встроенная Mermaid Tiny отображает связанные процессы без CDN или Node.js. Безопасность путей, HTML, диаграмм, HTTP-раздачи и process timeout проверяется негативными тестами. Модель процессов формирует раздельные каталоги UC- и FLOW- , стабильные URL по ID и рабочее пространство use case с описанием, картой, проигрыванием и связями. Экранная модель формирует основной каталог, отдельную общую карту с SVG-связями, sitemap, hotspots и traceability. Всё работает через file:// , поддерживает клавиатуру, touch, состояния, ошибки и fallback без preview. Активные задачи, блокеры и следующий результат вычисляются из work items и roadmap и отображаются в HTML автоматически."
   },
@@ -85,8 +85,8 @@
       "sourcePath": "index.md",
       "outputPath": "index.html",
       "type": "overview",
-      "title": "Docgent",
-      "description": "Docgent — dependency-free CLI на Go для проверяемой проектной документации в структурированном Markdown и автономного HTML-портала, работающего через file:// .",
+      "title": "Docu-docu",
+      "description": "Docu-docu — dependency-free CLI на Go для проверяемой проектной документации в структурированном Markdown и автономного HTML-портала, работающего через file:// .",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -100,190 +100,13 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T15:20:39.34407505Z",
+      "updatedAt": "2026-08-03T18:02:41.680769751Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
-      "links": [
-        {
-          "destination": "reference/features.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "reference/features.md",
-          "href": "reference/features.html"
-        },
-        {
-          "destination": "status.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "status.md",
-          "href": "status.html"
-        },
-        {
-          "destination": "roadmap.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "roadmap.md",
-          "href": "roadmap.html"
-        },
-        {
-          "destination": "ideas.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "ideas.md",
-          "href": "ideas.html"
-        },
-        {
-          "destination": "notes.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "notes.md",
-          "href": "notes.html"
-        },
-        {
-          "destination": "architecture/overview.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "architecture/overview.md",
-          "href": "architecture/overview.html"
-        },
-        {
-          "destination": "modules/",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "directory",
-          "target": "modules/index.html",
-          "href": "modules/index.html"
-        },
-        {
-          "destination": "guides/processes.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "guides/processes.md",
-          "href": "guides/processes.html"
-        },
-        {
-          "destination": "use-cases/",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "directory",
-          "target": "use-cases/index.html",
-          "href": "use-cases/index.html"
-        },
-        {
-          "destination": "flows/",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "directory",
-          "target": "flows/index.html",
-          "href": "flows/index.html"
-        },
-        {
-          "destination": "guides/screens.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "guides/screens.md",
-          "href": "guides/screens.html"
-        },
-        {
-          "destination": "contracts/cli.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "contracts/cli.md",
-          "href": "contracts/cli.html"
-        },
-        {
-          "destination": "decisions/",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "directory",
-          "target": "decisions/index.html",
-          "href": "decisions/index.html"
-        },
-        {
-          "destination": "risks.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "risks.md",
-          "href": "risks.html"
-        },
-        {
-          "destination": "guides/testing.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "guides/testing.md",
-          "href": "guides/testing.html"
-        },
-        {
-          "destination": "quality/",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "quality/index.md",
-          "href": "quality/index.html"
-        },
-        {
-          "destination": "guides/quality-runbooks.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "guides/quality-runbooks.md",
-          "href": "guides/quality-runbooks.html"
-        },
-        {
-          "destination": "guides/work-items.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "guides/work-items.md",
-          "href": "guides/work-items.html"
-        },
-        {
-          "destination": "reference/configuration.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "reference/configuration.md",
-          "href": "reference/configuration.html"
-        },
-        {
-          "destination": "work/",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "directory",
-          "target": "work/index.html",
-          "href": "work/index.html"
-        }
-      ],
+      "links": [],
       "backlinks": [],
-      "relatedDocuments": [
-        "reference/features.md",
-        "status.md",
-        "roadmap.md",
-        "ideas.md",
-        "notes.md",
-        "architecture/overview.md",
-        "guides/processes.md",
-        "guides/screens.md",
-        "contracts/cli.md",
-        "risks.md",
-        "guides/testing.md",
-        "quality/index.md",
-        "guides/quality-runbooks.md",
-        "guides/work-items.md",
-        "reference/configuration.md"
-      ]
+      "relatedDocuments": []
     },
     {
       "id": "",
@@ -293,7 +116,7 @@
       "title": "Текущее состояние",
       "description": "Релиз 0.0.1 локально подготовлен, покрыт автоматическими проверками и прошёл независимый semantic review. Git-тег и GitHub Release не создавались.",
       "metadata": {
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "stage": "Локально подготовлен стабильный релиз 0.0.1",
         "status": "Готово",
         "updated": "2026-08-03",
@@ -316,9 +139,7 @@
       "warnings": 0,
       "errors": 0,
       "links": [],
-      "backlinks": [
-        "index.md"
-      ],
+      "backlinks": [],
       "relatedDocuments": []
     },
     {
@@ -327,7 +148,7 @@
       "outputPath": "roadmap.html",
       "type": "roadmap",
       "title": "Дорожная карта",
-      "description": "Roadmap определяет продуктовый охват Docgent; состояние связанных UC- вычисляется из документов пользовательских сценариев.",
+      "description": "Roadmap определяет продуктовый охват Docu-docu; состояние связанных UC- вычисляется из документов пользовательских сценариев.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -341,14 +162,12 @@
         "remaining": 1,
         "percent": 90
       },
-      "updatedAt": "2026-08-03T15:20:39.346852211Z",
+      "updatedAt": "2026-08-03T18:02:41.686289347Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
       "links": [],
-      "backlinks": [
-        "index.md"
-      ],
+      "backlinks": [],
       "relatedDocuments": []
     },
     {
@@ -357,7 +176,7 @@
       "outputPath": "risks.html",
       "type": "risks",
       "title": "Риски",
-      "description": "Актуальные технические и эксплуатационные риски Docgent.",
+      "description": "Актуальные технические и эксплуатационные риски Docu-docu.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -371,14 +190,12 @@
         "remaining": 1,
         "percent": 89
       },
-      "updatedAt": "2026-07-29T20:47:51.16036051Z",
+      "updatedAt": "2026-08-03T18:02:41.686070091Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
       "links": [],
-      "backlinks": [
-        "index.md"
-      ],
+      "backlinks": [],
       "relatedDocuments": []
     },
     {
@@ -406,9 +223,7 @@
       "warnings": 0,
       "errors": 0,
       "links": [],
-      "backlinks": [
-        "index.md"
-      ],
+      "backlinks": [],
       "relatedDocuments": []
     },
     {
@@ -436,9 +251,7 @@
       "warnings": 0,
       "errors": 0,
       "links": [],
-      "backlinks": [
-        "index.md"
-      ],
+      "backlinks": [],
       "relatedDocuments": []
     },
     {
@@ -448,7 +261,7 @@
       "type": "architecture",
       "sectionType": "architecture",
       "title": "Архитектура просмотра изменений документации",
-      "description": "Docgent разрешает явно выбранные локальные Git-состояния, представляет каждую сторону ленивым snapshot и объединяет Git metadata с нормализованными документными сущностями в один versioned ChangeSetReport .",
+      "description": "Docu-docu разрешает явно выбранные локальные Git-состояния, представляет каждую сторону ленивым snapshot и объединяет Git metadata с нормализованными документными сущностями в один versioned ChangeSetReport .",
       "metadata": {
         "architectureQuestion": "Как Git-состояния превращаются в согласованный change set документации?",
         "documentType": "Architecture"
@@ -465,7 +278,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T14:15:08.026630863Z",
+      "updatedAt": "2026-08-03T18:02:41.673718096Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -538,7 +351,7 @@
       "type": "architecture",
       "sectionType": "architecture",
       "title": "Архитектура",
-      "description": "Docgent — локальный dependency-free Go CLI между исходным каталогом документации и двумя потребителями проверенной модели: автоматизацией через CLI/JSON и читателем автономного HTML-портала. Опциональный serve добавляет локальный HTTP/editor runtime; база данных и внешний runtime в границу системы не входят.",
+      "description": "Docu-docu — локальный dependency-free Go CLI между исходным каталогом документации и двумя потребителями проверенной модели: автоматизацией через CLI/JSON и читателем автономного HTML-портала. Опциональный serve добавляет локальный HTTP/editor runtime; база данных и внешний runtime в границу системы не входят.",
       "metadata": {
         "documentType": "Architecture Overview"
       },
@@ -554,7 +367,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T08:06:13.269515639Z",
+      "updatedAt": "2026-08-03T18:02:41.673889044Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -600,9 +413,7 @@
           "href": "documentation-changes.html"
         }
       ],
-      "backlinks": [
-        "index.md"
-      ],
+      "backlinks": [],
       "relatedDocuments": [
         "architecture/system-boundary.md",
         "architecture/runtime-components.md",
@@ -725,10 +536,10 @@
       "outputPath": "architecture/system-boundary.html",
       "type": "architecture",
       "sectionType": "architecture",
-      "title": "Системная граница Docgent",
-      "description": "Docgent ограничен одним локальным процессом, который читает документацию и репозиторий, строит проверенную модель и выдаёт diagnostics либо производные представления. В serve тот же процесс принимает ограниченные editor-запросы и атомарно сохраняет выбранный workspace-файл. Пользователь, агент, CI и браузер остаются взаимодействующими сторонами за этой границей.",
+      "title": "Системная граница Docu-docu",
+      "description": "Docu-docu ограничен одним локальным процессом, который читает документацию и репозиторий, строит проверенную модель и выдаёт diagnostics либо производные представления. В serve тот же процесс принимает ограниченные editor-запросы и атомарно сохраняет выбранный workspace-файл. Пользователь, агент, CI и браузер остаются взаимодействующими сторонами за этой границей.",
       "metadata": {
-        "architectureQuestion": "Где проходит системная граница Docgent и кто с ней взаимодействует?",
+        "architectureQuestion": "Где проходит системная граница Docu-docu и кто с ней взаимодействует?",
         "documentType": "Architecture"
       },
       "status": {
@@ -743,7 +554,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T19:06:03.259935007Z",
+      "updatedAt": "2026-08-03T18:02:41.674069407Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -788,7 +599,7 @@
       "outputPath": "architecture/trust-boundaries.html",
       "type": "architecture",
       "sectionType": "architecture",
-      "title": "Границы доверия Docgent",
+      "title": "Границы доверия Docu-docu",
       "description": "Markdown, ссылки, assets и Mermaid source считаются недоверенными данными; repository root и выбранные output/report paths задают файловую границу; команды work item считаются доверенным кодом только после отдельного явного разрешения на запуск.",
       "metadata": {
         "architectureQuestion": "Где проходят границы доверия?",
@@ -806,7 +617,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T14:46:49.417449274Z",
+      "updatedAt": "2026-08-03T18:02:41.674276277Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -855,7 +666,7 @@
       "description": "Все endpoints read-only, используют Cache-Control: no-store , принимают только локальные Git revisions и ограничивают доступ documentation roots.",
       "metadata": {
         "id": "CON-CHANGES-HTTP-V1",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "status": "Готово",
         "updated": "2026-07-31"
       },
@@ -887,13 +698,13 @@
       "outputPath": "contracts/cli.html",
       "type": "contract",
       "sectionType": "contracts",
-      "title": "CLI-контракт Docgent v1",
-      "description": "Контракт фиксирует публичные команды, exit codes и машинные JSON-форматы Docgent.",
+      "title": "CLI-контракт Docu-docu v1",
+      "description": "Контракт фиксирует публичные команды, exit codes и машинные JSON-форматы Docu-docu.",
       "metadata": {
         "id": "CON-CLI-V1",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "status": "Готово",
-        "updated": "2026-07-30"
+        "updated": "2026-08-03"
       },
       "status": {
         "kind": "done",
@@ -907,7 +718,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-08-03T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -946,7 +757,6 @@
         }
       ],
       "backlinks": [
-        "index.md",
         "architecture/system-boundary.md",
         "architecture/trust-boundaries.md",
         "flows/FLOW-DOCS-BUILD.md",
@@ -976,7 +786,7 @@
       "type": "contract",
       "sectionType": "contracts",
       "title": "CONTRACT-EDITOR-HTTP: Локальный editor API",
-      "description": "Контракт определяет действующий same-origin API локального workspace. Все маршруты имеют префикс / docgent/api/editor , всегда возвращают Cache-Control: no-store и не выдают CORS-заголовки. JSON-ответы содержат schemaVersion: 1 .",
+      "description": "Контракт определяет действующий same-origin API локального workspace. Все маршруты имеют префикс / docu-docu/api/editor , всегда возвращают Cache-Control: no-store и не выдают CORS-заголовки. JSON-ответы содержат schemaVersion: 1 .",
       "metadata": {
         "flow": "FLOW-DOCS-SERVE",
         "module": "MOD-SITE",
@@ -996,7 +806,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T19:30:21.746710468Z",
+      "updatedAt": "2026-08-03T18:02:41.675365261Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1018,9 +828,9 @@
       "type": "decision",
       "sectionType": "decisions",
       "title": "ADR-001: Dependency-free Go CLI",
-      "description": "Docgent поставляется одним Go-бинарником и не требует runtime-зависимостей. Единственное исключение для внешнего Go module зафиксировано в ADR-003 и не добавляет сеть либо соседние runtime-файлы.",
+      "description": "Docu-docu поставляется одним Go-бинарником и не требует runtime-зависимостей. Единственное исключение для внешнего Go module зафиксировано в ADR-003 и не добавляет сеть либо соседние runtime-файлы.",
       "metadata": {
-        "author": "Команда Docgent",
+        "author": "Команда Docu-docu",
         "date": "2026-07-25",
         "id": "ADR-001",
         "status": "Принято",
@@ -1065,10 +875,10 @@
       "outputPath": "decisions/ADR-002.html",
       "type": "decision",
       "sectionType": "decisions",
-      "title": "ADR-002: Граница ответственности Agent и Docgent",
+      "title": "ADR-002: Граница ответственности Agent и Docu-docu",
       "description": "Решение фиксирует границу между детерминированной механикой CLI и смысловой работой исполнителя.",
       "metadata": {
-        "author": "Команда Docgent",
+        "author": "Команда Docu-docu",
         "date": "2026-07-29",
         "id": "ADR-002",
         "status": "Принято",
@@ -1104,9 +914,9 @@
       "type": "decision",
       "sectionType": "decisions",
       "title": "ADR-003: Поддерживаемый YAML parser для OpenAPI diff",
-      "description": "Docgent использует один закреплённый pure-Go YAML module для корректного OpenAPI diff, сохраняя поставку одним автономным бинарником.",
+      "description": "Docu-docu использует один закреплённый pure-Go YAML module для корректного OpenAPI diff, сохраняя поставку одним автономным бинарником.",
       "metadata": {
-        "author": "Команда Docgent",
+        "author": "Команда Docu-docu",
         "date": "2026-07-31",
         "id": "ADR-003",
         "status": "Принято",
@@ -1569,7 +1379,7 @@
       "type": "guide",
       "sectionType": "guides",
       "title": "Просмотр изменений документации",
-      "description": "Docgent использует Git как единственный источник старой и новой версии. Он не создаёт snapshots, не выполняет fetch и не изменяет history, refs, index или working tree. Раздел доступен только в serve по адресу /changes/ ; обычный build остаётся автономным представлением текущей документации и не требует Git history.",
+      "description": "Docu-docu использует Git как единственный источник старой и новой версии. Он не создаёт snapshots, не выполняет fetch и не изменяет history, refs, index или working tree. Раздел доступен только в serve по адресу /changes/ ; обычный build остаётся автономным представлением текущей документации и не требует Git history.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -1583,7 +1393,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T14:15:08.024630849Z",
+      "updatedAt": "2026-08-03T18:02:41.677803732Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1643,14 +1453,12 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T08:35:23.681576149Z",
+      "updatedAt": "2026-08-03T18:02:41.67806661Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
       "links": [],
-      "backlinks": [
-        "index.md"
-      ],
+      "backlinks": [],
       "relatedDocuments": []
     },
     {
@@ -1680,7 +1488,6 @@
       "errors": 0,
       "links": [],
       "backlinks": [
-        "index.md",
         "reference/features.md"
       ],
       "relatedDocuments": []
@@ -1692,7 +1499,7 @@
       "type": "guide",
       "sectionType": "guides",
       "title": "Карта экранов и проигрываемые пользовательские сценарии",
-      "description": "Docgent строит карту, каталог, пошаговые сценарии и traceability из документов screens/SC- .md . Отдельный screens/map.md не используется.",
+      "description": "Docu-docu строит карту, каталог, пошаговые сценарии и traceability из документов screens/SC- .md . Отдельный screens/map.md не используется.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -1706,13 +1513,12 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T20:28:51.160577798Z",
+      "updatedAt": "2026-08-03T18:02:41.678703511Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
       "links": [],
       "backlinks": [
-        "index.md",
         "reference/features.md",
         "use-cases/screen-map.md"
       ],
@@ -1724,7 +1530,7 @@
       "outputPath": "guides/testing.html",
       "type": "guide",
       "sectionType": "guides",
-      "title": "Проверка изменений Docgent",
+      "title": "Проверка изменений Docu-docu",
       "description": "Руководство задаёт единый локальный и CI-цикл для кода и собственной документации проекта.",
       "metadata": {},
       "status": {
@@ -1739,13 +1545,12 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T09:00:46.042172051Z",
+      "updatedAt": "2026-08-03T18:02:41.678937397Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
       "links": [],
       "backlinks": [
-        "index.md",
         "flows/FLOW-DOCS-CHECK.md",
         "use-cases/check-documentation.md"
       ],
@@ -1758,7 +1563,7 @@
       "type": "guide",
       "sectionType": "guides",
       "title": "Рабочие задачи",
-      "description": "Docgent хранит каждый рабочий элемент в отдельном файле work/ .md . Функциональность, обслуживание, документация и исследования используют TASK- , а баги — BUG- . Все типы остаются одной сущностью WorkItem , используют общие статусы, зависимости, команды context/verify и годовой архив.",
+      "description": "Docu-docu хранит каждый рабочий элемент в отдельном файле work/ .md . Функциональность, обслуживание, документация и исследования используют TASK- , а баги — BUG- . Все типы остаются одной сущностью WorkItem , используют общие статусы, зависимости, команды context/verify и годовой архив.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -1772,7 +1577,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T20:28:51.159577792Z",
+      "updatedAt": "2026-08-03T18:02:41.680252152Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1787,7 +1592,6 @@
         }
       ],
       "backlinks": [
-        "index.md",
         "contracts/cli.md",
         "flows/FLOW-TASK-WORKFLOW.md",
         "modules/model.md",
@@ -1806,12 +1610,12 @@
       "type": "module",
       "sectionType": "modules",
       "title": "CLI и workflow задач",
-      "description": "Модуль предоставляет команды Docgent и детерминированный workflow от поиска и каркаса задачи до контекста и управляемого выполнения объявленных проверок.",
+      "description": "Модуль предоставляет команды Docu-docu и детерминированный workflow от поиска и каркаса задачи до контекста и управляемого выполнения объявленных проверок.",
       "metadata": {
         "id": "MOD-CLI",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "status": "Готово",
-        "updated": "2026-07-29"
+        "updated": "2026-08-03"
       },
       "status": {
         "kind": "done",
@@ -1825,7 +1629,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-29T00:00:00Z",
+      "updatedAt": "2026-08-03T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1936,7 +1740,7 @@
       "description": "Модуль разбирает поддерживаемое подмножество Markdown и создаёт безопасные HTML-фрагменты без исполнения встроенного содержимого.",
       "metadata": {
         "id": "MOD-MARKDOWN",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "status": "Готово",
         "updated": "2026-07-28"
       },
@@ -1994,7 +1798,7 @@
       "description": "Модуль превращает явно выбранные Git-состояния исходной документации в детерминированный отчёт для CLI, CI и локального портала.",
       "metadata": {
         "id": "MOD-CHANGES",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "status": "Готово",
         "updated": "2026-08-03"
       },
@@ -2042,7 +1846,7 @@
       "description": "Модуль читает каталог документации, строит связанную модель проекта и формирует диагностику структуры, идентификаторов, путей и зависимостей.",
       "metadata": {
         "id": "MOD-MODEL",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "status": "Готово",
         "updated": "2026-07-31"
       },
@@ -2159,9 +1963,9 @@
       "description": "Модуль формирует автономные HTML-страницы, навигацию, поиск и типизированный report.json из готовой проектной модели.",
       "metadata": {
         "id": "MOD-SITE",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "status": "Готово",
-        "updated": "2026-07-31"
+        "updated": "2026-08-03"
       },
       "status": {
         "kind": "done",
@@ -2175,7 +1979,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T00:00:00Z",
+      "updatedAt": "2026-08-03T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2254,9 +2058,9 @@
       "type": "quality-index",
       "sectionType": "quality",
       "title": "Стандарты качества",
-      "description": "Раздел фиксирует подтверждённые правила разработки и ведения документации Docgent. Стандарты применяются по явно указанной области и не являются источником команд task verify : исполняемые команды остаются в work item.",
+      "description": "Раздел фиксирует подтверждённые правила разработки и ведения документации Docu-docu. Стандарты применяются по явно указанной области и не являются источником команд task verify : исполняемые команды остаются в work item.",
       "metadata": {
-        "owner": "Команда Docgent"
+        "owner": "Команда Docu-docu"
       },
       "status": {
         "kind": "neutral",
@@ -2270,7 +2074,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-30T21:21:01.512683757Z",
+      "updatedAt": "2026-08-03T18:02:41.684492091Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2293,7 +2097,6 @@
         }
       ],
       "backlinks": [
-        "index.md",
         "modules/model.md"
       ],
       "relatedDocuments": [
@@ -2311,7 +2114,7 @@
       "description": "Стандарт удерживает Markdown источником истины и отделяет подтверждённые глобальные правила от локальных или сгенерированных представлений.",
       "metadata": {
         "id": "STD-DOCS-001",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "scope": "Исходная документация, шаблоны skill и отслеживаемые порталы",
         "status": "Действует",
         "updated": "2026-07-31"
@@ -2345,13 +2148,13 @@
       "type": "standard",
       "sectionType": "quality",
       "title": "STD-GO-001: Качество Go-кода",
-      "description": "Стандарт сохраняет реализацию Docgent небольшой, предсказуемой, dependency-free и проверяемой на поддерживаемых Go-платформах.",
+      "description": "Стандарт сохраняет реализацию Docu-docu небольшой, предсказуемой, dependency-free и проверяемой на поддерживаемых Go-платформах.",
       "metadata": {
         "id": "STD-GO-001",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "scope": "Go-код и тесты репозитория",
         "status": "Действует",
-        "updated": "2026-07-31"
+        "updated": "2026-08-03"
       },
       "status": {
         "kind": "in-progress",
@@ -2365,7 +2168,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T00:00:00Z",
+      "updatedAt": "2026-08-03T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2382,7 +2185,7 @@
       "type": "reference",
       "sectionType": "reference",
       "title": "ChangeSetReport schema v1",
-      "description": "docgent changes --format json возвращает детерминированный отчёт с schemaVersion , repository/branch/HEAD/dirty, resolved base/target, changeSetDigest , file/line/entity/classification summary, changes[] , task impact и diagnostics.",
+      "description": "docu-docu changes --format json возвращает детерминированный отчёт с schemaVersion , repository/branch/HEAD/dirty, resolved base/target, changeSetDigest , file/line/entity/classification summary, changes[] , task impact и diagnostics.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -2396,7 +2199,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-01T08:31:15.793388634Z",
+      "updatedAt": "2026-08-03T18:02:41.685034412Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2414,7 +2217,7 @@
       "type": "reference",
       "sectionType": "reference",
       "title": "Справочник конфигурации",
-      "description": "CLI работает без конфигурационного файла. Необязательный \u003crepository-root\u003e/.docgent/config.yml настраивает портал и автоматически читается командами build , check и serve .",
+      "description": "CLI работает без конфигурационного файла. Необязательный \u003crepository-root\u003e/.docu-docu/config.yml настраивает портал и автоматически читается командами build , check и serve .",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -2428,14 +2231,12 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T14:15:08.023630841Z",
+      "updatedAt": "2026-08-03T18:02:41.685419629Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
       "links": [],
-      "backlinks": [
-        "index.md"
-      ],
+      "backlinks": [],
       "relatedDocuments": []
     },
     {
@@ -2445,7 +2246,7 @@
       "type": "reference",
       "sectionType": "reference",
       "title": "Каталог возможностей",
-      "description": "Страница перечисляет реализованные возможности Docgent и указывает, где зафиксирован их подробный контракт. Источником истины остаются Markdown-файлы: портал и JSON не редактируют их и не хранят отдельную модель.",
+      "description": "Страница перечисляет реализованные возможности Docu-docu и указывает, где зафиксирован их подробный контракт. Источником истины остаются Markdown-файлы: портал и JSON не редактируют их и не хранят отдельную модель.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -2459,7 +2260,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T08:35:23.681576149Z",
+      "updatedAt": "2026-08-03T18:02:41.685866749Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2506,7 +2307,6 @@
         }
       ],
       "backlinks": [
-        "index.md",
         "work/TASK-SITE-001.md"
       ],
       "relatedDocuments": [
@@ -2859,7 +2659,7 @@
         "module": "MOD-SITE",
         "priority": "Средний",
         "status": "Готово",
-        "updated": "2026-07-31"
+        "updated": "2026-08-03"
       },
       "status": {
         "kind": "done",
@@ -2873,7 +2673,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T00:00:00Z",
+      "updatedAt": "2026-08-03T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -3279,12 +3079,12 @@
       "errors": 0,
       "links": [
         {
-          "destination": "../modules/cli.md#br-cli-004-docgent-не-интерпретирует-пользовательский-запрос",
+          "destination": "../modules/cli.md#br-cli-004-docu-docu-не-интерпретирует-пользовательский-запрос",
           "broken": false,
           "blocked": false,
           "targetKind": "document",
           "target": "modules/cli.md",
-          "href": "../modules/cli.html#br-cli-004-docgent-не-интерпретирует-пользовательский-запрос"
+          "href": "../modules/cli.html#br-cli-004-docu-docu-не-интерпретирует-пользовательский-запрос"
         },
         {
           "destination": "../modules/model.md#br-model-003-готовая-к-работе-задача-имеет-полный-проверяемый-контракт",
@@ -3341,7 +3141,7 @@
       "description": "",
       "metadata": {
         "module": "MOD-MODEL",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "priority": "Высокий",
         "standards": "STD-GO-001, STD-DOCS-001",
         "status": "Выполнено",
@@ -3380,7 +3180,7 @@
       "metadata": {
         "flow": "FLOW-DOCS-CHANGES",
         "module": "MOD-CHANGES",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "priority": "Высокий",
         "standards": "STD-GO-001, STD-DOCS-001",
         "status": "Выполнено",
@@ -3419,7 +3219,7 @@
       "metadata": {
         "flow": "FLOW-TASK-WORKFLOW",
         "module": "MOD-CLI",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "priority": "Высокий",
         "status": "Выполнено",
         "type": "Feature",
@@ -3452,11 +3252,11 @@
       "outputPath": "work/TASK-DOCS-001-self-documentation.html",
       "type": "work",
       "sectionType": "work",
-      "title": "TASK-DOCS-001: Добавить самодокументацию Docgent",
+      "title": "TASK-DOCS-001: Добавить самодокументацию Docu-docu",
       "description": "",
       "metadata": {
         "module": "MOD-MODEL",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "priority": "Высокий",
         "status": "Выполнено",
         "type": "Documentation",
@@ -3493,7 +3293,7 @@
       "description": "",
       "metadata": {
         "module": "MOD-MODEL",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "priority": "Высокий",
         "standards": "STD-GO-001, STD-DOCS-001",
         "status": "Выполнено",
@@ -3531,7 +3331,7 @@
       "description": "",
       "metadata": {
         "module": "MOD-MODEL",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "priority": "Высокий",
         "standards": "STD-GO-001, STD-DOCS-001",
         "status": "Выполнено",
@@ -3568,7 +3368,7 @@
       "description": "",
       "metadata": {
         "module": "MOD-MODEL",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "priority": "Высокий",
         "standards": "STD-GO-001, STD-DOCS-001",
         "status": "Выполнено",
@@ -3605,7 +3405,7 @@
       "description": "",
       "metadata": {
         "module": "MOD-MODEL",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "priority": "Высокий",
         "standards": "STD-GO-001, STD-DOCS-001",
         "status": "Выполнено",
@@ -3642,7 +3442,7 @@
       "description": "",
       "metadata": {
         "module": "MOD-CLI",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "priority": "Высокий",
         "standards": "STD-GO-001, STD-DOCS-001",
         "status": "Выполнено",
@@ -3679,7 +3479,7 @@
       "description": "",
       "metadata": {
         "module": "MOD-SITE",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "priority": "Средний",
         "status": "Выполнено",
         "type": "Feature",
@@ -3737,7 +3537,7 @@
       "metadata": {
         "flow": "FLOW-DOCS-SERVE",
         "module": "MOD-SITE",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "priority": "Высокий",
         "standards": "STD-GO-001, STD-DOCS-001",
         "status": "Выполнено",
@@ -3987,7 +3787,7 @@
       },
       "probability": "Средняя",
       "impact": "Среднее",
-      "owner": "Команда Docgent",
+      "owner": "Команда Docu-docu",
       "taskStats": {
         "total": 3,
         "completed": 2,
@@ -4029,7 +3829,7 @@
       },
       "probability": "Низкая",
       "impact": "Высокое",
-      "owner": "Команда Docgent",
+      "owner": "Команда Docu-docu",
       "taskStats": {
         "total": 3,
         "completed": 3,
@@ -4413,11 +4213,11 @@
           "label": "Действует",
           "recognized": true
         },
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "scope": "Исходная документация, шаблоны skill и отслеживаемые порталы",
         "updated": "2026-07-31",
-        "rules": "Глобальный охват определяет roadmap.md ; состояние явно связанного UC- берётся из use case. Остальные локальные чек-листы не агрегируются. Сгенерированные build/ , dist/ , example/site/ , project-docs/ и example/project-docs/ не редактируются как источник истины. Отслеживаемые порталы пересобираются из Markdown после semantic review и структурной проверки. Типизированный документ создаётся только для подтверждённой семантики; неизвестные владелец, дата, статус или процедура не изобретаются ради отсутствия предупреждения. Явно связанные стандарты и runbook читаются вместе с task context; область других применимых стандартов проверяется автором без glob-эвристик CLI. docs/runbooks/ создаётся только при наличии реальной эксплуатационной процедуры. docs/architecture/overview.md является обязательной картой; каждый другой Markdown-файл в architecture/ отвечает на один явный архитектурный вопрос и добавляется прямой ссылкой из overview. Подробности FLOW, CONTRACT, REFERENCE, RUNBOOK, ADR и MODULE остаются в соответствующих источниках истины, а semantic gate проверяет архитектурную форму и смысл по ARCH001 – ARCH013 . $use-docgent refresh и $use-docgent refresh diff обновляют исходную документацию только по текущим repository evidence; даты меняются вместе с содержанием или связями, а Last verified требует фактической проверки runbook. Корневой CHANGELOG.md , если он существует, является единственным специальным источником релизных изменений. Его нельзя дублировать в docs/changelog.md : такой файл остаётся обычным Markdown-документом. Не создавайте корневой журнал только ради portal-вкладки.",
-        "automaticChecks": "go run ./cmd/docgent check ./docs --strict --stale-days 0 ; тесты целостности шаблонов и публичного JSON schema; тесты ссылок, стабильных ID, task context и портальной навигации. Команды запускаются из work item или доверенного CI workflow, а не напрямую из этого стандарта.",
+        "rules": "Глобальный охват определяет roadmap.md ; состояние явно связанного UC- берётся из use case. Остальные локальные чек-листы не агрегируются. Сгенерированные build/ , dist/ , example/site/ , project-docs/ и example/project-docs/ не редактируются как источник истины. Отслеживаемые порталы пересобираются из Markdown после semantic review и структурной проверки. Типизированный документ создаётся только для подтверждённой семантики; неизвестные владелец, дата, статус или процедура не изобретаются ради отсутствия предупреждения. Явно связанные стандарты и runbook читаются вместе с task context; область других применимых стандартов проверяется автором без glob-эвристик CLI. docs/runbooks/ создаётся только при наличии реальной эксплуатационной процедуры. docs/architecture/overview.md является обязательной картой; каждый другой Markdown-файл в architecture/ отвечает на один явный архитектурный вопрос и добавляется прямой ссылкой из overview. Подробности FLOW, CONTRACT, REFERENCE, RUNBOOK, ADR и MODULE остаются в соответствующих источниках истины, а semantic gate проверяет архитектурную форму и смысл по ARCH001 – ARCH013 . $use-docu-docu refresh и $use-docu-docu refresh diff обновляют исходную документацию только по текущим repository evidence; даты меняются вместе с содержанием или связями, а Last verified требует фактической проверки runbook. Корневой CHANGELOG.md , если он существует, является единственным специальным источником релизных изменений. Его нельзя дублировать в docs/changelog.md : такой файл остаётся обычным Markdown-документом. Не создавайте корневой журнал только ради portal-вкладки.",
+        "automaticChecks": "go run ./cmd/docu-docu check ./docs --strict --stale-days 0 ; тесты целостности шаблонов и публичного JSON schema; тесты ссылок, стабильных ID, task context и портальной навигации. Команды запускаются из work item или доверенного CI workflow, а не напрямую из этого стандарта.",
         "document": "quality/STD-DOCS-001.md"
       },
       {
@@ -4429,10 +4229,10 @@
           "label": "Действует",
           "recognized": true
         },
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "scope": "Go-код и тесты репозитория",
-        "updated": "2026-07-31",
-        "rules": "Не добавлять внешнюю зависимость без доказанной необходимости. Сохранять обратную совместимость с вызовом docgent ./docs ... . Каждое новое правило валидации сопровождать поведенческим тестом. Каждое исправление безопасности сопровождать негативным тестом. Не ослаблять проверки repository-root и безопасного --clean . Сохранять обычные check , build , serve и task context неисполняющими команды work item.",
+        "updated": "2026-08-03",
+        "rules": "Не добавлять внешнюю зависимость без доказанной необходимости. Публичные операции вызываются только явными командами; путь без команды не запускает неявный build . Каждое новое правило валидации сопровождать поведенческим тестом. Каждое исправление безопасности сопровождать негативным тестом. Не ослаблять проверки repository-root и безопасного --clean . Сохранять обычные check , build , serve и task context неисполняющими команды work item.",
         "automaticChecks": "gofmt -w . ; go vet ./... ; go test ./... ; go test -race ./... . Команды запускаются из work item или доверенного CI workflow, а не напрямую из этого стандарта.",
         "document": "quality/STD-GO-001.md"
       }
@@ -4465,10 +4265,10 @@
       },
       {
         "id": "BR-CLI-004",
-        "title": "Docgent не интерпретирует пользовательский запрос",
+        "title": "Docu-docu не интерпретирует пользовательский запрос",
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
-        "anchor": "br-cli-004-docgent-не-интерпретирует-пользовательский-запрос",
+        "anchor": "br-cli-004-docu-docu-не-интерпретирует-пользовательский-запрос",
         "line": 48
       },
       {
@@ -4662,7 +4462,7 @@
         "archived": false,
         "priority": "Высокий",
         "updated": "2026-07-31",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "moduleId": "MOD-MODEL",
         "useCaseId": "UC-DOCS-02",
         "screenIds": [],
@@ -4710,7 +4510,7 @@
             "line": 73,
             "indent": 0,
             "completed": true,
-            "text": "AC-06 Архитектура Docgent и Service Desk разделена на подтверждённые"
+            "text": "AC-06 Архитектура Docu-docu и Service Desk разделена на подтверждённые"
           }
         ],
         "verificationMatrix": [
@@ -4749,7 +4549,7 @@
             "criterion": "RU/EN skill assets содержат раздельные overview/detail templates,",
             "completed": true,
             "commands": [
-              "go test ./... -run 'TestUseDocgentArchitecture|TestUseDocgentInitContract'"
+              "go test ./... -run 'TestUseDocu-docuArchitecture|TestUseDocu-docuInitContract'"
             ],
             "transitions": [],
             "verificationReferences": []
@@ -4759,17 +4559,17 @@
             "criterion": "Managed guidance и semantic gate синхронно задают границы типов,",
             "completed": true,
             "commands": [
-              "go test ./... -run 'TestUseDocgentArchitecture'"
+              "go test ./... -run 'TestUseDocu-docuArchitecture'"
             ],
             "transitions": [],
             "verificationReferences": []
           },
           {
             "criterionId": "AC-06",
-            "criterion": "Архитектура Docgent и Service Desk разделена на подтверждённые",
+            "criterion": "Архитектура Docu-docu и Service Desk разделена на подтверждённые",
             "completed": true,
             "commands": [
-              "go run ./cmd/docgent build ./docs --output ./project-docs --repository-root . --clean --strict --stale-days 0 \u0026\u0026 go run ./cmd/docgent build ./example/docs --output ./example/project-docs --repository-root ./example --clean --strict --stale-days 0"
+              "go run ./cmd/docu-docu build ./docs --output ./project-docs --repository-root . --clean --strict --stale-days 0 \u0026\u0026 go run ./cmd/docu-docu build ./example/docs --output ./example/project-docs --repository-root ./example --clean --strict --stale-days 0"
             ],
             "transitions": [],
             "verificationReferences": []
@@ -4800,21 +4600,21 @@
           {
             "target": "AC-04",
             "commands": [
-              "go test ./... -run 'TestUseDocgentArchitecture|TestUseDocgentInitContract'"
+              "go test ./... -run 'TestUseDocu-docuArchitecture|TestUseDocu-docuInitContract'"
             ],
             "line": 91
           },
           {
             "target": "AC-05",
             "commands": [
-              "go test ./... -run 'TestUseDocgentArchitecture'"
+              "go test ./... -run 'TestUseDocu-docuArchitecture'"
             ],
             "line": 92
           },
           {
             "target": "AC-06",
             "commands": [
-              "go run ./cmd/docgent build ./docs --output ./project-docs --repository-root . --clean --strict --stale-days 0 \u0026\u0026 go run ./cmd/docgent build ./example/docs --output ./example/project-docs --repository-root ./example --clean --strict --stale-days 0"
+              "go run ./cmd/docu-docu build ./docs --output ./project-docs --repository-root . --clean --strict --stale-days 0 \u0026\u0026 go run ./cmd/docu-docu build ./example/docs --output ./example/project-docs --repository-root ./example --clean --strict --stale-days 0"
             ],
             "line": 93
           },
@@ -4828,14 +4628,14 @@
           {
             "target": "DOCS",
             "commands": [
-              "go run ./cmd/docgent check ./docs --repository-root . --strict --stale-days 0 \u0026\u0026 go run ./cmd/docgent check ./example/docs --repository-root ./example --strict --stale-days 0"
+              "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0 \u0026\u0026 go run ./cmd/docu-docu check ./example/docs --repository-root ./example --strict --stale-days 0"
             ],
             "line": 95
           },
           {
             "target": "QUALITY",
             "commands": [
-              "go test ./... -run 'TestArchitectureContract|TestArchitectureSchemaContract|TestUseDocgentArchitecture'"
+              "go test ./... -run 'TestArchitectureContract|TestArchitectureSchemaContract|TestUseDocu-docuArchitecture'"
             ],
             "line": 96
           }
@@ -4854,15 +4654,15 @@
           "README.md",
           "screens_test.go",
           "skill_templates_test.go",
-          "skills/use-docgent/"
+          "skills/use-docu-docu/"
         ],
         "result": "docs/architecture/overview.md является обязательной картой архитектуры, а каждый другой Markdown-документ в architecture/ отвечает на один явный архитектурный вопрос и напрямую перечислен в overview.",
         "behaviorChange": "Было Каталог architecture/ был необязательным набором специализированных Markdown-документов без обязательной карты, явного вопроса и повышенной строгости локальных ссылок. Станет Обычный check требует корректный architecture overview, один непустой вопрос для каждого подробного документа, прямую рекурсивную карту документов и безопасные существующие локальные ссылки. Skill предоставляет раздельные RU/EN-шаблоны, безопасный init и semantic gate ARCH001 – ARCH013 .",
         "before": "Каталог architecture/ был необязательным набором специализированных Markdown-документов без обязательной карты, явного вопроса и повышенной строгости локальных ссылок.",
         "after": "Обычный check требует корректный architecture overview, один непустой вопрос для каждого подробного документа, прямую рекурсивную карту документов и безопасные существующие локальные ссылки. Skill предоставляет раздельные RU/EN-шаблоны, безопасный init и semantic gate ARCH001 – ARCH013 .",
-        "outOfScope": "новая Go-команда docgent init ; изменение ProjectReport schema v1 или типа documents[].type ; автоматическая миграция legacy-архитектуры; проверка пунктуации, вопросительных слов или архитектурного смысла в CLI; документы Docgent о deployment или владении данными без подтверждённого архитектурного вопроса.",
-        "plan": "Добавить metadata aliases и структурные architecture diagnostics. Расширить behavioral и schema contract tests. Обновить templates, init workflow, managed guidance и semantic gate. Мигрировать документацию Docgent и демонстрационного Service Desk. Выполнить независимый semantic review и устранить замечания. Пройти полный Go/Docgent verification и пересобрать portals.",
-        "documentationImpact": "Обновляются публичный архитектурный контракт, skill init и guidance, самодокументация Docgent, демонстрационный Service Desk, README, CLI/reference, модель, use case, changelog, стандарт документации и отслеживаемые portals.",
+        "outOfScope": "новая Go-команда docu-docu init ; изменение ProjectReport schema v1 или типа documents[].type ; автоматическая миграция legacy-архитектуры; проверка пунктуации, вопросительных слов или архитектурного смысла в CLI; документы Docu-docu о deployment или владении данными без подтверждённого архитектурного вопроса.",
+        "plan": "Добавить metadata aliases и структурные architecture diagnostics. Расширить behavioral и schema contract tests. Обновить templates, init workflow, managed guidance и semantic gate. Мигрировать документацию Docu-docu и демонстрационного Service Desk. Выполнить независимый semantic review и устранить замечания. Пройти полный Go/Docu-docu verification и пересобрать portals.",
+        "documentationImpact": "Обновляются публичный архитектурный контракт, skill init и guidance, самодокументация Docu-docu, демонстрационный Service Desk, README, CLI/reference, модель, use case, changelog, стандарт документации и отслеживаемые portals.",
         "documentationPaths": []
       },
       {
@@ -4878,7 +4678,7 @@
         "archived": false,
         "priority": "Высокий",
         "updated": "2026-08-01",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "moduleId": "MOD-CHANGES",
         "useCaseId": "UC-DOCS-05",
         "flowId": "FLOW-DOCS-CHANGES",
@@ -5183,14 +4983,14 @@
           {
             "target": "DOCS",
             "commands": [
-              "go run ./cmd/docgent check ./docs --repository-root ."
+              "go run ./cmd/docu-docu check ./docs --repository-root ."
             ],
             "line": 103
           },
           {
             "target": "QUALITY",
             "commands": [
-              "go vet ./... \u0026\u0026 go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docgent check ./docs --strict --stale-days 0"
+              "go vet ./... \u0026\u0026 go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docu-docu check ./docs --strict --stale-days 0"
             ],
             "line": 104
           }
@@ -5216,7 +5016,7 @@
           "README.md",
           "THIRD_PARTY_NOTICES.md"
         ],
-        "result": "docgent changes и раздел /changes показывают Git-изменения исходной документации как source, rendered и deterministic semantic diff, сопоставляют их с task impact и экспортируют ChangeSetReport schema v1.",
+        "result": "docu-docu changes и раздел /changes показывают Git-изменения исходной документации как source, rendered и deterministic semantic diff, сопоставляют их с task impact и экспортируют ChangeSetReport schema v1.",
         "behaviorChange": "Было Портал показывает только текущее состояние, а review использует внешний git diff без проектной семантики и task impact. Станет serve предоставляет read-only Changes workspace с явным диапазоном, ленивыми специализированными представлениями и live invalidation. CLI и CI получают тот же отчёт без изменения Git.",
         "before": "Портал показывает только текущее состояние, а review использует внешний git diff без проектной семантики и task impact.",
         "after": "serve предоставляет read-only Changes workspace с явным диапазоном, ленивыми специализированными представлениями и live invalidation. CLI и CI получают тот же отчёт без изменения Git.",
@@ -5258,7 +5058,7 @@
         "archived": false,
         "priority": "Высокий",
         "updated": "2026-07-29",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "moduleId": "MOD-CLI",
         "useCaseId": "UC-TASK-03",
         "flowId": "FLOW-TASK-WORKFLOW",
@@ -5399,7 +5199,7 @@
           {
             "target": "DOCS",
             "commands": [
-              "go run ./cmd/docgent check ./docs --repository-root . --strict"
+              "go run ./cmd/docu-docu check ./docs --repository-root . --strict"
             ],
             "line": 74
           }
@@ -5415,15 +5215,15 @@
           "internal/app/types.go",
           "report_types.go",
           "search.go",
-          "skills/use-docgent/"
+          "skills/use-docu-docu/"
         ],
         "result": "CLI предоставляет детерминированный путь от поиска документации и создания каркаса до readiness, контекста и явной проверки выбранной задачи.",
         "behaviorChange": "Было CLI предоставлял только task context и исполняющую команду task check ; каркасы, readiness и source-level поиск отсутствовали. Станет CLI предоставляет search , task init , scaffold , task ready , расширенный task context и task verify ; старая команда task check отсутствует.",
         "before": "CLI предоставлял только task context и исполняющую команду task check ; каркасы, readiness и source-level поиск отсутствовали.",
         "after": "CLI предоставляет search , task init , scaffold , task ready , расширенный task context и task verify ; старая команда task check отсутствует.",
-        "outOfScope": "интерпретация natural-language запроса внутри Docgent; автоматический выбор или заполнение сущностей; автоматическое изменение статусов и acceptance checkboxes; новые внешние зависимости.",
+        "outOfScope": "интерпретация natural-language запроса внутри Docu-docu; автоматический выбор или заполнение сущностей; автоматическое изменение статусов и acceptance checkboxes; новые внешние зависимости.",
         "plan": "Расширить parser, типы отчётов и task contract. Реализовать search, создание каркасов и readiness. Расширить context и заменить check на verify. Синхронизировать документацию, skill и тесты. Выполнить полный verification cycle.",
-        "documentationImpact": "Обновляются README.md , CHANGELOG.md , docs/contracts/cli.md , docs/roadmap.md , docs/use-cases/ , docs/flows/FLOW-TASK-WORKFLOW.md , docs/decisions/ADR-002.md и skills/use-docgent/ .",
+        "documentationImpact": "Обновляются README.md , CHANGELOG.md , docs/contracts/cli.md , docs/roadmap.md , docs/use-cases/ , docs/flows/FLOW-TASK-WORKFLOW.md , docs/decisions/ADR-002.md и skills/use-docu-docu/ .",
         "documentationPaths": [
           "CHANGELOG.md",
           "contracts/cli.md",
@@ -5435,7 +5235,7 @@
       },
       {
         "id": "TASK-DOCS-001",
-        "title": "Добавить самодокументацию Docgent",
+        "title": "Добавить самодокументацию Docu-docu",
         "status": {
           "kind": "done",
           "symbol": "✓",
@@ -5446,7 +5246,7 @@
         "archived": false,
         "priority": "Высокий",
         "updated": "2026-07-26",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "moduleId": "MOD-MODEL",
         "useCaseId": "UC-DOCS-02",
         "screenIds": [],
@@ -5455,13 +5255,13 @@
         "runbookIds": [],
         "dependsOn": [],
         "document": "work/TASK-DOCS-001-self-documentation.md",
-        "anchor": "task-docs-001-добавить-самодокументацию-docgent",
+        "anchor": "task-docs-001-добавить-самодокументацию-docu-docu",
         "criteria": [
           {
             "line": 29,
             "indent": 0,
             "completed": true,
-            "text": "AC-01 Самодокументация проходит docgent check --strict без замечаний."
+            "text": "AC-01 Самодокументация проходит docu-docu check --strict без замечаний."
           },
           {
             "line": 30,
@@ -5479,10 +5279,10 @@
         "verificationMatrix": [
           {
             "criterionId": "AC-01",
-            "criterion": "Самодокументация проходит docgent check --strict без замечаний.",
+            "criterion": "Самодокументация проходит docu-docu check --strict без замечаний.",
             "completed": true,
             "commands": [
-              "go run ./cmd/docgent check ./docs --strict --stale-days 0"
+              "go run ./cmd/docu-docu check ./docs --strict --stale-days 0"
             ],
             "transitions": [],
             "verificationReferences": []
@@ -5502,7 +5302,7 @@
             "criterion": "README содержит прямую ссылку на исходную документацию проекта.",
             "completed": true,
             "commands": [
-              "grep -q 'Проектная документация Docgent' README.md"
+              "grep -q 'Проектная документация Docu-docu' README.md"
             ],
             "transitions": [],
             "verificationReferences": []
@@ -5512,7 +5312,7 @@
           {
             "target": "AC-01",
             "commands": [
-              "go run ./cmd/docgent check ./docs --strict --stale-days 0"
+              "go run ./cmd/docu-docu check ./docs --strict --stale-days 0"
             ],
             "line": 42
           },
@@ -5526,7 +5326,7 @@
           {
             "target": "AC-03",
             "commands": [
-              "grep -q 'Проектная документация Docgent' README.md"
+              "grep -q 'Проектная документация Docu-docu' README.md"
             ],
             "line": 44
           },
@@ -5540,7 +5340,7 @@
           {
             "target": "DOCS",
             "commands": [
-              "go run ./cmd/docgent check ./docs --strict --stale-days 0"
+              "go run ./cmd/docu-docu check ./docs --strict --stale-days 0"
             ],
             "line": 46
           }
@@ -5549,7 +5349,7 @@
           "docs/",
           "README.md"
         ],
-        "result": "Репозиторий содержит собственную согласованную документацию, которая описывает текущую реализацию и проходит строгую проверку самим Docgent.",
+        "result": "Репозиторий содержит собственную согласованную документацию, которая описывает текущую реализацию и проходит строгую проверку самим Docu-docu.",
         "outOfScope": "изменение поведения CLI или JSON schema; публикация release artifacts; генерация и добавление output portal в Git.",
         "plan": "Зафиксировать текущее состояние, архитектуру и продуктовый охват. Описать модули, use cases, бизнес-правила и публичные контракты. Добавить риски, ADR, руководство проверки и справочник параметров. Связать документы, запустить strict-check и полный Go-цикл.",
         "documentationImpact": "Созданы исходные проектные документы в docs/ . README теперь ведёт на docs/index.md ; сгенерированный портал остаётся build artifact.",
@@ -5570,7 +5370,7 @@
         "archived": false,
         "priority": "Высокий",
         "updated": "2026-07-31",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "moduleId": "MOD-MODEL",
         "useCaseId": "UC-DOCS-02",
         "screenIds": [],
@@ -5677,7 +5477,7 @@
             "criterion": "Self-documentation содержит только подтверждённые стандарты и не создаёт фиктивный runbook.",
             "completed": true,
             "commands": [
-              "go run ./cmd/docgent check ./docs --strict --stale-days 0"
+              "go run ./cmd/docu-docu check ./docs --strict --stale-days 0"
             ],
             "transitions": [],
             "verificationReferences": []
@@ -5722,7 +5522,7 @@
           {
             "target": "AC-06",
             "commands": [
-              "go run ./cmd/docgent check ./docs --strict --stale-days 0"
+              "go run ./cmd/docu-docu check ./docs --strict --stale-days 0"
             ],
             "line": 81
           },
@@ -5736,7 +5536,7 @@
           {
             "target": "DOCS",
             "commands": [
-              "go run ./cmd/docgent check ./docs --strict --stale-days 0"
+              "go run ./cmd/docu-docu check ./docs --strict --stale-days 0"
             ],
             "line": 83
           },
@@ -5763,15 +5563,15 @@
           "quality.go",
           "quality_test.go",
           "report_types.go",
-          "skills/use-docgent/"
+          "skills/use-docu-docu/"
         ],
-        "result": "Docgent поддерживает опциональные стандарты STD- , эксплуатационные процедуры RB- , пользовательские верхнеуровневые разделы, их task-связи, schema-v1 коллекции, scaffolds и автономные каталоги портала.",
+        "result": "Docu-docu поддерживает опциональные стандарты STD- , эксплуатационные процедуры RB- , пользовательские верхнеуровневые разделы, их task-связи, schema-v1 коллекции, scaffolds и автономные каталоги портала.",
         "behaviorChange": "Было Неизвестные каталоги оставались полностью free-form, а Quality и Runbooks не имели типизированных контрактов, task-связей и специализированного портала. Станет Появившиеся quality/ , runbooks/ и custom-разделы получают явные manifest и typed validation без новых глобально обязательных файлов; task workflow переносит только явно связанные STD- и RB- .",
         "before": "Неизвестные каталоги оставались полностью free-form, а Quality и Runbooks не имели типизированных контрактов, task-связей и специализированного портала.",
         "after": "Появившиеся quality/ , runbooks/ и custom-разделы получают явные manifest и typed validation без новых глобально обязательных файлов; task workflow переносит только явно связанные STD- и RB- .",
         "outOfScope": "внешние зависимости; автоматическое сопоставление task scope с glob-областью стандарта; выполнение команд напрямую из стандарта; создание собственного runbook без реальной эксплуатационной процедуры; изменение версии schema v1 или генератора.",
         "plan": "Добавить typed model, diagnostics, freshness и custom manifests. Расширить task workflow, schema v1 и scaffolds. Добавить специализированные каталоги и тесты портала. Обновить self-documentation и пройти semantic review. Выполнить полный Go-цикл, strict-check и безопасную пересборку портала.",
-        "documentationImpact": "Обновлены README.md , CHANGELOG.md , docs/index.md , docs/modules/model.md , docs/use-cases/check-documentation.md , docs/contracts/cli.md , docs/reference/features.md , docs/guides/work-items.md и skills/use-docgent/SKILL.md ; добавлены руководство docs/guides/quality-runbooks.md , исходный раздел docs/quality/ , обновлённая reference-модель skill и восемь RU/EN skill-шаблонов standards, runbooks и их manifest. Сгенерированные порталы остаются производными от Markdown.",
+        "documentationImpact": "Обновлены README.md , CHANGELOG.md , docs/index.md , docs/modules/model.md , docs/use-cases/check-documentation.md , docs/contracts/cli.md , docs/reference/features.md , docs/guides/work-items.md и skills/use-docu-docu/SKILL.md ; добавлены руководство docs/guides/quality-runbooks.md , исходный раздел docs/quality/ , обновлённая reference-модель skill и восемь RU/EN skill-шаблонов standards, runbooks и их manifest. Сгенерированные порталы остаются производными от Markdown.",
         "documentationPaths": [
           "CHANGELOG.md",
           "contracts/cli.md",
@@ -5781,7 +5581,7 @@
           "modules/model.md",
           "README.md",
           "reference/features.md",
-          "skills/use-docgent/SKILL.md",
+          "skills/use-docu-docu/SKILL.md",
           "use-cases/check-documentation.md"
         ]
       },
@@ -5798,7 +5598,7 @@
         "archived": false,
         "priority": "Высокий",
         "updated": "2026-07-31",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "moduleId": "MOD-MODEL",
         "screenIds": [],
         "transitionIds": [],
@@ -5815,7 +5615,7 @@
             "line": 49,
             "indent": 0,
             "completed": true,
-            "text": "AC-01 Skill трактует $use-docgent init как единственный явный"
+            "text": "AC-01 Skill трактует $use-docu-docu init как единственный явный"
           },
           {
             "line": 52,
@@ -5839,10 +5639,10 @@
         "verificationMatrix": [
           {
             "criterionId": "AC-01",
-            "criterion": "Skill трактует $use-docgent init как единственный явный",
+            "criterion": "Skill трактует $use-docu-docu init как единственный явный",
             "completed": true,
             "commands": [
-              "go test ./... -run TestUseDocgentInitContract"
+              "go test ./... -run TestUseDocu-docuInitContract"
             ],
             "transitions": [],
             "verificationReferences": []
@@ -5852,7 +5652,7 @@
             "criterion": "Русский и английский блоки используют одинаковые стабильные",
             "completed": true,
             "commands": [
-              "go test ./... -run TestUseDocgentProjectGuidanceTemplates"
+              "go test ./... -run TestUseDocu-docuProjectGuidanceTemplates"
             ],
             "transitions": [],
             "verificationReferences": []
@@ -5862,7 +5662,7 @@
             "criterion": "Task workflow создаёт новый work item только для существенной",
             "completed": true,
             "commands": [
-              "go test ./... -run TestUseDocgentTaskCreationThreshold"
+              "go test ./... -run TestUseDocu-docuTaskCreationThreshold"
             ],
             "transitions": [],
             "verificationReferences": []
@@ -5872,7 +5672,7 @@
             "criterion": "Metadata skill описывает явный init и остаётся валидной.",
             "completed": true,
             "commands": [
-              "go test ./... -run TestUseDocgentMetadata"
+              "go test ./... -run TestUseDocu-docuMetadata"
             ],
             "transitions": [],
             "verificationReferences": []
@@ -5882,28 +5682,28 @@
           {
             "target": "AC-01",
             "commands": [
-              "go test ./... -run TestUseDocgentInitContract"
+              "go test ./... -run TestUseDocu-docuInitContract"
             ],
             "line": 67
           },
           {
             "target": "AC-02",
             "commands": [
-              "go test ./... -run TestUseDocgentProjectGuidanceTemplates"
+              "go test ./... -run TestUseDocu-docuProjectGuidanceTemplates"
             ],
             "line": 68
           },
           {
             "target": "AC-03",
             "commands": [
-              "go test ./... -run TestUseDocgentTaskCreationThreshold"
+              "go test ./... -run TestUseDocu-docuTaskCreationThreshold"
             ],
             "line": 69
           },
           {
             "target": "AC-04",
             "commands": [
-              "go test ./... -run TestUseDocgentMetadata"
+              "go test ./... -run TestUseDocu-docuMetadata"
             ],
             "line": 70
           },
@@ -5917,14 +5717,14 @@
           {
             "target": "DOCS",
             "commands": [
-              "go run ./cmd/docgent check ./docs --strict --stale-days 0"
+              "go run ./cmd/docu-docu check ./docs --strict --stale-days 0"
             ],
             "line": 72
           },
           {
             "target": "QUALITY",
             "commands": [
-              "go test ./... -run 'TestUseDocgent'"
+              "go test ./... -run 'TestUseDocu-docu'"
             ],
             "line": 73
           }
@@ -5935,15 +5735,15 @@
           "docs/work/TASK-DOCS-003.md",
           "README.md",
           "skill_templates_test.go",
-          "skills/use-docgent/"
+          "skills/use-docu-docu/"
         ],
-        "result": "Пользователь явно подключает Docgent к проекту через $use-docgent init ; skill создаёт минимальную документацию при необходимости и безопасно устанавливает ограниченные правила использования в AGENTS.md .",
-        "behaviorChange": "Было Skill не имел отдельного onboarding-вызова, а workflow безусловно предлагал создавать TASK- для каждого нового запроса. Станет Только явный $use-docgent init выполняет preflight, создаёт отсутствующий docs/index.md , устанавливает управляемый блок AGENTS.md и запускает структурную проверку. Обычные вызовы не меняют project instructions, а новые TASK- создаются только для существенной работы.",
+        "result": "Пользователь явно подключает Docu-docu к проекту через $use-docu-docu init ; skill создаёт минимальную документацию при необходимости и безопасно устанавливает ограниченные правила использования в AGENTS.md .",
+        "behaviorChange": "Было Skill не имел отдельного onboarding-вызова, а workflow безусловно предлагал создавать TASK- для каждого нового запроса. Станет Только явный $use-docu-docu init выполняет preflight, создаёт отсутствующий docs/index.md , устанавливает управляемый блок AGENTS.md и запускает структурную проверку. Обычные вызовы не меняют project instructions, а новые TASK- создаются только для существенной работы.",
         "before": "Skill не имел отдельного onboarding-вызова, а workflow безусловно предлагал создавать TASK- для каждого нового запроса.",
-        "after": "Только явный $use-docgent init выполняет preflight, создаёт отсутствующий docs/index.md , устанавливает управляемый блок AGENTS.md и запускает структурную проверку. Обычные вызовы не меняют project instructions, а новые TASK- создаются только для существенной работы.",
-        "outOfScope": "новая команда Go CLI docgent init ; автоматическое изменение AGENTS.md при неявном срабатывании skill; внешний runtime или dependency для слияния Markdown; создание полного starter pack документации.",
+        "after": "Только явный $use-docu-docu init выполняет preflight, создаёт отсутствующий docs/index.md , устанавливает управляемый блок AGENTS.md и запускает структурную проверку. Обычные вызовы не меняют project instructions, а новые TASK- создаются только для существенной работы.",
+        "outOfScope": "новая команда Go CLI docu-docu init ; автоматическое изменение AGENTS.md при неявном срабатывании skill; внешний runtime или dependency для слияния Markdown; создание полного starter pack документации.",
         "plan": "Добавить init reference и RU/EN project-guidance assets. Синхронизировать SKILL.md, workflow и metadata. Зафиксировать contract тестами и пользовательской документацией. Выполнить semantic review и полный verification cycle.",
-        "documentationImpact": "Обновлены skills/use-docgent/ , README.md , CHANGELOG.md , docs/guides/work-items.md и skill templates test.go . Публичные Go API, CLI и JSON schema не меняются; generated portals не редактируются.",
+        "documentationImpact": "Обновлены skills/use-docu-docu/ , README.md , CHANGELOG.md , docs/guides/work-items.md и skill templates test.go . Публичные Go API, CLI и JSON schema не меняются; generated portals не редактируются.",
         "documentationPaths": [
           "CHANGELOG.md",
           "guides/work-items.md",
@@ -5963,7 +5763,7 @@
         "archived": false,
         "priority": "Высокий",
         "updated": "2026-07-31",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "moduleId": "MOD-MODEL",
         "screenIds": [],
         "transitionIds": [],
@@ -5980,7 +5780,7 @@
             "line": 54,
             "indent": 0,
             "completed": true,
-            "text": "AC-01 Skill маршрутизирует $use-docgent refresh и `$use-docgent"
+            "text": "AC-01 Skill маршрутизирует $use-docu-docu refresh и `$use-docu-docu"
           },
           {
             "line": 56,
@@ -6010,16 +5810,16 @@
             "line": 66,
             "indent": 0,
             "completed": true,
-            "text": "AC-06 Go CLI по-прежнему отклоняет docgent refresh, а полный цикл"
+            "text": "AC-06 Go CLI по-прежнему отклоняет docu-docu refresh, а полный цикл"
           }
         ],
         "verificationMatrix": [
           {
             "criterionId": "AC-01",
-            "criterion": "Skill маршрутизирует $use-docgent refresh и `$use-docgent",
+            "criterion": "Skill маршрутизирует $use-docu-docu refresh и `$use-docu-docu",
             "completed": true,
             "commands": [
-              "go test ./... -run 'TestUseDocgentRefresh'"
+              "go test ./... -run 'TestUseDocu-docuRefresh'"
             ],
             "transitions": [],
             "verificationReferences": []
@@ -6029,7 +5829,7 @@
             "criterion": "Полный режим проверяет всю документацию, а diff-режим использует",
             "completed": true,
             "commands": [
-              "go test ./... -run 'TestUseDocgentRefresh'"
+              "go test ./... -run 'TestUseDocu-docuRefresh'"
             ],
             "transitions": [],
             "verificationReferences": []
@@ -6039,7 +5839,7 @@
             "criterion": "Workflow применяет evidence-first update, безопасную политику",
             "completed": true,
             "commands": [
-              "go test ./... -run 'TestUseDocgentRefresh'"
+              "go test ./... -run 'TestUseDocu-docuRefresh'"
             ],
             "transitions": [],
             "verificationReferences": []
@@ -6049,7 +5849,7 @@
             "criterion": "Semantic и structural gates предшествуют условной пересборке",
             "completed": true,
             "commands": [
-              "go test ./... -run 'TestUseDocgentRefresh'"
+              "go test ./... -run 'TestUseDocu-docuRefresh'"
             ],
             "transitions": [],
             "verificationReferences": []
@@ -6059,17 +5859,17 @@
             "criterion": "RU/EN guidance, metadata и пользовательская документация",
             "completed": true,
             "commands": [
-              "go test ./... -run 'TestUseDocgentRefresh|TestUseDocgentMetadata|TestUseDocgentProjectGuidanceTemplates'"
+              "go test ./... -run 'TestUseDocu-docuRefresh|TestUseDocu-docuMetadata|TestUseDocu-docuProjectGuidanceTemplates'"
             ],
             "transitions": [],
             "verificationReferences": []
           },
           {
             "criterionId": "AC-06",
-            "criterion": "Go CLI по-прежнему отклоняет docgent refresh, а полный цикл",
+            "criterion": "Go CLI по-прежнему отклоняет docu-docu refresh, а полный цикл",
             "completed": true,
             "commands": [
-              "go test ./... -run 'TestCLIArguments|TestUseDocgentRefresh'"
+              "go test ./... -run 'TestCLIArguments|TestUseDocu-docuRefresh'"
             ],
             "transitions": [],
             "verificationReferences": []
@@ -6079,42 +5879,42 @@
           {
             "target": "AC-01",
             "commands": [
-              "go test ./... -run 'TestUseDocgentRefresh'"
+              "go test ./... -run 'TestUseDocu-docuRefresh'"
             ],
             "line": 79
           },
           {
             "target": "AC-02",
             "commands": [
-              "go test ./... -run 'TestUseDocgentRefresh'"
+              "go test ./... -run 'TestUseDocu-docuRefresh'"
             ],
             "line": 80
           },
           {
             "target": "AC-03",
             "commands": [
-              "go test ./... -run 'TestUseDocgentRefresh'"
+              "go test ./... -run 'TestUseDocu-docuRefresh'"
             ],
             "line": 81
           },
           {
             "target": "AC-04",
             "commands": [
-              "go test ./... -run 'TestUseDocgentRefresh'"
+              "go test ./... -run 'TestUseDocu-docuRefresh'"
             ],
             "line": 82
           },
           {
             "target": "AC-05",
             "commands": [
-              "go test ./... -run 'TestUseDocgentRefresh|TestUseDocgentMetadata|TestUseDocgentProjectGuidanceTemplates'"
+              "go test ./... -run 'TestUseDocu-docuRefresh|TestUseDocu-docuMetadata|TestUseDocu-docuProjectGuidanceTemplates'"
             ],
             "line": 83
           },
           {
             "target": "AC-06",
             "commands": [
-              "go test ./... -run 'TestCLIArguments|TestUseDocgentRefresh'"
+              "go test ./... -run 'TestCLIArguments|TestUseDocu-docuRefresh'"
             ],
             "line": 84
           },
@@ -6128,14 +5928,14 @@
           {
             "target": "DOCS",
             "commands": [
-              "go run ./cmd/docgent check ./docs --repository-root . --strict --stale-days 0 \u0026\u0026 go run ./cmd/docgent check ./example/docs --repository-root ./example --strict --stale-days 0"
+              "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0 \u0026\u0026 go run ./cmd/docu-docu check ./example/docs --repository-root ./example --strict --stale-days 0"
             ],
             "line": 86
           },
           {
             "target": "QUALITY",
             "commands": [
-              "go test ./... -run 'TestUseDocgent'"
+              "go test ./... -run 'TestUseDocu-docu'"
             ],
             "line": 87
           }
@@ -6150,13 +5950,13 @@
           "project-docs/",
           "README.md",
           "skill_templates_test.go",
-          "skills/use-docgent/"
+          "skills/use-docu-docu/"
         ],
         "result": "Пользователь явно запускает полный или diff-ограниченный refresh документации; skill сверяет Markdown с текущими источниками истины, применяет доказуемые обновления и завершает работу semantic и structural gates.",
-        "behaviorChange": "Было Skill обновлял документацию только по конкретному запросу и не имел явного workflow для систематического ревью актуальности. Станет $use-docgent refresh проверяет весь проект, а $use-docgent refresh diff проверяет staged, unstaged и untracked изменения относительно HEAD и зависимую документацию. Оба режима могут обновлять, удалять и переименовывать документы при однозначной доказательной базе.",
+        "behaviorChange": "Было Skill обновлял документацию только по конкретному запросу и не имел явного workflow для систематического ревью актуальности. Станет $use-docu-docu refresh проверяет весь проект, а $use-docu-docu refresh diff проверяет staged, unstaged и untracked изменения относительно HEAD и зависимую документацию. Оба режима могут обновлять, удалять и переименовывать документы при однозначной доказательной базе.",
         "before": "Skill обновлял документацию только по конкретному запросу и не имел явного workflow для систематического ревью актуальности.",
-        "after": "$use-docgent refresh проверяет весь проект, а $use-docgent refresh diff проверяет staged, unstaged и untracked изменения относительно HEAD и зависимую документацию. Оба режима могут обновлять, удалять и переименовывать документы при однозначной доказательной базе.",
-        "outOfScope": "новая Go-команда docgent refresh ; отдельный read-only refresh workflow; merge-base или сравнение с default branch; изменение кода ради согласования с документацией; обновление Last verified без фактической проверки runbook.",
+        "after": "$use-docu-docu refresh проверяет весь проект, а $use-docu-docu refresh diff проверяет staged, unstaged и untracked изменения относительно HEAD и зависимую документацию. Оба режима могут обновлять, удалять и переименовывать документы при однозначной доказательной базе.",
+        "outOfScope": "новая Go-команда docu-docu refresh ; отдельный read-only refresh workflow; merge-base или сравнение с default branch; изменение кода ради согласования с документацией; обновление Last verified без фактической проверки runbook.",
         "plan": "Добавить refresh reference и маршрутизацию команд. Синхронизировать managed guidance, metadata и self-documentation. Зафиксировать полный, diff, safety и no-CLI contracts тестами. Провести независимый semantic review и устранить замечания. Выполнить полный verification и пересобрать tracked portals.",
         "documentationImpact": "Обновляются публичный workflow skill, RU/EN managed guidance, README, changelog, self-documentation, корневой AGENTS.md и оба tracked portal.",
         "documentationPaths": [
@@ -6176,7 +5976,7 @@
         "archived": false,
         "priority": "Высокий",
         "updated": "2026-08-03",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "moduleId": "MOD-MODEL",
         "screenIds": [],
         "transitionIds": [],
@@ -6298,7 +6098,7 @@
             "criterion": "Демо-проект задаёт полные локализованные project.locale и",
             "completed": true,
             "commands": [
-              "go run ./cmd/docgent check ./example/docs --repository-root ./example --strict --stale-days 0"
+              "go run ./cmd/docu-docu check ./example/docs --repository-root ./example --strict --stale-days 0"
             ],
             "transitions": [],
             "verificationReferences": []
@@ -6350,7 +6150,7 @@
           {
             "target": "AC-07",
             "commands": [
-              "go run ./cmd/docgent check ./example/docs --repository-root ./example --strict --stale-days 0"
+              "go run ./cmd/docu-docu check ./example/docs --repository-root ./example --strict --stale-days 0"
             ],
             "line": 64
           },
@@ -6364,7 +6164,7 @@
           {
             "target": "DOCS",
             "commands": [
-              "go run ./cmd/docgent check ./docs --repository-root . --strict --stale-days 0 \u0026\u0026 go run ./cmd/docgent check ./example/docs --repository-root ./example --strict --stale-days 0"
+              "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0 \u0026\u0026 go run ./cmd/docu-docu check ./example/docs --repository-root ./example --strict --stale-days 0"
             ],
             "line": 66
           },
@@ -6377,7 +6177,7 @@
           }
         ],
         "repositoryPaths": [
-          "$use-docgent",
+          "$use-docu-docu",
           "internal/app/sections.go"
         ],
         "result": "Модель и портал используют упорядоченный реестр встроенных разделов, локализованные project-названия, аддитивный JSON sectionType и единственный каталог FLOW- по маршруту processes/index.html .",
@@ -6402,7 +6202,7 @@
         "archived": false,
         "priority": "Высокий",
         "updated": "2026-08-03",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "moduleId": "MOD-CLI",
         "screenIds": [],
         "transitionIds": [],
@@ -6452,7 +6252,7 @@
             "criterion": "CLI и каноническая документация используют версию 0.0.1, а",
             "completed": true,
             "commands": [
-              "go run ./cmd/docgent version \u0026\u0026 test \"$(go run ./cmd/docgent version)\" = \"0.0.1\""
+              "go run ./cmd/docu-docu version \u0026\u0026 test \"$(go run ./cmd/docu-docu version)\" = \"0.0.1\""
             ],
             "transitions": [],
             "verificationReferences": []
@@ -6492,7 +6292,7 @@
             "criterion": "Исходная документация и оба отслеживаемых портала согласованы с",
             "completed": true,
             "commands": [
-              "go run ./cmd/docgent check ./docs --repository-root . --strict --stale-days 0"
+              "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
             ],
             "transitions": [],
             "verificationReferences": []
@@ -6502,7 +6302,7 @@
           {
             "target": "AC-01",
             "commands": [
-              "go run ./cmd/docgent version \u0026\u0026 test \"$(go run ./cmd/docgent version)\" = \"0.0.1\""
+              "go run ./cmd/docu-docu version \u0026\u0026 test \"$(go run ./cmd/docu-docu version)\" = \"0.0.1\""
             ],
             "line": 60
           },
@@ -6530,7 +6330,7 @@
           {
             "target": "AC-05",
             "commands": [
-              "go run ./cmd/docgent check ./docs --repository-root . --strict --stale-days 0"
+              "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
             ],
             "line": 64
           },
@@ -6544,7 +6344,7 @@
           {
             "target": "DOCS",
             "commands": [
-              "go run ./cmd/docgent check ./docs --repository-root . --strict --stale-days 0"
+              "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
             ],
             "line": 66
           },
@@ -6567,7 +6367,7 @@
           "README.md"
         ],
         "result": "Репозиторий локально готов к публикации стабильного релиза 0.0.1 : версия, детерминированные порталы, проверки, release bundle и GitHub workflow согласованы, но тег и публикация не выполняются.",
-        "outOfScope": "создание Git-тега; настройка или чтение GitHub remote; push, GitHub Actions и публикация GitHub Release; изменение набора или сигнатур CLI-команд, экспортов Go API и структуры JSON schema v1; меняется только значение существующей константы docgent.Version .",
+        "outOfScope": "создание Git-тега; настройка или чтение GitHub remote; push, GitHub Actions и публикация GitHub Release; изменение набора или сигнатур CLI-команд, экспортов Go API и структуры JSON schema v1; меняется только значение существующей константы docu-docu.Version .",
         "plan": "Зафиксировать версию и release contract. Устранить недетерминированный порядок поискового индекса. Унифицировать локальные и CI release gates. Обновить документацию и пересобрать порталы. Выполнить полный локальный release cycle без обращения к GitHub. Получить независимый semantic review изменённой release-документации.",
         "documentationImpact": "Обновляются версия, текущее состояние, завершённые Changes-сущности, канонический changelog и описание dependency-free поставки. Оба отслеживаемых портала пересобираются из исходного Markdown.",
         "documentationPaths": []
@@ -6585,7 +6385,7 @@
         "archived": false,
         "priority": "Средний",
         "updated": "2026-07-30",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "moduleId": "MOD-SITE",
         "useCaseId": "UC-DOCS-01",
         "screenIds": [],
@@ -6702,7 +6502,7 @@
           {
             "target": "DOCS",
             "commands": [
-              "go run ./cmd/docgent check ./docs --repository-root ."
+              "go run ./cmd/docu-docu check ./docs --repository-root ."
             ],
             "line": 76
           }
@@ -6739,7 +6539,7 @@
         "archived": false,
         "priority": "Высокий",
         "updated": "2026-07-31",
-        "owner": "Команда Docgent",
+        "owner": "Команда Docu-docu",
         "moduleId": "MOD-SITE",
         "useCaseId": "UC-DOCS-03",
         "flowId": "FLOW-DOCS-SERVE",
@@ -6836,7 +6636,7 @@
             "line": 101,
             "indent": 0,
             "completed": true,
-            "text": "AC-14 Запись требует JSON content type, X-Docgent-Action и same-origin /"
+            "text": "AC-14 Запись требует JSON content type, X-Docu-docu-Action и same-origin /"
           },
           {
             "line": 106,
@@ -6990,7 +6790,7 @@
           },
           {
             "criterionId": "AC-14",
-            "criterion": "Запись требует JSON content type, X-Docgent-Action и same-origin /",
+            "criterion": "Запись требует JSON content type, X-Docu-docu-Action и same-origin /",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestEditorWriteGuards|TestEditorCannotExecuteCommands'"
@@ -7023,7 +6823,7 @@
             "criterion": "Документация фиксирует границу build = static read-only,",
             "completed": true,
             "commands": [
-              "go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docgent check ./docs --strict --stale-days 0 \u0026\u0026 GOOS=windows GOARCH=amd64 go test -c -o /tmp/docgent-editor-windows.test . \u0026\u0026 GOOS=darwin GOARCH=amd64 go build -o /tmp/docgent-editor-darwin ./cmd/docgent \u0026\u0026 GOOS=linux GOARCH=amd64 go build -o /tmp/docgent-editor-linux ./cmd/docgent \u0026\u0026 test -s build/editor-qa/report.md \u0026\u0026 test -s build/editor-qa/semantic-review.txt"
+              "go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docu-docu check ./docs --strict --stale-days 0 \u0026\u0026 GOOS=windows GOARCH=amd64 go test -c -o /tmp/docu-docu-editor-windows.test . \u0026\u0026 GOOS=darwin GOARCH=amd64 go build -o /tmp/docu-docu-editor-darwin ./cmd/docu-docu \u0026\u0026 GOOS=linux GOARCH=amd64 go build -o /tmp/docu-docu-editor-linux ./cmd/docu-docu \u0026\u0026 test -s build/editor-qa/report.md \u0026\u0026 test -s build/editor-qa/semantic-review.txt"
             ],
             "transitions": [],
             "verificationReferences": []
@@ -7145,7 +6945,7 @@
           {
             "target": "AC-17",
             "commands": [
-              "go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docgent check ./docs --strict --stale-days 0 \u0026\u0026 GOOS=windows GOARCH=amd64 go test -c -o /tmp/docgent-editor-windows.test . \u0026\u0026 GOOS=darwin GOARCH=amd64 go build -o /tmp/docgent-editor-darwin ./cmd/docgent \u0026\u0026 GOOS=linux GOARCH=amd64 go build -o /tmp/docgent-editor-linux ./cmd/docgent \u0026\u0026 test -s build/editor-qa/report.md \u0026\u0026 test -s build/editor-qa/semantic-review.txt"
+              "go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docu-docu check ./docs --strict --stale-days 0 \u0026\u0026 GOOS=windows GOARCH=amd64 go test -c -o /tmp/docu-docu-editor-windows.test . \u0026\u0026 GOOS=darwin GOARCH=amd64 go build -o /tmp/docu-docu-editor-darwin ./cmd/docu-docu \u0026\u0026 GOOS=linux GOARCH=amd64 go build -o /tmp/docu-docu-editor-linux ./cmd/docu-docu \u0026\u0026 test -s build/editor-qa/report.md \u0026\u0026 test -s build/editor-qa/semantic-review.txt"
             ],
             "line": 144
           },
@@ -7159,14 +6959,14 @@
           {
             "target": "DOCS",
             "commands": [
-              "go run ./cmd/docgent check ./docs --repository-root ."
+              "go run ./cmd/docu-docu check ./docs --repository-root ."
             ],
             "line": 146
           },
           {
             "target": "QUALITY",
             "commands": [
-              "go vet ./... \u0026\u0026 go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docgent check ./docs --strict --stale-days 0"
+              "go vet ./... \u0026\u0026 go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docu-docu check ./docs --strict --stale-days 0"
             ],
             "line": 147
           }
@@ -7205,7 +7005,7 @@
           "README.md",
           "THIRD_PARTY_NOTICES.md"
         ],
-        "result": "docgent serve предоставляет локальный live workspace, в котором пользователь безопасно редактирует и создаёт исходные документы, видит preview и diagnostics, а портал синхронно обновляет модель, HTML и поиск. docgent build остаётся автономным read-only порталом для file:// .",
+        "result": "docu-docu serve предоставляет локальный live workspace, в котором пользователь безопасно редактирует и создаёт исходные документы, видит preview и diagnostics, а портал синхронно обновляет модель, HTML и поиск. docu-docu build остаётся автономным read-only порталом для file:// .",
         "behaviorChange": "Было serve пересобирает статический портал при открытии HTML и по ручной кнопке, но не предоставляет доступ к исходным файлам и не замечает внешнее изменение до следующего просмотра или ручной пересборки. Станет serve всегда включает защищённый same-origin editor API, отдельный Operate UI, live rebuild после записи и watcher внешних изменений. Статическая генерация не получает editor markup, server-only scripts или API-ссылки.",
         "before": "serve пересобирает статический портал при открытии HTML и по ручной кнопке, но не предоставляет доступ к исходным файлам и не замечает внешнее изменение до следующего просмотра или ручной пересборки.",
         "after": "serve всегда включает защищённый same-origin editor API, отдельный Operate UI, live rebuild после записи и watcher внешних изменений. Статическая генерация не получает editor markup, server-only scripts или API-ссылки.",

@@ -29,13 +29,13 @@
 ## Основной сценарий
 
 1. Исполнитель вызывает
-   `docgent task verify TASK-ID ./docs --dry-run --format json`.
-2. Docgent находит задачу и применяет к ней task-local validation gate.
-3. Docgent составляет список уникальных команд `AC-*`, `ALL` и `DOCS`.
+   `docu-docu task verify TASK-ID ./docs --dry-run --format json`.
+2. Docu-docu находит задачу и применяет к ней task-local validation gate.
+3. Docu-docu составляет список уникальных команд `AC-*`, `ALL` и `DOCS`.
 4. Dry-run возвращает команды со status `planned`, ничего не выполняя.
 5. После проверки плана исполнитель явно вызывает `task verify --run`.
-6. Docgent последовательно запускает выбранные команды из repository root.
-7. Docgent связывает результаты команд с критериями и формирует
+6. Docu-docu последовательно запускает выбранные команды из repository root.
+7. Docu-docu связывает результаты команд с критериями и формирует
    `TaskVerifyReport`.
 8. Исполнитель использует итоговый status, exit code и вывод команд для
    принятия результата.

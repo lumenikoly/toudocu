@@ -1,14 +1,14 @@
-<!-- docgent:project-guidance:start -->
-## Docgent
+<!-- docu-docu:project-guidance:start -->
+## Docu-docu
 
-- Используйте `$use-docgent`, когда запрос явно относится к Docgent или когда
+- Используйте `$use-docu-docu`, когда запрос явно относится к Docu-docu или когда
   изменение затрагивает документированное поведение, CLI/API/schema/config,
   архитектуру, безопасность, use cases, flows, screens, roadmap или task
   contract.
 - Не используйте skill для обычных вопросов, чтения кода, форматирования и
   рефакторинга без семантического влияния на документацию.
-- Используйте `$use-docgent refresh` для полного evidence-based ревью и
-  обновления исходной документации. Используйте `$use-docgent refresh diff`
+- Используйте `$use-docu-docu refresh` для полного evidence-based ревью и
+  обновления исходной документации. Используйте `$use-docu-docu refresh diff`
   для staged, unstaged и untracked изменений относительно `HEAD` и зависимых
   документов. Это изменяющие workflow skill, а не команды Go CLI и не init.
 - Создавайте новый `TASK-*` только по явному запросу или правилу проекта либо
@@ -26,5 +26,5 @@
   API или формат данных (`CONTRACT`), справочные факты (`REFERENCE`),
   эксплуатационную процедуру (`RUNBOOK`), причину решения (`ADR`) или локальную
   границу владения и правил (`MODULE`).
-- Обновляйте этот управляемый блок только явным вызовом `$use-docgent init`.
-<!-- docgent:project-guidance:end -->
+- Обновляйте этот управляемый блок только явным вызовом `$use-docu-docu init`.
+<!-- docu-docu:project-guidance:end -->

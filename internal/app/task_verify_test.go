@@ -1,4 +1,4 @@
-package docgent
+package docudocu
 
 import (
 	"bytes"
@@ -121,7 +121,7 @@ func TestTaskVerificationTargetsComeOnlyFromMappingLeftSide(t *testing.T) {
 		"AC-01": "make docs-check",
 		"AC-02": "printf 'ALL AC-99'",
 		"ALL":   "test -f ./docs/index.md",
-		"DOCS":  "go run ./cmd/docgent check ./docs --strict",
+		"DOCS":  "go run ./cmd/docu-docu check ./docs --strict",
 	}
 	writeTestFile(t, docs, "work/TASK-AUTH-020-verify.md", taskVerifyFixture("Готово к работе", false, commands, ""))
 	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})

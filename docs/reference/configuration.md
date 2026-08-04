@@ -1,7 +1,7 @@
 # Справочник конфигурации
 
 CLI работает без конфигурационного файла. Необязательный
-`<repository-root>/.docgent/config.yml` настраивает портал и автоматически
+`<repository-root>/.docu-docu/config.yml` настраивает портал и автоматически
 читается командами `build`, `check` и `serve`.
 
 ## Значения по умолчанию
@@ -58,7 +58,7 @@ site:
 цветовой схемы (`system`, `light`, `dark`). Выбор сохраняется локально в
 браузере; значения конфигурации остаются начальными для нового посетителя.
 
-Logo, favicon и hero должны быть обычными файлами внутри `.docgent/assets/`;
+Logo, favicon и hero должны быть обычными файлами внутри `.docu-docu/assets/`;
 абсолютные пути, traversal, symlinks и отсутствующие файлы отклоняются. SVG
 подключается как файл и не встраивается в HTML.
 
@@ -77,7 +77,7 @@ Logo, favicon и hero должны быть обычными файлами вн
 Путь должен указывать на фактический корень репозитория. Для текущего проекта:
 
 ```bash
-go run ./cmd/docgent check ./docs --repository-root . --strict
+go run ./cmd/docu-docu check ./docs --repository-root . --strict
 ```
 
 ## Repository URL и ref
@@ -143,8 +143,9 @@ remote. Лимит отключает тяжёлое представление 
 принимаются только этой командой. Адрес `0.0.0.0` разрешает доступ из локальной
 сети, но сервер не предоставляет TLS или авторизацию и выводит предупреждение.
 
-При просмотре через `serve` хедер показывает editor и ручную пересборку. Editor
-API всегда работает на том же listener и не получает отдельного CLI-флага.
+При просмотре через `serve` отдельная workspace-панель показывает editor и
+ручную пересборку модели, HTML и поиска. Editor API всегда работает на том же
+listener и не получает отдельного CLI-флага.
 `--host`, `--port` и `--open` сохраняют прежнюю семантику; `--no-open` и `--edit`
 не существуют. Через `file://` или другой статический HTTP-сервер editor markup,
 API URL, CodeMirror и server-only scripts отсутствуют.
@@ -157,7 +158,7 @@ guards не заменяют аутентификацию прямого LAN-к�
 
 ## Локаль и встроенные разделы
 
-`.docgent/config.yml` может содержать только `project`; `site` и `changes`
+`.docu-docu/config.yml` может содержать только `project`; `site` и `changes`
 остаются независимыми необязательными разделами. `project.locale` принимает
 нормализуемый BCP-47-style тег (например, `ru`, `en-GB`, `pt-BR`, `sr-Latn`).
 `project.sections` задаёт названия всех встроенных разделов и является
@@ -187,10 +188,15 @@ project:
 `lang="en"`. Для неизвестного, но синтаксически корректного locale допустим
 явный однократно сохранённый список названий.
 
+`task init` и `scaffold` без явного `--lang` используют основной язык
+`project.locale`, когда это `ru` или `en` (включая теги наподобие `ru-RU` и
+`en-GB`). Для другого или отсутствующего locale scaffold fallback равен `en`;
+явный `--lang` всегда имеет приоритет.
+
 ## Отдельные roots переводов
 
 `translations` описывает независимые порталы для workflow
-`$use-docgent translate`; это не новая Go CLI-команда. Канонический `docs/`
+`$use-docu-docu translate`; это не новая Go CLI-команда. Канонический `docs/`
 остаётся единственным источником `task context` и `ProjectModel`.
 
 ```yaml
@@ -221,7 +227,7 @@ translation root либо каноническим docs root. При `check`, `b
 
 ## Mermaid
 
-Mermaid не имеет пользовательских CLI-настроек. Docgent закрепляет:
+Mermaid не имеет пользовательских CLI-настроек. Docu-docu закрепляет:
 
 - типы `flowchart`, `stateDiagram-v2`, `sequenceDiagram`;
 - максимум 50 000 UTF-8 байт на блок;

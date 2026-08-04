@@ -3,7 +3,7 @@
 - Тип документа: Architecture
 - Архитектурный вопрос: Как Git-состояния превращаются в согласованный change set документации?
 
-Docgent разрешает явно выбранные локальные Git-состояния, представляет каждую
+Docu-docu разрешает явно выбранные локальные Git-состояния, представляет каждую
 сторону ленивым snapshot и объединяет Git metadata с нормализованными
 документными сущностями в один versioned `ChangeSetReport`.
 
@@ -36,7 +36,7 @@ renderers не имеют отдельного источника истины.
 Commit-to-commit change set неизменяем. HTTP cache identity включает comparison,
 workspace revision, `HEAD`, porcelain-v2 status и resolved пользовательские
 refs. После изменения следующий запрос строит новый report и digest, а прежние
-working bytes не становятся историей или snapshot Docgent.
+working bytes не становятся историей или snapshot Docu-docu.
 
 ## Границы
 

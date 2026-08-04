@@ -7,14 +7,14 @@
 - Сценарий: UC-DOCS-03
 - Процесс: FLOW-DOCS-SERVE
 - Стандарты: STD-GO-001, STD-DOCS-001
-- Владелец: Команда Docgent
+- Владелец: Команда Docu-docu
 - Последнее обновление: 2026-07-31
 
 ## Результат
 
-`docgent serve` предоставляет локальный live workspace, в котором пользователь
+`docu-docu serve` предоставляет локальный live workspace, в котором пользователь
 безопасно редактирует и создаёт исходные документы, видит preview и diagnostics,
-а портал синхронно обновляет модель, HTML и поиск. `docgent build` остаётся
+а портал синхронно обновляет модель, HTML и поиск. `docu-docu build` остаётся
 автономным read-only порталом для `file://`.
 
 ## Изменение поведения
@@ -79,7 +79,7 @@ live rebuild после записи и watcher внешних изменени�
   overwrite выполняется только вторым запросом с digest из conflict response и
   `confirmOverwrite: true`; новый внешний конфликт снова возвращает `409`.
 - [x] `AC-06` Markdown diagnostics строятся по полной модели с in-memory overlay;
-  JSON получает syntax и hotspots diagnostics, YAML — только доступные Docgent
+  JSON получает syntax и hotspots diagnostics, YAML — только доступные Docu-docu
   diagnostics; diagnostics не блокируют save.
 - [x] `AC-07` Save/create синхронно обновляют модель, HTML, поиск и revision;
   watcher с интервалом 750 мс и стабилизацией 200 мс замечает внешние изменения.
@@ -98,7 +98,7 @@ live rebuild после записи и watcher внешних изменени�
 - [x] `AC-13` Все editor JSON-ответы имеют `schemaVersion: 1`, `no-store` и единый
   error envelope; malformed, unknown fields, trailing JSON, >3 MiB body и >2 MiB
   content отклоняются.
-- [x] `AC-14` Запись требует JSON content type, `X-Docgent-Action` и same-origin /
+- [x] `AC-14` Запись требует JSON content type, `X-Docu-docu-Action` и same-origin /
   `Sec-Fetch-Site`; API не выдаёт CORS headers и не может запускать команды.
   При явном non-loopback listener оператор включает клиентов локальной сети в
   trust boundary: browser guards защищают от cross-origin страниц, но не служат
@@ -110,7 +110,7 @@ live rebuild после записи и watcher внешних изменени�
   build-only lock фиксирует согласованные версии, а runtime не требует Node.js.
 - [x] `AC-17` Документация фиксирует границу `build = static read-only`,
   `serve = view/edit/live rebuild`; backend, race, static-negative, cross-build,
-  browser desktop/mobile QA, semantic review и strict Docgent checks проходят.
+  browser desktop/mobile QA, semantic review и strict Docu-docu checks проходят.
 
 ## План
 
@@ -141,10 +141,10 @@ live rebuild после записи и watcher внешних изменени�
 - `AC-14` → `go test ./... -run 'TestEditorWriteGuards|TestEditorCannotExecuteCommands'`
 - `AC-15` → `go test ./... -run 'TestEditorAPIContract'`
 - `AC-16` → `go test ./... -run 'TestEditorVendoredAssets'`
-- `AC-17` → `go test ./... && go test -race ./... && go run ./cmd/docgent check ./docs --strict --stale-days 0 && GOOS=windows GOARCH=amd64 go test -c -o /tmp/docgent-editor-windows.test . && GOOS=darwin GOARCH=amd64 go build -o /tmp/docgent-editor-darwin ./cmd/docgent && GOOS=linux GOARCH=amd64 go build -o /tmp/docgent-editor-linux ./cmd/docgent && test -s build/editor-qa/report.md && test -s build/editor-qa/semantic-review.txt`
+- `AC-17` → `go test ./... && go test -race ./... && go run ./cmd/docu-docu check ./docs --strict --stale-days 0 && GOOS=windows GOARCH=amd64 go test -c -o /tmp/docu-docu-editor-windows.test . && GOOS=darwin GOARCH=amd64 go build -o /tmp/docu-docu-editor-darwin ./cmd/docu-docu && GOOS=linux GOARCH=amd64 go build -o /tmp/docu-docu-editor-linux ./cmd/docu-docu && test -s build/editor-qa/report.md && test -s build/editor-qa/semantic-review.txt`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docgent check ./docs --repository-root .`
-- `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/docgent check ./docs --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root .`
+- `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/docu-docu check ./docs --strict --stale-days 0`
 
 ## Влияние на документацию
 

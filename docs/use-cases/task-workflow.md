@@ -19,19 +19,19 @@
 
 ## Предусловия
 
-- Docgent доступен для запуска;
+- Docu-docu доступен для запуска;
 - исполнитель имеет права чтения документации и репозитория.
 
 ## Основной сценарий
 
 1. Исполнитель вызывает
-   `docgent task context TASK-ID ./docs --format json`.
-2. Docgent находит ровно одну задачу с указанным ID.
-3. Docgent проверяет, что задача имеет статус Ready, In Progress, Blocked или
+   `docu-docu task context TASK-ID ./docs --format json`.
+2. Docu-docu находит ровно одну задачу с указанным ID.
+3. Docu-docu проверяет, что задача имеет статус Ready, In Progress, Blocked или
    Done.
-4. Docgent собирает полный task contract, фиксированные разделы связанных
+4. Docu-docu собирает полный task contract, фиксированные разделы связанных
    сущностей, documentation-impact документы, business rules и diagnostics.
-5. Docgent возвращает `TaskContextReport` schema v1 с `requiredReads`.
+5. Docu-docu возвращает `TaskContextReport` schema v1 с `requiredReads`.
 6. Исполнитель использует результат, область изменений и ограничения задачи
    для планирования работы.
 

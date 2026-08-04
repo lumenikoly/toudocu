@@ -1,4 +1,4 @@
-package docgent
+package docudocu
 
 import (
 	"encoding/json"
@@ -15,66 +15,182 @@ import (
 )
 
 func PrintHelp(w io.Writer) {
-	fmt.Fprintf(w, `Docgent %s
+	fmt.Fprintf(w, `Docu-docu %s
 
 Использование:
-  docgent [build] [каталог-документации] [параметры]
-  docgent check [каталог-документации] [параметры]
-  docgent serve [каталог-документации] [параметры]
-  docgent changes [каталог-документации] [--base REV] [--target working-tree|index|HEAD|REV]
-  docgent changes file PATH [каталог-документации] [параметры]
-  docgent search "<запрос>" [каталог-документации] [--limit N] [--format text|json]
-  docgent task init [каталог-документации] --area AREA --title TITLE --type TYPE [--lang en|ru]
-  docgent scaffold module|use-case|flow|screen|decision|standard|runbook ID [каталог-документации] --title TITLE [--lang en|ru]
-  docgent task ready TASK-ID [каталог-документации] [--strict] [--format text|json]
-  docgent task context TASK-ID [каталог-документации] [параметры]
-  docgent task verify TASK-ID [каталог-документации] (--dry-run|--run) [параметры]
-  docgent task archive TASK-ID [каталог-документации] [--format text|json]
-  docgent task restore TASK-ID [каталог-документации] [--format text|json]
-  docgent task changes TASK-ID [каталог-документации] [параметры]
-  docgent version
+  docu-docu COMMAND [параметры]
 
-Примеры:
-  docgent build ./docs --output ./build/project-docs --clean
-  docgent check ./docs --strict
-  docgent serve ./docs --host 0.0.0.0 --port 8080
-  docgent changes ./docs --base main --target working-tree --format markdown
-  docgent search "task workflow" ./docs --format json
-  docgent task init ./docs --area CORE --title "Новая задача" --type Feature
-  docgent task ready TASK-CORE-001 ./docs --format json
-  docgent task context TASK-CORE-001 ./docs --format json
-  docgent task verify TASK-CORE-001 ./docs --dry-run --format json
-  docgent task archive TASK-CORE-001 ./docs --format json
-  docgent task restore TASK-CORE-001 ./docs --format json
+Команды:
+  check       Проверить исходную документацию без изменений
+  build       Собрать автономный read-only портал
+  serve       Запустить локальный портал, редактор и live rebuild
+  changes     Показать Git-backed изменения документации
+  search      Найти документы в исходном Markdown
+  scaffold    Создать один типизированный документ
+  task        Операции жизненного цикла work item
+  version     Показать версию
 
-Параметры:
-  -o, --output <каталог>       Выходной каталог
-  -t, --title <название>       Переопределить название проекта
-      --exclude <пути>         Исключить пути, через запятую или повторением
-      --stale-days <число>     Порог устаревания; 0 отключает проверку
-      --repository-root <путь> Корень репозитория для ссылок на код
-      --repository-url <url>   URL GitHub-репозитория
-      --repository-ref <ref>   Точный git ref, по умолчанию main
-      --clean                  Очистить выходной каталог
-      --open                   Открыть результат в браузере
-      --strict                 Предупреждения дают ненулевой exit code
-      --screen-map             Генерировать карту экранов (по умолчанию)
-      --no-screen-map          Не генерировать страницу карты экранов
-      --host <адрес>           Адрес serve, по умолчанию 127.0.0.1
-      --port <число>           Порт serve, по умолчанию 8080
-      --format text|json       Формат машинных отчётов
-      --base <revision>        Base для changes, по умолчанию HEAD
-      --target <side>          Target для changes либо task verify
-      --branch-base <ref>      merge-base(ref, HEAD) как base
-      --status <status>        Фильтр changes по статусу
-      --module <ID>            Фильтр changes по модулю
-      --task <TASK-ID>         Task impact для changes
-      --permanent-only        Только постоянная документация
-      --report <файл>          Сохранить JSON-отчёт task verify
-      --timeout <duration>     Timeout каждой команды task verify, по умолчанию 10m
-  -h, --help                   Справка
-  -v, --version                Версия
+Для справки по применимым параметрам и побочным эффектам:
+  docu-docu COMMAND --help
+  docu-docu task --help
 `, Version)
+}
+
+func PrintCommandHelp(w io.Writer, topic string) {
+	help := map[string]string{
+		"build": `Собирает автономный read-only портал и записывает output.
+
+Использование:
+  docu-docu build [docs-dir] [-o DIR] [--clean] [--open] [--strict]
+                [--exclude PATHS] [--stale-days N] [--repository-root DIR]
+                [--repository-url URL] [--repository-ref REF]
+                [--screen-map|--no-screen-map] [-t TITLE]
+
+Пример:
+  docu-docu build ./docs -o ./build/project-docs --clean
+
+Побочные эффекты: создаёт output; --clean предварительно очищает только безопасный output.`,
+		"check": `Проверяет структуру, ссылки, ID и явные связи без изменения файлов.
+
+Использование:
+  docu-docu check [docs-dir] [--strict] [--format text|json]
+                [--exclude PATHS] [--stale-days N] [--repository-root DIR]
+
+Пример:
+  docu-docu check ./docs --strict
+
+Побочные эффекты: отсутствуют. Без --strict warnings не меняют exit code.`,
+		"serve": `Собирает портал и запускает локальный HTTP/editor workspace с live rebuild.
+
+Использование:
+  docu-docu serve [docs-dir] [-o DIR] [--host ADDRESS] [--port N]
+                [--open] [--strict] [--exclude PATHS] [--stale-days N]
+                [--repository-root DIR] [--screen-map|--no-screen-map] [-t TITLE]
+
+Пример:
+  docu-docu serve ./docs --host 127.0.0.1 --port 8080
+
+Побочные эффекты: записывает output, запускает HTTP; browser save изменяет workspace.`,
+		"changes": `Строит read-only Git-backed отчёт об изменениях документации.
+
+Использование:
+  docu-docu changes [docs-dir] [--base REV|--branch-base REF]
+                  [--target working-tree|index|HEAD|REV]
+                  [--status STATUS] [--module ID] [--type TYPE]
+                  [--permanent-only] [--format text|json|markdown] [-o FILE]
+  docu-docu changes file PATH [docs-dir] [те же параметры]
+
+Пример:
+  docu-docu changes ./docs --base main --target working-tree --format markdown
+
+Побочные эффекты: отсутствуют; команда только читает Git и workspace.`,
+		"changes-file": `Показывает detail одного изменённого пути без изменения файлов.
+
+Использование:
+  docu-docu changes file PATH [docs-dir] [--base REV|--branch-base REF]
+                       [--target working-tree|index|HEAD|REV]
+                       [--format text|json|markdown] [-o FILE]`,
+		"search": `Ищет по свежим исходным Markdown без изменения файлов.
+
+Использование:
+  docu-docu search "QUERY" [docs-dir] [--limit N] [--format text|json]
+
+Пример:
+  docu-docu search "task workflow" ./docs --format json`,
+		"scaffold": `Атомарно создаёт один типизированный Markdown-файл.
+
+Использование:
+  docu-docu scaffold module|use-case|flow|screen|decision|standard|runbook ID
+                   [docs-dir] --title TITLE [--lang en|ru] [--format text|json]
+
+Без --lang язык берётся из .docu-docu/config.yml; fallback — en.
+Пример:
+  docu-docu scaffold module MOD-CLI ./docs --title "CLI"`,
+		"task": `Операции жизненного цикла work item.
+
+Использование:
+  docu-docu task init|ready|context|verify|archive|restore|changes ...
+
+Для параметров операции:
+  docu-docu task OPERATION --help`,
+		"task-init": `Атомарно создаёт новый Draft TASK-* или BUG-*.
+
+Использование:
+  docu-docu task init [docs-dir] --area AREA --title TITLE --type TYPE
+                    [--lang en|ru] [--format text|json]
+
+TYPE: Feature, Bug, Maintenance, Documentation или Research.
+Без --lang язык берётся из .docu-docu/config.yml; fallback — en.`,
+		"task-ready": `Проверяет полноту Draft/Ready контракта без изменения файлов.
+
+Использование:
+  docu-docu task ready TASK-ID [docs-dir] [--strict] [--format text|json]`,
+		"task-context": `Возвращает компактный read-only контекст Ready+ задачи.
+
+Использование:
+  docu-docu task context TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]`,
+		"task-verify": `Планирует или выполняет доверенные команды проверки задачи.
+
+Использование:
+  docu-docu task verify TASK-ID [docs-dir] (--dry-run|--run)
+                      [--target TARGET] [--report FILE] [--timeout DURATION]
+                      [--repository-root DIR] [--format text|json]
+
+Побочный эффект есть только у --run: выполняются команды задачи.`,
+		"task-archive": `Перемещает валидную Done/Cancelled задачу в work/archive/YYYY без перезаписи.
+
+Использование:
+  docu-docu task archive TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]`,
+		"task-restore": `Возвращает архивную задачу в work/ без перезаписи.
+
+Использование:
+  docu-docu task restore TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]`,
+		"task-changes": `Строит единственный task-scoped read-only отчёт изменений и impact diagnostics.
+
+Использование:
+  docu-docu task changes TASK-ID [docs-dir] [--base REV|--branch-base REF]
+                       [--target working-tree|index|HEAD|REV]
+                       [--format text|json|markdown] [-o FILE]`,
+		"version": "Показывает версию Docu-docu без побочных эффектов.\n\nИспользование:\n  docu-docu version",
+	}
+	if text, ok := help[topic]; ok {
+		fmt.Fprintln(w, text)
+		return
+	}
+	PrintHelp(w)
+}
+
+func helpTopic(argv []string) (string, bool) {
+	hasHelp := false
+	for _, arg := range argv {
+		if arg == "-h" || arg == "--help" {
+			hasHelp = true
+		}
+	}
+	if len(argv) > 0 && argv[0] == "help" {
+		hasHelp = true
+		argv = argv[1:]
+	}
+	if !hasHelp {
+		return "", false
+	}
+	words := []string{}
+	for _, arg := range argv {
+		if arg == "-h" || arg == "--help" || strings.HasPrefix(arg, "-") {
+			continue
+		}
+		words = append(words, arg)
+	}
+	if len(words) == 0 {
+		return "", true
+	}
+	if words[0] == "changes" && len(words) > 1 && words[1] == "file" {
+		return "changes-file", true
+	}
+	if words[0] == "task" && len(words) > 1 {
+		return "task-" + words[1], true
+	}
+	return words[0], true
 }
 
 func takeArgValue(args []string, index *int, option string) (string, error) {
@@ -85,9 +201,9 @@ func takeArgValue(args []string, index *int, option string) (string, error) {
 	return args[*index], nil
 }
 
-// ParseArguments parses both the backwards-compatible build form and explicit subcommands.
+// ParseArguments parses explicit subcommands.
 func ParseArguments(argv []string) (Options, bool, bool, error) {
-	options := Options{Command: "build", StaleDays: 90, RepositoryRef: "main", Format: "text", Timeout: 10 * time.Minute, Host: "127.0.0.1", Port: 8080, Language: "en", Limit: 20}
+	options := Options{StaleDays: 90, RepositoryRef: "main", Format: "text", Timeout: 10 * time.Minute, Host: "127.0.0.1", Port: 8080, Limit: 20}
 	help, version := false, false
 	timeoutSpecified, hostSpecified, portSpecified := false, false, false
 	titleSpecified, languageSpecified, limitSpecified, outputSpecified := false, false, false, false
@@ -100,7 +216,7 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			args = args[1:]
 		case "search":
 			if len(args) < 2 {
-				return options, false, false, fmt.Errorf("использование: docgent search \"<query>\" [каталог-документации]")
+				return options, false, false, fmt.Errorf("использование: docu-docu search \"<query>\" [каталог-документации]")
 			}
 			options.Command, options.Query = "search", args[1]
 			args = args[2:]
@@ -109,14 +225,14 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			args = args[1:]
 			if len(args) > 0 && args[0] == "file" {
 				if len(args) < 2 {
-					return options, false, false, fmt.Errorf("использование: docgent changes file PATH [каталог-документации]")
+					return options, false, false, fmt.Errorf("использование: docu-docu changes file PATH [каталог-документации]")
 				}
 				options.Command, options.ChangeFile = "changes-file", filepath.ToSlash(args[1])
 				args = args[2:]
 			}
 		case "scaffold":
 			if len(args) < 3 {
-				return options, false, false, fmt.Errorf("использование: docgent scaffold module|use-case|flow|screen|decision|standard|runbook ID [каталог-документации]")
+				return options, false, false, fmt.Errorf("использование: docu-docu scaffold module|use-case|flow|screen|decision|standard|runbook ID [каталог-документации]")
 			}
 			options.Command, options.EntityKind, options.EntityID = "scaffold", args[1], args[2]
 			args = args[3:]
@@ -130,7 +246,7 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			args = args[1:]
 		case "task":
 			if len(args) < 2 {
-				return options, false, false, fmt.Errorf("использование: docgent task init|ready|context|verify|archive|restore ...")
+				return options, false, false, fmt.Errorf("использование: docu-docu task init|ready|context|verify|archive|restore ...")
 			}
 			switch args[1] {
 			case "init":
@@ -143,11 +259,18 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 				}
 				options.Command = "task-" + args[1]
 			default:
-				return options, false, false, fmt.Errorf("использование: docgent task init|ready|context|verify|archive|restore ...")
+				return options, false, false, fmt.Errorf("использование: docu-docu task init|ready|context|verify|archive|restore ...")
 			}
 			options.TaskID = args[2]
 			args = args[3:]
+		default:
+			if !strings.HasPrefix(args[0], "-") {
+				return options, false, false, fmt.Errorf("неизвестная команда: %s", args[0])
+			}
 		}
+	}
+	if options.Command == "" && !help && !version {
+		return options, false, false, fmt.Errorf("требуется команда; используйте docu-docu --help")
 	}
 parseOptions:
 	for i := 0; i < len(args); i++ {
@@ -246,14 +369,6 @@ parseOptions:
 			options.ChangeModule = v
 		case strings.HasPrefix(arg, "--module="):
 			options.ChangeModule = strings.TrimPrefix(arg, "--module=")
-		case arg == "--task":
-			v, e := takeArgValue(args, &i, arg)
-			if e != nil {
-				return options, false, false, e
-			}
-			options.ChangeTaskID = v
-		case strings.HasPrefix(arg, "--task="):
-			options.ChangeTaskID = strings.TrimPrefix(arg, "--task=")
 		case arg == "--permanent-only":
 			options.ChangePermanentOnly = true
 		case arg == "--lang":
@@ -472,6 +587,9 @@ parseOptions:
 		return options, false, false, err
 	}
 	options.RepositoryRoot = repo
+	if !languageSpecified && (options.Command == "task-init" || options.Command == "scaffold") {
+		options.Language = configuredScaffoldLanguage(options.RepositoryRoot)
+	}
 	options.RepositoryURL = strings.TrimRight(options.RepositoryURL, "/")
 	if options.RepositoryURL != "" && !strings.HasPrefix(strings.ToLower(options.RepositoryURL), "http://") && !strings.HasPrefix(strings.ToLower(options.RepositoryURL), "https://") {
 		return options, false, false, fmt.Errorf("--repository-url должен быть HTTP(S) URL")
@@ -551,7 +669,7 @@ parseOptions:
 	if options.Command == "search" && len(searchWords(options.Query)) == 0 {
 		return options, false, false, fmt.Errorf("поисковый запрос не может быть пустым")
 	}
-	if options.Language != "en" && options.Language != "ru" {
+	if (options.Command == "task-init" || options.Command == "scaffold") && options.Language != "en" && options.Language != "ru" {
 		return options, false, false, fmt.Errorf("--lang должен быть en или ru")
 	}
 	if languageSpecified && options.Command != "task-init" && options.Command != "scaffold" {
@@ -603,6 +721,22 @@ func splitCSV(value string) []string {
 	return out
 }
 
+func configuredScaffoldLanguage(repositoryRoot string) string {
+	data, err := os.ReadFile(filepath.Join(repositoryRoot, ".docu-docu", "config.yml"))
+	if err != nil {
+		return "en"
+	}
+	config, err := parseSiteConfig(data)
+	if err != nil {
+		return "en"
+	}
+	language := strings.ToLower(strings.Split(config.Project.Locale, "-")[0])
+	if language == "ru" || language == "en" {
+		return language
+	}
+	return "en"
+}
+
 func openGeneratedSite(file string) error {
 	var command string
 	var args []string
@@ -633,6 +767,14 @@ func printCheckText(w io.Writer, model *Model) {
 
 // RunCLI executes one command and returns a process exit code.
 func RunCLI(argv []string, stdout, stderr io.Writer) int {
+	if topic, ok := helpTopic(argv); ok {
+		PrintCommandHelp(stdout, topic)
+		return 0
+	}
+	if len(argv) == 0 {
+		PrintHelp(stdout)
+		return 0
+	}
 	options, help, version, err := ParseArguments(argv)
 	if err != nil {
 		fmt.Fprintln(stderr, "Ошибка:", err)

@@ -878,7 +878,7 @@
   async function loadChanges() {
     if (changesLoaded) return true;
     try {
-      const response = await fetch('/_docgent/api/changes/screen-map', { headers: { Accept: 'application/json' } });
+      const response = await fetch('/_docu-docu/api/changes/screen-map', { headers: { Accept: 'application/json' } });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const payload = await response.json();
       (payload.nodes || []).forEach((change) => {
@@ -911,7 +911,7 @@
     render({ fit: true });
   });
 	changeStatusSelect?.addEventListener('change', () => render({ fit: true }));
-  document.addEventListener('docgent:panelshown', (event) => {
+  document.addEventListener('docu-docu:panelshown', (event) => {
     if (event.target?.contains(workspace)) {
       window.requestAnimationFrame(() => render({ fit: true }));
     }

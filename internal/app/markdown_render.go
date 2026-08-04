@@ -1,4 +1,4 @@
-package docgent
+package docudocu
 
 import (
 	"fmt"
@@ -480,7 +480,7 @@ func renderBlocks(entries []renderEntry, context RenderContext, options RenderOp
 			if heading, exists := context.HeadingByLine[entry.Index]; exists {
 				id = heading.ID
 			}
-			fmt.Fprintf(&b, `<h%d id="%s"><a class="heading-anchor" href="#%s" aria-label="Ссылка на раздел">#</a>%s</h%d>`, level, escapeAttr(id), escapeAttr(id), renderInline(match[2], context, 0), level)
+			fmt.Fprintf(&b, `<h%d id="%s"><a class="heading-anchor" href="#%s" aria-hidden="true" tabindex="-1">#</a>%s</h%d>`, level, escapeAttr(id), escapeAttr(id), renderInline(match[2], context, 0), level)
 			index++
 			continue
 		}

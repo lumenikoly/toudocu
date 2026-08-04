@@ -5,7 +5,7 @@
 - Приоритет: Высокий
 - Модуль: MOD-CLI
 - Стандарты: STD-GO-001, STD-DOCS-001
-- Владелец: Команда Docgent
+- Владелец: Команда Docu-docu
 - Последнее обновление: 2026-08-03
 
 ## Результат
@@ -31,7 +31,7 @@
 - настройка или чтение GitHub remote;
 - push, GitHub Actions и публикация GitHub Release;
 - изменение набора или сигнатур CLI-команд, экспортов Go API и структуры JSON
-  schema v1; меняется только значение существующей константы `docgent.Version`.
+  schema v1; меняется только значение существующей константы `docu-docu.Version`.
 
 ## Критерии приёмки
 
@@ -57,13 +57,13 @@
 
 ## Проверка
 
-- `AC-01` → `go run ./cmd/docgent version && test "$(go run ./cmd/docgent version)" = "0.0.1"`
+- `AC-01` → `go run ./cmd/docu-docu version && test "$(go run ./cmd/docu-docu version)" = "0.0.1"`
 - `AC-02` → `go test ./internal/app -run TestSearchIndexMetadataOrderIsDeterministic`
 - `AC-03` → `make check`
 - `AC-04` → `make release && cd dist && sha256sum -c checksums.txt`
-- `AC-05` → `go run ./cmd/docgent check ./docs --repository-root . --strict --stale-days 0`
+- `AC-05` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docgent check ./docs --repository-root . --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `make check`
 
 ## Влияние на документацию

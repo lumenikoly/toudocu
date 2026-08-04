@@ -3,14 +3,14 @@
 - Тип: HTTP contract
 - Статус: Готово
 - Версия schema: 1
-- Режим: только `docgent serve`
+- Режим: только `docu-docu serve`
 - Задача: TASK-SITE-002
 - Модуль: MOD-SITE
 - Сценарий: UC-DOCS-03
 - Процесс: FLOW-DOCS-SERVE
 
 Контракт определяет действующий same-origin API локального workspace. Все
-маршруты имеют префикс `/_docgent/api/editor`, всегда возвращают
+маршруты имеют префикс `/_docu-docu/api/editor`, всегда возвращают
 `Cache-Control: no-store` и не выдают CORS-заголовки. JSON-ответы содержат
 `schemaVersion: 1`.
 
@@ -20,7 +20,7 @@
 - JSON декодируется строго: неизвестные поля и значение после первого объекта
   возвращают `400 invalid_json`.
 - Записывающий `PUT`/`POST` требует `Content-Type: application/json`, заголовок
-  `X-Docgent-Action` со значением операции и same-origin browser context:
+  `X-Docu-docu-Action` со значением операции и same-origin browser context:
   совпадающий `Origin` и/или `Sec-Fetch-Site: same-origin`.
 - Неизвестный метод возвращает `405 method_not_allowed` и `Allow`.
 - Ошибка имеет единую форму:
@@ -98,7 +98,7 @@ Revision вычисляется из текущего workspace fingerprint, а 
 }
 ```
 
-`X-Docgent-Action` равен `save`. Успех возвращает
+`X-Docu-docu-Action` равен `save`. Успех возвращает
 `{schemaVersion, revision, file, rebuild}` с обновлёнными content, digest и
 diagnostics.
 Несовпадение digest возвращает `409 stale_digest` и запоминает ожидающий
@@ -109,7 +109,7 @@ conflict response и `confirmOverwrite: true`; тот же запрос без �
 
 ## `POST /preview`
 
-Принимает `{path, content}` и `X-Docgent-Action: preview`. Для Markdown возвращает
+Принимает `{path, content}` и `X-Docu-docu-Action: preview`. Для Markdown возвращает
 `{schemaVersion, path, html, diagnostics}` с безопасным HTML существующего
 renderer и diagnostics in-memory overlay. Ссылки
 разрешаются относительно документа только к безопасным portal/repository
@@ -117,7 +117,7 @@ targets. Для остальных extensions возвращается `415 prev
 
 ## `POST /validate`
 
-Принимает `{path, content}` и `X-Docgent-Action: validate`. Возвращает объект:
+Принимает `{path, content}` и `X-Docu-docu-Action: validate`. Возвращает объект:
 
 ```json
 {"schemaVersion":1,"path":"index.md","diagnostics":[{"severity":"error","code":"broken-link","message":"…","path":"index.md","line":4,"column":1}]}
@@ -125,12 +125,12 @@ targets. Для остальных extensions возвращается `415 prev
 
 Markdown использует полную модель с in-memory overlay. JSON получает syntax
 diagnostics и существующие проверки `screens/hotspots.json`. YAML не получает
-выдуманную общую schema и возвращает только доступные Docgent diagnostics.
+выдуманную общую schema и возвращает только доступные Docu-docu diagnostics.
 Diagnostics не блокируют сохранение.
 
 ## `POST /create`
 
-Принимает `X-Docgent-Action: create`, `template` и типизированные поля выбранного
+Принимает `X-Docu-docu-Action: create`, `template` и типизированные поля выбранного
 элемента общего реестра `task-init`, `module`, `use-case`, `flow`, `screen`,
 `decision`, `standard` или `runbook`. Каждый template entry имеет `key`, `label`,
 ordered `fields` и `languages`; field содержит `name`, `label`, `type` (`text`

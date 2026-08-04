@@ -6,12 +6,12 @@
 - Модуль: MOD-MODEL
 - Сценарий: UC-DOCS-02
 - Стандарты: STD-GO-001, STD-DOCS-001
-- Владелец: Команда Docgent
+- Владелец: Команда Docu-docu
 - Последнее обновление: 2026-07-31
 
 ## Результат
 
-Docgent поддерживает опциональные стандарты `STD-*`, эксплуатационные
+Docu-docu поддерживает опциональные стандарты `STD-*`, эксплуатационные
 процедуры `RB-*`, пользовательские верхнеуровневые разделы, их task-связи,
 schema-v1 коллекции, scaffolds и автономные каталоги портала.
 
@@ -42,7 +42,7 @@ typed validation без новых глобально обязательных �
 - `internal/app/task_verify.go`;
 - `internal/app/site.go`;
 - `quality_test.go`;
-- `skills/use-docgent/`;
+- `skills/use-docu-docu/`;
 - `docs/`;
 - `AGENTS.md`.
 
@@ -78,9 +78,9 @@ typed validation без новых глобально обязательных �
 - `AC-03` → `go test ./... -run 'TestQualityTaskContextAndConditionalVerification|TestQualityDanglingReferencesAndAdditiveJSON'`
 - `AC-04` → `go test ./... -run TestStandardAndRunbookScaffoldsAndCatalogs`
 - `AC-05` → `go test ./... -run TestStandardAndRunbookScaffoldsAndCatalogs`
-- `AC-06` → `go run ./cmd/docgent check ./docs --strict --stale-days 0`
+- `AC-06` → `go run ./cmd/docu-docu check ./docs --strict --stale-days 0`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docgent check ./docs --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/docu-docu check ./docs --strict --stale-days 0`
 - `QUALITY` → `go test ./... -run 'TestStandardsRunbooks|TestQualityTask|TestStandardAndRunbook|TestTypedKnowledge'`
 
 ## Влияние на документацию
@@ -88,7 +88,7 @@ typed validation без новых глобально обязательных �
 Обновлены `README.md`, `CHANGELOG.md`, `docs/index.md`, `docs/modules/model.md`,
 `docs/use-cases/check-documentation.md`, `docs/contracts/cli.md`,
 `docs/reference/features.md`, `docs/guides/work-items.md` и
-`skills/use-docgent/SKILL.md`; добавлены руководство
+`skills/use-docu-docu/SKILL.md`; добавлены руководство
 `docs/guides/quality-runbooks.md`, исходный раздел `docs/quality/`, обновлённая
 reference-модель skill и восемь RU/EN skill-шаблонов standards, runbooks и их
 manifest. Сгенерированные порталы остаются производными от Markdown.

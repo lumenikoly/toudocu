@@ -1,4 +1,4 @@
-# Проверка изменений Docgent
+# Проверка изменений Docu-docu
 
 Руководство задаёт единый локальный и CI-цикл для кода и собственной
 документации проекта.
@@ -9,7 +9,7 @@
 gofmt -w .
 go vet ./...
 go test ./...
-go run ./cmd/docgent check ./docs --strict --stale-days 0
+go run ./cmd/docu-docu check ./docs --strict --stale-days 0
 ```
 
 ## Полная проверка
@@ -17,7 +17,7 @@ go run ./cmd/docgent check ./docs --strict --stale-days 0
 ```bash
 go test -count=1 ./...
 go test -count=1 -race ./...
-go run ./cmd/docgent build ./docs \
+go run ./cmd/docu-docu build ./docs \
   --output ./build/project-docs \
   --repository-root . \
   --clean \
@@ -28,8 +28,8 @@ go run ./cmd/docgent build ./docs \
 Для проверки Windows-специфичного process management из Unix:
 
 ```bash
-GOOS=windows GOARCH=amd64 go test -c -o /tmp/docgent-windows.test .
-GOOS=windows GOARCH=amd64 go build -o /tmp/docgent-windows.exe ./cmd/docgent
+GOOS=windows GOARCH=amd64 go test -c -o /tmp/docu-docu-windows.test .
+GOOS=windows GOARCH=amd64 go build -o /tmp/docu-docu-windows.exe ./cmd/docu-docu
 ```
 
 ## Правила тестов
@@ -44,8 +44,8 @@ GOOS=windows GOARCH=amd64 go build -o /tmp/docgent-windows.exe ./cmd/docgent
 ## Проверка документационной задачи
 
 ```bash
-go run ./cmd/docgent task context TASK-DOCS-001 ./docs --format json
-go run ./cmd/docgent task verify TASK-DOCS-001 ./docs --dry-run --format json
+go run ./cmd/docu-docu task context TASK-DOCS-001 ./docs --format json
+go run ./cmd/docu-docu task verify TASK-DOCS-001 ./docs --dry-run --format json
 ```
 
 `task verify --run` запускает команды из документа и должен использоваться только для
@@ -57,7 +57,7 @@ go run ./cmd/docgent task verify TASK-DOCS-001 ./docs --dry-run --format json
 
 1. форматирование не создаёт diff;
 2. vet, обычные и race-тесты проходят;
-3. `docgent check ./docs --strict` не содержит warnings и errors;
+3. `docu-docu check ./docs --strict` не содержит warnings и errors;
 4. пример и минимальный проект с `index.md` и architecture overview остаются
    валидными;
 5. поведение и публичные контракты отражены в документации.

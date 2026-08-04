@@ -2,7 +2,7 @@
 
 - Идентификатор: CON-CHANGES-HTTP-V1
 - Статус: Готово
-- Владелец: Команда Docgent
+- Владелец: Команда Docu-docu
 - Последнее обновление: 2026-07-31
 
 Все endpoints read-only, используют `Cache-Control: no-store`, принимают только
@@ -10,12 +10,12 @@
 
 | Метод | Endpoint | Ответ |
 |---|---|---|
-| `GET/HEAD` | `/_docgent/api/changes` | `ChangeSetReport`, ETag = digest |
-| `GET` | `/_docgent/api/changes/file?path=...` | один `DocumentationChange` |
-| `GET` | `/_docgent/api/changes/task?task=TASK-*` | `TaskImpactReport` |
-| `GET` | `/_docgent/api/changes/content?side=before|after&path=...` | Git content |
-| `GET` | `/_docgent/api/changes/render?side=before|after&path=...` | sanitized HTML |
-| `GET` | `/_docgent/api/changes/screen-map` | screen/transition overlay v1 |
+| `GET/HEAD` | `/_docu-docu/api/changes` | `ChangeSetReport`, ETag = digest |
+| `GET` | `/_docu-docu/api/changes/file?path=...` | один `DocumentationChange` |
+| `GET` | `/_docu-docu/api/changes/task?task=TASK-*` | `TaskImpactReport` |
+| `GET` | `/_docu-docu/api/changes/content?side=before|after&path=...` | Git content |
+| `GET` | `/_docu-docu/api/changes/render?side=before|after&path=...` | sanitized HTML |
+| `GET` | `/_docu-docu/api/changes/screen-map` | screen/transition overlay v1 |
 
 Summary принимает `base`, `target`, `type`, `status`, `module` и `task`.
 Неверная revision возвращает 400; отсутствие Git — 503. Error envelope содержит

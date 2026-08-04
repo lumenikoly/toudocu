@@ -1,4 +1,4 @@
-package docgent
+package docudocu
 
 import (
 	"fmt"
@@ -36,7 +36,7 @@ func taskMoveReport(kind string) TaskMoveReport {
 	return TaskMoveReport{
 		SchemaVersion: 1,
 		Kind:          kind,
-		Generator:     GeneratorInfo{Name: "Docgent", Version: Version},
+		Generator:     GeneratorInfo{Name: "Docu-docu", Version: Version},
 		Status:        "blocked",
 		Issues:        []Issue{},
 	}

@@ -1,4 +1,4 @@
-package docgent
+package docudocu
 
 import (
 	"crypto/sha256"
@@ -928,6 +928,50 @@ func TestDocumentContextCopyMarkupAndAssets(t *testing.T) {
 	}
 }
 
+func TestPortalSimplifiedNavigationAndAccessibleHeadings(t *testing.T) {
+	_, docs, _ := createFixture(t)
+	model := buildFixture(t, docs)
+	dashboard := renderDashboard(model)
+	if count := strings.Count(dashboard, `class="recommended-entry"`); count < 3 || count > 5 {
+		t.Fatalf("recommended entry count = %d", count)
+	}
+	for _, expected := range []string{"С чего начать", "Каталог документации", "Матрица трассируемости"} {
+		if !strings.Contains(dashboard+renderTraceabilityPage(model, "traceability.html"), expected) {
+			t.Fatalf("portal missing %q", expected)
+		}
+	}
+	for _, forbidden := range []string{">⚑<", ">±<", ">⇥<", ">Traceability<"} {
+		if strings.Contains(renderNavigation(model, "index.html"), forbidden) {
+			t.Fatalf("navigation still contains noisy or untranslated label %q", forbidden)
+		}
+	}
+	if !strings.Contains(renderNavigation(model, "index.html"), "Обзор архитектуры") {
+		t.Fatal("architecture overview must have a distinct navigation label")
+	}
+
+	documentHTML := renderDocumentPage(model, model.DocByPath["modules/auth.md"])
+	if !strings.Contains(documentHTML, `class="heading-anchor"`) || !strings.Contains(documentHTML, `aria-hidden="true" tabindex="-1"`) {
+		t.Fatal("permalink must be excluded from the heading accessible name")
+	}
+	if strings.Contains(documentHTML, `class="heading-anchor" href=`) && strings.Contains(documentHTML, `aria-label="Ссылка на раздел"`) {
+		t.Fatal("heading permalink aria-label leaked into accessible heading name")
+	}
+
+	app, err := EmbeddedFiles.ReadFile("assets/app.js")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, expected := range []string{
+		"const containsActivePage = Boolean($('.is-active', folder));",
+		"hasSavedState ? folderState[key] === true : true",
+		"section.insertBefore(toggle, body)",
+	} {
+		if !strings.Contains(string(app), expected) {
+			t.Fatalf("browser behavior missing %q", expected)
+		}
+	}
+}
+
 func TestGenerateMermaidSiteAssetsAndMarkup(t *testing.T) {
 	_, docs, output := createFixture(t)
 	useCasePath := filepath.Join(docs, "use-cases", "login.md")
@@ -1015,12 +1059,15 @@ func TestBrokenLinksDoNotStopGeneration(t *testing.T) {
 }
 
 func TestCLIArguments(t *testing.T) {
-	options, _, _, err := ParseArguments([]string{"./docs", "--output", "./out", "--title=Проект", "--exclude", "tmp,cache", "--stale-days", "30", "--repository-root", ".", "--repository-url=https://github.com/example/project", "--repository-ref", "abc123", "--clean", "--strict"})
+	options, _, _, err := ParseArguments([]string{"build", "./docs", "--output", "./out", "--title=Проект", "--exclude", "tmp,cache", "--stale-days", "30", "--repository-root", ".", "--repository-url=https://github.com/example/project", "--repository-ref", "abc123", "--clean", "--strict"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if options.Title != "Проект" || options.StaleDays != 30 || len(options.Excludes) != 2 || !options.Clean || !options.Strict || options.RepositoryRef != "abc123" || !filepath.IsAbs(options.InputDirectory) {
 		t.Fatalf("options: %#v", options)
+	}
+	if _, _, _, err := ParseArguments([]string{"./docs"}); err == nil || !strings.Contains(err.Error(), "неизвестная команда") {
+		t.Fatalf("implicit build must be rejected, got %v", err)
 	}
 	if _, _, _, err := ParseArguments([]string{"init"}); err == nil || !strings.Contains(err.Error(), "неизвестная команда") {
 		t.Fatalf("init must be rejected as an unknown command, got %v", err)
@@ -1028,7 +1075,7 @@ func TestCLIArguments(t *testing.T) {
 	if _, _, _, err := ParseArguments([]string{"refresh"}); err == nil || !strings.Contains(err.Error(), "неизвестная команда") {
 		t.Fatalf("refresh must be rejected as an unknown command, got %v", err)
 	}
-	if _, _, _, err := ParseArguments([]string{"./docs", "--force"}); err == nil || !strings.Contains(err.Error(), "неизвестный параметр") {
+	if _, _, _, err := ParseArguments([]string{"build", "./docs", "--force"}); err == nil || !strings.Contains(err.Error(), "неизвестный параметр") {
 		t.Fatalf("--force must be rejected as an unknown option, got %v", err)
 	}
 	noMap, _, _, err := ParseArguments([]string{"build", "./docs", "--no-screen-map"})
@@ -1040,6 +1087,37 @@ func TestCLIArguments(t *testing.T) {
 	}
 	if _, _, _, err := ParseArguments([]string{"check", "./docs", "--no-screen-map"}); err == nil {
 		t.Fatal("screen map build option must be rejected by check")
+	}
+}
+
+func TestContextualHelp(t *testing.T) {
+	tests := []struct {
+		args      []string
+		contains  []string
+		forbidden []string
+	}{
+		{[]string{"check", "--help"}, []string{"Побочные эффекты: отсутствуют", "--strict", "--format text|json"}, []string{"--host", "--clean"}},
+		{[]string{"serve", "--help"}, []string{"HTTP/editor workspace", "--host ADDRESS", "browser save"}, []string{"--base REV"}},
+		{[]string{"task", "--help"}, []string{"init|ready|context|verify|archive|restore|changes"}, []string{"требуется TASK-ID"}},
+		{[]string{"task", "changes", "--help"}, []string{"единственный task-scoped", "TASK-ID"}, []string{"--task"}},
+		{[]string{"scaffold", "--help"}, []string{".docu-docu/config.yml", "fallback — en"}, []string{"--host"}},
+		{[]string{"changes", "file", "--help"}, []string{"одного изменённого пути", "PATH"}, []string{"--task"}},
+	}
+	for _, test := range tests {
+		var stdout, stderr strings.Builder
+		if code := RunCLI(test.args, &stdout, &stderr); code != 0 {
+			t.Fatalf("%v: exit=%d stderr=%s", test.args, code, stderr.String())
+		}
+		for _, expected := range test.contains {
+			if !strings.Contains(stdout.String(), expected) {
+				t.Errorf("%v help missing %q:\n%s", test.args, expected, stdout.String())
+			}
+		}
+		for _, forbidden := range test.forbidden {
+			if strings.Contains(stdout.String(), forbidden) {
+				t.Errorf("%v help contains inapplicable %q:\n%s", test.args, forbidden, stdout.String())
+			}
+		}
 	}
 }
 
@@ -1169,7 +1247,7 @@ func TestWorkItemPlanChecklistAllowed(t *testing.T) {
 			"AC-01": "go test ./...",
 			"AC-02": "go test ./...",
 			"ALL":   "go test ./...",
-			"DOCS":  "go run ./cmd/docgent check ./docs --strict",
+			"DOCS":  "go run ./cmd/docu-docu check ./docs --strict",
 		}, ""),
 		"## План\n\n1. Подготовить команды.\n2. Выполнить проверки.\n3. Сформировать отчёт и обновить документацию.",
 		"## План\n\n- [x] Выполненный шаг.\n- [ ] Следующий шаг.",

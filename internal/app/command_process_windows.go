@@ -1,6 +1,6 @@
 //go:build windows
 
-package docgent
+package docudocu
 
 import (
 	"context"

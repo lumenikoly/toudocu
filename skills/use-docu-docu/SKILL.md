@@ -1,211 +1,101 @@
 ---
-name: use-docgent
-description: Create, update, refresh, validate, and build adaptable project documentation managed by the Docgent CLI. Use for explicit Docgent documentation work; full-project or HEAD-diff currency reviews; modules, use cases, FLOW-* processes, SC-* screens and TR-* transitions; roadmap, risks, ADRs, contracts, guides, references, or TASK-* work items; integrity diagnostics; task context or verification; and static portals. Initialize project documentation and managed AGENTS.md guidance only when the user explicitly invokes `$use-docgent init`; never initialize implicitly. Do not use for ordinary code work without semantic documentation impact.
+name: use-docu-docu
+description: Create, update, refresh, validate, and build adaptable project documentation managed by the Docu-docu CLI. Use for explicit Docu-docu documentation work; full-project or HEAD-diff currency reviews; modules, use cases, FLOW-* processes, SC-* screens and TR-* transitions; roadmap, risks, ADRs, contracts, guides, references, or TASK-* work items; integrity diagnostics; task context or verification; and static portals. Initialize project documentation and managed AGENTS.md guidance only when the user explicitly invokes `$use-docu-docu init`; never initialize implicitly.
 ---
 
-# Use Docgent
+# Use Docu-docu
 
-Use Docgent to protect safety and explicit relationships, not to force every
-project into one documentation structure. Keep ordinary Markdown lightweight;
-apply typed contracts only when the project uses the corresponding capability.
+Docu-docu protects explicit relationships and safe paths. Markdown remains the
+source of truth; generated portals are output, not documentation sources.
 
-## Refresh only when explicitly requested
+## Route the request
 
-When the user explicitly invokes `$use-docgent refresh` or `$use-docgent
-refresh diff`, read [references/refresh.md](references/refresh.md) and follow
-its complete evidence, update, review, validation, and reporting workflow.
-`refresh` reviews the full documentation set; `refresh diff` starts from staged,
-unstaged, and untracked changes relative to `HEAD` and expands to affected
-documentation. Both forms may change documentation. Neither form is a Docgent
+Read only the operation reference plus the two shared references named below.
+
+| Operation | Reference | Changes files? | Confirmation / authority |
+|---|---|---:|---|
+| `$use-docu-docu init` | [references/init.md](references/init.md) | Yes | Only when the user explicitly invokes `$use-docu-docu init` |
+| `$use-docu-docu refresh` | [references/refresh.md](references/refresh.md) | May | Only when the user explicitly invokes `$use-docu-docu refresh` |
+| `$use-docu-docu refresh diff` | [references/refresh.md](references/refresh.md) | May | Only when the user explicitly invokes `$use-docu-docu refresh diff` |
+| `$use-docu-docu translate` | [references/translate.md](references/translate.md) | Yes | Only for an explicit translate request and selected target locale |
+| CLI, portal, task, or ordinary documentation work | [references/workflows.md](references/workflows.md) | Depends on request | Follow the user's requested mutation; `task verify --run` needs an explicit verification request |
+
+Init, refresh, refresh diff, and translate are agent workflows. They are not
+Docu-docu Go CLI commands. Never infer initialization from missing files, first
+use, or an ordinary documentation request. Neither refresh form is a Docu-docu
 Go CLI command or an initialization request.
 
-## Initialize only when explicitly requested
+For every operation, also read:
 
-When the user explicitly invokes `$use-docgent init`, read
-[references/init.md](references/init.md) and follow its complete preflight,
-managed-block, validation, and reporting workflow. The skill-level init is not
-a Docgent Go CLI command.
+- [references/semantic-gate.md](references/semantic-gate.md) before changing
+  documentation;
+- [references/document-model.md](references/document-model.md) before creating
+  a typed document or changing stable IDs and relationships.
 
-Never infer initialization from the first skill use, a missing managed block,
-or an ordinary request. Do not create or update project `AGENTS.md` guidance
-outside the explicit init workflow.
+## Establish context
 
-## Translate only when explicitly requested
-
-`$use-docgent translate` is an agent workflow, not a Go CLI command. Read
-[references/translate.md](references/translate.md) completely before changing
-translation trees or `.docgent/config.yml`. Canonical `docs/` remains the only
-source of task context and project model; each target locale is a separate
-documentation root.
-
-## Establish the environment
-
-1. Read repository instructions, CI configuration, existing documentation, and
-   documented Docgent commands before choosing paths or flags.
-2. Preserve the project's language, terminology, IDs, layout, and verification
-   policy. Use neutral language for a new project.
-3. Discover the documentation directory and repository root from existing
-   commands and links. In a monorepo, prefer the narrowest root that contains
-   the documentation and every referenced scope path. Use the Git root only as
-   a fallback.
-4. Resolve the CLI:
-   - use `docgent` when available in `PATH`;
-   - in the Docgent source repository, use `go run ./cmd/docgent`;
-   - otherwise report that Docgent is unavailable instead of installing it
-     without permission.
-5. Read [references/workflows.md](references/workflows.md) before choosing CLI
-   flags or working with `TASK-*`.
-6. Read [references/semantic-gate.md](references/semantic-gate.md) before
-   creating or changing any documentation.
-
-## Inspect before writing
-
-- For existing documentation, run the project's read-only check. If no command
-  is documented, use the discovered paths with JSON output:
-
-  ```bash
-  docgent check ./docs --repository-root . --format json
-  ```
-
-- Use diagnostics, current documents, repository artifacts, tests, and public
-  interfaces as evidence. Do not invent behavior, status, commands, owners, or
-  review dates to silence a diagnostic.
-- Read [references/document-model.md](references/document-model.md) before
-  creating a typed document or changing stable IDs and relationships.
-- Establish the document's audience, purpose, useful question, and sources of
-  truth before selecting a template or interpreting validation diagnostics.
-
-## Create or update documentation
-
-1. Apply the semantic gate. Prefer updating an existing source of truth and add
-   a document only when it communicates a distinct, evidence-backed purpose.
-2. For a new project, create a neutral `index.md` and the required
-   `architecture/overview.md` first. Keep the overview question map empty until
-   evidence supports detailed answers. Add more documents only when they
-   communicate known information.
-3. Use ordinary Markdown in untyped paths for free-form documentation. Use
-   `modules/`, `use-cases/`, `flows/`, `screens/`, `decisions/`, `roadmap.md`,
-   and `work/` only when the project benefits from their machine-readable
-   semantics.
-   Use `quality/STD-*.md` for enforceable standards and `runbooks/RB-*.md` for
-   real operational procedures. For an unknown top-level section, add an
-   `index.md` manifest with `Type: Custom`, owner, description, and useful H1.
-4. For a new module, use case, flow, screen, or decision, prefer the atomic CLI
-   scaffold when available:
+1. Read repository instructions, applicable standards, real runbooks, CI, and
+   documented Docu-docu commands. Preserve the project's language and terms.
+2. Resolve the CLI as `docu-docu` from `PATH`, or `go run ./cmd/docu-docu` inside
+   the Docu-docu source repository. Do not install it without permission.
+3. Discover docs root, repository root, excludes, stale policy, output, and
+   strict policy from the repository. Use `./docs` and its parent only as a
+   fallback.
+4. Run the repository's read-only check before writing. Otherwise use:
 
    ```bash
-   docgent scaffold module MOD-AREA ./docs --title "Title" --lang en
-   docgent scaffold standard STD-AREA-001 ./docs --title "Title" --lang en
-   docgent scaffold runbook RB-AREA-001 ./docs --title "Title" --lang en
+   docu-docu check ./docs --repository-root . --format json
    ```
 
-   Then use the closest template from `assets/templates/ru/` or
-   `assets/templates/en/` to enrich only evidence-backed sections. For other
-   document types, start directly from the closest template. Templates are
-   starting points, not a required starter pack. Remove unsupported optional
-   sections instead of filling them with plausible placeholders.
-5. Replace every `{{PLACEHOLDER}}`. Use `rg` when available, or an equivalent
-   text search, to find unresolved placeholders.
-6. Keep statements observable and specific. Update related documents together
-   only when an explicit relationship exists.
-7. Keep global progress in `roadmap.md` if the project uses a roadmap. Do not
-   add requirement checklists to `status.md`.
-8. When a repository-root `CHANGELOG.md` exists, treat it as the canonical
-   release journal. Update it only for evidence-backed user-facing release
-   changes; do not duplicate it in `docs/changelog.md` or create it merely to
-   obtain a portal tab. A `docs/changelog.md` file is ordinary Markdown.
-9. Preserve source Markdown as the source of truth. Never edit generated site
-   output as documentation.
-10. Treat Mermaid as visualization only. Keep requirements and acceptance
-   criteria in prose, and use only validated `flowchart`, `stateDiagram-v2`, or
-   `sequenceDiagram` blocks. Put concrete request sequences and significant
-   service interactions in `FLOW-*` documents. Link a product flow through
-   `Scenario` to one or more `UC-*`; Docgent derives the reverse `UC ↔ FLOW`
-   relationships. For a genuinely architectural flow, omit `Scenario` and link
-   the architecture document instead. Keep simple endpoint operations in API
-   contracts. For screen maps, edit the catalog and transition tables instead
-   of the generated Mermaid source.
-11. Complete the author review and any risk-based independent review before
-    treating Docgent validation as the final structural gate.
-12. Keep `architecture/overview.md` as the direct map of every Markdown file
-    below `architecture/`. Give every detailed architecture document one
-    non-empty architectural question and use the separate overview/detail
-    templates. Leave FLOW, CONTRACT, REFERENCE, RUNBOOK, ADR, and MODULE content
-    in their corresponding sources of truth.
+Diagnostics prove structural facts, not missing product intent. Never invent
+behavior, status, owner, date, relationship, or procedure to silence one.
 
-## Interpret validation correctly
+## Documentation invariants
 
-- Treat errors as failed integrity or an invalid explicit contract. Fix them
-  before declaring the documentation valid.
-- Treat warnings as editorial guidance. Fix them when evidence supports the
-  change; otherwise report them without inventing content.
-- Do not add a module, use case, status, date, ID, or section solely to achieve
-  zero warnings.
-- When a typed contract requires unsupported content, reconsider the document
-  type or request evidence instead of manufacturing a structurally valid model.
-- Use `--strict` only when repository instructions, CI, or the user explicitly
-  requires warnings to fail validation.
+- Every project requires both `index.md` and
+  `architecture/overview.md`. The overview declares `Architecture Overview`,
+  states the system boundary, and links directly to every other Markdown file
+  below `architecture/`.
+- Every detailed architecture document answers one explicit architectural
+  question. FLOW, CONTRACT, REFERENCE, RUNBOOK, ADR, and MODULE details stay in
+  their own sources of truth.
+- Use typed documents only for evidence-backed semantics. Unknown top-level
+  sections need an `index.md` manifest with `Type: Custom`, owner, description,
+  and a useful H1. Create `runbooks/` only for a real operational procedure.
+- Replace every template placeholder. Remove unsupported optional sections.
+  Mermaid is visualization only; prose owns requirements and acceptance.
+- A repository-root `CHANGELOG.md`, when present, is the only special release
+  journal. Do not create or duplicate `docs/changelog.md` for the portal.
+- Never edit generated `build/`, `dist/`, `project-docs/`, or example portal
+  output as source documentation.
 
-## Work with tasks safely
+## Work items
 
-1. Decide whether the request needs a durable work item. Create or reuse one
-   only when the user or repository policy explicitly requires it, or when the
-   work is substantial and benefits from durable scope, acceptance criteria,
-   verification, or handoff across sessions or owners. Contract or architecture
-   changes and migrations normally qualify. Ordinary questions, code reading,
-   small local edits, formatting, and behavior-preserving refactors do not.
-2. For qualifying new work, search and create a neutral Draft:
+Create a durable work item only when the user or repository explicitly requires
+one, or when substantial work needs durable scope, acceptance, verification,
+or handoff. Do not create one for every prompt or small local edit. Start
+implementation of an existing Ready+ item with:
 
-   ```bash
-   docgent search "request terms" ./docs --format json
-   docgent task init ./docs --area AREA --title "Title" --type Feature
-   ```
+```bash
+docu-docu task context TASK-AREA-001 ./docs --repository-root . --format json
+```
 
-   Select and fill entities from evidence. `--type Bug` allocates a `BUG-*`
-   identifier and uses the bug-specific scaffold. Docgent does not interpret
-   the request or change task status.
-3. Validate the complete Draft with `task ready`; change it to Ready only after
-   semantic review.
-4. Start implementation work with read-only context:
-
-   ```bash
-   docgent task context TASK-AREA-001 ./docs \
-     --repository-root . \
-     --format json
-   ```
-
-5. Treat an existing Ready+ task as an explicit contract: respect its result,
-   scope, exclusions, criteria, dependencies, module, use case, flow, screens,
-   and rules.
-   Read every explicitly linked standard and runbook. Also review the `Scope`
-   of other standards for applicability; do not infer applicability from a
-   task glob alone.
-6. Use checkboxes in `Acceptance criteria` and `Plan` when progress tracking is
-   useful. Keep `AC-*` identifiers and verification mappings on acceptance
-   criteria; plan steps do not require them.
-7. Do not broaden changes beyond task scope without user direction.
-8. Inspect `task verify --dry-run` first. Run `task verify --run` only when the
-   repository is trusted and the user explicitly asked to execute or verify the
-   task. It executes repository shell commands with the current user's
-   permissions.
-9. Archive only a validated Done or Cancelled task with `task archive`; restore
-   it with `task restore`. These commands move one Markdown file without
-   changing its status or content and block when direct links would break.
+Respect result, scope, exclusions, criteria, dependencies, linked standards,
+and runbooks. Review the declared Scope of other standards; do not infer it
+from globs. Inspect `task verify --dry-run` first. Run `task verify --run` only
+for an explicit verification request in a trusted repository. Archive or
+restore only through the corresponding task command.
 
 ## Validate and deliver
 
-1. After the semantic gate passes, finish with an ordinary project-wide check
-   using discovered paths:
+After the semantic gate, run the ordinary project-wide check:
 
-   ```bash
-   docgent check ./docs --repository-root .
-   ```
+```bash
+docu-docu check ./docs --repository-root .
+```
 
-2. Run an additional strict check only when strict validation is project policy.
-   Keep stale warnings visible, but update dates only after a real review.
-3. Build the portal only when requested or needed for verification. Discover the
-   project's output convention; otherwise choose a dedicated disposable
-   directory. Use `--clean` only after confirming the resolved output is safe.
-4. Report the semantic-gate result and reviewer when required, changed
-   documentation, errors resolved, remaining warnings, validation policy used,
-   and any verification intentionally not run.
+Run strict validation only when project policy or the user requires it. Build
+the portal only when requested or needed for verification, and use `--clean`
+only after confirming the resolved output is safe. Report semantic review,
+changed sources, resolved errors, remaining warnings, validation policy, and
+verification intentionally not run.

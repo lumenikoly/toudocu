@@ -18,7 +18,7 @@ function position(view, line, column) {
   return Math.min(record.to, record.from + Math.max(0, (Number(column) || 1) - 1));
 }
 
-window.DocgentCodeMirror = {
+window.DocuDocuCodeMirror = {
 	createMerge({ parent, before, after, language }) {
 		const readOnly = [basicSetup, languageExtension(language), EditorView.lineWrapping, EditorState.readOnly.of(true), EditorView.editable.of(false)];
 		const view = new MergeView({

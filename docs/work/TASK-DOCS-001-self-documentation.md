@@ -1,17 +1,17 @@
-# TASK-DOCS-001: Добавить самодокументацию Docgent
+# TASK-DOCS-001: Добавить самодокументацию Docu-docu
 
 - Статус: Выполнено
 - Тип: Documentation
 - Приоритет: Высокий
 - Модуль: MOD-MODEL
 - Сценарий: UC-DOCS-02
-- Владелец: Команда Docgent
+- Владелец: Команда Docu-docu
 - Последнее обновление: 2026-07-26
 
 ## Результат
 
 Репозиторий содержит собственную согласованную документацию, которая описывает
-текущую реализацию и проходит строгую проверку самим Docgent.
+текущую реализацию и проходит строгую проверку самим Docu-docu.
 
 ## Область изменения
 
@@ -26,7 +26,7 @@
 
 ## Критерии приёмки
 
-- [x] `AC-01` Самодокументация проходит `docgent check --strict` без замечаний.
+- [x] `AC-01` Самодокументация проходит `docu-docu check --strict` без замечаний.
 - [x] `AC-02` Модули, сценарии, правила, roadmap и CLI-контракт связаны стабильными ID.
 - [x] `AC-03` README содержит прямую ссылку на исходную документацию проекта.
 
@@ -39,11 +39,11 @@
 
 ## Проверка
 
-- `AC-01` → `go run ./cmd/docgent check ./docs --strict --stale-days 0`
+- `AC-01` → `go run ./cmd/docu-docu check ./docs --strict --stale-days 0`
 - `AC-02` → `go test ./... -run 'TestKnowledgeModel|TestMinimalDocumentationCheckAndBuild'`
-- `AC-03` → `grep -q 'Проектная документация Docgent' README.md`
+- `AC-03` → `grep -q 'Проектная документация Docu-docu' README.md`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docgent check ./docs --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/docu-docu check ./docs --strict --stale-days 0`
 
 ## Влияние на документацию
 

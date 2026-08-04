@@ -5,7 +5,7 @@
 - Приоритет: Высокий
 - Модуль: MOD-MODEL
 - Стандарты: STD-GO-001, STD-DOCS-001
-- Владелец: Команда Docgent
+- Владелец: Команда Docu-docu
 - Последнее обновление: 2026-08-03
 
 ## Результат
@@ -18,7 +18,7 @@
 
 - `internal/app/sections.go`, модель, config parser и портал;
 - canonical route каталога FLOW без legacy index в source directory;
-- `$use-docgent` init/refresh workflow;
+- `$use-docu-docu` init/refresh workflow;
 - configuration, model, portal и CLI documentation.
 
 ## Не входит в исправление
@@ -61,9 +61,9 @@ directory и маршрутом отдельных документов, а ег
 - `AC-04` → `go test ./... -run TestMissingProjectConfigurationUsesEnglishAndWarning`
 - `AC-05` → `go vet ./... && go test ./... && go test -race ./...`
 - `AC-06` → `go test ./... -run TestScreenPortalAndReportV1`
-- `AC-07` → `go run ./cmd/docgent check ./example/docs --repository-root ./example --strict --stale-days 0`
+- `AC-07` → `go run ./cmd/docu-docu check ./example/docs --repository-root ./example --strict --stale-days 0`
 - `ALL` → `go vet ./... && go test ./... && go test -race ./...`
-- `DOCS` → `go run ./cmd/docgent check ./docs --repository-root . --strict --stale-days 0 && go run ./cmd/docgent check ./example/docs --repository-root ./example --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0 && go run ./cmd/docu-docu check ./example/docs --repository-root ./example --strict --stale-days 0`
 - `QUALITY` → `go test ./...`
 
 ## План
@@ -83,4 +83,4 @@ init/refresh instructions skill. Generated portal пересобирается �
 ## Обоснование отсутствия сценария
 
 Изменение стабилизирует внутреннюю модель и конфигурационный контракт; оно не
-добавляет самостоятельного пользовательского сценария Docgent.
+добавляет самостоятельного пользовательского сценария Docu-docu.

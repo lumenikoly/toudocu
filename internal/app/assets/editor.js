@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const API = '/_docgent/api/editor';
+  const API = '/_docu-docu/api/editor';
   const $ = (selector, root = document) => root.querySelector(selector);
   const state = {
     files: [], templates: [], revision: '', etag: '', current: null,
@@ -35,7 +35,7 @@
   function actionOptions(action, body, method = 'POST') {
     return {
       method,
-      headers: { 'Content-Type': 'application/json', 'X-Docgent-Action': action, Accept: 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-Docu-docu-Action': action, Accept: 'application/json' },
       body: JSON.stringify(body),
     };
   }
@@ -61,7 +61,7 @@
     state.dirty = dirty;
     elements.dirty.hidden = !dirty;
     elements.save.disabled = !state.current || !dirty;
-    document.title = `${dirty ? '• ' : ''}Редактор — Docgent`;
+    document.title = `${dirty ? '• ' : ''}Редактор — Docu-docu`;
   }
 
   function onEditorChange() {
@@ -75,8 +75,8 @@
     state.editor = null;
     elements.host.replaceChildren();
     elements.fallback.hidden = true;
-    if (window.DocgentCodeMirror) {
-      state.editor = window.DocgentCodeMirror.create({ parent: elements.host, doc: content, language, onChange: onEditorChange });
+    if (window.DocuDocuCodeMirror) {
+      state.editor = window.DocuDocuCodeMirror.create({ parent: elements.host, doc: content, language, onChange: onEditorChange });
     } else {
       elements.fallback.hidden = false;
       elements.fallback.value = content;

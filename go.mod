@@ -1,4 +1,4 @@
-module docgent
+module docu-docu
 
 go 1.22
 

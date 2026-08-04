@@ -2,12 +2,13 @@
   'use strict';
   const button = document.querySelector('[data-server-rebuild]');
   const status = document.querySelector('[data-server-rebuild-status]');
-  const baseline = document.querySelector('meta[name="docgent-revision"]')?.content || '';
+  const label = document.querySelector('[data-server-rebuild-label]');
+  const baseline = document.querySelector('meta[name="docu-docu-revision"]')?.content || '';
   let etag = baseline ? `"${baseline}"` : '';
 
   async function pollRevision() {
     try {
-      const response = await fetch('/_docgent/api/editor/files', {
+      const response = await fetch('/_docu-docu/api/editor/files', {
         cache: 'no-store',
         headers: etag ? { 'If-None-Match': etag } : {},
       });
@@ -27,21 +28,32 @@
   button?.addEventListener('click', async () => {
     if (button.disabled) return;
     button.disabled = true;
+    button.classList.remove('has-error', 'has-success');
     button.classList.add('is-rebuilding');
-    if (status) status.textContent = 'Пересборка модели и HTML.';
+    if (label) label.textContent = 'Пересборка…';
+    if (status) status.textContent = 'Выполняется: модель, HTML и поисковый индекс.';
     try {
-      const response = await fetch('/__docgent/rebuild', {
+      const response = await fetch('/__docu-docu/rebuild', {
         method: 'POST',
         cache: 'no-store',
-        headers: { Accept: 'application/json', 'X-Docgent-Action': 'rebuild' },
+        headers: { Accept: 'application/json', 'X-Docu-docu-Action': 'rebuild' },
       });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      window.location.reload();
+      if (!response.ok) {
+        const detail = await response.text();
+        throw new Error(detail.trim() || `HTTP ${response.status}`);
+      }
+      const result = await response.json();
+      button.classList.remove('is-rebuilding');
+      button.classList.add('has-success');
+      if (label) label.textContent = 'Готово';
+      if (status) status.textContent = `Пересборка завершена: ${result.documents || 0} документов, ${result.pages || 0} страниц. Страница обновляется.`;
+      window.setTimeout(() => window.location.reload(), 700);
     } catch (error) {
       button.disabled = false;
       button.classList.remove('is-rebuilding');
       button.classList.add('has-error');
-      if (status) status.textContent = `Не удалось обновить документацию: ${error.message}.`;
+      if (label) label.textContent = 'Повторить';
+      if (status) status.textContent = `Пересборка не выполнена: ${error.message}. Исправьте причину и повторите.`;
     }
   });
 

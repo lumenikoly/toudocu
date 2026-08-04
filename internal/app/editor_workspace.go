@@ -1,4 +1,4 @@
-package docgent
+package docudocu
 
 import (
 	"bytes"
@@ -400,7 +400,7 @@ func (w *editorWorkspace) save(filePath string, content []byte, expectedDigest s
 		language, _ := editorLanguage(filePath)
 		return editorFile{}, &staleFileError{file: editorFile{Path: filePath, Language: language, Size: int64(len(current)), Digest: digest, Content: string(current)}}
 	}
-	temporary, err := os.CreateTemp(filepath.Dir(absolute), ".docgent-edit-*")
+	temporary, err := os.CreateTemp(filepath.Dir(absolute), ".docu-docu-edit-*")
 	if err != nil {
 		return editorFile{}, err
 	}

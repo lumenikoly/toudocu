@@ -1,6 +1,6 @@
 # Просмотр изменений документации
 
-Docgent использует Git как единственный источник старой и новой версии. Он не
+Docu-docu использует Git как единственный источник старой и новой версии. Он не
 создаёт snapshots, не выполняет fetch и не изменяет history, refs, index или
 working tree. Раздел доступен только в `serve` по адресу `/changes/`; обычный
 `build` остаётся автономным представлением текущей документации и не требует
@@ -12,7 +12,7 @@ Git history.
 untracked-файлы. Также доступны `HEAD → index`, revision → revision, revision →
 working-tree и `merge-base(base-ref, HEAD) → working-tree` через
 `--branch-base`. Base, target, resolved commit, branch и dirty state всегда
-видимы. Docgent не загружает remote refs и не угадывает неоднозначную базу.
+видимы. Docu-docu не загружает remote refs и не угадывает неоднозначную базу.
 
 ## Три уровня diff
 
@@ -55,18 +55,19 @@ view.
 ## CLI и CI
 
 ```bash
-docgent changes ./docs --format text
-docgent changes ./docs --base main --target working-tree --format json
-docgent changes ./docs --branch-base main --format markdown
-docgent changes file docs/modules/MOD-AUTH.md --base HEAD --target index
-docgent task changes TASK-AUTH-015 ./docs --format json
+docu-docu changes ./docs --format text
+docu-docu changes ./docs --base main --target working-tree --format json
+docu-docu changes ./docs --branch-base main --format markdown
+docu-docu changes file docs/modules/MOD-AUTH.md --base HEAD --target index
+docu-docu task changes TASK-AUTH-015 ./docs --format json
 ```
 
 Exit code `1` означает построенный отчёт с error, `2` — неверный диапазон, `3`
 — Git недоступен/не найден, `4` — внутренняя ошибка.
 
-Workflow `$use-docgent translate` использует этот report только как входные
-данные: `--task` строит `task changes` до `working-tree`, а `--base` —
+Workflow `$use-docu-docu translate` использует этот report только как входные
+данные: skill-параметр `--task` вызывает канонический `task changes` до
+`working-tree`, а `--base` —
 `<base> → working-tree`. Его API-only override включает assets даже если
 `changes.includeAssets: false`; schema `ChangeSetReport` при этом остаётся v1.
 Точный `sourceDiff` остаётся приоритетным и доступным, когда rendered,

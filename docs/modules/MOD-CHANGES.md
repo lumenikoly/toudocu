@@ -2,7 +2,7 @@
 
 - Идентификатор: MOD-CHANGES
 - Статус: Готово
-- Владелец: Команда Docgent
+- Владелец: Команда Docu-docu
 - Последнее обновление: 2026-08-03
 
 Модуль превращает явно выбранные Git-состояния исходной документации в
@@ -30,7 +30,7 @@
 ### BR-CHANGES-001: Git является единственным источником версий
 
 Старая сторона читается из object database или index, новая — из явно
-выбранного revision, index или working tree. Docgent не сохраняет собственную
+выбранного revision, index или working tree. Docu-docu не сохраняет собственную
 историю документации.
 
 ### BR-CHANGES-002: Исходный diff имеет приоритет
@@ -60,7 +60,7 @@ state. Неоднозначная базовая ветка требует вы�
 
 - `ChangeSetReport` schema v1;
 - CLI `changes` и `task changes`;
-- read-only `/_docgent/api/changes/`;
+- read-only `/_docu-docu/api/changes/`;
 - diagnostic codes и comparison enums.
 
 ## Связанные сценарии

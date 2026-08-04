@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
   "generator": {
-    "name": "Docgent",
+    "name": "Docu-docu",
     "version": "0.0.1"
   },
-  "generatedAt": "2026-08-03T15:22:37.029424278Z",
+  "generatedAt": "2026-08-03T18:51:52.153210791Z",
   "sourceDirectory": "docs",
-  "staleDays": 0,
+  "staleDays": 90,
   "project": {
     "title": "Service Desk Showcase",
-    "description": "Демонстрационный проект показывает возможности Docgent на документации небольшого сервиса обращений: от модели требований и задач до интерактивной карты экранов и проигрываемых сценариев.",
+    "description": "Демонстрационный проект показывает возможности Docu-docu на документации небольшого сервиса обращений: от модели требований и задач до интерактивной карты экранов и проигрываемых сценариев.",
     "status": {
       "kind": "in-progress",
       "symbol": "◐",
@@ -109,7 +109,7 @@
       "outputPath": "index.html",
       "type": "overview",
       "title": "Service Desk Showcase",
-      "description": "Демонстрационный проект показывает возможности Docgent на документации небольшого сервиса обращений: от модели требований и задач до интерактивной карты экранов и проигрываемых сценариев.",
+      "description": "Демонстрационный проект показывает возможности Docu-docu на документации небольшого сервиса обращений: от модели требований и задач до интерактивной карты экранов и проигрываемых сценариев.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -123,7 +123,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T09:00:01.419129524Z",
+      "updatedAt": "2026-08-03T18:02:41.691871371Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2012,7 +2012,7 @@
           {
             "target": "DOCS",
             "commands": [
-              "go run ./cmd/docgent check ./example/docs --repository-root ./example"
+              "go run ./cmd/docu-docu check ./example/docs --repository-root ./example"
             ],
             "line": 61
           }

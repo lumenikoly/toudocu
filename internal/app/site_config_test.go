@@ -1,4 +1,4 @@
-package docgent
+package docudocu
 
 import (
 	"os"
@@ -22,7 +22,7 @@ func configFixture(t *testing.T) (string, string) {
 
 func writeSiteConfig(t *testing.T, root, content string) {
 	t.Helper()
-	directory := filepath.Join(root, ".docgent")
+	directory := filepath.Join(root, ".docu-docu")
 	if err := os.MkdirAll(directory, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -48,7 +48,7 @@ func TestSiteConfigDefaultsAndMissingFile(t *testing.T) {
 		config.Density != "comfortable" || config.ContentWidth != "standard" || !config.Hero.Enabled {
 		t.Fatalf("defaults: %#v", config)
 	}
-	if model.Project.Title != "Index title" || config.Footer.Text != "Сгенерировано Docgent "+Version {
+	if model.Project.Title != "Index title" || config.Footer.Text != "Сгенерировано Docu-docu "+Version {
 		t.Fatalf("default title/footer: %#v / %#v", model.Project, config.Footer)
 	}
 }
@@ -131,7 +131,7 @@ func TestTranslationProfileRejectsUnsafeRootWhenSelected(t *testing.T) {
 
 func TestSiteConfigFullAndTitlePriority(t *testing.T) {
 	root, docs := configFixture(t)
-	assets := filepath.Join(root, ".docgent", "assets")
+	assets := filepath.Join(root, ".docu-docu", "assets")
 	if err := os.MkdirAll(assets, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -251,7 +251,7 @@ func TestSiteConfigRejectsUnsafeBrandAssets(t *testing.T) {
 
 func TestSiteConfigRejectsBrandSymlink(t *testing.T) {
 	root, docs := configFixture(t)
-	assets := filepath.Join(root, ".docgent", "assets")
+	assets := filepath.Join(root, ".docu-docu", "assets")
 	if err := os.MkdirAll(assets, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -274,10 +274,10 @@ func TestSiteConfigRejectsAssetDirectorySymlinkEscape(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(outside, "logo.svg"), []byte("<svg/>"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.MkdirAll(filepath.Join(root, ".docgent"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(root, ".docu-docu"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.Symlink(outside, filepath.Join(root, ".docgent", "assets")); err != nil {
+	if err := os.Symlink(outside, filepath.Join(root, ".docu-docu", "assets")); err != nil {
 		t.Skipf("symlinks unavailable: %v", err)
 	}
 	writeSiteConfig(t, root, "site:\n  logo: assets/logo.svg\n")
@@ -289,7 +289,7 @@ func TestSiteConfigRejectsAssetDirectorySymlinkEscape(t *testing.T) {
 func TestGenerateSiteBrandingAndThemeContract(t *testing.T) {
 	root, docs := configFixture(t)
 	output := filepath.Join(root, "site")
-	assets := filepath.Join(root, ".docgent", "assets")
+	assets := filepath.Join(root, ".docu-docu", "assets")
 	if err := os.MkdirAll(assets, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -327,7 +327,7 @@ func TestGenerateSiteBrandingAndThemeContract(t *testing.T) {
 		`data-site-theme="terminal"`, `data-color-scheme="system"`, `data-accent="rose"`,
 		`data-density="compact"`, `data-content-width="narrow"`,
 		`assets/branding/logo.svg`, `assets/branding/favicon.svg`, `assets/branding/hero.webp`,
-		`data-color-scheme-select`, `data-site-theme-select`, `docgent-site-theme`, `&lt;strong&gt;Escaped&lt;/strong&gt;`,
+		`data-color-scheme-select`, `data-site-theme-select`, `docu-docu-site-theme`, `&lt;strong&gt;Escaped&lt;/strong&gt;`,
 	} {
 		if !strings.Contains(html, part) {
 			t.Fatalf("missing %q", part)

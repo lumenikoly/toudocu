@@ -1,4 +1,4 @@
-package docgent
+package docudocu
 
 import (
 	"fmt"
@@ -48,7 +48,7 @@ type SiteConfig struct {
 	Changes      ChangesConfig
 	Project      ProjectConfig
 	// Translations describes independent documentation roots. It is deliberately
-	// not folded into Project: a Docgent model is always monolingual.
+	// not folded into Project: a Docu-docu model is always monolingual.
 	Translations      map[string]TranslationProfile
 	translationErrors map[string]string
 }
@@ -75,7 +75,7 @@ func defaultSiteConfig() SiteConfig {
 		Density:      "comfortable",
 		ContentWidth: "standard",
 		Footer: FooterConfig{
-			Text: "Сгенерировано Docgent " + Version,
+			Text: "Сгенерировано Docu-docu " + Version,
 		},
 		Hero:    HeroConfig{Enabled: true},
 		Changes: ChangesConfig{RenameSimilarity: 60, IncludeTaskArtifacts: true, IncludeAssets: true, SemanticDiff: true, RenderedDiff: true, MaxSourceDiffBytes: 2 * 1024 * 1024, MaxRenderedFileBytes: 1024 * 1024},
@@ -403,14 +403,14 @@ func validateBrandAsset(repositoryRoot, configuredPath, kind string) (string, st
 	}
 	clean := filepath.Clean(filepath.FromSlash(configuredPath))
 	if clean == "." || clean == "assets" || !strings.HasPrefix(clean, "assets"+string(filepath.Separator)) {
-		return "", "", fmt.Errorf("config.yml: site.%s должен находиться внутри .docgent/assets/", kind)
+		return "", "", fmt.Errorf("config.yml: site.%s должен находиться внутри .docu-docu/assets/", kind)
 	}
 	relative := strings.TrimPrefix(clean, "assets"+string(filepath.Separator))
 	if relative == "" || relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
-		return "", "", fmt.Errorf("config.yml: site.%s выходит за пределы .docgent/assets/", kind)
+		return "", "", fmt.Errorf("config.yml: site.%s выходит за пределы .docu-docu/assets/", kind)
 	}
-	assetsRoot := filepath.Join(repositoryRoot, ".docgent", "assets")
-	for _, directory := range []string{filepath.Join(repositoryRoot, ".docgent"), assetsRoot} {
+	assetsRoot := filepath.Join(repositoryRoot, ".docu-docu", "assets")
+	for _, directory := range []string{filepath.Join(repositoryRoot, ".docu-docu"), assetsRoot} {
 		info, err := os.Lstat(directory)
 		if err != nil {
 			if os.IsNotExist(err) {
@@ -448,13 +448,13 @@ func validateBrandAsset(repositoryRoot, configuredPath, kind string) (string, st
 }
 
 func loadSiteConfig(repositoryRoot string) (SiteConfig, map[string]string, error) {
-	configPath := filepath.Join(repositoryRoot, ".docgent", "config.yml")
+	configPath := filepath.Join(repositoryRoot, ".docu-docu", "config.yml")
 	data, err := os.ReadFile(configPath)
 	if os.IsNotExist(err) {
 		return defaultSiteConfig(), map[string]string{}, nil
 	}
 	if err != nil {
-		return SiteConfig{}, nil, fmt.Errorf("не удалось прочитать .docgent/config.yml: %w", err)
+		return SiteConfig{}, nil, fmt.Errorf("не удалось прочитать .docu-docu/config.yml: %w", err)
 	}
 	config, err := parseSiteConfig(data)
 	if err != nil {

@@ -1,6 +1,6 @@
 # ChangeSetReport schema v1
 
-`docgent changes --format json` возвращает детерминированный отчёт с
+`docu-docu changes --format json` возвращает детерминированный отчёт с
 `schemaVersion`, repository/branch/HEAD/dirty, resolved base/target,
 `changeSetDigest`, file/line/entity/classification summary, `changes[]`, task
 impact и diagnostics.
@@ -37,7 +37,7 @@ transitions с endpoints, action/condition и состоянием added/modifie
 `mermaidBlocks` содержит ID, status, caption, исходники before/after и source
 locations. Отдельные diagnostics `mermaid-old-version-invalid` и
 `mermaid-new-version-invalid` не скрывают доступный исходник другой стороны.
-Это исходниковое before/after представление; Docgent намеренно не строит
+Это исходниковое before/after представление; Docu-docu намеренно не строит
 pixel-level image diff.
 
 Основные codes: `git-repository-not-found`, `git-command-failed`,
@@ -54,4 +54,4 @@ pixel-level image diff.
 `deleted-entity-still-referenced`.
 
 Digest служит cache identity и live invalidation, но не является собственной
-историей Docgent.
+историей Docu-docu.

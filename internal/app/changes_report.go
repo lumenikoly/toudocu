@@ -1,4 +1,4 @@
-package docgent
+package docudocu
 
 import (
 	"encoding/json"
@@ -193,7 +193,7 @@ func outputChangesReport(options Options, report *ChangeSetReport, stdout io.Wri
 	if err := os.MkdirAll(directory, 0o755); err != nil {
 		return err
 	}
-	temporary, err := os.CreateTemp(directory, ".docgent-changes-*")
+	temporary, err := os.CreateTemp(directory, ".docu-docu-changes-*")
 	if err != nil {
 		return err
 	}

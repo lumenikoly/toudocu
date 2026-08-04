@@ -1,4 +1,4 @@
-package docgent
+package docudocu
 
 import (
 	"fmt"
@@ -306,7 +306,7 @@ func uniqueIssues(issues []Issue) []Issue {
 func BuildTaskReady(model *Model, taskID string, strict bool) TaskReadyReport {
 	item, issues := taskReadiness(model, taskID, strict)
 	report := TaskReadyReport{
-		SchemaVersion: 1, Kind: "task-ready", Generator: GeneratorInfo{Name: "Docgent", Version: Version},
+		SchemaVersion: 1, Kind: "task-ready", Generator: GeneratorInfo{Name: "Docu-docu", Version: Version},
 		Task: taskSnapshot(item, taskID), Status: "contract_incomplete", Issues: issues,
 	}
 	if item == nil {

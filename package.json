@@ -1,5 +1,5 @@
 {
-  "name": "docgent-editor-build",
+  "name": "docu-docu-editor-build",
   "private": true,
   "scripts": {
     "build:editor": "esbuild editor-bundle.mjs --bundle --format=iife --target=es2020 --minify --legal-comments=external --outfile=internal/app/assets/codemirror.js"

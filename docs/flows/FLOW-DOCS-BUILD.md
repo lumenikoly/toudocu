@@ -13,7 +13,7 @@ codes и безопасной очистке определяет
 
 ```mermaid
 flowchart TD
-    Start["docgent build"] --> Resolve["Нормализовать вход, output и repository root"]
+    Start["docu-docu build"] --> Resolve["Нормализовать вход, output и repository root"]
     Resolve --> Safe{"Пути безопасны?"}
     Safe -->|Нет| Reject["Отклонить операцию без удаления и записи"]
     Safe -->|Да| Read["Прочитать Markdown и локальные assets"]

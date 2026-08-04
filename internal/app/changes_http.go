@@ -1,4 +1,4 @@
-package docgent
+package docudocu
 
 import (
 	"crypto/sha256"
@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	changesAPIBase = "/_docgent/api/changes"
+	changesAPIBase = "/_docu-docu/api/changes"
 	changesUIPath  = "/changes/"
 )
 

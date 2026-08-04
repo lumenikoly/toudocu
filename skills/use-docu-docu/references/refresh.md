@@ -1,27 +1,27 @@
 # Documentation refresh
 
-Use this workflow only when the user explicitly invokes `$use-docgent refresh`
-or `$use-docgent refresh diff`. Both forms review documentation currency and
-apply evidence-backed updates. They are skill workflows, not Docgent Go CLI
+Use this workflow only when the user explicitly invokes `$use-docu-docu refresh`
+or `$use-docu-docu refresh diff`. Both forms review documentation currency and
+apply evidence-backed updates. They are skill workflows, not Docu-docu Go CLI
 commands.
 
 Refresh never performs initialization. Do not create a new documentation tree,
-install or update managed `AGENTS.md` guidance, or infer `$use-docgent init`
+install or update managed `AGENTS.md` guidance, or infer `$use-docu-docu init`
 from missing files. If no established documentation exists, stop and recommend
 explicit init.
 
 ## Establish the review boundary
 
 1. Read repository instructions, standards, runbooks, CI, task contracts, and
-   documented Docgent commands. Resolve the repository root, documentation
+   documented Docu-docu commands. Resolve the repository root, documentation
    directory, language, strict policy, and tracked portal convention.
-2. Resolve Docgent as described in `SKILL.md` and run the existing ordinary
+2. Resolve Docu-docu as described in `SKILL.md` and run the existing ordinary
    project check with JSON output. Diagnostics describe structural state; they
    are not evidence that a claim is current or useful.
-3. For `$use-docgent refresh`, inventory every source Markdown document and the
+3. For `$use-docu-docu refresh`, inventory every source Markdown document and the
    current repository evidence relevant to it: code, tests, public interfaces,
    schemas, configuration, CI, requirements, ADRs, and confirmed user input.
-4. For `$use-docgent refresh diff`, require a Git worktree with a valid `HEAD`.
+4. For `$use-docu-docu refresh diff`, require a Git worktree with a valid `HEAD`.
    Determine changed tracked paths from `git diff --name-only HEAD --` and
    untracked paths from `git ls-files --others --exclude-standard`. This includes
    staged and unstaged tracked changes. Do not compare with a merge-base or
@@ -43,7 +43,7 @@ For every document in scope:
 2. Compare behavioral claims, interfaces, boundaries, statuses, relationships,
    examples, commands, and paths with current evidence.
 3. Classify it as current, needs update, unverifiable, obsolete, duplicated, or
-   misplaced. A Docgent warning alone is not evidence for adding content.
+   misplaced. A Docu-docu warning alone is not evidence for adding content.
 4. Distinguish documentation drift from an implementation or product conflict.
    Refresh updates documentation to established current truth; it does not
    change code to make a document true. Report ambiguous conflicts as unresolved
@@ -78,7 +78,7 @@ For every document in scope:
 1. Complete the author semantic review for every changed source document.
 2. Obtain independent semantic review wherever `semantic-gate.md` requires it.
    Give the reviewer updated drafts and raw evidence, not a desired verdict or a
-   green Docgent result. Resolve `NEEDS_REWORK` before continuing.
+   green Docu-docu result. Resolve `NEEDS_REWORK` before continuing.
 3. Run the ordinary project-wide check. Run strict validation only when project
    policy requires it. Fix errors at their sources and report any supported
    warnings left intentionally unresolved.

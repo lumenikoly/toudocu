@@ -13,7 +13,7 @@
 
 ```mermaid
 flowchart TD
-    Start["docgent check"] --> Resolve["Проверить вход и repository root"]
+    Start["docu-docu check"] --> Resolve["Проверить вход и repository root"]
     Resolve --> Read["Прочитать Markdown без перехода по симлинкам"]
     Read --> Parse["Разобрать структуру, метаданные, ссылки и Mermaid"]
     Parse --> Validate["Проверить ID, связи, roadmap и work items"]

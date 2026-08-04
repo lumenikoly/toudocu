@@ -1,4 +1,4 @@
-package docgent
+package docudocu
 
 import (
 	"encoding/json"
@@ -467,7 +467,7 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 		"processes/index.html":      `Documented Processes`,
 		"use-cases/index.html":      `Пользовательские сценарии`,
 		"use-cases/UC-AUTH-01.html": `data-playable-flow`,
-		"traceability.html":         `Traceability Matrix`,
+		"traceability.html":         `Матрица трассируемости`,
 		"assets/screen-map.js":      `computeVisible`,
 		"assets/playable-flow.js":   `function activate`,
 	} {

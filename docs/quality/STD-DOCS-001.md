@@ -2,7 +2,7 @@
 
 - Идентификатор: STD-DOCS-001
 - Статус: Действует
-- Владелец: Команда Docgent
+- Владелец: Команда Docu-docu
 - Область: Исходная документация, шаблоны skill и отслеживаемые порталы
 - Последнее обновление: 2026-07-31
 
@@ -30,7 +30,7 @@
 8. Подробности FLOW, CONTRACT, REFERENCE, RUNBOOK, ADR и MODULE остаются в
    соответствующих источниках истины, а semantic gate проверяет архитектурную
    форму и смысл по `ARCH001`–`ARCH013`.
-9. `$use-docgent refresh` и `$use-docgent refresh diff` обновляют исходную
+9. `$use-docu-docu refresh` и `$use-docu-docu refresh diff` обновляют исходную
    документацию только по текущим repository evidence; даты меняются вместе с
    содержанием или связями, а `Last verified` требует фактической проверки
    runbook.
@@ -41,7 +41,7 @@
 
 ## Автоматические проверки
 
-- `go run ./cmd/docgent check ./docs --strict --stale-days 0`;
+- `go run ./cmd/docu-docu check ./docs --strict --stale-days 0`;
 - тесты целостности шаблонов и публичного JSON schema;
 - тесты ссылок, стабильных ID, task context и портальной навигации.
 

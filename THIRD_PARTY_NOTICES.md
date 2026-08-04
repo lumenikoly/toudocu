@@ -1,5 +1,10 @@
 # Third-party notices
 
+Docu-docu is licensed under Apache-2.0. The components below are separately
+licensed and retain their own copyright and license notices. Release packaging
+generates one complete `THIRD_PARTY_NOTICES.md` by combining this inventory with
+the notices of the embedded browser assets.
+
 ## CodeMirror 6
 
 The serve-only editor bundles `codemirror@6.0.2`,
@@ -19,10 +24,40 @@ IIFE bundle and is not a Go or end-user runtime dependency.
 - License: Apache-2.0 and MIT
 
 The package parses OpenAPI YAML for deterministic semantic comparison. It is
-linked into the Docgent binary and does not execute input or require a runtime
-service.
+linked into the Docu-docu binary and does not execute input or require a runtime
+service. Its source distribution contains MIT-licensed libyaml-derived files
+and Apache-2.0-licensed remaining files; its copyright notices are retained in
+the module source and this attribution accompanies the binary release.
 
-## Mermaid Tiny
+Copyright (c) 2006-2010 Kirill Simonov
+
+Copyright (c) 2006-2011 Kirill Simonov
+
+Copyright (c) 2011-2019 Canonical Ltd
+
+The libyaml-derived files use the following MIT License; the Apache-2.0 terms
+for the remaining files are provided by the top-level `LICENSE` included in
+every release archive.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+## Mermaid Tiny and bundled dependencies
 
 - Package: `@mermaid-js/tiny`
 - Version: `11.16.0`
@@ -31,6 +66,14 @@ service.
 - Embedded file: `assets/mermaid.tiny.js`
 - SHA-256: `a1bc2282b3d935693780f77931382c517e72eb72ff3427752cbb29941de11bee`
 
-The complete license text is stored in `assets/mermaid.LICENSE.txt` and copied
-into every generated portal next to the embedded library. Release packaging
-also includes this notice and `MERMAID-LICENSE.txt`.
+`mermaid.tiny.js` also includes the following third-party code:
+
+- lodash — MIT;
+- js-yaml — MIT;
+- DOMPurify — Apache-2.0 option (the package is dual-licensed under
+  Apache-2.0 or MPL-2.0).
+
+The complete notices and license texts for this browser bundle are stored in
+`assets/mermaid.LICENSE.txt` and copied into every generated portal next to the
+embedded library. Release packaging also includes this notice as
+part of the generated `THIRD_PARTY_NOTICES.md`.

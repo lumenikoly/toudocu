@@ -1,4 +1,4 @@
-package docgent
+package docudocu
 
 import (
 	"encoding/json"
@@ -71,9 +71,9 @@ func renderDocumentContextButton(model *Model, document *Document) string {
 	}
 	encoded := url.QueryEscape(document.SourcePath)
 	return `<div class="document-context-actions">` + copyButton +
-		`<a class="document-context-button" href="/_docgent/editor/?path=` + escapeAttr(encoded) + `">Редактировать</a>` +
+		`<a class="document-context-button" href="/_docu-docu/editor/?path=` + escapeAttr(encoded) + `">Редактировать</a>` +
 		`<a class="document-context-button" href="` + escapeAttr(changesDocumentURL(documentContextPath(model, document))) + `">Показать изменения</a>` +
-		`<a class="document-context-button" href="/_docgent/api/editor/file?raw=1&amp;path=` + escapeAttr(encoded) + `" target="_blank" rel="noopener">Открыть исходник</a></div>`
+		`<a class="document-context-button" href="/_docu-docu/api/editor/file?raw=1&amp;path=` + escapeAttr(encoded) + `" target="_blank" rel="noopener">Открыть исходник</a></div>`
 }
 
 func metricCard(label string, value any, detail string) string {
@@ -176,7 +176,7 @@ func renderNavigation(model *Model, current string) string {
 	writeGroup := func(section SectionType, directory, groupKey string, docs []*Document) {
 		target := outputForDirectory(model, directory)
 		active := ""
-		if target == current {
+		if target == current || strings.HasPrefix(current, directory+"/") || sectionRoute(section) != "" && strings.HasPrefix(current, sectionRoute(section)+"/") {
 			active = " is-active"
 		}
 		if section == SectionUseCases && strings.HasPrefix(current, "use-cases/") {
@@ -226,7 +226,11 @@ func renderNavigation(model *Model, current string) string {
 			return
 		}
 		for _, doc := range docs {
-			if strings.EqualFold(doc.FileName, "index.md") || doc.Type == "screen-map" {
+			if strings.EqualFold(doc.FileName, "index.md") || doc.Type == "screen-map" || doc.OutputPath == target {
+				continue
+			}
+			if section == SectionArchitecture && strings.EqualFold(doc.FileName, "overview.md") {
+				writeDoc(doc, "Обзор архитектуры")
 				continue
 			}
 			if section == SectionWork {
@@ -259,16 +263,16 @@ func renderNavigation(model *Model, current string) string {
 	if current == model.HealthOutputPath {
 		active = " is-active"
 	}
-	fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span class="nav-icon">⚑</span><span>Качество документации</span></a></li>`, active, escapeAttr(relativeURL(current, model.HealthOutputPath)))
+	fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span>Качество документации</span></a></li>`, active, escapeAttr(relativeURL(current, model.HealthOutputPath)))
 	if model.serveMode {
-		fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link" href="/changes/"><span class="nav-icon">±</span><span>Изменения</span></a></li>`)
+		fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link" href="/changes/"><span>Изменения</span></a></li>`)
 	}
 	if len(model.Knowledge.Screens) > 0 {
 		active = ""
 		if current == "traceability.html" {
 			active = " is-active"
 		}
-		fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span class="nav-icon">⇥</span><span>Traceability</span></a></li>`, active, escapeAttr(relativeURL(current, "traceability.html")))
+		fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span>Трассируемость</span></a></li>`, active, escapeAttr(relativeURL(current, "traceability.html")))
 	}
 	b.WriteString(`</ul></nav>`)
 	return b.String()
@@ -320,7 +324,7 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 	if initialTheme == "system" {
 		initialTheme = "light"
 	}
-	earlyTheme := `<script>(function(){var m="` + escapeAttr(config.ColorScheme) + `",t="` + escapeAttr(config.Theme) + `";try{var s=localStorage.getItem("docgent-color-scheme"),u=localStorage.getItem("docgent-site-theme");if(s==="system"||s==="light"||s==="dark")m=s;if(u==="classic"||u==="paper"||u==="terminal")t=u}catch(e){}var d=m==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):m;document.documentElement.dataset.colorScheme=m;document.documentElement.dataset.theme=d;document.documentElement.dataset.siteTheme=t}())</script>`
+	earlyTheme := `<script>(function(){var m="` + escapeAttr(config.ColorScheme) + `",t="` + escapeAttr(config.Theme) + `";try{var s=localStorage.getItem("docu-docu-color-scheme"),u=localStorage.getItem("docu-docu-site-theme");if(s==="system"||s==="light"||s==="dark")m=s;if(u==="classic"||u==="paper"||u==="terminal")t=u}catch(e){}var d=m==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):m;document.documentElement.dataset.colorScheme=m;document.documentElement.dataset.theme=d;document.documentElement.dataset.siteTheme=t}())</script>`
 	attributes := ` data-site-theme="` + escapeAttr(config.Theme) + `" data-color-scheme="` + escapeAttr(config.ColorScheme) + `" data-accent="` + escapeAttr(config.Accent) + `" data-density="` + escapeAttr(config.Density) + `" data-content-width="` + escapeAttr(config.ContentWidth) + `"`
 	brandMark := `<span class="brand-mark" aria-hidden="true">DG</span>`
 	if logo := brandingOutput(model, "logo"); logo != "" {
@@ -335,17 +339,17 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 	themeSelect := `<label class="header-select site-theme-select"><span class="header-select-visual" aria-hidden="true"><span class="site-theme-indicator" data-site-theme-indicator>` + escapeHTML(themeIndicator) + `</span><span data-site-theme-label>` + escapeHTML(themeLabel) + `</span></span><select data-site-theme-select aria-label="Тема оформления">` + selectOptions(config.Theme, []selectOption{{"classic", "Классика"}, {"paper", "Бумага"}, {"terminal", "Терминал"}}) + `</select></label>`
 	schemeSelect := `<label class="header-select scheme-select"><span class="header-select-visual" aria-hidden="true"><span class="scheme-toggle-indicator"></span><span data-theme-label>` + escapeHTML(schemeLabel) + `</span></span><select data-color-scheme-select aria-label="Цветовая схема">` + selectOptions(config.ColorScheme, []selectOption{{"system", "Система"}, {"light", "Светлая"}, {"dark", "Тёмная"}}) + `</select></label>`
 	languageSelect := renderLanguageSelect(model.languageTargets[current])
-	rebuildButton, serveAssets, serveRevision := "", "", ""
+	workspaceBar, serveAssets, serveRevision := "", "", ""
 	if model.serveMode {
-		rebuildButton = `<a class="icon-button" href="/_docgent/editor/" aria-label="Открыть редактор" title="Редактор документации">✎</a><button class="icon-button server-rebuild" type="button" data-server-rebuild aria-label="Пересобрать документацию" title="Пересобрать документацию"><svg class="server-rebuild-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 5v6h-6"/></svg></button><span class="visually-hidden" data-server-rebuild-status aria-live="polite"></span>`
+		workspaceBar = `<div class="workspace-bar" aria-label="Рабочая область serve"><div><strong>Рабочая область serve</strong><span>Область пересборки: модель, HTML и поиск</span></div><div class="workspace-actions"><a class="workspace-button" href="/_docu-docu/editor/">Открыть редактор</a><button class="workspace-button server-rebuild" type="button" data-server-rebuild><svg class="server-rebuild-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 5v6h-6"/></svg><span data-server-rebuild-label>Пересобрать</span></button></div><span class="workspace-status" data-server-rebuild-status role="status" aria-live="polite">Готово к пересборке.</span></div>`
 		serveAssets = `<link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/serve.css"><script src="` + escapeAttr(prefix) + `assets/serve.js" defer></script>`
-		serveRevision = `<meta name="docgent-revision" content="` + escapeAttr(model.serveRevision) + `">`
+		serveRevision = `<meta name="docu-docu-revision" content="` + escapeAttr(model.serveRevision) + `">`
 	}
 	locale := model.SiteConfig.Project.Locale
 	if locale == "" {
 		locale = "en"
 	}
-	return `<!doctype html><html lang="` + escapeAttr(locale) + `" data-theme="` + escapeAttr(initialTheme) + `"` + attributes + `><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` + serveRevision + `<meta name="description" content="` + escapeAttr(description) + `"><title>` + escapeHTML(fullTitle) + `</title><link rel="icon" href="` + escapeAttr(relativeURL(current, favicon)) + `">` + earlyTheme + `<link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/style.css">` + extraStyles + serveAssets + `<script src="` + escapeAttr(prefix) + `assets/search-index.js" defer></script>` + mermaidScript + `<script src="` + escapeAttr(prefix) + `assets/app.js" defer></script>` + extraScripts + `</head><body data-root-prefix="` + escapeAttr(prefix) + `" data-task-filter="all"><a class="skip-link" href="#main-content">Перейти к содержимому</a><header class="site-header"><div class="brand-area"><button class="icon-button sidebar-toggle" type="button" data-sidebar-toggle aria-label="Открыть навигацию">☰</button><a class="brand" href="` + escapeAttr(relativeURL(current, "index.html")) + `">` + brandMark + `<span class="brand-text">` + escapeHTML(model.Project.Title) + `</span></a></div><div class="global-search" role="search"><div class="search-input-wrap"><input type="search" data-global-search placeholder="Поиск по документации" aria-label="Поиск по документации"><span class="search-shortcut">/</span></div><div class="search-results" id="global-search-results" data-search-results role="listbox" hidden></div></div><div class="header-actions"><button class="icon-button" type="button" data-print aria-label="Печать">⎙</button>` + rebuildButton + languageSelect + themeSelect + schemeSelect + `</div></header><div class="site-layout"><aside class="sidebar">` + renderNavigation(model, current) + `</aside><div class="main-area"><main id="main-content" class="page-grid` + gridClass + `"><div class="page-content">` + content + `</div>` + tocHTML + `</main><footer class="site-footer">` + footer + `</footer></div></div></body></html>`
+	return `<!doctype html><html lang="` + escapeAttr(locale) + `" data-theme="` + escapeAttr(initialTheme) + `"` + attributes + `><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` + serveRevision + `<meta name="description" content="` + escapeAttr(description) + `"><title>` + escapeHTML(fullTitle) + `</title><link rel="icon" href="` + escapeAttr(relativeURL(current, favicon)) + `">` + earlyTheme + `<link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/style.css">` + extraStyles + serveAssets + `<script src="` + escapeAttr(prefix) + `assets/search-index.js" defer></script>` + mermaidScript + `<script src="` + escapeAttr(prefix) + `assets/app.js" defer></script>` + extraScripts + `</head><body data-root-prefix="` + escapeAttr(prefix) + `" data-task-filter="all"><a class="skip-link" href="#main-content">Перейти к содержимому</a><header class="site-header"><div class="brand-area"><button class="icon-button sidebar-toggle" type="button" data-sidebar-toggle aria-label="Открыть навигацию">☰</button><a class="brand" href="` + escapeAttr(relativeURL(current, "index.html")) + `">` + brandMark + `<span class="brand-text">` + escapeHTML(model.Project.Title) + `</span></a></div><div class="global-search" role="search"><div class="search-input-wrap"><input type="search" data-global-search placeholder="Поиск по документации" aria-label="Поиск по документации"><span class="search-shortcut">/</span></div><div class="search-results" id="global-search-results" data-search-results role="listbox" hidden></div></div><div class="header-actions"><button class="icon-button" type="button" data-print aria-label="Печать">⎙</button>` + languageSelect + themeSelect + schemeSelect + `</div></header>` + workspaceBar + `<div class="site-layout"><aside class="sidebar">` + renderNavigation(model, current) + `</aside><div class="main-area"><main id="main-content" class="page-grid` + gridClass + `"><div class="page-content">` + content + `</div>` + tocHTML + `</main><footer class="site-footer">` + footer + `</footer></div></div></body></html>`
 }
 
 func renderLanguageSelect(targets []LanguageTarget) string {
@@ -672,6 +676,52 @@ func renderComputedStatus(model *Model, current string) string {
 	return `<section class="dashboard-section"><div class="section-heading"><div><h2>Вычисляемое состояние</h2><p>Формируется из активных work items и эффективного состояния roadmap.</p></div></div><h3>Сейчас в работе</h3>` + activeHTML + `<h3>Блокеры</h3>` + blockersHTML + `<h3>Следующий результат</h3>` + nextHTML + `</section>`
 }
 
+func renderRecommendedEntries(model *Model) string {
+	type entry struct{ title, description, href string }
+	entries := []entry{}
+	seen := map[string]bool{}
+	add := func(title, description, href string) {
+		if href == "" || seen[href] || len(entries) >= 5 {
+			return
+		}
+		seen[href] = true
+		entries = append(entries, entry{title: title, description: description, href: href})
+	}
+	if overview := model.DocByPath["architecture/overview.md"]; overview != nil {
+		add("Архитектура", "Граница системы и карта архитектурных вопросов.", overview.OutputPath)
+	}
+	if len(model.Knowledge.UseCases) > 0 {
+		add("Пользовательские сценарии", "Наблюдаемое поведение и критерии результата.", "use-cases/index.html")
+	}
+	hasGuides := false
+	for _, document := range model.Documents {
+		if document.Directory == "guides" {
+			hasGuides = true
+			break
+		}
+	}
+	if hasGuides {
+		add("Руководства", "Практические пути выполнения типовых задач.", outputForDirectory(model, "guides"))
+	}
+	if len(model.Knowledge.WorkItems) > 0 {
+		add("Рабочие задачи", "Текущий scope, критерии и проверки work items.", "work/index.html")
+	}
+	add("Качество документации", "Ошибки, warnings и структурная целостность.", model.HealthOutputPath)
+	for _, document := range model.Documents {
+		if len(entries) >= 3 {
+			break
+		}
+		if document.SourcePath != "index.md" {
+			add(document.Title, document.Description, document.OutputPath)
+		}
+	}
+	var cards strings.Builder
+	for _, item := range entries {
+		cards.WriteString(`<a class="recommended-entry" href="` + escapeAttr(item.href) + `"><strong>` + escapeHTML(item.title) + `</strong><span>` + escapeHTML(item.description) + `</span></a>`)
+	}
+	return `<section class="dashboard-section recommended-entries"><div class="section-heading"><div><h2>С чего начать</h2><p>Рекомендуемые точки входа; полный список находится в каталоге ниже.</p></div></div><div class="recommended-entry-grid">` + cards.String() + `</div></section>`
+}
+
 func renderDashboard(model *Model) string {
 	stats := model.Stats
 	var docs strings.Builder
@@ -762,7 +812,7 @@ func renderDashboard(model *Model) string {
 	if document := model.Project.OverviewDocument; document != nil {
 		contextAction = `<div class="page-actions dashboard-page-actions">` + renderDocumentContextButton(model, document) + `</div>`
 	}
-	content := hero + contextAction + overview + `<section class="metric-grid">` + metrics.String() + `</section>` + roadmap + computedStatus + riskSection + `<section class="dashboard-section"><div class="section-heading"><div><h2>Документация проекта</h2><p>Поиск, фильтры, статусы и локальные чек-листы.</p></div><a class="section-link" href="` + escapeAttr(model.HealthOutputPath) + `">Качество →</a></div>` + documentList + `</section>`
+	content := hero + contextAction + overview + renderRecommendedEntries(model) + `<section class="metric-grid">` + metrics.String() + `</section>` + roadmap + computedStatus + riskSection + `<section class="dashboard-section"><div class="section-heading"><div><h2>Каталог документации</h2><p>Единый полный список с поиском, фильтрами и статусами.</p></div><a class="section-link" href="` + escapeAttr(model.HealthOutputPath) + `">Качество →</a></div>` + documentList + `</section>`
 	return pageShell(model, "index.html", model.Project.Title, model.Project.Description, content, "")
 }
 
@@ -945,7 +995,7 @@ func BuildReport(model *Model) ProjectReport {
 		})
 	}
 	return ProjectReport{
-		SchemaVersion: 1, Generator: GeneratorInfo{Name: "Docgent", Version: Version},
+		SchemaVersion: 1, Generator: GeneratorInfo{Name: "Docu-docu", Version: Version},
 		GeneratedAt: model.GeneratedAt, SourceDirectory: pathBase(model.RootDirectory),
 		StaleDays: model.StaleDays, Project: project, CurrentStatus: model.CurrentStatus,
 		Stats: model.Stats, Documents: documents, Roadmap: roadmap, Risks: risks,

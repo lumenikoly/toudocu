@@ -1,4 +1,4 @@
-package docgent
+package docudocu
 
 import (
 	"encoding/json"
@@ -424,12 +424,12 @@ func renderTraceabilityPage(model *Model, current string) string {
 			escapeAttr(search), escapeHTML(fallbackDash(row.UseCaseID)), escapeHTML(row.ScreenID), escapeHTML(row.TransitionID),
 			escapeHTML(row.TaskID), escapeHTML(row.CriterionID), escapeHTML(row.Verification))
 	}
-	content := breadcrumbs(model, current, "Traceability") +
-		`<header class="page-header"><h1>Traceability Matrix</h1><p class="page-lead">Связи use case, screen, transition, task, criterion и verification.</p></header>` +
+	content := breadcrumbs(model, current, "Трассируемость") +
+		`<header class="page-header"><h1>Матрица трассируемости</h1><p class="page-lead">Связи сценариев, экранов, переходов, задач, критериев и проверок.</p></header>` +
 		`<section class="dashboard-section" data-filter-scope><div class="collection-controls"><input type="search" data-filter-control="search" placeholder="UC, SC, TR, TASK или AC" aria-label="Поиск traceability"></div>` +
 		`<div class="collection-summary">Показано: <strong data-filter-count></strong></div><div class="screen-catalog-table"><table><thead><tr><th>Use Case</th><th>Screen</th><th>Transition</th><th>Task</th><th>Criterion</th><th>Verification</th></tr></thead><tbody>` +
 		rows.String() + `</tbody></table></div><div class="empty-state" data-filter-empty hidden>Связи не найдены.</div></section>`
-	return pageShell(model, current, "Traceability", "Матрица прослеживаемости", content, "")
+	return pageShell(model, current, "Трассируемость", "Матрица трассируемости", content, "")
 }
 
 func renderScreenConnections(model *Model, document *Document) string {

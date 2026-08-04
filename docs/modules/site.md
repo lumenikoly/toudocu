@@ -2,8 +2,8 @@
 
 - Идентификатор: MOD-SITE
 - Статус: Готово
-- Владелец: Команда Docgent
-- Последнее обновление: 2026-07-31
+- Владелец: Команда Docu-docu
+- Последнее обновление: 2026-08-03
 
 Модуль формирует автономные HTML-страницы, навигацию, поиск и типизированный
 `report.json` из готовой проектной модели.
@@ -83,7 +83,7 @@ fallback favicon и браузерные ресурсы встроены чер�
 загружаются.
 
 Пользовательские logo, favicon и hero читаются только как обычные файлы из
-`.docgent/assets/`, проверяются при построении модели и копируются в
+`.docu-docu/assets/`, проверяются при построении модели и копируются в
 `assets/branding/`. `build`, `check` и `serve` используют одну диагностику и
 остаются offline-first.
 
@@ -104,7 +104,7 @@ buffer можно скачать. Diagnostics не блокируют сохра
 ### BR-SITE-009: Locale portals изолированы от canonical workspace
 
 При запуске `serve` из canonical root configured `translations.<locale>`
-создают независимые read-only snapshots по `/_docgent/locales/<locale>/`.
+создают независимые read-only snapshots по `/_docu-docu/locales/<locale>/`.
 Переключатель получает URL только из server-computed targets: Markdown
 сопоставляется по relative source path, generated page — по существующему
 output path, иначе используется locale homepage. Locale mount не получает
@@ -121,10 +121,16 @@ editor, changes API, rebuild controls, source paths или canonical workspace.
   а для `TASK-*` и `BUG-*` дополнительно различает невыполненное `☐` и
   выполненное `☑`; текстовая подпись статуса остаётся доступной независимо от
   цвета;
+- активная группа навигации раскрывается, остальные группы по умолчанию
+  свёрнуты, а явный выбор пользователя сохраняется локально;
+- dashboard показывает не более пяти рекомендуемых точек входа; единственной
+  полной поверхностью остаётся фильтруемый каталог;
 - каталоги, Screen Map, traceability и health page не выдают синтетический
   контекст документа;
-- в `serve` хедер позволяет открыть editor/source и вручную пересобрать модель
-  без остановки listener; через `file://` этих действий и assets нет;
+- в `serve` отдельная workspace-панель позволяет открыть editor и вручную
+  пересобрать модель, HTML и поиск без остановки listener; она показывает
+  область, progress, результат или ошибку с повтором; через `file://` этих
+  действий и assets нет;
 - save/create и стабильное внешнее изменение обновляют model, HTML, search,
   diagnostics и workspace revision синхронно;
 - обычный HTTP request не запускает rebuild; watcher публикует snapshot только

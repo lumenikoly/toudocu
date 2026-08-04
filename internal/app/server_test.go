@@ -1,4 +1,4 @@
-package docgent
+package docudocu
 
 import (
 	"encoding/json"
@@ -114,7 +114,7 @@ func TestDocumentationServerRebuildEndpointRegeneratesSite(t *testing.T) {
 
 	writeTestFile(t, docs, "index.md", "# Серверный проект\n\nВерсия после пересборки.\n")
 	request := httptest.NewRequest(http.MethodPost, rebuildEndpoint, nil)
-	request.Header.Set("X-Docgent-Action", "rebuild")
+	request.Header.Set("X-Docu-docu-Action", "rebuild")
 	response := httptest.NewRecorder()
 	handler.ServeHTTP(response, request)
 	if response.Code != http.StatusOK {
@@ -184,7 +184,7 @@ func TestDocumentationServerLocalePortalsAreReadOnlyAndMatched(t *testing.T) {
 	writeTestFile(t, docs, "guide.md", "# Canonical guide\n\nCanonical text.\n")
 	writeTestFile(t, filepath.Join(filepath.Dir(docs), "i18n", "en"), "index.md", "# English home\n\nHome.\n")
 	writeTestFile(t, filepath.Join(filepath.Dir(docs), "i18n", "en"), "guide.md", "# English guide\n\nEnglish text.\n")
-	writeTestFile(t, filepath.Dir(docs), ".docgent/config.yml", `project:
+	writeTestFile(t, filepath.Dir(docs), ".docu-docu/config.yml", `project:
   locale: ru
   sections:
     architecture: Architecture
@@ -222,20 +222,20 @@ translations:
 	}
 	canonical := httptest.NewRecorder()
 	handler.ServeHTTP(canonical, httptest.NewRequest(http.MethodGet, "/guide.html", nil))
-	if canonical.Code != http.StatusOK || !strings.Contains(canonical.Body.String(), `value="/_docgent/locales/en/guide.html"`) {
+	if canonical.Code != http.StatusOK || !strings.Contains(canonical.Body.String(), `value="/_docu-docu/locales/en/guide.html"`) {
 		t.Fatalf("canonical: %d %s", canonical.Code, canonical.Body.String())
 	}
 	locale := httptest.NewRecorder()
-	handler.ServeHTTP(locale, httptest.NewRequest(http.MethodGet, "/_docgent/locales/en/guide.html", nil))
+	handler.ServeHTTP(locale, httptest.NewRequest(http.MethodGet, "/_docu-docu/locales/en/guide.html", nil))
 	if locale.Code != http.StatusOK || !strings.Contains(locale.Body.String(), "English text.") {
 		t.Fatalf("locale: %d %s", locale.Code, locale.Body.String())
 	}
-	for _, forbidden := range []string{"data-server-rebuild", "/_docgent/editor/", "/changes/"} {
+	for _, forbidden := range []string{"data-server-rebuild", "/_docu-docu/editor/", "/changes/"} {
 		if strings.Contains(locale.Body.String(), forbidden) {
 			t.Fatalf("locale leaked canonical control %q", forbidden)
 		}
 	}
-	for _, target := range []string{"/_docgent/locales/en/_docgent/api/editor/file", "/_docgent/locales/en/../editor/"} {
+	for _, target := range []string{"/_docu-docu/locales/en/_docu-docu/api/editor/file", "/_docu-docu/locales/en/../editor/"} {
 		response := httptest.NewRecorder()
 		handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, target, nil))
 		if response.Code == http.StatusOK && strings.Contains(response.Body.String(), "Canonical text.") {
@@ -264,7 +264,7 @@ func TestDocumentationServerKeepsLastGoodSnapshotAndShowsUnavailableLocale(t *te
 	}
 
 	options, docs = serveTestOptions(t)
-	writeTestFile(t, filepath.Dir(docs), ".docgent/config.yml", `project:
+	writeTestFile(t, filepath.Dir(docs), ".docu-docu/config.yml", `project:
   locale: ru
   sections:
     architecture: Architecture
@@ -301,7 +301,7 @@ translations:
 		t.Fatal(err)
 	}
 	response = httptest.NewRecorder()
-	handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/_docgent/locales/en/", nil))
+	handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/_docu-docu/locales/en/", nil))
 	if response.Code != http.StatusServiceUnavailable || !strings.Contains(response.Body.String(), "Unavailable") || strings.Contains(response.Body.String(), filepath.Dir(docs)) {
 		t.Fatalf("unavailable locale response is unsafe: %d %s", response.Code, response.Body.String())
 	}

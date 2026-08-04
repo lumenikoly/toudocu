@@ -1,4 +1,4 @@
-package docgent
+package docudocu
 
 import (
 	"fmt"

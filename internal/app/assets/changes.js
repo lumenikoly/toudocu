@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const API = '/_docgent/api/changes';
+  const API = '/_docu-docu/api/changes';
   const $ = (selector, root = document) => root.querySelector(selector);
   const state = { report: null, selected: null, tab: 'summary', merge: null, etag: '' };
   const elements = {
@@ -102,7 +102,7 @@
 
   function detailHeader(change) {
     const entity = change.entitiesAfter[0] || change.entitiesBefore[0];
-    return `<header class="changes-detail-header"><div><span class="changes-file-status status-${escapeHTML(change.status)}">${escapeHTML(statusLabel(change.status))}</span><h2>${escapeHTML(entity?.id || change.path.split('/').pop())}${entity?.title ? ` — ${escapeHTML(entity.title)}` : ''}</h2><p>${escapeHTML(change.oldPath ? `${change.oldPath} → ${change.path}` : change.path)} · +${change.lines.added} −${change.lines.deleted}</p></div><a class="changes-button secondary" href="/_docgent/editor/?path=${encodeURIComponent(change.path.replace(/^docs\//, ''))}">Редактировать текущий файл</a></header><nav class="changes-tabs" role="tablist" aria-label="Представления изменения">${tabsFor(change).map(([id, label]) => `<button type="button" role="tab" aria-selected="${state.tab === id}" data-tab="${id}">${label}</button>`).join('')}</nav><div class="changes-tab-panel" data-tab-panel></div>`;
+    return `<header class="changes-detail-header"><div><span class="changes-file-status status-${escapeHTML(change.status)}">${escapeHTML(statusLabel(change.status))}</span><h2>${escapeHTML(entity?.id || change.path.split('/').pop())}${entity?.title ? ` — ${escapeHTML(entity.title)}` : ''}</h2><p>${escapeHTML(change.oldPath ? `${change.oldPath} → ${change.path}` : change.path)} · +${change.lines.added} −${change.lines.deleted}</p></div><a class="changes-button secondary" href="/_docu-docu/editor/?path=${encodeURIComponent(change.path.replace(/^docs\//, ''))}">Редактировать текущий файл</a></header><nav class="changes-tabs" role="tablist" aria-label="Представления изменения">${tabsFor(change).map(([id, label]) => `<button type="button" role="tab" aria-selected="${state.tab === id}" data-tab="${id}">${label}</button>`).join('')}</nav><div class="changes-tab-panel" data-tab-panel></div>`;
   }
 
   async function renderDetail() {
@@ -159,7 +159,7 @@
       });
       const requested = decodeURIComponent(location.hash.slice(1)); const requestedIndex = change.sourceDiffHunks.findIndex((hunk) => hunk.id === requested); if (requestedIndex >= 0) requestAnimationFrame(() => focusHunk(requestedIndex));
     };
-    const showMerge = async () => { host.innerHTML = '<div class="changes-loading">Загрузка обеих версий…</div>'; try { const [before, after] = await Promise.all([fetchSide(change, 'before'), fetchSide(change, 'after')]); host.replaceChildren(); if (window.DocgentCodeMirror?.createMerge) state.merge = window.DocgentCodeMirror.createMerge({ parent: host, before, after, language: languageFor(change.path) }); else { host.innerHTML = `<div class="source-columns"><pre>${escapeHTML(before)}</pre><pre>${escapeHTML(after)}</pre></div>`; } } catch (error) { host.innerHTML = `<div class="changes-error">Не удалось загрузить версии: ${escapeHTML(error.message)}</div>`; } };
+    const showMerge = async () => { host.innerHTML = '<div class="changes-loading">Загрузка обеих версий…</div>'; try { const [before, after] = await Promise.all([fetchSide(change, 'before'), fetchSide(change, 'after')]); host.replaceChildren(); if (window.DocuDocuCodeMirror?.createMerge) state.merge = window.DocuDocuCodeMirror.createMerge({ parent: host, before, after, language: languageFor(change.path) }); else { host.innerHTML = `<div class="source-columns"><pre>${escapeHTML(before)}</pre><pre>${escapeHTML(after)}</pre></div>`; } } catch (error) { host.innerHTML = `<div class="changes-error">Не удалось загрузить версии: ${escapeHTML(error.message)}</div>`; } };
     panel.querySelector('[data-source-mode="unified"]').addEventListener('click', showUnified); panel.querySelector('[data-source-mode="merge"]').addEventListener('click', showMerge);
     panel.querySelector('[data-hunk-previous]')?.addEventListener('click', () => focusHunk(activeHunk - 1)); panel.querySelector('[data-hunk-next]')?.addEventListener('click', () => focusHunk(activeHunk + 1));
     panel.querySelector('[data-copy-diff]').addEventListener('click', async () => { await navigator.clipboard.writeText(change.sourceDiff || ''); announce('Diff скопирован.'); }); showUnified();

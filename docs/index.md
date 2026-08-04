@@ -1,6 +1,6 @@
-# Docgent
+# Docu-docu
 
-Docgent — dependency-free CLI на Go для проверяемой проектной документации в
+Docu-docu — dependency-free CLI на Go для проверяемой проектной документации в
 структурированном Markdown и автономного HTML-портала, работающего через
 `file://`.
 
@@ -12,7 +12,7 @@ Docgent — dependency-free CLI на Go для проверяемой проек
 
 ## Решение
 
-Docgent строит единую модель из Markdown, проверяет стабильные идентификаторы,
+Docu-docu строит единую модель из Markdown, проверяет стабильные идентификаторы,
 ссылки, бизнес-правила, roadmap и work items, а затем отдаёт результат человеку
 в HTML и автоматизации в JSON ProjectReport schema v1.
 
@@ -49,26 +49,3 @@ Docgent строит единую модель из Markdown, проверяет
 - команды `task verify --run` считаются доверенным кодом репозитория;
 - портал является статическим и не редактирует исходные документы;
 - глобальный прогресс определяется только `roadmap.md`.
-
-## Быстрые ссылки
-
-- [Полный каталог возможностей](reference/features.md)
-- [Текущее состояние](status.md)
-- [Дорожная карта](roadmap.md)
-- [Идеи развития](ideas.md)
-- [Заметки](notes.md)
-- [Архитектура](architecture/overview.md)
-- [Модули](modules/)
-- [Процессы и пользовательские сценарии](guides/processes.md)
-- [Пользовательские сценарии](use-cases/)
-- [Процессы](flows/)
-- [Карта экранов](guides/screens.md)
-- [CLI-контракт](contracts/cli.md)
-- [Архитектурные решения](decisions/)
-- [Риски](risks.md)
-- [Правила проверки](guides/testing.md)
-- [Стандарты качества](quality/)
-- [Standards, Runbooks и Custom-разделы](guides/quality-runbooks.md)
-- [Рабочие задачи: статусы, типы и проверки](guides/work-items.md)
-- [Справочник конфигурации](reference/configuration.md)
-- [Рабочие задачи](work/)

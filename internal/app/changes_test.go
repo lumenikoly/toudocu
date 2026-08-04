@@ -1,4 +1,4 @@
-package docgent
+package docudocu
 
 import (
 	"bytes"
@@ -40,7 +40,7 @@ func newChangesRepository(t *testing.T) (string, string) {
 	docs := filepath.Join(root, "docs")
 	gitTestRun(t, root, "init", "-q")
 	gitTestRun(t, root, "config", "user.email", "test@example.test")
-	gitTestRun(t, root, "config", "user.name", "Docgent Test")
+	gitTestRun(t, root, "config", "user.name", "Docu-docu Test")
 	writeChangesTestFile(t, filepath.Join(docs, "modules", "MOD-CORE.md"), "# MOD-CORE: Core\n\n- Status: Active\n\n## Rules\n\nOriginal.\n")
 	writeChangesTestFile(t, filepath.Join(docs, "use-cases", "UC-CORE-01.md"), "# UC-CORE-01: Open\n\n## Result\n\nOpened.\n")
 	gitTestRun(t, root, "add", "docs")

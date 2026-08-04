@@ -1,12 +1,12 @@
-# CLI-контракт Docgent v1
+# CLI-контракт Docu-docu v1
 
 - Идентификатор: CON-CLI-V1
 - Статус: Готово
-- Владелец: Команда Docgent
-- Последнее обновление: 2026-07-30
+- Владелец: Команда Docu-docu
+- Последнее обновление: 2026-08-03
 
 Контракт фиксирует публичные команды, exit codes и машинные JSON-форматы
-Docgent.
+Docu-docu.
 
 ## Команды
 
@@ -29,24 +29,25 @@ Docgent.
 | `task changes` | отсутствуют | task-specific report и impact diagnostics |
 | `version` | отсутствуют | версия генератора |
 
-Вызов `docgent ./docs ...` эквивалентен `docgent build ./docs ...`.
+Сборка вызывается только как `docu-docu build ./docs ...`. Путь без команды
+отклоняется как неизвестная команда.
 Историческая команда верхнего уровня `init`, skill-level имя `refresh` и
-прежняя `task check` отсутствуют без alias. Вызовы `docgent init` и `docgent
-refresh` отклоняются как неизвестные команды; `$use-docgent init`,
-`$use-docgent refresh` и `$use-docgent refresh diff` принадлежат AI-skill.
+прежняя `task check` отсутствуют без alias. Вызовы `docu-docu init` и `docu-docu
+refresh` отклоняются как неизвестные команды; `$use-docu-docu init`,
+`$use-docu-docu refresh` и `$use-docu-docu refresh diff` принадлежат AI-skill.
 
 ```text
-docgent search "<query>" [docs-dir] [--limit N] [--format text|json]
-docgent task init [docs-dir] --area AREA --title TITLE --type TYPE [--lang en|ru]
-  docgent scaffold module|use-case|flow|screen|decision|standard|runbook ID [docs-dir] --title TITLE [--lang en|ru]
-docgent task ready TASK-ID [docs-dir] [--strict] [--format text|json]
-docgent task context TASK-ID [docs-dir] [--format text|json]
-docgent task verify TASK-ID [docs-dir] (--dry-run|--run) [--target TARGET] [--report FILE] [--timeout DURATION] [--format text|json]
-docgent task archive TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]
-docgent task restore TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]
-docgent changes [docs-dir] [--base REV|--branch-base REF] [--target working-tree|index|HEAD|REV] [--format text|json|markdown]
-docgent changes file PATH [docs-dir] [параметры changes]
-docgent task changes TASK-ID [docs-dir] [параметры changes]
+docu-docu search "<query>" [docs-dir] [--limit N] [--format text|json]
+docu-docu task init [docs-dir] --area AREA --title TITLE --type TYPE [--lang en|ru]
+docu-docu scaffold module|use-case|flow|screen|decision|standard|runbook ID [docs-dir] --title TITLE [--lang en|ru]
+docu-docu task ready TASK-ID [docs-dir] [--strict] [--format text|json]
+docu-docu task context TASK-ID [docs-dir] [--format text|json]
+docu-docu task verify TASK-ID [docs-dir] (--dry-run|--run) [--target TARGET] [--report FILE] [--timeout DURATION] [--format text|json]
+docu-docu task archive TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]
+docu-docu task restore TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]
+docu-docu changes [docs-dir] [--base REV|--branch-base REF] [--target working-tree|index|HEAD|REV] [--format text|json|markdown]
+docu-docu changes file PATH [docs-dir] [параметры changes]
+docu-docu task changes TASK-ID [docs-dir] [параметры changes]
 ```
 
 В каталоге документации глобально ожидаются `index.md` и
@@ -59,34 +60,32 @@ errors. `status.md`, `roadmap.md` и остальные типизированн
 Статусы, типы, обязательные поля, разделы и команды `TASK-*`/`BUG-*` описаны в
 [руководстве по рабочим задачам](../guides/work-items.md).
 Значение `--title` для `task init` и `scaffold` всегда однострочное.
+Без `--lang` обе команды используют `project.locale` из
+`.docu-docu/config.yml`, если его основной язык поддерживается (`en` или `ru`),
+иначе используют `en`. Явный `--lang` имеет приоритет.
 
-## Общие параметры
+## Параметры команд
 
-```text
--o, --output <directory>
--t, --title <name>
-    --exclude <paths>
-    --stale-days <number>
-    --repository-root <path>
-    --repository-url <http(s)-url>
-    --repository-ref <exact-ref>
-    --clean
-    --open
-    --strict
-    --screen-map
-    --no-screen-map
-    --host <address>
-    --port <number>
-    --format text|json
-    --report <file>
-    --timeout <duration>
-    --base <revision>
-    --branch-base <ref>
-    --status <status>
-    --module <MOD-ID>
-    --task <TASK-ID>
-    --permanent-only
-```
+Контекстный `COMMAND --help` показывает только применимые параметры, пример и
+побочные эффекты и завершается с кодом `0`, включая неполные формы `task
+--help`, `task OPERATION --help` и `scaffold --help`.
+
+- `build`: output, title, exclude, stale policy, repository links, clean,
+  open, strict и screen map;
+- `check`: exclude, stale policy, repository root, strict и text/json format;
+- `serve`: build-параметры, host и port;
+- `changes`, `changes file`, `task changes`: comparison, filters,
+  text/json/markdown format и необязательный output-файл;
+- `search`: limit и text/json format;
+- `task init`, `scaffold`: обязательные поля, locale и text/json format;
+- `task ready`: strict и text/json format;
+- `task context`, `task archive`, `task restore`: repository root и
+  text/json format;
+- `task verify`: ровно один из `--dry-run`/`--run`, target, report, timeout,
+  repository root и text/json format.
+
+Флаг `changes --task` отсутствует. Task-scoped report доступен только через
+`task changes TASK-ID`.
 
 `--host` и `--port` разрешены только для `serve`; значения по умолчанию —
 `127.0.0.1` и `8080`. Для доступа из локальной сети требуется явный
@@ -95,7 +94,7 @@ errors. `status.md`, `roadmap.md` и остальные типизированн
 Пока работает `serve`, save/create, watcher и ручная кнопка canonical portal могут
 перестроить портал, не закрывая listener; HTML-запрос всегда отдаёт готовый
 snapshot. При запуске из canonical root configured `translations.<locale>`
-доступны read-only по `/_docgent/locales/<locale>/`; они не получают editor или
+доступны read-only по `/_docu-docu/locales/<locale>/`; они не получают editor или
 canonical API. Editor API и его JSON schema v1
 определены в [отдельном HTTP-контракте](editor-http.md). `build` всегда остаётся
 static read-only: editor markup, CodeMirror, API URL и server-only scripts в его

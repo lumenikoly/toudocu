@@ -1,5 +1,5 @@
 package main
 
-import "docgent"
+import "docu-docu"
 
-func main() { docgent.Main() }
+func main() { docudocu.Main() }

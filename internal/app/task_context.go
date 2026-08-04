@@ -1,4 +1,4 @@
-package docgent
+package docudocu
 
 import (
 	"fmt"
@@ -104,7 +104,7 @@ func BuildTaskContext(model *Model, taskID string) (TaskContextReport, error) {
 	}
 	report := TaskContextReport{
 		SchemaVersion: 1, Kind: "task-context",
-		Generator:         GeneratorInfo{Name: "Docgent", Version: Version},
+		Generator:         GeneratorInfo{Name: "Docu-docu", Version: Version},
 		Task:              *item,
 		Screens:           []KnowledgeScreen{},
 		ScreenTransitions: []ScreenTransition{},

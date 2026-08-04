@@ -1,13 +1,13 @@
 # Карта экранов и проигрываемые пользовательские сценарии
 
-Docgent строит карту, каталог, пошаговые сценарии и traceability из документов
+Docu-docu строит карту, каталог, пошаговые сценарии и traceability из документов
 `screens/SC-*.md`. Отдельный `screens/map.md` не используется.
 
 Страницу карты можно явно включить или отключить:
 
 ```bash
-docgent build ./docs --screen-map
-docgent build ./docs --no-screen-map
+docu-docu build ./docs --screen-map
+docu-docu build ./docs --no-screen-map
 ```
 
 При отключённой общей карте каталог, страницы use cases с пошаговым режимом и
@@ -83,7 +83,7 @@ sitemap, а не порядок user flow.
 - Разрешить цикл: Да
 ```
 
-Docgent добавляет переходы выбранного `UC-*` и глобальные переходы, вычисляет
+Docu-docu добавляет переходы выбранного `UC-*` и глобальные переходы, вычисляет
 достижимые экраны, тупики, циклы и пути к terminal screens.
 
 Неконечный достижимый экран должен иметь выход. Цикл без выхода считается
@@ -96,7 +96,7 @@ Docgent добавляет переходы выбранного `UC-*` и гл�
 old-side ghost elements — красный пунктир и `removed`. Состояние не передаётся
 только цветом. Filters module/use case/status/changed-only применяются к
 объединённой old/new модели; выбор элемента открывает semantic diff. JSON
-доступен через `/_docgent/api/changes/screen-map`.
+доступен через `/_docu-docu/api/changes/screen-map`.
 
 Карточка показывает preview или placeholder, ID, название, маршрут, статус,
 модуль и количество входящих и исходящих переходов. Доступны:

@@ -24,14 +24,14 @@
       if (label) label.textContent = labels[mode];
       if (select) select.value = mode;
       if (announce) {
-        document.dispatchEvent(new CustomEvent('docgent:themechange', { detail: { mode, theme: resolved } }));
+        document.dispatchEvent(new CustomEvent('docu-docu:themechange', { detail: { mode, theme: resolved } }));
       }
     };
     apply(false);
 
     select?.addEventListener('change', () => {
       mode = select.value;
-      try { localStorage.setItem('docgent-color-scheme', mode); } catch { /* file:// privacy mode */ }
+      try { localStorage.setItem('docu-docu-color-scheme', mode); } catch { /* file:// privacy mode */ }
       apply();
     });
     media.addEventListener?.('change', () => {
@@ -54,7 +54,7 @@
       if (indicator) indicator.textContent = indicators[theme];
       if (select) select.value = theme;
       if (announce) {
-        document.dispatchEvent(new CustomEvent('docgent:themechange', {
+        document.dispatchEvent(new CustomEvent('docu-docu:themechange', {
           detail: { siteTheme: theme, theme: document.documentElement.dataset.theme },
         }));
       }
@@ -63,7 +63,7 @@
 
     select?.addEventListener('change', () => {
       theme = select.value;
-      try { localStorage.setItem('docgent-site-theme', theme); } catch { /* file:// privacy mode */ }
+      try { localStorage.setItem('docu-docu-site-theme', theme); } catch { /* file:// privacy mode */ }
       apply();
     });
   }
@@ -132,7 +132,9 @@
         folderState[key] = collapsed;
         try { localStorage.setItem('project-docs-navigation', JSON.stringify(folderState)); } catch { /* file:// privacy mode */ }
       };
-      setCollapsed(folderState[key] === true, false);
+      const containsActivePage = Boolean($('.is-active', folder));
+      const hasSavedState = Object.prototype.hasOwnProperty.call(folderState, key);
+      setCollapsed(containsActivePage ? false : (hasSavedState ? folderState[key] === true : true), false);
       folderToggle?.addEventListener('click', (event) => {
         event.stopPropagation();
         setCollapsed(!folder.classList.contains('is-collapsed'));
@@ -374,7 +376,7 @@
           toggle.setAttribute('aria-label', `${collapsed ? 'Развернуть' : 'Свернуть'} раздел ${headingTitle}`);
           updateCollapseAllButton();
         });
-        heading.append(toggle);
+        section.insertBefore(toggle, body);
       }
     });
 
@@ -628,7 +630,7 @@
     const scheduleRender = () => {
       renderQueue = renderQueue.then(renderAll, renderAll);
     };
-    document.addEventListener('docgent:themechange', scheduleRender);
+    document.addEventListener('docu-docu:themechange', scheduleRender);
     scheduleRender();
   }
 
@@ -853,7 +855,7 @@
       selected = hashRow.dataset.screenRow;
       hashRow.classList.add('is-selected');
     }
-    document.addEventListener('docgent:themechange', scheduleRender);
+    document.addEventListener('docu-docu:themechange', scheduleRender);
     scheduleRender();
   }
 
@@ -890,7 +892,7 @@
           panel.hidden = panel.id !== targetID;
         });
         const activePanel = panels.find((panel) => panel.id === targetID);
-        activePanel?.dispatchEvent(new CustomEvent('docgent:panelshown', { bubbles: true }));
+        activePanel?.dispatchEvent(new CustomEvent('docu-docu:panelshown', { bubbles: true }));
         if (updateHistory && window.location.hash !== `#${targetID}`) {
           window.history.pushState(null, '', `#${targetID}`);
         }

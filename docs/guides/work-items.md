@@ -1,6 +1,6 @@
 # Рабочие задачи
 
-Docgent хранит каждый рабочий элемент в отдельном файле `work/*.md`.
+Docu-docu хранит каждый рабочий элемент в отдельном файле `work/*.md`.
 Функциональность, обслуживание, документация и исследования используют
 `TASK-*`, а баги — `BUG-*`. Все типы остаются одной сущностью `WorkItem`,
 используют общие статусы, зависимости, команды context/verify и годовой архив.
@@ -26,7 +26,7 @@ Docgent хранит каждый рабочий элемент в отдель�
 
 ## Когда создавать задачу
 
-Docgent создаёт нейтральный каркас, но не решает, нужен ли work item для
+Docu-docu создаёт нейтральный каркас, но не решает, нужен ли work item для
 конкретного запроса. Не создавайте `TASK-*` для каждого prompt, обычного
 вопроса, чтения кода, форматирования, небольшой локальной правки или
 рефакторинга без изменения поведения.
@@ -39,10 +39,10 @@ criteria, verification или передача между сессиями и и
 создания дубликата.
 
 Устанавливаемый skill закрепляет этот выборочный режим в `AGENTS.md` только по
-явному prompt-вызову `$use-docgent init`. Это не команда Go CLI и не повод
+явному prompt-вызову `$use-docu-docu init`. Это не команда Go CLI и не повод
 создавать отдельную задачу только ради инициализации.
 
-Полный `$use-docgent refresh` и ограниченный `$use-docgent refresh diff` также
+Полный `$use-docu-docu refresh` и ограниченный `$use-docu-docu refresh diff` также
 не создают `TASK-*` безусловно. Они применяют тот же порог: durable work item
 появляется только при существенном scope, устойчивых acceptance criteria,
 handoff или явном требовании пользователя либо проекта.
@@ -63,7 +63,7 @@ handoff или явном требовании пользователя либо
 
 ## Фактическое влияние на документацию
 
-`docgent task changes TASK-ID --base ... --target ...` и вкладка «Изменения»
+`docu-docu task changes TASK-ID --base ... --target ...` и вкладка «Изменения»
 сопоставляют явно перечисленные пути `Влияние на документацию` с Git change
 set. Сам `TASK-*` выводится отдельно как контракт задачи и не увеличивает
 счётчик постоянной документации. Явные пути имеют приоритет над вычисленными
@@ -71,7 +71,7 @@ set. Сам `TASK-*` выводится отдельно как контракт
 
 `declared-document-not-changed` и `undeclared-document-change` по умолчанию
 warning: это сигнал review, а не автоматический вывод о корректности кода.
-Активный base/target всегда показывается; Docgent не определяет скрыто исходный
+Активный base/target всегда показывается; Docu-docu не определяет скрыто исходный
 commit задачи.
 
 ## Типы
@@ -112,7 +112,7 @@ commit задачи.
 | `Воспроизводимость` | `Всегда`, `Часто`, `Иногда`, `Редко`, `Не воспроизводится`, `Неизвестно` |
 | `Регрессия` | `Да`, `Нет` |
 
-Серьёзность описывает последствия, а приоритет — порядок работы; Docgent не
+Серьёзность описывает последствия, а приоритет — порядок работы; Docu-docu не
 вычисляет одно поле из другого. Для `Регрессия: Да` в документе указывается
 версия или период проявления.
 
@@ -172,8 +172,8 @@ work/archive/2026/TASK-AUTH-009.md
 Используйте команды, а не ручное перемещение:
 
 ```bash
-docgent task archive TASK-AUTH-009 ./docs --format json
-docgent task restore TASK-AUTH-009 ./docs --format json
+docu-docu task archive TASK-AUTH-009 ./docs --format json
+docu-docu task restore TASK-AUTH-009 ./docs --format json
 ```
 
 Архивирование разрешено только для `Done`/`Выполнено` и
@@ -227,7 +227,7 @@ docgent task restore TASK-AUTH-009 ./docs --format json
 - `AC-01` → `go test ./internal/auth -run TestInvalidToken`
 - `AC-02` → `go test ./internal/auth -run TestResetPassword`
 - `ALL` → `go test ./...`
-- `DOCS` → `docgent check ./docs --strict`
+- `DOCS` → `docu-docu check ./docs --strict`
 ```
 
 Targets имеют следующий смысл:
@@ -302,7 +302,7 @@ verification означает `ALL + DOCS + QUALITY`. `task context` включ�
 - `AC-01` → `go test ./internal/auth -run TestExpiredResetToken`
 - `AC-02` → `go test ./internal/auth -run TestResetTokenSingleUse`
 - `ALL` → `go test ./...`
-- `DOCS` → `docgent check ./docs --strict`
+- `DOCS` → `docu-docu check ./docs --strict`
 
 ## Влияние на документацию
 

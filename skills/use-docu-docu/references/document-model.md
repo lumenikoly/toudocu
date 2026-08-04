@@ -1,7 +1,7 @@
-# Docgent document model
+# Docu-docu document model
 
 Use this reference when deciding whether a document should remain free-form or
-participate in Docgent's typed knowledge model.
+participate in Docu-docu's typed knowledge model.
 
 ## Validation boundary
 
@@ -79,7 +79,7 @@ When opting into a typed entity:
 - update all references together when identity genuinely changes;
 - use relative Markdown links that remain inside repository root.
 
-For a `UC-*` roadmap item, Docgent derives effective completion from the linked
+For a `UC-*` roadmap item, Docu-docu derives effective completion from the linked
 use-case status. `CON-*` and `DLV-*` retain their roadmap checkbox state. Other
 checklists do not contribute to global progress.
 
@@ -90,13 +90,13 @@ rules, invariants, stable interfaces, and related use cases. The use-case
 template includes its main scenario, postconditions, rules, and implementation.
 The flow template contains a Mermaid visualization and explicit links to its
 requirements or architecture source. A product flow may list one or more
-`UC-*` values in `Scenario`; Docgent builds both the `FLOW → UC` list and the
+`UC-*` values in `Scenario`; Docu-docu builds both the `FLOW → UC` list and the
 reverse `UC → FLOW` relationships. Each screen template contains that screen's
-metadata, states and outgoing transitions; Docgent derives the catalog, map and
+metadata, states and outgoing transitions; Docu-docu derives the catalog, map and
 playable flows from those files. The ADR template includes context, decision,
 and consequences.
 
-Docgent reports missing recommended sections as warnings. Use these sections
+Docu-docu reports missing recommended sections as warnings. Use these sections
 when they add information; do not create empty or speculative prose. If the
 project does not need typed semantics, use the generic `document.md` template
 outside the reserved typed paths.
@@ -117,12 +117,12 @@ Common schema-driven anti-patterns include:
 
 Use one `FLOW-*` document for one significant scenario, branch, error path, or
 service interaction. For a product flow, list one or more existing `UC-*`
-values in the `Scenario` field; Docgent creates the reverse relationship on
+values in the `Scenario` field; Docu-docu creates the reverse relationship on
 every listed use case. For a genuinely architectural flow, omit `Scenario` and
 link an architecture document instead. Put concrete request sequences in
 `flows/`; keep component, boundary, and dependency overviews in architecture,
 and leave simple endpoint operations in API contracts. Mermaid node labels and
-edges are visualization only: Docgent does not derive relationships from them.
+edges are visualization only: Docu-docu does not derive relationships from them.
 Derive the diagram from the scenario; do not start from a generic
 start-to-finish graph and retrofit meaning.
 
@@ -165,7 +165,7 @@ internal component states as screens. Every transition must represent a
 meaningful user action. Put the detailed behavior of one scenario in a
 `FLOW-*` document instead of duplicating it in the product-wide map.
 
-Do not maintain a separate Mermaid source or `screens/map.md`. Docgent derives
+Do not maintain a separate Mermaid source or `screens/map.md`. Docu-docu derives
 the catalog, SVG map and playable flows from the screen documents.
 
 Use cases and tasks can select screens with:

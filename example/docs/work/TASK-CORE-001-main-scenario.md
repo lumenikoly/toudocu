@@ -58,7 +58,7 @@
 - `AC-05` → `TR-CORE-005` → `TestInvalidRequest`
 - `AC-05` → `test -f ./docs/contracts/api.md`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docgent check ./example/docs --repository-root ./example`
+- `DOCS` → `go run ./cmd/docu-docu check ./example/docs --repository-root ./example`
 
 ## План
 

@@ -1,4 +1,4 @@
-package docgent
+package docudocu
 
 import (
 	"bytes"
@@ -39,7 +39,7 @@ func editorRequest(method, target, action string, body any) *http.Request {
 	request := httptest.NewRequest(method, target, reader)
 	if action != "" {
 		request.Header.Set("Content-Type", "application/json")
-		request.Header.Set("X-Docgent-Action", action)
+		request.Header.Set("X-Docu-docu-Action", action)
 		request.Header.Set("Sec-Fetch-Site", "same-origin")
 		request.Header.Set("Origin", "http://"+request.Host)
 	}
@@ -65,7 +65,7 @@ func TestStaticSiteExcludesEditor(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, forbidden := range []string{"/_docgent/editor", "/changes/", "editor.js", "changes.js", "serve.js", "data-server-rebuild"} {
+	for _, forbidden := range []string{"/_docu-docu/editor", "/changes/", "editor.js", "changes.js", "serve.js", "data-server-rebuild"} {
 		if strings.Contains(string(page), forbidden) {
 			t.Fatalf("static page contains %q", forbidden)
 		}
@@ -74,7 +74,7 @@ func TestStaticSiteExcludesEditor(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if strings.Contains(string(app), "__docgent") || strings.Contains(string(app), "server-rebuild") {
+	if strings.Contains(string(app), "__docu-docu") || strings.Contains(string(app), "server-rebuild") {
 		t.Fatal("static app contains server-only rebuild code")
 	}
 	for _, asset := range []string{"editor.js", "changes.js", "changes.css", "codemirror.js", "serve.js"} {
@@ -90,10 +90,14 @@ func TestServeSiteIncludesEditor(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, expected := range []string{"/_docgent/editor/", "/changes/", "assets/serve.js", "data-server-rebuild", `meta name="docgent-revision" content="` + server.revision + `"`} {
+	for _, expected := range []string{"/_docu-docu/editor/", "/changes/", "assets/serve.js", "data-server-rebuild", "Рабочая область serve", "Область пересборки: модель, HTML и поиск", "Готово к пересборке", `meta name="docu-docu-revision" content="` + server.revision + `"`} {
 		if !strings.Contains(string(page), expected) {
 			t.Fatalf("serve page missing %q", expected)
 		}
+	}
+	files := performEditorRequest(server, editorRequest(http.MethodGet, editorAPIBase+"/files", "", nil))
+	if files.Header().Get("ETag") != `"`+server.revision+`"` || !strings.Contains(files.Body.String(), `"revision":"`+server.revision+`"`) {
+		t.Fatalf("serve page and polling endpoint use different revisions: meta=%s etag=%s body=%s", server.revision, files.Header().Get("ETag"), files.Body.String())
 	}
 	response := performEditorRequest(server, editorRequest(http.MethodGet, editorUIPath, "", nil))
 	if response.Code != http.StatusOK || !strings.Contains(response.Body.String(), "data-editor-host") {
@@ -203,7 +207,7 @@ func TestEditorAtomicSave(t *testing.T) {
 	if runtime.GOOS != "windows" && info.Mode().Perm() != 0640 {
 		t.Fatalf("mode changed: %o", info.Mode().Perm())
 	}
-	leftovers, _ := filepath.Glob(filepath.Join(docs, ".docgent-edit-*"))
+	leftovers, _ := filepath.Glob(filepath.Join(docs, ".docu-docu-edit-*"))
 	if len(leftovers) != 0 {
 		t.Fatalf("temporary files left: %v", leftovers)
 	}
@@ -342,7 +346,7 @@ func TestEditorPollingStateMachine(t *testing.T) {
 	for _, expected := range []string{"window.setInterval(() => loadFiles({ conditional: true })", "Файл удалён с диска", "Загрузить внешнюю версию и потерять", "new Blob([currentContent()]"} {
 		assertEditorAssetContains(t, "editor.js", expected)
 	}
-	for _, expected := range []string{`meta[name="docgent-revision"]`, "let etag = baseline"} {
+	for _, expected := range []string{`meta[name="docu-docu-revision"]`, "let etag = baseline"} {
 		assertEditorAssetContains(t, "serve.js", expected)
 	}
 }
@@ -566,9 +570,12 @@ func TestEditorVendoredAssets(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, artifact := range []string{"CODEMIRROR-LICENSE.txt", "CODEMIRROR-CHECKSUMS.txt"} {
+	for _, artifact := range []string{"THIRD_PARTY_NOTICES.md", "CODEMIRROR-CHECKSUMS.txt", "cat internal/app/assets/mermaid.LICENSE.txt", "cat internal/app/assets/codemirror.LICENSE.txt"} {
 		if !strings.Contains(string(makefile), artifact) {
 			t.Fatalf("release packaging missing %s", artifact)
 		}
+	}
+	if strings.Contains(string(makefile), "NOTICE ") {
+		t.Fatal("release packaging must not require a root NOTICE file")
 	}
 }

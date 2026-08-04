@@ -1,6 +1,6 @@
 # Каталог возможностей
 
-Страница перечисляет реализованные возможности Docgent и указывает, где
+Страница перечисляет реализованные возможности Docu-docu и указывает, где
 зафиксирован их подробный контракт. Источником истины остаются Markdown-файлы:
 портал и JSON не редактируют их и не хранят отдельную модель.
 
@@ -11,37 +11,37 @@
 - В `serve`: unified/CodeMirror merge/rendered/semantic diff, OpenAPI,
   Mermaid, assets, screen-map overlay и task impact.
 
-Docgent поставляется одним Go-бинарником без внешних runtime-зависимостей.
+Docu-docu поставляется одним Go-бинарником без внешних runtime-зависимостей.
 
 | Возможность | Команда | Результат |
 |---|---|---|
-| Проверка проекта | `docgent check ./docs` | diagnostics или `ProjectReport` |
-| Строгая проверка | `docgent check ./docs --strict` | warning также даёт exit code `1` |
-| Сборка портала | `docgent build ./docs` | автономный HTML и `report.json` |
-| Локальный workspace | `docgent serve ./docs` | view/edit, editor API, watcher и live rebuild |
-| Поиск документов | `docgent search "query" ./docs` | `SearchReport` по свежим Markdown |
-| Создание задачи | `docgent task init ./docs --area AREA --title TITLE --type TYPE` | новый Draft и `TaskInitReport` |
-| Создание сущности | `docgent scaffold module|use-case|flow|screen|decision ID ./docs --title TITLE` | атомарный scaffold и `ScaffoldReport` |
-| Проверка готовности | `docgent task ready TASK-ID ./docs` | read-only `TaskReadyReport` |
-| Контекст задачи | `docgent task context TASK-ID ./docs` | read-only `TaskContextReport` |
-| Проверка задачи | `docgent task verify TASK-ID ./docs --dry-run|--run` | план или выполнение команд и `TaskVerifyReport` |
-| Версия | `docgent version` | версия генератора |
+| Проверка проекта | `docu-docu check ./docs` | diagnostics или `ProjectReport` |
+| Строгая проверка | `docu-docu check ./docs --strict` | warning также даёт exit code `1` |
+| Сборка портала | `docu-docu build ./docs` | автономный HTML и `report.json` |
+| Локальный workspace | `docu-docu serve ./docs` | view/edit, editor API, watcher и live rebuild |
+| Поиск документов | `docu-docu search "query" ./docs` | `SearchReport` по свежим Markdown |
+| Создание задачи | `docu-docu task init ./docs --area AREA --title TITLE --type TYPE` | новый Draft и `TaskInitReport` |
+| Создание сущности | `docu-docu scaffold module|use-case|flow|screen|decision ID ./docs --title TITLE` | атомарный scaffold и `ScaffoldReport` |
+| Проверка готовности | `docu-docu task ready TASK-ID ./docs` | read-only `TaskReadyReport` |
+| Контекст задачи | `docu-docu task context TASK-ID ./docs` | read-only `TaskContextReport` |
+| Проверка задачи | `docu-docu task verify TASK-ID ./docs --dry-run|--run` | план или выполнение команд и `TaskVerifyReport` |
+| Версия | `docu-docu version` | версия генератора |
 
-Вызов `docgent ./docs` сохраняется как сокращение для `build`. Отдельной
-верхнеуровневой команды `init` нет: минимальный проект создаётся файлами
+Сборка требует явного `docu-docu build ./docs`; путь без команды отклоняется.
+Отдельной верхнеуровневой команды `init` нет: минимальный проект создаётся файлами
 `docs/index.md` и `docs/architecture/overview.md`; `task init` создаёт только
 work item. Параметры и exit codes
 определены в [CLI-контракте](../contracts/cli.md).
 
 ## Skill workflows актуализации
 
-Устанавливаемый `use-docgent` предоставляет две изменяющие prompt-команды,
-которые не входят в Go CLI:
+Устанавливаемый `use-docu-docu` предоставляет изменяющие agent workflows,
+которые не входят в Go CLI: `init`, `refresh`, `refresh diff` и `translate`.
 
-- `$use-docgent refresh` сверяет весь набор исходных Markdown-документов с
+- `$use-docu-docu refresh` сверяет весь набор исходных Markdown-документов с
   текущим кодом, тестами, публичными интерфейсами, schemas, configuration, CI,
   требованиями и решениями;
-- `$use-docgent refresh diff` начинает со staged, unstaged и untracked файлов
+- `$use-docu-docu refresh diff` начинает со staged, unstaged и untracked файлов
   относительно `HEAD` и добавляет зависимые документы по ссылкам, stable ID,
   task relationships и изменённому публичному поведению.
 
@@ -57,7 +57,7 @@ Refresh обновляет только evidence-backed источники, не
 Минимальная документация содержит `index.md` и карту
 `architecture/overview.md` с типом `Architecture Overview`. Каждый другой
 `architecture/**/*.md` отвечает на один непустой архитектурный вопрос и
-должен быть напрямую указан в overview. По мере необходимости Docgent
+должен быть напрямую указан в overview. По мере необходимости Docu-docu
 распознаёт:
 
 - `status.md`, `roadmap.md`, `risks.md`, `ideas.md` и `notes.md`;
@@ -106,14 +106,16 @@ gate, а schema v1 сохраняет `documents[].type: "architecture"`.
 `build` создаёт страницы документов и каталогов, dashboard, health report,
 поиск и `report.json`. Интерфейс предоставляет:
 
-- иерархическую сворачиваемую навигацию с сохранением состояния;
-- цветовые статусы в значках навигации с текстовой подписью для доступности и
+- иерархическую навигацию: активная группа раскрыта, остальные по умолчанию
+  свёрнуты, пользовательское состояние сохраняется;
+- цветовые статусы в значках документов с текстовой подписью для доступности и
   отдельными `☐`/`☑` для невыполненных и выполненных `TASK-*`/`BUG-*`;
 - глобальный полнотекстовый поиск с клавиатурным вызовом `/`;
 - отдельную страницу «Журнал изменений проекта» из корневого `CHANGELOG.md`,
   если это обычный читаемый файл; она участвует в portal search, но не входит в
   `report.json`, task context, semantic model или editor workspace;
-- оглавление и сворачиваемые разделы документа;
+- 3–5 рекомендуемых точек входа и единый фильтруемый полный каталог;
+- оглавление и сворачиваемые разделы документа с чистыми accessible names;
 - копирование названия и repository-relative пути исходного Markdown-документа
   для передачи контекста агенту;
 - копирование блоков кода с fallback на выделение;
@@ -133,7 +135,7 @@ gate, а schema v1 сохраняет `documents[].type: "architecture"`.
 исходников, path/dirty/save toolbar, CodeMirror, вкладки Editor/Preview/Split и
 positional diagnostics. Markdown preview использует существующий safe renderer;
 JSON получает syntax и hotspots diagnostics, а произвольный YAML — только
-доступные Docgent diagnostics без выдуманной общей schema.
+доступные Docu-docu diagnostics без выдуманной общей schema.
 
 Save использует SHA-256 CAS и atomic replace. После save/create модель, HTML,
 search и diagnostics перестраиваются синхронно; watcher проверяет внешние
@@ -283,7 +285,7 @@ Timeout завершает дерево процессов, а stdout и stderr 
 
 ## Ограничения
 
-Docgent не является сетевой CMS, collaborative editor или средой выполнения
+Docu-docu не является сетевой CMS, collaborative editor или средой выполнения
 продукта. Live workspace существует только внутри процесса `serve`, не хранит
 серверную базу, не выполняет API-запросы пошагового viewer и не импортирует
 интерфейсы из Figma или frontend-кода.

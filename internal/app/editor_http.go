@@ -1,4 +1,4 @@
-package docgent
+package docudocu
 
 import (
 	"encoding/json"
@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	editorAPIBase   = "/_docgent/api/editor"
-	editorUIPath    = "/_docgent/editor/"
+	editorAPIBase   = "/_docu-docu/api/editor"
+	editorUIPath    = "/_docu-docu/editor/"
 	editorBodyLimit = 3 << 20
 )
 
@@ -87,8 +87,8 @@ func requireEditorJSONAction(w http.ResponseWriter, r *http.Request, action stri
 		writeEditorError(w, http.StatusUnsupportedMediaType, "invalid_content_type", "Требуется Content-Type application/json", nil)
 		return false
 	}
-	if r.Header.Get("X-Docgent-Action") != action {
-		writeEditorError(w, http.StatusForbidden, "action_forbidden", "Неверный X-Docgent-Action", nil)
+	if r.Header.Get("X-Docu-docu-Action") != action {
+		writeEditorError(w, http.StatusForbidden, "action_forbidden", "Неверный X-Docu-docu-Action", nil)
 		return false
 	}
 	if !editorOriginAllowed(r) {
@@ -157,10 +157,18 @@ func (s *documentationServer) serveEditorFiles(w http.ResponseWriter, r *http.Re
 	if !allowEditorMethods(w, r, http.MethodGet) {
 		return
 	}
-	files, revision, err := s.workspace.scan(s.model)
+	files, _, err := s.workspace.scan(s.model)
 	if err != nil {
 		writeEditorError(w, http.StatusInternalServerError, "workspace_error", err.Error(), nil)
 		return
+	}
+	revision := s.revision
+	if revision == "" {
+		_, revision, err = s.workspace.scan(s.model)
+		if err != nil {
+			writeEditorError(w, http.StatusInternalServerError, "workspace_error", err.Error(), nil)
+			return
+		}
 	}
 	etag := `"` + revision + `"`
 	w.Header().Set("ETag", etag)

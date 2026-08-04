@@ -5,7 +5,7 @@
 - Приоритет: Средний
 - Модуль: MOD-SITE
 - Сценарий: UC-DOCS-01
-- Владелец: Команда Docgent
+- Владелец: Команда Docu-docu
 - Последнее обновление: 2026-07-30
 
 ## Результат
@@ -73,7 +73,7 @@
 - `AC-03` → `go test ./... -run 'TestDocumentContext'`
 - `AC-04` → `go test ./... -run 'TestDocumentContext'`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docgent check ./docs --repository-root .`
+- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root .`
 
 ## Влияние на документацию
 

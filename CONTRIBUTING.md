@@ -1,6 +1,6 @@
 # Contributing
 
-Спасибо за вклад в Docgent.
+Спасибо за вклад в Docu-docu.
 
 ## Процесс
 

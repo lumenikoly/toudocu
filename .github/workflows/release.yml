@@ -17,7 +17,7 @@ jobs:
           go-version-file: go.mod
           cache: true
       - name: Verify tag version
-        run: test "$(go run ./cmd/docgent version)" = "$GITHUB_REF_NAME"
+        run: test "$(go run ./cmd/docu-docu version)" = "$GITHUB_REF_NAME"
       - run: make release
       - uses: actions/upload-artifact@v4
         with:

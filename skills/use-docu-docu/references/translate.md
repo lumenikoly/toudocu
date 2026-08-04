@@ -1,9 +1,9 @@
 # Translation workflow
 
-Use only for an explicit `$use-docgent translate <locale>` request:
+Use only for an explicit `$use-docu-docu translate <locale>` request:
 
 ```text
-$use-docgent translate <locale> (--task <TASK-ID> | --base <ref> | --all-stale)
+$use-docu-docu translate <locale> (--task <TASK-ID> | --base <ref> | --all-stale)
 ```
 
 Exactly one mode is required. Normalize the locale, reject the canonical
@@ -15,8 +15,8 @@ translation root, or be the canonical docs root. Use the bundled map in
 the full map, obtain the titles in the request context, then save it once; do
 not rewrite an existing profile.
 
-Build the source change set with `docgent task changes <TASK-ID> ./docs --target
-working-tree --format json`, or `docgent changes ./docs --base <ref> --target
+Build the source change set with `docu-docu task changes <TASK-ID> ./docs --target
+working-tree --format json`, or `docu-docu changes ./docs --base <ref> --target
 working-tree --format json`. Do not fetch, checkout, stage, alter refs, or use
 history beyond the resolved base. Request assets with the changes-only include
 assets override, regardless of `changes.includeAssets`.
@@ -34,11 +34,11 @@ the available exact source diff, existing target, and these rules. Translate
 reader-facing prose; preserve IDs, metadata keys, enum/status contract values,
 commands, paths, URLs, anchors, code fences, and Mermaid/OpenAPI syntax.
 
-Maintain `.docgent/translations/<locale>.json` as a map of canonical relative
+Maintain `.docu-docu/translations/<locale>.json` as a map of canonical relative
 paths to SHA-256 source digests. Do not write or update it until one final:
 
 ```bash
-docgent check <target-root> --repository-root . --strict
+docu-docu check <target-root> --repository-root . --strict
 ```
 
 passes. If it fails, leave translated file edits in the worktree, leave the

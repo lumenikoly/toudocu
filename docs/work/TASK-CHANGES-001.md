@@ -7,12 +7,12 @@
 - Сценарий: UC-DOCS-05
 - Процесс: FLOW-DOCS-CHANGES
 - Стандарты: STD-GO-001, STD-DOCS-001
-- Владелец: Команда Docgent
+- Владелец: Команда Docu-docu
 - Последнее обновление: 2026-08-01
 
 ## Результат
 
-`docgent changes` и раздел `/changes` показывают Git-изменения исходной
+`docu-docu changes` и раздел `/changes` показывают Git-изменения исходной
 документации как source, rendered и deterministic semantic diff, сопоставляют
 их с task impact и экспортируют `ChangeSetReport` schema v1.
 
@@ -100,8 +100,8 @@
 - `AC-11` → `go test ./... -run 'TestChangesInvalidation|TestChangesWithoutGit'`
 - `AC-12` → `go test ./... -run 'TestStaticSiteExcludesChanges|TestProjectReport'`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docgent check ./docs --repository-root .`
-- `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/docgent check ./docs --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root .`
+- `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/docu-docu check ./docs --strict --stale-days 0`
 
 ## Влияние на документацию
 

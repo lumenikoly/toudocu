@@ -2,7 +2,23 @@
 
 ## Unreleased
 
-- Пока нет изменений.
+- Лицензия собственного кода изменена с MIT на Apache-2.0. При подготовке
+  release bundle формируется единый `THIRD_PARTY_NOTICES.md` с notices для
+  CodeMirror, Mermaid Tiny, lodash, js-yaml, DOMPurify и `go.yaml.in/yaml/v3`.
+- CLI получил контекстный help для каждой команды и task-группы с применимыми
+  параметрами, примерами, побочными эффектами и exit code `0`.
+- Удалены два синтаксических дубля: сборка требует явного `docu-docu build`, а
+  task-scoped change report вызывается только как `docu-docu task changes` без
+  флага `changes --task`.
+- `task init` и `scaffold` без `--lang` используют поддерживаемый основной язык
+  `project.locale`; fallback остаётся `en`, явный флаг имеет приоритет.
+- Skill `use-docu-docu` сокращён до таблицы маршрутизации операций и общих
+  инвариантов; обязательность `architecture/overview.md` закреплена единообразно.
+- Портал раскрывает только активную группу навигации по умолчанию, показывает
+  до пяти рекомендуемых точек входа, локализует трассируемость и отделяет
+  serve-workspace от действий чтения и документа. Пересборка показывает область,
+  progress, результат и ошибку с повтором; permalink и collapse-кнопки больше
+  не загрязняют accessible name заголовка.
 
 ## 0.0.1
 
@@ -18,7 +34,7 @@
   изменений проекта» по маршруту `project-changelog.html` и включает его в
   portal search. Файл не меняет `ProjectReport`, task context, semantic model
   или editor workspace; `docs/changelog.md` остаётся обычным Markdown.
-- Добавлены `docgent changes`, `changes file` и `task changes` с Git-backed
+- Добавлены `docu-docu changes`, `changes file` и `task changes` с Git-backed
   commit/index/working-tree snapshots, schema-v1 JSON, text/Markdown reports,
   filters, task impact и exit codes 0–4.
 - `serve` получил `/changes/`, read-only HTTP API, ETag digest polling,
@@ -39,21 +55,21 @@
 - Карта экранов получила obstacle-aware трассировку переходов и отдельный слой
   двухстрочных подписей, которые обходят карточки и остаются доступными с
   клавиатуры без изменения screen model или JSON schema.
-- Skill получил изменяющие workflow `$use-docgent refresh` для полного ревью
-  актуальности и `$use-docgent refresh diff` для staged, unstaged и untracked
+- Skill получил изменяющие workflow `$use-docu-docu refresh` для полного ревью
+  актуальности и `$use-docu-docu refresh diff` для staged, unstaged и untracked
   изменений относительно `HEAD` с расширением на зависимые документы. Оба
   режима используют evidence-first updates, semantic gate и условную
-  пересборку tracked portals; Go-команда `docgent refresh` не добавлена.
+  пересборку tracked portals; Go-команда `docu-docu refresh` не добавлена.
 - Архитектурная документация стала вопросно-ориентированной:
   `architecture/overview.md` обязателен, имеет тип `Architecture Overview` и
   напрямую перечисляет каждый подробный ответ; обычный check выдаёт стабильные
   errors для отсутствующей карты, типа, вопроса, листинга и небезопасных
   архитектурных ссылок без изменения ProjectReport schema v1.
-- RU/EN architecture template разделён на overview и detail; `$use-docgent
+- RU/EN architecture template разделён на overview и detail; `$use-docu-docu
   init` создаёт минимальные `index.md` и architecture overview, но
   останавливается на legacy-архитектуре. Managed guidance и semantic gate
   получили правила одного вопроса и проверки `ARCH001`–`ARCH013`.
-- Skill получил явный onboarding-вызов `$use-docgent init`: только он создаёт
+- Skill получил явный onboarding-вызов `$use-docu-docu init`: только он создаёт
   минимальную документацию и устанавливает управляемые правила в `AGENTS.md`;
   обычные prompt больше не подразумевают автоматическую инициализацию или
   обязательный новый `TASK-*`.
@@ -71,9 +87,9 @@
   варианты accent, плотности и ширины, переключатель `system → light → dark` и
   отдельные выпадающие списки темы и цветовой схемы с локальным сохранением
   выбора; Mermaid-цвета согласованы с обоими контролами.
-- `.docgent/config.yml` настраивает title, hero, footer, logo и favicon через
+- `.docu-docu/config.yml` настраивает title, hero, footer, logo и favicon через
   строгий YAML-поднабор; branding assets копируются только из
-  `.docgent/assets/`, а runtime-ресурсы остаются offline-first.
+  `.docu-docu/assets/`, а runtime-ресурсы остаются offline-first.
 - Добавлены детерминированные `search`, `task init`, `scaffold`, `task ready`,
   расширенный `task context` и `task verify`; прежняя `task check` удалена.
 - Все публичные JSON-отчёты используют единую schema v1 без legacy-слоя и
@@ -83,7 +99,7 @@
 - `task verify --run` блокирует Draft и Cancelled; readiness требует module,
   task context включает явно связанные transitions, а отсутствующий scope-каталог
   и многострочный scaffold title отклоняются.
-- Зафиксирована граница Agent/Docgent: CLI не интерпретирует запрос, не меняет
+- Зафиксирована граница Agent/Docu-docu: CLI не интерпретирует запрос, не меняет
   статус и не подтверждает acceptance criteria.
 - `sequenceDiagram` теперь подчиняется общим правилам связи Mermaid-документов:
   конкретные последовательности запросов можно описывать в связанных `FLOW-*`

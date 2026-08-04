@@ -1,4 +1,4 @@
-package docgent
+package docudocu
 
 import (
 	"context"
@@ -249,7 +249,7 @@ func executeTaskVerify(model *Model, options Options, stdout, stderr io.Writer, 
 	item, validationIssues := taskVerifyValidation(model, options.TaskID, options.Target, options.VerifyMode)
 	report := TaskVerifyReport{
 		SchemaVersion: 1, Kind: "task-verify",
-		Generator: GeneratorInfo{Name: "Docgent", Version: Version},
+		Generator: GeneratorInfo{Name: "Docu-docu", Version: Version},
 		Task:      taskSnapshot(item, options.TaskID), StartedAt: startedAt, Mode: options.VerifyMode, Target: options.Target,
 		ValidationIssues: append([]Issue{}, validationIssues...),
 		Issues:           append([]Issue{}, model.Issues...),
@@ -349,7 +349,7 @@ func writeReportAtomically(target string, data []byte) error {
 	if err := os.MkdirAll(directory, 0700); err != nil {
 		return err
 	}
-	temporary, err := os.CreateTemp(directory, ".docgent-task-report-*")
+	temporary, err := os.CreateTemp(directory, ".docu-docu-task-report-*")
 	if err != nil {
 		return err
 	}
