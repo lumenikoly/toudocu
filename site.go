@@ -12,9 +12,9 @@ import (
 
 const Version = "1.1.0-go"
 
-var fieldOrder = []string{"status", "type", "stage", "version", "owner", "author", "actor", "priority", "criticality", "module", "useCase", "dependsOn", "source", "date", "plannedDate", "updated", "probability", "impact", "id", "tags"}
+var fieldOrder = []string{"status", "type", "stage", "version", "owner", "author", "actor", "priority", "criticality", "module", "useCase", "flow", "dependsOn", "source", "date", "plannedDate", "updated", "probability", "impact", "id", "tags"}
 
-var typeIcons = map[string]string{"overview": "⌂", "status": "◐", "roadmap": "→", "risks": "!", "changelog": "↻", "use-case": "◎", "module": "▦", "architecture": "◇", "contract": "⇄", "decision": "◆", "guide": "◫", "work": "☑", "reference": "≡", "document": "•"}
+var typeIcons = map[string]string{"overview": "⌂", "status": "◐", "roadmap": "→", "risks": "!", "ideas": "✦", "notes": "✎", "changelog": "↻", "use-case": "◎", "module": "▦", "architecture": "◇", "contract": "⇄", "decision": "◆", "flow": "⇢", "guide": "◫", "work": "☑", "reference": "≡", "document": "•"}
 
 func renderStatusChip(status StatusInfo) string {
 	return fmt.Sprintf(`<span class="status-chip status-%s" title="%s"><span aria-hidden="true">%s</span><span>%s</span></span>`, escapeAttr(status.Kind), escapeAttr(status.Label), escapeHTML(status.Symbol), escapeHTML(status.Label))
@@ -118,7 +118,11 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 		tocHTML = `<aside class="page-toc" aria-label="Оглавление"><div class="page-toc-title">На странице</div>` + toc + `</aside>`
 		gridClass = ""
 	}
-	return `<!doctype html><html lang="ru" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="` + escapeAttr(description) + `"><title>` + escapeHTML(fullTitle) + `</title><link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/style.css"><script src="` + escapeAttr(prefix) + `assets/search-index.js" defer></script><script src="` + escapeAttr(prefix) + `assets/app.js" defer></script></head><body data-root-prefix="` + escapeAttr(prefix) + `" data-task-filter="all"><a class="skip-link" href="#main-content">Перейти к содержимому</a><header class="site-header"><div class="brand-area"><button class="icon-button sidebar-toggle" type="button" data-sidebar-toggle aria-label="Открыть навигацию">☰</button><a class="brand" href="` + escapeAttr(relativeURL(current, "index.html")) + `"><span class="brand-mark">DG</span><span class="brand-text">` + escapeHTML(model.Project.Title) + `</span></a></div><div class="global-search" role="search"><div class="search-input-wrap"><input type="search" data-global-search placeholder="Поиск по документации" aria-label="Поиск по документации"><span class="search-shortcut">/</span></div><div class="search-results" id="global-search-results" data-search-results role="listbox" hidden></div></div><div class="header-actions"><button class="icon-button" type="button" data-print aria-label="Печать">⎙</button><button class="icon-button" type="button" data-theme-toggle aria-label="Переключить тему">☾</button></div></header><div class="site-layout"><aside class="sidebar">` + renderNavigation(model, current) + `</aside><div class="main-area"><main id="main-content" class="page-grid` + gridClass + `"><div class="page-content">` + content + `</div>` + tocHTML + `</main><footer class="site-footer">Сгенерировано Docgent ` + Version + `</footer></div></div></body></html>`
+	mermaidScript := ""
+	if strings.Contains(content, `data-mermaid-diagram`) {
+		mermaidScript = `<script src="` + escapeAttr(prefix) + `assets/mermaid.tiny.js" defer></script>`
+	}
+	return `<!doctype html><html lang="ru" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="` + escapeAttr(description) + `"><title>` + escapeHTML(fullTitle) + `</title><link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/style.css"><script src="` + escapeAttr(prefix) + `assets/search-index.js" defer></script>` + mermaidScript + `<script src="` + escapeAttr(prefix) + `assets/app.js" defer></script></head><body data-root-prefix="` + escapeAttr(prefix) + `" data-task-filter="all"><a class="skip-link" href="#main-content">Перейти к содержимому</a><header class="site-header"><div class="brand-area"><button class="icon-button sidebar-toggle" type="button" data-sidebar-toggle aria-label="Открыть навигацию">☰</button><a class="brand" href="` + escapeAttr(relativeURL(current, "index.html")) + `"><span class="brand-mark">DG</span><span class="brand-text">` + escapeHTML(model.Project.Title) + `</span></a></div><div class="global-search" role="search"><div class="search-input-wrap"><input type="search" data-global-search placeholder="Поиск по документации" aria-label="Поиск по документации"><span class="search-shortcut">/</span></div><div class="search-results" id="global-search-results" data-search-results role="listbox" hidden></div></div><div class="header-actions"><button class="icon-button" type="button" data-print aria-label="Печать">⎙</button><button class="icon-button" type="button" data-theme-toggle aria-label="Переключить тему">☾</button></div></header><div class="site-layout"><aside class="sidebar">` + renderNavigation(model, current) + `</aside><div class="main-area"><main id="main-content" class="page-grid` + gridClass + `"><div class="page-content">` + content + `</div>` + tocHTML + `</main><footer class="site-footer">Сгенерировано Docgent ` + Version + `</footer></div></div></body></html>`
 }
 
 func breadcrumbs(model *Model, current, title string) string {
@@ -231,7 +235,7 @@ func filterControls(includeStatus, includeType bool) string {
 	}
 	typeControl := ""
 	if includeType {
-		typeControl = `<select data-filter-control="type"><option value="all">Все типы</option><option value="module">Модули</option><option value="use-case">Сценарии</option><option value="architecture">Архитектура</option><option value="decision">Решения</option><option value="work">Задачи</option></select>`
+		typeControl = `<select data-filter-control="type"><option value="all">Все типы</option><option value="module">Модули</option><option value="use-case">Сценарии</option><option value="flow">Процессы</option><option value="architecture">Архитектура</option><option value="decision">Решения</option><option value="work">Задачи</option></select>`
 	}
 	return `<div class="collection-controls"><input type="search" data-filter-control="search" placeholder="Фильтр" aria-label="Фильтр">` + statusControl + typeControl + `</div>`
 }
@@ -541,7 +545,7 @@ func GenerateSite(model *Model, options Options) (GenerateResult, error) {
 	if err = mkdirp(output); err != nil {
 		return GenerateResult{}, err
 	}
-	for _, asset := range []string{"style.css", "app.js"} {
+	for _, asset := range []string{"style.css", "app.js", "mermaid.tiny.js", "mermaid.LICENSE.txt"} {
 		if err = copyFSFile(EmbeddedFiles, "assets/"+asset, filepath.Join(output, "assets", asset)); err != nil {
 			return GenerateResult{}, err
 		}
@@ -598,5 +602,5 @@ func GenerateSite(model *Model, options Options) (GenerateResult, error) {
 	if err = writeFileEnsured(filepath.Join(output, model.ReportOutputPath), report); err != nil {
 		return GenerateResult{}, err
 	}
-	return GenerateResult{OutputDirectory: output, Pages: pages, Assets: len(model.Assets) + 3}, nil
+	return GenerateResult{OutputDirectory: output, Pages: pages, Assets: len(model.Assets) + 5}, nil
 }

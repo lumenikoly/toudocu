@@ -375,7 +375,8 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 	return WorkItem{
 		ID: match[1], Title: match[2], Status: StatusFor(item.Metadata["status"]), Type: typeName,
 		Priority: item.Metadata["priority"], Owner: item.Metadata["owner"], ModuleID: item.Metadata["module"],
-		UseCaseID: useCaseID, DependsOn: splitReferences(item.Metadata["dependsOn"]), Document: document.SourcePath,
+		UseCaseID: useCaseID, FlowID: strings.TrimSpace(item.Metadata["flow"]),
+		DependsOn: splitReferences(item.Metadata["dependsOn"]), Document: document.SourcePath,
 		Anchor: item.Heading.ID, Criteria: criteria, Verification: verification, Checks: checks,
 		RepositoryPaths: repositoryPaths, line: item.Heading.Line + 1,
 		Result: strings.TrimSpace(resultSection.Text), Blocker: strings.TrimSpace(blockerSection.Text),
@@ -468,7 +469,7 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 	workItems := []WorkItem{}
 
 	for _, document := range model.Documents {
-		requiredPrefix := map[string]string{"module": "MOD-", "use-case": "UC-", "decision": "ADR-"}[document.Type]
+		requiredPrefix := map[string]string{"module": "MOD-", "use-case": "UC-", "decision": "ADR-", "flow": "FLOW-"}[document.Type]
 		stableID := document.Metadata["id"]
 		if requiredPrefix != "" && stableID == "" {
 			addKnowledgeIssue(model, document, "error", "missing-document-id", fmt.Sprintf("Для типа «%s» требуется поле «Идентификатор».", document.TypeLabel), 0)
@@ -568,6 +569,12 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 		}
 		if item.UseCaseID != "" && useCaseByID[item.UseCaseID] == nil {
 			addKnowledgeIssue(model, item.ownerDoc, "error", "dangling-use-case-reference", fmt.Sprintf("Задача %s ссылается на неизвестный сценарий %s.", item.ID, fallbackDash(item.UseCaseID)), item.line)
+		}
+		if item.FlowID != "" {
+			target := documentIDs[item.FlowID]
+			if target == nil || target.Type != "flow" {
+				addKnowledgeIssue(model, item.ownerDoc, "error", "dangling-flow-reference", fmt.Sprintf("Задача %s ссылается на неизвестный процесс %s.", item.ID, fallbackDash(item.FlowID)), item.line)
+			}
 		}
 		for _, dependencyID := range item.DependsOn {
 			if workByID[dependencyID] == nil {

@@ -1,13 +1,29 @@
 package docgent
 
 import (
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 )
+
+func TestEmbeddedMermaidVersionIsPinned(t *testing.T) {
+	content, err := EmbeddedFiles.ReadFile("assets/mermaid.tiny.js")
+	if err != nil {
+		t.Fatal(err)
+	}
+	const expected = "a1bc2282b3d935693780f77931382c517e72eb72ff3427752cbb29941de11bee"
+	if actual := fmt.Sprintf("%x", sha256.Sum256(content)); actual != expected {
+		t.Fatalf("unexpected Mermaid bundle checksum: got %s want %s", actual, expected)
+	}
+	if _, err := EmbeddedFiles.ReadFile("assets/mermaid.LICENSE.txt"); err != nil {
+		t.Fatal("embedded Mermaid license is missing")
+	}
+}
 
 func writeTestFile(t *testing.T, root, relative, content string) {
 	t.Helper()
@@ -174,6 +190,218 @@ func TestModelAndStatistics(t *testing.T) {
 	}
 }
 
+func TestNotesAndIdeasAreUnvalidatedFreeFormDocuments(t *testing.T) {
+	root := t.TempDir()
+	docs := filepath.Join(root, "docs")
+	writeTestFile(t, docs, "index.md", "# Проект\n\nОписание.\n")
+	writeTestFile(t, docs, "notes.md", `# Заметки
+
+## Наблюдения
+
+- Первый пункт с **выделением**
+  - Вложенный пункт
+`)
+	writeTestFile(t, docs, "ideas.md", `- Статус: неизвестная идея
+- Обновлено: 2000-01-01
+
+## Возможности
+
+1. Первый план.
+2. Второй план.
+`)
+
+	model, err := BuildDocumentationModel(Options{
+		InputDirectory: docs,
+		RepositoryRoot: root,
+		StaleDays:      1,
+		Now:            time.Date(2026, 7, 27, 12, 0, 0, 0, time.UTC),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if model.DocByPath["notes.md"].Type != "notes" || model.DocByPath["ideas.md"].Type != "ideas" {
+		t.Fatalf("unexpected free-form types: notes=%q ideas=%q", model.DocByPath["notes.md"].Type, model.DocByPath["ideas.md"].Type)
+	}
+	for _, issue := range model.Issues {
+		if issue.DocumentPath == "notes.md" || issue.DocumentPath == "ideas.md" {
+			t.Fatalf("free-form documents must not produce validation issues: %#v", issue)
+		}
+	}
+
+	output := filepath.Join(root, "site")
+	if _, err := GenerateSite(model, Options{OutputDirectory: output}); err != nil {
+		t.Fatal(err)
+	}
+	notesHTML, err := os.ReadFile(filepath.Join(output, "notes.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, fragment := range []string{"Заметки", "Наблюдения", "<ul>", "<strong>выделением</strong>", "Вложенный пункт"} {
+		if !strings.Contains(string(notesHTML), fragment) {
+			t.Fatalf("notes page does not contain %q", fragment)
+		}
+	}
+	ideasHTML, err := os.ReadFile(filepath.Join(output, "ideas.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(ideasHTML), "<ol>") || !strings.Contains(string(ideasHTML), "Идеи развития") {
+		t.Fatal("ideas page must render ordered plans and its document type")
+	}
+}
+
+func TestMermaidFlowModelAndRelationships(t *testing.T) {
+	root := t.TempDir()
+	docs := filepath.Join(root, "docs")
+	writeTestFile(t, docs, "index.md", "# Проект\n\nОписание.\n")
+	writeTestFile(t, docs, "modules/auth.md", `# Авторизация
+
+- Идентификатор: MOD-AUTH
+- Статус: В работе
+
+Модуль авторизации.
+`)
+	writeTestFile(t, docs, "use-cases/login.md", `# UC-AUTH-01: Вход
+
+- Идентификатор: UC-AUTH-01
+- Статус: В работе
+- Модуль: MOD-AUTH
+
+Пользователь входит.
+`)
+	writeTestFile(t, docs, "flows/login.md", `# FLOW-AUTH-LOGIN: Вход
+
+- Идентификатор: FLOW-AUTH-LOGIN
+- Сценарий: UC-AUTH-01
+- Модуль: MOD-AUTH
+
+Процесс входа.
+
+## Процесс
+
+`+"```mermaid"+`
+flowchart TD
+    Login --> Dashboard
+`+"```"+`
+`)
+	writeTestFile(t, docs, "architecture/services.md", `# Взаимодействие сервисов
+
+- Идентификатор: ADR-SERVICES
+
+Архитектурное взаимодействие.
+
+`+"```mermaid"+`
+sequenceDiagram
+    Web->>API: Login
+`+"```"+`
+`)
+	writeTestFile(t, docs, "flows/services.md", `# FLOW-SERVICES: Вызов API
+
+- Идентификатор: FLOW-SERVICES
+
+Архитектурный процесс.
+
+`+"```mermaid"+`
+sequenceDiagram
+    Web->>API: Login
+`+"```"+`
+
+[Архитектура](../architecture/services.md)
+`)
+
+	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	flow := model.DocByPath["flows/login.md"]
+	if flow == nil || flow.Type != "flow" {
+		t.Fatalf("flow document was not classified: %#v", flow)
+	}
+	for _, issue := range model.Issues {
+		if strings.Contains(issue.Code, "mermaid") || strings.Contains(issue.Code, "flow") || issue.Code == "dangling-use-case-reference" || issue.Code == "dangling-module-reference" {
+			t.Fatalf("valid Mermaid model produced issue: %#v", issue)
+		}
+	}
+}
+
+func TestMermaidContractErrors(t *testing.T) {
+	root := t.TempDir()
+	docs := filepath.Join(root, "docs")
+	writeTestFile(t, docs, "index.md", "# Проект\n\nОписание.\n")
+	writeTestFile(t, docs, "flows/missing.md", `# Процесс без схемы
+
+- Идентификатор: FLOW-MISSING
+`)
+	writeTestFile(t, docs, "guides/unlinked.md", `# Непривязанная схема
+
+Описание.
+
+`+"```mermaid"+`
+sequenceDiagram
+    A->>B: Test
+`+"```"+`
+`)
+	writeTestFile(t, docs, "work/TASK-FLOW-001.md", `# TASK-FLOW-001: Проверить процесс
+
+- Статус: Черновик
+- Тип: Research
+- Процесс: FLOW-UNKNOWN
+
+## Результат
+
+Проверка выполнена.
+`)
+	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	codes := map[string]bool{}
+	for _, issue := range model.Issues {
+		codes[issue.Code] = true
+	}
+	for _, code := range []string{"missing-flow-diagram", "unlinked-mermaid-diagram", "sequence-diagram-outside-architecture", "dangling-flow-reference"} {
+		if !codes[code] {
+			t.Fatalf("missing %s in %#v", code, model.Issues)
+		}
+	}
+}
+
+func TestTaskContextIncludesReferencedFlow(t *testing.T) {
+	_, docs, _ := createFixture(t)
+	writeTestFile(t, docs, "flows/login.md", `# FLOW-AUTH-LOGIN: Вход
+
+- Идентификатор: FLOW-AUTH-LOGIN
+- Сценарий: UC-AUTH-01
+
+Процесс входа.
+
+`+"```mermaid"+`
+flowchart TD
+    Login --> Dashboard
+`+"```"+`
+`)
+	commands := map[string]string{"AC-01": "pass", "AC-02": "pass", "ALL": "pass", "DOCS": "pass"}
+	task := strings.Replace(taskCheckFixture("Черновик", false, commands, ""), "- Сценарий: UC-AUTH-01", "- Сценарий: UC-AUTH-01\n- Процесс: FLOW-AUTH-LOGIN", 1)
+	writeTestFile(t, docs, "work/TASK-AUTH-020-flow.md", task)
+	model := buildFixture(t, docs)
+	report, err := BuildTaskContext(model, "TASK-AUTH-020")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Task.FlowID != "FLOW-AUTH-LOGIN" {
+		t.Fatalf("flow ID missing from task: %#v", report.Task)
+	}
+	found := false
+	for _, document := range report.Documents {
+		if document.Path == "flows/login.md" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("flow missing from task context: %#v", report.Documents)
+	}
+}
+
 func TestGenerateSite(t *testing.T) {
 	_, docs, output := createFixture(t)
 	indexFile, err := os.OpenFile(filepath.Join(docs, "index.md"), os.O_APPEND|os.O_WRONLY, 0644)
@@ -243,6 +471,75 @@ func TestGenerateSite(t *testing.T) {
 	}
 	if !foundDirectoryTarget {
 		t.Fatal("generated directory link is missing a typed report target")
+	}
+}
+
+func TestGenerateMermaidSiteAssetsAndMarkup(t *testing.T) {
+	_, docs, output := createFixture(t)
+	useCasePath := filepath.Join(docs, "use-cases", "login.md")
+	file, err := os.OpenFile(useCasePath, os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = file.WriteString("\n## Схема\n\n```mermaid\nflowchart TD\n    Login --> Dashboard\n```\n")
+	_ = file.Close()
+
+	model := buildFixture(t, docs)
+	if _, err := GenerateSite(model, Options{OutputDirectory: output}); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{"assets/mermaid.tiny.js", "assets/mermaid.LICENSE.txt"} {
+		if _, err := os.Stat(filepath.Join(output, filepath.FromSlash(name))); err != nil {
+			t.Fatalf("missing embedded Mermaid asset %s: %v", name, err)
+		}
+	}
+	htmlBytes, err := os.ReadFile(filepath.Join(output, "use-cases", "login.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	html := string(htmlBytes)
+	for _, part := range []string{`data-mermaid-diagram`, `class="mermaid-source"`, `../assets/mermaid.tiny.js`, "Показать исходный код"} {
+		if !strings.Contains(html, part) {
+			t.Fatalf("Mermaid page missing %q: %s", part, html)
+		}
+	}
+	if strings.Contains(html, `type="module"`) || strings.Contains(html, "cdn.") {
+		t.Fatalf("Mermaid page must be file:// compatible and offline: %s", html)
+	}
+	if strings.Index(html, "assets/mermaid.tiny.js") > strings.Index(html, "assets/app.js") {
+		t.Fatal("Mermaid bundle must execute before app.js")
+	}
+	indexBytes, _ := os.ReadFile(filepath.Join(output, "index.html"))
+	if strings.Contains(string(indexBytes), "assets/mermaid.tiny.js") {
+		t.Fatal("pages without diagrams must not load Mermaid")
+	}
+}
+
+func TestDocumentationAssetCannotReplaceMermaidLicense(t *testing.T) {
+	root, docs, output := createFixture(t)
+	writeTestFile(t, docs, "assets/mermaid.LICENSE.txt", "untrusted")
+	indexPath := filepath.Join(docs, "index.md")
+	index, err := os.OpenFile(indexPath, os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = index.WriteString("\n[Лицензия](assets/mermaid.LICENSE.txt)\n")
+	_ = index.Close()
+	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	link := model.DocByPath["index.md"].ResolvedLinks[len(model.DocByPath["index.md"].ResolvedLinks)-1]
+	if link.AssetPath != "_files/assets/mermaid.LICENSE.txt" {
+		t.Fatalf("reserved Mermaid license path was not isolated: %#v", link)
+	}
+	if _, err := GenerateSite(model, Options{OutputDirectory: output}); err != nil {
+		t.Fatal(err)
+	}
+	embedded, _ := os.ReadFile(filepath.Join(output, "assets", "mermaid.LICENSE.txt"))
+	copied, _ := os.ReadFile(filepath.Join(output, "_files", "assets", "mermaid.LICENSE.txt"))
+	if strings.TrimSpace(string(copied)) != "untrusted" || strings.TrimSpace(string(embedded)) == "untrusted" {
+		t.Fatal("documentation asset replaced embedded Mermaid license")
 	}
 }
 

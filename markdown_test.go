@@ -63,3 +63,60 @@ func TestRenderMarkdownFormats(t *testing.T) {
 		}
 	}
 }
+
+func TestAnalyzeMermaidBlocks(t *testing.T) {
+	source := "flowchart TD\n    Login --> Dashboard"
+	block := analyzeMermaidBlock(4, 7, source, true)
+	if block.DiagramType != "flowchart" || len(block.Problems) != 0 {
+		t.Fatalf("valid Mermaid block: %#v", block)
+	}
+
+	cases := []struct {
+		name   string
+		source string
+		closed bool
+		code   string
+	}{
+		{"empty", "", true, "empty-mermaid-diagram"},
+		{"unsupported", "journey\n  title Login", true, "unsupported-mermaid-diagram-type"},
+		{"frontmatter", "---\nconfig:\n  theme: dark\n---\nflowchart TD\nA-->B", true, "forbidden-mermaid-configuration"},
+		{"directive", "flowchart TD\n%%{init: {\"theme\":\"dark\"}}%%\nA-->B", true, "forbidden-mermaid-configuration"},
+		{"unterminated", source, false, "unterminated-mermaid-diagram"},
+		{"too-large", "flowchart TD\n" + strings.Repeat("A", mermaidMaxBytes), true, "mermaid-diagram-too-large"},
+	}
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			block := analyzeMermaidBlock(0, 1, test.source, test.closed)
+			found := false
+			for _, problem := range block.Problems {
+				if problem.Code == test.code {
+					found = true
+				}
+			}
+			if !found {
+				t.Fatalf("%s missing from %#v", test.code, block.Problems)
+			}
+		})
+	}
+
+	nested := strings.Split("````md\n```mermaid\njourney\n```\n````", "\n")
+	if blocks := scanMermaidBlocks(nested); len(blocks) != 0 {
+		t.Fatalf("Mermaid-looking content inside another fence must remain code: %#v", blocks)
+	}
+}
+
+func TestRenderMermaidBlockAndFallback(t *testing.T) {
+	valid := AnalyzeMarkdown("# Diagram\n\n```mermaid\nstateDiagram-v2\n[*] --> Ready\n```\n")
+	html := RenderMarkdown(valid, RenderContext{}, RenderOptions{})
+	for _, part := range []string{`data-mermaid-container`, `data-mermaid-diagram`, `class="mermaid-source"`, "Показать исходный код", "stateDiagram-v2"} {
+		if !strings.Contains(html, part) {
+			t.Fatalf("valid Mermaid HTML missing %q: %s", part, html)
+		}
+	}
+
+	invalid := AnalyzeMarkdown("# Diagram\n\n```mermaid\njourney\n```\n")
+	html = RenderMarkdown(invalid, RenderContext{}, RenderOptions{})
+	if strings.Contains(html, `data-mermaid-diagram`) || !strings.Contains(html, "Не удалось отобразить диаграмму.") {
+		t.Fatalf("invalid Mermaid must use fallback: %s", html)
+	}
+}

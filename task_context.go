@@ -96,6 +96,14 @@ func BuildTaskContext(model *Model, taskID string) (TaskContextReport, error) {
 	if report.UseCase != nil {
 		documentPaths[report.UseCase.Document] = true
 	}
+	if item.FlowID != "" {
+		for _, document := range model.Documents {
+			if document.Type == "flow" && document.Metadata["id"] == item.FlowID {
+				documentPaths[document.SourcePath] = true
+				break
+			}
+		}
+	}
 	for _, rule := range report.BusinessRules {
 		documentPaths[rule.Document] = true
 	}
@@ -128,6 +136,9 @@ func printTaskContextText(w io.Writer, report TaskContextReport) {
 	}
 	if report.UseCase != nil {
 		fmt.Fprintf(w, "Сценарий: %s — %s\n", report.UseCase.ID, report.UseCase.Title)
+	}
+	if report.Task.FlowID != "" {
+		fmt.Fprintf(w, "Процесс: %s\n", report.Task.FlowID)
 	}
 	if len(report.Task.RepositoryPaths) > 0 {
 		fmt.Fprintf(w, "Область изменения: %s\n", strings.Join(report.Task.RepositoryPaths, ", "))

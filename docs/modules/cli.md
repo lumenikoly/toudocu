@@ -3,7 +3,7 @@
 - Идентификатор: MOD-CLI
 - Статус: Готово
 - Владелец: Команда Docgent
-- Последнее обновление: 2026-07-27
+- Последнее обновление: 2026-07-28
 
 Модуль предоставляет команды Docgent, компактный контекст задачи и управляемое
 выполнение объявленных проверок.
@@ -66,3 +66,9 @@ validation gate.
 - [UC-TASK-02: Проверка рабочей задачи](../use-cases/task-check.md)
 - [UC-DOCS-02: Проверка документации](../use-cases/check-documentation.md)
 - [UC-DOCS-03: Локальный сервер](../use-cases/serve-portal.md)
+
+## Связанные процессы
+
+- [FLOW-DOCS-CHECK: Проверка документационного контракта](../flows/FLOW-DOCS-CHECK.md)
+- [FLOW-DOCS-SERVE: Локальный просмотр портала](../flows/FLOW-DOCS-SERVE.md)
+- [FLOW-TASK-WORKFLOW: Работа с проверяемой задачей](../flows/FLOW-TASK-WORKFLOW.md)

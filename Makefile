@@ -32,6 +32,8 @@ release: test
 	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o $(DIST)/docgent-darwin-amd64 $(CMD)
 	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags="-s -w" -o $(DIST)/docgent-darwin-arm64 $(CMD)
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o $(DIST)/docgent-windows-amd64.exe $(CMD)
+	cp LICENSE THIRD_PARTY_NOTICES.md $(DIST)/
+	cp assets/mermaid.LICENSE.txt $(DIST)/MERMAID-LICENSE.txt
 	cd $(DIST) && sha256sum * > checksums.txt
 
 clean:

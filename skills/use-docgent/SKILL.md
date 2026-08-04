@@ -47,8 +47,8 @@ apply typed contracts only when the project uses the corresponding capability.
 1. For a new project, create a neutral `index.md` first. Add more documents only
    when they communicate known information.
 2. Use ordinary Markdown in untyped paths for free-form documentation. Use
-   `modules/`, `use-cases/`, `decisions/`, `roadmap.md`, and `work/` only when
-   the project benefits from their machine-readable semantics.
+   `modules/`, `use-cases/`, `flows/`, `decisions/`, `roadmap.md`, and `work/`
+   only when the project benefits from their machine-readable semantics.
 3. Select the closest template from `assets/templates/ru/` or
    `assets/templates/en/`. Templates are starting points, not a required
    starter pack.
@@ -60,6 +60,9 @@ apply typed contracts only when the project uses the corresponding capability.
    add requirement checklists to `status.md`.
 7. Preserve source Markdown as the source of truth. Never edit generated site
    output as documentation.
+8. Treat Mermaid as visualization only. Keep requirements and acceptance
+   criteria in prose, and use only validated `flowchart`, `stateDiagram-v2`, or
+   architectural `sequenceDiagram` blocks.
 
 ## Interpret validation correctly
 

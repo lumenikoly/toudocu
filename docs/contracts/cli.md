@@ -69,6 +69,7 @@ Docgent 1.x.
 - `schemaVersion`, generator и время построения;
 - project, current status и агрегированные stats;
 - документы, безопасно разрешённые links и backlinks;
+- optional `flowId` у work item, если задача ссылается на `FLOW-*`;
 - roadmap с declared и effective completion;
 - риски, knowledge model и issues.
 

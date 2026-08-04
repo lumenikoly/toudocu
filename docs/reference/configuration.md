@@ -54,6 +54,18 @@ mtime файла. `--stale-days 0` отключает warning об устаре�
 Без `--strict` ненулевой exit code дают errors. В strict mode любой warning
 также завершает команду с кодом `1`.
 
+## Mermaid
+
+Mermaid не имеет пользовательских CLI-настроек. Docgent закрепляет:
+
+- типы `flowchart`, `stateDiagram-v2`, `sequenceDiagram`;
+- максимум 50 000 UTF-8 байт на блок;
+- `securityLevel: strict`;
+- запрет Mermaid front matter и directives;
+- темы `default` и `dark` вслед за темой портала.
+
+Эти параметры нельзя переопределить из документации.
+
 ## Безопасная очистка
 
 `--clean` разрешён только для отдельного output directory. Нельзя очистить:

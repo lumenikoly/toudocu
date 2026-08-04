@@ -12,7 +12,10 @@ import (
 
 var activeAssetExtensions = map[string]struct{}{".html": {}, ".htm": {}, ".xhtml": {}, ".js": {}, ".mjs": {}, ".cjs": {}, ".svg": {}, ".svgz": {}, ".xml": {}}
 var safeImageExtensions = map[string]struct{}{".png": {}, ".jpg": {}, ".jpeg": {}, ".gif": {}, ".webp": {}, ".avif": {}, ".bmp": {}}
-var reservedOutputAssets = map[string]struct{}{"assets/style.css": {}, "assets/app.js": {}, "assets/search-index.js": {}, "report.json": {}}
+var reservedOutputAssets = map[string]struct{}{
+	"assets/style.css": {}, "assets/app.js": {}, "assets/search-index.js": {},
+	"assets/mermaid.tiny.js": {}, "assets/mermaid.LICENSE.txt": {}, "report.json": {},
+}
 
 func splitLinkDestination(destination string) (pathPart, query, hash string) {
 	text := strings.TrimSpace(destination)

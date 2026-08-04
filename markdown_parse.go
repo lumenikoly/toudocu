@@ -18,6 +18,7 @@ var fieldAliases = map[string]string{
 	"criticality": "criticality", "критичность": "criticality",
 	"module": "module", "модуль": "module",
 	"use case": "useCase", "scenario": "useCase", "сценарий": "useCase", "связанный сценарий": "useCase",
+	"flow": "flow", "process": "flow", "процесс": "flow",
 	"depends on": "dependsOn", "dependencies": "dependsOn", "зависит от": "dependsOn",
 	"date": "date", "дата": "date",
 	"planned date": "plannedDate", "target date": "plannedDate", "due date": "plannedDate", "плановая дата": "plannedDate", "целевая дата": "plannedDate",
@@ -32,6 +33,7 @@ var displayFieldNames = map[string]string{
 	"status": "Статус", "stage": "Этап", "version": "Версия", "owner": "Владелец",
 	"author": "Автор", "actor": "Актор", "priority": "Приоритет", "criticality": "Критичность",
 	"module": "Модуль", "useCase": "Сценарий", "dependsOn": "Зависит от", "date": "Дата",
+	"flow":        "Процесс",
 	"plannedDate": "Плановая дата", "updated": "Последнее обновление", "probability": "Вероятность",
 	"impact": "Влияние", "id": "Идентификатор", "tags": "Теги", "type": "Тип", "source": "Источник",
 }

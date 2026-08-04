@@ -674,6 +674,30 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .code-language { position: absolute; top: 6px; right: 48px; z-index: 2; color: #9ba7b5; font-size: 10px; text-transform: uppercase; }
 .copy-code { position: absolute; top: 7px; right: 7px; z-index: 3; padding: 3px 7px; border: 1px solid #37414d; border-radius: 6px; background: #202731; color: #c7d0da; cursor: pointer; font-size: 11px; }
 .copy-code:hover { background: #2a3440; }
+.mermaid-diagram { margin: 1.5em 0; }
+.mermaid-diagram > .mermaid {
+  overflow-x: auto;
+  min-height: 80px;
+  margin: 0;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-soft);
+  text-align: center;
+}
+.mermaid-diagram > .mermaid svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+.mermaid-error {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--danger) 38%, var(--border));
+  border-radius: 10px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-weight: 700;
+}
+.mermaid-source { margin-top: 10px; }
+.mermaid-source summary { width: fit-content; color: var(--accent-strong); cursor: pointer; font-size: 13px; font-weight: 700; }
+.mermaid-source .code-block { margin-bottom: 0; }
 .table-wrap { overflow-x: auto; margin: 1.25em 0; border: 1px solid var(--border); border-radius: 9px; }
 .doc-content table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .doc-content th, .doc-content td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
@@ -816,6 +840,8 @@ body[data-task-filter="complete"] .task-item.is-open { display: none; }
   .page-grid { padding: 0; }
   .doc-content, .card, .metric-card { box-shadow: none; break-inside: avoid; }
   .doc-section .section-body { display: block !important; }
+  .mermaid-source { display: none; }
+  .mermaid-diagram { break-inside: avoid; }
   a { color: inherit !important; text-decoration: none !important; }
   a[href]::after { content: "" !important; }
 }

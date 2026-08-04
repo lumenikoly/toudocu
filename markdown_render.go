@@ -398,6 +398,22 @@ func renderInline(input string, context RenderContext, depth int) string {
 	return text
 }
 
+func renderMermaid(source string, valid bool) string {
+	sourceHTML := escapeHTML(source)
+	var b strings.Builder
+	b.WriteString(`<figure class="mermaid-diagram" data-mermaid-container>`)
+	if valid {
+		b.WriteString(`<pre class="mermaid" data-mermaid-diagram aria-label="Диаграмма Mermaid">` + sourceHTML + `</pre>`)
+		b.WriteString(`<p class="mermaid-error" data-mermaid-error role="alert" hidden>Не удалось отобразить диаграмму.</p>`)
+	} else {
+		b.WriteString(`<p class="mermaid-error" role="alert">Не удалось отобразить диаграмму.</p>`)
+	}
+	b.WriteString(`<details class="mermaid-source"><summary>Показать исходный код</summary>`)
+	b.WriteString(`<div class="code-block"><span class="code-language">mermaid</span><pre><code class="language-mermaid">` + sourceHTML + `</code></pre></div>`)
+	b.WriteString(`</details></figure>`)
+	return b.String()
+}
+
 func renderBlocks(entries []renderEntry, context RenderContext, options RenderOptions, suppressed map[int]struct{}) string {
 	var b strings.Builder
 	for index := 0; index < len(entries); {
@@ -420,23 +436,31 @@ func renderBlocks(entries []renderEntry, context RenderContext, options RenderOp
 				}
 			}
 			code := []string{}
+			closed := false
 			index++
 			for index < len(entries) {
 				candidate := entries[index].Text
 				closingMarker, closingLength, closingTail, closing := fenceAt(candidate)
 				if closing && closingMarker == marker && closingLength >= fenceLength && closingTail == "" {
+					closed = true
 					index++
 					break
 				}
 				code = append(code, candidate)
 				index++
 			}
+			source := strings.Join(code, "\n")
+			if isMermaidFenceInfo(languageRaw) {
+				block := analyzeMermaidBlock(entry.Index, entry.Index+len(code)+1, source, closed)
+				b.WriteString(renderMermaid(source, len(block.Problems) == 0))
+				continue
+			}
 			languageClass, languageLabel := "", ""
 			if language != "" {
 				languageClass = ` class="language-` + escapeAttr(language) + `"`
 				languageLabel = `<span class="code-language">` + escapeHTML(language) + `</span>`
 			}
-			b.WriteString(`<div class="code-block">` + languageLabel + `<pre><code` + languageClass + `>` + escapeHTML(strings.Join(code, "\n")) + `</code></pre></div>`)
+			b.WriteString(`<div class="code-block">` + languageLabel + `<pre><code` + languageClass + `>` + escapeHTML(source) + `</code></pre></div>`)
 			continue
 		}
 

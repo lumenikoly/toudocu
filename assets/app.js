@@ -31,6 +31,7 @@
       document.documentElement.dataset.theme = next;
       try { localStorage.setItem('project-docs-theme', next); } catch { /* ignore */ }
       updateButton();
+      document.dispatchEvent(new CustomEvent('docgent:themechange', { detail: { theme: next } }));
     });
   }
 
@@ -340,6 +341,55 @@
     });
   }
 
+  function initializeMermaid() {
+    const containers = $$('[data-mermaid-container]').filter((container) => $('[data-mermaid-diagram]', container));
+    if (!containers.length) return;
+
+    const showError = (container) => {
+      container.classList.add('has-error');
+      const target = $('[data-mermaid-diagram]', container);
+      const error = $('[data-mermaid-error]', container);
+      if (target) target.replaceChildren();
+      if (error) error.hidden = false;
+    };
+
+    let renderQueue = Promise.resolve();
+    const renderAll = async () => {
+      if (!window.mermaid) {
+        containers.forEach(showError);
+        return;
+      }
+      window.mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: 'strict',
+        secure: ['secure', 'securityLevel', 'startOnLoad', 'maxTextSize', 'suppressErrorRendering'],
+        maxTextSize: 50000,
+        suppressErrorRendering: true,
+        theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+      });
+      for (const container of containers) {
+        const target = $('[data-mermaid-diagram]', container);
+        const source = $('.mermaid-source code', container)?.textContent || '';
+        const error = $('[data-mermaid-error]', container);
+        if (!target) continue;
+        container.classList.remove('has-error');
+        if (error) error.hidden = true;
+        target.removeAttribute('data-processed');
+        target.textContent = source;
+        try {
+          await window.mermaid.run({ nodes: [target] });
+        } catch {
+          showError(container);
+        }
+      }
+    };
+    const scheduleRender = () => {
+      renderQueue = renderQueue.then(renderAll, renderAll);
+    };
+    document.addEventListener('docgent:themechange', scheduleRender);
+    scheduleRender();
+  }
+
   function initializeTocTracking() {
     const links = $$('.page-toc a[href^="#"]');
     if (!links.length || !('IntersectionObserver' in window)) return;
@@ -364,6 +414,7 @@
   initializeTaskFilters();
   initializeCollapsibleSections();
   initializeCodeCopy();
+  initializeMermaid();
   initializeTocTracking();
   initializePrint();
 })();

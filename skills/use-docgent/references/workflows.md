@@ -61,12 +61,15 @@ typed documents only for semantics the project will use:
 
 - add a module when stable ownership, boundaries, or business rules matter;
 - add a use case when observable behavior should link to a module;
+- add a flow when a reusable Mermaid visualization should link to a use case or
+  architecture document;
 - add a roadmap when the project wants global progress aggregation;
 - add a work item when an agent or CI needs a checkable task contract.
 
 When adding related types, create targets before references: module and rules,
-then use case, then roadmap or work item. Replace every template placeholder
-before validation.
+then use case, then optional flow, then roadmap or work item. Replace every
+template placeholder before validation. A flow never replaces prose
+requirements or acceptance criteria.
 
 ## Task workflow
 

@@ -16,19 +16,19 @@ var typeLabels = map[string]string{
 	"overview": "Обзор проекта", "status": "Текущее состояние", "roadmap": "Дорожная карта",
 	"risks": "Риски", "changelog": "История изменений", "use-case": "Пользовательский сценарий",
 	"module": "Модуль", "architecture": "Архитектура", "contract": "Контрактный каталог",
-	"decision": "Архитектурное решение", "guide": "Руководство", "work": "Рабочие задачи",
-	"reference": "Справочник", "document": "Документ",
+	"decision": "Архитектурное решение", "flow": "Процесс", "guide": "Руководство", "work": "Рабочие задачи",
+	"reference": "Справочник", "notes": "Заметки", "ideas": "Идеи развития", "document": "Документ",
 }
 
 var folderLabels = map[string]string{
 	"use-cases": "Пользовательские сценарии", "modules": "Модули", "architecture": "Архитектура",
-	"contracts": "Контракты", "decisions": "Решения", "guides": "Руководства",
+	"contracts": "Контракты", "decisions": "Решения", "flows": "Процессы", "guides": "Руководства",
 	"work": "Рабочие задачи", "reference": "Справочник",
 }
 
 var rootOrder = map[string]int{
 	"index.md": 0, "status.md": 1, "roadmap.md": 2, "risks.md": 3,
-	"changelog.md": 4, "glossary.md": 5,
+	"ideas.md": 4, "notes.md": 5, "changelog.md": 6, "glossary.md": 7,
 }
 
 type statusGroup struct {
@@ -68,6 +68,10 @@ func ClassifyDocument(relativePath string) string {
 		return "risks"
 	case "changelog.md":
 		return "changelog"
+	case "notes.md":
+		return "notes"
+	case "ideas.md":
+		return "ideas"
 	}
 	switch first {
 	case "use-cases":
@@ -80,6 +84,8 @@ func ClassifyDocument(relativePath string) string {
 		return "contract"
 	case "decisions":
 		return "decision"
+	case "flows":
+		return "flow"
 	case "guides":
 		return "guide"
 	case "work":
@@ -282,6 +288,9 @@ func hasSection(document *Document, names []string) bool {
 }
 
 func validateDocumentBasics(model *Model, document *Document) {
+	if containsType([]string{"notes", "ideas"}, document.Type) {
+		return
+	}
 	if strings.TrimSpace(document.Content) == "" {
 		addDocumentIssue(model, document, newIssue("warning", "empty-document", "Документ пустой.", document.SourcePath, 0))
 	}
@@ -488,6 +497,7 @@ func BuildDocumentationModel(options Options) (*Model, error) {
 	validateGlobalStructure(model)
 	resolveLinks(model)
 	connectUseCasesAndModules(model)
+	validateMermaidDocuments(model)
 	model.Knowledge = buildKnowledgeModel(model)
 	model.Risks = buildRisks(model)
 	model.RoadmapStages = buildRoadmapStages(model)

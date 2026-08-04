@@ -31,8 +31,11 @@ types are optional.
 | `status.md` | A current snapshot | Project status metadata; checklists are rejected |
 | `roadmap.md` | Global scope and progress | Validates checklist IDs and derives linked `UC-*` state |
 | `risks.md` | Risk tracking | Extracts `RISK-*` sections and mitigation progress |
+| `ideas.md` | Feature ideas and future plans | Free-form; no required metadata or sections |
+| `notes.md` | Notes, observations, and temporary context | Free-form; no required metadata or sections |
 | `modules/*.md` | Stable component boundaries and rules | Requires a unique `MOD-*` and validates relationships |
 | `use-cases/*.md` | Observable actor behavior | Requires a unique `UC-*` and an existing module |
+| `flows/*.md` | A reusable visual process | Requires a unique `FLOW-*`, Mermaid, and a use-case or architecture relationship |
 | `decisions/*.md` | Durable decisions | Requires a unique `ADR-*` |
 | `work/TASK-*.md` | Agent- or CI-readable work | Requires exactly one task and status-dependent fields |
 | `architecture/`, `contracts/`, `guides/`, `reference/` | Specialized human documentation | Classifies and renders the document |
@@ -52,6 +55,7 @@ When opting into a typed entity:
 - declare business rules as module headings such as
   `### BR-AREA-001: Title`;
 - give decisions unique `ADR-*` IDs;
+- give reusable flows unique `FLOW-*` IDs and link them to requirements;
 - give work items unique `TASK-AREA-NNN` IDs;
 - keep IDs stable when titles or filenames change;
 - update all references together when identity genuinely changes;
@@ -66,7 +70,8 @@ checklists do not contribute to global progress.
 The module template includes purpose, code location, boundaries, business
 rules, invariants, stable interfaces, and related use cases. The use-case
 template includes its main scenario, postconditions, rules, and implementation.
-The ADR template includes context, decision, and consequences.
+The flow template contains a Mermaid visualization and an explicit requirements
+link. The ADR template includes context, decision, and consequences.
 
 Docgent reports missing recommended sections as warnings. Use these sections
 when they add information; do not create empty or speculative prose. If the
@@ -93,6 +98,10 @@ For every non-draft status, also require:
 Feature and Bug tasks require an existing use case. Maintenance,
 Documentation, and Research tasks without a use case require a non-empty
 Use-case omission reason.
+
+Tasks may declare an optional `Flow`/`Process` field with an existing `FLOW-*`.
+It adds the flow document to task context but does not replace the use case or
+acceptance criteria.
 
 Put checkboxes only in acceptance criteria. Start every criterion with one
 unique `AC-*` and give it exactly one verification entry:

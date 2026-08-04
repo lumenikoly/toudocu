@@ -224,6 +224,7 @@ type WorkItem struct {
 	Owner           string                  `json:"owner,omitempty"`
 	ModuleID        string                  `json:"moduleId,omitempty"`
 	UseCaseID       string                  `json:"useCaseId,omitempty"`
+	FlowID          string                  `json:"flowId,omitempty"`
 	DependsOn       []string                `json:"dependsOn"`
 	Document        string                  `json:"document"`
 	Anchor          string                  `json:"anchor"`
