@@ -28,15 +28,15 @@ CLI предоставляет `search`, `task init`, `scaffold`, `task ready`, 
 
 ## Область изменения
 
-- `cli.go`
-- `types.go`
+- `internal/app/cli.go`
+- `internal/app/types.go`
 - `report_types.go`
-- `knowledge.go`
-- `task_verify.go`
-- `task_context.go`
+- `internal/app/knowledge.go`
+- `internal/app/task_verify.go`
+- `internal/app/task_context.go`
 - `search.go`
-- `scaffold.go`
-- `task_ready.go`
+- `internal/app/scaffold.go`
+- `internal/app/task_ready.go`
 - `docs/`
 - `skills/use-docgent/`
 

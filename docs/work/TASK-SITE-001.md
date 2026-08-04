@@ -34,11 +34,11 @@
 
 ## Область изменения
 
-- `site.go`;
-- `process_site.go`;
-- `assets/app.js`;
-- `assets/style.css`;
-- тесты генерации портала;
+- `internal/app/site.go`;
+- `internal/app/process_site.go`;
+- `internal/app/assets/app.js`;
+- `internal/app/assets/style.css`;
+- тесты генерации портала в `internal/app/`;
 - исходная документация модуля и каталога возможностей.
 
 ## Не входит в задачу

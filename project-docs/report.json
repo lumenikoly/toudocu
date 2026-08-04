@@ -4,9 +4,9 @@
     "name": "Docgent",
     "version": "1.1.0-go"
   },
-  "generatedAt": "2026-08-01T18:43:43.074805505Z",
+  "generatedAt": "2026-08-01T20:20:55.145211866Z",
   "sourceDirectory": "docs",
-  "staleDays": 90,
+  "staleDays": 0,
   "project": {
     "title": "Docgent",
     "description": "Docgent — dependency-free CLI на Go для проверяемой проектной документации в структурированном Markdown и автономного HTML-портала, работающего через file:// .",
@@ -4321,7 +4321,7 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-001-контекст-задачи-не-исполняет-команды",
-        "line": 35
+        "line": 33
       },
       {
         "id": "BR-CLI-002",
@@ -4329,7 +4329,7 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-002-проверки-запускаются-только-явно",
-        "line": 40
+        "line": 38
       },
       {
         "id": "BR-CLI-003",
@@ -4337,7 +4337,7 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-003-timeout-завершает-дерево-процессов",
-        "line": 45
+        "line": 43
       },
       {
         "id": "BR-CLI-004",
@@ -4345,7 +4345,7 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-004-docgent-не-интерпретирует-пользовательский-запрос",
-        "line": 50
+        "line": 48
       },
       {
         "id": "BR-CLI-005",
@@ -4353,7 +4353,7 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-005-browser-и-cli-используют-один-scaffold-registry",
-        "line": 56
+        "line": 54
       },
       {
         "id": "BR-MD-001",
@@ -4712,12 +4712,12 @@
           "AGENTS.md",
           "CHANGELOG.md",
           "docs/",
-          "docs_core.go",
           "documentation_links.go",
           "example/docs/",
           "example/project-docs/",
           "integration_test.go",
-          "markdown_parse.go",
+          "internal/app/docs_core.go",
+          "internal/app/markdown_parse.go",
           "project-docs/",
           "README.md",
           "screens_test.go",
@@ -5064,24 +5064,25 @@
           }
         ],
         "repositoryPaths": [
-          "*_test.go",
-          "assets/",
+          "api.go",
           "CHANGELOG.md",
-          "cli.go",
           "docs/",
           "example/project-docs/",
           "go.mod",
           "go.sum",
+          "internal/app/",
+          "internal/app/assets/",
+          "internal/app/cli.go",
+          "internal/app/screen_site.go",
+          "internal/app/server.go",
+          "internal/app/site.go",
+          "internal/app/site_config.go",
+          "internal/app/types.go",
           "package-lock.json",
           "package.json",
           "project-docs/",
           "README.md",
-          "screen_site.go",
-          "server.go",
-          "site.go",
-          "site_config.go",
-          "THIRD_PARTY_NOTICES.md",
-          "types.go"
+          "THIRD_PARTY_NOTICES.md"
         ],
         "result": "docgent changes и раздел /changes показывают Git-изменения исходной документации как source, rendered и deterministic semantic diff, сопоставляют их с task impact и экспортируют ChangeSetReport schema v1.",
         "behaviorChange": "Было Портал показывает только текущее состояние, а review использует внешний git diff без проектной семантики и task impact. Станет serve предоставляет read-only Changes workspace с явным диапазоном, ленивыми специализированными представлениями и live invalidation. CLI и CI получают тот же отчёт без изменения Git.",
@@ -5272,17 +5273,17 @@
           }
         ],
         "repositoryPaths": [
-          "cli.go",
           "docs/",
-          "knowledge.go",
+          "internal/app/cli.go",
+          "internal/app/knowledge.go",
+          "internal/app/scaffold.go",
+          "internal/app/task_context.go",
+          "internal/app/task_ready.go",
+          "internal/app/task_verify.go",
+          "internal/app/types.go",
           "report_types.go",
-          "scaffold.go",
           "search.go",
-          "skills/use-docgent/",
-          "task_context.go",
-          "task_ready.go",
-          "task_verify.go",
-          "types.go"
+          "skills/use-docgent/"
         ],
         "result": "CLI предоставляет детерминированный путь от поиска документации и создания каркаса до readiness, контекста и явной проверки выбранной задачи.",
         "behaviorChange": "Было CLI предоставлял только task context и исполняющую команду task check ; каркасы, readiness и source-level поиск отсутствовали. Станет CLI предоставляет search , task init , scaffold , task ready , расширенный task context и task verify ; старая команда task check отсутствует.",
@@ -5618,19 +5619,19 @@
         "repositoryPaths": [
           "AGENTS.md",
           "docs/",
-          "docs_core.go",
-          "knowledge.go",
-          "markdown_parse.go",
+          "internal/app/docs_core.go",
+          "internal/app/knowledge.go",
+          "internal/app/markdown_parse.go",
+          "internal/app/scaffold.go",
+          "internal/app/site.go",
+          "internal/app/task_context.go",
+          "internal/app/task_ready.go",
+          "internal/app/task_verify.go",
+          "internal/app/types.go",
           "quality.go",
           "quality_test.go",
           "report_types.go",
-          "scaffold.go",
-          "site.go",
-          "skills/use-docgent/",
-          "task_context.go",
-          "task_ready.go",
-          "task_verify.go",
-          "types.go"
+          "skills/use-docgent/"
         ],
         "result": "Docgent поддерживает опциональные стандарты STD- , эксплуатационные процедуры RB- , пользовательские верхнеуровневые разделы, их task-связи, schema-v1 коллекции, scaffolds и автономные каталоги портала.",
         "behaviorChange": "Было Неизвестные каталоги оставались полностью free-form, а Quality и Runbooks не имели типизированных контрактов, task-связей и специализированного портала. Станет Появившиеся quality/ , runbooks/ и custom-разделы получают явные manifest и typed validation без новых глобально обязательных файлов; task workflow переносит только явно связанные STD- и RB- .",
@@ -5814,8 +5815,7 @@
         "documentationPaths": [
           "CHANGELOG.md",
           "guides/work-items.md",
-          "README.md",
-          "skill_templates_test.go"
+          "README.md"
         ]
       },
       {
@@ -6011,10 +6011,10 @@
         "repositoryPaths": [
           "AGENTS.md",
           "CHANGELOG.md",
-          "cli.go",
           "docs/",
           "example/project-docs/",
           "integration_test.go",
+          "internal/app/cli.go",
           "project-docs/",
           "README.md",
           "skill_templates_test.go",
@@ -6167,10 +6167,11 @@
           }
         ],
         "repositoryPaths": [
-          "assets/app.js",
-          "assets/style.css",
-          "process_site.go",
-          "site.go"
+          "internal/app/",
+          "internal/app/assets/app.js",
+          "internal/app/assets/style.css",
+          "internal/app/process_site.go",
+          "internal/app/site.go"
         ],
         "result": "На страницах исходных Markdown-документов пользователь может одним действием скопировать название и repository-relative путь, чтобы передать точный контекст агенту.",
         "behaviorChange": "Было Портал позволял копировать блоки кода, но не предоставлял короткую ссылку на исходный документ открытой страницы. Станет Обычные страницы документов, канонические страницы use case и главный dashboard для index.md содержат кнопку «Копировать контекст». В буфер записываются две строки:",
@@ -6630,8 +6631,6 @@
           }
         ],
         "repositoryPaths": [
-          "*_test.go",
-          "assets/",
           "CHANGELOG.md",
           "docs/architecture/failure-isolation.md",
           "docs/architecture/overview.md",
@@ -6647,20 +6646,22 @@
           "docs/reference/configuration.md",
           "docs/reference/features.md",
           "docs/use-cases/serve-portal.md",
-          "docs_core.go",
           "editor-bundle.mjs",
-          "embed.go",
           "example/project-docs/",
+          "internal/app/",
+          "internal/app/assets/",
+          "internal/app/docs_core.go",
+          "internal/app/embed.go",
+          "internal/app/process_site.go",
+          "internal/app/scaffold.go",
+          "internal/app/screen_site.go",
+          "internal/app/screens.go",
+          "internal/app/server.go",
+          "internal/app/site.go",
           "package-lock.json",
           "package.json",
-          "process_site.go",
           "project-docs/",
           "README.md",
-          "scaffold.go",
-          "screen_site.go",
-          "screens.go",
-          "server.go",
-          "site.go",
           "THIRD_PARTY_NOTICES.md"
         ],
         "result": "docgent serve предоставляет локальный live workspace, в котором пользователь безопасно редактирует и создаёт исходные документы, видит preview и diagnostics, а портал синхронно обновляет модель, HTML и поиск. docgent build остаётся автономным read-only порталом для file:// .",

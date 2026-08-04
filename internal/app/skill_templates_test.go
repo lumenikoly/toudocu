@@ -194,7 +194,7 @@ func TestUseDocgentTemplatesDoNotInventSemanticStructure(t *testing.T) {
 }
 
 func TestUseDocgentWorkItemReferenceAllowsCriteriaAndPlanChecklists(t *testing.T) {
-	content, err := os.ReadFile(filepath.Join("skills", "use-docgent", "references", "document-model.md"))
+	content, err := os.ReadFile(repositoryPath("skills", "use-docgent", "references", "document-model.md"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -342,7 +342,7 @@ func TestUseDocgentArchitectureTemplates(t *testing.T) {
 					t.Errorf("%s architecture detail does not contain %q", language, expected)
 				}
 			}
-			if _, err := os.Stat(filepath.Join("skills", "use-docgent", "assets", "templates", language, "architecture.md")); !os.IsNotExist(err) {
+			if _, err := os.Stat(repositoryPath("skills", "use-docgent", "assets", "templates", language, "architecture.md")); !os.IsNotExist(err) {
 				t.Errorf("%s monolithic architecture template still exists: %v", language, err)
 			}
 
@@ -487,7 +487,7 @@ func writeSkillTemplate(t *testing.T, docs, language, templateName, destination 
 
 func readUseDocgentFile(t *testing.T, relativePath string) string {
 	t.Helper()
-	content, err := os.ReadFile(filepath.Join("skills", "use-docgent", relativePath))
+	content, err := os.ReadFile(repositoryPath("skills", "use-docgent", relativePath))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -496,10 +496,14 @@ func readUseDocgentFile(t *testing.T, relativePath string) string {
 
 func readSkillTemplate(t *testing.T, language, templateName string) string {
 	t.Helper()
-	templatePath := filepath.Join("skills", "use-docgent", "assets", "templates", language, templateName)
+	templatePath := repositoryPath("skills", "use-docgent", "assets", "templates", language, templateName)
 	content, err := os.ReadFile(templatePath)
 	if err != nil {
 		t.Fatal(err)
 	}
 	return string(content)
+}
+
+func repositoryPath(parts ...string) string {
+	return filepath.Join(append([]string{"..", ".."}, parts...)...)
 }

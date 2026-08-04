@@ -30,17 +30,17 @@ typed validation без новых глобально обязательных �
 
 ## Область изменения
 
-- `docs_core.go`;
+- `internal/app/docs_core.go`;
 - `quality.go`;
-- `knowledge.go`;
-- `types.go`;
+- `internal/app/knowledge.go`;
+- `internal/app/types.go`;
 - `report_types.go`;
-- `markdown_parse.go`;
-- `scaffold.go`;
-- `task_context.go`;
-- `task_ready.go`;
-- `task_verify.go`;
-- `site.go`;
+- `internal/app/markdown_parse.go`;
+- `internal/app/scaffold.go`;
+- `internal/app/task_context.go`;
+- `internal/app/task_ready.go`;
+- `internal/app/task_verify.go`;
+- `internal/app/site.go`;
 - `quality_test.go`;
 - `skills/use-docgent/`;
 - `docs/`;

@@ -31,7 +31,7 @@ workflow для систематического ревью актуальнос
 ## Область изменения
 
 - `skills/use-docgent/`;
-- `cli.go`;
+- `internal/app/cli.go`;
 - `skill_templates_test.go`;
 - `integration_test.go`;
 - `README.md`;

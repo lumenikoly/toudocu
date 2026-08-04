@@ -15,13 +15,11 @@
 
 ## Расположение в коде
 
-- CLI: `cli.go`, `cmd/docgent/main.go`;
-- локальный HTTP-сервер: `server.go`;
-- read-only контекст: `task_context.go`;
-- readiness: `task_ready.go`;
-- search и каркасы: `search.go`, `scaffold.go`;
-- выполнение verify: `task_verify.go`;
-- управление процессами: `command_process_unix.go`, `command_process_windows.go`.
+- публичный фасад и entrypoint: `api.go`, `cmd/docgent/main.go`;
+- CLI и локальный HTTP-сервер: `internal/app/cli.go`, `internal/app/server.go`;
+- read-only контекст и readiness: `internal/app/task_context.go`, `internal/app/task_ready.go`;
+- search и каркасы: `internal/app/search.go`, `internal/app/scaffold.go`;
+- выполнение verify и управление процессами: `internal/app/task_verify.go`, `internal/app/command_process_*.go`.
 
 ## Границы
 

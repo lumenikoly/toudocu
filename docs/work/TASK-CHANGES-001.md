@@ -31,11 +31,11 @@
 
 ## Область изменения
 
-- корень Go-пакета, `cli.go`, `types.go`, `site_config.go`;
-- `server.go`, `site.go`, `screen_site.go`;
-- `assets/`, `package.json`, `package-lock.json`;
+- публичный фасад `api.go` и `internal/app/cli.go`, `internal/app/types.go`, `internal/app/site_config.go`;
+- `internal/app/server.go`, `internal/app/site.go`, `internal/app/screen_site.go`;
+- `internal/app/assets/`, `package.json`, `package-lock.json`;
 - `go.mod`, `go.sum`, `THIRD_PARTY_NOTICES.md`;
-- `*_test.go`;
+- тесты в `internal/app/`;
 - `docs/`, `README.md`, `CHANGELOG.md`;
 - `project-docs/`, `example/project-docs/` только через пересборку.
 

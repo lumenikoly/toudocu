@@ -15,9 +15,9 @@
 
 ## Расположение в коде
 
-- `changes_*.go` — comparison, Git adapter, отчёты и специализированные diff;
-- `server.go` — read-only changes API и live invalidation;
-- `assets/changes.*` — serve-only интерфейс просмотра.
+- `internal/app/changes_*.go` — comparison, Git adapter, отчёты и специализированные diff;
+- `internal/app/server.go` — read-only changes API и live invalidation;
+- `internal/app/assets/changes.*` — serve-only интерфейс просмотра.
 
 ## Границы
 

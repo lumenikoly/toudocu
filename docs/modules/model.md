@@ -15,10 +15,10 @@
 
 ## Расположение в коде
 
-- модель документов: `docs_core.go`, `types.go`;
-- знания и work items: `knowledge.go`;
-- разрешение ссылок: `documentation_links.go`;
-- общие безопасные операции с путями: `utils.go`.
+- модель документов: `internal/app/docs_core.go`, `internal/app/types.go`;
+- знания и work items: `internal/app/knowledge.go`;
+- разрешение ссылок: `internal/app/documentation_links.go`;
+- общие безопасные операции с путями: `internal/app/utils.go`.
 
 ## Границы
 

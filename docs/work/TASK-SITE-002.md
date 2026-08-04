@@ -33,13 +33,13 @@ live rebuild после записи и watcher внешних изменени�
 
 ## Область изменения
 
-- `server.go`, `docs_core.go`, `screens.go` и новые Go-файлы server/editor workspace;
-- `site.go`, `process_site.go`, `screen_site.go` и генерация serve-варианта;
-- `scaffold.go` и общий реестр шаблонов;
-- `assets/` и `embed.go`;
+- `internal/app/server.go`, `internal/app/docs_core.go`, `internal/app/screens.go` и новые Go-файлы server/editor workspace;
+- `internal/app/site.go`, `internal/app/process_site.go`, `internal/app/screen_site.go` и генерация serve-варианта;
+- `internal/app/scaffold.go` и общий реестр шаблонов;
+- `internal/app/assets/` и `internal/app/embed.go`;
 - `package.json`, `package-lock.json` и `editor-bundle.mjs` для build-only
   CodeMirror bundle;
-- `*_test.go`;
+- тесты в `internal/app/`;
 - `README.md`, `THIRD_PARTY_NOTICES.md` и `CHANGELOG.md`;
 - `docs/use-cases/serve-portal.md`;
 - `docs/flows/FLOW-DOCS-SERVE.md`;

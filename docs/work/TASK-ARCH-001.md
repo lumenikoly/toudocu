@@ -32,9 +32,9 @@ RU/EN-шаблоны, безопасный init и semantic gate `ARCH001`–`AR
 
 ## Область изменения
 
-- `docs_core.go`;
+- `internal/app/docs_core.go`;
 - `documentation_links.go`;
-- `markdown_parse.go`;
+- `internal/app/markdown_parse.go`;
 - `integration_test.go`;
 - `screens_test.go`;
 - `skill_templates_test.go`;

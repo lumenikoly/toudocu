@@ -15,10 +15,10 @@ HTML-фрагменты без исполнения встроенного со�
 
 ## Расположение в коде
 
-- анализ: `markdown_parse.go`;
-- рендеринг: `markdown_render.go`;
-- нормализация и экранирование: `utils.go`;
-- поведенческие тесты: `markdown_test.go`.
+- анализ: `internal/app/markdown_parse.go`;
+- рендеринг: `internal/app/markdown_render.go`;
+- нормализация и экранирование: `internal/app/utils.go`;
+- поведенческие тесты: `internal/app/markdown_test.go`.
 
 ## Границы
 

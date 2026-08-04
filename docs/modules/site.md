@@ -15,13 +15,13 @@
 
 ## Расположение в коде
 
-- оболочка HTML и отчёт: `site.go`, `report_types.go`;
-- каталоги процессов и use cases: `process_site.go`;
-- Screen Map, каталог и страницы экранов: `screen_site.go`;
-- локальная HTTP-раздача: `server.go`;
-- editor workspace, API и platform-specific atomic replace: `editor_*.go`;
-- встроенные ресурсы: `embed.go`, `assets/`;
-- конфигурация тем и безопасного брендинга: `site_config.go`.
+- оболочка HTML и отчёт: `internal/app/site.go`, `internal/app/report_types.go`;
+- каталоги процессов и use cases: `internal/app/process_site.go`;
+- Screen Map, каталог и страницы экранов: `internal/app/screen_site.go`;
+- локальная HTTP-раздача: `internal/app/server.go`;
+- editor workspace, API и platform-specific atomic replace: `internal/app/editor_*.go`;
+- встроенные ресурсы: `internal/app/embed.go`, `internal/app/assets/`;
+- конфигурация тем и безопасного брендинга: `internal/app/site_config.go`.
 
 ## Границы
 

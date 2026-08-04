@@ -547,7 +547,7 @@ func TestEditorVendoredAssets(t *testing.T) {
 	if err != nil || !strings.Contains(string(checksums), hex.EncodeToString(sum[:])) {
 		t.Fatalf("bundle checksum missing: %v", err)
 	}
-	lock, err := os.ReadFile("package-lock.json")
+	lock, err := os.ReadFile(filepath.Join("..", "..", "package-lock.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -562,7 +562,7 @@ func TestEditorVendoredAssets(t *testing.T) {
 	if _, err := EmbeddedFiles.ReadFile("assets/codemirror.checksums.txt"); err != nil {
 		t.Fatal(err)
 	}
-	makefile, err := os.ReadFile("Makefile")
+	makefile, err := os.ReadFile(filepath.Join("..", "..", "Makefile"))
 	if err != nil {
 		t.Fatal(err)
 	}
