@@ -359,15 +359,20 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 	}
 
 	criteria, verification, checks := parseCriteriaAndVerification(model, document, item, strictWorkflow)
-	criteriaLines := map[int]struct{}{}
+	checklistLines := map[int]struct{}{}
 	if criteriaSection, found := workSection(item, "критерии приёмки", "критерии приемки", "acceptance criteria"); found {
 		for _, criterion := range criteriaSection.Tasks {
-			criteriaLines[criterion.Line] = struct{}{}
+			checklistLines[criterion.Line] = struct{}{}
+		}
+	}
+	if planSection, found := workSection(item, "план", "plan"); found {
+		for _, step := range planSection.Tasks {
+			checklistLines[step.Line] = struct{}{}
 		}
 	}
 	for _, task := range extractTasks(document.Lines[item.Heading.Line+1:item.EndLine], nil, item.Heading.Line+1) {
-		if _, allowed := criteriaLines[task.Line]; !allowed {
-			addKnowledgeIssue(model, document, "error", "task-checkbox-outside-criteria", "Чекбоксы задачи разрешены только в разделе «Критерии приёмки».", task.Line)
+		if _, allowed := checklistLines[task.Line]; !allowed {
+			addKnowledgeIssue(model, document, "error", "task-checkbox-outside-criteria", "Чекбоксы задачи разрешены только в разделах «Критерии приёмки» и «План».", task.Line)
 		}
 	}
 

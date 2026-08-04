@@ -280,8 +280,11 @@ func TestMermaidFlowModelAndRelationships(t *testing.T) {
 ## Процесс
 
 `+"```mermaid"+`
-flowchart TD
-    Login --> Dashboard
+sequenceDiagram
+    User->>Web: Login
+    Web->>API: Authenticate
+    API-->>Web: Session
+    Web-->>User: Dashboard
 `+"```"+`
 `)
 	writeTestFile(t, docs, "architecture/services.md", `# Взаимодействие сервисов
@@ -422,10 +425,13 @@ sequenceDiagram
 	for _, issue := range model.Issues {
 		codes[issue.Code] = true
 	}
-	for _, code := range []string{"missing-flow-diagram", "unlinked-mermaid-diagram", "sequence-diagram-outside-architecture", "dangling-flow-reference"} {
+	for _, code := range []string{"missing-flow-diagram", "unlinked-mermaid-diagram", "dangling-flow-reference"} {
 		if !codes[code] {
 			t.Fatalf("missing %s in %#v", code, model.Issues)
 		}
+	}
+	if codes["sequence-diagram-outside-architecture"] {
+		t.Fatalf("removed sequence diagram diagnostic returned in %#v", model.Issues)
 	}
 }
 
@@ -741,6 +747,7 @@ func TestWorkItemValidationRules(t *testing.T) {
 ## Результат
 
 Результат.
+- [ ] Чекбокс вне критериев и плана.
 
 ## Область изменения
 
@@ -758,9 +765,8 @@ func TestWorkItemValidationRules(t *testing.T) {
 
 ## План
 
-1. Первый шаг.
-2. Второй шаг.
 - [ ] Чекбокс в плане.
+- [x] Завершённый шаг в плане.
 
 ## Проверка
 
@@ -784,6 +790,28 @@ func TestWorkItemValidationRules(t *testing.T) {
 	} {
 		if !codes[code] {
 			t.Fatalf("missing issue %s in %#v", code, model.Issues)
+		}
+	}
+}
+
+func TestWorkItemPlanChecklistAllowed(t *testing.T) {
+	_, docs, _ := createFixture(t)
+	content := strings.Replace(
+		taskCheckFixture("Готово к работе", false, map[string]string{
+			"AC-01": "go test ./...",
+			"AC-02": "go test ./...",
+			"ALL":   "go test ./...",
+			"DOCS":  "go run ./cmd/docgent check ./docs --strict",
+		}, ""),
+		"## План\n\n1. Подготовить команды.\n2. Выполнить проверки.\n3. Сформировать отчёт и обновить документацию.",
+		"## План\n\n- [x] Выполненный шаг.\n- [ ] Следующий шаг.",
+		1,
+	)
+	writeTestFile(t, docs, "work/TASK-AUTH-020-plan-checklist.md", content)
+	model := buildFixture(t, docs)
+	for _, issue := range model.Issues {
+		if issue.DocumentPath == "work/TASK-AUTH-020-plan-checklist.md" && issue.Code == "task-checkbox-outside-criteria" {
+			t.Fatalf("plan checklist must be allowed: %#v", issue)
 		}
 	}
 }

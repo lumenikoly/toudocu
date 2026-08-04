@@ -248,15 +248,5 @@ func validateMermaidDocuments(model *Model) {
 				document.SourcePath, blocks[0].OpeningLine+1,
 			))
 		}
-		architectureLinked := documentLinksToType(document, "architecture")
-		for _, block := range blocks {
-			if block.DiagramType == "sequenceDiagram" && !architectureLinked {
-				addDocumentIssue(model, document, newIssue(
-					"error", "sequence-diagram-outside-architecture",
-					"sequenceDiagram разрешена только в архитектурном контексте.",
-					document.SourcePath, block.OpeningLine+1,
-				))
-			}
-		}
 	}
 }

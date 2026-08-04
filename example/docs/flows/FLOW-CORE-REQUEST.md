@@ -8,6 +8,24 @@
 Диаграммы визуализируют основной сценарий и состояния формы. Источником
 переходов для Screen Map остаются документы `screens/SC-*.md`.
 
+## Взаимодействие сервисов
+
+```mermaid
+sequenceDiagram
+    actor User as Пользователь
+    participant UI as Service Desk UI
+    participant API as Core API
+    User->>UI: Отправить запрос
+    UI->>API: validate(request)
+    alt Данные корректны
+        API-->>UI: created(result)
+        UI-->>User: Показать результат
+    else Данные некорректны
+        API-->>UI: INVALID_INPUT
+        UI-->>User: Остаться на форме с ошибкой
+    end
+```
+
 ## Процесс
 
 ```mermaid

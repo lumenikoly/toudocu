@@ -102,11 +102,14 @@ Common schema-driven anti-patterns include:
 
 ## Flows and screen maps
 
-Use a `FLOW-*` document for the detailed behavior of one reusable scenario.
-Link it to an existing use case or architecture document. Mermaid node labels
-and edges are visualization only: Docgent does not derive relationships from
-them. Derive the diagram from the scenario; do not start from a generic
-start-to-finish graph and retrofit meaning.
+Use one `FLOW-*` document for one significant scenario, branch, error path, or
+service interaction. Link it to an existing use case through `Scenario`, or to
+an architecture document when the flow is genuinely architectural. Put
+concrete request sequences in `flows/`; keep component, boundary, and dependency
+overviews in architecture, and leave simple endpoint operations in API
+contracts. Mermaid node labels and edges are visualization only: Docgent does
+not derive relationships from them. Derive the diagram from the scenario; do
+not start from a generic start-to-finish graph and retrofit meaning.
 
 Use one `screens/SC-*.md` file for every significant screen. Metadata and the
 outgoing transition table are the machine-readable source of truth:

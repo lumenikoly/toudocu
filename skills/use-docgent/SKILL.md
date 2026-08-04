@@ -70,8 +70,10 @@ apply typed contracts only when the project uses the corresponding capability.
    output as documentation.
 9. Treat Mermaid as visualization only. Keep requirements and acceptance
    criteria in prose, and use only validated `flowchart`, `stateDiagram-v2`, or
-   architectural `sequenceDiagram` blocks. For screen maps, edit the catalog
-   and transition tables instead of the generated Mermaid source.
+   `sequenceDiagram` blocks. Put concrete request sequences and significant
+   service interactions in `FLOW-*` documents linked through `Scenario`; keep
+   simple endpoint operations in API contracts. For screen maps, edit the
+   catalog and transition tables instead of the generated Mermaid source.
 10. Complete the author review and any risk-based independent review before
     treating Docgent validation as the final structural gate.
 
