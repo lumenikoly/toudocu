@@ -239,7 +239,7 @@ func renderUseCasePage(model *Model, document *Document) string {
 	content := breadcrumbs(model, current, useCase.ID) +
 		`<header class="page-header usecase-header"><div class="page-kicker">` + renderStatusChip(useCase.Status) + `<span class="badge">Пользовательский сценарий</span></div><h1>` +
 		escapeHTML(useCase.ID+" · "+screenTitleForUseCase(*useCase)) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` +
-		renderMetadata(document) + `</header><div class="usecase-workspace" data-usecase-tabs><nav class="usecase-tabs" role="tablist" aria-label="Представления пользовательского сценария">` +
+		renderMetadata(document) + `<div class="page-actions">` + renderDocumentContextButton(model, document) + `</div></header><div class="usecase-workspace" data-usecase-tabs><nav class="usecase-tabs" role="tablist" aria-label="Представления пользовательского сценария">` +
 		tabLinks.String() + `</nav><section class="usecase-panel" id="overview" role="tabpanel" aria-labelledby="tab-overview" data-usecase-panel><article class="doc-content">` + body +
 		`</article></section><section class="usecase-panel" id="map" role="tabpanel" aria-labelledby="tab-map" data-usecase-panel>` + mapPanel +
 		`</section><section class="usecase-panel" id="play" role="tabpanel" aria-labelledby="tab-play" data-usecase-panel>` + playPanel +

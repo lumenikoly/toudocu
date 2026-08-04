@@ -4,9 +4,9 @@
     "name": "Docgent",
     "version": "1.1.0-go"
   },
-  "generatedAt": "2026-07-30T18:50:21.598124407Z",
+  "generatedAt": "2026-07-30T19:17:02.142004758Z",
   "sourceDirectory": "docs",
-  "staleDays": 0,
+  "staleDays": 90,
   "project": {
     "title": "Docgent",
     "description": "Docgent — dependency-free CLI на Go для проверяемой проектной документации в структурированном Markdown и автономного HTML-портала, работающего через file:// .",
@@ -37,17 +37,17 @@
     }
   },
   "stats": {
-    "documents": 33,
+    "documents": 34,
     "totalTasks": 10,
     "completedTasks": 9,
     "remainingTasks": 1,
     "taskProgress": 90,
-    "documentsComplete": 2,
+    "documentsComplete": 3,
     "documentsInProgress": 2,
     "documentsNotStarted": 0,
     "documentsWithoutTasks": 29,
     "staleDocuments": 0,
-    "documentsWithoutDescription": 2,
+    "documentsWithoutDescription": 3,
     "documentsWithoutStatus": 0,
     "brokenLinks": 0,
     "warnings": 0,
@@ -1463,7 +1463,8 @@
         "flows/FLOW-DOCS-SERVE.md",
         "use-cases/build-portal.md",
         "use-cases/screen-map.md",
-        "use-cases/serve-portal.md"
+        "use-cases/serve-portal.md",
+        "work/TASK-SITE-001.md"
       ],
       "relatedDocuments": [
         "use-cases/build-portal.md",
@@ -1523,7 +1524,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-30T18:47:33.533664024Z",
+      "updatedAt": "2026-07-30T19:12:14.848602821Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1554,7 +1555,8 @@
         }
       ],
       "backlinks": [
-        "index.md"
+        "index.md",
+        "work/TASK-SITE-001.md"
       ],
       "relatedDocuments": [
         "contracts/cli.md",
@@ -2325,6 +2327,62 @@
       "links": [],
       "backlinks": [],
       "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "work/TASK-SITE-001.md",
+      "outputPath": "work/TASK-SITE-001.html",
+      "type": "work",
+      "title": "TASK-SITE-001: Добавить копирование контекста документа",
+      "description": "",
+      "metadata": {
+        "module": "MOD-SITE",
+        "owner": "Команда Docgent",
+        "priority": "Средний",
+        "status": "Выполнено",
+        "type": "Feature",
+        "updated": "2026-07-30",
+        "useCase": "UC-DOCS-01"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Выполнено",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 9,
+        "completed": 9,
+        "remaining": 0,
+        "percent": 100
+      },
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../modules/site.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/site.md",
+          "href": "../modules/site.html"
+        },
+        {
+          "destination": "../reference/features.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/features.md",
+          "href": "../reference/features.html"
+        }
+      ],
+      "backlinks": [],
+      "relatedDocuments": [
+        "modules/site.md",
+        "reference/features.md"
+      ]
     }
   ],
   "roadmap": [
@@ -3331,6 +3389,155 @@
         "documentationImpact": "Созданы исходные проектные документы в docs/ . README теперь ведёт на docs/index.md ; сгенерированный портал остаётся build artifact.",
         "documentationPaths": [
           "index.md"
+        ]
+      },
+      {
+        "id": "TASK-SITE-001",
+        "title": "Добавить копирование контекста документа",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Выполнено",
+          "recognized": true
+        },
+        "type": "Feature",
+        "priority": "Средний",
+        "owner": "Команда Docgent",
+        "moduleId": "MOD-SITE",
+        "useCaseId": "UC-DOCS-01",
+        "screenIds": [],
+        "transitionIds": [],
+        "dependsOn": [],
+        "document": "work/TASK-SITE-001.md",
+        "anchor": "task-site-001-добавить-копирование-контекста-документа",
+        "criteria": [
+          {
+            "line": 53,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-01 Обычный документ, use case и dashboard копируют название и"
+          },
+          {
+            "line": 55,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-02 Каталоги и служебные страницы не получают кнопку контекста."
+          },
+          {
+            "line": 56,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-03 Копирование работает через Clipboard API и автономный fallback для"
+          },
+          {
+            "line": 58,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-04 Путь не раскрывает абсолютное расположение документа; вне"
+          }
+        ],
+        "verificationMatrix": [
+          {
+            "criterionId": "AC-01",
+            "criterion": "Обычный документ, use case и dashboard копируют название и",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestGenerateSite|TestDocumentContext'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-02",
+            "criterion": "Каталоги и служебные страницы не получают кнопку контекста.",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestDocumentContext'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-03",
+            "criterion": "Копирование работает через Clipboard API и автономный fallback для",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestDocumentContext'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-04",
+            "criterion": "Путь не раскрывает абсолютное расположение документа; вне",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestDocumentContext'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          }
+        ],
+        "checks": [
+          {
+            "target": "AC-01",
+            "commands": [
+              "go test ./... -run 'TestGenerateSite|TestDocumentContext'"
+            ],
+            "line": 71
+          },
+          {
+            "target": "AC-02",
+            "commands": [
+              "go test ./... -run 'TestDocumentContext'"
+            ],
+            "line": 72
+          },
+          {
+            "target": "AC-03",
+            "commands": [
+              "go test ./... -run 'TestDocumentContext'"
+            ],
+            "line": 73
+          },
+          {
+            "target": "AC-04",
+            "commands": [
+              "go test ./... -run 'TestDocumentContext'"
+            ],
+            "line": 74
+          },
+          {
+            "target": "ALL",
+            "commands": [
+              "go test ./..."
+            ],
+            "line": 75
+          },
+          {
+            "target": "DOCS",
+            "commands": [
+              "go run ./cmd/docgent check ./docs --repository-root ."
+            ],
+            "line": 76
+          }
+        ],
+        "repositoryPaths": [
+          "assets/app.js",
+          "assets/style.css",
+          "process_site.go",
+          "site.go"
+        ],
+        "result": "На страницах исходных Markdown-документов пользователь может одним действием скопировать название и repository-relative путь, чтобы передать точный контекст агенту.",
+        "behaviorChange": "Было Портал позволял копировать блоки кода, но не предоставлял короткую ссылку на исходный документ открытой страницы. Станет Обычные страницы документов, канонические страницы use case и главный dashboard для index.md содержат кнопку «Копировать контекст». В буфер записываются две строки:",
+        "before": "Портал позволял копировать блоки кода, но не предоставлял короткую ссылку на исходный документ открытой страницы.",
+        "after": "Обычные страницы документов, канонические страницы use case и главный dashboard для index.md содержат кнопку «Копировать контекст». В буфер записываются две строки:",
+        "outOfScope": "копирование полного содержимого документа; кнопка на каталогах, Screen Map, traceability и health page; изменение CLI, Go API или report.json schema v1; новые зависимости.",
+        "plan": "Добавить безопасное вычисление контекста и HTML-кнопку. Подключить кнопку ко всем source-backed страницам выбранного охвата. Реализовать browser copy, состояния и адаптивные стили. Обновить документацию и тесты. Выполнить полный verification cycle и пересобрать отслеживаемый портал.",
+        "documentationImpact": "Обновляются описание модуля и каталог возможностей. Отслеживаемый портал пересобирается из исходного Markdown после завершения проверки.",
+        "documentationPaths": [
+          "modules/site.md",
+          "reference/features.md"
         ]
       }
     ]

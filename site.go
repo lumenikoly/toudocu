@@ -32,6 +32,22 @@ func renderProgress(stats TaskStats, label string) string {
 	return fmt.Sprintf(`<div class="progress-block"><div class="progress-header"><span class="progress-label">%s · %d из %d</span><span class="progress-value">%d%%</span></div><div class="progress-track%s" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="%d"><div class="progress-fill" style="width:%d%%"></div></div></div>`, escapeHTML(label), stats.Completed, stats.Total, percent, complete, percent, percent)
 }
 
+func documentContextPath(model *Model, document *Document) string {
+	if ensureInside(model.RepositoryRoot, document.AbsolutePath) {
+		return toPosixRelative(model.RepositoryRoot, document.AbsolutePath)
+	}
+	return document.SourcePath
+}
+
+func renderDocumentContextButton(model *Model, document *Document) string {
+	if document == nil {
+		return ""
+	}
+	return `<button class="document-context-button" type="button" data-copy-document-context data-document-context-title="` +
+		escapeAttr(document.Title) + `" data-document-context-path="` + escapeAttr(documentContextPath(model, document)) +
+		`"><span class="document-context-icon" aria-hidden="true">⧉</span><span data-copy-document-context-label aria-live="polite">Копировать контекст</span></button>`
+}
+
 func metricCard(label string, value any, detail string) string {
 	out := fmt.Sprintf(`<div class="metric-card"><div class="metric-label">%s</div><div class="metric-value">%s</div>`, escapeHTML(label), escapeHTML(value))
 	if detail != "" {
@@ -410,7 +426,7 @@ func renderDocumentPage(model *Model, document *Document) string {
 	if document.Type == "flow" {
 		flowConnections = renderFlowConnections(model, document)
 	}
-	content := breadcrumbs(model, document.OutputPath, document.Title) + `<header class="page-header"><div class="page-kicker">` + renderStatusChip(displayStatus) + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + issues + `</div><h1>` + escapeHTML(document.Title) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` + renderMetadata(document) + renderProgress(document.TaskStats, "Готовность документа") + controls + `<div class="page-actions"><button class="collapse-all-button" type="button" data-collapse-all data-collapse-state="expanded" aria-expanded="true"><span class="collapse-all-icon" aria-hidden="true"><span class="collapse-icon collapse-icon-up">↑</span><span class="collapse-icon collapse-icon-down">↓</span></span><span data-collapse-label>Свернуть разделы</span></button></div></header>` + computedStatus + `<article class="doc-content">` + body + `</article>` + screenConnections + renderRelated(model, document)
+	content := breadcrumbs(model, document.OutputPath, document.Title) + `<header class="page-header"><div class="page-kicker">` + renderStatusChip(displayStatus) + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + issues + `</div><h1>` + escapeHTML(document.Title) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` + renderMetadata(document) + renderProgress(document.TaskStats, "Готовность документа") + controls + `<div class="page-actions">` + renderDocumentContextButton(model, document) + `<button class="collapse-all-button" type="button" data-collapse-all data-collapse-state="expanded" aria-expanded="true"><span class="collapse-all-icon" aria-hidden="true"><span class="collapse-icon collapse-icon-up">↑</span><span class="collapse-icon collapse-icon-down">↓</span></span><span data-collapse-label>Свернуть разделы</span></button></div></header>` + computedStatus + `<article class="doc-content">` + body + `</article>` + screenConnections + renderRelated(model, document)
 	content += flowConnections
 	return pageShell(model, document.OutputPath, document.Title, document.Description, content, renderTOC(document))
 }
@@ -576,7 +592,11 @@ func renderDashboard(model *Model) string {
 		}
 		hero = `<header class="` + heroClass + `"><div class="hero-copy">` + heroLogo + status + `<h1>` + escapeHTML(model.Project.Title) + `</h1><p class="hero-description">` + escapeHTML(model.Project.Description) + `</p>` + summary + meta + `</div>` + heroImage + `</header>`
 	}
-	content := hero + overview + `<section class="metric-grid">` + metrics.String() + `</section>` + roadmap + computedStatus + riskSection + `<section class="dashboard-section"><div class="section-heading"><div><h2>Документация проекта</h2><p>Поиск, фильтры, статусы и локальные чек-листы.</p></div><a class="section-link" href="` + escapeAttr(model.HealthOutputPath) + `">Качество →</a></div>` + documentList + `</section>`
+	contextAction := ""
+	if document := model.Project.OverviewDocument; document != nil {
+		contextAction = `<div class="page-actions dashboard-page-actions">` + renderDocumentContextButton(model, document) + `</div>`
+	}
+	content := hero + contextAction + overview + `<section class="metric-grid">` + metrics.String() + `</section>` + roadmap + computedStatus + riskSection + `<section class="dashboard-section"><div class="section-heading"><div><h2>Документация проекта</h2><p>Поиск, фильтры, статусы и локальные чек-листы.</p></div><a class="section-link" href="` + escapeAttr(model.HealthOutputPath) + `">Качество →</a></div>` + documentList + `</section>`
 	return pageShell(model, "index.html", model.Project.Title, model.Project.Description, content, "")
 }
 

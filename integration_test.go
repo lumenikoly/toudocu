@@ -564,6 +564,73 @@ func TestGenerateSite(t *testing.T) {
 	}
 }
 
+func TestDocumentContextCopyMarkupAndAssets(t *testing.T) {
+	root, docs, _ := createFixture(t)
+	model := buildFixture(t, docs)
+	module := model.DocByPath["modules/auth.md"]
+	useCase := model.DocByPath["use-cases/login.md"]
+
+	moduleHTML := renderDocumentPage(model, module)
+	for _, part := range []string{
+		`data-copy-document-context`,
+		`data-document-context-title="Авторизация"`,
+		`data-document-context-path="docs/modules/auth.md"`,
+		`data-copy-document-context-label`,
+		`Копировать контекст`,
+	} {
+		if !strings.Contains(moduleHTML, part) {
+			t.Fatalf("document context markup missing %q", part)
+		}
+	}
+	if !strings.Contains(renderUseCasePage(model, useCase), `data-document-context-path="docs/use-cases/login.md"`) {
+		t.Fatal("canonical use-case page must expose its source document context")
+	}
+	if !strings.Contains(renderDashboard(model), `data-document-context-path="docs/index.md"`) {
+		t.Fatal("dashboard must expose the root index document context")
+	}
+
+	for name, html := range map[string]string{
+		"directory":    renderDirectoryPage(model, "modules"),
+		"processes":    renderProcessCatalogPage(model, "processes/index.html", "flow"),
+		"health":       renderHealthPage(model),
+		"traceability": renderTraceabilityPage(model, "traceability.html"),
+	} {
+		if strings.Contains(html, `data-copy-document-context`) {
+			t.Fatalf("%s page must not expose synthetic document context", name)
+		}
+	}
+
+	model.RepositoryRoot = filepath.Join(root, "unrelated")
+	fallbackHTML := renderDocumentPage(model, module)
+	if !strings.Contains(fallbackHTML, `data-document-context-path="modules/auth.md"`) ||
+		strings.Contains(fallbackHTML, module.AbsolutePath) {
+		t.Fatal("context outside repository root must use SourcePath without exposing an absolute path")
+	}
+
+	appScript, err := EmbeddedFiles.ReadFile("assets/app.js")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, part := range []string{
+		"initializeDocumentContextCopy",
+		"navigator.clipboard?.writeText",
+		"document.execCommand('copy')",
+		"Документ: ${title}\\nПуть: ${path}",
+		"Не удалось скопировать",
+	} {
+		if !strings.Contains(string(appScript), part) {
+			t.Fatalf("document context browser behavior missing %q", part)
+		}
+	}
+	style, err := EmbeddedFiles.ReadFile("assets/style.css")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(style), `.document-context-button`) {
+		t.Fatal("document context button styles are missing")
+	}
+}
+
 func TestGenerateMermaidSiteAssetsAndMarkup(t *testing.T) {
 	_, docs, output := createFixture(t)
 	useCasePath := filepath.Join(docs, "use-cases", "login.md")

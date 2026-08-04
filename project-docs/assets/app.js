@@ -404,6 +404,53 @@
     updateCollapseAllButton();
   }
 
+  async function copyText(value) {
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(value);
+        return true;
+      } catch { /* file:// and browser permission fallback */ }
+    }
+
+    const activeElement = document.activeElement;
+    const textarea = document.createElement('textarea');
+    textarea.value = value;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.inset = '0 auto auto -9999px';
+    textarea.style.opacity = '0';
+    document.body.append(textarea);
+    textarea.focus();
+    textarea.select();
+    textarea.setSelectionRange(0, textarea.value.length);
+    let copied = false;
+    try {
+      copied = typeof document.execCommand === 'function' && document.execCommand('copy');
+    } catch { /* unsupported fallback */ }
+    textarea.remove();
+    activeElement?.focus?.();
+    return copied;
+  }
+
+  function initializeDocumentContextCopy() {
+    $$('[data-copy-document-context]').forEach((button) => {
+      const label = $('[data-copy-document-context-label]', button);
+      const title = button.dataset.documentContextTitle || '';
+      const path = button.dataset.documentContextPath || '';
+      let resetTimer = 0;
+      button.addEventListener('click', async () => {
+        window.clearTimeout(resetTimer);
+        const copied = await copyText(`Документ: ${title}\nПуть: ${path}`);
+        button.dataset.copyState = copied ? 'success' : 'error';
+        if (label) label.textContent = copied ? 'Скопировано' : 'Не удалось скопировать';
+        resetTimer = window.setTimeout(() => {
+          delete button.dataset.copyState;
+          if (label) label.textContent = 'Копировать контекст';
+        }, copied ? 1300 : 2200);
+      });
+    });
+  }
+
   function initializeCodeCopy() {
     $$('.code-block').forEach((block) => {
       const code = $('code', block);
@@ -884,6 +931,7 @@
   initializeCollectionFilters();
   initializeTaskFilters();
   initializeCollapsibleSections();
+  initializeDocumentContextCopy();
   initializeCodeCopy();
   initializeMermaid();
   initializeUseCaseTabs();
