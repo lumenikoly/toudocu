@@ -51,5 +51,6 @@ Docgent строит единую модель из Markdown, проверяет
 - [Архитектурные решения](decisions/)
 - [Риски](risks.md)
 - [Правила проверки](guides/testing.md)
+- [Рабочие задачи: статусы, типы и проверки](guides/work-items.md)
 - [Справочник конфигурации](reference/configuration.md)
 - [Рабочие задачи](work/)

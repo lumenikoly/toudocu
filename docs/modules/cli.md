@@ -62,5 +62,7 @@ validation gate.
 
 ## Связанные сценарии
 
-- [UC-TASK-01: Работа с выбранной задачей](../use-cases/task-workflow.md)
+- [UC-TASK-01: Контекст рабочей задачи](../use-cases/task-workflow.md)
+- [UC-TASK-02: Проверка рабочей задачи](../use-cases/task-check.md)
 - [UC-DOCS-02: Проверка документации](../use-cases/check-documentation.md)
+- [UC-DOCS-03: Локальный сервер](../use-cases/serve-portal.md)

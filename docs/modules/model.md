@@ -58,8 +58,10 @@ diagnostics.
 - `ProjectReport` schema v1;
 - коды `Issue`;
 - правила ID и структуры, описанные в [CLI-контракте](../contracts/cli.md).
+- статусы, типы и формат задач из [руководства по рабочим задачам](../guides/work-items.md).
 
 ## Связанные сценарии
 
 - [UC-DOCS-02: Проверка документации](../use-cases/check-documentation.md)
-- [UC-TASK-01: Работа с выбранной задачей](../use-cases/task-workflow.md)
+- [UC-TASK-01: Контекст рабочей задачи](../use-cases/task-workflow.md)
+- [UC-TASK-02: Проверка рабочей задачи](../use-cases/task-check.md)

@@ -60,3 +60,4 @@
 ## Связанные сценарии
 
 - [UC-DOCS-01: Сборка портала](../use-cases/build-portal.md)
+- [UC-DOCS-03: Локальный сервер](../use-cases/serve-portal.md)
