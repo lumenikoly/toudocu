@@ -233,6 +233,104 @@ func TestUseDocgentOptionalRelationshipPlaceholders(t *testing.T) {
 	}
 }
 
+func TestUseDocgentInitContract(t *testing.T) {
+	skill := readUseDocgentFile(t, "SKILL.md")
+	for _, expected := range []string{
+		"explicitly invokes `$use-docgent init`",
+		"[references/init.md](references/init.md)",
+		"Never infer initialization",
+		"Docgent Go CLI command",
+	} {
+		if !strings.Contains(skill, expected) {
+			t.Errorf("SKILL.md does not define explicit init contract %q", expected)
+		}
+	}
+
+	initReference := readUseDocgentFile(t, filepath.Join("references", "init.md"))
+	for _, expected := range []string{
+		"Do not infer initialization",
+		"Preflight before changing files",
+		"<!-- docgent:project-guidance:start -->",
+		"<!-- docgent:project-guidance:end -->",
+		"duplicated",
+		"reversed",
+		"conflicting",
+		"no `index.md`",
+		"ordinary project-wide Docgent check",
+		"Do not create a `TASK-*` merely because init is running",
+	} {
+		if !strings.Contains(initReference, expected) {
+			t.Errorf("init reference does not contain %q", expected)
+		}
+	}
+}
+
+func TestUseDocgentProjectGuidanceTemplates(t *testing.T) {
+	const startMarker = "<!-- docgent:project-guidance:start -->"
+	const endMarker = "<!-- docgent:project-guidance:end -->"
+
+	for _, language := range []string{"ru", "en"} {
+		content := readUseDocgentFile(t, filepath.Join("assets", "project-guidance", language+".md"))
+		if strings.Count(content, startMarker) != 1 || strings.Count(content, endMarker) != 1 {
+			t.Errorf("%s guidance must contain each managed marker exactly once", language)
+		}
+		if strings.Index(content, startMarker) >= strings.Index(content, endMarker) {
+			t.Errorf("%s guidance markers are not ordered", language)
+		}
+		trimmed := strings.TrimSpace(content)
+		if !strings.HasPrefix(trimmed, startMarker) || !strings.HasSuffix(trimmed, endMarker) {
+			t.Errorf("%s guidance contains content outside the managed block", language)
+		}
+		for _, expected := range []string{"$use-docgent", "TASK-*", "$use-docgent init"} {
+			if !strings.Contains(content, expected) {
+				t.Errorf("%s guidance does not contain %q", language, expected)
+			}
+		}
+	}
+
+	ru := readUseDocgentFile(t, filepath.Join("assets", "project-guidance", "ru.md"))
+	en := readUseDocgentFile(t, filepath.Join("assets", "project-guidance", "en.md"))
+	if !strings.Contains(ru, "Не создавайте задачу для каждого prompt") {
+		t.Error("Russian guidance does not prevent per-prompt task creation")
+	}
+	if !strings.Contains(en, "Do not create a task for every prompt") {
+		t.Error("English guidance does not prevent per-prompt task creation")
+	}
+}
+
+func TestUseDocgentTaskCreationThreshold(t *testing.T) {
+	skill := readUseDocgentFile(t, "SKILL.md")
+	workflows := readUseDocgentFile(t, filepath.Join("references", "workflows.md"))
+	for name, content := range map[string]string{"SKILL.md": skill, "workflows.md": workflows} {
+		for _, expected := range []string{"explicitly requires", "substantial", "Do not create"} {
+			if !strings.Contains(content, expected) {
+				t.Errorf("%s does not contain task threshold %q", name, expected)
+			}
+		}
+	}
+	for _, forbidden := range []string{
+		"For a new request, search and create a neutral Draft",
+		"For a new request, start with `search`, `task init`",
+	} {
+		if strings.Contains(skill, forbidden) || strings.Contains(workflows, forbidden) {
+			t.Errorf("unconditional task workflow remains: %q", forbidden)
+		}
+	}
+}
+
+func TestUseDocgentMetadata(t *testing.T) {
+	metadata := readUseDocgentFile(t, filepath.Join("agents", "openai.yaml"))
+	for _, expected := range []string{
+		`display_name: "Use Docgent"`,
+		`short_description: "Подключайте и ведите Docgent по необходимости"`,
+		`default_prompt: "Используй $use-docgent init, чтобы явно подключить Docgent к этому проекту."`,
+	} {
+		if !strings.Contains(metadata, expected) {
+			t.Errorf("openai.yaml does not contain %q", expected)
+		}
+	}
+}
+
 func writeSkillTemplate(t *testing.T, docs, language, templateName, destination string, replacements map[string]string) {
 	t.Helper()
 	rendered := readSkillTemplate(t, language, templateName)
@@ -243,6 +341,15 @@ func writeSkillTemplate(t *testing.T, docs, language, templateName, destination 
 		t.Fatalf("unresolved placeholder in %s/%s:\n%s", language, templateName, rendered)
 	}
 	writeTestFile(t, docs, destination, rendered)
+}
+
+func readUseDocgentFile(t *testing.T, relativePath string) string {
+	t.Helper()
+	content, err := os.ReadFile(filepath.Join("skills", "use-docgent", relativePath))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(content)
 }
 
 func readSkillTemplate(t *testing.T, language, templateName string) string {

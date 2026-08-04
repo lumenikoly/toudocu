@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Skill получил явный onboarding-вызов `$use-docgent init`: только он создаёт
+  минимальный `docs/index.md` и устанавливает управляемые правила в `AGENTS.md`;
+  обычные prompt больше не подразумевают автоматическую инициализацию или
+  обязательный новый `TASK-*`.
 - Добавлены опциональные `quality/STD-*`, `runbooks/RB-*`, custom manifests,
   task-связи `Standards`/`Affected runbooks`, verification target `QUALITY`,
   RU/EN scaffolds и специализированные каталоги портала.

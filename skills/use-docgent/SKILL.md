@@ -1,6 +1,6 @@
 ---
 name: use-docgent
-description: Create, update, validate, and build adaptable project documentation managed by the Docgent CLI. Use when Codex needs to initialize or revise Docgent Markdown; work with modules, use cases, FLOW-* Mermaid processes, SC-* screen documents and TR-* transitions, roadmap items, risks, ADRs, contracts, guides, references, or TASK-* work items; fix integrity diagnostics; obtain task context; run explicitly requested trusted task verification; or generate the static portal.
+description: Create, update, validate, and build adaptable project documentation managed by the Docgent CLI. Use for explicit Docgent documentation work; modules, use cases, FLOW-* processes, SC-* screens and TR-* transitions; roadmap, risks, ADRs, contracts, guides, references, or TASK-* work items; integrity diagnostics; task context or verification; and static portals. Initialize project documentation and managed AGENTS.md guidance only when the user explicitly invokes `$use-docgent init`; never initialize implicitly. Do not use for ordinary code work without semantic documentation impact.
 ---
 
 # Use Docgent
@@ -8,6 +8,17 @@ description: Create, update, validate, and build adaptable project documentation
 Use Docgent to protect safety and explicit relationships, not to force every
 project into one documentation structure. Keep ordinary Markdown lightweight;
 apply typed contracts only when the project uses the corresponding capability.
+
+## Initialize only when explicitly requested
+
+When the user explicitly invokes `$use-docgent init`, read
+[references/init.md](references/init.md) and follow its complete preflight,
+managed-block, validation, and reporting workflow. The skill-level init is not
+a Docgent Go CLI command.
+
+Never infer initialization from the first skill use, a missing managed block,
+or an ordinary request. Do not create or update project `AGENTS.md` guidance
+outside the explicit init workflow.
 
 ## Establish the environment
 
@@ -108,7 +119,13 @@ apply typed contracts only when the project uses the corresponding capability.
 
 ## Work with tasks safely
 
-1. For a new request, search and create a neutral Draft:
+1. Decide whether the request needs a durable work item. Create or reuse one
+   only when the user or repository policy explicitly requires it, or when the
+   work is substantial and benefits from durable scope, acceptance criteria,
+   verification, or handoff across sessions or owners. Contract or architecture
+   changes and migrations normally qualify. Ordinary questions, code reading,
+   small local edits, formatting, and behavior-preserving refactors do not.
+2. For qualifying new work, search and create a neutral Draft:
 
    ```bash
    docgent search "request terms" ./docs --format json
@@ -118,9 +135,9 @@ apply typed contracts only when the project uses the corresponding capability.
    Select and fill entities from evidence. `--type Bug` allocates a `BUG-*`
    identifier and uses the bug-specific scaffold. Docgent does not interpret
    the request or change task status.
-2. Validate the complete Draft with `task ready`; change it to Ready only after
+3. Validate the complete Draft with `task ready`; change it to Ready only after
    semantic review.
-3. Start implementation work with read-only context:
+4. Start implementation work with read-only context:
 
    ```bash
    docgent task context TASK-AREA-001 ./docs \
@@ -128,21 +145,21 @@ apply typed contracts only when the project uses the corresponding capability.
      --format json
    ```
 
-4. Treat an existing Ready+ task as an explicit contract: respect its result,
+5. Treat an existing Ready+ task as an explicit contract: respect its result,
    scope, exclusions, criteria, dependencies, module, use case, flow, screens,
    and rules.
    Read every explicitly linked standard and runbook. Also review the `Scope`
    of other standards for applicability; do not infer applicability from a
    task glob alone.
-5. Use checkboxes in `Acceptance criteria` and `Plan` when progress tracking is
+6. Use checkboxes in `Acceptance criteria` and `Plan` when progress tracking is
    useful. Keep `AC-*` identifiers and verification mappings on acceptance
    criteria; plan steps do not require them.
-6. Do not broaden changes beyond task scope without user direction.
-7. Inspect `task verify --dry-run` first. Run `task verify --run` only when the
+7. Do not broaden changes beyond task scope without user direction.
+8. Inspect `task verify --dry-run` first. Run `task verify --run` only when the
    repository is trusted and the user explicitly asked to execute or verify the
    task. It executes repository shell commands with the current user's
    permissions.
-8. Archive only a validated Done or Cancelled task with `task archive`; restore
+9. Archive only a validated Done or Cancelled task with `task archive`; restore
    it with `task restore`. These commands move one Markdown file without
    changing its status or content and block when direct links would break.
 

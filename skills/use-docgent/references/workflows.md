@@ -16,8 +16,9 @@ Before choosing flags:
 4. fall back to `./docs` and its parent only when no convention exists.
 
 Use `docgent` from `PATH`. In the Docgent source repository, substitute
-`go run ./cmd/docgent`. Docgent has no `init` command; create Markdown from the
-bundled templates.
+`go run ./cmd/docgent`. The Go CLI has no `init` command. The explicit
+`$use-docgent init` prompt follows [init.md](init.md); other document creation
+uses the bundled templates.
 
 ## Documentation gate
 
@@ -107,8 +108,14 @@ product or repository evidence.
 
 ## Task workflow
 
-For a new request, start with `search`, `task init`, semantic filling and
-read-only `task ready`. For implementation, start with:
+Create a work item only when the user or repository policy explicitly requires
+one, or when substantial work needs durable scope, acceptance criteria,
+verification, or handoff. Do not create one for every prompt, ordinary
+question, small local edit, or behavior-preserving refactor.
+
+For qualifying new work, start with `search`, `task init`, semantic filling and
+read-only `task ready`. For implementation of an existing Ready+ task, start
+with:
 
 ```bash
 docgent task context TASK-AREA-001 ./docs \
