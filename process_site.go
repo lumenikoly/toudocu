@@ -113,32 +113,28 @@ func renderProcessRows(model *Model, current, onlyType string) string {
 }
 
 func renderProcessCatalogPage(model *Model, current, onlyType string) string {
-	title := "Все процессы"
-	description := "Пользовательские сценарии и визуальные процессы проекта."
+	title := "Процессы"
+	description := "Бизнес-, технические, операционные и межмодульные процессы."
 	badge := "Процессы"
-	typeControl := `<label class="screen-filter-field"><span>Тип</span><select data-filter-control="type"><option value="all">Все типы</option><option value="use-case">Пользовательские сценарии</option><option value="flow">Визуальные процессы</option></select></label>`
+	badgeTarget := "processes/index.html"
+	summary := "FLOW связан с пользовательскими сценариями"
 	if onlyType == "use-case" {
 		title = "Пользовательские сценарии"
 		description = "Цели пользователя, экранные пути и проверяемые результаты."
-		badge = "Все процессы"
-		typeControl = ""
-	} else if onlyType == "flow" {
-		title = "Визуальные процессы"
-		description = "Бизнес-, технические, операционные и межмодульные процессы."
-		badge = "Все процессы"
-		typeControl = ""
+		badge = "Пользовательские сценарии"
+		badgeTarget = "use-cases/index.html"
+		summary = "UC связан с процессами и экранами"
 	}
 	rows := renderProcessRows(model, current, onlyType)
 	content := breadcrumbs(model, current, title) +
-		`<header class="page-header"><div class="page-kicker"><a class="badge" href="` + escapeAttr(relativeURL(current, "processes/index.html")) + `">` + escapeHTML(badge) + `</a></div><h1>` +
+		`<header class="page-header"><div class="page-kicker"><a class="badge" href="` + escapeAttr(relativeURL(current, badgeTarget)) + `">` + escapeHTML(badge) + `</a></div><h1>` +
 		escapeHTML(title) + `</h1><p class="page-lead">` + escapeHTML(description) + `</p></header>` +
 		`<section class="process-catalog" data-filter-scope><div class="process-filterbar">` +
 		`<label class="screen-filter-field process-filter-search"><span>Поиск</span><input type="search" data-filter-control="search" placeholder="ID, название или модуль"></label>` +
-		typeControl +
 		`<label class="screen-filter-field"><span>Модуль</span><select data-filter-control="module"><option value="all">Все модули</option>` + processModuleOptions(model) + `</select></label>` +
 		`<label class="screen-filter-field"><span>Связанный сценарий</span><select data-filter-control="usecase"><option value="all">Все сценарии</option>` + processUseCaseOptions(model) + `</select></label>` +
 		`<button class="toolbar-button screen-filter-reset" type="button" data-filter-reset>Сбросить</button></div>` +
-		`<div class="screen-catalog-summary" aria-live="polite"><span>Найдено: <strong data-filter-count></strong></span><span>UC и FLOW остаются самостоятельными сущностями</span></div>` +
+		`<div class="screen-catalog-summary" aria-live="polite"><span>Найдено: <strong data-filter-count></strong></span><span>` + escapeHTML(summary) + `</span></div>` +
 		`<div class="process-table"><table><thead><tr><th scope="col">Процесс</th><th scope="col">Тип</th><th scope="col">Модуль</th><th scope="col">Статус</th><th scope="col">Связи</th><th scope="col">Представления</th></tr></thead><tbody>` +
 		rows + `</tbody></table></div><div class="empty-state" data-filter-empty hidden>Процессы не найдены.</div></section>`
 	return pageShell(model, current, title, description, content, "")

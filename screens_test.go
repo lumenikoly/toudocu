@@ -54,6 +54,19 @@ func createScreenFixture(t *testing.T) (string, string) {
 
 Модуль авторизации.
 `)
+	writeTestFile(t, docs, "flows/FLOW-AUTH-LOGIN.md", `# FLOW-AUTH-LOGIN: Вход пользователя
+
+- Идентификатор: FLOW-AUTH-LOGIN
+- Сценарий: UC-AUTH-01
+- Модуль: MOD-AUTH
+
+## Процесс
+
+`+"```mermaid"+`
+flowchart LR
+    Start --> Login
+`+"```"+`
+`)
 	writeTestFile(t, docs, "screens/SC-PUBLIC-HOME.md", `# SC-PUBLIC-HOME: Главная
 
 - Идентификатор: SC-PUBLIC-HOME
@@ -443,10 +456,10 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	for file, expected := range map[string]string{
 		"screens/index.html":        `data-screen-map`,
 		"screens/catalog.html":      `Каталог экранов`,
-		"processes/index.html":      `Все процессы`,
+		"processes/index.html":      `Процессы`,
 		"use-cases/index.html":      `Пользовательские сценарии`,
 		"use-cases/UC-AUTH-01.html": `data-playable-flow`,
-		"flows/index.html":          `Визуальные процессы`,
+		"flows/index.html":          `Процессы`,
 		"traceability.html":         `Traceability Matrix`,
 		"assets/screen-map.js":      `computeVisible`,
 		"assets/playable-flow.js":   `function activate`,
@@ -476,8 +489,32 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(mapData), "3 вход.") || !strings.Contains(string(mapData), "3 исх.") {
+	mapPage := string(mapData)
+	if !strings.Contains(mapPage, "3 вход.") || !strings.Contains(mapPage, "3 исх.") {
 		t.Fatalf("screen cards must expose incoming and outgoing transition counts: %s", mapData)
+	}
+	mapNavigation := navigationFolderHTML(t, mapPage, "screens")
+	if !strings.Contains(mapNavigation, `nav-folder-link is-active" href="catalog.html"`) {
+		t.Fatal("screens parent must link to the catalog and remain active on the map")
+	}
+	if strings.Count(mapNavigation, `href="catalog.html"`) != 1 || strings.Count(mapNavigation, `href="index.html"`) != 1 {
+		t.Fatal("screens navigation must expose one catalog entry point and one map entry point")
+	}
+	if strings.Contains(mapNavigation, `<span>Каталог экранов</span>`) {
+		t.Fatal("screen catalog must not be duplicated as a child navigation item")
+	}
+	catalogNavigation := navigationFolderHTML(t, string(catalogData), "screens")
+	if !strings.Contains(catalogNavigation, `nav-folder-link is-active" href="catalog.html"`) {
+		t.Fatal("screens parent must be active on the catalog")
+	}
+	screenData, err := os.ReadFile(filepath.Join(output, "screens", "SC-AUTH-LOGIN.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	screenNavigation := navigationFolderHTML(t, string(screenData), "screens")
+	if !strings.Contains(screenNavigation, `nav-folder-link is-active" href="catalog.html"`) ||
+		!strings.Contains(screenNavigation, `nav-link is-active`) {
+		t.Fatal("screens parent and current screen must both be active on a screen document")
 	}
 	flowData, err := os.ReadFile(filepath.Join(output, "use-cases", "UC-AUTH-01.html"))
 	if err != nil {
@@ -495,9 +532,8 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 		`Открыть use case`,
 		`data-nav-folder="use-cases"`,
 		`data-nav-folder="processes"`,
-		`Все процессы`,
 		`Пользовательские сценарии`,
-		`Визуальные процессы`,
+		`FLOW-AUTH-LOGIN`,
 		`Расположение в коде`,
 	} {
 		if !strings.Contains(useCasePage, expected) {
@@ -518,6 +554,14 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	if strings.Contains(processNavigation, `UC-AUTH-01`) {
 		t.Fatal("individual use cases must not be duplicated inside the processes navigation tree")
 	}
+	for _, unexpected := range []string{`processes-flow`, `Все процессы`, `Визуальные процессы`, `../flows/index.html`} {
+		if strings.Contains(processNavigation, unexpected) {
+			t.Fatalf("process navigation must be flat, found %q", unexpected)
+		}
+	}
+	if !strings.Contains(processNavigation, `FLOW-AUTH-LOGIN`) {
+		t.Fatal("flow documents must be direct children of the processes section")
+	}
 	if strings.Index(useCasePage, `data-nav-folder="use-cases"`) > strings.Index(useCasePage, `data-nav-folder="processes"`) {
 		t.Fatal("user scenarios must appear above processes in the primary navigation")
 	}
@@ -532,15 +576,18 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	if strings.Contains(navigationFolderHTML(t, processPage, "use-cases"), `nav-folder-link is-active`) {
 		t.Fatal("aggregate catalog must not activate the user-scenarios section")
 	}
-	if !strings.Contains(processPage, `UC-AUTH-01`) {
-		t.Fatal("aggregate processes catalog must retain user scenarios")
+	if strings.Contains(processPage, `data-type="use-case"`) || strings.Contains(processPage, `data-filter-control="type"`) {
+		t.Fatal("processes catalog must contain only flows and must not expose a redundant type filter")
+	}
+	if !strings.Contains(processPage, `data-type="flow"`) || !strings.Contains(processPage, `FLOW-AUTH-LOGIN`) {
+		t.Fatal("processes catalog must retain flow documents")
 	}
 	useCaseCatalogData, err := os.ReadFile(filepath.Join(output, "use-cases", "index.html"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(useCaseCatalogData), `../processes/index.html`) || !strings.Contains(string(useCaseCatalogData), `>Все процессы</a>`) {
-		t.Fatal("user-scenarios catalog must link to the aggregate processes catalog")
+	if !strings.Contains(string(useCaseCatalogData), `data-type="use-case"`) || strings.Contains(string(useCaseCatalogData), `data-type="flow"`) {
+		t.Fatal("user-scenarios catalog must contain only use cases")
 	}
 	if _, err := os.Stat(filepath.Join(output, "flows", "UC-AUTH-01.html")); !os.IsNotExist(err) {
 		t.Fatalf("legacy duplicate playable page must not be generated: %v", err)
@@ -603,6 +650,24 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	}
 }
 
+func TestProcessesNavigationWithoutFlowsIsPlainLink(t *testing.T) {
+	root, docs := createScreenFixture(t)
+	if err := os.Remove(filepath.Join(docs, "flows", "FLOW-AUTH-LOGIN.md")); err != nil {
+		t.Fatal(err)
+	}
+	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	navigation := renderNavigation(model, "use-cases/UC-AUTH-01.html")
+	if strings.Contains(navigation, `data-nav-folder="processes"`) {
+		t.Fatal("processes without flow documents must not expose an empty folder toggle")
+	}
+	if !strings.Contains(navigation, `<a class="nav-link" href="../processes/index.html"><span class="nav-icon" aria-hidden="true">⇢</span><span>Процессы</span></a>`) {
+		t.Fatal("processes without flow documents must remain available as a plain catalog link")
+	}
+}
+
 func TestScreenCatalogUsesUnambiguousUseCaseValues(t *testing.T) {
 	root, docs := createScreenFixture(t)
 	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
@@ -633,5 +698,18 @@ func TestNoScreenMapStillBuildsCatalogAndReport(t *testing.T) {
 		if _, err := os.Stat(filepath.Join(output, filepath.FromSlash(name))); err != nil {
 			t.Fatalf("%s must still be generated: %v", name, err)
 		}
+	}
+	catalogData, err := os.ReadFile(filepath.Join(output, "screens", "catalog.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	navigation := navigationFolderHTML(t, string(catalogData), "screens")
+	if !strings.Contains(navigation, `nav-folder-link is-active" href="catalog.html"`) {
+		t.Fatal("screens parent must link to and activate the catalog without a screen map")
+	}
+	if strings.Count(navigation, `href="catalog.html"`) != 1 ||
+		strings.Contains(navigation, `href="index.html"`) ||
+		strings.Contains(navigation, `<span>Каталог экранов</span>`) {
+		t.Fatal("navigation without a screen map must not duplicate the catalog or expose a map link")
 	}
 }

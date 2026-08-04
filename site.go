@@ -45,9 +45,6 @@ func outputForDirectory(model *Model, directory string) string {
 		return "processes/index.html"
 	}
 	if directory == "screens" && len(model.Knowledge.Screens) > 0 {
-		if model.ScreenMapEnabled {
-			return "screens/index.html"
-		}
 		return "screens/catalog.html"
 	}
 	if document := model.DocByPath[path.Join(directory, "index.md")]; document != nil {
@@ -137,60 +134,42 @@ func renderNavigation(model *Model, current string) string {
 		if key == "processes" && (strings.HasPrefix(current, "processes/") || strings.HasPrefix(current, "flows/")) {
 			active = " is-active"
 		}
+		if key == "screens" && strings.HasPrefix(current, "screens/") {
+			active = " is-active"
+		}
 		label := directoryLabel(key)
 		groupID := "nav-group-" + slugify(key)
-		fmt.Fprintf(&b, `<li class="nav-item nav-folder" data-nav-folder="%s"><div class="nav-folder-row"><button class="nav-folder-toggle" type="button" data-nav-folder-toggle aria-expanded="true" aria-controls="%s" aria-label="Свернуть раздел %s"><span aria-hidden="true">▾</span></button><a class="nav-folder-link%s" href="%s"><span>%s</span></a></div><ul id="%s">`, escapeAttr(key), escapeAttr(groupID), escapeAttr(label), active, escapeAttr(relativeURL(current, target)), escapeHTML(label), escapeAttr(groupID))
-		if key == "screens" && len(model.Knowledge.Screens) > 0 {
-			generatedPages := []struct{ title, target, icon string }{
-				{"Каталог экранов", "screens/catalog.html", "▣"},
-			}
-			if model.ScreenMapEnabled {
-				generatedPages = append([]struct{ title, target, icon string }{{"Карта экранов", "screens/index.html", "⌗"}}, generatedPages...)
-			}
-			for _, generated := range generatedPages {
-				activeClass := ""
-				if current == generated.target {
-					activeClass = " is-active"
-				}
-				fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span class="nav-icon" aria-hidden="true">%s</span><span>%s</span></a></li>`, activeClass, escapeAttr(relativeURL(current, generated.target)), generated.icon, generated.title)
-			}
-		}
 		docs := groups[key]
 		sort.SliceStable(docs, func(i, j int) bool { return documentLess(docs[i], docs[j]) })
 		if key == "processes" {
-			generatedPages := []struct{ title, target, icon string }{
-				{"Все процессы", "processes/index.html", "⇢"},
-				{"Визуальные процессы", "flows/index.html", "⇄"},
+			hasFlowDocuments := false
+			for _, doc := range docs {
+				if doc.Type == "flow" && !strings.EqualFold(doc.FileName, "index.md") {
+					hasFlowDocuments = true
+					break
+				}
 			}
-			for _, generated := range generatedPages {
-				activeClass := ""
-				aria := ""
-				if current == generated.target {
-					activeClass = " is-active"
-					aria = ` aria-current="page"`
-				}
-				fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"%s><span class="nav-icon" aria-hidden="true">%s</span><span>%s</span></a></li>`,
-					activeClass, escapeAttr(relativeURL(current, generated.target)), aria, generated.icon, generated.title)
+			if !hasFlowDocuments {
+				fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span class="nav-icon" aria-hidden="true">⇢</span><span>%s</span></a></li>`,
+					active, escapeAttr(relativeURL(current, target)), escapeHTML(label))
+				continue
 			}
-			for _, processType := range []struct {
-				label string
-				kind  string
-			}{{"Визуальные процессы", "flow"}} {
-				hasDocuments := false
-				for _, doc := range docs {
-					if doc.Type == processType.kind && !strings.EqualFold(doc.FileName, "index.md") {
-						hasDocuments = true
-						break
-					}
-				}
-				if !hasDocuments {
-					continue
-				}
-				b.WriteString(`<li class="nav-subsection-label"><span aria-hidden="true">▶</span><span>` + escapeHTML(processType.label) + `</span></li>`)
-				for _, doc := range docs {
-					if doc.Type == processType.kind && !strings.EqualFold(doc.FileName, "index.md") {
-						writeDoc(doc)
-					}
+		}
+		fmt.Fprintf(&b, `<li class="nav-item nav-folder" data-nav-folder="%s"><div class="nav-folder-row"><button class="nav-folder-toggle" type="button" data-nav-folder-toggle aria-expanded="true" aria-controls="%s" aria-label="Свернуть раздел %s"><span aria-hidden="true">▾</span></button><a class="nav-folder-link%s" href="%s"><span>%s</span></a></div><ul id="%s">`, escapeAttr(key), escapeAttr(groupID), escapeAttr(label), active, escapeAttr(relativeURL(current, target)), escapeHTML(label), escapeAttr(groupID))
+		if key == "screens" && model.ScreenMapEnabled {
+			activeClass := ""
+			aria := ""
+			if current == "screens/index.html" {
+				activeClass = " is-active"
+				aria = ` aria-current="page"`
+			}
+			fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"%s><span class="nav-icon" aria-hidden="true">⌗</span><span>Карта экранов</span></a></li>`,
+				activeClass, escapeAttr(relativeURL(current, "screens/index.html")), aria)
+		}
+		if key == "processes" {
+			for _, doc := range docs {
+				if doc.Type == "flow" && !strings.EqualFold(doc.FileName, "index.md") {
+					writeDoc(doc)
 				}
 			}
 			b.WriteString(`</ul></li>`)
@@ -839,7 +818,7 @@ func GenerateSite(model *Model, options Options) (GenerateResult, error) {
 	}
 	if len(model.Knowledge.UseCases)+len(model.Knowledge.Flows) > 0 {
 		processPages := map[string]string{
-			"processes/index.html": renderProcessCatalogPage(model, "processes/index.html", ""),
+			"processes/index.html": renderProcessCatalogPage(model, "processes/index.html", "flow"),
 			"use-cases/index.html": renderProcessCatalogPage(model, "use-cases/index.html", "use-case"),
 			"flows/index.html":     renderProcessCatalogPage(model, "flows/index.html", "flow"),
 		}

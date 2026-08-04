@@ -291,16 +291,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
   font-weight: 700;
 }
 .nav-icon { width: 17px; text-align: center; opacity: 0.9; }
-.nav-subsection-label {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 30px;
-  margin: 7px 9px 2px;
-  color: var(--text);
-  font-size: 12px;
-  font-weight: 750;
-}
 .nav-playable-item .nav-link { padding-left: 16px; font-size: 13px; }
 .nav-status-dot {
   width: 7px;
@@ -892,7 +882,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .screen-map-node:focus-visible > path { stroke: var(--accent-strong) !important; stroke-width: 4px !important; }
 .process-filterbar {
   display: grid;
-  grid-template-columns: minmax(220px, 1.5fr) repeat(3, minmax(150px, 1fr)) auto;
+  grid-template-columns: minmax(220px, 1.5fr) repeat(2, minmax(150px, 1fr)) auto;
   align-items: end;
   gap: 12px;
   padding: 16px;
@@ -1399,7 +1389,7 @@ html[data-color-scheme="dark"] .scheme-toggle-indicator { background: var(--text
   .header-actions .icon-button:not(.sidebar-toggle):first-child { display: none; }
   .header-select [data-theme-label],
   .header-select [data-site-theme-label] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .header-select { width: 44px; justify-content: center; padding: 0; }
+  .header-select { width: 44px; min-height: 44px; justify-content: center; padding: 0; }
   .header-select::after { position: absolute; right: 5px; bottom: 7px; width: 5px; height: 5px; }
   .page-grid { padding: 22px 14px 48px; }
   .page-header h1 { font-size: 34px; }
