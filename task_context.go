@@ -40,13 +40,15 @@ func BuildTaskContext(model *Model, taskID string) (TaskContextReport, error) {
 	}
 	report := TaskContextReport{
 		SchemaVersion: 1, Kind: "task-context",
-		Generator:     GeneratorInfo{Name: "Docgent", Version: Version},
-		Task:          *item,
-		BusinessRules: []BusinessRule{},
-		Dependencies:  []WorkItem{},
-		Dependents:    []WorkItem{},
-		Documents:     []TaskContextDocument{},
-		Issues:        []Issue{},
+		Generator:         GeneratorInfo{Name: "Docgent", Version: Version},
+		Task:              *item,
+		Screens:           []KnowledgeScreen{},
+		ScreenTransitions: []ScreenTransition{},
+		BusinessRules:     []BusinessRule{},
+		Dependencies:      []WorkItem{},
+		Dependents:        []WorkItem{},
+		Documents:         []TaskContextDocument{},
+		Issues:            []Issue{},
 	}
 	_, report.FullVerification = planTaskCommands(*item)
 
@@ -104,6 +106,32 @@ func BuildTaskContext(model *Model, taskID string) (TaskContextReport, error) {
 			}
 		}
 	}
+	for _, screenID := range item.ScreenIDs {
+		for _, screen := range model.Knowledge.Screens {
+			if screen.ID != screenID {
+				continue
+			}
+			report.Screens = append(report.Screens, screen)
+			if screen.Document != "" {
+				documentPaths[screen.Document] = true
+			}
+			break
+		}
+	}
+	if len(item.ScreenIDs) > 0 {
+		selectedScreens := map[string]bool{}
+		for _, screenID := range item.ScreenIDs {
+			selectedScreens[screenID] = true
+		}
+		for _, transition := range model.Knowledge.Transitions {
+			if selectedScreens[transition.FromID] || selectedScreens[transition.ToID] {
+				report.ScreenTransitions = append(report.ScreenTransitions, transition)
+			}
+		}
+		if mapDocument := model.DocByPath["screens/map.md"]; mapDocument != nil {
+			documentPaths[mapDocument.SourcePath] = true
+		}
+	}
 	for _, rule := range report.BusinessRules {
 		documentPaths[rule.Document] = true
 	}
@@ -139,6 +167,9 @@ func printTaskContextText(w io.Writer, report TaskContextReport) {
 	}
 	if report.Task.FlowID != "" {
 		fmt.Fprintf(w, "Процесс: %s\n", report.Task.FlowID)
+	}
+	if len(report.Task.ScreenIDs) > 0 {
+		fmt.Fprintf(w, "Экраны: %s\n", strings.Join(report.Task.ScreenIDs, ", "))
 	}
 	if len(report.Task.RepositoryPaths) > 0 {
 		fmt.Fprintf(w, "Область изменения: %s\n", strings.Join(report.Task.RepositoryPaths, ", "))

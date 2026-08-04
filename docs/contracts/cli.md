@@ -70,6 +70,7 @@ Docgent 1.x.
 - project, current status и агрегированные stats;
 - документы, безопасно разрешённые links и backlinks;
 - optional `flowId` у work item, если задача ссылается на `FLOW-*`;
+- экраны, переходы, экранную статистику и `screenIds` у связанных сущностей;
 - roadmap с declared и effective completion;
 - риски, knowledge model и issues.
 
@@ -79,8 +80,9 @@ issues начинаются с единицы.
 ## TaskContextReport schema v1
 
 Read-only отчёт содержит выбранный `WorkItem`, признак `fullVerification`,
-связанные module и use case, business rules, зависимости, зависимые задачи,
-компактные сведения о документах и относящиеся к контексту issues.
+связанные module, use case, screens и incident screen transitions, business
+rules, зависимости, зависимые задачи, компактные сведения о документах и
+относящиеся к контексту issues.
 
 Команда не выполняет содержимое `checks`.
 

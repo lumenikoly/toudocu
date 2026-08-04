@@ -1,0 +1,972 @@
+{
+  "schemaVersion": 1,
+  "generator": {
+    "name": "Docgent",
+    "version": "1.1.0-go"
+  },
+  "generatedAt": "2026-07-28T18:07:13.492810713Z",
+  "sourceDirectory": "docs",
+  "staleDays": 90,
+  "project": {
+    "title": "Название проекта",
+    "description": "Одним абзацем: что это за проект и какую ценность он создаёт.",
+    "status": {
+      "kind": "in-progress",
+      "symbol": "◐",
+      "label": "В работе",
+      "recognized": true
+    },
+    "stage": "MVP",
+    "version": "0.1.0",
+    "owner": "Команда проекта",
+    "updated": "2026-07-25",
+    "summary": "Что уже работает, над чем ведётся работа и что важно знать сейчас. Активные задачи, блокеры и следующий результат автоматически выводятся в HTML-представлении из work items и roadmap."
+  },
+  "currentStatus": {
+    "activeWork": [],
+    "blockers": [],
+    "nextResult": {
+      "id": "UC-CORE-01",
+      "text": "UC-CORE-01 Пользователь получает основной результат проекта.",
+      "kind": "use-case",
+      "declaredCompleted": false,
+      "effectiveCompleted": false,
+      "completionSource": "use-case-status",
+      "targetDocument": "use-cases/core.md",
+      "targetStatus": {
+        "kind": "in-progress",
+        "symbol": "◐",
+        "label": "В работе",
+        "recognized": true
+      },
+      "document": "roadmap.md",
+      "line": 11
+    }
+  },
+  "stats": {
+    "documents": 14,
+    "totalTasks": 3,
+    "completedTasks": 1,
+    "remainingTasks": 2,
+    "taskProgress": 33,
+    "documentsComplete": 0,
+    "documentsInProgress": 1,
+    "documentsNotStarted": 1,
+    "documentsWithoutTasks": 12,
+    "staleDocuments": 0,
+    "documentsWithoutDescription": 1,
+    "documentsWithoutStatus": 0,
+    "brokenLinks": 0,
+    "warnings": 0,
+    "errors": 0,
+    "modules": 1,
+    "moduleStatuses": {
+      "in-progress": 1
+    },
+    "useCases": 1,
+    "useCaseStatuses": {
+      "in-progress": 1
+    },
+    "screens": 4,
+    "screensDone": 1,
+    "screensInProgress": 2,
+    "screensPlanned": 1,
+    "screensUnreachable": 0,
+    "risks": 1,
+    "openRisks": 1,
+    "decisions": 1
+  },
+  "documents": [
+    {
+      "id": "",
+      "sourcePath": "index.md",
+      "outputPath": "index.html",
+      "type": "overview",
+      "title": "Название проекта",
+      "description": "Одним абзацем: что это за проект и какую ценность он создаёт.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-25T20:07:08.030515383Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "status.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "status.md",
+          "href": "status.html"
+        },
+        {
+          "destination": "use-cases/",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "directory",
+          "target": "use-cases/index.html",
+          "href": "use-cases/index.html"
+        },
+        {
+          "destination": "modules/",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "directory",
+          "target": "modules/index.html",
+          "href": "modules/index.html"
+        },
+        {
+          "destination": "architecture/",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "directory",
+          "target": "architecture/index.html",
+          "href": "architecture/index.html"
+        },
+        {
+          "destination": "contracts/",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "directory",
+          "target": "contracts/index.html",
+          "href": "contracts/index.html"
+        },
+        {
+          "destination": "roadmap.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "roadmap.md",
+          "href": "roadmap.html"
+        },
+        {
+          "destination": "risks.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "risks.md",
+          "href": "risks.html"
+        },
+        {
+          "destination": "work/",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "directory",
+          "target": "work/index.html",
+          "href": "work/index.html"
+        }
+      ],
+      "backlinks": [],
+      "relatedDocuments": [
+        "status.md",
+        "roadmap.md",
+        "risks.md"
+      ]
+    },
+    {
+      "id": "",
+      "sourcePath": "status.md",
+      "outputPath": "status.html",
+      "type": "status",
+      "title": "Текущее состояние",
+      "description": "Краткое вводное описание текущего этапа.",
+      "metadata": {
+        "owner": "Команда проекта",
+        "stage": "MVP",
+        "status": "В работе",
+        "updated": "2026-07-25",
+        "version": "0.1.0"
+      },
+      "status": {
+        "kind": "in-progress",
+        "symbol": "◐",
+        "label": "В работе",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-25T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "index.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "roadmap.md",
+      "outputPath": "roadmap.html",
+      "type": "roadmap",
+      "title": "Дорожная карта",
+      "description": "Единственный источник глобального прогресса проекта.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 3,
+        "completed": 1,
+        "remaining": 2,
+        "percent": 33
+      },
+      "updatedAt": "2026-07-25T20:15:44.803040411Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "index.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "risks.md",
+      "outputPath": "risks.html",
+      "type": "risks",
+      "title": "Риски",
+      "description": "Активные риски проекта и планы их снижения.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 2,
+        "completed": 0,
+        "remaining": 2,
+        "percent": 0
+      },
+      "updatedAt": "2026-07-25T20:07:08.032515405Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "index.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "architecture/overview.md",
+      "outputPath": "architecture/overview.html",
+      "type": "architecture",
+      "title": "Архитектура проекта",
+      "description": "Общее описание архитектуры системы.",
+      "metadata": {
+        "owner": "Architecture Team",
+        "status": "В работе",
+        "updated": "2026-07-25"
+      },
+      "status": {
+        "kind": "in-progress",
+        "symbol": "◐",
+        "label": "В работе",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-25T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "CON-CORE-API",
+      "sourcePath": "contracts/api.md",
+      "outputPath": "contracts/api.html",
+      "type": "contract",
+      "title": "API-контракт",
+      "description": "Описание стабильных входов, выходов и ошибок системы.",
+      "metadata": {
+        "id": "CON-CORE-API"
+      },
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-25T20:15:44.820040593Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "modules/core.md",
+        "use-cases/core.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "ADR-000",
+      "sourcePath": "decisions/000-decision.md",
+      "outputPath": "decisions/000-decision.html",
+      "type": "decision",
+      "title": "ADR-000: Базовое архитектурное решение",
+      "description": "Краткое описание решения.",
+      "metadata": {
+        "author": "Architecture Team",
+        "date": "2026-07-25",
+        "id": "ADR-000",
+        "status": "Предложено",
+        "updated": "2026-07-25"
+      },
+      "status": {
+        "kind": "planned",
+        "symbol": "◷",
+        "label": "Предложено",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-25T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "guides/testing.md",
+      "outputPath": "guides/testing.html",
+      "type": "guide",
+      "title": "Тестирование",
+      "description": "Команды и правила проверки изменений.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-25T20:07:08.140516562Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "MOD-CORE",
+      "sourcePath": "modules/core.md",
+      "outputPath": "modules/core.html",
+      "type": "module",
+      "title": "Основной модуль",
+      "description": "Основной модуль демонстрирует рекомендуемую структуру описания кода и правил.",
+      "metadata": {
+        "id": "MOD-CORE",
+        "owner": "Команда проекта",
+        "status": "В работе",
+        "updated": "2026-07-25"
+      },
+      "status": {
+        "kind": "in-progress",
+        "symbol": "◐",
+        "label": "В работе",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-25T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../contracts/api.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/api.md",
+          "href": "../contracts/api.html"
+        },
+        {
+          "destination": "../use-cases/core.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/core.md",
+          "href": "../use-cases/core.html"
+        }
+      ],
+      "backlinks": [
+        "use-cases/core.md"
+      ],
+      "relatedDocuments": [
+        "contracts/api.md",
+        "use-cases/core.md"
+      ]
+    },
+    {
+      "id": "",
+      "sourcePath": "reference/configuration.md",
+      "outputPath": "reference/configuration.html",
+      "type": "reference",
+      "title": "Конфигурация",
+      "description": "Справочник параметров проекта.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-25T20:07:08.135516508Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "screens/map.md",
+      "outputPath": "screens/map.html",
+      "type": "screen-map",
+      "title": "Карта экранов",
+      "description": "Карта демонстрирует каталог экранов и переходы основного сценария.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-28T17:10:17.401450692Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "SC-CORE-REQUEST",
+      "sourcePath": "screens/SC-CORE-REQUEST.md",
+      "outputPath": "screens/SC-CORE-REQUEST.html",
+      "type": "screen",
+      "title": "SC-CORE-REQUEST: Новый запрос",
+      "description": "Экран принимает данные основного пользовательского запроса.",
+      "metadata": {
+        "component": "src/core/request/",
+        "id": "SC-CORE-REQUEST",
+        "module": "MOD-CORE",
+        "route": "/request",
+        "status": "В работе",
+        "updated": "2026-07-28"
+      },
+      "status": {
+        "kind": "in-progress",
+        "symbol": "◐",
+        "label": "В работе",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-28T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../use-cases/core.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/core.md",
+          "href": "../use-cases/core.html"
+        }
+      ],
+      "backlinks": [],
+      "relatedDocuments": [
+        "use-cases/core.md"
+      ]
+    },
+    {
+      "id": "UC-CORE-01",
+      "sourcePath": "use-cases/core.md",
+      "outputPath": "use-cases/core.html",
+      "type": "use-case",
+      "title": "UC-CORE-01: Основной пользовательский сценарий",
+      "description": "Пользователь получает основной результат проекта.",
+      "metadata": {
+        "actor": "Пользователь",
+        "id": "UC-CORE-01",
+        "module": "MOD-CORE",
+        "priority": "Высокий",
+        "screens": "SC-CORE-HOME, SC-CORE-REQUEST, SC-CORE-RESULT",
+        "status": "В работе",
+        "updated": "2026-07-25"
+      },
+      "status": {
+        "kind": "in-progress",
+        "symbol": "◐",
+        "label": "В работе",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-25T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../modules/core.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/core.md",
+          "href": "../modules/core.html"
+        },
+        {
+          "destination": "../contracts/api.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/api.md",
+          "href": "../contracts/api.html"
+        }
+      ],
+      "backlinks": [
+        "modules/core.md",
+        "screens/SC-CORE-REQUEST.md"
+      ],
+      "relatedDocuments": [
+        "modules/core.md",
+        "contracts/api.md"
+      ]
+    },
+    {
+      "id": "",
+      "sourcePath": "work/TASK-CORE-001-main-scenario.md",
+      "outputPath": "work/TASK-CORE-001-main-scenario.html",
+      "type": "work",
+      "title": "TASK-CORE-001: Реализовать основной сценарий",
+      "description": "",
+      "metadata": {
+        "module": "MOD-CORE",
+        "owner": "Команда проекта",
+        "priority": "Высокий",
+        "screens": "SC-CORE-REQUEST, SC-CORE-RESULT",
+        "status": "Черновик",
+        "type": "Feature",
+        "updated": "2026-07-24",
+        "useCase": "UC-CORE-01"
+      },
+      "status": {
+        "kind": "not-started",
+        "symbol": "○",
+        "label": "Черновик",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-24T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    }
+  ],
+  "roadmap": [
+    {
+      "title": "MVP",
+      "status": {
+        "kind": "in-progress",
+        "symbol": "◐",
+        "label": "В работе",
+        "recognized": true
+      },
+      "plannedDate": "2026-07-25",
+      "taskStats": {
+        "total": 2,
+        "completed": 1,
+        "remaining": 1,
+        "percent": 50
+      },
+      "items": [
+        {
+          "id": "UC-CORE-01",
+          "text": "UC-CORE-01 Пользователь получает основной результат проекта.",
+          "kind": "use-case",
+          "declaredCompleted": false,
+          "effectiveCompleted": false,
+          "completionSource": "use-case-status",
+          "targetDocument": "use-cases/core.md",
+          "targetStatus": {
+            "kind": "in-progress",
+            "symbol": "◐",
+            "label": "В работе",
+            "recognized": true
+          },
+          "document": "roadmap.md",
+          "line": 11
+        },
+        {
+          "id": "DLV-DOCS-01",
+          "text": "DLV-DOCS-01 Создана проверяемая структура документации.",
+          "kind": "deliverable",
+          "declaredCompleted": true,
+          "effectiveCompleted": true,
+          "completionSource": "roadmap-checkbox",
+          "document": "roadmap.md",
+          "line": 12
+        }
+      ],
+      "document": "roadmap.md",
+      "anchor": "mvp"
+    },
+    {
+      "title": "Версия 1.0",
+      "status": {
+        "kind": "planned",
+        "symbol": "◷",
+        "label": "Запланировано",
+        "recognized": true
+      },
+      "plannedDate": "",
+      "taskStats": {
+        "total": 1,
+        "completed": 0,
+        "remaining": 1,
+        "percent": 0
+      },
+      "items": [
+        {
+          "id": "DLV-RELEASE-01",
+          "text": "DLV-RELEASE-01 Подготовлен стабильный релиз.",
+          "kind": "deliverable",
+          "declaredCompleted": false,
+          "effectiveCompleted": false,
+          "completionSource": "roadmap-checkbox",
+          "document": "roadmap.md",
+          "line": 18
+        }
+      ],
+      "document": "roadmap.md",
+      "anchor": "версия-10"
+    }
+  ],
+  "risks": [
+    {
+      "id": "RISK-01",
+      "title": "Неполные требования",
+      "status": {
+        "kind": "open",
+        "symbol": "◇",
+        "label": "Открыт",
+        "recognized": true
+      },
+      "probability": "Средняя",
+      "impact": "Высокое",
+      "owner": "Команда проекта",
+      "taskStats": {
+        "total": 2,
+        "completed": 0,
+        "remaining": 2,
+        "percent": 0
+      },
+      "document": "risks.md",
+      "anchor": "risk-01-неполные-требования"
+    }
+  ],
+  "knowledge": {
+    "modules": [
+      {
+        "id": "MOD-CORE",
+        "title": "Основной модуль",
+        "status": {
+          "kind": "in-progress",
+          "symbol": "◐",
+          "label": "В работе",
+          "recognized": true
+        },
+        "document": "modules/core.md",
+        "repositoryPaths": [],
+        "useCaseIds": [
+          "UC-CORE-01"
+        ],
+        "screenIds": [
+          "SC-CORE-HELP",
+          "SC-CORE-HOME",
+          "SC-CORE-REQUEST",
+          "SC-CORE-RESULT"
+        ],
+        "businessRuleIds": [
+          "BR-CORE-001"
+        ]
+      }
+    ],
+    "useCases": [
+      {
+        "id": "UC-CORE-01",
+        "title": "UC-CORE-01: Основной пользовательский сценарий",
+        "status": {
+          "kind": "in-progress",
+          "symbol": "◐",
+          "label": "В работе",
+          "recognized": true
+        },
+        "moduleId": "MOD-CORE",
+        "document": "use-cases/core.md",
+        "repositoryPaths": [],
+        "businessRuleIds": [
+          "BR-CORE-001"
+        ],
+        "screenIds": [
+          "SC-CORE-HOME",
+          "SC-CORE-REQUEST",
+          "SC-CORE-RESULT"
+        ]
+      }
+    ],
+    "screens": [
+      {
+        "id": "SC-CORE-HOME",
+        "title": "Главная",
+        "moduleId": "MOD-CORE",
+        "kind": "page",
+        "role": "entry",
+        "route": "/",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Готово",
+          "recognized": true
+        },
+        "errorIds": [],
+        "useCaseIds": [
+          "UC-CORE-01"
+        ],
+        "workItemIds": [],
+        "reachable": true,
+        "line": 9
+      },
+      {
+        "id": "SC-CORE-REQUEST",
+        "title": "Новый запрос",
+        "moduleId": "MOD-CORE",
+        "kind": "page",
+        "role": "normal",
+        "route": "/request",
+        "status": {
+          "kind": "in-progress",
+          "symbol": "◐",
+          "label": "В работе",
+          "recognized": true
+        },
+        "errorIds": [
+          "ERR-CORE-INVALID"
+        ],
+        "document": "screens/SC-CORE-REQUEST.md",
+        "useCaseIds": [
+          "UC-CORE-01"
+        ],
+        "workItemIds": [
+          "TASK-CORE-001"
+        ],
+        "reachable": true,
+        "line": 10
+      },
+      {
+        "id": "SC-CORE-HELP",
+        "title": "Подсказка",
+        "moduleId": "MOD-CORE",
+        "kind": "modal",
+        "role": "normal",
+        "status": {
+          "kind": "in-progress",
+          "symbol": "◐",
+          "label": "В работе",
+          "recognized": true
+        },
+        "errorIds": [],
+        "useCaseIds": [],
+        "workItemIds": [],
+        "reachable": true,
+        "line": 11
+      },
+      {
+        "id": "SC-CORE-RESULT",
+        "title": "Результат",
+        "moduleId": "MOD-CORE",
+        "kind": "page",
+        "role": "terminal",
+        "route": "/result",
+        "status": {
+          "kind": "planned",
+          "symbol": "◷",
+          "label": "Запланировано",
+          "recognized": true
+        },
+        "errorIds": [],
+        "useCaseIds": [
+          "UC-CORE-01"
+        ],
+        "workItemIds": [
+          "TASK-CORE-001"
+        ],
+        "reachable": true,
+        "line": 12
+      }
+    ],
+    "screenTransitions": [
+      {
+        "fromId": "SC-CORE-HOME",
+        "toId": "SC-CORE-REQUEST",
+        "action": "Создать запрос",
+        "kind": "navigation",
+        "document": "screens/map.md",
+        "line": 18
+      },
+      {
+        "fromId": "SC-CORE-REQUEST",
+        "toId": "SC-CORE-HELP",
+        "action": "Открыть подсказку",
+        "kind": "navigation",
+        "document": "screens/map.md",
+        "line": 19
+      },
+      {
+        "fromId": "SC-CORE-HELP",
+        "toId": "SC-CORE-REQUEST",
+        "action": "Закрыть",
+        "kind": "navigation",
+        "document": "screens/map.md",
+        "line": 20
+      },
+      {
+        "fromId": "SC-CORE-REQUEST",
+        "toId": "SC-CORE-RESULT",
+        "action": "Отправить",
+        "condition": "Данные корректны",
+        "kind": "redirect",
+        "document": "screens/map.md",
+        "line": 21
+      }
+    ],
+    "businessRules": [
+      {
+        "id": "BR-CORE-001",
+        "title": "Результат создаётся только после проверки входных данных",
+        "moduleId": "MOD-CORE",
+        "document": "modules/core.md",
+        "anchor": "br-core-001-результат-создаётся-только-после-проверки-входных-данных",
+        "line": 25
+      }
+    ],
+    "workItems": [
+      {
+        "id": "TASK-CORE-001",
+        "title": "Реализовать основной сценарий",
+        "status": {
+          "kind": "not-started",
+          "symbol": "○",
+          "label": "Черновик",
+          "recognized": true
+        },
+        "type": "Feature",
+        "priority": "Высокий",
+        "owner": "Команда проекта",
+        "moduleId": "MOD-CORE",
+        "useCaseId": "UC-CORE-01",
+        "screenIds": [
+          "SC-CORE-REQUEST",
+          "SC-CORE-RESULT"
+        ],
+        "dependsOn": [],
+        "document": "work/TASK-CORE-001-main-scenario.md",
+        "anchor": "task-core-001-реализовать-основной-сценарий",
+        "criteria": [],
+        "verificationMatrix": [],
+        "checks": [],
+        "repositoryPaths": [],
+        "result": "Основной сценарий выполняется согласно критериям приёмки."
+      }
+    ]
+  },
+  "issues": []
+}

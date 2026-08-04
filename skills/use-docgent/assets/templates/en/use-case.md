@@ -4,6 +4,7 @@
 - Status: {{STATUS}}
 - Actor: {{ACTOR}}
 - Module: {{MODULE_ID}}
+{{OPTIONAL_SCREENS_METADATA}}
 - Priority: {{PRIORITY}}
 - Last updated: {{DATE}}
 

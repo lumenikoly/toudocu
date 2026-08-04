@@ -17,13 +17,15 @@ var typeLabels = map[string]string{
 	"risks": "Риски", "changelog": "История изменений", "use-case": "Пользовательский сценарий",
 	"module": "Модуль", "architecture": "Архитектура", "contract": "Контрактный каталог",
 	"decision": "Архитектурное решение", "flow": "Процесс", "guide": "Руководство", "work": "Рабочие задачи",
-	"reference": "Справочник", "notes": "Заметки", "ideas": "Идеи развития", "document": "Документ",
+	"reference": "Справочник", "screen-map": "Карта экранов", "screen": "Экран",
+	"notes": "Заметки", "ideas": "Идеи развития", "document": "Документ",
 }
 
 var folderLabels = map[string]string{
 	"use-cases": "Пользовательские сценарии", "modules": "Модули", "architecture": "Архитектура",
 	"contracts": "Контракты", "decisions": "Решения", "flows": "Процессы", "guides": "Руководства",
 	"work": "Рабочие задачи", "reference": "Справочник",
+	"screens": "Экраны",
 }
 
 var rootOrder = map[string]int{
@@ -92,6 +94,11 @@ func ClassifyDocument(relativePath string) string {
 		return "work"
 	case "reference":
 		return "reference"
+	case "screens":
+		if base == "map.md" {
+			return "screen-map"
+		}
+		return "screen"
 	}
 	if base == "index.md" {
 		return "document"
@@ -499,6 +506,7 @@ func BuildDocumentationModel(options Options) (*Model, error) {
 	connectUseCasesAndModules(model)
 	validateMermaidDocuments(model)
 	model.Knowledge = buildKnowledgeModel(model)
+	buildScreenKnowledge(model)
 	model.Risks = buildRisks(model)
 	model.RoadmapStages = buildRoadmapStages(model)
 	model.Project = buildProjectInfo(model, options.Title)
@@ -523,6 +531,9 @@ func directoryLabel(directory string) string {
 }
 
 func directoryHasSourceIndex(model *Model, directory string) bool {
+	if directory == "screens" && model.DocByPath["screens/map.md"] != nil {
+		return true
+	}
 	return model.DocByPath[path.Join(directory, "index.md")] != nil
 }
 

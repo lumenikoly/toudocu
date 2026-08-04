@@ -156,16 +156,18 @@ type TaskContextDocument struct {
 }
 
 type TaskContextReport struct {
-	SchemaVersion    int                   `json:"schemaVersion"`
-	Kind             string                `json:"kind"`
-	Generator        GeneratorInfo         `json:"generator"`
-	Task             WorkItem              `json:"task"`
-	FullVerification bool                  `json:"fullVerification"`
-	Module           *KnowledgeModule      `json:"module,omitempty"`
-	UseCase          *KnowledgeUseCase     `json:"useCase,omitempty"`
-	BusinessRules    []BusinessRule        `json:"businessRules"`
-	Dependencies     []WorkItem            `json:"dependencies"`
-	Dependents       []WorkItem            `json:"dependents"`
-	Documents        []TaskContextDocument `json:"documents"`
-	Issues           []Issue               `json:"issues"`
+	SchemaVersion     int                   `json:"schemaVersion"`
+	Kind              string                `json:"kind"`
+	Generator         GeneratorInfo         `json:"generator"`
+	Task              WorkItem              `json:"task"`
+	FullVerification  bool                  `json:"fullVerification"`
+	Module            *KnowledgeModule      `json:"module,omitempty"`
+	UseCase           *KnowledgeUseCase     `json:"useCase,omitempty"`
+	Screens           []KnowledgeScreen     `json:"screens"`
+	ScreenTransitions []ScreenTransition    `json:"screenTransitions"`
+	BusinessRules     []BusinessRule        `json:"businessRules"`
+	Dependencies      []WorkItem            `json:"dependencies"`
+	Dependents        []WorkItem            `json:"dependents"`
+	Documents         []TaskContextDocument `json:"documents"`
+	Issues            []Issue               `json:"issues"`
 }

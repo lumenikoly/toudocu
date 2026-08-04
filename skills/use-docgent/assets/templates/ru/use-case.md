@@ -4,6 +4,7 @@
 - Статус: {{STATUS}}
 - Актор: {{ACTOR}}
 - Модуль: {{MODULE_ID}}
+{{OPTIONAL_SCREENS_METADATA}}
 - Приоритет: {{PRIORITY}}
 - Последнее обновление: {{DATE}}
 

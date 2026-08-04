@@ -1,6 +1,6 @@
 ---
 name: use-docgent
-description: Create, update, validate, and build adaptable project documentation managed by the Docgent CLI. Use when an agent needs to initialize or revise a documentation directory, write ordinary or typed Docgent Markdown, fix integrity diagnostics, maintain optional modules, use cases, business rules, roadmap items, risks, ADRs, contracts, guides, references, or TASK-* work items, obtain task context, run an explicitly requested trusted task verification, or generate the static documentation portal.
+description: Create, update, validate, and build adaptable project documentation managed by the Docgent CLI. Use when Codex needs to initialize or revise Docgent Markdown; work with modules, use cases, FLOW-* Mermaid processes, screens/map.md product maps, SC-* screen documents, roadmap items, risks, ADRs, contracts, guides, references, or TASK-* work items; fix integrity diagnostics; obtain task context; run explicitly requested trusted task verification; or generate the static portal.
 ---
 
 # Use Docgent
@@ -47,8 +47,9 @@ apply typed contracts only when the project uses the corresponding capability.
 1. For a new project, create a neutral `index.md` first. Add more documents only
    when they communicate known information.
 2. Use ordinary Markdown in untyped paths for free-form documentation. Use
-   `modules/`, `use-cases/`, `flows/`, `decisions/`, `roadmap.md`, and `work/`
-   only when the project benefits from their machine-readable semantics.
+   `modules/`, `use-cases/`, `flows/`, `screens/`, `decisions/`, `roadmap.md`,
+   and `work/` only when the project benefits from their machine-readable
+   semantics.
 3. Select the closest template from `assets/templates/ru/` or
    `assets/templates/en/`. Templates are starting points, not a required
    starter pack.
@@ -62,7 +63,8 @@ apply typed contracts only when the project uses the corresponding capability.
    output as documentation.
 8. Treat Mermaid as visualization only. Keep requirements and acceptance
    criteria in prose, and use only validated `flowchart`, `stateDiagram-v2`, or
-   architectural `sequenceDiagram` blocks.
+   architectural `sequenceDiagram` blocks. For screen maps, edit the catalog
+   and transition tables instead of the generated Mermaid source.
 
 ## Interpret validation correctly
 
@@ -86,7 +88,8 @@ apply typed contracts only when the project uses the corresponding capability.
    ```
 
 2. Treat an existing non-draft task as an explicit contract: respect its result,
-   scope, exclusions, criteria, dependencies, module, use case, and rules.
+   scope, exclusions, criteria, dependencies, module, use case, flow, screens,
+   and rules.
 3. Do not broaden changes beyond task scope without user direction.
 4. Run `task check` only when the repository is trusted and the user explicitly
    asked to execute or verify the task. It executes repository shell commands

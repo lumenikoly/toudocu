@@ -63,13 +63,17 @@ typed documents only for semantics the project will use:
 - add a use case when observable behavior should link to a module;
 - add a flow when a reusable Mermaid visualization should link to a use case or
   architecture document;
+- add `screens/map.md` when product navigation needs stable `SC-*`, a searchable
+  catalog, or graph validation;
+- add `screens/SC-*.md` only when a significant screen needs its own purpose,
+  actions, states, errors, route, component, or acceptance context;
 - add a roadmap when the project wants global progress aggregation;
 - add a work item when an agent or CI needs a checkable task contract.
 
 When adding related types, create targets before references: module and rules,
-then use case, then optional flow, then roadmap or work item. Replace every
-template placeholder before validation. A flow never replaces prose
-requirements or acceptance criteria.
+then use case, then optional screen map or flow, then roadmap or work item.
+Replace every template placeholder before validation. A map or flow never
+replaces prose requirements or acceptance criteria.
 
 ## Task workflow
 
@@ -84,6 +88,10 @@ docgent task context TASK-AREA-001 ./docs \
 Use the task, related entities, dependencies, documents, and issues from the
 report. Inspect source artifacts when the compact context is insufficient.
 `task context` never executes checks.
+
+A task with `Flow` includes its `FLOW-*` document. A task with `Screens`
+includes selected screen records, incident transitions, `screens/map.md`, and
+matching `SC-*` documents.
 
 Run:
 

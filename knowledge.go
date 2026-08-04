@@ -376,6 +376,7 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 		ID: match[1], Title: match[2], Status: StatusFor(item.Metadata["status"]), Type: typeName,
 		Priority: item.Metadata["priority"], Owner: item.Metadata["owner"], ModuleID: item.Metadata["module"],
 		UseCaseID: useCaseID, FlowID: strings.TrimSpace(item.Metadata["flow"]),
+		ScreenIDs: splitReferences(item.Metadata["screens"]),
 		DependsOn: splitReferences(item.Metadata["dependsOn"]), Document: document.SourcePath,
 		Anchor: item.Heading.ID, Criteria: criteria, Verification: verification, Checks: checks,
 		RepositoryPaths: repositoryPaths, line: item.Heading.Line + 1,
@@ -469,7 +470,7 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 	workItems := []WorkItem{}
 
 	for _, document := range model.Documents {
-		requiredPrefix := map[string]string{"module": "MOD-", "use-case": "UC-", "decision": "ADR-", "flow": "FLOW-"}[document.Type]
+		requiredPrefix := map[string]string{"module": "MOD-", "use-case": "UC-", "decision": "ADR-", "flow": "FLOW-", "screen": "SC-"}[document.Type]
 		stableID := document.Metadata["id"]
 		if requiredPrefix != "" && stableID == "" {
 			addKnowledgeIssue(model, document, "error", "missing-document-id", fmt.Sprintf("Для типа «%s» требуется поле «Идентификатор».", document.TypeLabel), 0)
@@ -485,9 +486,9 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 		}
 		switch document.Type {
 		case "module":
-			modules = append(modules, KnowledgeModule{ID: stableID, Title: document.Title, Status: document.Status, Document: document.SourcePath, RepositoryPaths: repositoryPathsFor(document)})
+			modules = append(modules, KnowledgeModule{ID: stableID, Title: document.Title, Status: document.Status, Document: document.SourcePath, RepositoryPaths: repositoryPathsFor(document), UseCaseIDs: []string{}, ScreenIDs: []string{}, BusinessRuleIDs: []string{}})
 		case "use-case":
-			useCases = append(useCases, KnowledgeUseCase{ID: stableID, Title: document.Title, Status: document.Status, ModuleID: document.Metadata["module"], Document: document.SourcePath, RepositoryPaths: repositoryPathsFor(document)})
+			useCases = append(useCases, KnowledgeUseCase{ID: stableID, Title: document.Title, Status: document.Status, ModuleID: document.Metadata["module"], Document: document.SourcePath, RepositoryPaths: repositoryPathsFor(document), BusinessRuleIDs: []string{}, ScreenIDs: splitReferences(document.Metadata["screens"])})
 		}
 		if document.Type == "module" {
 			for _, heading := range document.Headings {
@@ -600,7 +601,7 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 			return naturalCompare(modules[i].BusinessRuleIDs[a], modules[i].BusinessRuleIDs[b]) < 0
 		})
 	}
-	return KnowledgeModel{Modules: modules, UseCases: useCases, BusinessRules: businessRules, WorkItems: workItems}
+	return KnowledgeModel{Modules: modules, UseCases: useCases, Screens: []KnowledgeScreen{}, Transitions: []ScreenTransition{}, BusinessRules: businessRules, WorkItems: workItems}
 }
 
 func fallbackDash(value string) string {
@@ -755,7 +756,20 @@ func buildStats(model *Model) Stats {
 		total += stage.TaskStats.Total
 		completed += stage.TaskStats.Completed
 	}
-	stats := Stats{Documents: len(model.Documents), TotalTasks: total, CompletedTasks: completed, RemainingTasks: total - completed, TaskProgress: progress(completed, total), ModuleStatuses: countStatuses(model.Collections["module"]), UseCaseStatuses: countStatuses(model.Collections["use-case"]), Modules: len(model.Collections["module"]), UseCases: len(model.Collections["use-case"]), Risks: len(model.Risks), Decisions: len(model.Collections["decision"])}
+	stats := Stats{Documents: len(model.Documents), TotalTasks: total, CompletedTasks: completed, RemainingTasks: total - completed, TaskProgress: progress(completed, total), ModuleStatuses: countStatuses(model.Collections["module"]), UseCaseStatuses: countStatuses(model.Collections["use-case"]), Modules: len(model.Collections["module"]), UseCases: len(model.Collections["use-case"]), Screens: len(model.Knowledge.Screens), Risks: len(model.Risks), Decisions: len(model.Collections["decision"])}
+	for _, screen := range model.Knowledge.Screens {
+		switch screen.Status.Kind {
+		case "done":
+			stats.ScreensDone++
+		case "in-progress":
+			stats.ScreensInProgress++
+		case "planned":
+			stats.ScreensPlanned++
+		}
+		if !screen.Reachable {
+			stats.ScreensUnreachable++
+		}
+	}
 	for _, document := range model.Documents {
 		switch {
 		case document.TaskStats.Total == 0:
@@ -869,6 +883,17 @@ func buildSearchIndex(model *Model) []SearchItem {
 			description = document.PlainText
 		}
 		result = append(result, SearchItem{Title: document.Title, Path: document.SourcePath, URL: document.OutputPath, Type: document.Type, TypeLabel: document.TypeLabel, Status: document.Metadata["status"], Owner: document.Metadata["owner"], Description: truncate(description, 220), Text: text})
+	}
+	for _, screen := range model.Knowledge.Screens {
+		if screen.Document != "" {
+			continue
+		}
+		result = append(result, SearchItem{
+			Title: screen.ID + ": " + screen.Title, Path: "screens/map.md", URL: "screens/map.html#screen-" + slugify(screen.ID),
+			Type: "screen", TypeLabel: typeLabels["screen"], Status: screen.Status.Label,
+			Description: strings.TrimSpace(strings.Join([]string{screen.ModuleID, screen.Route}, " · ")),
+			Text:        canonicalText(strings.Join([]string{screen.ID, screen.Title, screen.ModuleID, screen.Route, strings.Join(screen.ErrorIDs, " ")}, " ")),
+		})
 	}
 	return result
 }

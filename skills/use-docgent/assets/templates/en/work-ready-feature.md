@@ -5,6 +5,8 @@
 - Priority: {{PRIORITY}}
 - Module: {{MODULE_ID}}
 - Use case: {{USE_CASE_ID}}
+{{OPTIONAL_FLOW_METADATA}}
+{{OPTIONAL_SCREENS_METADATA}}
 - Owner: {{OWNER}}
 - Last updated: {{DATE}}
 

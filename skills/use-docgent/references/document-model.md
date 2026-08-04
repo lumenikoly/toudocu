@@ -36,6 +36,8 @@ types are optional.
 | `modules/*.md` | Stable component boundaries and rules | Requires a unique `MOD-*` and validates relationships |
 | `use-cases/*.md` | Observable actor behavior | Requires a unique `UC-*` and an existing module |
 | `flows/*.md` | A reusable visual process | Requires a unique `FLOW-*`, Mermaid, and a use-case or architecture relationship |
+| `screens/map.md` | A product-wide screen graph | Parses the screen catalog and transitions; validates `SC-*`, modules, routes, and topology |
+| `screens/SC-*.md` | Detailed behavior of a significant screen | Requires a catalogued `SC-*`; computed transitions stay in the central map |
 | `decisions/*.md` | Durable decisions | Requires a unique `ADR-*` |
 | `work/TASK-*.md` | Agent- or CI-readable work | Requires exactly one task and status-dependent fields |
 | `architecture/`, `contracts/`, `guides/`, `reference/` | Specialized human documentation | Classifies and renders the document |
@@ -56,6 +58,7 @@ When opting into a typed entity:
   `### BR-AREA-001: Title`;
 - give decisions unique `ADR-*` IDs;
 - give reusable flows unique `FLOW-*` IDs and link them to requirements;
+- give screens unique `SC-<AREA>-<NAME>` IDs and keep transitions in `screens/map.md`;
 - give work items unique `TASK-AREA-NNN` IDs;
 - keep IDs stable when titles or filenames change;
 - update all references together when identity genuinely changes;
@@ -71,12 +74,70 @@ The module template includes purpose, code location, boundaries, business
 rules, invariants, stable interfaces, and related use cases. The use-case
 template includes its main scenario, postconditions, rules, and implementation.
 The flow template contains a Mermaid visualization and an explicit requirements
-link. The ADR template includes context, decision, and consequences.
+link. The screen-map template contains the catalog and transitions; the screen
+template adds details without duplicating the graph. The ADR template includes
+context, decision, and consequences.
 
 Docgent reports missing recommended sections as warnings. Use these sections
 when they add information; do not create empty or speculative prose. If the
 project does not need typed semantics, use the generic `document.md` template
 outside the reserved typed paths.
+
+## Flows and screen maps
+
+Use a `FLOW-*` document for the detailed behavior of one reusable scenario.
+Link it to an existing use case or architecture document. Mermaid node labels
+and edges are visualization only: Docgent does not derive relationships from
+them.
+
+Use `screens/map.md` for the product-wide navigation graph. Its two tables are
+the machine-readable source of truth:
+
+```md
+## Screen catalog
+
+| ID | Screen | Module | Type | Role | Route | Status | Errors |
+|---|---|---|---|---|---|---|---|
+| SC-AREA-START | Start | MOD-AREA | page | entry | `/start` | Planned | — |
+| SC-AREA-RESULT | Result | MOD-AREA | page | terminal | `/result` | Planned | — |
+
+## Transitions
+
+| From | Action | Condition | To | Type |
+|---|---|---|---|---|
+| SC-AREA-START | Continue | — | SC-AREA-RESULT | navigation |
+```
+
+Follow these constraints:
+
+- use `page` or `modal` for Type;
+- use `normal`, `entry`, `terminal`, or `entry-terminal` for Role;
+- use `navigation` or `redirect` for transition Type;
+- use a blank cell or `—` for an absent route, condition, or error list;
+- declare at least one entry screen and mark valid exits as terminal;
+- reference existing uppercase `MOD-*` and `SC-*` IDs only;
+- treat routes as case-sensitive; duplicate routes produce a warning;
+- do not use external URLs as transition targets in the v1 graph;
+- use `ERR-*` values for catalog filtering; Docgent does not resolve them
+  against a separate error catalog.
+
+Do not add or edit a Mermaid fence in `screens/map.md`. Docgent generates the
+`flowchart LR` visualization from the catalog and transition tables.
+
+Detailed `screens/SC-*.md` documents are optional. When present, repeated
+module, status, and route metadata must match the catalog. Do not duplicate
+transition tables in screen documents.
+
+Use cases and tasks can select screens with:
+
+```md
+- Screens: SC-AREA-START, SC-AREA-RESULT
+```
+
+Unknown screen IDs are errors. In templates, the whole-line placeholders
+`OPTIONAL_SCREENS_METADATA`, `OPTIONAL_FLOW_METADATA`,
+`OPTIONAL_ROUTE_METADATA`, and `OPTIONAL_COMPONENT_METADATA` mean: replace the
+placeholder with one complete metadata line, or delete the line.
 
 ## Work-item contract
 
@@ -102,6 +163,11 @@ Use-case omission reason.
 Tasks may declare an optional `Flow`/`Process` field with an existing `FLOW-*`.
 It adds the flow document to task context but does not replace the use case or
 acceptance criteria.
+
+Tasks may also declare `Screens` with one or more existing `SC-*` IDs. Task
+context then includes those screen records, their incident transitions,
+`screens/map.md`, and matching screen documents. Screens do not replace task
+scope or acceptance criteria.
 
 Put checkboxes only in acceptance criteria. Start every criterion with one
 unique `AC-*` and give it exactly one verification entry:

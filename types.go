@@ -192,6 +192,7 @@ type KnowledgeModule struct {
 	Document        string     `json:"document"`
 	RepositoryPaths []string   `json:"repositoryPaths"`
 	UseCaseIDs      []string   `json:"useCaseIds"`
+	ScreenIDs       []string   `json:"screenIds"`
 	BusinessRuleIDs []string   `json:"businessRuleIds"`
 }
 
@@ -203,6 +204,33 @@ type KnowledgeUseCase struct {
 	Document        string     `json:"document"`
 	RepositoryPaths []string   `json:"repositoryPaths"`
 	BusinessRuleIDs []string   `json:"businessRuleIds"`
+	ScreenIDs       []string   `json:"screenIds"`
+}
+
+type KnowledgeScreen struct {
+	ID          string     `json:"id"`
+	Title       string     `json:"title"`
+	ModuleID    string     `json:"moduleId"`
+	Kind        string     `json:"kind"`
+	Role        string     `json:"role"`
+	Route       string     `json:"route,omitempty"`
+	Status      StatusInfo `json:"status"`
+	ErrorIDs    []string   `json:"errorIds"`
+	Document    string     `json:"document,omitempty"`
+	UseCaseIDs  []string   `json:"useCaseIds"`
+	WorkItemIDs []string   `json:"workItemIds"`
+	Reachable   bool       `json:"reachable"`
+	Line        int        `json:"line"`
+}
+
+type ScreenTransition struct {
+	FromID    string `json:"fromId"`
+	ToID      string `json:"toId"`
+	Action    string `json:"action"`
+	Condition string `json:"condition,omitempty"`
+	Kind      string `json:"kind"`
+	Document  string `json:"document"`
+	Line      int    `json:"line"`
 }
 
 type BusinessRule struct {
@@ -225,6 +253,7 @@ type WorkItem struct {
 	ModuleID        string                  `json:"moduleId,omitempty"`
 	UseCaseID       string                  `json:"useCaseId,omitempty"`
 	FlowID          string                  `json:"flowId,omitempty"`
+	ScreenIDs       []string                `json:"screenIds"`
 	DependsOn       []string                `json:"dependsOn"`
 	Document        string                  `json:"document"`
 	Anchor          string                  `json:"anchor"`
@@ -255,6 +284,8 @@ type VerificationCheck struct {
 type KnowledgeModel struct {
 	Modules       []KnowledgeModule  `json:"modules"`
 	UseCases      []KnowledgeUseCase `json:"useCases"`
+	Screens       []KnowledgeScreen  `json:"screens"`
+	Transitions   []ScreenTransition `json:"screenTransitions"`
 	BusinessRules []BusinessRule     `json:"businessRules"`
 	WorkItems     []WorkItem         `json:"workItems"`
 }
@@ -314,6 +345,11 @@ type Stats struct {
 	ModuleStatuses              map[string]int `json:"moduleStatuses"`
 	UseCases                    int            `json:"useCases"`
 	UseCaseStatuses             map[string]int `json:"useCaseStatuses"`
+	Screens                     int            `json:"screens"`
+	ScreensDone                 int            `json:"screensDone"`
+	ScreensInProgress           int            `json:"screensInProgress"`
+	ScreensPlanned              int            `json:"screensPlanned"`
+	ScreensUnreachable          int            `json:"screensUnreachable"`
 	Risks                       int            `json:"risks"`
 	OpenRisks                   int            `json:"openRisks"`
 	Decisions                   int            `json:"decisions"`

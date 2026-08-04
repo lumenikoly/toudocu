@@ -12,9 +12,9 @@ import (
 
 const Version = "1.1.0-go"
 
-var fieldOrder = []string{"status", "type", "stage", "version", "owner", "author", "actor", "priority", "criticality", "module", "useCase", "flow", "dependsOn", "source", "date", "plannedDate", "updated", "probability", "impact", "id", "tags"}
+var fieldOrder = []string{"status", "type", "stage", "version", "owner", "author", "actor", "priority", "criticality", "module", "useCase", "flow", "screens", "route", "component", "errors", "dependsOn", "source", "date", "plannedDate", "updated", "probability", "impact", "id", "tags"}
 
-var typeIcons = map[string]string{"overview": "⌂", "status": "◐", "roadmap": "→", "risks": "!", "ideas": "✦", "notes": "✎", "changelog": "↻", "use-case": "◎", "module": "▦", "architecture": "◇", "contract": "⇄", "decision": "◆", "flow": "⇢", "guide": "◫", "work": "☑", "reference": "≡", "document": "•"}
+var typeIcons = map[string]string{"overview": "⌂", "status": "◐", "roadmap": "→", "risks": "!", "ideas": "✦", "notes": "✎", "changelog": "↻", "use-case": "◎", "module": "▦", "architecture": "◇", "contract": "⇄", "decision": "◆", "flow": "⇢", "screen-map": "⌗", "screen": "▣", "guide": "◫", "work": "☑", "reference": "≡", "document": "•"}
 
 func renderStatusChip(status StatusInfo) string {
 	return fmt.Sprintf(`<span class="status-chip status-%s" title="%s"><span aria-hidden="true">%s</span><span>%s</span></span>`, escapeAttr(status.Kind), escapeAttr(status.Label), escapeHTML(status.Symbol), escapeHTML(status.Label))
@@ -41,6 +41,11 @@ func metricCard(label string, value any, detail string) string {
 }
 
 func outputForDirectory(model *Model, directory string) string {
+	if directory == "screens" {
+		if document := model.DocByPath["screens/map.md"]; document != nil {
+			return document.OutputPath
+		}
+	}
 	if document := model.DocByPath[path.Join(directory, "index.md")]; document != nil {
 		return document.OutputPath
 	}
@@ -89,7 +94,7 @@ func renderNavigation(model *Model, current string) string {
 		docs := groups[key]
 		sort.SliceStable(docs, func(i, j int) bool { return documentLess(docs[i], docs[j]) })
 		for _, doc := range docs {
-			if strings.EqualFold(doc.FileName, "index.md") {
+			if strings.EqualFold(doc.FileName, "index.md") || doc.Type == "screen-map" {
 				continue
 			}
 			writeDoc(doc)
@@ -195,6 +200,9 @@ func renderRelated(model *Model, document *Document) string {
 }
 
 func renderDocumentPage(model *Model, document *Document) string {
+	if document.Type == "screen-map" {
+		return renderScreenMapPage(model, document)
+	}
 	resolver := linkResolverFor(model, document)
 	taskCompletionByLine := map[int]bool{}
 	if document.Type == "roadmap" {
@@ -220,7 +228,18 @@ func renderDocumentPage(model *Model, document *Document) string {
 	if document.Type == "status" {
 		computedStatus = renderComputedStatus(model, document.OutputPath)
 	}
-	content := breadcrumbs(model, document.OutputPath, document.Title) + `<header class="page-header"><div class="page-kicker">` + renderStatusChip(document.Status) + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + issues + `</div><h1>` + escapeHTML(document.Title) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` + renderMetadata(document) + renderProgress(document.TaskStats, "Готовность документа") + controls + `<div class="page-actions"><button class="collapse-all-button" type="button" data-collapse-all data-collapse-state="expanded" aria-expanded="true"><span class="collapse-all-icon" aria-hidden="true"><span class="collapse-icon collapse-icon-up">↑</span><span class="collapse-icon collapse-icon-down">↓</span></span><span data-collapse-label>Свернуть разделы</span></button></div></header>` + computedStatus + `<article class="doc-content">` + body + `</article>` + renderRelated(model, document)
+	screenConnections := ""
+	displayStatus := document.Status
+	if document.Type == "screen" {
+		screenConnections = renderScreenConnections(model, document)
+		for _, screen := range model.Knowledge.Screens {
+			if screen.ID == document.Metadata["id"] {
+				displayStatus = screen.Status
+				break
+			}
+		}
+	}
+	content := breadcrumbs(model, document.OutputPath, document.Title) + `<header class="page-header"><div class="page-kicker">` + renderStatusChip(displayStatus) + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + issues + `</div><h1>` + escapeHTML(document.Title) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` + renderMetadata(document) + renderProgress(document.TaskStats, "Готовность документа") + controls + `<div class="page-actions"><button class="collapse-all-button" type="button" data-collapse-all data-collapse-state="expanded" aria-expanded="true"><span class="collapse-all-icon" aria-hidden="true"><span class="collapse-icon collapse-icon-up">↑</span><span class="collapse-icon collapse-icon-down">↓</span></span><span data-collapse-label>Свернуть разделы</span></button></div></header>` + computedStatus + `<article class="doc-content">` + body + `</article>` + screenConnections + renderRelated(model, document)
 	return pageShell(model, document.OutputPath, document.Title, document.Description, content, renderTOC(document))
 }
 
@@ -235,7 +254,7 @@ func filterControls(includeStatus, includeType bool) string {
 	}
 	typeControl := ""
 	if includeType {
-		typeControl = `<select data-filter-control="type"><option value="all">Все типы</option><option value="module">Модули</option><option value="use-case">Сценарии</option><option value="flow">Процессы</option><option value="architecture">Архитектура</option><option value="decision">Решения</option><option value="work">Задачи</option></select>`
+		typeControl = `<select data-filter-control="type"><option value="all">Все типы</option><option value="module">Модули</option><option value="use-case">Сценарии</option><option value="screen-map">Карты экранов</option><option value="screen">Экраны</option><option value="flow">Процессы</option><option value="architecture">Архитектура</option><option value="decision">Решения</option><option value="work">Задачи</option></select>`
 	}
 	return `<div class="collection-controls"><input type="search" data-filter-control="search" placeholder="Фильтр" aria-label="Фильтр">` + statusControl + typeControl + `</div>`
 }

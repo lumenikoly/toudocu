@@ -4,6 +4,8 @@
 - Type: {{TASK_TYPE}}
 - Priority: {{PRIORITY}}
 - Module: {{MODULE_ID}}
+{{OPTIONAL_FLOW_METADATA}}
+{{OPTIONAL_SCREENS_METADATA}}
 - Owner: {{OWNER}}
 - Last updated: {{DATE}}
 
