@@ -190,12 +190,16 @@ func renderScreenMapWorkspace(model *Model, current, initialUseCase string, embe
 		initialAttribute = ` data-map-initial-usecase="` + escapeAttr(initialUseCase) + `"`
 		modeControls = `<div class="screen-map-modes"><span class="screen-map-fixed-mode">Сценарий <code>` + escapeHTML(initialUseCase) + `</code></span></div>`
 	}
+	changesControl := ""
+	if model.serveRevision != "" {
+		changesControl = `<button type="button" class="toolbar-button" data-map-changes aria-pressed="false">Показать изменения</button><select data-map-change-status aria-label="Статус изменения" hidden><option value="">Все изменения</option><option value="added">Добавленные</option><option value="modified">Изменённые</option><option value="removed">Удалённые</option></select>`
+	}
 	return `<section class="` + workspaceClass + `" data-screen-map` + initialAttribute + `>` +
 		`<div class="screen-map-toolbar">` + modeControls +
 		`<div class="screen-map-filters"><input type="search" data-map-search placeholder="Найти экран" aria-label="Найти экран">` +
 		`<select data-map-status aria-label="Статус"><option value="">Все статусы</option>` + screenStatusOptions(model) + `</select>` +
 		`<select data-map-module aria-label="Модуль" hidden><option value="">Выберите модуль</option>` + screenModuleOptions(model) + `</select>` +
-		`<select data-map-usecase aria-label="Сценарий" hidden><option value="">Выберите сценарий</option>` + screenUseCaseOptions(model, initialUseCase) + `</select></div>` +
+		`<select data-map-usecase aria-label="Сценарий" hidden><option value="">Выберите сценарий</option>` + screenUseCaseOptions(model, initialUseCase) + `</select>` + changesControl + `</div>` +
 		`<div class="screen-map-zoom" role="group" aria-label="Масштаб"><button type="button" data-map-zoom-out aria-label="Уменьшить">−</button>` +
 		`<button type="button" data-map-fit>Вписать</button><button type="button" data-map-reset>Сбросить</button>` +
 		`<button type="button" data-map-zoom-in aria-label="Увеличить">+</button><button type="button" data-map-fullscreen>На весь экран</button></div></div>` +

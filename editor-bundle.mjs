@@ -4,6 +4,7 @@ import { markdown } from '@codemirror/lang-markdown';
 import { json } from '@codemirror/lang-json';
 import { yaml } from '@codemirror/lang-yaml';
 import { setDiagnostics } from '@codemirror/lint';
+import { MergeView } from '@codemirror/merge';
 
 function languageExtension(language) {
   if (language === 'json') return json();
@@ -18,6 +19,18 @@ function position(view, line, column) {
 }
 
 window.DocgentCodeMirror = {
+	createMerge({ parent, before, after, language }) {
+		const readOnly = [basicSetup, languageExtension(language), EditorView.lineWrapping, EditorState.readOnly.of(true), EditorView.editable.of(false)];
+		const view = new MergeView({
+			parent,
+			a: { doc: before, extensions: readOnly },
+			b: { doc: after, extensions: readOnly },
+			collapseUnchanged: { margin: 3, minSize: 6 },
+			highlightChanges: true,
+			gutter: true,
+		});
+		return { destroy: () => view.destroy() };
+	},
   create({ parent, doc, language, onChange }) {
     let applying = false;
     const view = new EditorView({

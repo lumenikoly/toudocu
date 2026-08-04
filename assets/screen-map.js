@@ -35,6 +35,8 @@
   const useCaseSelect = workspace.querySelector('[data-map-usecase]');
   const statusSelect = workspace.querySelector('[data-map-status]');
   const search = workspace.querySelector('[data-map-search]');
+  const changesToggle = workspace.querySelector('[data-map-changes]');
+  const changeStatusSelect = workspace.querySelector('[data-map-change-status]');
   const initialUseCase = workspace.dataset.mapInitialUsecase || '';
   let mode = initialUseCase ? 'usecase' : 'all';
   let selected = '';
@@ -50,6 +52,10 @@
   let groupBounds = [];
   let cardHeight = MIN_CARD_HEIGHT;
   let canvasBounds = { width: 900, height: 620 };
+  let changesLoaded = false;
+  let changesActive = false;
+  const changedNodes = new Map();
+  const changedEdges = new Map();
 
   function selectedFlow() {
     return flows.find((flow) => flow.useCase === useCaseSelect?.value);
@@ -57,7 +63,9 @@
 
   function computeVisible() {
     const query = (search?.value || '').trim().toLocaleLowerCase();
-    let values = screens;
+    let values = screens.filter((screen) => !screen._changeGhost || changesActive);
+    if (changesActive) values = values.filter((screen) => changedNodes.has(screen.id));
+    if (changesActive && changeStatusSelect?.value) values = values.filter((screen) => changedNodes.get(screen.id)?.status === changeStatusSelect.value);
     if (mode === 'module' && moduleSelect?.value) values = values.filter((screen) => screen.module === moduleSelect.value);
     if (mode === 'usecase' && selectedFlow()) {
       const allowed = new Set(selectedFlow().reachableScreens || []);
@@ -74,6 +82,8 @@
         .map((screen) => ({ id: `parent-${screen.id}`, source: screen.parent, target: screen.id, action: 'Содержит', condition: '', type: 'navigation' }));
     } else {
       activeEdges = transitions.filter((transition) => visible.has(transition.source) && visible.has(transition.target));
+      if (changesActive) activeEdges = activeEdges.filter((transition) => changedEdges.has(transition.id));
+      if (changesActive && changeStatusSelect?.value) activeEdges = activeEdges.filter((transition) => changedEdges.get(transition.id)?.status === changeStatusSelect.value);
       if (mode === 'usecase' && useCaseSelect?.value) {
         activeEdges = activeEdges.filter((transition) => !transition.useCase || transition.useCase === useCaseSelect.value);
       }
@@ -582,6 +592,11 @@
 
       const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       group.classList.add('screen-edge', `screen-edge-${edge.type || 'navigation'}`);
+      const change = changedEdges.get(edge.id);
+      if (change) {
+        group.classList.add(`is-change-${change.status}`);
+        group.setAttribute('aria-label', `Переход ${changeStatusLabel(change.status)}: ${edge.id}`);
+      }
       group.dataset.transitionId = edge.id;
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       path.classList.add('screen-edge-path');
@@ -632,6 +647,8 @@
     const preview = screen.preview
       ? `<img class="screen-inspector-preview" src="${escapeAttribute(screen.preview)}" alt="Превью ${escapeAttribute(screen.title)}">`
       : `<div class="screen-inspector-preview screen-preview-placeholder"><strong>${escapeText(screen.id)}</strong><span>Превью отсутствует</span></div>`;
+    const nodeChange = changedNodes.get(id);
+    const changeNotice = nodeChange ? `<p class="screen-change-notice is-${escapeAttribute(nodeChange.status)}">${escapeText(changeStatusLabel(nodeChange.status))} в текущем наборе изменений</p>` : '';
     inspector.innerHTML = `<div class="screen-inspector-head"><span>${escapeText(screen.module)}</span><button type="button" data-inspector-close aria-label="Закрыть">×</button></div>
       <p class="screen-eyebrow">${escapeText(screen.id)}</p><h2>${escapeText(screen.title)}</h2>${preview}<p>${escapeText(screen.description || '')}</p>
       <dl><div><dt>Статус</dt><dd>${escapeText(screen.status?.label || '')}</dd></div><div><dt>Маршрут</dt><dd><code>${escapeText(screen.route || '—')}</code></dd></div>
@@ -641,7 +658,7 @@
       <h3>Контракты</h3><p>${escapeText((screen.contracts || []).join(' · ') || 'Связей нет')}</p>
       <h3>Исходящие переходы</h3><ul>${outgoingRows || '<li>Нет переходов</li>'}</ul>
       <h3>Входящие переходы</h3><ul>${incomingRows || '<li>Нет переходов</li>'}</ul>
-      <a class="primary-link" href="${escapeAttribute(data.screenUrls?.[id] || '#')}">Открыть документ →</a>`;
+      ${changeNotice}<a class="primary-link" href="${escapeAttribute(data.screenUrls?.[id] || '#')}">Открыть документ →</a>`;
     inspector.querySelector('[data-inspector-close]')?.addEventListener('click', () => selectScreen(''));
   }
 
@@ -701,6 +718,15 @@
     nodeById.forEach((node, id) => {
       node.hidden = !visible.has(id);
       node.style.height = '';
+		const change = changedNodes.get(id);
+		node.classList.remove('is-change-added', 'is-change-modified', 'is-change-removed');
+		if (change) {
+		  node.classList.add(`is-change-${change.status}`);
+		  node.dataset.changeStatus = changeStatusLabel(change.status);
+		  node.setAttribute('aria-label', `${node.dataset.screenNode}: ${changeStatusLabel(change.status)}`);
+		} else {
+		  delete node.dataset.changeStatus;
+		}
     });
     cardHeight = Math.max(
       MIN_CARD_HEIGHT,
@@ -821,6 +847,70 @@
     if (document.fullscreenElement) document.exitFullscreen?.();
     else stage.requestFullscreen?.();
   });
+  function changeStatusLabel(value) {
+    return ({ added: 'Добавлено', modified: 'Изменено', removed: 'Удалено' })[value] || 'Изменено';
+  }
+
+  function changeSnapshot(value) {
+    return value?.after || value?.before || {};
+  }
+
+  function addGhostNode(node) {
+    if (!node?.id || byId.has(node.id)) return;
+    const screen = {
+      id: node.id, title: node.title || node.id, route: node.route || 'Удалённый экран', module: node.module || 'Удалённые',
+      status: { kind: node.status || 'removed', label: 'Удалён' }, states: [], useCases: [], workItems: [], contracts: [], _changeGhost: true,
+    };
+    screens.push(screen);
+    byId.set(screen.id, screen);
+    const card = document.createElement('article');
+    card.className = 'screen-node is-change-removed';
+    card.dataset.screenNode = screen.id;
+    card.tabIndex = 0;
+    card.setAttribute('role', 'button');
+    card.innerHTML = `<div class="screen-preview-placeholder"><strong>${escapeText(screen.id)}</strong><span>Удалённый экран</span></div><div class="screen-node-copy"><strong>${escapeText(screen.id)}</strong><span>${escapeText(screen.title)}</span><small>${escapeText(screen.route)}</small><div class="screen-node-meta"><span class="screen-module-label">${escapeText(screen.module)}</span></div></div>`;
+    nodeById.set(screen.id, card);
+    nodesLayer.append(card);
+    card.addEventListener('click', (event) => { event.stopPropagation(); selectScreen(screen.id); });
+    card.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); selectScreen(screen.id); } });
+  }
+
+  async function loadChanges() {
+    if (changesLoaded) return true;
+    try {
+      const response = await fetch('/_docgent/api/changes/screen-map', { headers: { Accept: 'application/json' } });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const payload = await response.json();
+      (payload.nodes || []).forEach((change) => {
+        if (!change.id) return;
+        const status = change.status === 'deleted' ? 'removed' : (change.status === 'added' || change.status === 'untracked' ? 'added' : 'modified');
+        changedNodes.set(change.id, { ...change, status });
+        if (status === 'removed') addGhostNode(changeSnapshot(change));
+      });
+      (payload.edges || []).forEach((change) => {
+        const edge = changeSnapshot(change);
+        const status = change.status === 'deleted' ? 'removed' : (change.status === 'added' || change.status === 'untracked' ? 'added' : 'modified');
+        if (!edge.id) return;
+        changedEdges.set(edge.id, { ...change, status });
+        if (status === 'removed' && !transitions.some((item) => item.id === edge.id)) transitions.push({ ...edge, type: 'navigation', _changeGhost: true });
+      });
+      changesLoaded = true;
+      return true;
+    } catch (error) {
+      if (status) status.textContent = `Не удалось загрузить изменения карты: ${error.message}`;
+      return false;
+    }
+  }
+  changesToggle?.addEventListener('click', async () => {
+    if (!changesActive && !(await loadChanges())) return;
+    changesActive = !changesActive;
+    changesToggle.classList.toggle('is-active', changesActive);
+    changesToggle.setAttribute('aria-pressed', String(changesActive));
+    changesToggle.textContent = changesActive ? 'Скрыть изменения' : 'Показать изменения';
+		changeStatusSelect.hidden = !changesActive;
+    render({ fit: true });
+  });
+	changeStatusSelect?.addEventListener('change', () => render({ fit: true }));
   document.addEventListener('docgent:panelshown', (event) => {
     if (event.target?.contains(workspace)) {
       window.requestAnimationFrame(() => render({ fit: true }));

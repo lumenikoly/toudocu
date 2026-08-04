@@ -72,6 +72,7 @@ func renderDocumentContextButton(model *Model, document *Document) string {
 	encoded := url.QueryEscape(document.SourcePath)
 	return `<div class="document-context-actions">` + copyButton +
 		`<a class="document-context-button" href="/_docgent/editor/?path=` + escapeAttr(encoded) + `">Редактировать</a>` +
+		`<a class="document-context-button" href="` + escapeAttr(changesDocumentURL(documentContextPath(model, document))) + `">Показать изменения</a>` +
 		`<a class="document-context-button" href="/_docgent/api/editor/file?raw=1&amp;path=` + escapeAttr(encoded) + `" target="_blank" rel="noopener">Открыть исходник</a></div>`
 }
 
@@ -257,6 +258,9 @@ func renderNavigation(model *Model, current string) string {
 		active = " is-active"
 	}
 	fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span class="nav-icon">⚑</span><span>Качество документации</span></a></li>`, active, escapeAttr(relativeURL(current, model.HealthOutputPath)))
+	if model.serveMode {
+		fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link" href="/changes/"><span class="nav-icon">±</span><span>Изменения</span></a></li>`)
+	}
 	if len(model.Knowledge.Screens) > 0 {
 		active = ""
 		if current == "traceability.html" {
@@ -483,6 +487,10 @@ func renderDocumentPage(model *Model, document *Document) string {
 	}
 	if document.Type == "flow" {
 		flowConnections = renderFlowConnections(model, document)
+	}
+	if model.serveMode && document.Type == "work" {
+		id := stableEntityIDRE.FindString(document.Title)
+		computedStatus = `<nav class="task-page-tabs" aria-label="Представления задачи"><span aria-current="page">Контракт задачи</span><a href="/changes/?task=` + escapeAttr(url.QueryEscape(id)) + `&amp;path=` + escapeAttr(url.QueryEscape(documentContextPath(model, document))) + `">Изменения</a></nav>` + computedStatus
 	}
 	content := breadcrumbs(model, document.OutputPath, document.Title) + `<header class="page-header"><div class="page-kicker">` + renderStatusChip(displayStatus) + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + issues + `</div><h1>` + escapeHTML(document.Title) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` + renderMetadata(document) + renderProgress(document.TaskStats, "Готовность документа") + controls + `<div class="page-actions">` + renderDocumentContextButton(model, document) + `<button class="collapse-all-button" type="button" data-collapse-all data-collapse-state="expanded" aria-expanded="true"><span class="collapse-all-icon" aria-hidden="true"><span class="collapse-icon collapse-icon-up">↑</span><span class="collapse-icon collapse-icon-down">↓</span></span><span data-collapse-label>Свернуть разделы</span></button></div></header>` + computedStatus + `<article class="doc-content">` + body + `</article>` + screenConnections + renderRelated(model, document)
 	content += flowConnections
@@ -975,7 +983,7 @@ func generateSite(model *Model, options Options, serve bool) (GenerateResult, er
 	if err = mkdirp(output); err != nil {
 		return GenerateResult{}, err
 	}
-	serveOnlyAssets := []string{"serve.css", "serve.js", "editor.css", "editor.js", "codemirror.js", "codemirror.LICENSE.txt", "codemirror.checksums.txt"}
+	serveOnlyAssets := []string{"serve.css", "serve.js", "editor.css", "editor.js", "changes.css", "changes.js", "codemirror.js", "codemirror.LICENSE.txt", "codemirror.checksums.txt"}
 	if !serve {
 		for _, asset := range serveOnlyAssets {
 			if removeErr := os.Remove(filepath.Join(output, "assets", asset)); removeErr != nil && !os.IsNotExist(removeErr) {

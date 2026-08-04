@@ -91,6 +91,13 @@ Docgent добавляет переходы выбранного `UC-*` и гл�
 
 ## Карта
 
+В `serve` раздел изменений добавляет change overlay. Новые SC/TR имеют зелёный
+контур или линию и label `added`, изменённые — жёлтый `modified`, удалённые
+old-side ghost elements — красный пунктир и `removed`. Состояние не передаётся
+только цветом. Filters module/use case/status/changed-only применяются к
+объединённой old/new модели; выбор элемента открывает semantic diff. JSON
+доступен через `/_docgent/api/changes/screen-map`.
+
 Карточка показывает preview или placeholder, ID, название, маршрут, статус,
 модуль и количество входящих и исходящих переходов. Доступны:
 

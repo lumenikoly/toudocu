@@ -53,6 +53,16 @@ func TestSiteConfigDefaultsAndMissingFile(t *testing.T) {
 	}
 }
 
+func TestChangesConfig(t *testing.T) {
+	config, err := parseSiteConfig([]byte("changes:\n  defaultBaseRef: main\n  renameSimilarity: 75\n  includeAssets: false\n  semanticDiff: true\n  maxSourceDiffBytes: 2048\n  exclude:\n    - docs/generated/**\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if config.Changes.DefaultBaseRef != "main" || config.Changes.RenameSimilarity != 75 || config.Changes.IncludeAssets || !config.Changes.SemanticDiff || config.Changes.MaxSourceDiffBytes != 2048 || len(config.Changes.Exclude) != 1 {
+		t.Fatalf("changes config: %#v", config.Changes)
+	}
+}
+
 func TestSiteConfigFullAndTitlePriority(t *testing.T) {
 	root, docs := configFixture(t)
 	assets := filepath.Join(root, ".docgent", "assets")

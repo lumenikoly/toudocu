@@ -4,9 +4,9 @@
     "name": "Docgent",
     "version": "1.1.0-go"
   },
-  "generatedAt": "2026-07-31T19:34:18.869374905Z",
+  "generatedAt": "2026-08-01T08:35:01.710439333Z",
   "sourceDirectory": "docs",
-  "staleDays": 0,
+  "staleDays": 90,
   "project": {
     "title": "Docgent",
     "description": "Docgent — dependency-free CLI на Go для проверяемой проектной документации в структурированном Markdown и автономного HTML-портала, работающего через file:// .",
@@ -37,28 +37,30 @@
     }
   },
   "stats": {
-    "documents": 48,
+    "documents": 57,
     "totalTasks": 10,
     "completedTasks": 9,
     "remainingTasks": 1,
     "taskProgress": 90,
-    "documentsComplete": 8,
+    "documentsComplete": 9,
     "documentsInProgress": 2,
     "documentsNotStarted": 0,
-    "documentsWithoutTasks": 38,
+    "documentsWithoutTasks": 46,
     "staleDocuments": 0,
-    "documentsWithoutDescription": 8,
+    "documentsWithoutDescription": 9,
     "documentsWithoutStatus": 0,
     "brokenLinks": 0,
     "warnings": 0,
     "errors": 0,
-    "modules": 4,
+    "modules": 5,
     "moduleStatuses": {
-      "done": 4
+      "done": 4,
+      "in-progress": 1
     },
-    "useCases": 7,
+    "useCases": 8,
     "useCaseStatuses": {
-      "done": 7
+      "done": 7,
+      "in-progress": 1
     },
     "screens": 0,
     "screensDone": 0,
@@ -67,7 +69,7 @@
     "screensUnreachable": 0,
     "risks": 3,
     "openRisks": 2,
-    "decisions": 2,
+    "decisions": 3,
     "openBugs": 0,
     "criticalBugs": 0,
     "highSeverityBugs": 0,
@@ -443,6 +445,41 @@
     },
     {
       "id": "",
+      "sourcePath": "architecture/documentation-changes.md",
+      "outputPath": "architecture/documentation-changes.html",
+      "type": "architecture",
+      "title": "Архитектура просмотра изменений документации",
+      "description": "Docgent разрешает явно выбранные локальные Git-состояния, представляет каждую сторону ленивым snapshot и объединяет Git metadata с нормализованными документными сущностями в один versioned ChangeSetReport .",
+      "metadata": {
+        "architectureQuestion": "Как Git-состояния превращаются в согласованный change set документации?",
+        "documentType": "Architecture"
+      },
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-31T20:55:03.91770923Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "architecture/overview.md",
+        "flows/FLOW-DOCS-CHANGES.md",
+        "guides/documentation-changes.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
       "sourcePath": "architecture/failure-isolation.md",
       "outputPath": "architecture/failure-isolation.html",
       "type": "architecture",
@@ -516,7 +553,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T19:06:03.259935007Z",
+      "updatedAt": "2026-07-31T19:59:40.181265153Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -552,6 +589,14 @@
           "targetKind": "document",
           "target": "architecture/failure-isolation.md",
           "href": "failure-isolation.html"
+        },
+        {
+          "destination": "documentation-changes.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "architecture/documentation-changes.md",
+          "href": "documentation-changes.html"
         }
       ],
       "backlinks": [
@@ -561,7 +606,8 @@
         "architecture/system-boundary.md",
         "architecture/runtime-components.md",
         "architecture/trust-boundaries.md",
-        "architecture/failure-isolation.md"
+        "architecture/failure-isolation.md",
+        "architecture/documentation-changes.md"
       ]
     },
     {
@@ -587,7 +633,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T19:06:03.261935023Z",
+      "updatedAt": "2026-07-31T20:28:51.162577809Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -756,7 +802,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T19:06:03.26357035Z",
+      "updatedAt": "2026-07-31T20:28:51.161577803Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -794,6 +840,41 @@
         "modules/markdown.md",
         "modules/cli.md"
       ]
+    },
+    {
+      "id": "CON-CHANGES-HTTP-V1",
+      "sourcePath": "contracts/changes-http.md",
+      "outputPath": "contracts/changes-http.html",
+      "type": "contract",
+      "title": "HTTP-контракт Documentation Changes v1",
+      "description": "Все endpoints read-only, используют Cache-Control: no-store , принимают только локальные Git revisions и ограничивают доступ documentation roots.",
+      "metadata": {
+        "id": "CON-CHANGES-HTTP-V1",
+        "owner": "Команда Docgent",
+        "status": "Готово",
+        "updated": "2026-07-31"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Готово",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-31T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "guides/documentation-changes.md"
+      ],
+      "relatedDocuments": []
     },
     {
       "id": "CON-CLI-V1",
@@ -840,6 +921,22 @@
           "targetKind": "document",
           "target": "contracts/editor-http.md",
           "href": "editor-http.html"
+        },
+        {
+          "destination": "../guides/documentation-changes.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/documentation-changes.md",
+          "href": "../guides/documentation-changes.html"
+        },
+        {
+          "destination": "../reference/changes-report.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/changes-report.md",
+          "href": "../reference/changes-report.html"
         }
       ],
       "backlinks": [
@@ -861,7 +958,9 @@
       ],
       "relatedDocuments": [
         "guides/work-items.md",
-        "contracts/editor-http.md"
+        "contracts/editor-http.md",
+        "guides/documentation-changes.md",
+        "reference/changes-report.md"
       ]
     },
     {
@@ -911,7 +1010,7 @@
       "outputPath": "decisions/001-dependency-free.html",
       "type": "decision",
       "title": "ADR-001: Dependency-free Go CLI",
-      "description": "Docgent поставляется одним Go-бинарником и не использует внешние модули или runtime-зависимости.",
+      "description": "Docgent поставляется одним Go-бинарником и не требует runtime-зависимостей. Единственное исключение для внешнего Go module зафиксировано в ADR-003 и не добавляет сеть либо соседние runtime-файлы.",
       "metadata": {
         "author": "Команда Docgent",
         "date": "2026-07-25",
@@ -935,11 +1034,22 @@
       "stale": false,
       "warnings": 0,
       "errors": 0,
-      "links": [],
+      "links": [
+        {
+          "destination": "ADR-003.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "decisions/ADR-003.md",
+          "href": "ADR-003.html"
+        }
+      ],
       "backlinks": [
         "architecture/system-boundary.md"
       ],
-      "relatedDocuments": []
+      "relatedDocuments": [
+        "decisions/ADR-003.md"
+      ]
     },
     {
       "id": "ADR-002",
@@ -975,6 +1085,42 @@
       "backlinks": [
         "architecture/system-boundary.md",
         "use-cases/UC-TASK-03.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "ADR-003",
+      "sourcePath": "decisions/ADR-003.md",
+      "outputPath": "decisions/ADR-003.html",
+      "type": "decision",
+      "title": "ADR-003: Поддерживаемый YAML parser для OpenAPI diff",
+      "description": "Docgent использует один закреплённый pure-Go YAML module для корректного OpenAPI diff, сохраняя поставку одним автономным бинарником.",
+      "metadata": {
+        "author": "Команда Docgent",
+        "date": "2026-07-31",
+        "id": "ADR-003",
+        "status": "Принято",
+        "updated": "2026-07-31"
+      },
+      "status": {
+        "kind": "accepted",
+        "symbol": "✓",
+        "label": "Принято",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-31T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "decisions/001-dependency-free.md"
       ],
       "relatedDocuments": []
     },
@@ -1060,6 +1206,70 @@
         "modules/site.md",
         "modules/model.md",
         "contracts/cli.md"
+      ]
+    },
+    {
+      "id": "FLOW-DOCS-CHANGES",
+      "sourcePath": "flows/FLOW-DOCS-CHANGES.md",
+      "outputPath": "flows/FLOW-DOCS-CHANGES.html",
+      "type": "flow",
+      "title": "FLOW-DOCS-CHANGES: Построение и просмотр изменений документации",
+      "description": "Процесс показывает путь от явно выбранного Git-диапазона к ленивым представлениям одного детерминированного change set.",
+      "metadata": {
+        "id": "FLOW-DOCS-CHANGES",
+        "module": "MOD-CHANGES",
+        "updated": "2026-07-31",
+        "useCase": "UC-DOCS-05"
+      },
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-31T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../use-cases/UC-DOCS-05.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/UC-DOCS-05.md",
+          "href": "../use-cases/UC-DOCS-05.html"
+        },
+        {
+          "destination": "../modules/MOD-CHANGES.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/MOD-CHANGES.md",
+          "href": "../modules/MOD-CHANGES.html"
+        },
+        {
+          "destination": "../architecture/documentation-changes.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "architecture/documentation-changes.md",
+          "href": "../architecture/documentation-changes.html"
+        }
+      ],
+      "backlinks": [
+        "use-cases/UC-DOCS-05.md"
+      ],
+      "relatedDocuments": [
+        "use-cases/UC-DOCS-05.md",
+        "modules/MOD-CHANGES.md",
+        "architecture/documentation-changes.md"
       ]
     },
     {
@@ -1339,6 +1549,65 @@
     },
     {
       "id": "",
+      "sourcePath": "guides/documentation-changes.md",
+      "outputPath": "guides/documentation-changes.html",
+      "type": "guide",
+      "title": "Просмотр изменений документации",
+      "description": "Docgent использует Git как единственный источник старой и новой версии. Он не создаёт snapshots, не выполняет fetch и не изменяет history, refs, index или working tree. Раздел доступен только в serve по адресу /changes/ ; обычный build остаётся автономным представлением текущей документации и не требует Git history.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-01T08:31:15.791639442Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../contracts/changes-http.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/changes-http.md",
+          "href": "../contracts/changes-http.html"
+        },
+        {
+          "destination": "../reference/changes-report.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/changes-report.md",
+          "href": "../reference/changes-report.html"
+        },
+        {
+          "destination": "../architecture/documentation-changes.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "architecture/documentation-changes.md",
+          "href": "../architecture/documentation-changes.html"
+        }
+      ],
+      "backlinks": [
+        "contracts/cli.md"
+      ],
+      "relatedDocuments": [
+        "contracts/changes-http.md",
+        "reference/changes-report.md",
+        "architecture/documentation-changes.md"
+      ]
+    },
+    {
+      "id": "",
       "sourcePath": "guides/processes.md",
       "outputPath": "guides/processes.html",
       "type": "guide",
@@ -1418,7 +1687,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T13:44:36.047014071Z",
+      "updatedAt": "2026-07-31T20:28:51.160577798Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1482,7 +1751,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T10:04:56.077920215Z",
+      "updatedAt": "2026-07-31T20:28:51.159577792Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1690,6 +1959,53 @@
       "relatedDocuments": [
         "use-cases/build-portal.md",
         "use-cases/check-documentation.md"
+      ]
+    },
+    {
+      "id": "MOD-CHANGES",
+      "sourcePath": "modules/MOD-CHANGES.md",
+      "outputPath": "modules/MOD-CHANGES.html",
+      "type": "module",
+      "title": "MOD-CHANGES: Изменения документации",
+      "description": "Модуль превращает явно выбранные Git-состояния исходной документации в детерминированный отчёт для CLI, CI и локального портала.",
+      "metadata": {
+        "id": "MOD-CHANGES",
+        "owner": "Команда Docgent",
+        "status": "В работе",
+        "updated": "2026-07-31"
+      },
+      "status": {
+        "kind": "in-progress",
+        "symbol": "◐",
+        "label": "В работе",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-31T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../use-cases/UC-DOCS-05.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/UC-DOCS-05.md",
+          "href": "../use-cases/UC-DOCS-05.html"
+        }
+      ],
+      "backlinks": [
+        "flows/FLOW-DOCS-CHANGES.md",
+        "use-cases/UC-DOCS-05.md"
+      ],
+      "relatedDocuments": [
+        "use-cases/UC-DOCS-05.md"
       ]
     },
     {
@@ -2032,6 +2348,37 @@
     },
     {
       "id": "",
+      "sourcePath": "reference/changes-report.md",
+      "outputPath": "reference/changes-report.html",
+      "type": "reference",
+      "title": "ChangeSetReport schema v1",
+      "description": "docgent changes --format json возвращает детерминированный отчёт с schemaVersion , repository/branch/HEAD/dirty, resolved base/target, changeSetDigest , file/line/entity/classification summary, changes[] , task impact и diagnostics.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-01T08:31:15.793388634Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "contracts/cli.md",
+        "guides/documentation-changes.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
       "sourcePath": "reference/configuration.md",
       "outputPath": "reference/configuration.html",
       "type": "reference",
@@ -2050,7 +2397,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T19:06:34.727179962Z",
+      "updatedAt": "2026-07-31T20:28:51.161577803Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2080,7 +2427,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T19:06:34.725179947Z",
+      "updatedAt": "2026-07-31T20:28:51.163577814Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2770,6 +3117,96 @@
       ]
     },
     {
+      "id": "UC-DOCS-05",
+      "sourcePath": "use-cases/UC-DOCS-05.md",
+      "outputPath": "use-cases/UC-DOCS-05.html",
+      "type": "use-case",
+      "title": "UC-DOCS-05: Просматривать изменения документации",
+      "description": "Разработчик рассматривает изменения исходной документации в терминах Git, отрендерированных страниц и проектных сущностей перед завершением задачи.",
+      "metadata": {
+        "actor": "Разработчик",
+        "id": "UC-DOCS-05",
+        "module": "MOD-CHANGES",
+        "priority": "Высокий",
+        "status": "В работе",
+        "updated": "2026-07-31"
+      },
+      "status": {
+        "kind": "in-progress",
+        "symbol": "◐",
+        "label": "В работе",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-31T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../modules/MOD-CHANGES.md#br-changes-001-git-является-единственным-источником-версий",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/MOD-CHANGES.md",
+          "href": "../modules/MOD-CHANGES.html#br-changes-001-git-является-единственным-источником-версий"
+        },
+        {
+          "destination": "../modules/MOD-CHANGES.md#br-changes-002-исходный-diff-имеет-приоритет",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/MOD-CHANGES.md",
+          "href": "../modules/MOD-CHANGES.html#br-changes-002-исходный-diff-имеет-приоритет"
+        },
+        {
+          "destination": "../modules/MOD-CHANGES.md#br-changes-003-диапазон-всегда-явный",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/MOD-CHANGES.md",
+          "href": "../modules/MOD-CHANGES.html#br-changes-003-диапазон-всегда-явный"
+        },
+        {
+          "destination": "../modules/MOD-CHANGES.md#br-changes-004-анализ-ограничен-документационными-roots",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/MOD-CHANGES.md",
+          "href": "../modules/MOD-CHANGES.html#br-changes-004-анализ-ограничен-документационными-roots"
+        },
+        {
+          "destination": "../modules/MOD-CHANGES.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/MOD-CHANGES.md",
+          "href": "../modules/MOD-CHANGES.html"
+        },
+        {
+          "destination": "../flows/FLOW-DOCS-CHANGES.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-DOCS-CHANGES.md",
+          "href": "../flows/FLOW-DOCS-CHANGES.html"
+        }
+      ],
+      "backlinks": [
+        "flows/FLOW-DOCS-CHANGES.md",
+        "modules/MOD-CHANGES.md"
+      ],
+      "relatedDocuments": [
+        "modules/MOD-CHANGES.md",
+        "flows/FLOW-DOCS-CHANGES.md"
+      ]
+    },
+    {
       "id": "UC-TASK-03",
       "sourcePath": "use-cases/UC-TASK-03.md",
       "outputPath": "use-cases/UC-TASK-03.html",
@@ -2884,6 +3321,44 @@
         "percent": 100
       },
       "updatedAt": "2026-07-31T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "work/TASK-CHANGES-001.md",
+      "outputPath": "work/TASK-CHANGES-001.html",
+      "type": "work",
+      "title": "TASK-CHANGES-001: Просмотр изменений документации",
+      "description": "",
+      "metadata": {
+        "flow": "FLOW-DOCS-CHANGES",
+        "module": "MOD-CHANGES",
+        "owner": "Команда Docgent",
+        "priority": "Высокий",
+        "standards": "STD-GO-001, STD-DOCS-001",
+        "status": "Выполнено",
+        "type": "Feature",
+        "updated": "2026-08-01",
+        "useCase": "UC-DOCS-05"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Выполнено",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 18,
+        "completed": 18,
+        "remaining": 0,
+        "percent": 100
+      },
+      "updatedAt": "2026-08-01T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -3489,6 +3964,28 @@
         ]
       },
       {
+        "id": "MOD-CHANGES",
+        "title": "MOD-CHANGES: Изменения документации",
+        "status": {
+          "kind": "in-progress",
+          "symbol": "◐",
+          "label": "В работе",
+          "recognized": true
+        },
+        "document": "modules/MOD-CHANGES.md",
+        "repositoryPaths": [],
+        "useCaseIds": [
+          "UC-DOCS-05"
+        ],
+        "screenIds": [],
+        "businessRuleIds": [
+          "BR-CHANGES-001",
+          "BR-CHANGES-002",
+          "BR-CHANGES-003",
+          "BR-CHANGES-004"
+        ]
+      },
+      {
         "id": "MOD-MODEL",
         "title": "Проектная модель и валидация",
         "status": {
@@ -3685,6 +4182,31 @@
         "allowCycle": false
       },
       {
+        "id": "UC-DOCS-05",
+        "title": "UC-DOCS-05: Просматривать изменения документации",
+        "status": {
+          "kind": "in-progress",
+          "symbol": "◐",
+          "label": "В работе",
+          "recognized": true
+        },
+        "moduleId": "MOD-CHANGES",
+        "document": "use-cases/UC-DOCS-05.md",
+        "repositoryPaths": [],
+        "businessRuleIds": [
+          "BR-CHANGES-001",
+          "BR-CHANGES-002",
+          "BR-CHANGES-003",
+          "BR-CHANGES-004"
+        ],
+        "flowIds": [
+          "FLOW-DOCS-CHANGES"
+        ],
+        "screenIds": [],
+        "terminalScreens": [],
+        "allowCycle": false
+      },
+      {
         "id": "UC-TASK-03",
         "title": "UC-TASK-03: Подготовить новую рабочую задачу",
         "status": {
@@ -3717,6 +4239,15 @@
           "UC-DOCS-01"
         ],
         "document": "flows/FLOW-DOCS-BUILD.md"
+      },
+      {
+        "id": "FLOW-DOCS-CHANGES",
+        "title": "FLOW-DOCS-CHANGES: Построение и просмотр изменений документации",
+        "moduleId": "MOD-CHANGES",
+        "useCaseIds": [
+          "UC-DOCS-05"
+        ],
+        "document": "flows/FLOW-DOCS-CHANGES.md"
       },
       {
         "id": "FLOW-DOCS-CHECK",
@@ -3847,6 +4378,38 @@
         "document": "modules/markdown.md",
         "anchor": "br-md-003-mermaid-остаётся-визуализацией",
         "line": 40
+      },
+      {
+        "id": "BR-CHANGES-001",
+        "title": "Git является единственным источником версий",
+        "moduleId": "MOD-CHANGES",
+        "document": "modules/MOD-CHANGES.md",
+        "anchor": "br-changes-001-git-является-единственным-источником-версий",
+        "line": 30
+      },
+      {
+        "id": "BR-CHANGES-002",
+        "title": "Исходный diff имеет приоритет",
+        "moduleId": "MOD-CHANGES",
+        "document": "modules/MOD-CHANGES.md",
+        "anchor": "br-changes-002-исходный-diff-имеет-приоритет",
+        "line": 36
+      },
+      {
+        "id": "BR-CHANGES-003",
+        "title": "Диапазон всегда явный",
+        "moduleId": "MOD-CHANGES",
+        "document": "modules/MOD-CHANGES.md",
+        "anchor": "br-changes-003-диапазон-всегда-явный",
+        "line": 41
+      },
+      {
+        "id": "BR-CHANGES-004",
+        "title": "Анализ ограничен документационными roots",
+        "moduleId": "MOD-CHANGES",
+        "document": "modules/MOD-CHANGES.md",
+        "anchor": "br-changes-004-анализ-ограничен-документационными-roots",
+        "line": 46
       },
       {
         "id": "BR-MODEL-001",
@@ -4169,6 +4732,385 @@
         "plan": "Добавить metadata aliases и структурные architecture diagnostics. Расширить behavioral и schema contract tests. Обновить templates, init workflow, managed guidance и semantic gate. Мигрировать документацию Docgent и демонстрационного Service Desk. Выполнить независимый semantic review и устранить замечания. Пройти полный Go/Docgent verification и пересобрать portals.",
         "documentationImpact": "Обновляются публичный архитектурный контракт, skill init и guidance, самодокументация Docgent, демонстрационный Service Desk, README, CLI/reference, модель, use case, changelog, стандарт документации и отслеживаемые portals.",
         "documentationPaths": []
+      },
+      {
+        "id": "TASK-CHANGES-001",
+        "title": "Просмотр изменений документации",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Выполнено",
+          "recognized": true
+        },
+        "type": "Feature",
+        "archived": false,
+        "priority": "Высокий",
+        "updated": "2026-08-01",
+        "owner": "Команда Docgent",
+        "moduleId": "MOD-CHANGES",
+        "useCaseId": "UC-DOCS-05",
+        "flowId": "FLOW-DOCS-CHANGES",
+        "screenIds": [],
+        "transitionIds": [],
+        "standardIds": [
+          "STD-GO-001",
+          "STD-DOCS-001"
+        ],
+        "runbookIds": [],
+        "dependsOn": [],
+        "document": "work/TASK-CHANGES-001.md",
+        "anchor": "task-changes-001-просмотр-изменений-документации",
+        "criteria": [
+          {
+            "line": 53,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-01 Git adapter поддерживает commit, index и working-tree snapshots,"
+          },
+          {
+            "line": 56,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-02 ChangeSetReport schema v1 содержит явный resolved comparison,"
+          },
+          {
+            "line": 58,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-03 Unified diff точно получен от Git, side-by-side выводится из hunks,"
+          },
+          {
+            "line": 60,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-04 Deterministic semantic diff поддерживает UC, FLOW, SC/TR, MOD,"
+          },
+          {
+            "line": 62,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-05 OpenAPI YAML/JSON diff сравнивает operations, requests, responses,"
+          },
+          {
+            "line": 64,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-06 Rendered Markdown, Mermaid, Screen Map и image assets доступны до"
+          },
+          {
+            "line": 66,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-07 Task impact отделяет task contract от permanent documentation и"
+          },
+          {
+            "line": 68,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-08 CLI поддерживает summary, file и task reports, filters,"
+          },
+          {
+            "line": 70,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-09 Read-only HTTP API проверяет revisions/paths/limits, поддерживает"
+          },
+          {
+            "line": 72,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-10 Changes UI поддерживает comparison selector, filters/search,"
+          },
+          {
+            "line": 74,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-11 serve сохраняет filters/open file при invalidation, а отсутствие"
+          },
+          {
+            "line": 76,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-12 Static build, существующий check, ProjectReport schema v1 и"
+          }
+        ],
+        "verificationMatrix": [
+          {
+            "criterionId": "AC-01",
+            "criterion": "Git adapter поддерживает commit, index и working-tree snapshots,",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestGitChange|TestChangeComparison'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-02",
+            "criterion": "ChangeSetReport schema v1 содержит явный resolved comparison,",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestChangeSetReport|TestChangeSetDigest'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-03",
+            "criterion": "Unified diff точно получен от Git, side-by-side выводится из hunks,",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestSourceDiff|TestSideBySideDiff|TestLargeChange'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-04",
+            "criterion": "Deterministic semantic diff поддерживает UC, FLOW, SC/TR, MOD,",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestSemanticDiff'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-05",
+            "criterion": "OpenAPI YAML/JSON diff сравнивает operations, requests, responses,",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestOpenAPIDiff'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-06",
+            "criterion": "Rendered Markdown, Mermaid, Screen Map и image assets доступны до",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestRenderedChange|TestMermaidChange|TestAssetChange|TestScreenMapChange'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-07",
+            "criterion": "Task impact отделяет task contract от permanent documentation и",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestTaskImpact'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-08",
+            "criterion": "CLI поддерживает summary, file и task reports, filters,",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestChangesCLI'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-09",
+            "criterion": "Read-only HTTP API проверяет revisions/paths/limits, поддерживает",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestChangesHTTP'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-10",
+            "criterion": "Changes UI поддерживает comparison selector, filters/search,",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestChangesAssetsContract'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-11",
+            "criterion": "serve сохраняет filters/open file при invalidation, а отсутствие",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestChangesInvalidation|TestChangesWithoutGit'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-12",
+            "criterion": "Static build, существующий check, ProjectReport schema v1 и",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestStaticSiteExcludesChanges|TestProjectReport'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          }
+        ],
+        "checks": [
+          {
+            "target": "AC-01",
+            "commands": [
+              "go test ./... -run 'TestGitChange|TestChangeComparison'"
+            ],
+            "line": 90
+          },
+          {
+            "target": "AC-02",
+            "commands": [
+              "go test ./... -run 'TestChangeSetReport|TestChangeSetDigest'"
+            ],
+            "line": 91
+          },
+          {
+            "target": "AC-03",
+            "commands": [
+              "go test ./... -run 'TestSourceDiff|TestSideBySideDiff|TestLargeChange'"
+            ],
+            "line": 92
+          },
+          {
+            "target": "AC-04",
+            "commands": [
+              "go test ./... -run 'TestSemanticDiff'"
+            ],
+            "line": 93
+          },
+          {
+            "target": "AC-05",
+            "commands": [
+              "go test ./... -run 'TestOpenAPIDiff'"
+            ],
+            "line": 94
+          },
+          {
+            "target": "AC-06",
+            "commands": [
+              "go test ./... -run 'TestRenderedChange|TestMermaidChange|TestAssetChange|TestScreenMapChange'"
+            ],
+            "line": 95
+          },
+          {
+            "target": "AC-07",
+            "commands": [
+              "go test ./... -run 'TestTaskImpact'"
+            ],
+            "line": 96
+          },
+          {
+            "target": "AC-08",
+            "commands": [
+              "go test ./... -run 'TestChangesCLI'"
+            ],
+            "line": 97
+          },
+          {
+            "target": "AC-09",
+            "commands": [
+              "go test ./... -run 'TestChangesHTTP'"
+            ],
+            "line": 98
+          },
+          {
+            "target": "AC-10",
+            "commands": [
+              "go test ./... -run 'TestChangesAssetsContract'"
+            ],
+            "line": 99
+          },
+          {
+            "target": "AC-11",
+            "commands": [
+              "go test ./... -run 'TestChangesInvalidation|TestChangesWithoutGit'"
+            ],
+            "line": 100
+          },
+          {
+            "target": "AC-12",
+            "commands": [
+              "go test ./... -run 'TestStaticSiteExcludesChanges|TestProjectReport'"
+            ],
+            "line": 101
+          },
+          {
+            "target": "ALL",
+            "commands": [
+              "go test ./..."
+            ],
+            "line": 102
+          },
+          {
+            "target": "DOCS",
+            "commands": [
+              "go run ./cmd/docgent check ./docs --repository-root ."
+            ],
+            "line": 103
+          },
+          {
+            "target": "QUALITY",
+            "commands": [
+              "go vet ./... \u0026\u0026 go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docgent check ./docs --strict --stale-days 0"
+            ],
+            "line": 104
+          }
+        ],
+        "repositoryPaths": [
+          "*_test.go",
+          "assets/",
+          "CHANGELOG.md",
+          "cli.go",
+          "docs/",
+          "example/project-docs/",
+          "go.mod",
+          "go.sum",
+          "package-lock.json",
+          "package.json",
+          "project-docs/",
+          "README.md",
+          "screen_site.go",
+          "server.go",
+          "site.go",
+          "site_config.go",
+          "THIRD_PARTY_NOTICES.md",
+          "types.go"
+        ],
+        "result": "docgent changes и раздел /changes показывают Git-изменения исходной документации как source, rendered и deterministic semantic diff, сопоставляют их с task impact и экспортируют ChangeSetReport schema v1.",
+        "behaviorChange": "Было Портал показывает только текущее состояние, а review использует внешний git diff без проектной семантики и task impact. Станет serve предоставляет read-only Changes workspace с явным диапазоном, ленивыми специализированными представлениями и live invalidation. CLI и CI получают тот же отчёт без изменения Git.",
+        "before": "Портал показывает только текущее состояние, а review использует внешний git diff без проектной семантики и task impact.",
+        "after": "serve предоставляет read-only Changes workspace с явным диапазоном, ленивыми специализированными представлениями и live invalidation. CLI и CI получают тот же отчёт без изменения Git.",
+        "outOfScope": "изменение Git index, history, refs или working tree; fetch, checkout, commit, merge, rebase и GitHub PR API; inline review comments, approvals и conflict editor; AI-generated summaries и исправление документации; pixel diff Mermaid или изображений; Git diff исходного кода вне documentation roots.",
+        "plan": "Реализовать Git snapshots, comparison model и ChangeSetReport. Добавить source, semantic, OpenAPI, task и specialized diff engines. Добавить CLI reports и exit-code mapping. Реализовать changes service, HTTP API, cache и invalidation. Реализовать Changes UI и интеграцию с document/task/screen pages. Обновить документацию, generated portals и выполнить все gates.",
+        "documentationImpact": "Добавляются module/use case/flow, architecture answer, YAML ADR, changes guide, HTTP/JSON contracts и diagnostics reference. Обновляются CLI, serve, task, OpenAPI, Screen Map, configuration, security, README и changelog. docs/modules/MOD-CHANGES.md ; docs/use-cases/UC-DOCS-05.md ; docs/flows/FLOW-DOCS-CHANGES.md ; docs/architecture/documentation-changes.md ; docs/architecture/overview.md ; docs/architecture/runtime-components.md ; docs/architecture/trust-boundaries.md ; docs/decisions/ADR-003.md ; docs/decisions/001-dependency-free.md ; docs/contracts/cli.md ; docs/contracts/changes-http.md ; docs/guides/documentation-changes.md ; docs/guides/work-items.md ; docs/guides/screens.md ; docs/reference/changes-report.md ; docs/reference/configuration.md ; docs/reference/features.md ; README.md ; CHANGELOG.md .",
+        "documentationPaths": [
+          "architecture/documentation-changes.md",
+          "architecture/overview.md",
+          "architecture/runtime-components.md",
+          "architecture/trust-boundaries.md",
+          "CHANGELOG.md",
+          "contracts/changes-http.md",
+          "contracts/cli.md",
+          "decisions/001-dependency-free.md",
+          "decisions/ADR-003.md",
+          "flows/FLOW-DOCS-CHANGES.md",
+          "guides/documentation-changes.md",
+          "guides/screens.md",
+          "guides/work-items.md",
+          "modules/MOD-CHANGES.md",
+          "README.md",
+          "reference/changes-report.md",
+          "reference/configuration.md",
+          "reference/features.md",
+          "use-cases/UC-DOCS-05.md"
+        ]
       },
       {
         "id": "TASK-CLI-001",

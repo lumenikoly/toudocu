@@ -65,7 +65,7 @@ func TestStaticSiteExcludesEditor(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, forbidden := range []string{"/_docgent/editor", "editor.js", "serve.js", "data-server-rebuild"} {
+	for _, forbidden := range []string{"/_docgent/editor", "/changes/", "editor.js", "changes.js", "serve.js", "data-server-rebuild"} {
 		if strings.Contains(string(page), forbidden) {
 			t.Fatalf("static page contains %q", forbidden)
 		}
@@ -77,7 +77,7 @@ func TestStaticSiteExcludesEditor(t *testing.T) {
 	if strings.Contains(string(app), "__docgent") || strings.Contains(string(app), "server-rebuild") {
 		t.Fatal("static app contains server-only rebuild code")
 	}
-	for _, asset := range []string{"editor.js", "codemirror.js", "serve.js"} {
+	for _, asset := range []string{"editor.js", "changes.js", "changes.css", "codemirror.js", "serve.js"} {
 		if _, err := os.Stat(filepath.Join(options.OutputDirectory, "assets", asset)); !os.IsNotExist(err) {
 			t.Fatalf("static output contains %s", asset)
 		}
@@ -90,7 +90,7 @@ func TestServeSiteIncludesEditor(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, expected := range []string{"/_docgent/editor/", "assets/serve.js", "data-server-rebuild", `meta name="docgent-revision" content="` + server.revision + `"`} {
+	for _, expected := range []string{"/_docgent/editor/", "/changes/", "assets/serve.js", "data-server-rebuild", `meta name="docgent-revision" content="` + server.revision + `"`} {
 		if !strings.Contains(string(page), expected) {
 			t.Fatalf("serve page missing %q", expected)
 		}
@@ -98,6 +98,10 @@ func TestServeSiteIncludesEditor(t *testing.T) {
 	response := performEditorRequest(server, editorRequest(http.MethodGet, editorUIPath, "", nil))
 	if response.Code != http.StatusOK || !strings.Contains(response.Body.String(), "data-editor-host") {
 		t.Fatalf("editor UI: status=%d body=%s", response.Code, response.Body.String())
+	}
+	changes := performEditorRequest(server, editorRequest(http.MethodGet, changesUIPath, "", nil))
+	if changes.Code != http.StatusOK || !strings.Contains(changes.Body.String(), "data-file-list") {
+		t.Fatalf("changes UI: status=%d body=%s", changes.Code, changes.Body.String())
 	}
 }
 
@@ -547,7 +551,7 @@ func TestEditorVendoredAssets(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, version := range []string{`"codemirror": "6.0.2"`, `"@codemirror/lang-markdown": "6.5.1"`, `"@codemirror/lang-json": "6.0.2"`, `"@codemirror/lang-yaml": "6.1.3"`, `"@codemirror/lint": "6.9.7"`} {
+	for _, version := range []string{`"codemirror": "6.0.2"`, `"@codemirror/lang-markdown": "6.5.1"`, `"@codemirror/lang-json": "6.0.2"`, `"@codemirror/lang-yaml": "6.1.3"`, `"@codemirror/lint": "6.9.7"`, `"@codemirror/merge": "6.12.2"`} {
 		if !strings.Contains(string(lock), version) {
 			t.Fatalf("lockfile missing %s", version)
 		}

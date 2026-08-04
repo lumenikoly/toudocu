@@ -656,6 +656,23 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	}
 }
 
+func TestServeScreenMapExposesChangesToggleOnlyInServe(t *testing.T) {
+	root, docs := createScreenFixture(t)
+	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	staticPage := renderScreenMapPage(model, "screens/index.html")
+	if strings.Contains(staticPage, "data-map-changes") {
+		t.Fatal("static screen map must not require Git changes API")
+	}
+	model.serveRevision = "test-revision"
+	servePage := renderScreenMapPage(model, "screens/index.html")
+	if !strings.Contains(servePage, "data-map-changes") || !strings.Contains(servePage, "Показать изменения") {
+		t.Fatal("serve screen map missing changes toggle")
+	}
+}
+
 func TestProcessesNavigationWithoutFlowsIsPlainLink(t *testing.T) {
 	root, docs := createScreenFixture(t)
 	if err := os.Remove(filepath.Join(docs, "flows", "FLOW-AUTH-LOGIN.md")); err != nil {

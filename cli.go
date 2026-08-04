@@ -2,6 +2,7 @@ package docgent
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -20,6 +21,8 @@ func PrintHelp(w io.Writer) {
   docgent [build] [каталог-документации] [параметры]
   docgent check [каталог-документации] [параметры]
   docgent serve [каталог-документации] [параметры]
+  docgent changes [каталог-документации] [--base REV] [--target working-tree|index|HEAD|REV]
+  docgent changes file PATH [каталог-документации] [параметры]
   docgent search "<запрос>" [каталог-документации] [--limit N] [--format text|json]
   docgent task init [каталог-документации] --area AREA --title TITLE --type TYPE [--lang en|ru]
   docgent scaffold module|use-case|flow|screen|decision|standard|runbook ID [каталог-документации] --title TITLE [--lang en|ru]
@@ -28,12 +31,14 @@ func PrintHelp(w io.Writer) {
   docgent task verify TASK-ID [каталог-документации] (--dry-run|--run) [параметры]
   docgent task archive TASK-ID [каталог-документации] [--format text|json]
   docgent task restore TASK-ID [каталог-документации] [--format text|json]
+  docgent task changes TASK-ID [каталог-документации] [параметры]
   docgent version
 
 Примеры:
   docgent build ./docs --output ./build/project-docs --clean
   docgent check ./docs --strict
   docgent serve ./docs --host 0.0.0.0 --port 8080
+  docgent changes ./docs --base main --target working-tree --format markdown
   docgent search "task workflow" ./docs --format json
   docgent task init ./docs --area CORE --title "Новая задача" --type Feature
   docgent task ready TASK-CORE-001 ./docs --format json
@@ -58,6 +63,13 @@ func PrintHelp(w io.Writer) {
       --host <адрес>           Адрес serve, по умолчанию 127.0.0.1
       --port <число>           Порт serve, по умолчанию 8080
       --format text|json       Формат машинных отчётов
+      --base <revision>        Base для changes, по умолчанию HEAD
+      --target <side>          Target для changes либо task verify
+      --branch-base <ref>      merge-base(ref, HEAD) как base
+      --status <status>        Фильтр changes по статусу
+      --module <ID>            Фильтр changes по модулю
+      --task <TASK-ID>         Task impact для changes
+      --permanent-only        Только постоянная документация
       --report <файл>          Сохранить JSON-отчёт task verify
       --timeout <duration>     Timeout каждой команды task verify, по умолчанию 10m
   -h, --help                   Справка
@@ -92,6 +104,16 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			}
 			options.Command, options.Query = "search", args[1]
 			args = args[2:]
+		case "changes":
+			options.Command = "changes"
+			args = args[1:]
+			if len(args) > 0 && args[0] == "file" {
+				if len(args) < 2 {
+					return options, false, false, fmt.Errorf("использование: docgent changes file PATH [каталог-документации]")
+				}
+				options.Command, options.ChangeFile = "changes-file", filepath.ToSlash(args[1])
+				args = args[2:]
+			}
 		case "scaffold":
 			if len(args) < 3 {
 				return options, false, false, fmt.Errorf("использование: docgent scaffold module|use-case|flow|screen|decision|standard|runbook ID [каталог-документации]")
@@ -115,7 +137,7 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 				options.Command = "task-init"
 				args = args[2:]
 				goto parseOptions
-			case "ready", "context", "verify", "archive", "restore":
+			case "ready", "context", "verify", "archive", "restore", "changes":
 				if len(args) < 3 {
 					return options, false, false, fmt.Errorf("для task %s требуется TASK-ID", args[1])
 				}
@@ -145,10 +167,18 @@ parseOptions:
 			if e != nil {
 				return options, false, false, e
 			}
-			options.OutputDirectory = v
+			if options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes" {
+				options.ChangeOutput = v
+			} else {
+				options.OutputDirectory = v
+			}
 			outputSpecified = true
 		case strings.HasPrefix(arg, "--output="):
-			options.OutputDirectory = strings.TrimPrefix(arg, "--output=")
+			if options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes" {
+				options.ChangeOutput = strings.TrimPrefix(arg, "--output=")
+			} else {
+				options.OutputDirectory = strings.TrimPrefix(arg, "--output=")
+			}
 			outputSpecified = true
 		case arg == "-t" || arg == "--title":
 			v, e := takeArgValue(args, &i, arg)
@@ -173,9 +203,59 @@ parseOptions:
 			if e != nil {
 				return options, false, false, e
 			}
-			options.TaskType = v
+			if options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes" {
+				options.ChangeEntityType = v
+			} else {
+				options.TaskType = v
+			}
 		case strings.HasPrefix(arg, "--type="):
-			options.TaskType = strings.TrimPrefix(arg, "--type=")
+			if options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes" {
+				options.ChangeEntityType = strings.TrimPrefix(arg, "--type=")
+			} else {
+				options.TaskType = strings.TrimPrefix(arg, "--type=")
+			}
+		case arg == "--base":
+			v, e := takeArgValue(args, &i, arg)
+			if e != nil {
+				return options, false, false, e
+			}
+			options.ChangeBase = v
+		case strings.HasPrefix(arg, "--base="):
+			options.ChangeBase = strings.TrimPrefix(arg, "--base=")
+		case arg == "--branch-base":
+			v, e := takeArgValue(args, &i, arg)
+			if e != nil {
+				return options, false, false, e
+			}
+			options.ChangeBranchBase = v
+		case strings.HasPrefix(arg, "--branch-base="):
+			options.ChangeBranchBase = strings.TrimPrefix(arg, "--branch-base=")
+		case arg == "--status":
+			v, e := takeArgValue(args, &i, arg)
+			if e != nil {
+				return options, false, false, e
+			}
+			options.ChangeStatus = v
+		case strings.HasPrefix(arg, "--status="):
+			options.ChangeStatus = strings.TrimPrefix(arg, "--status=")
+		case arg == "--module":
+			v, e := takeArgValue(args, &i, arg)
+			if e != nil {
+				return options, false, false, e
+			}
+			options.ChangeModule = v
+		case strings.HasPrefix(arg, "--module="):
+			options.ChangeModule = strings.TrimPrefix(arg, "--module=")
+		case arg == "--task":
+			v, e := takeArgValue(args, &i, arg)
+			if e != nil {
+				return options, false, false, e
+			}
+			options.ChangeTaskID = v
+		case strings.HasPrefix(arg, "--task="):
+			options.ChangeTaskID = strings.TrimPrefix(arg, "--task=")
+		case arg == "--permanent-only":
+			options.ChangePermanentOnly = true
 		case arg == "--lang":
 			v, e := takeArgValue(args, &i, arg)
 			if e != nil {
@@ -219,9 +299,17 @@ parseOptions:
 			if e != nil {
 				return options, false, false, e
 			}
-			options.Target = strings.ToUpper(v)
+			if options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes" {
+				options.ChangeTarget = v
+			} else {
+				options.Target = strings.ToUpper(v)
+			}
 		case strings.HasPrefix(arg, "--target="):
-			options.Target = strings.ToUpper(strings.TrimPrefix(arg, "--target="))
+			if options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes" {
+				options.ChangeTarget = strings.TrimPrefix(arg, "--target=")
+			} else {
+				options.Target = strings.ToUpper(strings.TrimPrefix(arg, "--target="))
+			}
 		case arg == "--exclude":
 			v, e := takeArgValue(args, &i, arg)
 			if e != nil {
@@ -391,8 +479,8 @@ parseOptions:
 	if strings.TrimSpace(options.RepositoryRef) == "" {
 		return options, false, false, fmt.Errorf("--repository-ref не может быть пустым")
 	}
-	if options.Format != "text" && options.Format != "json" {
-		return options, false, false, fmt.Errorf("--format должен быть text или json")
+	if options.Format != "text" && options.Format != "json" && !((options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes") && options.Format == "markdown") {
+		return options, false, false, fmt.Errorf("--format должен быть text, json или markdown для changes")
 	}
 	if strings.TrimSpace(options.Host) == "" {
 		return options, false, false, fmt.Errorf("--host не может быть пустым")
@@ -403,7 +491,7 @@ parseOptions:
 	if screenMapOption != "" && options.Command != "build" && options.Command != "serve" {
 		return options, false, false, fmt.Errorf("--screen-map и --no-screen-map доступны только для build и serve")
 	}
-	if options.Command == "task-ready" || options.Command == "task-context" || options.Command == "task-verify" ||
+	if options.Command == "task-ready" || options.Command == "task-context" || options.Command == "task-verify" || options.Command == "task-changes" ||
 		options.Command == "task-archive" || options.Command == "task-restore" {
 		if !taskIDRE.MatchString(options.TaskID) {
 			return options, false, false, fmt.Errorf("идентификатор рабочего элемента должен иметь формат TASK-AREA-NNN или BUG-AREA-NNN")
@@ -478,7 +566,7 @@ parseOptions:
 	if titleSpecified && options.Command != "build" && options.Command != "serve" && options.Command != "task-init" && options.Command != "scaffold" {
 		return options, false, false, fmt.Errorf("--title недоступен для этой команды")
 	}
-	if outputSpecified && options.Command != "build" && options.Command != "serve" {
+	if outputSpecified && options.Command != "build" && options.Command != "serve" && options.Command != "changes" && options.Command != "changes-file" && options.Command != "task-changes" {
 		return options, false, false, fmt.Errorf("--output доступен только для build и serve")
 	}
 	if (options.Clean || options.Open) && options.Command != "build" && options.Command != "serve" {
@@ -486,6 +574,21 @@ parseOptions:
 	}
 	if options.Strict && options.Command != "build" && options.Command != "check" && options.Command != "serve" && options.Command != "task-ready" {
 		return options, false, false, fmt.Errorf("--strict недоступен для этой команды")
+	}
+	if options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes" {
+		if options.ChangeBranchBase != "" && options.ChangeBase != "" {
+			return options, false, false, fmt.Errorf("--base и --branch-base нельзя использовать вместе")
+		}
+		if options.ChangeOutput != "" {
+			absolute, err := filepath.Abs(options.ChangeOutput)
+			if err != nil {
+				return options, false, false, err
+			}
+			options.ChangeOutput = absolute
+		}
+		if options.Command == "task-changes" {
+			options.ChangeTaskID = options.TaskID
+		}
 	}
 	return options, help, version, nil
 }
@@ -533,6 +636,9 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	options, help, version, err := ParseArguments(argv)
 	if err != nil {
 		fmt.Fprintln(stderr, "Ошибка:", err)
+		if len(argv) > 0 && (argv[0] == "changes" || (argv[0] == "task" && len(argv) > 1 && argv[1] == "changes")) {
+			return 2
+		}
 		return 1
 	}
 	if help {
@@ -575,6 +681,35 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 		if err := serveDocumentation(options, stdout, stderr); err != nil {
 			fmt.Fprintln(stderr, "Ошибка:", err)
 			return 1
+		}
+		return 0
+	}
+	if options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes" {
+		report, err := BuildDocumentationChanges(options)
+		if err != nil {
+			fmt.Fprintln(stderr, "Ошибка:", err)
+			var failure *changeFailure
+			if errors.As(err, &failure) {
+				return failure.Code
+			}
+			return 4
+		}
+		filterDocumentationChanges(report, options)
+		if err := outputChangesReport(options, report, stdout); err != nil {
+			fmt.Fprintln(stderr, "Ошибка:", err)
+			return 4
+		}
+		for _, diagnostic := range report.Diagnostics {
+			if diagnostic.Severity == "error" {
+				return 1
+			}
+		}
+		if report.TaskImpact != nil {
+			for _, diagnostic := range report.TaskImpact.Diagnostics {
+				if diagnostic.Severity == "error" {
+					return 1
+				}
+			}
 		}
 		return 0
 	}

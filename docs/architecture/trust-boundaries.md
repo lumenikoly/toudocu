@@ -44,6 +44,13 @@ browser context, не выдаёт CORS и ограничивает body/content
 
 ## Граница исполнения
 
+Documentation Changes запускает установленный `git` напрямую argument array с
+`--no-ext-diff`, `--no-textconv`, `--no-color` и NUL-separated path output.
+Hooks, shell, fetch, checkout и изменение index не выполняются. Revision
+валидируется, blob читается из object database, HTTP path должен совпасть с
+элементом change set внутри documentation roots. Старый Markdown проходит ту
+же sanitization policy и не получает editor или network privileges.
+
 Обычные `check`, `build`, `serve`, editor API, `search`, readiness и context не запускают
 команды из Markdown. Исполнение появляется только в `task verify --run` после
 task-local validation gate; правила разрешения описаны в

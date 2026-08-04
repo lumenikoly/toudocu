@@ -258,6 +258,18 @@ screen позволяет начать заново, открыть карту �
 
 ## Основные команды
 
+```bash
+docgent changes ./docs
+docgent changes ./docs --base main --target working-tree --format json
+docgent changes ./docs --branch-base main --format markdown
+docgent task changes TASK-ID ./docs --format json
+```
+
+`serve` добавляет read-only раздел `/changes/`. Git остаётся источником версий;
+Docgent не выполняет fetch, add, commit, checkout или другие изменения
+репозитория. Source, rendered и deterministic semantic diff описаны в
+[руководстве](docs/guides/documentation-changes.md).
+
 Проверить документацию, не создавая сайт:
 
 ```bash

@@ -21,6 +21,18 @@ type HeroConfig struct {
 	Image   string
 }
 
+type ChangesConfig struct {
+	DefaultBaseRef       string
+	RenameSimilarity     int
+	IncludeTaskArtifacts bool
+	IncludeAssets        bool
+	SemanticDiff         bool
+	RenderedDiff         bool
+	MaxSourceDiffBytes   int
+	MaxRenderedFileBytes int
+	Exclude              []string
+}
+
 // SiteConfig configures the generated portal's built-in appearance and branding.
 type SiteConfig struct {
 	Title        string
@@ -33,6 +45,7 @@ type SiteConfig struct {
 	ContentWidth string
 	Footer       FooterConfig
 	Hero         HeroConfig
+	Changes      ChangesConfig
 }
 
 func defaultSiteConfig() SiteConfig {
@@ -45,7 +58,8 @@ func defaultSiteConfig() SiteConfig {
 		Footer: FooterConfig{
 			Text: "Сгенерировано Docgent " + Version,
 		},
-		Hero: HeroConfig{Enabled: true},
+		Hero:    HeroConfig{Enabled: true},
+		Changes: ChangesConfig{RenameSimilarity: 60, IncludeTaskArtifacts: true, IncludeAssets: true, SemanticDiff: true, RenderedDiff: true, MaxSourceDiffBytes: 2 * 1024 * 1024, MaxRenderedFileBytes: 1024 * 1024},
 	}
 }
 
@@ -111,6 +125,7 @@ func parseConfigScalar(raw string, line int) (string, bool, error) {
 func parseSiteConfig(data []byte) (SiteConfig, error) {
 	config := defaultSiteConfig()
 	values := map[string]configScalar{}
+	changeExcludes := []string{}
 	stack := []string{}
 	for index, rawLine := range strings.Split(strings.ReplaceAll(string(data), "\r\n", "\n"), "\n") {
 		line := index + 1
@@ -129,6 +144,14 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 			return config, fmt.Errorf("config.yml:%d: неверная вложенность", line)
 		}
 		text := strings.TrimSpace(rawLine)
+		if strings.HasPrefix(text, "- ") && strings.Join(stack, ".") == "changes.exclude" {
+			value, _, err := parseConfigScalar(strings.TrimSpace(strings.TrimPrefix(text, "- ")), line)
+			if err != nil || value == "" {
+				return config, fmt.Errorf("config.yml:%d: неверный changes.exclude", line)
+			}
+			changeExcludes = append(changeExcludes, value)
+			continue
+		}
 		colon := strings.IndexByte(text, ':')
 		if colon <= 0 {
 			return config, fmt.Errorf("config.yml:%d: ожидался ключ и двоеточие", line)
@@ -158,11 +181,14 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 		values[path] = configScalar{value: value, line: line, quoted: quoted}
 	}
 
-	allowedMaps := map[string]bool{"site": true, "site.footer": true, "site.hero": true}
+	allowedMaps := map[string]bool{"site": true, "site.footer": true, "site.hero": true, "changes": true, "changes.exclude": true}
 	allowedScalars := map[string]bool{
 		"site.title": true, "site.logo": true, "site.favicon": true, "site.theme": true,
 		"site.colorScheme": true, "site.accent": true, "site.density": true, "site.contentWidth": true,
 		"site.footer.text": true, "site.footer.url": true, "site.hero.enabled": true, "site.hero.image": true,
+		"changes.defaultBaseRef": true, "changes.renameSimilarity": true, "changes.includeTaskArtifacts": true,
+		"changes.includeAssets": true, "changes.semanticDiff": true, "changes.renderedDiff": true,
+		"changes.maxSourceDiffBytes": true, "changes.maxRenderedFileBytes": true,
 	}
 	for key, scalar := range values {
 		if scalar.value == "" && allowedMaps[key] {
@@ -171,7 +197,8 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 		if !allowedScalars[key] {
 			return config, fmt.Errorf("config.yml:%d: неизвестный ключ %q", scalar.line, key)
 		}
-		if key != "site.hero.enabled" && !scalar.quoted && (scalar.value == "true" || scalar.value == "false") {
+		isBoolean := key == "site.hero.enabled" || strings.HasPrefix(key, "changes.include") || key == "changes.semanticDiff" || key == "changes.renderedDiff"
+		if !isBoolean && !scalar.quoted && (scalar.value == "true" || scalar.value == "false") {
 			return config, fmt.Errorf("config.yml:%d: %s должен быть строкой", scalar.line, key)
 		}
 		switch key {
@@ -202,9 +229,48 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 				return config, fmt.Errorf("config.yml:%d: site.hero.enabled должен быть boolean", scalar.line)
 			}
 			config.Hero.Enabled = scalar.value == "true"
+		case "changes.defaultBaseRef":
+			config.Changes.DefaultBaseRef = scalar.value
+		case "changes.renameSimilarity":
+			value, err := strconv.Atoi(scalar.value)
+			if err != nil || value < 1 || value > 100 {
+				return config, fmt.Errorf("config.yml:%d: changes.renameSimilarity должен быть от 1 до 100", scalar.line)
+			}
+			config.Changes.RenameSimilarity = value
+		case "changes.maxSourceDiffBytes":
+			value, err := strconv.Atoi(scalar.value)
+			if err != nil || value < 1 {
+				return config, fmt.Errorf("config.yml:%d: changes.maxSourceDiffBytes должен быть положительным", scalar.line)
+			}
+			config.Changes.MaxSourceDiffBytes = value
+		case "changes.maxRenderedFileBytes":
+			value, err := strconv.Atoi(scalar.value)
+			if err != nil || value < 1 {
+				return config, fmt.Errorf("config.yml:%d: changes.maxRenderedFileBytes должен быть положительным", scalar.line)
+			}
+			config.Changes.MaxRenderedFileBytes = value
+		case "changes.includeTaskArtifacts", "changes.includeAssets", "changes.semanticDiff", "changes.renderedDiff":
+			if scalar.quoted || scalar.value != "true" && scalar.value != "false" {
+				return config, fmt.Errorf("config.yml:%d: %s должен быть boolean", scalar.line, key)
+			}
+			value := scalar.value == "true"
+			switch key {
+			case "changes.includeTaskArtifacts":
+				config.Changes.IncludeTaskArtifacts = value
+			case "changes.includeAssets":
+				config.Changes.IncludeAssets = value
+			case "changes.semanticDiff":
+				config.Changes.SemanticDiff = value
+			case "changes.renderedDiff":
+				config.Changes.RenderedDiff = value
+			}
 		}
 	}
+	config.Changes.Exclude = changeExcludes
 	if _, ok := values["site"]; !ok {
+		if _, changesOnly := values["changes"]; changesOnly {
+			return config, validateSiteConfig(config)
+		}
 		return config, fmt.Errorf("config.yml: отсутствует корневая карта site")
 	}
 	return config, validateSiteConfig(config)

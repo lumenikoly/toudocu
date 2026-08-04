@@ -6,6 +6,11 @@
 
 ## CLI
 
+- Git-backed `changes`, `changes file` и `task changes` для working tree,
+  index, revisions и branch merge-base; text, JSON и Markdown reports.
+- В `serve`: unified/CodeMirror merge/rendered/semantic diff, OpenAPI,
+  Mermaid, assets, screen-map overlay и task impact.
+
 Docgent поставляется одним Go-бинарником без внешних runtime-зависимостей.
 
 | Возможность | Команда | Результат |

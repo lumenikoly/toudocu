@@ -15,6 +15,13 @@ Runtime образует последовательный конвейер: CLI 
 
 ## Компоненты
 
+`GitChangeSource` разрешает commits/index/working tree и читает status, patches
+и blobs. `ChangeSetBuilder` объединяет Git metadata с parser/knowledge model;
+source, rendered, semantic, OpenAPI и task engines деградируют независимо.
+`ChangesHTTPHandler` отдаёт read-only views, а UI опрашивает digest и сохраняет
+URL state при invalidation. Компоненты активны для `changes` и `serve`;
+статический `build` от Git не зависит.
+
 | Граница | Ответственность | Источник подробностей |
 |---|---|---|
 | CLI | Разобрать команду, нормализовать пути и выбрать операцию | [MOD-CLI](../modules/cli.md) |

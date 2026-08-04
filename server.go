@@ -17,15 +17,16 @@ import (
 const rebuildEndpoint = "/__docgent/rebuild"
 
 type documentationServer struct {
-	options     Options
-	fileHandler http.Handler
-	stderr      io.Writer
-	mu          sync.Mutex
-	workspace   *editorWorkspace
-	model       *Model
-	result      GenerateResult
-	revision    string
-	overwrites  map[string]string
+	options      Options
+	fileHandler  http.Handler
+	stderr       io.Writer
+	mu           sync.Mutex
+	workspace    *editorWorkspace
+	model        *Model
+	result       GenerateResult
+	revision     string
+	overwrites   map[string]string
+	changesCache map[string]*ChangeSetReport
 }
 
 func newDocumentationServer(options Options, stderr io.Writer) (*documentationServer, *Model, GenerateResult, error) {
@@ -34,11 +35,12 @@ func newDocumentationServer(options Options, stderr io.Writer) (*documentationSe
 		return nil, nil, GenerateResult{}, err
 	}
 	server := &documentationServer{
-		options:     options,
-		fileHandler: http.FileServer(http.Dir(options.OutputDirectory)),
-		stderr:      stderr,
-		workspace:   workspace,
-		overwrites:  map[string]string{},
+		options:      options,
+		fileHandler:  http.FileServer(http.Dir(options.OutputDirectory)),
+		stderr:       stderr,
+		workspace:    workspace,
+		overwrites:   map[string]string{},
+		changesCache: map[string]*ChangeSetReport{},
 	}
 	model, result, err := server.rebuild()
 	if err != nil {
@@ -64,6 +66,7 @@ func (s *documentationServer) rebuild() (*Model, GenerateResult, error) {
 	s.model = model
 	s.result = result
 	s.revision = revision
+	s.changesCache = map[string]*ChangeSetReport{}
 	return model, result, nil
 }
 
@@ -77,6 +80,14 @@ func (s *documentationServer) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	defer s.mu.Unlock()
 	if strings.HasPrefix(r.URL.Path, editorAPIBase+"/") {
 		s.serveEditorAPI(w, r)
+		return
+	}
+	if r.URL.Path == changesAPIBase || strings.HasPrefix(r.URL.Path, changesAPIBase+"/") {
+		s.serveChangesAPI(w, r)
+		return
+	}
+	if r.URL.Path == changesUIPath || r.URL.Path == strings.TrimSuffix(changesUIPath, "/") {
+		s.serveChangesUI(w, r)
 		return
 	}
 	if r.URL.Path == editorUIPath || r.URL.Path == strings.TrimSuffix(editorUIPath, "/") {

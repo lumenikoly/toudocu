@@ -51,6 +51,17 @@
 .screen-node { position: absolute; width: 278px; min-height: 248px; margin: 0; overflow: hidden; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); box-shadow: 0 3px 8px rgb(15 23 42 / .08); cursor: pointer; transition: border-color 140ms ease, box-shadow 140ms ease, opacity 140ms ease; }
 .screen-node:hover, .screen-node:focus-visible { border-color: var(--accent); box-shadow: 0 5px 8px rgb(15 23 42 / .14); outline: none; }
 .screen-node.is-selected { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent), 0 5px 8px rgb(15 23 42 / .14); }
+.screen-node.is-change-added { border-color: color-mix(in srgb, #16803a 66%, var(--border)); box-shadow: inset 0 3px 0 #16803a; }
+.screen-node.is-change-modified { border-color: color-mix(in srgb, #a86600 66%, var(--border)); box-shadow: inset 0 3px 0 #a86600; }
+.screen-node.is-change-removed { border-style: dashed; border-color: color-mix(in srgb, #bd3131 66%, var(--border)); box-shadow: inset 0 3px 0 #bd3131; opacity: .84; }
+.screen-node[data-change-status]::after { content: attr(data-change-status); position: absolute; top: 8px; right: 8px; padding: 3px 6px; border-radius: 5px; background: var(--surface); border: 1px solid currentColor; color: var(--muted); font-size: 10px; font-weight: 700; }
+.screen-edge.is-change-added path { stroke: #16803a; stroke-width: 2.5; opacity: 1; }
+.screen-edge.is-change-modified path { stroke: #a86600; stroke-width: 2.5; opacity: 1; }
+.screen-edge.is-change-removed path { stroke: #bd3131; stroke-width: 2.5; stroke-dasharray: 6 5; opacity: 1; }
+.screen-change-notice { margin: 14px 0; padding: 8px 10px; border-top: 2px solid var(--muted); background: var(--surface-soft); font-size: 13px; }
+.screen-change-notice.is-added { border-color: #16803a; }
+.screen-change-notice.is-modified { border-color: #a86600; }
+.screen-change-notice.is-removed { border-color: #bd3131; }
 .screen-node[hidden] { display: none; }
 .screen-node-preview, .screen-preview-placeholder { width: 100%; height: 128px; object-fit: cover; border-bottom: 1px solid var(--border); background: var(--surface-soft); }
 .screen-preview-placeholder { display: grid; place-content: center; gap: 4px; text-align: center; color: var(--muted); }

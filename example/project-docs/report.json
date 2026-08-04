@@ -4,9 +4,9 @@
     "name": "Docgent",
     "version": "1.1.0-go"
   },
-  "generatedAt": "2026-07-31T19:34:18.886072583Z",
+  "generatedAt": "2026-08-01T08:35:03.090794106Z",
   "sourceDirectory": "docs",
-  "staleDays": 0,
+  "staleDays": 90,
   "project": {
     "title": "Service Desk Showcase",
     "description": "Демонстрационный проект показывает возможности Docgent на документации небольшого сервиса обращений: от модели требований и задач до интерактивной карты экранов и проигрываемых сценариев.",

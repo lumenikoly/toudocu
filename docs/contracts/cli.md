@@ -15,6 +15,8 @@ Docgent.
 | `check` | отсутствуют | diagnostics или `ProjectReport` |
 | `build` | записывает output, при `--clean` безопасно очищает его | автономный портал и `report.json` |
 | `serve` | собирает output, запускает HTTP и по явному browser save изменяет workspace | editor API, watcher и live rebuild |
+| `changes` | отсутствуют; только read-only Git | text, Markdown или `ChangeSetReport` v1 |
+| `changes file` | отсутствуют | detail одного изменённого path |
 | `search` | отсутствуют | `SearchReport` по свежим Markdown |
 | `task init` | атомарно создаёт новый `TASK-*` или `BUG-*` по типу | `TaskInitReport` |
 | `scaffold` | атомарно создаёт выбранную сущность | `ScaffoldReport` |
@@ -24,6 +26,7 @@ Docgent.
 | `task verify --run` | исполняет доверенные команды задачи | `TaskVerifyReport` |
 | `task archive` | без перезаписи перемещает один терминальный work item в `work/archive/YYYY/` | `TaskMoveReport` |
 | `task restore` | без перезаписи возвращает один архивный work item в `work/` | `TaskMoveReport` |
+| `task changes` | отсутствуют | task-specific report и impact diagnostics |
 | `version` | отсутствуют | версия генератора |
 
 Вызов `docgent ./docs ...` эквивалентен `docgent build ./docs ...`.
@@ -41,6 +44,9 @@ docgent task context TASK-ID [docs-dir] [--format text|json]
 docgent task verify TASK-ID [docs-dir] (--dry-run|--run) [--target TARGET] [--report FILE] [--timeout DURATION] [--format text|json]
 docgent task archive TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]
 docgent task restore TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]
+docgent changes [docs-dir] [--base REV|--branch-base REF] [--target working-tree|index|HEAD|REV] [--format text|json|markdown]
+docgent changes file PATH [docs-dir] [параметры changes]
+docgent task changes TASK-ID [docs-dir] [параметры changes]
 ```
 
 В каталоге документации глобально ожидаются `index.md` и
@@ -74,6 +80,12 @@ errors. `status.md`, `roadmap.md` и остальные типизированн
     --format text|json
     --report <file>
     --timeout <duration>
+    --base <revision>
+    --branch-base <ref>
+    --status <status>
+    --module <MOD-ID>
+    --task <TASK-ID>
+    --permanent-only
 ```
 
 `--host` и `--port` разрешены только для `serve`; значения по умолчанию —
@@ -95,6 +107,11 @@ same-origin guards не являются сетевой аутентификац
 `--report` и `--timeout` разрешены только для `task verify`.
 `task verify --run` разрешён только для статусов Ready, In Progress, Blocked и
 Done; безопасный `--dry-run` также можно использовать для полного Draft.
+
+Changes parameters, JSON/Markdown contract и Git security описаны в
+[руководстве](../guides/documentation-changes.md). Exit codes changes: `0` —
+нет blocking diagnostics, `1` — отчёт построен с error, `2` — arguments или
+revision, `3` — Git/repository недоступен, `4` — внутренняя ошибка.
 
 `--screen-map` и `--no-screen-map` разрешены для `build` и `serve`. Карта
 генерируется по умолчанию при наличии `screens/SC-*.md`; `--no-screen-map`
@@ -195,3 +212,6 @@ optional `archiveYear` и issues. Команды перемещения не р�
 
 Все публичные отчёты используют schema v1. Контракт развивается напрямую без
 legacy-слоя, преобразователей и параллельной выдачи нескольких версий схемы.
+
+`ChangeSetReport` имеет независимую schema v1 и не добавляется в обычный
+`ProjectReport`; поля определены в [JSON reference](../reference/changes-report.md).

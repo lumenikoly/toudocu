@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Добавлены `docgent changes`, `changes file` и `task changes` с Git-backed
+  commit/index/working-tree snapshots, schema-v1 JSON, text/Markdown reports,
+  filters, task impact и exit codes 0–4.
+- `serve` получил `/changes/`, read-only HTTP API, ETag digest polling,
+  unified/CodeMirror merge/rendered/semantic views, OpenAPI compatibility,
+  Mermaid, assets и screen-map overlays. Static `build` не зависит от Git.
+- OpenAPI YAML использует `go.yaml.in/yaml/v3@v3.0.5`, а serve-only merge view
+  — `@codemirror/merge@6.12.2`.
 - `serve` получил live editor workspace с safe source tree, CodeMirror,
   Markdown preview, diagnostics, typed create, SHA-256 CAS save, external-change
   watcher и ETag polling; save/create синхронно обновляют модель, HTML и поиск.

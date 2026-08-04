@@ -118,6 +118,27 @@ Markdown.
 
 ## Local server и editor workspace
 
+## Documentation Changes
+
+```yaml
+changes:
+  defaultBaseRef: main
+  renameSimilarity: 60
+  includeTaskArtifacts: true
+  includeAssets: true
+  semanticDiff: true
+  renderedDiff: true
+  maxSourceDiffBytes: 2097152
+  maxRenderedFileBytes: 1048576
+  exclude:
+    - docs/generated/**
+    - docs/cache/**
+```
+
+Секция необязательна; стандартный режим остаётся `HEAD → working-tree`.
+`defaultBaseRef` используется только без явного base и не загружается с
+remote. Лимит отключает тяжёлое представление одного файла, не весь change set.
+
 `serve` по умолчанию использует `127.0.0.1:8080`. `--host` и `--port`
 принимаются только этой командой. Адрес `0.0.0.0` разрешает доступ из локальной
 сети, но сервер не предоставляет TLS или авторизацию и выводит предупреждение.
