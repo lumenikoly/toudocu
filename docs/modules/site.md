@@ -3,7 +3,7 @@
 - Идентификатор: MOD-SITE
 - Статус: Готово
 - Владелец: Команда Docu-docu
-- Последнее обновление: 2026-08-03
+- Последнее обновление: 2026-08-04
 
 Модуль формирует автономные HTML-страницы, навигацию, поиск и типизированный
 `report.json` из готовой проектной модели.
@@ -52,7 +52,7 @@ Markdown. Только явный режим `serve` предоставляет 
 ### BR-SITE-004: Mermaid работает автономно и в строгом режиме
 
 Закреплённый classic bundle Mermaid Tiny копируется из `go:embed`, загружается
-только на страницах с диаграммами и запускается с `securityLevel: strict`.
+только при приближении диаграммы к viewport и запускается с `securityLevel: strict`.
 Ошибка синтаксиса не ломает страницу: портал показывает сообщение и исходный
 код диаграммы.
 
@@ -112,6 +112,21 @@ editor, changes API, rebuild controls, source paths или canonical workspace.
 `build`, `file://` и `serve` непосредственно на translation root остаются
 одноязычными.
 
+### BR-SITE-010: Мягкая навигация ограничена canonical serve portal
+
+Только canonical portal режима `serve` перехватывает обычные same-origin
+переходы между HTML-документами. Он заранее загружает до восьми последних
+страниц после pointer hover или keyboard focus, проверяет workspace revision и
+заменяет документную оболочку без rebuild. Back/Forward, anchors, восстановление
+scroll и фокус main сохраняют браузерную семантику. Editor, changes, API,
+locale, external и специальные переходы всегда остаются полной навигацией;
+ошибка сети, неподходящий HTML или новая revision также приводят к полной
+загрузке.
+
+Поисковый индекс загружается только при первом обращении к поиску и сохраняется
+в памяти между мягкими переходами. Mermaid bundle загружается при приближении
+первой диаграммы и повторно используется до полной загрузки страницы.
+
 ## Инварианты
 
 - исходный `index.md` отображается dashboard, а не дублирующей страницей;
@@ -135,6 +150,13 @@ editor, changes API, rebuild controls, source paths или canonical workspace.
   diagnostics и workspace revision синхронно;
 - обычный HTTP request не запускает rebuild; watcher публикует snapshot только
   после успешной сборки, а locale rebuild не меняет canonical editor или changes state;
+- мягкий переход в canonical `serve` не запускает rebuild и принимает HTML
+  только с текущей workspace revision; watcher и ручная пересборка завершаются
+  полной перезагрузкой, которая синхронизирует runtime и snapshot;
+- обычная страница не загружает поисковый индекс или Mermaid до обращения к
+  поиску либо приближения диаграммы к viewport;
+- Screen Map и playable flow повторно инициализируются для нового layout; при
+  замене DOM предыдущий page lifecycle отменяет listeners и observers;
 - конфликт служебного output получает отдельный безопасный путь;
 - `ProjectReport` и HTML строятся из одной модели;
 - сгенерированные файлы не становятся источником истины.

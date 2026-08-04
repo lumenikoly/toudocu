@@ -4,9 +4,9 @@
     "name": "Docu-docu",
     "version": "0.0.1"
   },
-  "generatedAt": "2026-08-04T20:14:41.302466285Z",
+  "generatedAt": "2026-08-04T21:02:06.528740071Z",
   "sourceDirectory": "docs",
-  "staleDays": 0,
+  "staleDays": 90,
   "project": {
     "title": "Docu-docu",
     "description": "Docu-docu — dependency-free CLI на Go с публичным Go-фасадом для проверяемой проектной документации в структурированном Markdown и автономного HTML-портала, работающего через file:// .",
@@ -1287,7 +1287,7 @@
       "metadata": {
         "id": "FLOW-DOCS-SERVE",
         "module": "MOD-SITE",
-        "updated": "2026-07-31",
+        "updated": "2026-08-04",
         "useCase": "UC-DOCS-03"
       },
       "status": {
@@ -1302,7 +1302,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T00:00:00Z",
+      "updatedAt": "2026-08-04T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2101,7 +2101,7 @@
         "id": "MOD-SITE",
         "owner": "Команда Docu-docu",
         "status": "Готово",
-        "updated": "2026-08-03"
+        "updated": "2026-08-04"
       },
       "status": {
         "kind": "done",
@@ -2115,7 +2115,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T00:00:00Z",
+      "updatedAt": "2026-08-04T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2804,7 +2804,7 @@
         "module": "MOD-SITE",
         "priority": "Средний",
         "status": "Готово",
-        "updated": "2026-08-03"
+        "updated": "2026-08-04"
       },
       "status": {
         "kind": "done",
@@ -2818,7 +2818,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T00:00:00Z",
+      "updatedAt": "2026-08-04T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2838,6 +2838,14 @@
           "targetKind": "document",
           "target": "modules/site.md",
           "href": "../modules/site.html#br-site-007-build-и-serve-имеют-разные-возможности"
+        },
+        {
+          "destination": "../modules/site.md#br-site-010-мягкая-навигация-ограничена-canonical-serve-portal",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/site.md",
+          "href": "../modules/site.html#br-site-010-мягкая-навигация-ограничена-canonical-serve-portal"
         },
         {
           "destination": "../flows/FLOW-DOCS-SERVE.md",
@@ -4172,7 +4180,8 @@
           "BR-SITE-006",
           "BR-SITE-007",
           "BR-SITE-008",
-          "BR-SITE-009"
+          "BR-SITE-009",
+          "BR-SITE-010"
         ]
       }
     ],
@@ -4265,7 +4274,8 @@
         "repositoryPaths": [],
         "businessRuleIds": [
           "BR-SITE-003",
-          "BR-SITE-007"
+          "BR-SITE-007",
+          "BR-SITE-010"
         ],
         "flowIds": [
           "FLOW-DOCS-SERVE"
@@ -4661,6 +4671,14 @@
         "document": "modules/site.md",
         "anchor": "br-site-009-locale-portals-изолированы-от-canonical-workspace",
         "line": 104
+      },
+      {
+        "id": "BR-SITE-010",
+        "title": "Мягкая навигация ограничена canonical serve portal",
+        "moduleId": "MOD-SITE",
+        "document": "modules/site.md",
+        "anchor": "br-site-010-мягкая-навигация-ограничена-canonical-serve-portal",
+        "line": 115
       }
     ],
     "workItems": [

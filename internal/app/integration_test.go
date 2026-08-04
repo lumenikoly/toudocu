@@ -996,7 +996,7 @@ func TestGenerateMermaidSiteAssetsAndMarkup(t *testing.T) {
 		t.Fatal(err)
 	}
 	html := string(htmlBytes)
-	for _, part := range []string{`data-mermaid-diagram`, `class="mermaid-source"`, `../assets/mermaid.tiny.js`, "Показать исходный код"} {
+	for _, part := range []string{`data-mermaid-diagram`, `class="mermaid-source"`, `../assets/app.js`, "Показать исходный код"} {
 		if !strings.Contains(html, part) {
 			t.Fatalf("Mermaid page missing %q: %s", part, html)
 		}
@@ -1007,12 +1007,38 @@ func TestGenerateMermaidSiteAssetsAndMarkup(t *testing.T) {
 	if strings.Contains(html, `type="module"`) || strings.Contains(html, "cdn.") {
 		t.Fatalf("Mermaid page must be file:// compatible and offline: %s", html)
 	}
-	if strings.Index(html, "assets/mermaid.tiny.js") > strings.Index(html, "assets/app.js") {
-		t.Fatal("Mermaid bundle must execute before app.js")
+	if strings.Contains(html, "assets/mermaid.tiny.js") {
+		t.Fatal("Mermaid bundle must be loaded lazily by app.js")
 	}
 	indexBytes, _ := os.ReadFile(filepath.Join(output, "index.html"))
 	if strings.Contains(string(indexBytes), "assets/mermaid.tiny.js") {
 		t.Fatal("pages without diagrams must not load Mermaid")
+	}
+}
+
+func TestPortalHeavyAssetsAreLazy(t *testing.T) {
+	_, docs, output := createFixture(t)
+	model := buildFixture(t, docs)
+	if _, err := GenerateSite(model, Options{OutputDirectory: output}); err != nil {
+		t.Fatal(err)
+	}
+	page, err := os.ReadFile(filepath.Join(output, "index.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, eager := range []string{"assets/search-index.js", "assets/mermaid.tiny.js", "assets/screen-map.js", "assets/playable-flow.js"} {
+		if strings.Contains(string(page), eager) {
+			t.Fatalf("ordinary page eagerly loads %s", eager)
+		}
+	}
+	app, err := os.ReadFile(filepath.Join(output, "assets", "app.js"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, lazy := range []string{"loadScript('search-index.js')", "loadScript('mermaid.tiny.js')", "loadScript('screen-map.js')", "loadScript('playable-flow.js')"} {
+		if !strings.Contains(string(app), lazy) {
+			t.Fatalf("app.js missing lazy loader %q", lazy)
+		}
 	}
 }
 

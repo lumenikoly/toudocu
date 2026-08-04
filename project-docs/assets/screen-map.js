@@ -1,8 +1,12 @@
-(() => {
+window.DocuDocuInitializeScreenMap = (scope, signal) => {
   'use strict';
 
-  const workspace = document.querySelector('[data-screen-map]');
+  scope = scope || document;
+
+  const workspace = scope.querySelector('[data-screen-map]');
   if (!workspace) return;
+  if (workspace.dataset.pageInitialized === 'true') return;
+  workspace.dataset.pageInitialized = 'true';
   const data = JSON.parse(workspace.querySelector('[data-screen-map-data]')?.textContent || '{}');
   const screens = data.screens || [];
   const transitions = data.transitions || [];
@@ -915,7 +919,7 @@
     if (event.target?.contains(workspace)) {
       window.requestAnimationFrame(() => render({ fit: true }));
     }
-  });
+  }, signal ? { signal } : undefined);
 
   if (initialUseCase && useCaseSelect) {
     useCaseSelect.value = initialUseCase;
@@ -933,4 +937,4 @@
   }
   render({ fit: true });
   if (hash.get('screen')) selectScreen(hash.get('screen'));
-})();
+};
