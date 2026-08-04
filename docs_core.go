@@ -502,6 +502,7 @@ func BuildDocumentationModel(options Options) (*Model, error) {
 	model.Risks = buildRisks(model)
 	model.RoadmapStages = buildRoadmapStages(model)
 	model.Project = buildProjectInfo(model, options.Title)
+	model.CurrentStatus = buildCurrentStatus(model)
 	model.Stats = buildStats(model)
 	model.SearchIndex = buildSearchIndex(model)
 	return model, nil

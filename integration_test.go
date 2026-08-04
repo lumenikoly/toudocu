@@ -230,6 +230,39 @@ func TestCLIArguments(t *testing.T) {
 	}
 }
 
+func TestTaskCheckCLIArguments(t *testing.T) {
+	options, _, _, err := ParseArguments([]string{
+		"task", "check", "TASK-AUTH-014", "./docs",
+		"--repository-root", ".", "--format", "json", "--report", "./task-report.json", "--timeout", "45s",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if options.Command != "task-check" || options.TaskID != "TASK-AUTH-014" || options.Format != "json" || options.Timeout != 45*time.Second || !filepath.IsAbs(options.ReportPath) {
+		t.Fatalf("options: %#v", options)
+	}
+	if _, _, _, err := ParseArguments([]string{"check", "./docs", "--timeout", "1s"}); err == nil {
+		t.Fatal("--timeout must be rejected outside task check")
+	}
+	if _, _, _, err := ParseArguments([]string{"task", "check", "TASK-AUTH-014", "./docs", "--report", "./docs/report.json"}); err == nil {
+		t.Fatal("--report must not overwrite source documentation")
+	}
+	root := t.TempDir()
+	docs := filepath.Join(root, "docs")
+	if err := os.MkdirAll(docs, 0755); err != nil {
+		t.Fatal(err)
+	}
+	alias := filepath.Join(root, "docs-alias")
+	if err := os.Symlink(docs, alias); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+	if _, _, _, err := ParseArguments([]string{
+		"task", "check", "TASK-AUTH-014", docs, "--report", filepath.Join(alias, "report.json"),
+	}); err == nil {
+		t.Fatal("--report must not overwrite source documentation through a symlink")
+	}
+}
+
 func TestKnowledgeModel(t *testing.T) {
 	_, docs, _ := createFixture(t)
 	content := "# TASK-AUTH-001: Защитить вход\n\n" +
@@ -304,6 +337,7 @@ func TestWorkItemValidationRules(t *testing.T) {
 		"missing-criterion-verification",
 		"task-checkbox-outside-criteria",
 		"incomplete-completed-task",
+		"missing-completed-task-check",
 		"missing-scope-path",
 		"unsafe-scope-path",
 		"empty-work-section",
@@ -372,9 +406,88 @@ func TestStatusAndRoadmapConsistency(t *testing.T) {
 	writeTestFile(t, docs, "roadmap.md", "# Roadmap\n\n## MVP\n\n- [x] `UC-AUTH-01` Пользователь входит.\n- [ ] Произвольный результат.\n- [ ] `UC-UNKNOWN-01` Неизвестный сценарий.\n")
 	model := buildFixture(t, docs)
 	codes := issueCodes(model)
-	for _, code := range []string{"status-requirement-checklist", "roadmap-use-case-status-mismatch", "invalid-roadmap-item-id", "dangling-roadmap-reference"} {
+	for _, code := range []string{"status-requirement-checklist", "invalid-roadmap-item-id", "dangling-roadmap-reference"} {
 		if !codes[code] {
 			t.Fatalf("missing issue %s in %#v", code, model.Issues)
+		}
+	}
+	if model.RoadmapStages[0].Items[0].EffectiveCompleted {
+		t.Fatal("roadmap completion must be derived from the unfinished use case")
+	}
+}
+
+func TestRoadmapCompletionIsDerivedAndRendered(t *testing.T) {
+	root, docs, output := createFixture(t)
+	useCasePath := filepath.Join(docs, "use-cases", "login.md")
+	content, err := os.ReadFile(useCasePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeTestFile(t, docs, "use-cases/login.md", strings.Replace(string(content), "- Статус: В работе", "- Статус: Выполнено", 1))
+	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	stage := model.RoadmapStages[0]
+	if stage.TaskStats.Completed != 2 || model.Stats.CompletedTasks != 2 || stage.Items[1].DeclaredCompleted || !stage.Items[1].EffectiveCompleted || stage.Items[1].CompletionSource != "use-case-status" {
+		t.Fatalf("derived roadmap: %#v %#v", stage, model.Stats)
+	}
+	if _, err := GenerateSite(model, Options{OutputDirectory: output, Clean: true}); err != nil {
+		t.Fatal(err)
+	}
+	roadmapHTML, err := os.ReadFile(filepath.Join(output, "roadmap.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(roadmapHTML), `data-task-state="open"`) {
+		t.Fatalf("roadmap HTML did not apply effective completion: %s", roadmapHTML)
+	}
+	report, err := json.Marshal(BuildReport(model))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, part := range []string{`"schemaVersion":1`, `"declaredCompleted":false`, `"effectiveCompleted":true`, `"completionSource":"use-case-status"`} {
+		if !strings.Contains(string(report), part) {
+			t.Fatalf("missing %s in %s", part, report)
+		}
+	}
+}
+
+func TestRoadmapContractAndDeliverableRemainManual(t *testing.T) {
+	_, docs, _ := createFixture(t)
+	writeTestFile(t, docs, "contracts/auth.md", "# Auth contract\n\n- Идентификатор: CON-AUTH-API\n- Статус: В работе\n\nContract.\n")
+	writeTestFile(t, docs, "roadmap.md", "# Roadmap\n\n## MVP\n\n- [x] `CON-AUTH-API` Контракт опубликован.\n- [ ] `DLV-RELEASE-01` Релиз подготовлен.\n")
+	model := buildFixture(t, docs)
+	items := model.RoadmapStages[0].Items
+	if len(items) != 2 || !items[0].EffectiveCompleted || items[0].CompletionSource != "roadmap-checkbox" || items[1].EffectiveCompleted {
+		t.Fatalf("manual roadmap items: %#v", items)
+	}
+}
+
+func TestComputedStatusAppearsOnDashboardAndStatusPage(t *testing.T) {
+	root, docs, output := createFixture(t)
+	commands := map[string]string{"AC-01": "pass", "AC-02": "pass", "ALL": "pass", "DOCS": "pass"}
+	task := taskCheckFixture("Заблокировано", false, commands, "\n## Блокер\n\nОжидается решение ADR-014.\n")
+	writeTestFile(t, docs, "work/TASK-AUTH-020-check.md", task)
+	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(model.CurrentStatus.ActiveWork) != 1 || len(model.CurrentStatus.Blockers) != 1 || model.CurrentStatus.NextResult == nil || model.CurrentStatus.NextResult.ID != "UC-AUTH-01" {
+		t.Fatalf("current status: %#v", model.CurrentStatus)
+	}
+	if _, err := GenerateSite(model, Options{OutputDirectory: output, Clean: true}); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{"index.html", "status.html"} {
+		data, err := os.ReadFile(filepath.Join(output, name))
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, part := range []string{"Вычисляемое состояние", "TASK-AUTH-020", "Ожидается решение ADR-014", "UC-AUTH-01"} {
+			if !strings.Contains(string(data), part) {
+				t.Fatalf("%s missing %q", name, part)
+			}
 		}
 	}
 }

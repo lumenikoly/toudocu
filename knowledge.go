@@ -15,6 +15,7 @@ var (
 	riskHeadingRE           = regexp.MustCompile(`^([A-Za-zА-Яа-я]+[-_ ]?\d+)\s*[:—-]\s*(.+)$`)
 	businessRuleReferenceRE = regexp.MustCompile(`\bBR-[A-Z0-9-]+\b`)
 	criterionIDRE           = regexp.MustCompile(`\bAC-[A-Z0-9-]+\b`)
+	verificationTargetRE    = regexp.MustCompile(`\b(?:AC-[A-Z0-9-]+|ALL|DOCS)\b`)
 	roadmapIDRE             = regexp.MustCompile(`\b(?:UC|CON|CONTRACT|DLV|DELIVERABLE)-[A-Z0-9-]+\b`)
 	codeSpanRE              = regexp.MustCompile("`+([^`\\n]+?)`+")
 	numberedPlanLineRE      = regexp.MustCompile(`^\s*\d+[.)]\s+\S`)
@@ -161,10 +162,10 @@ func commandsForVerificationLine(line, criterionID string) []string {
 	return nil
 }
 
-func parseCriteriaAndVerification(model *Model, document *Document, item parsedWorkItem) ([]Task, []CriterionVerification) {
+func parseCriteriaAndVerification(model *Model, document *Document, item parsedWorkItem) ([]Task, []CriterionVerification, []VerificationCheck) {
 	criteriaSection, criteriaFound := workSection(item, "критерии приёмки", "критерии приемки", "acceptance criteria")
 	if !criteriaFound {
-		return nil, nil
+		return nil, nil, nil
 	}
 	if len(criteriaSection.Tasks) == 0 {
 		addKnowledgeIssue(model, document, "error", "missing-acceptance-criterion", "Задача должна содержать хотя бы один критерий приёмки.", criteriaSection.Heading.Line+1)
@@ -193,23 +194,42 @@ func parseCriteriaAndVerification(model *Model, document *Document, item parsedW
 
 	verificationSection, verificationFound := workSection(item, "проверка", "verification")
 	commandsByID := map[string][]string{}
+	checks := []VerificationCheck{}
+	seenTargets := map[string]bool{}
 	if verificationFound {
 		for lineIndex := verificationSection.Heading.Line + 1; lineIndex < verificationSection.EndLine; lineIndex++ {
 			line := document.Lines[lineIndex]
-			for _, id := range uniqueStrings(criterionIDRE.FindAllString(strings.ToUpper(stripInlineMarkdown(line)), -1)) {
-				if _, exists := byID[id]; !exists {
-					addKnowledgeIssue(model, document, "error", "unknown-criterion-verification", "Проверка ссылается на неизвестный критерий "+id+".", lineIndex+1)
+			targets := uniqueStrings(verificationTargetRE.FindAllString(strings.ToUpper(stripInlineMarkdown(line)), -1))
+			if len(targets) == 0 {
+				continue
+			}
+			if len(targets) > 1 {
+				addKnowledgeIssue(model, document, "error", "ambiguous-verification-target", "Одна запись проверки должна ссылаться ровно на один target AC-*, ALL или DOCS.", lineIndex+1)
+				continue
+			}
+			target := targets[0]
+			if strings.HasPrefix(target, "AC-") {
+				if _, exists := byID[target]; !exists {
+					addKnowledgeIssue(model, document, "error", "unknown-criterion-verification", "Проверка ссылается на неизвестный критерий "+target+".", lineIndex+1)
 					continue
 				}
-				commands := commandsForVerificationLine(line, id)
-				if len(commands) == 0 {
-					addKnowledgeIssue(model, document, "error", "empty-criterion-verification", "Для критерия "+id+" не указана команда проверки.", lineIndex+1)
-					continue
+			}
+			commands := commandsForVerificationLine(line, target)
+			if len(commands) == 0 {
+				addKnowledgeIssue(model, document, "error", "empty-criterion-verification", "Для target "+target+" не указана команда проверки.", lineIndex+1)
+				continue
+			}
+			if seenTargets[target] {
+				code := "duplicate-verification-target"
+				if strings.HasPrefix(target, "AC-") {
+					code = "duplicate-criterion-verification"
 				}
-				if len(commandsByID[id]) > 0 {
-					addKnowledgeIssue(model, document, "error", "duplicate-criterion-verification", "Для критерия "+id+" указано несколько записей проверки.", lineIndex+1)
-				}
-				commandsByID[id] = append(commandsByID[id], commands...)
+				addKnowledgeIssue(model, document, "error", code, "Для target "+target+" указано несколько записей проверки.", lineIndex+1)
+			}
+			seenTargets[target] = true
+			checks = append(checks, VerificationCheck{Target: target, Commands: commands, Line: lineIndex + 1})
+			if strings.HasPrefix(target, "AC-") {
+				commandsByID[target] = append(commandsByID[target], commands...)
 			}
 		}
 	}
@@ -225,7 +245,7 @@ func parseCriteriaAndVerification(model *Model, document *Document, item parsedW
 		text := strings.TrimSpace(criterionIDRE.ReplaceAllString(criterion.task.Text, ""))
 		matrix = append(matrix, CriterionVerification{CriterionID: criterion.id, Criterion: text, Completed: criterion.task.Completed, Commands: commands})
 	}
-	return tasks, matrix
+	return tasks, matrix, checks
 }
 
 func validateScopePaths(model *Model, document *Document, item parsedWorkItem) []string {
@@ -293,7 +313,7 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 		workSectionContentRequired(model, document, item, section, found, required.label)
 	}
 
-	criteria, verification := parseCriteriaAndVerification(model, document, item)
+	criteria, verification, checks := parseCriteriaAndVerification(model, document, item)
 	criteriaLines := map[int]struct{}{}
 	if criteriaSection, found := workSection(item, "критерии приёмки", "критерии приемки", "acceptance criteria"); found {
 		for _, criterion := range criteriaSection.Tasks {
@@ -333,6 +353,15 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 				}
 			}
 		}
+		declared := map[string]bool{}
+		for _, check := range checks {
+			declared[check.Target] = true
+		}
+		for _, target := range []string{"ALL", "DOCS"} {
+			if !declared[target] {
+				addKnowledgeIssue(model, document, "error", "missing-completed-task-check", "Выполненная задача должна содержать проверку "+target+".", item.Heading.Line+1)
+			}
+		}
 	}
 
 	useCaseID := strings.TrimSpace(item.Metadata["useCase"])
@@ -346,12 +375,15 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 		}
 	}
 
+	resultSection, _ := workSection(item, "результат", "result")
+	blockerSection, _ := workSection(item, "блокер", "blocker")
 	return WorkItem{
 		ID: match[1], Title: match[2], Status: StatusFor(item.Metadata["status"]), Type: typeName,
 		Priority: item.Metadata["priority"], Owner: item.Metadata["owner"], ModuleID: item.Metadata["module"],
 		UseCaseID: useCaseID, DependsOn: splitReferences(item.Metadata["dependsOn"]), Document: document.SourcePath,
-		Anchor: item.Heading.ID, Criteria: criteria, Verification: verification,
+		Anchor: item.Heading.ID, Criteria: criteria, Verification: verification, Checks: checks,
 		RepositoryPaths: validateScopePaths(model, document, item), line: item.Heading.Line + 1,
+		Result: strings.TrimSpace(resultSection.Text), Blocker: strings.TrimSpace(blockerSection.Text),
 		ownerDoc: document, statusName: statusName,
 	}
 }
@@ -366,7 +398,7 @@ func validateStatusDocument(model *Model) {
 	}
 }
 
-func validateRoadmap(model *Model, documentIDs map[string]*Document, useCaseByID map[string]*KnowledgeUseCase) {
+func validateRoadmap(model *Model, documentIDs map[string]*Document) {
 	document := model.DocByPath["roadmap.md"]
 	if document == nil {
 		return
@@ -391,12 +423,6 @@ func validateRoadmap(model *Model, documentIDs map[string]*Document, useCaseByID
 		if target == nil || (target.Type != "use-case" && target.Type != "contract") {
 			addKnowledgeIssue(model, document, "error", "dangling-roadmap-reference", "Roadmap ссылается на неизвестный сценарий или контракт "+id+".", task.Line+1)
 			continue
-		}
-		if task.Completed && target.Type == "use-case" {
-			useCase := useCaseByID[id]
-			if useCase == nil || useCase.Status.Kind != "done" {
-				addKnowledgeIssue(model, document, "error", "roadmap-use-case-status-mismatch", "Завершённый элемент roadmap ссылается на незавершённый сценарий "+id+".", task.Line+1)
-			}
 		}
 	}
 }
@@ -561,7 +587,7 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 	}
 	detectTaskDependencyCycles(model, workItems, workByID)
 	validateStatusDocument(model)
-	validateRoadmap(model, documentIDs, useCaseByID)
+	validateRoadmap(model, documentIDs)
 	for i := range modules {
 		modules[i].UseCaseIDs = uniqueStrings(modules[i].UseCaseIDs)
 		modules[i].BusinessRuleIDs = uniqueStrings(modules[i].BusinessRuleIDs)
@@ -610,18 +636,105 @@ func fallbackValue(value, fallback string) string {
 
 func buildRoadmapStages(model *Model) []RoadmapStage {
 	result := []RoadmapStage{}
-	for _, document := range model.Collections["roadmap"] {
-		for _, section := range document.Sections {
-			completed := 0
-			for _, task := range section.Tasks {
-				if task.Completed {
-					completed++
-				}
-			}
-			result = append(result, RoadmapStage{Title: section.Title, Status: StatusFor(section.Metadata["status"]), PlannedDate: section.Metadata["plannedDate"], Owner: section.Metadata["owner"], TaskStats: TaskStats{Total: len(section.Tasks), Completed: completed, Remaining: len(section.Tasks) - completed, Percent: progress(completed, len(section.Tasks))}, Document: document, Anchor: section.ID, Text: section.Text})
+	useCases := map[string]KnowledgeUseCase{}
+	for _, useCase := range model.Knowledge.UseCases {
+		useCases[useCase.ID] = useCase
+	}
+	documentsByID := map[string]*Document{}
+	for _, document := range model.Documents {
+		if id := document.Metadata["id"]; id != "" {
+			documentsByID[id] = document
 		}
 	}
+	for _, document := range model.Collections["roadmap"] {
+		for _, section := range document.Sections {
+			items := []RoadmapItem{}
+			completed := 0
+			for _, task := range section.Tasks {
+				ids := uniqueStrings(roadmapIDRE.FindAllString(strings.ToUpper(task.Text), -1))
+				id := ""
+				if len(ids) == 1 {
+					id = ids[0]
+				}
+				kind := "unknown"
+				switch {
+				case strings.HasPrefix(id, "UC-"):
+					kind = "use-case"
+				case strings.HasPrefix(id, "CON-") || strings.HasPrefix(id, "CONTRACT-"):
+					kind = "contract"
+				case strings.HasPrefix(id, "DLV-") || strings.HasPrefix(id, "DELIVERABLE-"):
+					kind = "deliverable"
+				}
+				item := RoadmapItem{
+					ID: id, Text: task.Text, Kind: kind, DeclaredCompleted: task.Completed,
+					EffectiveCompleted: task.Completed, CompletionSource: "roadmap-checkbox",
+					Document: document.SourcePath, Line: task.Line + 1,
+				}
+				if useCase, exists := useCases[id]; exists {
+					status := useCase.Status
+					item.EffectiveCompleted = status.Kind == "done"
+					item.CompletionSource = "use-case-status"
+					item.TargetDocument = useCase.Document
+					item.TargetStatus = &status
+				} else if target := documentsByID[id]; target != nil {
+					item.TargetDocument = target.SourcePath
+					status := target.Status
+					item.TargetStatus = &status
+				}
+				if item.EffectiveCompleted {
+					completed++
+				}
+				items = append(items, item)
+			}
+			result = append(result, RoadmapStage{
+				Title: section.Title, Status: StatusFor(section.Metadata["status"]),
+				PlannedDate: section.Metadata["plannedDate"], Owner: section.Metadata["owner"],
+				TaskStats: TaskStats{Total: len(items), Completed: completed, Remaining: len(items) - completed, Percent: progress(completed, len(items))},
+				Items:     items, Document: document, Anchor: section.ID, Text: section.Text,
+			})
+		}
+	}
+	for _, document := range model.Collections["roadmap"] {
+		total, completed := 0, 0
+		for _, stage := range result {
+			if stage.Document != document {
+				continue
+			}
+			total += stage.TaskStats.Total
+			completed += stage.TaskStats.Completed
+		}
+		document.TaskStats = TaskStats{Total: total, Completed: completed, Remaining: total - completed, Percent: progress(completed, total)}
+	}
 	return result
+}
+
+func buildCurrentStatus(model *Model) CurrentStatus {
+	current := CurrentStatus{}
+	for _, item := range model.Knowledge.WorkItems {
+		if item.Status.Kind != "planned" && item.Status.Kind != "in-progress" && item.Status.Kind != "blocked" {
+			continue
+		}
+		current.ActiveWork = append(current.ActiveWork, CurrentWorkItem{
+			ID: item.ID, Title: item.Title, Status: item.Status, ModuleID: item.ModuleID,
+			Document: item.Document, Anchor: item.Anchor,
+		})
+		if item.Status.Kind == "blocked" {
+			current.Blockers = append(current.Blockers, CurrentBlocker{
+				TaskID: item.ID, Text: item.Blocker, Document: item.Document, Anchor: item.Anchor,
+			})
+		}
+	}
+	for stageIndex := range model.RoadmapStages {
+		for itemIndex := range model.RoadmapStages[stageIndex].Items {
+			item := &model.RoadmapStages[stageIndex].Items[itemIndex]
+			if !item.EffectiveCompleted {
+				copy := *item
+				current.NextResult = &copy
+				return current
+			}
+		}
+	}
+	return current
 }
 
 func countStatuses(documents []*Document) map[string]int {
@@ -634,9 +747,9 @@ func countStatuses(documents []*Document) map[string]int {
 
 func buildStats(model *Model) Stats {
 	total, completed := 0, 0
-	if roadmap := model.DocByPath["roadmap.md"]; roadmap != nil {
-		total = roadmap.TaskStats.Total
-		completed = roadmap.TaskStats.Completed
+	for _, stage := range model.RoadmapStages {
+		total += stage.TaskStats.Total
+		completed += stage.TaskStats.Completed
 	}
 	stats := Stats{Documents: len(model.Documents), TotalTasks: total, CompletedTasks: completed, RemainingTasks: total - completed, TaskProgress: progress(completed, total), ModuleStatuses: countStatuses(model.Collections["module"]), UseCaseStatuses: countStatuses(model.Collections["use-case"]), Modules: len(model.Collections["module"]), UseCases: len(model.Collections["use-case"]), Risks: len(model.Risks), Decisions: len(model.Collections["decision"])}
 	for _, document := range model.Documents {

@@ -20,8 +20,9 @@ var (
 )
 
 type RenderContext struct {
-	ResolveLink   LinkResolver
-	HeadingByLine map[int]Heading
+	ResolveLink          LinkResolver
+	HeadingByLine        map[int]Heading
+	TaskCompletionByLine map[int]bool
 }
 
 type RenderOptions struct {
@@ -106,10 +107,14 @@ func renderListGroups(nodes []*listNode, context RenderContext) string {
 		}
 		fmt.Fprintf(&b, "<%s%s%s>", tag, startAttr, taskClass)
 		for _, node := range group {
+			completed := node.Completed
+			if override, exists := context.TaskCompletionByLine[node.SourceIndex]; exists {
+				completed = override
+			}
 			itemClass := ""
 			if node.Task {
 				state, class := "open", "is-open"
-				if node.Completed {
+				if completed {
 					state, class = "complete", "is-complete"
 				}
 				itemClass = fmt.Sprintf(` class="task-item %s" data-task-state="%s"`, class, state)
@@ -117,7 +122,7 @@ func renderListGroups(nodes []*listNode, context RenderContext) string {
 			fmt.Fprintf(&b, "<li%s>", itemClass)
 			if node.Task {
 				label, mark := "Не выполнено", ""
-				if node.Completed {
+				if completed {
 					label, mark = "Выполнено", "✓"
 				}
 				fmt.Fprintf(&b, `<span class="task-checkbox" role="img" aria-label="%s">%s</span>`, label, mark)
@@ -590,14 +595,14 @@ func RenderMarkdown(document ParsedMarkdown, context RenderContext, options Rend
 	return renderBlocks(entries, context, options, suppressed)
 }
 
-func renderDocumentMarkdown(document *Document, resolver LinkResolver) string {
+func renderDocumentMarkdown(document *Document, resolver LinkResolver, taskCompletionByLine map[int]bool) string {
 	parsed := ParsedMarkdown{
 		Content: document.Content, Lines: document.Lines, Title: document.Title, Description: document.Description,
 		Headings: document.Headings, HeadingByLine: document.HeadingByLine,
 		Metadata: document.Metadata, MetadataExtras: document.MetadataExtras, MetadataLineIndexes: document.MetadataLineIndexes,
 		Tasks: document.Tasks, Links: document.Links, Sections: document.Sections, PlainText: document.PlainText,
 	}
-	return RenderMarkdown(parsed, RenderContext{ResolveLink: resolver, HeadingByLine: document.HeadingByLine}, RenderOptions{SkipH1: true, SuppressMetadata: true})
+	return RenderMarkdown(parsed, RenderContext{ResolveLink: resolver, HeadingByLine: document.HeadingByLine, TaskCompletionByLine: taskCompletionByLine}, RenderOptions{SkipH1: true, SuppressMetadata: true})
 }
 
 func RenderMarkdownFragment(markdown string, context RenderContext) string {

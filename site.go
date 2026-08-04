@@ -12,9 +12,9 @@ import (
 	"time"
 )
 
-const Version = "1.0.0-go"
+const Version = "1.1.0-go"
 
-var fieldOrder = []string{"status", "stage", "version", "owner", "author", "actor", "priority", "criticality", "module", "useCase", "dependsOn", "date", "plannedDate", "updated", "probability", "impact", "id", "tags"}
+var fieldOrder = []string{"status", "type", "stage", "version", "owner", "author", "actor", "priority", "criticality", "module", "useCase", "dependsOn", "source", "date", "plannedDate", "updated", "probability", "impact", "id", "tags"}
 
 var typeIcons = map[string]string{"overview": "⌂", "status": "◐", "roadmap": "→", "risks": "!", "changelog": "↻", "use-case": "◎", "module": "▦", "architecture": "◇", "contract": "⇄", "decision": "◆", "guide": "◫", "work": "☑", "reference": "≡", "document": "•"}
 
@@ -192,7 +192,18 @@ func renderRelated(model *Model, document *Document) string {
 
 func renderDocumentPage(model *Model, document *Document) string {
 	resolver := linkResolverFor(model, document)
-	body := renderDocumentMarkdown(document, resolver)
+	taskCompletionByLine := map[int]bool{}
+	if document.Type == "roadmap" {
+		for _, stage := range model.RoadmapStages {
+			if stage.Document != document {
+				continue
+			}
+			for _, item := range stage.Items {
+				taskCompletionByLine[item.Line-1] = item.EffectiveCompleted
+			}
+		}
+	}
+	body := renderDocumentMarkdown(document, resolver, taskCompletionByLine)
 	controls := ""
 	if document.TaskStats.Total > 0 {
 		controls = `<div class="task-toolbar"><span>Чек-лист:</span><button type="button" data-task-filter="all">Все</button><button type="button" data-task-filter="open">Невыполненные</button><button type="button" data-task-filter="complete">Выполненные</button></div>`
@@ -201,7 +212,11 @@ func renderDocumentPage(model *Model, document *Document) string {
 	if len(document.Warnings)+len(document.Errors) > 0 {
 		issues = fmt.Sprintf(`<a class="badge" href="%s">Замечания: %d</a>`, escapeAttr(relativeURL(document.OutputPath, model.HealthOutputPath)), len(document.Warnings)+len(document.Errors))
 	}
-	content := breadcrumbs(model, document.OutputPath, document.Title) + `<header class="page-header"><div class="page-kicker">` + renderStatusChip(document.Status) + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + issues + `</div><h1>` + escapeHTML(document.Title) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` + renderMetadata(document) + renderProgress(document.TaskStats, "Готовность документа") + controls + `<div class="page-actions"><button type="button" data-collapse-all>Свернуть разделы</button></div></header><article class="doc-content">` + body + `</article>` + renderRelated(model, document)
+	computedStatus := ""
+	if document.Type == "status" {
+		computedStatus = renderComputedStatus(model, document.OutputPath)
+	}
+	content := breadcrumbs(model, document.OutputPath, document.Title) + `<header class="page-header"><div class="page-kicker">` + renderStatusChip(document.Status) + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + issues + `</div><h1>` + escapeHTML(document.Title) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` + renderMetadata(document) + renderProgress(document.TaskStats, "Готовность документа") + controls + `<div class="page-actions"><button type="button" data-collapse-all>Свернуть разделы</button></div></header>` + computedStatus + `<article class="doc-content">` + body + `</article>` + renderRelated(model, document)
 	return pageShell(model, document.OutputPath, document.Title, document.Description, content, renderTOC(document))
 }
 
@@ -211,6 +226,58 @@ func docCard(current string, document *Document) string {
 
 func filterControls(model *Model) string {
 	return `<div class="collection-controls"><input type="search" data-filter-control="search" placeholder="Фильтр" aria-label="Фильтр"><select data-filter-control="status"><option value="all">Все статусы</option><option value="done">Готово</option><option value="in-progress">В работе</option><option value="planned">Запланировано</option><option value="blocked">Заблокировано</option></select><select data-filter-control="type"><option value="all">Все типы</option><option value="module">Модули</option><option value="use-case">Сценарии</option><option value="architecture">Архитектура</option><option value="decision">Решения</option><option value="work">Задачи</option></select></div>`
+}
+
+func renderComputedStatus(model *Model, current string) string {
+	var active strings.Builder
+	for _, item := range model.CurrentStatus.ActiveWork {
+		href := "#"
+		if document := model.DocByPath[item.Document]; document != nil {
+			href = relativeURL(current, document.OutputPath) + "#" + item.Anchor
+		}
+		active.WriteString(`<tr><td><a href="` + escapeAttr(href) + `">` + escapeHTML(item.ID) + `</a></td><td>` + escapeHTML(item.Title) + `</td><td>` + renderStatusChip(item.Status) + `</td><td>` + escapeHTML(item.ModuleID) + `</td></tr>`)
+	}
+	activeHTML := `<p class="empty-state">Активных задач нет.</p>`
+	if active.Len() > 0 {
+		activeHTML = `<div class="data-table"><table><thead><tr><th>ID</th><th>Задача</th><th>Статус</th><th>Модуль</th></tr></thead><tbody>` + active.String() + `</tbody></table></div>`
+	}
+
+	var blockers strings.Builder
+	for _, blocker := range model.CurrentStatus.Blockers {
+		href := "#"
+		if document := model.DocByPath[blocker.Document]; document != nil {
+			href = relativeURL(current, document.OutputPath) + "#" + blocker.Anchor
+		}
+		text := blocker.Text
+		if text == "" {
+			text = "Причина блокировки не указана."
+		}
+		blockers.WriteString(`<li><a href="` + escapeAttr(href) + `">` + escapeHTML(blocker.TaskID) + `</a> — ` + escapeHTML(text) + `</li>`)
+	}
+	blockersHTML := `<p>Критических блокеров нет.</p>`
+	if blockers.Len() > 0 {
+		blockersHTML = `<ul class="related-list">` + blockers.String() + `</ul>`
+	}
+
+	nextHTML := `<p>Все результаты roadmap выполнены.</p>`
+	if next := model.CurrentStatus.NextResult; next != nil {
+		target := next.TargetDocument
+		if target == "" {
+			target = next.Document
+		}
+		href := "#"
+		if document := model.DocByPath[target]; document != nil {
+			href = relativeURL(current, document.OutputPath)
+		}
+		status := StatusFor("Запланировано")
+		if next.CompletionSource == "use-case-status" && next.TargetStatus != nil {
+			status = *next.TargetStatus
+		}
+		text := strings.TrimSpace(strings.TrimLeft(strings.TrimPrefix(next.Text, next.ID), " :—-"))
+		nextHTML = `<div class="card-kicker">` + renderStatusChip(status) + `</div><p><a href="` + escapeAttr(href) + `"><strong>` + escapeHTML(next.ID) + `</strong></a> — ` + escapeHTML(text) + `</p>`
+	}
+
+	return `<section class="dashboard-section"><div class="section-heading"><div><h2>Вычисляемое состояние</h2><p>Формируется из активных work items и эффективного состояния roadmap.</p></div></div><h3>Сейчас в работе</h3>` + activeHTML + `<h3>Блокеры</h3>` + blockersHTML + `<h3>Следующий результат</h3>` + nextHTML + `</section>`
 }
 
 func renderDashboard(model *Model) string {
@@ -232,20 +299,8 @@ func renderDashboard(model *Model) string {
 		href := relativeURL("index.html", risk.Document.OutputPath) + "#" + risk.Anchor
 		risks.WriteString(`<article class="risk-card"><div>` + renderStatusChip(risk.Status) + `</div><h3><a href="` + escapeAttr(href) + `">` + escapeHTML(risk.ID+": "+risk.Title) + `</a></h3><p>Вероятность: ` + escapeHTML(risk.Probability) + ` · Влияние: ` + escapeHTML(risk.Impact) + `</p>` + renderProgress(risk.TaskStats, "Снижение риска") + `</article>`)
 	}
-	work := ""
-	if len(model.Knowledge.WorkItems) > 0 {
-		var b strings.Builder
-		for _, item := range model.Knowledge.WorkItems {
-			doc := model.DocByPath[item.Document]
-			href := "#"
-			if doc != nil {
-				href = relativeURL("index.html", doc.OutputPath) + "#" + item.Anchor
-			}
-			b.WriteString(`<tr><td><a href="` + escapeAttr(href) + `">` + escapeHTML(item.ID) + `</a></td><td>` + escapeHTML(item.Title) + `</td><td>` + renderStatusChip(item.Status) + `</td><td>` + escapeHTML(item.ModuleID) + `</td></tr>`)
-		}
-		work = `<section class="dashboard-section"><div class="section-heading"><div><h2>Текущие рабочие задачи</h2><p>Атомарные задачи, подходящие для человека и ИИ.</p></div></div><div class="data-table"><table><thead><tr><th>ID</th><th>Задача</th><th>Статус</th><th>Модуль</th></tr></thead><tbody>` + b.String() + `</tbody></table></div></section>`
-	}
-	content := `<header class="hero"><div class="page-kicker">` + renderStatusChip(model.Project.Status) + `</div><h1>` + escapeHTML(model.Project.Title) + `</h1><p class="page-lead">` + escapeHTML(model.Project.Description) + `</p><p>` + escapeHTML(model.Project.Summary) + `</p><div class="hero-meta">` + escapeHTML(strings.Join(nonEmpty([]string{model.Project.Stage, model.Project.Version, model.Project.Owner, model.Project.Updated}), " · ")) + `</div></header><section class="metric-grid">` + metricCard("Прогресс", fmt.Sprintf("%d%%", percentOrZero(stats.TaskProgress)), fmt.Sprintf("%d из %d задач roadmap", stats.CompletedTasks, stats.TotalTasks)) + metricCard("Документы", stats.Documents, fmt.Sprintf("%d замечаний", stats.Warnings+stats.Errors)) + metricCard("Модули", stats.Modules, fmt.Sprintf("%d сценариев", stats.UseCases)) + metricCard("Риски", stats.OpenRisks, fmt.Sprintf("%d всего", stats.Risks)) + `</section><section class="dashboard-section"><div class="section-heading"><div><h2>Дорожная карта</h2><p>Прогресс проекта считается только по roadmap.md.</p></div></div><div class="timeline-grid">` + stages.String() + `</div></section><section class="dashboard-section"><div class="section-heading"><div><h2>Открытые риски</h2></div></div><div class="card-grid">` + risks.String() + `</div></section>` + work + `<section class="dashboard-section"><div class="section-heading"><div><h2>Документация проекта</h2><p>Поиск, фильтры, статусы и локальные чек-листы.</p></div><a class="section-link" href="` + escapeAttr(model.HealthOutputPath) + `">Качество →</a></div><div data-filter-scope>` + filterControls(model) + `<div class="collection-summary">Показано: <strong data-filter-count></strong></div><div class="card-grid">` + docs.String() + `</div><div class="empty-state" data-filter-empty hidden>Ничего не найдено.</div></div></section>`
+	computedStatus := renderComputedStatus(model, "index.html")
+	content := `<header class="hero"><div class="page-kicker">` + renderStatusChip(model.Project.Status) + `</div><h1>` + escapeHTML(model.Project.Title) + `</h1><p class="page-lead">` + escapeHTML(model.Project.Description) + `</p><p>` + escapeHTML(model.Project.Summary) + `</p><div class="hero-meta">` + escapeHTML(strings.Join(nonEmpty([]string{model.Project.Stage, model.Project.Version, model.Project.Owner, model.Project.Updated}), " · ")) + `</div></header><section class="metric-grid">` + metricCard("Прогресс", fmt.Sprintf("%d%%", percentOrZero(stats.TaskProgress)), fmt.Sprintf("%d из %d задач roadmap", stats.CompletedTasks, stats.TotalTasks)) + metricCard("Документы", stats.Documents, fmt.Sprintf("%d замечаний", stats.Warnings+stats.Errors)) + metricCard("Модули", stats.Modules, fmt.Sprintf("%d сценариев", stats.UseCases)) + metricCard("Риски", stats.OpenRisks, fmt.Sprintf("%d всего", stats.Risks)) + `</section><section class="dashboard-section"><div class="section-heading"><div><h2>Дорожная карта</h2><p>Roadmap определяет охват; состояние UC-элементов вычисляется из связанных сценариев.</p></div></div><div class="timeline-grid">` + stages.String() + `</div></section>` + computedStatus + `<section class="dashboard-section"><div class="section-heading"><div><h2>Открытые риски</h2></div></div><div class="card-grid">` + risks.String() + `</div></section><section class="dashboard-section"><div class="section-heading"><div><h2>Документация проекта</h2><p>Поиск, фильтры, статусы и локальные чек-листы.</p></div><a class="section-link" href="` + escapeAttr(model.HealthOutputPath) + `">Качество →</a></div><div data-filter-scope>` + filterControls(model) + `<div class="collection-summary">Показано: <strong data-filter-count></strong></div><div class="card-grid">` + docs.String() + `</div><div class="empty-state" data-filter-empty hidden>Ничего не найдено.</div></div></section>`
 	return pageShell(model, "index.html", model.Project.Title, model.Project.Description, content, "")
 }
 
@@ -328,7 +383,7 @@ func BuildReport(model *Model) map[string]any {
 	}
 	roadmap := []map[string]any{}
 	for _, stage := range model.RoadmapStages {
-		roadmap = append(roadmap, map[string]any{"title": stage.Title, "status": stage.Status, "plannedDate": stage.PlannedDate, "taskStats": stage.TaskStats, "document": stage.Document.SourcePath, "anchor": stage.Anchor})
+		roadmap = append(roadmap, map[string]any{"title": stage.Title, "status": stage.Status, "plannedDate": stage.PlannedDate, "taskStats": stage.TaskStats, "items": stage.Items, "document": stage.Document.SourcePath, "anchor": stage.Anchor})
 	}
 	risks := []map[string]any{}
 	for _, risk := range model.Risks {
@@ -339,7 +394,7 @@ func BuildReport(model *Model) map[string]any {
 		"stage": model.Project.Stage, "version": model.Project.Version, "owner": model.Project.Owner,
 		"updated": model.Project.Updated, "summary": model.Project.Summary,
 	}
-	return map[string]any{"generator": map[string]any{"name": "Docgent", "version": Version}, "generatedAt": model.GeneratedAt, "sourceDirectory": pathBase(model.RootDirectory), "staleDays": model.StaleDays, "project": project, "stats": model.Stats, "documents": documents, "roadmap": roadmap, "risks": risks, "knowledge": model.Knowledge, "issues": model.Issues}
+	return map[string]any{"schemaVersion": 1, "generator": map[string]any{"name": "Docgent", "version": Version}, "generatedAt": model.GeneratedAt, "sourceDirectory": pathBase(model.RootDirectory), "staleDays": model.StaleDays, "project": project, "currentStatus": model.CurrentStatus, "stats": model.Stats, "documents": documents, "roadmap": roadmap, "risks": risks, "knowledge": model.Knowledge, "issues": model.Issues}
 }
 
 func ensureOutputSafety(inputDirectory, outputDirectory string) error {

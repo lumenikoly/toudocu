@@ -5,6 +5,7 @@ import "time"
 // Options configures one CLI operation or a direct library call.
 type Options struct {
 	Command         string
+	TaskID          string
 	InputDirectory  string
 	OutputDirectory string
 	Title           string
@@ -17,6 +18,8 @@ type Options struct {
 	Open            bool
 	Strict          bool
 	Format          string
+	ReportPath      string
+	Timeout         time.Duration
 	Force           bool
 	Example         bool
 	Now             time.Time
@@ -162,9 +165,23 @@ type RoadmapStage struct {
 	PlannedDate string
 	Owner       string
 	TaskStats   TaskStats
+	Items       []RoadmapItem
 	Document    *Document
 	Anchor      string
 	Text        string
+}
+
+type RoadmapItem struct {
+	ID                 string      `json:"id"`
+	Text               string      `json:"text"`
+	Kind               string      `json:"kind"`
+	DeclaredCompleted  bool        `json:"declaredCompleted"`
+	EffectiveCompleted bool        `json:"effectiveCompleted"`
+	CompletionSource   string      `json:"completionSource"`
+	TargetDocument     string      `json:"targetDocument,omitempty"`
+	TargetStatus       *StatusInfo `json:"targetStatus,omitempty"`
+	Document           string      `json:"document"`
+	Line               int         `json:"line"`
 }
 
 type KnowledgeModule struct {
@@ -211,7 +228,10 @@ type WorkItem struct {
 	Anchor          string                  `json:"anchor"`
 	Criteria        []Task                  `json:"criteria"`
 	Verification    []CriterionVerification `json:"verificationMatrix"`
+	Checks          []VerificationCheck     `json:"checks"`
 	RepositoryPaths []string                `json:"repositoryPaths"`
+	Result          string                  `json:"result,omitempty"`
+	Blocker         string                  `json:"blocker,omitempty"`
 	line            int
 	ownerDoc        *Document
 	statusName      string
@@ -222,6 +242,74 @@ type CriterionVerification struct {
 	Criterion   string   `json:"criterion"`
 	Completed   bool     `json:"completed"`
 	Commands    []string `json:"commands"`
+}
+
+type VerificationCheck struct {
+	Target   string   `json:"target"`
+	Commands []string `json:"commands"`
+	Line     int      `json:"line"`
+}
+
+type TaskCheckTask struct {
+	ID       string     `json:"id"`
+	Title    string     `json:"title"`
+	Status   StatusInfo `json:"status"`
+	Type     string     `json:"type,omitempty"`
+	Document string     `json:"document"`
+}
+
+type CommandExecutionResult struct {
+	Sequence        int       `json:"sequence"`
+	Command         string    `json:"command"`
+	Targets         []string  `json:"targets"`
+	Status          string    `json:"status"`
+	ExitCode        *int      `json:"exitCode"`
+	StartedAt       time.Time `json:"startedAt"`
+	FinishedAt      time.Time `json:"finishedAt"`
+	DurationMillis  int64     `json:"durationMillis"`
+	Stdout          string    `json:"stdout"`
+	Stderr          string    `json:"stderr"`
+	StdoutTruncated bool      `json:"stdoutTruncated"`
+	StderrTruncated bool      `json:"stderrTruncated"`
+}
+
+type CriterionExecutionResult struct {
+	ID                string `json:"id"`
+	Description       string `json:"description"`
+	DocumentCompleted bool   `json:"documentCompleted"`
+	Status            string `json:"status"`
+}
+
+type TargetExecutionResult struct {
+	Target string `json:"target"`
+	Status string `json:"status"`
+}
+
+type TaskCheckSummary struct {
+	TotalCommands    int `json:"totalCommands"`
+	PassedCommands   int `json:"passedCommands"`
+	FailedCommands   int `json:"failedCommands"`
+	TimedOutCommands int `json:"timedOutCommands"`
+	CriteriaPassed   int `json:"criteriaPassed"`
+	CriteriaFailed   int `json:"criteriaFailed"`
+}
+
+type TaskCheckReport struct {
+	SchemaVersion    int                        `json:"schemaVersion"`
+	Kind             string                     `json:"kind"`
+	Generator        map[string]string          `json:"generator"`
+	Task             TaskCheckTask              `json:"task"`
+	StartedAt        time.Time                  `json:"startedAt"`
+	FinishedAt       time.Time                  `json:"finishedAt"`
+	DurationMillis   int64                      `json:"durationMillis"`
+	Status           string                     `json:"status"`
+	FullVerification bool                       `json:"fullVerification"`
+	ValidationIssues []Issue                    `json:"validationIssues"`
+	Issues           []Issue                    `json:"issues"`
+	Commands         []CommandExecutionResult   `json:"commands"`
+	Criteria         []CriterionExecutionResult `json:"criteria"`
+	Targets          []TargetExecutionResult    `json:"targets"`
+	Summary          TaskCheckSummary           `json:"summary"`
 }
 
 type KnowledgeModel struct {
@@ -242,6 +330,28 @@ type ProjectInfo struct {
 	Summary          string
 	OverviewDocument *Document
 	StatusDocument   *Document
+}
+
+type CurrentWorkItem struct {
+	ID       string     `json:"id"`
+	Title    string     `json:"title"`
+	Status   StatusInfo `json:"status"`
+	ModuleID string     `json:"moduleId,omitempty"`
+	Document string     `json:"document"`
+	Anchor   string     `json:"anchor"`
+}
+
+type CurrentBlocker struct {
+	TaskID   string `json:"taskId"`
+	Text     string `json:"text"`
+	Document string `json:"document"`
+	Anchor   string `json:"anchor"`
+}
+
+type CurrentStatus struct {
+	ActiveWork []CurrentWorkItem `json:"activeWork"`
+	Blockers   []CurrentBlocker  `json:"blockers"`
+	NextResult *RoadmapItem      `json:"nextResult,omitempty"`
 }
 
 type Stats struct {
@@ -298,6 +408,7 @@ type Model struct {
 	RoadmapStages    []RoadmapStage
 	Knowledge        KnowledgeModel
 	Project          ProjectInfo
+	CurrentStatus    CurrentStatus
 	Stats            Stats
 	SearchIndex      []SearchItem
 	HealthOutputPath string

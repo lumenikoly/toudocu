@@ -25,6 +25,7 @@ docgent ./docs --output ./build/project-docs --clean
 ```bash
 docgent init ./docs
 docgent check ./docs --strict
+docgent task check TASK-AREA-001 ./docs --format json
 docgent version
 ```
 
@@ -49,5 +50,9 @@ Use `docgent init` as the canonical example. The validator now rejects:
 - completed tasks with unchecked criteria;
 - blocked or cancelled tasks without their required reason section;
 - roadmap checkboxes without stable use-case, contract, or `DLV-*` identifiers.
+
+For linked `UC-*` items, roadmap completion is now derived from the use-case status. The source checkbox is retained but ignored for progress. `CON-*` and `DLV-*` remain manual.
+
+`report.json` and the new `TaskCheckReport` expose `schemaVersion: 1`. Verification commands are trusted code and run only through an explicit `docgent task check` invocation.
 
 No Node.js runtime or package installation is required.

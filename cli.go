@@ -10,6 +10,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func PrintHelp(w io.Writer) {
@@ -18,12 +19,14 @@ func PrintHelp(w io.Writer) {
 Использование:
   docgent [build] [каталог-документации] [параметры]
   docgent check [каталог-документации] [параметры]
+  docgent task check TASK-ID [каталог-документации] [параметры]
   docgent init [каталог-документации] [--force]
   docgent version
 
 Примеры:
   docgent build ./docs --output ./build/project-docs --clean
   docgent check ./docs --strict
+  docgent task check TASK-CORE-001 ./docs --format json
   docgent init ./docs
 
 Параметры:
@@ -37,7 +40,9 @@ func PrintHelp(w io.Writer) {
       --clean                  Очистить выходной каталог
       --open                   Открыть результат в браузере
       --strict                 Предупреждения дают ненулевой exit code
-      --format text|json       Формат команды check
+      --format text|json       Формат check и task check
+      --report <файл>          Сохранить JSON-отчёт task check
+      --timeout <duration>     Timeout каждой команды task check, по умолчанию 10m
       --force                  Перезаписать шаблоны при init
   -h, --help                   Справка
   -v, --version                Версия
@@ -54,8 +59,9 @@ func takeArgValue(args []string, index *int, option string) (string, error) {
 
 // ParseArguments parses both the backwards-compatible build form and explicit subcommands.
 func ParseArguments(argv []string) (Options, bool, bool, error) {
-	options := Options{Command: "build", StaleDays: 90, RepositoryRef: "main", Format: "text"}
+	options := Options{Command: "build", StaleDays: 90, RepositoryRef: "main", Format: "text", Timeout: 10 * time.Minute}
 	help, version := false, false
+	timeoutSpecified := false
 	args := append([]string{}, argv...)
 	if len(args) > 0 {
 		switch args[0] {
@@ -68,6 +74,13 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 		case "help":
 			help = true
 			args = args[1:]
+		case "task":
+			if len(args) < 3 || args[1] != "check" {
+				return options, false, false, fmt.Errorf("использование: docgent task check TASK-ID [каталог-документации]")
+			}
+			options.Command = "task-check"
+			options.TaskID = args[2]
+			args = args[3:]
 		}
 	}
 	for i := 0; i < len(args); i++ {
@@ -154,6 +167,32 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			options.Format = v
 		case strings.HasPrefix(arg, "--format="):
 			options.Format = strings.TrimPrefix(arg, "--format=")
+		case arg == "--report":
+			v, e := takeArgValue(args, &i, arg)
+			if e != nil {
+				return options, false, false, e
+			}
+			options.ReportPath = v
+		case strings.HasPrefix(arg, "--report="):
+			options.ReportPath = strings.TrimPrefix(arg, "--report=")
+		case arg == "--timeout":
+			v, e := takeArgValue(args, &i, arg)
+			if e != nil {
+				return options, false, false, e
+			}
+			duration, e := time.ParseDuration(v)
+			if e != nil || duration <= 0 {
+				return options, false, false, fmt.Errorf("--timeout должен быть положительной duration, например 10m")
+			}
+			options.Timeout = duration
+			timeoutSpecified = true
+		case strings.HasPrefix(arg, "--timeout="):
+			duration, e := time.ParseDuration(strings.TrimPrefix(arg, "--timeout="))
+			if e != nil || duration <= 0 {
+				return options, false, false, fmt.Errorf("--timeout должен быть положительной duration, например 10m")
+			}
+			options.Timeout = duration
+			timeoutSpecified = true
 		case arg == "--clean":
 			options.Clean = true
 		case arg == "--open":
@@ -205,6 +244,37 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 	}
 	if options.Format != "text" && options.Format != "json" {
 		return options, false, false, fmt.Errorf("--format должен быть text или json")
+	}
+	if options.Command == "task-check" {
+		if workItemHeadingRE.FindStringSubmatch(options.TaskID+": check") == nil {
+			return options, false, false, fmt.Errorf("TASK-ID должен иметь формат TASK-AREA-NNN")
+		}
+		if options.ReportPath != "" {
+			report, err := filepath.Abs(options.ReportPath)
+			if err != nil {
+				return options, false, false, err
+			}
+			if !strings.EqualFold(filepath.Ext(report), ".json") {
+				return options, false, false, fmt.Errorf("--report должен указывать JSON-файл")
+			}
+			resolvedInput, err := resolvePathForSafety(options.InputDirectory)
+			if err != nil {
+				return options, false, false, err
+			}
+			resolvedReport, err := resolvePathForSafety(report)
+			if err != nil {
+				return options, false, false, err
+			}
+			if ensureInside(options.InputDirectory, report) || ensureInside(resolvedInput, resolvedReport) {
+				return options, false, false, fmt.Errorf("--report не может перезаписывать каталог исходной документации")
+			}
+			if info, err := os.Stat(report); err == nil && info.IsDir() {
+				return options, false, false, fmt.Errorf("--report должен указывать файл, а не каталог")
+			}
+			options.ReportPath = report
+		}
+	} else if options.ReportPath != "" || timeoutSpecified {
+		return options, false, false, fmt.Errorf("--report и --timeout доступны только для task check")
 	}
 	return options, help, version, nil
 }
@@ -275,6 +345,30 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	if err != nil {
 		fmt.Fprintln(stderr, "Ошибка:", err)
 		return 1
+	}
+	if options.Command == "task-check" {
+		report := executeTaskCheck(model, options, stdout, stderr, osCommandRunner{})
+		data, marshalErr := marshalTaskCheckReport(report)
+		if marshalErr != nil {
+			fmt.Fprintln(stderr, "Ошибка:", marshalErr)
+			return 1
+		}
+		reportWriteFailed := false
+		if options.ReportPath != "" {
+			if err := writeReportAtomically(options.ReportPath, data); err != nil {
+				fmt.Fprintln(stderr, "Не удалось сохранить отчёт:", err)
+				reportWriteFailed = true
+			}
+		}
+		if options.Format == "json" {
+			fmt.Fprintln(stdout, string(data))
+		} else {
+			printTaskCheckText(stdout, report)
+		}
+		if report.Status != "passed" || reportWriteFailed {
+			return 1
+		}
+		return 0
 	}
 	if options.Command == "check" {
 		if options.Format == "json" {
