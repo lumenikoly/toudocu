@@ -526,7 +526,11 @@ func renderDocumentPage(model *Model, document *Document) string {
 		id := stableEntityIDRE.FindString(document.Title)
 		computedStatus = `<nav class="task-page-tabs" aria-label="Представления задачи"><span aria-current="page">Контракт задачи</span><a href="/changes/?task=` + escapeAttr(url.QueryEscape(id)) + `&amp;path=` + escapeAttr(url.QueryEscape(documentContextPath(model, document))) + `">Изменения</a></nav>` + computedStatus
 	}
-	content := breadcrumbs(model, document.OutputPath, document.Title) + `<header class="page-header"><div class="page-kicker">` + renderStatusChip(displayStatus) + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + issues + `</div><h1>` + escapeHTML(document.Title) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` + renderMetadata(document) + renderProgress(document.TaskStats, "Готовность документа") + controls + `<div class="page-actions">` + renderDocumentContextButton(model, document) + `<button class="collapse-all-button" type="button" data-collapse-all data-collapse-state="expanded" aria-expanded="true"><span class="collapse-all-icon" aria-hidden="true"><span class="collapse-icon collapse-icon-up">↑</span><span class="collapse-icon collapse-icon-down">↓</span></span><span data-collapse-label>Свернуть разделы</span></button></div></header>` + computedStatus + `<article class="doc-content">` + body + `</article>` + screenConnections + renderRelated(model, document)
+	statusChip := ""
+	if strings.TrimSpace(document.Metadata["status"]) != "" {
+		statusChip = renderStatusChip(displayStatus)
+	}
+	content := breadcrumbs(model, document.OutputPath, document.Title) + `<header class="page-header"><div class="page-kicker">` + statusChip + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + issues + `</div><h1>` + escapeHTML(document.Title) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` + renderMetadata(document) + renderProgress(document.TaskStats, "Готовность документа") + controls + `<div class="page-actions">` + renderDocumentContextButton(model, document) + `<button class="collapse-all-button" type="button" data-collapse-all data-collapse-state="expanded" aria-expanded="true"><span class="collapse-icon collapse-icon-up">↑</span><span class="collapse-icon collapse-icon-down">↓</span></span><span data-collapse-label>Свернуть разделы</span></button></div></header>` + computedStatus + `<article class="doc-content">` + body + `</article>` + screenConnections + renderRelated(model, document)
 	content += flowConnections
 	return pageShell(model, document.OutputPath, document.Title, document.Description, content, renderTOC(document))
 }
@@ -574,7 +578,11 @@ func docCard(current string, document *Document) string {
 			}
 		}
 	}
-	return `<article class="document-card" data-filter-item data-search="` + escapeAttr(searchText) + `" data-status="` + escapeAttr(document.Status.Kind) + `" data-type="` + escapeAttr(document.Type) + `" data-work-type="` + escapeAttr(workType) + `" data-severity="` + escapeAttr(severity) + `" data-regression="` + escapeAttr(regression) + `" data-reproducibility="` + escapeAttr(reproducibility) + `" data-cause="` + escapeAttr(causeState) + `" data-regression-test="` + escapeAttr(regressionTestState) + `" data-owner="` + escapeAttr(document.Metadata["owner"]) + `" data-archive="` + archiveState + `"><div class="card-kicker">` + renderStatusChip(document.Status) + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + archiveBadge + `</div><h3><a href="` + escapeAttr(relativeURL(current, document.OutputPath)) + `">` + escapeHTML(document.Title) + `</a></h3><p>` + escapeHTML(truncate(document.Description, 180)) + `</p>` + workDetails + renderProgress(document.TaskStats, "Задачи") + `<div class="card-path">` + escapeHTML(document.SourcePath) + `</div></article>`
+	statusChip := ""
+	if strings.TrimSpace(document.Metadata["status"]) != "" {
+		statusChip = renderStatusChip(document.Status)
+	}
+	return `<article class="document-card" data-filter-item data-search="` + escapeAttr(searchText) + `" data-status="` + escapeAttr(document.Status.Kind) + `" data-type="` + escapeAttr(document.Type) + `" data-work-type="` + escapeAttr(workType) + `" data-severity="` + escapeAttr(severity) + `" data-regression="` + escapeAttr(regression) + `" data-reproducibility="` + escapeAttr(reproducibility) + `" data-cause="` + escapeAttr(causeState) + `" data-regression-test="` + escapeAttr(regressionTestState) + `" data-owner="` + escapeAttr(document.Metadata["owner"]) + `" data-archive="` + archiveState + `"><div class="card-kicker">` + statusChip + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + archiveBadge + `</div><h3><a href="` + escapeAttr(relativeURL(current, document.OutputPath)) + `">` + escapeHTML(document.Title) + `</a></h3><p>` + escapeHTML(truncate(document.Description, 180)) + `</p>` + workDetails + renderProgress(document.TaskStats, "Задачи") + `<div class="card-path">` + escapeHTML(document.SourcePath) + `</div></article>`
 }
 
 func filterControls(includeStatus, includeType bool) string {
