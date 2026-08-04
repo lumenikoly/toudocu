@@ -18,7 +18,10 @@
   воспроизводимый портал с поиском, темами, branding и локализацией.
 - Workflow рабочих задач включает typed scaffolds, readiness, контекст, проверку
   и traceability; все публичные JSON-отчёты используют schema v1.
-- Skill `use-docu-docu` добавляет явные agent-workflow для инициализации,
+- Skill `docu-docu` добавляет явные agent-workflow для инициализации,
   проверки актуальности исходной документации и перевода locale tree.
 - Релиз собирается для пяти платформ с единым quality gate, checksums, лицензией
   Apache-2.0 и notices для встроенных сторонних компонентов.
+- POSIX- и PowerShell-installers автоматически выбирают релизный
+  бинарник, проверяют SHA-256 и без `sudo` устанавливают или
+  обновляют Docu-docu в профиле пользователя.

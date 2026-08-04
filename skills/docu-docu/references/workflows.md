@@ -17,11 +17,11 @@ Before choosing flags:
 
 Use `docu-docu` from `PATH`. In the Docu-docu source repository, substitute
 `go run ./cmd/docu-docu`. The Go CLI has no `init` command. The explicit
-`$use-docu-docu init` prompt follows [init.md](init.md); other document creation
+`$docu-docu init` prompt follows [init.md](init.md); other document creation
 uses the bundled templates.
 
-The Go CLI also has no `refresh` command. Explicit `$use-docu-docu refresh` and
-`$use-docu-docu refresh diff` prompts follow [refresh.md](refresh.md). The first
+The Go CLI also has no `refresh` command. Explicit `$docu-docu refresh` and
+`$docu-docu refresh diff` prompts follow [refresh.md](refresh.md). The first
 reviews all source documentation; the second scopes evidence from the current
 worktree relative to `HEAD` and includes affected documentation.
 

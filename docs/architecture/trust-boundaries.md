@@ -6,7 +6,8 @@
 Markdown, ссылки, assets и Mermaid source считаются недоверенными данными;
 repository root и выбранные output/report paths задают файловую границу; команды
 work item считаются доверенным кодом только после отдельного явного разрешения
-на запуск.
+на запуск. До запуска CLI release installer отдельно доверяет GitHub Release
+как единому удалённому источнику binary и checksum.
 
 ## Область
 
@@ -59,3 +60,18 @@ Hooks, shell, fetch, checkout и изменение index не выполняю�
 команды из Markdown. Исполнение появляется только в `task verify --run` после
 task-local validation gate; правила разрешения описаны в
 [MOD-CLI](../modules/cli.md).
+
+## Граница release bootstrap
+
+POSIX- и PowerShell-installers выполняются до Go CLI с правами текущего
+пользователя. Они загружают точно выбранный binary и `checksums.txt` из
+одного HTTPS GitHub Release, требуют ровно одину matching SHA-256 запись и
+проверяют version до замены. Binary и checksum имеют один trust root:
+эта проверка обнаруживает повреждение, но не заменяет независимую подпись.
+
+Установка не получает `sudo`: по умолчанию запись ограничена user
+install dir и одной idempotent `PATH` entry. Явный `DOCU_DOCU_INSTALL_DIR`
+может указать любой доступный для записи каталог и не меняет profile. Загрузка,
+проверка и staging завершаются до замены; ошибка не повреждает уже
+установленный binary. Прямые `curl | sh` и `irm | iex` осознанно добавляют
+удалённый installer в trust boundary пользователя.

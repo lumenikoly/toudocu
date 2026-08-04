@@ -1,12 +1,12 @@
 # Documentation refresh
 
-Use this workflow only when the user explicitly invokes `$use-docu-docu refresh`
-or `$use-docu-docu refresh diff`. Both forms review documentation currency and
+Use this workflow only when the user explicitly invokes `$docu-docu refresh`
+or `$docu-docu refresh diff`. Both forms review documentation currency and
 apply evidence-backed updates. They are skill workflows, not Docu-docu Go CLI
 commands.
 
 Refresh never performs initialization. Do not create a new documentation tree,
-install or update managed `AGENTS.md` guidance, or infer `$use-docu-docu init`
+install or update managed `AGENTS.md` guidance, or infer `$docu-docu init`
 from missing files. If no established documentation exists, stop and recommend
 explicit init.
 
@@ -18,10 +18,10 @@ explicit init.
 2. Resolve Docu-docu as described in `SKILL.md` and run the existing ordinary
    project check with JSON output. Diagnostics describe structural state; they
    are not evidence that a claim is current or useful.
-3. For `$use-docu-docu refresh`, inventory every source Markdown document and the
+3. For `$docu-docu refresh`, inventory every source Markdown document and the
    current repository evidence relevant to it: code, tests, public interfaces,
    schemas, configuration, CI, requirements, ADRs, and confirmed user input.
-4. For `$use-docu-docu refresh diff`, require a Git worktree with a valid `HEAD`.
+4. For `$docu-docu refresh diff`, require a Git worktree with a valid `HEAD`.
    Determine changed tracked paths from `git diff --name-only HEAD --` and
    untracked paths from `git ls-files --others --exclude-standard`. This includes
    staged and unstaged tracked changes. Do not compare with a merge-base or

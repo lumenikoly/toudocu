@@ -39,10 +39,10 @@ criteria, verification или передача между сессиями и и
 создания дубликата.
 
 Устанавливаемый skill закрепляет этот выборочный режим в `AGENTS.md` только по
-явному prompt-вызову `$use-docu-docu init`. Это не команда Go CLI и не повод
+явному prompt-вызову `$docu-docu init`. Это не команда Go CLI и не повод
 создавать отдельную задачу только ради инициализации.
 
-Полный `$use-docu-docu refresh` и ограниченный `$use-docu-docu refresh diff` также
+Полный `$docu-docu refresh` и ограниченный `$docu-docu refresh diff` также
 не создают `TASK-*` безусловно. Они применяют тот же порог: durable work item
 появляется только при существенном scope, устойчивых acceptance criteria,
 handoff или явном требовании пользователя либо проекта.

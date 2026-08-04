@@ -65,7 +65,7 @@ docu-docu task changes TASK-AUTH-015 ./docs --format json
 Exit code `1` означает построенный отчёт с error, `2` — неверный диапазон, `3`
 — Git недоступен/не найден, `4` — внутренняя ошибка.
 
-Workflow `$use-docu-docu translate` использует этот report только как входные
+Workflow `$docu-docu translate` использует этот report только как входные
 данные: skill-параметр `--task` вызывает канонический `task changes` до
 `working-tree`, а `--base` —
 `<base> → working-tree`. Его API-only override включает assets даже если

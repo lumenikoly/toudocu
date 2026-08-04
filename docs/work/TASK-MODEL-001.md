@@ -18,7 +18,7 @@
 
 - `internal/app/sections.go`, модель, config parser и портал;
 - canonical route каталога FLOW без legacy index в source directory;
-- `$use-docu-docu` init/refresh workflow;
+- `$docu-docu` init/refresh workflow;
 - configuration, model, portal и CLI documentation.
 
 ## Не входит в исправление

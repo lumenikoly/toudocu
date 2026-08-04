@@ -38,7 +38,7 @@ CLI предоставляет `search`, `task init`, `scaffold`, `task ready`, 
 - `internal/app/scaffold.go`
 - `internal/app/task_ready.go`
 - `docs/`
-- `skills/use-docu-docu/`
+- `skills/docu-docu/`
 
 ## Не входит в задачу
 
@@ -77,4 +77,4 @@ CLI предоставляет `search`, `task init`, `scaffold`, `task ready`, 
 
 Обновляются `README.md`, `CHANGELOG.md`, `docs/contracts/cli.md`,
 `docs/roadmap.md`, `docs/use-cases/`, `docs/flows/FLOW-TASK-WORKFLOW.md`,
-`docs/decisions/ADR-002.md` и `skills/use-docu-docu/`.
+`docs/decisions/ADR-002.md` и `skills/docu-docu/`.

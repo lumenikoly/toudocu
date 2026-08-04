@@ -1,6 +1,6 @@
 # Explicit project initialization
 
-Use this workflow only when the user explicitly invokes `$use-docu-docu init` or
+Use this workflow only when the user explicitly invokes `$docu-docu init` or
 unambiguously asks to run the skill's init workflow. Do not infer initialization
 from a missing `AGENTS.md` block, an ordinary documentation request, a check, or
 another implicit skill trigger. The Docu-docu Go CLI has no `init` command.

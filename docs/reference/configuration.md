@@ -196,7 +196,7 @@ project:
 ## Отдельные roots переводов
 
 `translations` описывает независимые порталы для workflow
-`$use-docu-docu translate`; это не новая Go CLI-команда. Канонический `docs/`
+`$docu-docu translate`; это не новая Go CLI-команда. Канонический `docs/`
 остаётся единственным источником `task context` и `ProjectModel`.
 
 ```yaml

@@ -30,7 +30,7 @@
 8. Подробности FLOW, CONTRACT, REFERENCE, RUNBOOK, ADR и MODULE остаются в
    соответствующих источниках истины, а semantic gate проверяет архитектурную
    форму и смысл по `ARCH001`–`ARCH013`.
-9. `$use-docu-docu refresh` и `$use-docu-docu refresh diff` обновляют исходную
+9. `$docu-docu refresh` и `$docu-docu refresh diff` обновляют исходную
    документацию только по текущим repository evidence; даты меняются вместе с
    содержанием или связями, а `Last verified` требует фактической проверки
    runbook.

@@ -47,13 +47,13 @@ workflow и Git-backed changes. Прямые вызовы возвращают �
 
 ## Skill workflows актуализации
 
-Устанавливаемый `use-docu-docu` предоставляет изменяющие agent workflows,
+Устанавливаемый `docu-docu` предоставляет изменяющие agent workflows,
 которые не входят в Go CLI: `init`, `refresh`, `refresh diff` и `translate`.
 
-- `$use-docu-docu refresh` сверяет весь набор исходных Markdown-документов с
+- `$docu-docu refresh` сверяет весь набор исходных Markdown-документов с
   текущим кодом, тестами, публичными интерфейсами, schemas, configuration, CI,
   требованиями и решениями;
-- `$use-docu-docu refresh diff` начинает со staged, unstaged и untracked файлов
+- `$docu-docu refresh diff` начинает со staged, unstaged и untracked файлов
   относительно `HEAD` и добавляет зависимые документы по ссылкам, stable ID,
   task relationships и изменённому публичному поведению.
 

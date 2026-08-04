@@ -25,8 +25,8 @@
 
 CLI не интерпретирует пользовательский запрос. `task ready` и `task context`
 только читают данные, а `task verify --run` запускает команды после локального
-validation gate. Prompt-workflows `$use-docu-docu init`, `$use-docu-docu refresh`
-и `$use-docu-docu refresh diff` находятся за границей Go CLI.
+validation gate. Prompt-workflows `$docu-docu init`, `$docu-docu refresh`
+и `$docu-docu refresh diff` находятся за границей Go CLI.
 
 ## Бизнес-правила
 

@@ -1,9 +1,9 @@
 # Translation workflow
 
-Use only for an explicit `$use-docu-docu translate <locale>` request:
+Use only for an explicit `$docu-docu translate <locale>` request:
 
 ```text
-$use-docu-docu translate <locale> (--task <TASK-ID> | --base <ref> | --all-stale)
+$docu-docu translate <locale> (--task <TASK-ID> | --base <ref> | --all-stale)
 ```
 
 Exactly one mode is required. Normalize the locale, reject the canonical

@@ -52,6 +52,7 @@ release: check
 	cp LICENSE $(DIST)/
 	{ cat THIRD_PARTY_NOTICES.md; printf '\n\n# Embedded browser asset notices\n'; cat internal/app/assets/mermaid.LICENSE.txt; printf '\n\n'; cat internal/app/assets/codemirror.LICENSE.txt; } > $(DIST)/THIRD_PARTY_NOTICES.md
 	cp internal/app/assets/codemirror.checksums.txt $(DIST)/CODEMIRROR-CHECKSUMS.txt
+	cp scripts/install.sh scripts/install.ps1 $(DIST)/
 	cd $(DIST) && sha256sum * > checksums.txt
 
 clean:

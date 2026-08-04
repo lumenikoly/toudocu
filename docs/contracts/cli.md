@@ -36,8 +36,8 @@ Docu-docu.
 отклоняется как неизвестная команда.
 Историческая команда верхнего уровня `init`, skill-level имя `refresh` и
 прежняя `task check` отсутствуют без alias. Вызовы `docu-docu init` и `docu-docu
-refresh` отклоняются как неизвестные команды; `$use-docu-docu init`,
-`$use-docu-docu refresh` и `$use-docu-docu refresh diff` принадлежат AI-skill.
+refresh` отклоняются как неизвестные команды; `$docu-docu init`,
+`$docu-docu refresh` и `$docu-docu refresh diff` принадлежат AI-skill.
 
 ```text
 docu-docu search "<query>" [docs-dir] [--limit N] [--format text|json]

@@ -4,12 +4,12 @@
     "name": "Docu-docu",
     "version": "0.0.1"
   },
-  "generatedAt": "2026-08-03T18:51:50.772187239Z",
+  "generatedAt": "2026-08-04T20:14:41.302466285Z",
   "sourceDirectory": "docs",
-  "staleDays": 90,
+  "staleDays": 0,
   "project": {
     "title": "Docu-docu",
-    "description": "Docu-docu — dependency-free CLI на Go для проверяемой проектной документации в структурированном Markdown и автономного HTML-портала, работающего через file:// .",
+    "description": "Docu-docu — dependency-free CLI на Go с публичным Go-фасадом для проверяемой проектной документации в структурированном Markdown и автономного HTML-портала, работающего через file:// .",
     "status": {
       "kind": "done",
       "symbol": "✓",
@@ -19,8 +19,8 @@
     "stage": "Локально подготовлен стабильный релиз 0.0.1",
     "version": "0.0.1",
     "owner": "Команда Docu-docu",
-    "updated": "2026-08-03",
-    "summary": "CLI проверяет, собирает и локально раздаёт документацию, формирует типизированные JSON-отчёты, выдаёт контекст выбранной задачи и выполняет её проверки только по явной команде. Встроенная Mermaid Tiny отображает связанные процессы без CDN или Node.js. Безопасность путей, HTML, диаграмм, HTTP-раздачи и process timeout проверяется негативными тестами. Модель процессов формирует раздельные каталоги UC- и FLOW- , стабильные URL по ID и рабочее пространство use case с описанием, картой, проигрыванием и связями. Экранная модель формирует основной каталог, отдельную общую карту с SVG-связями, sitemap, hotspots и traceability. Всё работает через file:// , поддерживает клавиатуру, touch, состояния, ошибки и fallback без preview. Активные задачи, блокеры и следующий результат вычисляются из work items и roadmap и отображаются в HTML автоматически."
+    "updated": "2026-08-04",
+    "summary": "CLI проверяет, собирает и локально раздаёт документацию, формирует типизированные JSON-отчёты, выдаёт контекст выбранной задачи и выполняет её проверки только по явной команде. Корневой Go-пакет предоставляет стабильный фасад модели, рендеринга и отчётов для локального встраивания; канонический удалённый module path пока не опубликован. Встроенная Mermaid Tiny отображает связанные процессы без CDN или Node.js. Безопасность путей, HTML, диаграмм, HTTP-раздачи и process timeout проверяется негативными тестами. Модель процессов формирует раздельные каталоги UC- и FLOW- , стабильные URL по ID и рабочее пространство use case с описанием, картой, проигрыванием и связями. Экранная модель формирует основной каталог, отдельную общую карту с SVG-связями, sitemap, hotspots и traceability. Всё работает через file:// , поддерживает клавиатуру, touch, состояния, ошибки и fallback без preview. Активные задачи, блокеры и следующий результат вычисляются из work items и roadmap и отображаются в HTML автоматически."
   },
   "currentStatus": {
     "activeWork": [],
@@ -33,21 +33,21 @@
       "effectiveCompleted": false,
       "completionSource": "roadmap-checkbox",
       "document": "roadmap.md",
-      "line": 26
+      "line": 28
     }
   },
   "stats": {
-    "documents": 59,
-    "totalTasks": 10,
-    "completedTasks": 9,
+    "documents": 62,
+    "totalTasks": 12,
+    "completedTasks": 11,
     "remainingTasks": 1,
-    "taskProgress": 90,
-    "documentsComplete": 11,
+    "taskProgress": 92,
+    "documentsComplete": 12,
     "documentsInProgress": 2,
     "documentsNotStarted": 0,
-    "documentsWithoutTasks": 46,
+    "documentsWithoutTasks": 48,
     "staleDocuments": 0,
-    "documentsWithoutDescription": 11,
+    "documentsWithoutDescription": 12,
     "documentsWithoutStatus": 0,
     "brokenLinks": 0,
     "warnings": 0,
@@ -86,7 +86,7 @@
       "outputPath": "index.html",
       "type": "overview",
       "title": "Docu-docu",
-      "description": "Docu-docu — dependency-free CLI на Go для проверяемой проектной документации в структурированном Markdown и автономного HTML-портала, работающего через file:// .",
+      "description": "Docu-docu — dependency-free CLI на Go с публичным Go-фасадом для проверяемой проектной документации в структурированном Markdown и автономного HTML-портала, работающего через file:// .",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -100,7 +100,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T18:02:41.680769751Z",
+      "updatedAt": "2026-08-04T17:55:47.551125692Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -114,12 +114,12 @@
       "outputPath": "status.html",
       "type": "status",
       "title": "Текущее состояние",
-      "description": "Релиз 0.0.1 локально подготовлен, покрыт автоматическими проверками и прошёл независимый semantic review. Git-тег и GitHub Release не создавались.",
+      "description": "Релиз 0.0.1 локально подготовлен вместе с проверяемыми POSIX- и PowerShell-installers. Git-тег и GitHub Release не создавались, поэтому one-liner станет рабочим только после публикации владельцем.",
       "metadata": {
         "owner": "Команда Docu-docu",
         "stage": "Локально подготовлен стабильный релиз 0.0.1",
         "status": "Готово",
-        "updated": "2026-08-03",
+        "updated": "2026-08-04",
         "version": "0.0.1"
       },
       "status": {
@@ -134,7 +134,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T00:00:00Z",
+      "updatedAt": "2026-08-04T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -157,12 +157,12 @@
         "recognized": true
       },
       "taskStats": {
-        "total": 10,
-        "completed": 9,
+        "total": 12,
+        "completed": 11,
         "remaining": 1,
-        "percent": 90
+        "percent": 92
       },
-      "updatedAt": "2026-08-03T18:02:41.686289347Z",
+      "updatedAt": "2026-08-04T17:52:58.789622342Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -190,7 +190,7 @@
         "remaining": 1,
         "percent": 89
       },
-      "updatedAt": "2026-08-03T18:02:41.686070091Z",
+      "updatedAt": "2026-08-04T17:52:58.790622344Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -218,7 +218,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-27T20:57:46.365500173Z",
+      "updatedAt": "2026-08-04T17:37:44.154091352Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -246,7 +246,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-27T20:57:46.365500173Z",
+      "updatedAt": "2026-08-04T17:37:44.154961957Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -278,7 +278,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T18:02:41.673718096Z",
+      "updatedAt": "2026-08-04T17:37:50.256272857Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -314,7 +314,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T19:06:03.26357035Z",
+      "updatedAt": "2026-08-04T17:37:48.016614839Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -351,7 +351,7 @@
       "type": "architecture",
       "sectionType": "architecture",
       "title": "Архитектура",
-      "description": "Docu-docu — локальный dependency-free Go CLI между исходным каталогом документации и двумя потребителями проверенной модели: автоматизацией через CLI/JSON и читателем автономного HTML-портала. Опциональный serve добавляет локальный HTTP/editor runtime; база данных и внешний runtime в границу системы не входят.",
+      "description": "Docu-docu — локальный dependency-free Go runtime между исходным каталогом документации и потребителями проверенной модели: Go-кодом через публичный фасад, автоматизацией через CLI/JSON и читателем автономного HTML-портала. Опциональный serve добавляет локальный HTTP/editor runtime; база данных и внешний runtime в границу системы не входят.",
       "metadata": {
         "documentType": "Architecture Overview"
       },
@@ -367,7 +367,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T18:02:41.673889044Z",
+      "updatedAt": "2026-08-04T17:55:47.5539959Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -429,7 +429,7 @@
       "type": "architecture",
       "sectionType": "architecture",
       "title": "Разделение ответственности runtime-компонентов",
-      "description": "Runtime образует последовательный конвейер: CLI нормализует операцию, Markdown слой извлекает безопасное представление, модель проверяет структуру и связи, а выбранный потребитель возвращает отчёт, строит портал или выполняет отдельно разрешённый task workflow.",
+      "description": "Runtime образует последовательный конвейер: CLI либо прямой вызов Go API задаёт операцию, Markdown-слой извлекает безопасное представление, модель проверяет структуру и связи, а выбранный потребитель возвращает отчёт, строит портал или выполняет отдельно разрешённый task workflow.",
       "metadata": {
         "architectureQuestion": "Как runtime-компоненты делят ответственность?",
         "documentType": "Architecture"
@@ -446,7 +446,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T14:46:49.417449274Z",
+      "updatedAt": "2026-08-04T17:53:30.343702237Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -458,6 +458,14 @@
           "targetKind": "document",
           "target": "modules/cli.md",
           "href": "../modules/cli.html"
+        },
+        {
+          "destination": "../contracts/go-api.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/go-api.md",
+          "href": "../contracts/go-api.html"
         },
         {
           "destination": "../modules/markdown.md",
@@ -521,6 +529,7 @@
       ],
       "relatedDocuments": [
         "modules/cli.md",
+        "contracts/go-api.md",
         "modules/markdown.md",
         "modules/model.md",
         "modules/site.md",
@@ -537,7 +546,7 @@
       "type": "architecture",
       "sectionType": "architecture",
       "title": "Системная граница Docu-docu",
-      "description": "Docu-docu ограничен одним локальным процессом, который читает документацию и репозиторий, строит проверенную модель и выдаёт diagnostics либо производные представления. В serve тот же процесс принимает ограниченные editor-запросы и атомарно сохраняет выбранный workspace-файл. Пользователь, агент, CI и браузер остаются взаимодействующими сторонами за этой границей.",
+      "description": "Docu-docu ограничен одним локальным процессом, который читает документацию и репозиторий, строит проверенную модель и выдаёт diagnostics либо производные представления. Встраивающий Go-код вызывает тот же фасад модели и операций без отдельного процесса. В serve процесс принимает ограниченные editor-запросы и атомарно сохраняет выбранный workspace-файл. Пользователь, библиотечный потребитель, агент, CI и браузер остаются взаимодействующими сторонами за этой границей. Release installer также остаётся снаружи: это отдельный bootstrap, который использует сеть только до запуска Go runtime.",
       "metadata": {
         "architectureQuestion": "Где проходит системная граница Docu-docu и кто с ней взаимодействует?",
         "documentType": "Architecture"
@@ -554,7 +563,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T18:02:41.674069407Z",
+      "updatedAt": "2026-08-04T20:01:02.557990969Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -566,6 +575,14 @@
           "targetKind": "document",
           "target": "contracts/cli.md",
           "href": "../contracts/cli.html"
+        },
+        {
+          "destination": "../contracts/go-api.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/go-api.md",
+          "href": "../contracts/go-api.html"
         },
         {
           "destination": "../decisions/001-dependency-free.md",
@@ -582,6 +599,14 @@
           "targetKind": "document",
           "target": "decisions/ADR-002.md",
           "href": "../decisions/ADR-002.html"
+        },
+        {
+          "destination": "../guides/installation.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/installation.md",
+          "href": "../guides/installation.html"
         }
       ],
       "backlinks": [
@@ -589,8 +614,10 @@
       ],
       "relatedDocuments": [
         "contracts/cli.md",
+        "contracts/go-api.md",
         "decisions/001-dependency-free.md",
-        "decisions/ADR-002.md"
+        "decisions/ADR-002.md",
+        "guides/installation.md"
       ]
     },
     {
@@ -600,7 +627,7 @@
       "type": "architecture",
       "sectionType": "architecture",
       "title": "Границы доверия Docu-docu",
-      "description": "Markdown, ссылки, assets и Mermaid source считаются недоверенными данными; repository root и выбранные output/report paths задают файловую границу; команды work item считаются доверенным кодом только после отдельного явного разрешения на запуск.",
+      "description": "Markdown, ссылки, assets и Mermaid source считаются недоверенными данными; repository root и выбранные output/report paths задают файловую границу; команды work item считаются доверенным кодом только после отдельного явного разрешения на запуск. До запуска CLI release installer отдельно доверяет GitHub Release как единому удалённому источнику binary и checksum.",
       "metadata": {
         "architectureQuestion": "Где проходят границы доверия?",
         "documentType": "Architecture"
@@ -617,7 +644,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T18:02:41.674276277Z",
+      "updatedAt": "2026-08-04T20:10:12.84064625Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -704,7 +731,7 @@
         "id": "CON-CLI-V1",
         "owner": "Команда Docu-docu",
         "status": "Готово",
-        "updated": "2026-08-03"
+        "updated": "2026-08-04"
       },
       "status": {
         "kind": "done",
@@ -718,11 +745,19 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T00:00:00Z",
+      "updatedAt": "2026-08-04T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
       "links": [
+        {
+          "destination": "go-api.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/go-api.md",
+          "href": "go-api.html"
+        },
         {
           "destination": "../guides/work-items.md",
           "broken": false,
@@ -759,6 +794,7 @@
       "backlinks": [
         "architecture/system-boundary.md",
         "architecture/trust-boundaries.md",
+        "contracts/go-api.md",
         "flows/FLOW-DOCS-BUILD.md",
         "flows/FLOW-DOCS-SERVE.md",
         "flows/FLOW-TASK-WORKFLOW.md",
@@ -773,6 +809,7 @@
         "use-cases/UC-TASK-03.md"
       ],
       "relatedDocuments": [
+        "contracts/go-api.md",
         "guides/work-items.md",
         "contracts/editor-http.md",
         "guides/documentation-changes.md",
@@ -806,7 +843,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T18:02:41.675365261Z",
+      "updatedAt": "2026-08-04T17:37:50.257324912Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -820,6 +857,65 @@
         "work/TASK-SITE-002.md"
       ],
       "relatedDocuments": []
+    },
+    {
+      "id": "CON-GO-API-V1",
+      "sourcePath": "contracts/go-api.md",
+      "outputPath": "contracts/go-api.html",
+      "type": "contract",
+      "sectionType": "contracts",
+      "title": "Go API-контракт Docu-docu v1",
+      "description": "Контракт описывает экспортируемый фасад корневого Go-пакета. Он нужен разработчикам, которые встраивают модель, рендеринг или отчёты Docu-docu без запуска отдельного процесса.",
+      "metadata": {
+        "id": "CON-GO-API-V1",
+        "owner": "Команда Docu-docu",
+        "status": "Готово",
+        "updated": "2026-08-04"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Готово",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-04T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "cli.html"
+        },
+        {
+          "destination": "cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "cli.html"
+        }
+      ],
+      "backlinks": [
+        "architecture/runtime-components.md",
+        "architecture/system-boundary.md",
+        "contracts/cli.md",
+        "modules/model.md",
+        "reference/features.md"
+      ],
+      "relatedDocuments": [
+        "contracts/cli.md"
+      ]
     },
     {
       "id": "ADR-001",
@@ -1393,7 +1489,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T18:02:41.677803732Z",
+      "updatedAt": "2026-08-04T19:29:54.228409592Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1434,6 +1530,37 @@
     },
     {
       "id": "",
+      "sourcePath": "guides/installation.md",
+      "outputPath": "guides/installation.html",
+      "type": "guide",
+      "sectionType": "guides",
+      "title": "Установка и обновление Docu-docu",
+      "description": "Это руководство помогает без прав администратора установить подходящий бинарник из GitHub Release. Та же команда повторно проверяет и обновляет установку.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-04T20:10:12.841646256Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "architecture/system-boundary.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
       "sourcePath": "guides/processes.md",
       "outputPath": "guides/processes.html",
       "type": "guide",
@@ -1453,7 +1580,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T18:02:41.67806661Z",
+      "updatedAt": "2026-08-04T17:37:50.258773593Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1482,7 +1609,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T09:00:46.039679568Z",
+      "updatedAt": "2026-08-04T17:37:47.497167782Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1513,7 +1640,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T18:02:41.678703511Z",
+      "updatedAt": "2026-08-04T17:37:50.25898079Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1545,7 +1672,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T18:02:41.678937397Z",
+      "updatedAt": "2026-08-04T17:37:50.259132707Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1577,7 +1704,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T18:02:41.680252152Z",
+      "updatedAt": "2026-08-04T19:29:54.230235652Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1848,7 +1975,7 @@
         "id": "MOD-MODEL",
         "owner": "Команда Docu-docu",
         "status": "Готово",
-        "updated": "2026-07-31"
+        "updated": "2026-08-04"
       },
       "status": {
         "kind": "done",
@@ -1862,11 +1989,19 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T00:00:00Z",
+      "updatedAt": "2026-08-04T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
       "links": [
+        {
+          "destination": "../contracts/go-api.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/go-api.md",
+          "href": "../contracts/go-api.html"
+        },
         {
           "destination": "../contracts/cli.md",
           "broken": false,
@@ -1943,6 +2078,7 @@
         "use-cases/UC-TASK-03.md"
       ],
       "relatedDocuments": [
+        "contracts/go-api.md",
         "contracts/cli.md",
         "guides/work-items.md",
         "quality/index.md",
@@ -2074,7 +2210,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T18:02:41.684492091Z",
+      "updatedAt": "2026-08-04T17:37:50.260886123Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2199,7 +2335,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T18:02:41.685034412Z",
+      "updatedAt": "2026-08-04T17:37:50.261049374Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2231,7 +2367,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T18:02:41.685419629Z",
+      "updatedAt": "2026-08-04T19:29:54.233235703Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2260,7 +2396,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T18:02:41.685866749Z",
+      "updatedAt": "2026-08-04T19:29:54.233235703Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2272,6 +2408,14 @@
           "targetKind": "document",
           "target": "contracts/cli.md",
           "href": "../contracts/cli.html"
+        },
+        {
+          "destination": "../contracts/go-api.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/go-api.md",
+          "href": "../contracts/go-api.html"
         },
         {
           "destination": "../guides/quality-runbooks.md",
@@ -2311,6 +2455,7 @@
       ],
       "relatedDocuments": [
         "contracts/cli.md",
+        "contracts/go-api.md",
         "guides/quality-runbooks.md",
         "contracts/editor-http.md",
         "guides/screens.md",
@@ -3260,7 +3405,7 @@
         "priority": "Высокий",
         "status": "Выполнено",
         "type": "Documentation",
-        "updated": "2026-07-26",
+        "updated": "2026-08-04",
         "useCase": "UC-DOCS-02"
       },
       "status": {
@@ -3275,7 +3420,7 @@
         "remaining": 0,
         "percent": 100
       },
-      "updatedAt": "2026-07-26T00:00:00Z",
+      "updatedAt": "2026-08-04T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -3471,6 +3616,42 @@
     },
     {
       "id": "",
+      "sourcePath": "work/TASK-RELEASE-002.md",
+      "outputPath": "work/TASK-RELEASE-002.html",
+      "type": "work",
+      "sectionType": "work",
+      "title": "TASK-RELEASE-002: Добавить установку и обновление из GitHub Release",
+      "description": "",
+      "metadata": {
+        "module": "MOD-CLI",
+        "owner": "Команда Docu-docu",
+        "standards": "STD-GO-001, STD-DOCS-001",
+        "status": "Выполнено",
+        "type": "Maintenance",
+        "updated": "2026-08-04"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Выполнено",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 6,
+        "completed": 6,
+        "remaining": 0,
+        "percent": 100
+      },
+      "updatedAt": "2026-08-04T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
       "sourcePath": "work/TASK-SITE-001.md",
       "outputPath": "work/TASK-SITE-001.html",
       "type": "work",
@@ -3588,8 +3769,8 @@
       },
       "plannedDate": "",
       "taskStats": {
-        "total": 9,
-        "completed": 9,
+        "total": 11,
+        "completed": 11,
         "remaining": 0,
         "percent": 100
       },
@@ -3663,6 +3844,23 @@
           "line": 14
         },
         {
+          "id": "UC-DOCS-05",
+          "text": "UC-DOCS-05 Пользователь просматривает изменения документации.",
+          "kind": "use-case",
+          "declaredCompleted": true,
+          "effectiveCompleted": true,
+          "completionSource": "use-case-status",
+          "targetDocument": "use-cases/UC-DOCS-05.md",
+          "targetStatus": {
+            "kind": "done",
+            "symbol": "✓",
+            "label": "Готово",
+            "recognized": true
+          },
+          "document": "roadmap.md",
+          "line": 15
+        },
+        {
           "id": "UC-TASK-01",
           "text": "UC-TASK-01 Исполнитель получает контекст выбранной задачи.",
           "kind": "use-case",
@@ -3677,7 +3875,7 @@
             "recognized": true
           },
           "document": "roadmap.md",
-          "line": 15
+          "line": 16
         },
         {
           "id": "UC-TASK-02",
@@ -3694,7 +3892,7 @@
             "recognized": true
           },
           "document": "roadmap.md",
-          "line": 16
+          "line": 17
         },
         {
           "id": "UC-TASK-03",
@@ -3711,7 +3909,7 @@
             "recognized": true
           },
           "document": "roadmap.md",
-          "line": 17
+          "line": 18
         },
         {
           "id": "CON-CLI-V1",
@@ -3728,7 +3926,24 @@
             "recognized": true
           },
           "document": "roadmap.md",
-          "line": 18
+          "line": 19
+        },
+        {
+          "id": "CON-GO-API-V1",
+          "text": "CON-GO-API-V1 Зафиксирован публичный Go API-контракт.",
+          "kind": "contract",
+          "declaredCompleted": true,
+          "effectiveCompleted": true,
+          "completionSource": "roadmap-checkbox",
+          "targetDocument": "contracts/go-api.md",
+          "targetStatus": {
+            "kind": "done",
+            "symbol": "✓",
+            "label": "Готово",
+            "recognized": true
+          },
+          "document": "roadmap.md",
+          "line": 20
         },
         {
           "id": "DLV-SELF-DOCS-01",
@@ -3738,7 +3953,7 @@
           "effectiveCompleted": true,
           "completionSource": "roadmap-checkbox",
           "document": "roadmap.md",
-          "line": 19
+          "line": 21
         }
       ],
       "document": "roadmap.md",
@@ -3768,7 +3983,7 @@
           "effectiveCompleted": false,
           "completionSource": "roadmap-checkbox",
           "document": "roadmap.md",
-          "line": 26
+          "line": 28
         }
       ],
       "document": "roadmap.md",
@@ -4216,7 +4431,7 @@
         "owner": "Команда Docu-docu",
         "scope": "Исходная документация, шаблоны skill и отслеживаемые порталы",
         "updated": "2026-07-31",
-        "rules": "Глобальный охват определяет roadmap.md ; состояние явно связанного UC- берётся из use case. Остальные локальные чек-листы не агрегируются. Сгенерированные build/ , dist/ , example/site/ , project-docs/ и example/project-docs/ не редактируются как источник истины. Отслеживаемые порталы пересобираются из Markdown после semantic review и структурной проверки. Типизированный документ создаётся только для подтверждённой семантики; неизвестные владелец, дата, статус или процедура не изобретаются ради отсутствия предупреждения. Явно связанные стандарты и runbook читаются вместе с task context; область других применимых стандартов проверяется автором без glob-эвристик CLI. docs/runbooks/ создаётся только при наличии реальной эксплуатационной процедуры. docs/architecture/overview.md является обязательной картой; каждый другой Markdown-файл в architecture/ отвечает на один явный архитектурный вопрос и добавляется прямой ссылкой из overview. Подробности FLOW, CONTRACT, REFERENCE, RUNBOOK, ADR и MODULE остаются в соответствующих источниках истины, а semantic gate проверяет архитектурную форму и смысл по ARCH001 – ARCH013 . $use-docu-docu refresh и $use-docu-docu refresh diff обновляют исходную документацию только по текущим repository evidence; даты меняются вместе с содержанием или связями, а Last verified требует фактической проверки runbook. Корневой CHANGELOG.md , если он существует, является единственным специальным источником релизных изменений. Его нельзя дублировать в docs/changelog.md : такой файл остаётся обычным Markdown-документом. Не создавайте корневой журнал только ради portal-вкладки.",
+        "rules": "Глобальный охват определяет roadmap.md ; состояние явно связанного UC- берётся из use case. Остальные локальные чек-листы не агрегируются. Сгенерированные build/ , dist/ , example/site/ , project-docs/ и example/project-docs/ не редактируются как источник истины. Отслеживаемые порталы пересобираются из Markdown после semantic review и структурной проверки. Типизированный документ создаётся только для подтверждённой семантики; неизвестные владелец, дата, статус или процедура не изобретаются ради отсутствия предупреждения. Явно связанные стандарты и runbook читаются вместе с task context; область других применимых стандартов проверяется автором без glob-эвристик CLI. docs/runbooks/ создаётся только при наличии реальной эксплуатационной процедуры. docs/architecture/overview.md является обязательной картой; каждый другой Markdown-файл в architecture/ отвечает на один явный архитектурный вопрос и добавляется прямой ссылкой из overview. Подробности FLOW, CONTRACT, REFERENCE, RUNBOOK, ADR и MODULE остаются в соответствующих источниках истины, а semantic gate проверяет архитектурную форму и смысл по ARCH001 – ARCH013 . $docu-docu refresh и $docu-docu refresh diff обновляют исходную документацию только по текущим repository evidence; даты меняются вместе с содержанием или связями, а Last verified требует фактической проверки runbook. Корневой CHANGELOG.md , если он существует, является единственным специальным источником релизных изменений. Его нельзя дублировать в docs/changelog.md : такой файл остаётся обычным Markdown-документом. Не создавайте корневой журнал только ради portal-вкладки.",
         "automaticChecks": "go run ./cmd/docu-docu check ./docs --strict --stale-days 0 ; тесты целостности шаблонов и публичного JSON schema; тесты ссылок, стабильных ID, task context и портальной навигации. Команды запускаются из work item или доверенного CI workflow, а не напрямую из этого стандарта.",
         "document": "quality/STD-DOCS-001.md"
       },
@@ -4654,7 +4869,7 @@
           "README.md",
           "screens_test.go",
           "skill_templates_test.go",
-          "skills/use-docu-docu/"
+          "skills/docu-docu/"
         ],
         "result": "docs/architecture/overview.md является обязательной картой архитектуры, а каждый другой Markdown-документ в architecture/ отвечает на один явный архитектурный вопрос и напрямую перечислен в overview.",
         "behaviorChange": "Было Каталог architecture/ был необязательным набором специализированных Markdown-документов без обязательной карты, явного вопроса и повышенной строгости локальных ссылок. Станет Обычный check требует корректный architecture overview, один непустой вопрос для каждого подробного документа, прямую рекурсивную карту документов и безопасные существующие локальные ссылки. Skill предоставляет раздельные RU/EN-шаблоны, безопасный init и semantic gate ARCH001 – ARCH013 .",
@@ -5215,7 +5430,7 @@
           "internal/app/types.go",
           "report_types.go",
           "search.go",
-          "skills/use-docu-docu/"
+          "skills/docu-docu/"
         ],
         "result": "CLI предоставляет детерминированный путь от поиска документации и создания каркаса до readiness, контекста и явной проверки выбранной задачи.",
         "behaviorChange": "Было CLI предоставлял только task context и исполняющую команду task check ; каркасы, readiness и source-level поиск отсутствовали. Станет CLI предоставляет search , task init , scaffold , task ready , расширенный task context и task verify ; старая команда task check отсутствует.",
@@ -5223,7 +5438,7 @@
         "after": "CLI предоставляет search , task init , scaffold , task ready , расширенный task context и task verify ; старая команда task check отсутствует.",
         "outOfScope": "интерпретация natural-language запроса внутри Docu-docu; автоматический выбор или заполнение сущностей; автоматическое изменение статусов и acceptance checkboxes; новые внешние зависимости.",
         "plan": "Расширить parser, типы отчётов и task contract. Реализовать search, создание каркасов и readiness. Расширить context и заменить check на verify. Синхронизировать документацию, skill и тесты. Выполнить полный verification cycle.",
-        "documentationImpact": "Обновляются README.md , CHANGELOG.md , docs/contracts/cli.md , docs/roadmap.md , docs/use-cases/ , docs/flows/FLOW-TASK-WORKFLOW.md , docs/decisions/ADR-002.md и skills/use-docu-docu/ .",
+        "documentationImpact": "Обновляются README.md , CHANGELOG.md , docs/contracts/cli.md , docs/roadmap.md , docs/use-cases/ , docs/flows/FLOW-TASK-WORKFLOW.md , docs/decisions/ADR-002.md и skills/docu-docu/ .",
         "documentationPaths": [
           "CHANGELOG.md",
           "contracts/cli.md",
@@ -5245,7 +5460,7 @@
         "type": "Documentation",
         "archived": false,
         "priority": "Высокий",
-        "updated": "2026-07-26",
+        "updated": "2026-08-04",
         "owner": "Команда Docu-docu",
         "moduleId": "MOD-MODEL",
         "useCaseId": "UC-DOCS-02",
@@ -5302,7 +5517,7 @@
             "criterion": "README содержит прямую ссылку на исходную документацию проекта.",
             "completed": true,
             "commands": [
-              "grep -q 'Проектная документация Docu-docu' README.md"
+              "grep -Fq 'Исходная документация проекта' README.md \u0026\u0026 grep -Fq 'docs/index.md' README.md"
             ],
             "transitions": [],
             "verificationReferences": []
@@ -5326,7 +5541,7 @@
           {
             "target": "AC-03",
             "commands": [
-              "grep -q 'Проектная документация Docu-docu' README.md"
+              "grep -Fq 'Исходная документация проекта' README.md \u0026\u0026 grep -Fq 'docs/index.md' README.md"
             ],
             "line": 44
           },
@@ -5563,7 +5778,7 @@
           "quality.go",
           "quality_test.go",
           "report_types.go",
-          "skills/use-docu-docu/"
+          "skills/docu-docu/"
         ],
         "result": "Docu-docu поддерживает опциональные стандарты STD- , эксплуатационные процедуры RB- , пользовательские верхнеуровневые разделы, их task-связи, schema-v1 коллекции, scaffolds и автономные каталоги портала.",
         "behaviorChange": "Было Неизвестные каталоги оставались полностью free-form, а Quality и Runbooks не имели типизированных контрактов, task-связей и специализированного портала. Станет Появившиеся quality/ , runbooks/ и custom-разделы получают явные manifest и typed validation без новых глобально обязательных файлов; task workflow переносит только явно связанные STD- и RB- .",
@@ -5571,7 +5786,7 @@
         "after": "Появившиеся quality/ , runbooks/ и custom-разделы получают явные manifest и typed validation без новых глобально обязательных файлов; task workflow переносит только явно связанные STD- и RB- .",
         "outOfScope": "внешние зависимости; автоматическое сопоставление task scope с glob-областью стандарта; выполнение команд напрямую из стандарта; создание собственного runbook без реальной эксплуатационной процедуры; изменение версии schema v1 или генератора.",
         "plan": "Добавить typed model, diagnostics, freshness и custom manifests. Расширить task workflow, schema v1 и scaffolds. Добавить специализированные каталоги и тесты портала. Обновить self-documentation и пройти semantic review. Выполнить полный Go-цикл, strict-check и безопасную пересборку портала.",
-        "documentationImpact": "Обновлены README.md , CHANGELOG.md , docs/index.md , docs/modules/model.md , docs/use-cases/check-documentation.md , docs/contracts/cli.md , docs/reference/features.md , docs/guides/work-items.md и skills/use-docu-docu/SKILL.md ; добавлены руководство docs/guides/quality-runbooks.md , исходный раздел docs/quality/ , обновлённая reference-модель skill и восемь RU/EN skill-шаблонов standards, runbooks и их manifest. Сгенерированные порталы остаются производными от Markdown.",
+        "documentationImpact": "Обновлены README.md , CHANGELOG.md , docs/index.md , docs/modules/model.md , docs/use-cases/check-documentation.md , docs/contracts/cli.md , docs/reference/features.md , docs/guides/work-items.md и skills/docu-docu/SKILL.md ; добавлены руководство docs/guides/quality-runbooks.md , исходный раздел docs/quality/ , обновлённая reference-модель skill и восемь RU/EN skill-шаблонов standards, runbooks и их manifest. Сгенерированные порталы остаются производными от Markdown.",
         "documentationPaths": [
           "CHANGELOG.md",
           "contracts/cli.md",
@@ -5581,7 +5796,7 @@
           "modules/model.md",
           "README.md",
           "reference/features.md",
-          "skills/use-docu-docu/SKILL.md",
+          "skills/docu-docu/SKILL.md",
           "use-cases/check-documentation.md"
         ]
       },
@@ -5615,7 +5830,7 @@
             "line": 49,
             "indent": 0,
             "completed": true,
-            "text": "AC-01 Skill трактует $use-docu-docu init как единственный явный"
+            "text": "AC-01 Skill трактует $docu-docu init как единственный явный"
           },
           {
             "line": 52,
@@ -5639,7 +5854,7 @@
         "verificationMatrix": [
           {
             "criterionId": "AC-01",
-            "criterion": "Skill трактует $use-docu-docu init как единственный явный",
+            "criterion": "Skill трактует $docu-docu init как единственный явный",
             "completed": true,
             "commands": [
               "go test ./... -run TestUseDocu-docuInitContract"
@@ -5735,15 +5950,15 @@
           "docs/work/TASK-DOCS-003.md",
           "README.md",
           "skill_templates_test.go",
-          "skills/use-docu-docu/"
+          "skills/docu-docu/"
         ],
-        "result": "Пользователь явно подключает Docu-docu к проекту через $use-docu-docu init ; skill создаёт минимальную документацию при необходимости и безопасно устанавливает ограниченные правила использования в AGENTS.md .",
-        "behaviorChange": "Было Skill не имел отдельного onboarding-вызова, а workflow безусловно предлагал создавать TASK- для каждого нового запроса. Станет Только явный $use-docu-docu init выполняет preflight, создаёт отсутствующий docs/index.md , устанавливает управляемый блок AGENTS.md и запускает структурную проверку. Обычные вызовы не меняют project instructions, а новые TASK- создаются только для существенной работы.",
+        "result": "Пользователь явно подключает Docu-docu к проекту через $docu-docu init ; skill создаёт минимальную документацию при необходимости и безопасно устанавливает ограниченные правила использования в AGENTS.md .",
+        "behaviorChange": "Было Skill не имел отдельного onboarding-вызова, а workflow безусловно предлагал создавать TASK- для каждого нового запроса. Станет Только явный $docu-docu init выполняет preflight, создаёт отсутствующий docs/index.md , устанавливает управляемый блок AGENTS.md и запускает структурную проверку. Обычные вызовы не меняют project instructions, а новые TASK- создаются только для существенной работы.",
         "before": "Skill не имел отдельного onboarding-вызова, а workflow безусловно предлагал создавать TASK- для каждого нового запроса.",
-        "after": "Только явный $use-docu-docu init выполняет preflight, создаёт отсутствующий docs/index.md , устанавливает управляемый блок AGENTS.md и запускает структурную проверку. Обычные вызовы не меняют project instructions, а новые TASK- создаются только для существенной работы.",
+        "after": "Только явный $docu-docu init выполняет preflight, создаёт отсутствующий docs/index.md , устанавливает управляемый блок AGENTS.md и запускает структурную проверку. Обычные вызовы не меняют project instructions, а новые TASK- создаются только для существенной работы.",
         "outOfScope": "новая команда Go CLI docu-docu init ; автоматическое изменение AGENTS.md при неявном срабатывании skill; внешний runtime или dependency для слияния Markdown; создание полного starter pack документации.",
         "plan": "Добавить init reference и RU/EN project-guidance assets. Синхронизировать SKILL.md, workflow и metadata. Зафиксировать contract тестами и пользовательской документацией. Выполнить semantic review и полный verification cycle.",
-        "documentationImpact": "Обновлены skills/use-docu-docu/ , README.md , CHANGELOG.md , docs/guides/work-items.md и skill templates test.go . Публичные Go API, CLI и JSON schema не меняются; generated portals не редактируются.",
+        "documentationImpact": "Обновлены skills/docu-docu/ , README.md , CHANGELOG.md , docs/guides/work-items.md и skill templates test.go . Публичные Go API, CLI и JSON schema не меняются; generated portals не редактируются.",
         "documentationPaths": [
           "CHANGELOG.md",
           "guides/work-items.md",
@@ -5780,7 +5995,7 @@
             "line": 54,
             "indent": 0,
             "completed": true,
-            "text": "AC-01 Skill маршрутизирует $use-docu-docu refresh и `$use-docu-docu"
+            "text": "AC-01 Skill маршрутизирует $docu-docu refresh и `$docu-docu"
           },
           {
             "line": 56,
@@ -5816,7 +6031,7 @@
         "verificationMatrix": [
           {
             "criterionId": "AC-01",
-            "criterion": "Skill маршрутизирует $use-docu-docu refresh и `$use-docu-docu",
+            "criterion": "Skill маршрутизирует $docu-docu refresh и `$docu-docu",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestUseDocu-docuRefresh'"
@@ -5950,12 +6165,12 @@
           "project-docs/",
           "README.md",
           "skill_templates_test.go",
-          "skills/use-docu-docu/"
+          "skills/docu-docu/"
         ],
         "result": "Пользователь явно запускает полный или diff-ограниченный refresh документации; skill сверяет Markdown с текущими источниками истины, применяет доказуемые обновления и завершает работу semantic и structural gates.",
-        "behaviorChange": "Было Skill обновлял документацию только по конкретному запросу и не имел явного workflow для систематического ревью актуальности. Станет $use-docu-docu refresh проверяет весь проект, а $use-docu-docu refresh diff проверяет staged, unstaged и untracked изменения относительно HEAD и зависимую документацию. Оба режима могут обновлять, удалять и переименовывать документы при однозначной доказательной базе.",
+        "behaviorChange": "Было Skill обновлял документацию только по конкретному запросу и не имел явного workflow для систематического ревью актуальности. Станет $docu-docu refresh проверяет весь проект, а $docu-docu refresh diff проверяет staged, unstaged и untracked изменения относительно HEAD и зависимую документацию. Оба режима могут обновлять, удалять и переименовывать документы при однозначной доказательной базе.",
         "before": "Skill обновлял документацию только по конкретному запросу и не имел явного workflow для систематического ревью актуальности.",
-        "after": "$use-docu-docu refresh проверяет весь проект, а $use-docu-docu refresh diff проверяет staged, unstaged и untracked изменения относительно HEAD и зависимую документацию. Оба режима могут обновлять, удалять и переименовывать документы при однозначной доказательной базе.",
+        "after": "$docu-docu refresh проверяет весь проект, а $docu-docu refresh diff проверяет staged, unstaged и untracked изменения относительно HEAD и зависимую документацию. Оба режима могут обновлять, удалять и переименовывать документы при однозначной доказательной базе.",
         "outOfScope": "новая Go-команда docu-docu refresh ; отдельный read-only refresh workflow; merge-base или сравнение с default branch; изменение кода ради согласования с документацией; обновление Last verified без фактической проверки runbook.",
         "plan": "Добавить refresh reference и маршрутизацию команд. Синхронизировать managed guidance, metadata и self-documentation. Зафиксировать полный, diff, safety и no-CLI contracts тестами. Провести независимый semantic review и устранить замечания. Выполнить полный verification и пересобрать tracked portals.",
         "documentationImpact": "Обновляются публичный workflow skill, RU/EN managed guidance, README, changelog, self-documentation, корневой AGENTS.md и оба tracked portal.",
@@ -6177,7 +6392,7 @@
           }
         ],
         "repositoryPaths": [
-          "$use-docu-docu",
+          "$docu-docu",
           "internal/app/sections.go"
         ],
         "result": "Модель и портал используют упорядоченный реестр встроенных разделов, локализованные project-названия, аддитивный JSON sectionType и единственный каталог FLOW- по маршруту processes/index.html .",
@@ -6371,6 +6586,214 @@
         "plan": "Зафиксировать версию и release contract. Устранить недетерминированный порядок поискового индекса. Унифицировать локальные и CI release gates. Обновить документацию и пересобрать порталы. Выполнить полный локальный release cycle без обращения к GitHub. Получить независимый semantic review изменённой release-документации.",
         "documentationImpact": "Обновляются версия, текущее состояние, завершённые Changes-сущности, канонический changelog и описание dependency-free поставки. Оба отслеживаемых портала пересобираются из исходного Markdown.",
         "documentationPaths": []
+      },
+      {
+        "id": "TASK-RELEASE-002",
+        "title": "Добавить установку и обновление из GitHub Release",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Выполнено",
+          "recognized": true
+        },
+        "type": "Maintenance",
+        "archived": false,
+        "updated": "2026-08-04",
+        "owner": "Команда Docu-docu",
+        "moduleId": "MOD-CLI",
+        "screenIds": [],
+        "transitionIds": [],
+        "standardIds": [
+          "STD-GO-001",
+          "STD-DOCS-001"
+        ],
+        "runbookIds": [],
+        "dependsOn": [],
+        "document": "work/TASK-RELEASE-002.md",
+        "anchor": "task-release-002-добавить-установку-и-обновление-из-github-release",
+        "criteria": [
+          {
+            "line": 68,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-01 Installer однозначно выбирает пять существующих"
+          },
+          {
+            "line": 71,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-02 По умолчанию выбирается latest stable release;"
+          },
+          {
+            "line": 75,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-03 Бинарник заменяется только после точной проверки"
+          },
+          {
+            "line": 79,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-04 Release bundle содержит оба installer-скрипта, а"
+          },
+          {
+            "line": 81,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-05 README и каноническая документация описывают"
+          },
+          {
+            "line": 85,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-06 Повторный запуск, upgrade, downgrade и добавление"
+          }
+        ],
+        "verificationMatrix": [
+          {
+            "criterionId": "AC-01",
+            "criterion": "Installer однозначно выбирает пять существующих",
+            "completed": true,
+            "commands": [
+              "go test ./internal/app -run TestInstallerPlatformContract"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-02",
+            "criterion": "По умолчанию выбирается latest stable release;",
+            "completed": true,
+            "commands": [
+              "go test ./internal/app -run TestInstallerSelectionAndPathContract"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-03",
+            "criterion": "Бинарник заменяется только после точной проверки",
+            "completed": true,
+            "commands": [
+              "go test ./internal/app -run TestInstallerIntegrityAndReplacement"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-04",
+            "criterion": "Release bundle содержит оба installer-скрипта, а",
+            "completed": true,
+            "commands": [
+              "make release \u0026\u0026 cd dist \u0026\u0026 sha256sum -c checksums.txt \u0026\u0026 test \"$(wc -l \u003c checksums.txt)\" -eq 10 \u0026\u0026 for file in docu-docu-linux-amd64 docu-docu-linux-arm64 docu-docu-darwin-amd64 docu-docu-darwin-arm64 docu-docu-windows-amd64.exe install.sh install.ps1 LICENSE THIRD_PARTY_NOTICES.md CODEMIRROR-CHECKSUMS.txt; do awk -v file=\"$file\" '$2 == file { found=1 } END { exit !found }' checksums.txt || exit 1; done"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-05",
+            "criterion": "README и каноническая документация описывают",
+            "completed": true,
+            "commands": [
+              "go test ./internal/app -run TestInstallerDocumentationContract \u0026\u0026 go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-06",
+            "criterion": "Повторный запуск, upgrade, downgrade и добавление",
+            "completed": true,
+            "commands": [
+              "go test ./internal/app -run TestInstallerRepeatUpgradeDowngradeAndPath"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          }
+        ],
+        "checks": [
+          {
+            "target": "AC-01",
+            "commands": [
+              "go test ./internal/app -run TestInstallerPlatformContract"
+            ],
+            "line": 99
+          },
+          {
+            "target": "AC-02",
+            "commands": [
+              "go test ./internal/app -run TestInstallerSelectionAndPathContract"
+            ],
+            "line": 100
+          },
+          {
+            "target": "AC-03",
+            "commands": [
+              "go test ./internal/app -run TestInstallerIntegrityAndReplacement"
+            ],
+            "line": 101
+          },
+          {
+            "target": "AC-04",
+            "commands": [
+              "make release \u0026\u0026 cd dist \u0026\u0026 sha256sum -c checksums.txt \u0026\u0026 test \"$(wc -l \u003c checksums.txt)\" -eq 10 \u0026\u0026 for file in docu-docu-linux-amd64 docu-docu-linux-arm64 docu-docu-darwin-amd64 docu-docu-darwin-arm64 docu-docu-windows-amd64.exe install.sh install.ps1 LICENSE THIRD_PARTY_NOTICES.md CODEMIRROR-CHECKSUMS.txt; do awk -v file=\"$file\" '$2 == file { found=1 } END { exit !found }' checksums.txt || exit 1; done"
+            ],
+            "line": 102
+          },
+          {
+            "target": "AC-05",
+            "commands": [
+              "go test ./internal/app -run TestInstallerDocumentationContract \u0026\u0026 go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
+            ],
+            "line": 103
+          },
+          {
+            "target": "AC-06",
+            "commands": [
+              "go test ./internal/app -run TestInstallerRepeatUpgradeDowngradeAndPath"
+            ],
+            "line": 104
+          },
+          {
+            "target": "ALL",
+            "commands": [
+              "go test ./..."
+            ],
+            "line": 105
+          },
+          {
+            "target": "DOCS",
+            "commands": [
+              "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
+            ],
+            "line": 106
+          },
+          {
+            "target": "QUALITY",
+            "commands": [
+              "make check"
+            ],
+            "line": 107
+          }
+        ],
+        "repositoryPaths": [
+          ".github/workflows/",
+          "CHANGELOG.md",
+          "docs/",
+          "internal/app/",
+          "Makefile",
+          "README.md"
+        ],
+        "result": "Release bundle и workflow 0.0.1 готовы к публикации POSIX- и PowerShell-bootstrap: после публикации владельцем пользователь одной командой устанавливает или обновляет Docu-docu, а bootstrap сам выбирает поддерживаемый OS/architecture artifact и проверяет SHA-256 до замены файла.",
+        "behaviorChange": "Было Пользователь вручную выбирает бинарник в GitHub Releases, проверяет его и добавляет в PATH . Станет POSIX- и PowerShell-команды скачивают подходящий artifact и checksums.txt , проверяют целостность и без sudo атомарно устанавливают его в /.local/bin/docu-docu или %LOCALAPPDATA%\\Programs\\docu-docu\\docu-docu.exe . Канонические команды: Оба install. публикуются как assets ещё не опубликованного релиза 0.0.1 . Если standard user dir ещё не в PATH , POSIX installer один раз добавляет managed entry в .zshrc для zsh, .bashrc для bash, fish conf.d , а для остальных POSIX shells — в .profile . PowerShell installer один раз добавляет стандартный каталог в user PATH . Текущий parent shell не изменяется: installer печатает точную source /fish-команду, для .profile просит login/re-login, а для Windows — открыть новый terminal.",
+        "before": "Пользователь вручную выбирает бинарник в GitHub Releases, проверяет его и добавляет в PATH .",
+        "after": "POSIX- и PowerShell-команды скачивают подходящий artifact и checksums.txt , проверяют целостность и без sudo атомарно устанавливают его в /.local/bin/docu-docu или %LOCALAPPDATA%\\Programs\\docu-docu\\docu-docu.exe . Канонические команды: Оба install. публикуются как assets ещё не опубликованного релиза 0.0.1 . Если standard user dir ещё не в PATH , POSIX installer один раз добавляет managed entry в .zshrc для zsh, .bashrc для bash, fish conf.d , а для остальных POSIX shells — в .profile . PowerShell installer один раз добавляет стандартный каталог в user PATH . Текущий parent shell не изменяется: installer печатает точную source /fish-команду, для .profile просит login/re-login, а для Windows — открыть новый terminal.",
+        "outOfScope": "публикация Git-тега или GitHub Release; фоновое самообновление или новая команда Go CLI; system-wide установка через sudo и package managers; Windows ARM64 и другие новые release targets; подпись или notarization релизных бинарников.",
+        "plan": "Реализовать одинаковый installer contract для POSIX и PowerShell. Включить скрипты в release bundle и checksum generation. Добавить platform, integrity, replacement и release contract tests. Обновить источные документы и release notes. Пройти semantic gate, полную проверку и пересобрать портал.",
+        "documentationImpact": "Добавляется guide установки; обновляются README, CHANGELOG.md , текущее состояние, system/trust boundary и отслеживаемый портал.",
+        "documentationPaths": [
+          "CHANGELOG.md"
+        ]
       },
       {
         "id": "TASK-SITE-001",

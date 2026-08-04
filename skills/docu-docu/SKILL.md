@@ -1,9 +1,9 @@
 ---
-name: use-docu-docu
-description: Create, update, refresh, validate, and build adaptable project documentation managed by the Docu-docu CLI. Use for explicit Docu-docu documentation work; full-project or HEAD-diff currency reviews; modules, use cases, FLOW-* processes, SC-* screens and TR-* transitions; roadmap, risks, ADRs, contracts, guides, references, or TASK-* work items; integrity diagnostics; task context or verification; and static portals. Initialize project documentation and managed AGENTS.md guidance only when the user explicitly invokes `$use-docu-docu init`; never initialize implicitly.
+name: docu-docu
+description: Create, update, refresh, validate, and build adaptable project documentation managed by the Docu-docu CLI. Use for explicit Docu-docu documentation work; full-project or HEAD-diff currency reviews; modules, use cases, FLOW-* processes, SC-* screens and TR-* transitions; roadmap, risks, ADRs, contracts, guides, references, or TASK-* work items; integrity diagnostics; task context or verification; and static portals. Initialize project documentation and managed AGENTS.md guidance only when the user explicitly invokes `$docu-docu init`; never initialize implicitly.
 ---
 
-# Use Docu-docu
+# Docu-docu
 
 Docu-docu protects explicit relationships and safe paths. Markdown remains the
 source of truth; generated portals are output, not documentation sources.
@@ -14,10 +14,10 @@ Read only the operation reference plus the two shared references named below.
 
 | Operation | Reference | Changes files? | Confirmation / authority |
 |---|---|---:|---|
-| `$use-docu-docu init` | [references/init.md](references/init.md) | Yes | Only when the user explicitly invokes `$use-docu-docu init` |
-| `$use-docu-docu refresh` | [references/refresh.md](references/refresh.md) | May | Only when the user explicitly invokes `$use-docu-docu refresh` |
-| `$use-docu-docu refresh diff` | [references/refresh.md](references/refresh.md) | May | Only when the user explicitly invokes `$use-docu-docu refresh diff` |
-| `$use-docu-docu translate` | [references/translate.md](references/translate.md) | Yes | Only for an explicit translate request and selected target locale |
+| `$docu-docu init` | [references/init.md](references/init.md) | Yes | Only when the user explicitly invokes `$docu-docu init` |
+| `$docu-docu refresh` | [references/refresh.md](references/refresh.md) | May | Only when the user explicitly invokes `$docu-docu refresh` |
+| `$docu-docu refresh diff` | [references/refresh.md](references/refresh.md) | May | Only when the user explicitly invokes `$docu-docu refresh diff` |
+| `$docu-docu translate` | [references/translate.md](references/translate.md) | Yes | Only for an explicit translate request and selected target locale |
 | CLI, portal, task, or ordinary documentation work | [references/workflows.md](references/workflows.md) | Depends on request | Follow the user's requested mutation; `task verify --run` needs an explicit verification request |
 
 Init, refresh, refresh diff, and translate are agent workflows. They are not
