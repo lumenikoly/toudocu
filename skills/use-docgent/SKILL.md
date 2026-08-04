@@ -30,6 +30,14 @@ Never infer initialization from the first skill use, a missing managed block,
 or an ordinary request. Do not create or update project `AGENTS.md` guidance
 outside the explicit init workflow.
 
+## Translate only when explicitly requested
+
+`$use-docgent translate` is an agent workflow, not a Go CLI command. Read
+[references/translate.md](references/translate.md) completely before changing
+translation trees or `.docgent/config.yml`. Canonical `docs/` remains the only
+source of task context and project model; each target locale is a separate
+documentation root.
+
 ## Establish the environment
 
 1. Read repository instructions, CI configuration, existing documentation, and

@@ -22,6 +22,7 @@ Docgent разрешает явно выбранные локальные Git-с
 | Change-set builder | Свести file states, line statistics, entity-aware rename и diagnostics |
 | Diff engines | Построить точный source patch и его hunks, structural rendered sections, semantic, OpenAPI, Mermaid, map и asset views |
 | Changes service | Кэшировать отчёты по Git/workspace fingerprint и обслуживать CLI/HTTP consumers |
+| Translation workflow | Потребить canonical change set по одному файлу и записать независимый locale root после strict gate |
 
 ## Поток данных
 
@@ -44,3 +45,5 @@ working bytes не становятся историей или snapshot Docgent
 - static build не получает changes endpoints;
 - ошибки специализированного анализа изолированы от source diff;
 - содержимое Git не даёт дополнительных renderer или editor разрешений.
+- translation workflow не добавляет LLM-клиент или multilingual entity в Go-модель;
+  его manifest с digest хранится отдельно от `ChangeSetReport` schema v1.

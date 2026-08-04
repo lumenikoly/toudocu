@@ -4,7 +4,7 @@
     "name": "Docgent",
     "version": "1.1.0-go"
   },
-  "generatedAt": "2026-08-03T08:42:49.944317948Z",
+  "generatedAt": "2026-08-03T14:53:28.813249617Z",
   "sourceDirectory": "docs",
   "staleDays": 0,
   "project": {
@@ -467,7 +467,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T20:55:03.91770923Z",
+      "updatedAt": "2026-08-03T14:15:08.026630863Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -637,7 +637,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T20:28:51.162577809Z",
+      "updatedAt": "2026-08-03T14:46:49.417449274Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -808,7 +808,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T20:28:51.161577803Z",
+      "updatedAt": "2026-08-03T14:46:49.417449274Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1585,7 +1585,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-01T08:31:15.791639442Z",
+      "updatedAt": "2026-08-03T14:15:08.024630849Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2430,7 +2430,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T08:11:35.86343659Z",
+      "updatedAt": "2026-08-03T14:15:08.023630841Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -4121,7 +4121,8 @@
           "BR-SITE-005",
           "BR-SITE-006",
           "BR-SITE-007",
-          "BR-SITE-008"
+          "BR-SITE-008",
+          "BR-SITE-009"
         ]
       }
     ],
@@ -4602,6 +4603,14 @@
         "document": "modules/site.md",
         "anchor": "br-site-008-запись-защищена-optimistic-concurrency",
         "line": 96
+      },
+      {
+        "id": "BR-SITE-009",
+        "title": "Locale portals изолированы от canonical workspace",
+        "moduleId": "MOD-SITE",
+        "document": "modules/site.md",
+        "anchor": "br-site-009-locale-portals-изолированы-от-canonical-workspace",
+        "line": 104
       }
     ],
     "workItems": [

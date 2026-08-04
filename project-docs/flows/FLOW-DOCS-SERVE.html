@@ -5,7 +5,10 @@
     Built --&gt;|Да| Listen[&#34;Слушать указанный адрес&#34;]
     Listen --&gt; Watch[&#34;Запустить watcher workspace&#34;]
     Watch --&gt; Request[&#34;Получить HTTP-запрос или внешнее изменение&#34;]
-    Request --&gt; Editor{&#34;Editor save или create?&#34;}
+    Request --&gt; Locale{&#34;Locale route?&#34;}
+    Locale --&gt;|Да| LocaleSnapshot[&#34;Отдать read-only locale snapshot&#34;]
+    LocaleSnapshot --&gt; Request
+    Locale --&gt;|Нет| Editor{&#34;Editor save или create?&#34;}
     Editor --&gt;|Да| Guard[&#34;Проверить origin, action, path и limits; для save — digest&#34;]
     Guard --&gt; Accepted{&#34;Запись допустима?&#34;}
     Accepted --&gt;|Нет| APIError[&#34;Вернуть JSON error без изменения файла&#34;]
@@ -24,14 +27,8 @@
     ManualResult --&gt;|Да| Reload[&#34;Перезагрузить текущую страницу&#34;]
     Reload --&gt; Request
     ManualError --&gt; Request
-    Manual --&gt;|Нет| HTML{&#34;Запрошена HTML-страница или directory route?&#34;}
-    HTML --&gt;|Нет| Static[&#34;Отдать файл из output-каталога&#34;]
-    HTML --&gt;|Да| HTMLRebuild[&#34;Пересобрать портал из актуального Markdown&#34;]
-    HTMLRebuild --&gt; Rebuilt{&#34;Пересборка успешна?&#34;}
-    Rebuilt --&gt;|Нет| Error[&#34;Вернуть HTTP 500 для текущего запроса&#34;]
-    Rebuilt --&gt;|Да| Static
+    Manual --&gt;|Нет| Static[&#34;Отдать последний успешный snapshot&#34;]
     Static --&gt; Request
-    Error --&gt; Request
     Request --&gt;|Ctrl+C| Finish[&#34;Остановить сервер и освободить порт&#34;]</pre><p class="mermaid-error" data-mermaid-error role="alert" hidden>Не удалось отобразить диаграмму.</p></div><details class="mermaid-source"><summary>Показать исходный код</summary><div class="code-block"><span class="code-language">mermaid</span><pre><code class="language-mermaid">flowchart TD
     Start[&#34;docgent serve&#34;] --&gt; Build[&#34;Выполнить первоначальную сборку&#34;]
     Build --&gt; Built{&#34;Сборка успешна?&#34;}
@@ -39,7 +36,10 @@
     Built --&gt;|Да| Listen[&#34;Слушать указанный адрес&#34;]
     Listen --&gt; Watch[&#34;Запустить watcher workspace&#34;]
     Watch --&gt; Request[&#34;Получить HTTP-запрос или внешнее изменение&#34;]
-    Request --&gt; Editor{&#34;Editor save или create?&#34;}
+    Request --&gt; Locale{&#34;Locale route?&#34;}
+    Locale --&gt;|Да| LocaleSnapshot[&#34;Отдать read-only locale snapshot&#34;]
+    LocaleSnapshot --&gt; Request
+    Locale --&gt;|Нет| Editor{&#34;Editor save или create?&#34;}
     Editor --&gt;|Да| Guard[&#34;Проверить origin, action, path и limits; для save — digest&#34;]
     Guard --&gt; Accepted{&#34;Запись допустима?&#34;}
     Accepted --&gt;|Нет| APIError[&#34;Вернуть JSON error без изменения файла&#34;]
@@ -58,12 +58,6 @@
     ManualResult --&gt;|Да| Reload[&#34;Перезагрузить текущую страницу&#34;]
     Reload --&gt; Request
     ManualError --&gt; Request
-    Manual --&gt;|Нет| HTML{&#34;Запрошена HTML-страница или directory route?&#34;}
-    HTML --&gt;|Нет| Static[&#34;Отдать файл из output-каталога&#34;]
-    HTML --&gt;|Да| HTMLRebuild[&#34;Пересобрать портал из актуального Markdown&#34;]
-    HTMLRebuild --&gt; Rebuilt{&#34;Пересборка успешна?&#34;}
-    Rebuilt --&gt;|Нет| Error[&#34;Вернуть HTTP 500 для текущего запроса&#34;]
-    Rebuilt --&gt;|Да| Static
+    Manual --&gt;|Нет| Static[&#34;Отдать последний успешный snapshot&#34;]
     Static --&gt; Request
-    Error --&gt; Request
-    Request --&gt;|Ctrl+C| Finish[&#34;Остановить сервер и освободить порт&#34;]</code></pre></div></details></figure><h2 id="границы-процесса"><a class="heading-anchor" href="#границы-процесса" aria-label="Ссылка на раздел">#</a>Границы процесса</h2><ul><li><span class="task-text">Обычные маршруты раздают output; editor API ограничен workspace-файлами внутри</span></li></ul><p>docs root и не предоставляет доступ к остальному репозиторию.</p><ul><li><span class="task-text">По умолчанию используется loopback; доступ через <code>0.0.0.0</code> включается явно.</span></li><li><span class="task-text">Ручная пересборка обновляет модель и HTML, но не закрывает listener и не</span></li></ul><p>меняет его адрес.</p><ul><li><span class="task-text">Editor, CodeMirror, API, polling и ручная пересборка существуют только в</span></li></ul><p><code>serve</code>; статический портал через <code>file://</code> не содержит их markup или assets.</p><ul><li><span class="task-text">Ошибка пересборки не останавливает уже запущенный сервер.</span></li></ul><h2 id="связанные-документы"><a class="heading-anchor" href="#связанные-документы" aria-label="Ссылка на раздел">#</a>Связанные документы</h2><ul><li><span class="task-text"><a href="../use-cases/UC-DOCS-03.html">UC-DOCS-03: Просматривать документацию на локальном сервере</a></span></li><li><span class="task-text"><a href="FLOW-DOCS-BUILD.html">FLOW-DOCS-BUILD: Сборка автономного портала</a></span></li><li><span class="task-text"><a href="../modules/site.html">MOD-SITE: Статический портал</a></span></li><li><span class="task-text"><a href="../contracts/cli.html">CLI-контракт</a></span></li><li><span class="task-text"><a href="../contracts/editor-http.html">HTTP-контракт editor API</a></span></li></ul></article><section class="dashboard-section"><h2>Связанные документы</h2><ul class="related-list"><li><a href="../use-cases/UC-DOCS-03.html">UC-DOCS-03: Просматривать документацию на локальном сервере</a><span class="table-subtext">Пользовательский сценарий</span></li><li><a href="FLOW-DOCS-BUILD.html">FLOW-DOCS-BUILD: Сборка автономного портала</a><span class="table-subtext">Процесс</span></li><li><a href="../modules/site.html">Статический портал</a><span class="table-subtext">Модуль</span></li><li><a href="../contracts/cli.html">CLI-контракт Docgent v1</a><span class="table-subtext">Контрактный каталог</span></li><li><a href="../contracts/editor-http.html">CONTRACT-EDITOR-HTTP: Локальный editor API</a><span class="table-subtext">Контрактный каталог</span></li><li><a href="../architecture/runtime-components.html">Разделение ответственности runtime-компонентов</a><span class="table-subtext">Архитектура</span></li><li><a href="../modules/cli.html">CLI и workflow задач</a><span class="table-subtext">Модуль</span></li></ul></section><section class="dashboard-section flow-connections"><h2>Связанные пользовательские сценарии</h2><div class="process-relations"><a class="process-relation-chip" href="../use-cases/UC-DOCS-03.html">UC-DOCS-03</a></div></section></div><aside class="page-toc" aria-label="Оглавление"><div class="page-toc-title">На странице</div><ul><li class="toc-level-2"><a href="#процесс">Процесс</a></li><li class="toc-level-2"><a href="#границы-процесса">Границы процесса</a></li><li class="toc-level-2"><a href="#связанные-документы">Связанные документы</a></li></ul></aside></main><footer class="site-footer">Сгенерировано Docgent 1.1.0-go</footer></div></div></body></html>
+    Request --&gt;|Ctrl+C| Finish[&#34;Остановить сервер и освободить порт&#34;]</code></pre></div></details></figure><h2 id="границы-процесса"><a class="heading-anchor" href="#границы-процесса" aria-label="Ссылка на раздел">#</a>Границы процесса</h2><ul><li><span class="task-text">Обычные маршруты раздают output; editor API ограничен workspace-файлами внутри</span></li></ul><p>docs root и не предоставляет доступ к остальному репозиторию.</p><ul><li><span class="task-text">По умолчанию используется loopback; доступ через <code>0.0.0.0</code> включается явно.</span></li><li><span class="task-text">Ручная пересборка обновляет модель и HTML, но не закрывает listener и не</span></li></ul><p>меняет его адрес.</p><ul><li><span class="task-text">HTTP navigation никогда не запускает rebuild. При configured translations</span></li></ul><p>watcher пересобирает только изменившийся root; locale mount остаётся read-only и не получает editor, changes или canonical API.</p><ul><li><span class="task-text">Editor, CodeMirror, API, polling и ручная пересборка существуют только в</span></li></ul><p><code>serve</code>; статический портал через <code>file://</code> не содержит их markup или assets.</p><ul><li><span class="task-text">Ошибка пересборки не останавливает уже запущенный сервер.</span></li></ul><h2 id="связанные-документы"><a class="heading-anchor" href="#связанные-документы" aria-label="Ссылка на раздел">#</a>Связанные документы</h2><ul><li><span class="task-text"><a href="../use-cases/UC-DOCS-03.html">UC-DOCS-03: Просматривать документацию на локальном сервере</a></span></li><li><span class="task-text"><a href="FLOW-DOCS-BUILD.html">FLOW-DOCS-BUILD: Сборка автономного портала</a></span></li><li><span class="task-text"><a href="../modules/site.html">MOD-SITE: Статический портал</a></span></li><li><span class="task-text"><a href="../contracts/cli.html">CLI-контракт</a></span></li><li><span class="task-text"><a href="../contracts/editor-http.html">HTTP-контракт editor API</a></span></li></ul></article><section class="dashboard-section"><h2>Связанные документы</h2><ul class="related-list"><li><a href="../use-cases/UC-DOCS-03.html">UC-DOCS-03: Просматривать документацию на локальном сервере</a><span class="table-subtext">Пользовательский сценарий</span></li><li><a href="FLOW-DOCS-BUILD.html">FLOW-DOCS-BUILD: Сборка автономного портала</a><span class="table-subtext">Процесс</span></li><li><a href="../modules/site.html">Статический портал</a><span class="table-subtext">Модуль</span></li><li><a href="../contracts/cli.html">CLI-контракт Docgent v1</a><span class="table-subtext">Контрактный каталог</span></li><li><a href="../contracts/editor-http.html">CONTRACT-EDITOR-HTTP: Локальный editor API</a><span class="table-subtext">Контрактный каталог</span></li><li><a href="../architecture/runtime-components.html">Разделение ответственности runtime-компонентов</a><span class="table-subtext">Архитектура</span></li><li><a href="../modules/cli.html">CLI и workflow задач</a><span class="table-subtext">Модуль</span></li></ul></section><section class="dashboard-section flow-connections"><h2>Связанные пользовательские сценарии</h2><div class="process-relations"><a class="process-relation-chip" href="../use-cases/UC-DOCS-03.html">UC-DOCS-03</a></div></section></div><aside class="page-toc" aria-label="Оглавление"><div class="page-toc-title">На странице</div><ul><li class="toc-level-2"><a href="#процесс">Процесс</a></li><li class="toc-level-2"><a href="#границы-процесса">Границы процесса</a></li><li class="toc-level-2"><a href="#связанные-документы">Связанные документы</a></li></ul></aside></main><footer class="site-footer">Сгенерировано Docgent 1.1.0-go</footer></div></div></body></html>

@@ -39,7 +39,12 @@ func BuildDocumentationChanges(options Options) (*ChangeSetReport, error) {
 	if options.ChangeMaxRenderedFileBytes == 0 {
 		options.ChangeMaxRenderedFileBytes = config.Changes.MaxRenderedFileBytes
 	}
-	options.ChangeIncludeTaskArtifacts, options.ChangeIncludeAssets = config.Changes.IncludeTaskArtifacts, config.Changes.IncludeAssets
+	options.ChangeIncludeTaskArtifacts = config.Changes.IncludeTaskArtifacts
+	if !options.ChangeForceIncludeAssets {
+		options.ChangeIncludeAssets = config.Changes.IncludeAssets
+	} else {
+		options.ChangeIncludeAssets = true
+	}
 	options.ChangeSemanticDiff, options.ChangeRenderedDiff, options.ChangeExclude = config.Changes.SemanticDiff, config.Changes.RenderedDiff, config.Changes.Exclude
 	baseRef := strings.TrimSpace(options.ChangeBase)
 	if baseRef == "" {

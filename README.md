@@ -111,6 +111,9 @@ YAML-поднабор и пример приведены в
 [справочнике конфигурации](docs/reference/configuration.md). Для стабильной
 локализованной навигации задайте `project.locale` и все `project.sections`;
 без них портал использует английские fallback-названия и сообщает warning.
+Переводы выполняются отдельным workflow `$use-docgent translate`, а не новой
+командой CLI: каждый locale живёт в собственном docs root и проходит обычный
+strict `check`; canonical `docs/` остаётся источником task context.
 
 ### Документация самого Docgent
 

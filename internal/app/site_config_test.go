@@ -63,6 +63,72 @@ func TestChangesConfig(t *testing.T) {
 	}
 }
 
+func TestTranslationProfileSelectsIndependentLocaleRoot(t *testing.T) {
+	root, docs := configFixture(t)
+	target := filepath.Join(root, "docs-en")
+	if err := os.MkdirAll(target, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(target, "index.md"), []byte("# English docs\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	config, err := parseSiteConfig([]byte(`project:
+  locale: ru
+translations:
+  en:
+    root: docs-en
+    sections:
+      architecture: Architecture
+      modules: Modules
+      use-cases: Use Cases
+      flows: Processes
+      screens: Screens
+      decisions: Architecture Decisions
+      contracts: Contracts
+      quality: Quality Standards
+      runbooks: Runbooks
+      reference: Reference
+      work: Work Items
+      guides: Guides
+`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := selectTranslationProfile(&config, root, target); err != nil {
+		t.Fatal(err)
+	}
+	if config.Project.Locale != "en" || config.Project.Sections[SectionModules] != "Modules" {
+		t.Fatalf("translation project config was not selected: %#v", config.Project)
+	}
+	// A canonical selection is unaffected by configured translations.
+	config, err = parseSiteConfig([]byte(`project:
+  locale: ru
+translations:
+  en:
+    root: docs-en
+    sections:
+      architecture: Architecture
+`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := selectTranslationProfile(&config, root, docs); err != nil {
+		t.Fatalf("canonical root must not validate incomplete translations: %v", err)
+	}
+}
+
+func TestTranslationProfileRejectsUnsafeRootWhenSelected(t *testing.T) {
+	root, _ := configFixture(t)
+	config, err := parseSiteConfig([]byte("translations:\n  en:\n    root: ../outside\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	// This direct safety check is also used by selection and workflow callers.
+	if _, err := safeTranslationRoot(root, config.Translations["en"].Root); err == nil {
+		t.Fatal("unsafe translation root accepted")
+	}
+}
+
 func TestSiteConfigFullAndTitlePriority(t *testing.T) {
 	root, docs := configFixture(t)
 	assets := filepath.Join(root, ".docgent", "assets")

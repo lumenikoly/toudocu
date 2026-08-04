@@ -29,9 +29,11 @@ URL state при invalidation. Компоненты активны для `chang
 | Project model | Классифицировать документы, разрешить связи и сформировать diagnostics | [MOD-MODEL](../modules/model.md) |
 | Site | Создать автономный read-only портал или serve-only editor workspace с live rebuild | [MOD-SITE](../modules/site.md) |
 
-Статический generator и serve-вариант разделены. Workspace перечисляет и
-атомарно записывает разрешённые файлы; editor API применяет HTTP guards;
-watcher замечает стабильный внешний fingerprint. Любая принятая запись заново
+Статический generator и serve-вариант разделены. Serve хранит отдельные
+runtime snapshots canonical и configured translation roots: HTTP читает только
+последний успешный snapshot, а watcher перестраивает изменившийся root.
+Workspace перечисляет и атомарно записывает разрешённые canonical файлы;
+editor API применяет HTTP guards. Любая принятая запись заново
 проходит Project model и Site, поэтому browser не формирует параллельную модель.
 
 Screen graph и task workflow расширяют модель, но не обходят её validation

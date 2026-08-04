@@ -65,6 +65,13 @@ docgent task changes TASK-AUTH-015 ./docs --format json
 Exit code `1` означает построенный отчёт с error, `2` — неверный диапазон, `3`
 — Git недоступен/не найден, `4` — внутренняя ошибка.
 
+Workflow `$use-docgent translate` использует этот report только как входные
+данные: `--task` строит `task changes` до `working-tree`, а `--base` —
+`<base> → working-tree`. Его API-only override включает assets даже если
+`changes.includeAssets: false`; schema `ChangeSetReport` при этом остаётся v1.
+Точный `sourceDiff` остаётся приоритетным и доступным, когда rendered,
+semantic, OpenAPI или Mermaid представления добавляют свои diagnostics.
+
 ## Task impact
 
 Изменение `TASK-*` отделяется как контракт задачи от постоянной документации.

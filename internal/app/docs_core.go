@@ -635,6 +635,10 @@ func buildDocumentationModel(options Options, overlay map[string][]byte) (*Model
 	if err != nil {
 		return nil, err
 	}
+	translationRoots, err := selectTranslationProfile(&siteConfig, repositoryRoot, root)
+	if err != nil {
+		return nil, err
+	}
 	now := options.Now
 	if now.IsZero() {
 		now = time.Now().UTC()
@@ -656,6 +660,25 @@ func buildDocumentationModel(options Options, overlay map[string][]byte) (*Model
 		model.RepositoryRef = "main"
 	}
 	files := scanMarkdownFiles(root, options.Excludes, &model.Issues)
+	// A repository-root scan is canonical by definition. Translation trees are
+	// independent portals and must never leak into task context or ProjectModel.
+	if filepath.Clean(root) == filepath.Clean(repositoryRoot) && len(translationRoots) > 0 {
+		filtered := files[:0]
+		for _, file := range files {
+			absolute := filepath.Join(root, filepath.FromSlash(file.RelativePath))
+			excluded := false
+			for _, translationRoot := range translationRoots {
+				if pathContains(translationRoot, absolute) {
+					excluded = true
+					break
+				}
+			}
+			if !excluded {
+				filtered = append(filtered, file)
+			}
+		}
+		files = filtered
+	}
 	if filepath.Clean(root) == filepath.Clean(repositoryRoot) {
 		filtered := files[:0]
 		for _, file := range files {

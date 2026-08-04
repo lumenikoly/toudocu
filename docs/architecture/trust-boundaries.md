@@ -41,6 +41,10 @@ browser context, не выдаёт CORS и ограничивает body/content
 от cross-origin browser страницы, но не аутентифицируют прямой HTTP-клиент.
 Поэтому явный non-loopback listener включает доступных клиентов локальной сети
 в trust boundary; CLI сохраняет предупреждение об отсутствии TLS и авторизации.
+Locale routes ограничены `/_docgent/locales/<locale>/` и отдают только
+сгенерированные read-only snapshots. Они не перенаправляют к editor, changes,
+workspace или canonical API; target URLs вычисляет сервер из разрешённых
+profiles и mounts.
 
 ## Граница исполнения
 

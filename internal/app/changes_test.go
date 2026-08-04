@@ -58,6 +58,27 @@ func TestParseNameStatusNULPaths(t *testing.T) {
 	}
 }
 
+func TestChangesForceIncludeAssetsOverridesConfigOnly(t *testing.T) {
+	root, docs := newChangesRepository(t)
+	writeSiteConfig(t, root, "changes:\n  includeAssets: false\n")
+	asset := filepath.Join(docs, "images", "diagram.png")
+	writeChangesTestFile(t, asset, "\x89PNG\r\n\x1a\nasset")
+	report, err := BuildDocumentationChanges(Options{InputDirectory: docs, ChangeBase: "HEAD", ChangeTarget: "working-tree"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(report.Changes) != 0 {
+		t.Fatalf("assets must follow config by default: %#v", report.Changes)
+	}
+	report, err = BuildDocumentationChanges(Options{InputDirectory: docs, ChangeBase: "HEAD", ChangeTarget: "working-tree", ChangeForceIncludeAssets: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(report.Changes) != 1 || report.Changes[0].Path != "docs/images/diagram.png" || !report.Changes[0].Binary {
+		t.Fatalf("asset override lost: %#v", report.Changes)
+	}
+}
+
 func TestSourceDiffHunksKeepLocationsAndPatch(t *testing.T) {
 	patch := "diff --git a/docs/a.md b/docs/a.md\n--- a/docs/a.md\n+++ b/docs/a.md\n@@ -2,2 +2,3 @@ heading\n old\n+new\n@@ -20 +21,0 @@ tail\n-gone\n"
 	hunks := parseSourceDiffHunks(patch)

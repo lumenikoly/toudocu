@@ -187,6 +187,38 @@ project:
 `lang="en"`. Для неизвестного, но синтаксически корректного locale допустим
 явный однократно сохранённый список названий.
 
+## Отдельные roots переводов
+
+`translations` описывает независимые порталы для workflow
+`$use-docgent translate`; это не новая Go CLI-команда. Канонический `docs/`
+остаётся единственным источником `task context` и `ProjectModel`.
+
+```yaml
+translations:
+  en:
+    root: docs-en
+    sections:
+      architecture: Architecture
+      modules: Modules
+      use-cases: Use Cases
+      flows: Processes
+      screens: Screens
+      decisions: Architecture Decisions
+      contracts: Contracts
+      quality: Quality Standards
+      runbooks: Runbooks
+      reference: Reference
+      work: Work Items
+      guides: Guides
+```
+
+Root задаётся относительно repository root, находится внутри него и не может
+быть самим repository root, symlink, traversal или пересечением с другим
+translation root либо каноническим docs root. При `check`, `build` или `serve`
+ровно на translation root профиль временно заменяет `project.locale` и
+`project.sections`. Обычная работа с canonical root не читает translation tree
+и не получает diagnostics незавершённого другого profile.
+
 ## Mermaid
 
 Mermaid не имеет пользовательских CLI-настроек. Docgent закрепляет:

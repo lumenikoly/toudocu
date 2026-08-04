@@ -19,7 +19,10 @@ flowchart TD
     Built -->|Да| Listen["Слушать указанный адрес"]
     Listen --> Watch["Запустить watcher workspace"]
     Watch --> Request["Получить HTTP-запрос или внешнее изменение"]
-    Request --> Editor{"Editor save или create?"}
+    Request --> Locale{"Locale route?"}
+    Locale -->|Да| LocaleSnapshot["Отдать read-only locale snapshot"]
+    LocaleSnapshot --> Request
+    Locale -->|Нет| Editor{"Editor save или create?"}
     Editor -->|Да| Guard["Проверить origin, action, path и limits; для save — digest"]
     Guard --> Accepted{"Запись допустима?"}
     Accepted -->|Нет| APIError["Вернуть JSON error без изменения файла"]
@@ -38,14 +41,8 @@ flowchart TD
     ManualResult -->|Да| Reload["Перезагрузить текущую страницу"]
     Reload --> Request
     ManualError --> Request
-    Manual -->|Нет| HTML{"Запрошена HTML-страница или directory route?"}
-    HTML -->|Нет| Static["Отдать файл из output-каталога"]
-    HTML -->|Да| HTMLRebuild["Пересобрать портал из актуального Markdown"]
-    HTMLRebuild --> Rebuilt{"Пересборка успешна?"}
-    Rebuilt -->|Нет| Error["Вернуть HTTP 500 для текущего запроса"]
-    Rebuilt -->|Да| Static
+    Manual -->|Нет| Static["Отдать последний успешный snapshot"]
     Static --> Request
-    Error --> Request
     Request -->|Ctrl+C| Finish["Остановить сервер и освободить порт"]
 ```
 
@@ -56,6 +53,9 @@ flowchart TD
 - По умолчанию используется loopback; доступ через `0.0.0.0` включается явно.
 - Ручная пересборка обновляет модель и HTML, но не закрывает listener и не
   меняет его адрес.
+- HTTP navigation никогда не запускает rebuild. При configured translations
+  watcher пересобирает только изменившийся root; locale mount остаётся read-only
+  и не получает editor, changes или canonical API.
 - Editor, CodeMirror, API, polling и ручная пересборка существуют только в
   `serve`; статический портал через `file://` не содержит их markup или assets.
 - Ошибка пересборки не останавливает уже запущенный сервер.

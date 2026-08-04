@@ -101,6 +101,17 @@ editor markup, API URL, CodeMirror и server-only rebuild code. `serve` отде
 с актуальным digest и явным `confirmOverwrite`; при удалении исходника dirty
 buffer можно скачать. Diagnostics не блокируют сохранение.
 
+### BR-SITE-009: Locale portals изолированы от canonical workspace
+
+При запуске `serve` из canonical root configured `translations.<locale>`
+создают независимые read-only snapshots по `/_docgent/locales/<locale>/`.
+Переключатель получает URL только из server-computed targets: Markdown
+сопоставляется по relative source path, generated page — по существующему
+output path, иначе используется locale homepage. Locale mount не получает
+editor, changes API, rebuild controls, source paths или canonical workspace.
+`build`, `file://` и `serve` непосредственно на translation root остаются
+одноязычными.
+
 ## Инварианты
 
 - исходный `index.md` отображается dashboard, а не дублирующей страницей;
@@ -116,6 +127,8 @@ buffer можно скачать. Diagnostics не блокируют сохра
   без остановки listener; через `file://` этих действий и assets нет;
 - save/create и стабильное внешнее изменение обновляют model, HTML, search,
   diagnostics и workspace revision синхронно;
+- обычный HTTP request не запускает rebuild; watcher публикует snapshot только
+  после успешной сборки, а locale rebuild не меняет canonical editor или changes state;
 - конфликт служебного output получает отдельный безопасный путь;
 - `ProjectReport` и HTML строятся из одной модели;
 - сгенерированные файлы не становятся источником истины.

@@ -101,7 +101,7 @@ func TestDocumentationServerServesAndRebuilds(t *testing.T) {
 	assertRequestContains(http.MethodGet, "/report.json", `"schemaVersion": 1`)
 
 	writeTestFile(t, docs, "index.md", "# Серверный проект\n\nВторая версия после обновления.\n")
-	assertRequestContains(http.MethodGet, "/", "Вторая версия после обновления.")
+	assertRequestContains(http.MethodGet, "/", "Первая версия.")
 }
 
 func TestDocumentationServerRebuildEndpointRegeneratesSite(t *testing.T) {
@@ -174,8 +174,136 @@ func TestDocumentationServerDoesNotExposeSourceOrPartialBuild(t *testing.T) {
 	failedRequest := httptest.NewRequest(http.MethodGet, "/", nil)
 	failedResponse := httptest.NewRecorder()
 	handler.ServeHTTP(failedResponse, failedRequest)
-	if failedResponse.Code != http.StatusInternalServerError || !strings.Contains(failedResponse.Body.String(), "Не удалось пересобрать документацию") {
+	if failedResponse.Code != http.StatusOK || !strings.Contains(failedResponse.Body.String(), "Первая версия.") {
 		t.Fatalf("status=%d body=%s", failedResponse.Code, failedResponse.Body.String())
+	}
+}
+
+func TestDocumentationServerLocalePortalsAreReadOnlyAndMatched(t *testing.T) {
+	options, docs := serveTestOptions(t)
+	writeTestFile(t, docs, "guide.md", "# Canonical guide\n\nCanonical text.\n")
+	writeTestFile(t, filepath.Join(filepath.Dir(docs), "i18n", "en"), "index.md", "# English home\n\nHome.\n")
+	writeTestFile(t, filepath.Join(filepath.Dir(docs), "i18n", "en"), "guide.md", "# English guide\n\nEnglish text.\n")
+	writeTestFile(t, filepath.Dir(docs), ".docgent/config.yml", `project:
+  locale: ru
+  sections:
+    architecture: Architecture
+    modules: Modules
+    use-cases: Use cases
+    flows: Flows
+    screens: Screens
+    decisions: Decisions
+    contracts: Contracts
+    quality: Quality
+    runbooks: Runbooks
+    reference: Reference
+    work: Work
+    guides: Guides
+translations:
+  en:
+    root: i18n/en
+    sections:
+      architecture: Architecture
+      modules: Modules
+      use-cases: Use cases
+      flows: Flows
+      screens: Screens
+      decisions: Decisions
+      contracts: Contracts
+      quality: Quality
+      runbooks: Runbooks
+      reference: Reference
+      work: Work
+      guides: Guides
+`)
+	handler, _, _, err := newDocumentationServer(options, &strings.Builder{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	canonical := httptest.NewRecorder()
+	handler.ServeHTTP(canonical, httptest.NewRequest(http.MethodGet, "/guide.html", nil))
+	if canonical.Code != http.StatusOK || !strings.Contains(canonical.Body.String(), `value="/_docgent/locales/en/guide.html"`) {
+		t.Fatalf("canonical: %d %s", canonical.Code, canonical.Body.String())
+	}
+	locale := httptest.NewRecorder()
+	handler.ServeHTTP(locale, httptest.NewRequest(http.MethodGet, "/_docgent/locales/en/guide.html", nil))
+	if locale.Code != http.StatusOK || !strings.Contains(locale.Body.String(), "English text.") {
+		t.Fatalf("locale: %d %s", locale.Code, locale.Body.String())
+	}
+	for _, forbidden := range []string{"data-server-rebuild", "/_docgent/editor/", "/changes/"} {
+		if strings.Contains(locale.Body.String(), forbidden) {
+			t.Fatalf("locale leaked canonical control %q", forbidden)
+		}
+	}
+	for _, target := range []string{"/_docgent/locales/en/_docgent/api/editor/file", "/_docgent/locales/en/../editor/"} {
+		response := httptest.NewRecorder()
+		handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, target, nil))
+		if response.Code == http.StatusOK && strings.Contains(response.Body.String(), "Canonical text.") {
+			t.Fatalf("locale escaped mount: %s", target)
+		}
+	}
+}
+
+func TestDocumentationServerKeepsLastGoodSnapshotAndShowsUnavailableLocale(t *testing.T) {
+	options, docs := serveTestOptions(t)
+	var stderr strings.Builder
+	handler, _, _, err := newDocumentationServer(options, &stderr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.RemoveAll(docs); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := handler.rebuild(); err == nil {
+		t.Fatal("expected failed canonical rebuild")
+	}
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/", nil))
+	if response.Code != http.StatusOK || !strings.Contains(response.Body.String(), "Первая версия.") {
+		t.Fatalf("last-known-good snapshot lost: %d %s", response.Code, response.Body.String())
+	}
+
+	options, docs = serveTestOptions(t)
+	writeTestFile(t, filepath.Dir(docs), ".docgent/config.yml", `project:
+  locale: ru
+  sections:
+    architecture: Architecture
+    modules: Modules
+    use-cases: Use cases
+    flows: Flows
+    screens: Screens
+    decisions: Decisions
+    contracts: Contracts
+    quality: Quality
+    runbooks: Runbooks
+    reference: Reference
+    work: Work
+    guides: Guides
+translations:
+  en:
+    root: missing/en
+    sections:
+      architecture: Architecture
+      modules: Modules
+      use-cases: Use cases
+      flows: Flows
+      screens: Screens
+      decisions: Decisions
+      contracts: Contracts
+      quality: Quality
+      runbooks: Runbooks
+      reference: Reference
+      work: Work
+      guides: Guides
+`)
+	handler, _, _, err = newDocumentationServer(options, &stderr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response = httptest.NewRecorder()
+	handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/_docgent/locales/en/", nil))
+	if response.Code != http.StatusServiceUnavailable || !strings.Contains(response.Body.String(), "Unavailable") || strings.Contains(response.Body.String(), filepath.Dir(docs)) {
+		t.Fatalf("unavailable locale response is unsafe: %d %s", response.Code, response.Body.String())
 	}
 }
 

@@ -30,29 +30,32 @@ type Options struct {
 	ChangeMaxRenderedFileBytes int
 	ChangeIncludeTaskArtifacts bool
 	ChangeIncludeAssets        bool
-	ChangeSemanticDiff         bool
-	ChangeRenderedDiff         bool
-	ChangeExclude              []string
-	ChangeOmitSourceDiff       bool
-	InputDirectory             string
-	OutputDirectory            string
-	Title                      string
-	Excludes                   []string
-	StaleDays                  int
-	RepositoryRoot             string
-	RepositoryURL              string
-	RepositoryRef              string
-	Clean                      bool
-	Open                       bool
-	Strict                     bool
-	NoScreenMap                bool
-	Format                     string
-	ReportPath                 string
-	Timeout                    time.Duration
-	Host                       string
-	Port                       int
-	Example                    bool
-	Now                        time.Time
+	// ChangeForceIncludeAssets is an API-only override for workflows that need
+	// binary copying irrespective of changes.includeAssets.
+	ChangeForceIncludeAssets bool
+	ChangeSemanticDiff       bool
+	ChangeRenderedDiff       bool
+	ChangeExclude            []string
+	ChangeOmitSourceDiff     bool
+	InputDirectory           string
+	OutputDirectory          string
+	Title                    string
+	Excludes                 []string
+	StaleDays                int
+	RepositoryRoot           string
+	RepositoryURL            string
+	RepositoryRef            string
+	Clean                    bool
+	Open                     bool
+	Strict                   bool
+	NoScreenMap              bool
+	Format                   string
+	ReportPath               string
+	Timeout                  time.Duration
+	Host                     string
+	Port                     int
+	Example                  bool
+	Now                      time.Time
 }
 
 type StatusInfo struct {
@@ -557,6 +560,7 @@ type Model struct {
 	sourceOverlay    map[string][]byte
 	serveMode        bool
 	serveRevision    string
+	languageTargets  map[string][]LanguageTarget
 }
 
 type GenerateResult struct {

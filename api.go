@@ -62,6 +62,7 @@ type (
 	FooterConfig             = core.FooterConfig
 	HeroConfig               = core.HeroConfig
 	ChangesConfig            = core.ChangesConfig
+	TranslationProfile       = core.TranslationProfile
 	SiteConfig               = core.SiteConfig
 	GeneratorInfo            = core.GeneratorInfo
 	TaskVerifyTask           = core.TaskVerifyTask

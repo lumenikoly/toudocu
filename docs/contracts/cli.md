@@ -92,8 +92,11 @@ errors. `status.md`, `roadmap.md` и остальные типизированн
 `127.0.0.1` и `8080`. Для доступа из локальной сети требуется явный
 `--host 0.0.0.0`.
 
-Пока работает `serve`, HTML-запрос, save/create, watcher и ручная кнопка могут
-перестроить портал, не закрывая listener. Editor API и его JSON schema v1
+Пока работает `serve`, save/create, watcher и ручная кнопка canonical portal могут
+перестроить портал, не закрывая listener; HTML-запрос всегда отдаёт готовый
+snapshot. При запуске из canonical root configured `translations.<locale>`
+доступны read-only по `/_docgent/locales/<locale>/`; они не получают editor или
+canonical API. Editor API и его JSON schema v1
 определены в [отдельном HTTP-контракте](editor-http.md). `build` всегда остаётся
 static read-only: editor markup, CodeMirror, API URL и server-only scripts в его
 результат не входят.

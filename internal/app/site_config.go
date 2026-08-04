@@ -47,11 +47,23 @@ type SiteConfig struct {
 	Hero         HeroConfig
 	Changes      ChangesConfig
 	Project      ProjectConfig
+	// Translations describes independent documentation roots. It is deliberately
+	// not folded into Project: a Docgent model is always monolingual.
+	Translations      map[string]TranslationProfile
+	translationErrors map[string]string
 }
 
 // ProjectConfig controls stable built-in section names for one portal locale.
 type ProjectConfig struct {
 	Locale   string
+	Sections map[SectionType]string
+}
+
+// TranslationProfile configures one independently checked documentation tree.
+// Root is relative to repository root and Sections must name every built-in
+// section for Locale.
+type TranslationProfile struct {
+	Root     string
 	Sections map[SectionType]string
 }
 
@@ -143,7 +155,7 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 			return config, fmt.Errorf("config.yml:%d: табуляция в отступах запрещена", line)
 		}
 		indent := len(rawLine) - len(strings.TrimLeft(rawLine, " "))
-		if indent%2 != 0 || indent > 4 {
+		if indent%2 != 0 || indent > 6 {
 			return config, fmt.Errorf("config.yml:%d: неверный отступ", line)
 		}
 		level := indent / 2
@@ -188,7 +200,7 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 		values[path] = configScalar{value: value, line: line, quoted: quoted}
 	}
 
-	allowedMaps := map[string]bool{"site": true, "site.footer": true, "site.hero": true, "changes": true, "changes.exclude": true, "project": true, "project.sections": true}
+	allowedMaps := map[string]bool{"site": true, "site.footer": true, "site.hero": true, "changes": true, "changes.exclude": true, "project": true, "project.sections": true, "translations": true}
 	allowedScalars := map[string]bool{
 		"site.title": true, "site.logo": true, "site.favicon": true, "site.theme": true,
 		"site.colorScheme": true, "site.accent": true, "site.density": true, "site.contentWidth": true,
@@ -201,11 +213,41 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 	for _, spec := range BuiltinSections {
 		allowedScalars["project.sections."+string(spec.Type)] = true
 	}
+	translationLocales := map[string]string{}
+	translationErrors := map[string]string{}
+	for path, scalar := range values {
+		parts := strings.Split(path, ".")
+		if len(parts) < 2 || parts[0] != "translations" {
+			continue
+		}
+		locale, ok := normalizeLocale(parts[1])
+		if !ok {
+			// Keep translation-specific errors deferred until that root is chosen.
+			continue
+		}
+		if previous, duplicate := translationLocales[locale]; duplicate && previous != parts[1] {
+			translationErrors[locale] = "TRANSLATION_LOCALE_INVALID: duplicate normalized locale " + locale
+			continue
+		}
+		translationLocales[locale] = parts[1]
+		allowedMaps["translations."+parts[1]] = true
+		allowedMaps["translations."+parts[1]+".sections"] = true
+		allowedScalars["translations."+parts[1]+".root"] = true
+		for _, spec := range BuiltinSections {
+			allowedScalars["translations."+parts[1]+".sections."+string(spec.Type)] = true
+		}
+		_ = scalar
+	}
 	for key, scalar := range values {
 		if scalar.value == "" && allowedMaps[key] {
 			continue
 		}
 		if !allowedScalars[key] {
+			if strings.HasPrefix(key, "translations.") {
+				// Translation profiles are selected lazily. This lets a canonical
+				// check remain independent from an unfinished locale profile.
+				continue
+			}
 			return config, fmt.Errorf("config.yml:%d: неизвестный ключ %q", scalar.line, key)
 		}
 		isBoolean := key == "site.hero.enabled" || strings.HasPrefix(key, "changes.include") || key == "changes.semanticDiff" || key == "changes.renderedDiff"
@@ -219,6 +261,7 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 				return config, fmt.Errorf("config.yml:%d: project.locale должен быть корректным BCP-47-style locale", scalar.line)
 			}
 			config.Project.Locale = locale
+		case "translations":
 		case "project.sections.architecture", "project.sections.modules", "project.sections.use-cases", "project.sections.flows", "project.sections.screens", "project.sections.decisions", "project.sections.contracts", "project.sections.quality", "project.sections.runbooks", "project.sections.reference", "project.sections.work", "project.sections.guides":
 			if strings.TrimSpace(scalar.value) == "" {
 				return config, fmt.Errorf("config.yml:%d: %s не может быть пустым", scalar.line, key)
@@ -291,9 +334,25 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 			}
 		}
 	}
+	if len(translationLocales) > 0 {
+		config.Translations = map[string]TranslationProfile{}
+		config.translationErrors = translationErrors
+		for locale, rawLocale := range translationLocales {
+			profile := TranslationProfile{Sections: map[SectionType]string{}}
+			if root, ok := values["translations."+rawLocale+".root"]; ok {
+				profile.Root = root.value
+			}
+			for _, spec := range BuiltinSections {
+				if title, ok := values["translations."+rawLocale+".sections."+string(spec.Type)]; ok {
+					profile.Sections[spec.Type] = title.value
+				}
+			}
+			config.Translations[locale] = profile
+		}
+	}
 	config.Changes.Exclude = changeExcludes
 	if _, ok := values["site"]; !ok {
-		if _, changesOnly := values["changes"]; changesOnly || values["project"].line > 0 {
+		if _, changesOnly := values["changes"]; changesOnly || values["project"].line > 0 || values["translations"].line > 0 {
 			return config, validateSiteConfig(config)
 		}
 		return config, fmt.Errorf("config.yml: отсутствует корневая карта site")
@@ -412,4 +471,99 @@ func loadSiteConfig(repositoryRoot string) (SiteConfig, map[string]string, error
 		}
 	}
 	return config, branding, nil
+}
+
+// selectTranslationProfile applies a profile only when input is exactly its
+// root. Configuring translations must never make an ordinary canonical command
+// fail because another locale is incomplete.
+func selectTranslationProfile(config *SiteConfig, repositoryRoot, inputRoot string) ([]string, error) {
+	inputRoot = filepath.Clean(inputRoot)
+	validRoots := []string{}
+	selected := ""
+	for locale, profile := range config.Translations {
+		root, err := safeTranslationRoot(repositoryRoot, profile.Root)
+		if err != nil {
+			continue
+		}
+		validRoots = append(validRoots, root)
+		if filepath.Clean(root) == inputRoot {
+			selected = locale
+		}
+	}
+	if selected == "" {
+		return validRoots, nil
+	}
+	profile := config.Translations[selected]
+	if config.translationErrors[selected] != "" {
+		return nil, fmt.Errorf("%s", config.translationErrors[selected])
+	}
+	root, err := safeTranslationRoot(repositoryRoot, profile.Root)
+	if err != nil {
+		return nil, fmt.Errorf("TRANSLATION_PROFILE_INVALID: %w", err)
+	}
+	// `docs/` is the conventional canonical root. Keeping translations outside
+	// it prevents an accidental multilingual tree from becoming one model.
+	canonicalRoot := filepath.Join(repositoryRoot, "docs")
+	if info, statErr := os.Stat(canonicalRoot); statErr == nil && info.IsDir() && (pathContains(canonicalRoot, root) || pathContains(root, canonicalRoot)) {
+		return nil, fmt.Errorf("TRANSLATION_ROOT_COLLISION: translations.%s пересекается с canonical docs root", selected)
+	}
+	if selected == config.Project.Locale {
+		return nil, fmt.Errorf("TRANSLATION_LOCALE_CONFLICT: locale %q совпадает с project.locale", selected)
+	}
+	if len(profile.Sections) != len(BuiltinSections) {
+		return nil, fmt.Errorf("TRANSLATION_PROFILE_INCOMPLETE: translations.%s.sections должен содержать все встроенные разделы", selected)
+	}
+	for _, spec := range BuiltinSections {
+		if strings.TrimSpace(profile.Sections[spec.Type]) == "" {
+			return nil, fmt.Errorf("TRANSLATION_PROFILE_INCOMPLETE: translations.%s.sections.%s пуст", selected, spec.Type)
+		}
+	}
+	for otherLocale, other := range config.Translations {
+		if otherLocale == selected {
+			continue
+		}
+		otherRoot, otherErr := safeTranslationRoot(repositoryRoot, other.Root)
+		if otherErr != nil {
+			continue
+		}
+		if filepath.Clean(otherRoot) == root || pathContains(root, otherRoot) || pathContains(otherRoot, root) {
+			return nil, fmt.Errorf("TRANSLATION_ROOT_COLLISION: translations.%s и translations.%s пересекаются", selected, otherLocale)
+		}
+	}
+	config.Project = ProjectConfig{Locale: selected, Sections: profile.Sections}
+	return validRoots, nil
+}
+
+func safeTranslationRoot(repositoryRoot, configured string) (string, error) {
+	if strings.TrimSpace(configured) == "" || filepath.IsAbs(configured) || strings.Contains(configured, "\\") {
+		return "", fmt.Errorf("translation root должен быть непустым относительным путём внутри repository root")
+	}
+	clean := filepath.Clean(filepath.FromSlash(configured))
+	if clean == "." || clean == ".." || strings.HasPrefix(clean, ".."+string(filepath.Separator)) {
+		return "", fmt.Errorf("translation root выходит за repository root")
+	}
+	root := filepath.Join(repositoryRoot, clean)
+	if !pathContains(repositoryRoot, root) || filepath.Clean(root) == filepath.Clean(repositoryRoot) {
+		return "", fmt.Errorf("translation root должен быть вложен в repository root")
+	}
+	current := repositoryRoot
+	for _, part := range strings.Split(clean, string(filepath.Separator)) {
+		current = filepath.Join(current, part)
+		info, err := os.Lstat(current)
+		if os.IsNotExist(err) {
+			break
+		}
+		if err != nil {
+			return "", err
+		}
+		if info.Mode()&os.ModeSymlink != 0 {
+			return "", fmt.Errorf("symlink запрещён в translation root: %s", configured)
+		}
+	}
+	return root, nil
+}
+
+func pathContains(parent, child string) bool {
+	rel, err := filepath.Rel(filepath.Clean(parent), filepath.Clean(child))
+	return err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator))
 }
