@@ -19,6 +19,7 @@ func PrintHelp(w io.Writer) {
 Использование:
   docgent [build] [каталог-документации] [параметры]
   docgent check [каталог-документации] [параметры]
+  docgent serve [каталог-документации] [параметры]
   docgent task check TASK-ID [каталог-документации] [параметры]
   docgent task context TASK-ID [каталог-документации] [параметры]
   docgent version
@@ -26,6 +27,7 @@ func PrintHelp(w io.Writer) {
 Примеры:
   docgent build ./docs --output ./build/project-docs --clean
   docgent check ./docs --strict
+  docgent serve ./docs --host 0.0.0.0 --port 8080
   docgent task check TASK-CORE-001 ./docs --format json
   docgent task context TASK-CORE-001 ./docs --format json
 
@@ -40,6 +42,8 @@ func PrintHelp(w io.Writer) {
       --clean                  Очистить выходной каталог
       --open                   Открыть результат в браузере
       --strict                 Предупреждения дают ненулевой exit code
+      --host <адрес>           Адрес serve, по умолчанию 127.0.0.1
+      --port <число>           Порт serve, по умолчанию 8080
       --format text|json       Формат check, task context и task check
       --report <файл>          Сохранить JSON-отчёт task check
       --timeout <duration>     Timeout каждой команды task check, по умолчанию 10m
@@ -58,13 +62,13 @@ func takeArgValue(args []string, index *int, option string) (string, error) {
 
 // ParseArguments parses both the backwards-compatible build form and explicit subcommands.
 func ParseArguments(argv []string) (Options, bool, bool, error) {
-	options := Options{Command: "build", StaleDays: 90, RepositoryRef: "main", Format: "text", Timeout: 10 * time.Minute}
+	options := Options{Command: "build", StaleDays: 90, RepositoryRef: "main", Format: "text", Timeout: 10 * time.Minute, Host: "127.0.0.1", Port: 8080}
 	help, version := false, false
-	timeoutSpecified := false
+	timeoutSpecified, hostSpecified, portSpecified := false, false, false
 	args := append([]string{}, argv...)
 	if len(args) > 0 {
 		switch args[0] {
-		case "build", "check":
+		case "build", "check", "serve":
 			options.Command = args[0]
 			args = args[1:]
 		case "init":
@@ -201,6 +205,34 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			}
 			options.Timeout = duration
 			timeoutSpecified = true
+		case arg == "--host":
+			v, e := takeArgValue(args, &i, arg)
+			if e != nil {
+				return options, false, false, e
+			}
+			options.Host = v
+			hostSpecified = true
+		case strings.HasPrefix(arg, "--host="):
+			options.Host = strings.TrimPrefix(arg, "--host=")
+			hostSpecified = true
+		case arg == "--port":
+			v, e := takeArgValue(args, &i, arg)
+			if e != nil {
+				return options, false, false, e
+			}
+			port, e := strconv.Atoi(v)
+			if e != nil || port < 1 || port > 65535 {
+				return options, false, false, fmt.Errorf("--port должен быть числом от 1 до 65535")
+			}
+			options.Port = port
+			portSpecified = true
+		case strings.HasPrefix(arg, "--port="):
+			port, e := strconv.Atoi(strings.TrimPrefix(arg, "--port="))
+			if e != nil || port < 1 || port > 65535 {
+				return options, false, false, fmt.Errorf("--port должен быть числом от 1 до 65535")
+			}
+			options.Port = port
+			portSpecified = true
 		case arg == "--clean":
 			options.Clean = true
 		case arg == "--open":
@@ -250,6 +282,12 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 	}
 	if options.Format != "text" && options.Format != "json" {
 		return options, false, false, fmt.Errorf("--format должен быть text или json")
+	}
+	if strings.TrimSpace(options.Host) == "" {
+		return options, false, false, fmt.Errorf("--host не может быть пустым")
+	}
+	if options.Command != "serve" && (hostSpecified || portSpecified) {
+		return options, false, false, fmt.Errorf("--host и --port доступны только для serve")
 	}
 	if options.Command == "task-check" || options.Command == "task-context" {
 		if workItemHeadingRE.FindStringSubmatch(options.TaskID+": check") == nil {
@@ -338,6 +376,13 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	}
 	if version {
 		fmt.Fprintln(stdout, Version)
+		return 0
+	}
+	if options.Command == "serve" {
+		if err := serveDocumentation(options, stdout, stderr); err != nil {
+			fmt.Fprintln(stderr, "Ошибка:", err)
+			return 1
+		}
 		return 0
 	}
 	model, err := BuildDocumentationModel(options)

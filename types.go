@@ -20,6 +20,8 @@ type Options struct {
 	Format          string
 	ReportPath      string
 	Timeout         time.Duration
+	Host            string
+	Port            int
 	Example         bool
 	Now             time.Time
 }
