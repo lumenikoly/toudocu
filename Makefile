@@ -1,8 +1,11 @@
 BINARY := docgent
 CMD := ./cmd/docgent
 DIST := dist
+DOCGENT := go run $(CMD)
+DOCS_DIR := docs
+DEMO_DOCS_DIR := example/docs
 
-.PHONY: fmt vet test build docs demo clean release
+.PHONY: fmt vet test build docs docs-serve demo demo-serve clean release
 
 fmt:
 	gofmt -w .
@@ -18,11 +21,17 @@ build:
 	CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o $(BINARY) $(CMD)
 
 docs:
-	go run $(CMD) build ./docs --output ./build/project-docs --repository-root . --clean
+	$(DOCGENT) build ./$(DOCS_DIR) --output ./build/project-docs --repository-root . --clean
+
+docs-serve:
+	$(DOCGENT) serve ./$(DOCS_DIR)
 
 demo:
 	rm -rf example/site
-	go run $(CMD) build example/docs --output example/site --clean --stale-days 0
+	$(DOCGENT) build ./$(DEMO_DOCS_DIR) --output ./example/site --clean --stale-days 0
+
+demo-serve:
+	$(DOCGENT) serve ./$(DEMO_DOCS_DIR)
 
 release: test
 	rm -rf $(DIST)

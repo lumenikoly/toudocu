@@ -4,26 +4,40 @@
     "name": "Docgent",
     "version": "1.1.0-go"
   },
-  "generatedAt": "2026-07-28T18:07:13.492810713Z",
+  "generatedAt": "2026-07-29T14:36:41.449713652Z",
   "sourceDirectory": "docs",
   "staleDays": 90,
   "project": {
-    "title": "Название проекта",
-    "description": "Одним абзацем: что это за проект и какую ценность он создаёт.",
+    "title": "Service Desk Showcase",
+    "description": "Демонстрационный проект показывает возможности Docgent на документации небольшого сервиса обращений: от модели требований и задач до интерактивной карты экранов и проигрываемых сценариев.",
     "status": {
       "kind": "in-progress",
       "symbol": "◐",
       "label": "В работе",
       "recognized": true
     },
-    "stage": "MVP",
+    "stage": "Интерактивный прототип",
     "version": "0.1.0",
     "owner": "Команда проекта",
-    "updated": "2026-07-25",
-    "summary": "Что уже работает, над чем ведётся работа и что важно знать сейчас. Активные задачи, блокеры и следующий результат автоматически выводятся в HTML-представлении из work items и roadmap."
+    "updated": "2026-07-29",
+    "summary": "Портал показывает документы всех основных типов, автономные Mermaid-диаграммы, карту экранов с пятью видами переходов, два playable flow, raster preview, fallback без изображения, hotspots и traceability рабочей задачи. Активные задачи, блокеры и следующий результат автоматически выводятся в HTML-представлении из work items и roadmap."
   },
   "currentStatus": {
-    "activeWork": [],
+    "activeWork": [
+      {
+        "id": "TASK-CORE-001",
+        "title": "Реализовать основной сценарий",
+        "status": {
+          "kind": "in-progress",
+          "symbol": "◐",
+          "label": "В работе",
+          "recognized": true
+        },
+        "moduleId": "MOD-CORE",
+        "document": "work/TASK-CORE-001-main-scenario.md",
+        "anchor": "task-core-001-реализовать-основной-сценарий"
+      }
+    ],
     "blockers": [],
     "nextResult": {
       "id": "UC-CORE-01",
@@ -44,31 +58,33 @@
     }
   },
   "stats": {
-    "documents": 14,
-    "totalTasks": 3,
-    "completedTasks": 1,
+    "documents": 23,
+    "totalTasks": 4,
+    "completedTasks": 2,
     "remainingTasks": 2,
-    "taskProgress": 33,
+    "taskProgress": 50,
     "documentsComplete": 0,
     "documentsInProgress": 1,
-    "documentsNotStarted": 1,
-    "documentsWithoutTasks": 12,
+    "documentsNotStarted": 3,
+    "documentsWithoutTasks": 19,
     "staleDocuments": 0,
-    "documentsWithoutDescription": 1,
+    "documentsWithoutDescription": 2,
     "documentsWithoutStatus": 0,
     "brokenLinks": 0,
     "warnings": 0,
     "errors": 0,
-    "modules": 1,
+    "modules": 2,
     "moduleStatuses": {
+      "done": 1,
       "in-progress": 1
     },
-    "useCases": 1,
+    "useCases": 2,
     "useCaseStatuses": {
+      "done": 1,
       "in-progress": 1
     },
-    "screens": 4,
-    "screensDone": 1,
+    "screens": 5,
+    "screensDone": 2,
     "screensInProgress": 2,
     "screensPlanned": 1,
     "screensUnreachable": 0,
@@ -82,8 +98,8 @@
       "sourcePath": "index.md",
       "outputPath": "index.html",
       "type": "overview",
-      "title": "Название проекта",
-      "description": "Одним абзацем: что это за проект и какую ценность он создаёт.",
+      "title": "Service Desk Showcase",
+      "description": "Демонстрационный проект показывает возможности Docgent на документации небольшого сервиса обращений: от модели требований и задач до интерактивной карты экранов и проигрываемых сценариев.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -97,7 +113,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-25T20:07:08.030515383Z",
+      "updatedAt": "2026-07-29T13:25:09.582045182Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -111,12 +127,28 @@
           "href": "status.html"
         },
         {
+          "destination": "screens/",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "directory",
+          "target": "screens/index.html",
+          "href": "screens/index.html"
+        },
+        {
           "destination": "use-cases/",
           "broken": false,
           "blocked": false,
           "targetKind": "directory",
           "target": "use-cases/index.html",
           "href": "use-cases/index.html"
+        },
+        {
+          "destination": "flows/",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "directory",
+          "target": "flows/index.html",
+          "href": "flows/index.html"
         },
         {
           "destination": "modules/",
@@ -159,6 +191,22 @@
           "href": "risks.html"
         },
         {
+          "destination": "ideas.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "ideas.md",
+          "href": "ideas.html"
+        },
+        {
+          "destination": "notes.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "notes.md",
+          "href": "notes.html"
+        },
+        {
           "destination": "work/",
           "broken": false,
           "blocked": false,
@@ -171,7 +219,9 @@
       "relatedDocuments": [
         "status.md",
         "roadmap.md",
-        "risks.md"
+        "risks.md",
+        "ideas.md",
+        "notes.md"
       ]
     },
     {
@@ -180,12 +230,12 @@
       "outputPath": "status.html",
       "type": "status",
       "title": "Текущее состояние",
-      "description": "Краткое вводное описание текущего этапа.",
+      "description": "Документационная модель готова для демонстрации. Основной сценарий находится в работе, а переход во внешний центр поддержки уже описан как реализованный.",
       "metadata": {
         "owner": "Команда проекта",
-        "stage": "MVP",
+        "stage": "Интерактивный прототип",
         "status": "В работе",
-        "updated": "2026-07-25",
+        "updated": "2026-07-29",
         "version": "0.1.0"
       },
       "status": {
@@ -200,7 +250,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-25T00:00:00Z",
+      "updatedAt": "2026-07-29T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -225,12 +275,12 @@
         "recognized": true
       },
       "taskStats": {
-        "total": 3,
-        "completed": 1,
+        "total": 4,
+        "completed": 2,
         "remaining": 2,
-        "percent": 33
+        "percent": 50
       },
-      "updatedAt": "2026-07-25T20:15:44.803040411Z",
+      "updatedAt": "2026-07-29T13:25:09.584045203Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -272,15 +322,75 @@
     },
     {
       "id": "",
+      "sourcePath": "ideas.md",
+      "outputPath": "ideas.html",
+      "type": "ideas",
+      "title": "Идеи",
+      "description": "Свободный документ без обязательной мета-модели.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-29T13:25:09.592045285Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "index.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "notes.md",
+      "outputPath": "notes.html",
+      "type": "notes",
+      "title": "Заметки",
+      "description": "Эта страница демонстрирует свободный Markdown: цитату, список и inline code.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-29T13:25:09.593045296Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "index.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
       "sourcePath": "architecture/overview.md",
       "outputPath": "architecture/overview.html",
       "type": "architecture",
       "title": "Архитектура проекта",
-      "description": "Общее описание архитектуры системы.",
+      "description": "Service Desk разделяет основной пользовательский интерфейс и внешний центр поддержки. Эта страница также демонстрирует архитектурный sequenceDiagram .",
       "metadata": {
         "owner": "Architecture Team",
         "status": "В работе",
-        "updated": "2026-07-25"
+        "updated": "2026-07-29"
       },
       "status": {
         "kind": "in-progress",
@@ -294,7 +404,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-25T00:00:00Z",
+      "updatedAt": "2026-07-29T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -324,7 +434,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-25T20:15:44.820040593Z",
+      "updatedAt": "2026-07-29T12:02:31.139394266Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -368,6 +478,61 @@
       "links": [],
       "backlinks": [],
       "relatedDocuments": []
+    },
+    {
+      "id": "FLOW-CORE-REQUEST",
+      "sourcePath": "flows/FLOW-CORE-REQUEST.md",
+      "outputPath": "flows/FLOW-CORE-REQUEST.html",
+      "type": "flow",
+      "title": "FLOW-CORE-REQUEST: Создание запроса",
+      "description": "Диаграммы визуализируют основной сценарий и состояния формы. Источником переходов для Screen Map остаются документы screens/SC- .md .",
+      "metadata": {
+        "id": "FLOW-CORE-REQUEST",
+        "module": "MOD-CORE",
+        "updated": "2026-07-29",
+        "useCase": "UC-CORE-01"
+      },
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-29T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../use-cases/core.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/core.md",
+          "href": "../use-cases/core.html"
+        },
+        {
+          "destination": "../screens/SC-CORE-REQUEST.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "screens/SC-CORE-REQUEST.md",
+          "href": "../screens/SC-CORE-REQUEST.html"
+        }
+      ],
+      "backlinks": [
+        "use-cases/core.md"
+      ],
+      "relatedDocuments": [
+        "use-cases/core.md",
+        "screens/SC-CORE-REQUEST.md"
+      ]
     },
     {
       "id": "",
@@ -445,11 +610,58 @@
         }
       ],
       "backlinks": [
-        "use-cases/core.md"
+        "use-cases/core.md",
+        "use-cases/support.md"
       ],
       "relatedDocuments": [
         "contracts/api.md",
         "use-cases/core.md"
+      ]
+    },
+    {
+      "id": "MOD-SUPPORT",
+      "sourcePath": "modules/support.md",
+      "outputPath": "modules/support.html",
+      "type": "module",
+      "title": "Внешняя поддержка",
+      "description": "Модуль описывает границу перехода из Service Desk во внешний Support Center.",
+      "metadata": {
+        "id": "MOD-SUPPORT",
+        "owner": "Integration Team",
+        "status": "Реализован",
+        "updated": "2026-07-29"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Реализован",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-29T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../use-cases/support.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/support.md",
+          "href": "../use-cases/support.html"
+        }
+      ],
+      "backlinks": [
+        "use-cases/support.md"
+      ],
+      "relatedDocuments": [
+        "use-cases/support.md"
       ]
     },
     {
@@ -481,17 +693,24 @@
       "relatedDocuments": []
     },
     {
-      "id": "",
-      "sourcePath": "screens/map.md",
-      "outputPath": "screens/map.html",
-      "type": "screen-map",
-      "title": "Карта экранов",
-      "description": "Карта демонстрирует каталог экранов и переходы основного сценария.",
-      "metadata": {},
+      "id": "SC-CORE-HELP",
+      "sourcePath": "screens/SC-CORE-HELP.md",
+      "outputPath": "screens/SC-CORE-HELP.html",
+      "type": "screen",
+      "title": "SC-CORE-HELP: Подсказка",
+      "description": "Контекстная помощь при заполнении запроса.",
+      "metadata": {
+        "id": "SC-CORE-HELP",
+        "module": "MOD-CORE",
+        "parentScreen": "SC-CORE-REQUEST",
+        "status": "В работе",
+        "type": "Модальное окно",
+        "updated": "2026-07-29"
+      },
       "status": {
-        "kind": "neutral",
-        "symbol": "•",
-        "label": "Не указан",
+        "kind": "in-progress",
+        "symbol": "◐",
+        "label": "В работе",
         "recognized": true
       },
       "taskStats": {
@@ -500,7 +719,42 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-28T17:10:17.401450692Z",
+      "updatedAt": "2026-07-29T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "SC-CORE-HOME",
+      "sourcePath": "screens/SC-CORE-HOME.md",
+      "outputPath": "screens/SC-CORE-HOME.html",
+      "type": "screen",
+      "title": "SC-CORE-HOME: Главная",
+      "description": "Начальный экран основного сценария.",
+      "metadata": {
+        "id": "SC-CORE-HOME",
+        "module": "MOD-CORE",
+        "route": "/",
+        "status": "Реализован",
+        "type": "Страница",
+        "updated": "2026-07-29"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Реализован",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-29T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -516,12 +770,16 @@
       "title": "SC-CORE-REQUEST: Новый запрос",
       "description": "Экран принимает данные основного пользовательского запроса.",
       "metadata": {
-        "component": "src/core/request/",
+        "component": "web/pages/request/",
         "id": "SC-CORE-REQUEST",
         "module": "MOD-CORE",
+        "owner": "Frontend Team",
+        "parentScreen": "SC-CORE-HOME",
+        "preview": "../assets/screens/request.png",
         "route": "/request",
         "status": "В работе",
-        "updated": "2026-07-28"
+        "type": "Экран",
+        "updated": "2026-07-29"
       },
       "status": {
         "kind": "in-progress",
@@ -535,7 +793,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-28T00:00:00Z",
+      "updatedAt": "2026-07-29T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -549,10 +807,84 @@
           "href": "../use-cases/core.html"
         }
       ],
-      "backlinks": [],
+      "backlinks": [
+        "flows/FLOW-CORE-REQUEST.md"
+      ],
       "relatedDocuments": [
         "use-cases/core.md"
       ]
+    },
+    {
+      "id": "SC-CORE-RESULT",
+      "sourcePath": "screens/SC-CORE-RESULT.md",
+      "outputPath": "screens/SC-CORE-RESULT.html",
+      "type": "screen",
+      "title": "SC-CORE-RESULT: Результат",
+      "description": "Конечный экран успешного сценария.",
+      "metadata": {
+        "id": "SC-CORE-RESULT",
+        "module": "MOD-CORE",
+        "parentScreen": "SC-CORE-HOME",
+        "route": "/result",
+        "status": "Запланировано",
+        "type": "Страница",
+        "updated": "2026-07-29"
+      },
+      "status": {
+        "kind": "planned",
+        "symbol": "◷",
+        "label": "Запланировано",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-29T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "SC-SUPPORT-PORTAL",
+      "sourcePath": "screens/SC-SUPPORT-PORTAL.md",
+      "outputPath": "screens/SC-SUPPORT-PORTAL.html",
+      "type": "screen",
+      "title": "SC-SUPPORT-PORTAL: Центр поддержки",
+      "description": "Внешняя конечная страница сценария поддержки. Preview намеренно отсутствует, чтобы продемонстрировать безопасный placeholder.",
+      "metadata": {
+        "id": "SC-SUPPORT-PORTAL",
+        "module": "MOD-SUPPORT",
+        "owner": "Integration Team",
+        "route": "https://support.example.com/",
+        "status": "Реализован",
+        "type": "Внешняя страница",
+        "updated": "2026-07-29"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Реализован",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-29T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
     },
     {
       "id": "UC-CORE-01",
@@ -563,12 +895,15 @@
       "description": "Пользователь получает основной результат проекта.",
       "metadata": {
         "actor": "Пользователь",
+        "allowCycle": "Да",
         "id": "UC-CORE-01",
         "module": "MOD-CORE",
         "priority": "Высокий",
-        "screens": "SC-CORE-HOME, SC-CORE-REQUEST, SC-CORE-RESULT",
+        "screens": "SC-CORE-HOME, SC-CORE-REQUEST, SC-CORE-HELP, SC-CORE-RESULT",
+        "startScreen": "SC-CORE-HOME",
         "status": "В работе",
-        "updated": "2026-07-25"
+        "terminalScreens": "SC-CORE-RESULT",
+        "updated": "2026-07-29"
       },
       "status": {
         "kind": "in-progress",
@@ -582,7 +917,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-25T00:00:00Z",
+      "updatedAt": "2026-07-29T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -602,15 +937,85 @@
           "targetKind": "document",
           "target": "contracts/api.md",
           "href": "../contracts/api.html"
+        },
+        {
+          "destination": "../flows/FLOW-CORE-REQUEST.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-CORE-REQUEST.md",
+          "href": "../flows/FLOW-CORE-REQUEST.html"
         }
       ],
       "backlinks": [
+        "flows/FLOW-CORE-REQUEST.md",
         "modules/core.md",
         "screens/SC-CORE-REQUEST.md"
       ],
       "relatedDocuments": [
         "modules/core.md",
-        "contracts/api.md"
+        "contracts/api.md",
+        "flows/FLOW-CORE-REQUEST.md"
+      ]
+    },
+    {
+      "id": "UC-CORE-02",
+      "sourcePath": "use-cases/support.md",
+      "outputPath": "use-cases/support.html",
+      "type": "use-case",
+      "title": "UC-CORE-02: Открыть центр поддержки",
+      "description": "Пользователь переходит из Service Desk во внешний центр поддержки.",
+      "metadata": {
+        "actor": "Пользователь",
+        "id": "UC-CORE-02",
+        "module": "MOD-CORE",
+        "priority": "Средний",
+        "screens": "SC-CORE-HOME, SC-SUPPORT-PORTAL",
+        "startScreen": "SC-CORE-HOME",
+        "status": "Реализован",
+        "terminalScreens": "SC-SUPPORT-PORTAL",
+        "updated": "2026-07-29"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Реализован",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-29T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../modules/core.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/core.md",
+          "href": "../modules/core.html"
+        },
+        {
+          "destination": "../modules/support.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/support.md",
+          "href": "../modules/support.html"
+        }
+      ],
+      "backlinks": [
+        "modules/support.md"
+      ],
+      "relatedDocuments": [
+        "modules/core.md",
+        "modules/support.md"
       ]
     },
     {
@@ -621,14 +1026,54 @@
       "title": "TASK-CORE-001: Реализовать основной сценарий",
       "description": "",
       "metadata": {
+        "flow": "FLOW-CORE-REQUEST",
         "module": "MOD-CORE",
         "owner": "Команда проекта",
         "priority": "Высокий",
-        "screens": "SC-CORE-REQUEST, SC-CORE-RESULT",
-        "status": "Черновик",
+        "screens": "SC-CORE-HOME, SC-CORE-REQUEST, SC-CORE-HELP, SC-CORE-RESULT",
+        "status": "В работе",
+        "transitions": "TR-CORE-001, TR-CORE-002, TR-CORE-003, TR-CORE-004, TR-CORE-005",
         "type": "Feature",
-        "updated": "2026-07-24",
+        "updated": "2026-07-29",
         "useCase": "UC-CORE-01"
+      },
+      "status": {
+        "kind": "in-progress",
+        "symbol": "◐",
+        "label": "В работе",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 5,
+        "completed": 0,
+        "remaining": 5,
+        "percent": 0
+      },
+      "updatedAt": "2026-07-29T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "work/TASK-SUPPORT-002-external-support.md",
+      "outputPath": "work/TASK-SUPPORT-002-external-support.html",
+      "type": "work",
+      "title": "TASK-SUPPORT-002: Проверить внешний переход",
+      "description": "",
+      "metadata": {
+        "module": "MOD-SUPPORT",
+        "owner": "Integration Team",
+        "priority": "Средний",
+        "screens": "SC-CORE-HOME, SC-SUPPORT-PORTAL",
+        "status": "Черновик",
+        "transitions": "TR-CORE-006",
+        "type": "Feature",
+        "updated": "2026-07-29",
+        "useCase": "UC-CORE-02"
       },
       "status": {
         "kind": "not-started",
@@ -637,12 +1082,12 @@
         "recognized": true
       },
       "taskStats": {
-        "total": 0,
+        "total": 1,
         "completed": 0,
-        "remaining": 0,
-        "percent": null
+        "remaining": 1,
+        "percent": 0
       },
-      "updatedAt": "2026-07-24T00:00:00Z",
+      "updatedAt": "2026-07-29T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -662,10 +1107,10 @@
       },
       "plannedDate": "2026-07-25",
       "taskStats": {
-        "total": 2,
-        "completed": 1,
+        "total": 3,
+        "completed": 2,
         "remaining": 1,
-        "percent": 50
+        "percent": 67
       },
       "items": [
         {
@@ -686,6 +1131,23 @@
           "line": 11
         },
         {
+          "id": "UC-CORE-02",
+          "text": "UC-CORE-02 Пользователь открывает внешний центр поддержки.",
+          "kind": "use-case",
+          "declaredCompleted": true,
+          "effectiveCompleted": true,
+          "completionSource": "use-case-status",
+          "targetDocument": "use-cases/support.md",
+          "targetStatus": {
+            "kind": "done",
+            "symbol": "✓",
+            "label": "Реализован",
+            "recognized": true
+          },
+          "document": "roadmap.md",
+          "line": 12
+        },
+        {
           "id": "DLV-DOCS-01",
           "text": "DLV-DOCS-01 Создана проверяемая структура документации.",
           "kind": "deliverable",
@@ -693,7 +1155,7 @@
           "effectiveCompleted": true,
           "completionSource": "roadmap-checkbox",
           "document": "roadmap.md",
-          "line": 12
+          "line": 13
         }
       ],
       "document": "roadmap.md",
@@ -723,7 +1185,7 @@
           "effectiveCompleted": false,
           "completionSource": "roadmap-checkbox",
           "document": "roadmap.md",
-          "line": 18
+          "line": 19
         }
       ],
       "document": "roadmap.md",
@@ -767,7 +1229,8 @@
         "document": "modules/core.md",
         "repositoryPaths": [],
         "useCaseIds": [
-          "UC-CORE-01"
+          "UC-CORE-01",
+          "UC-CORE-02"
         ],
         "screenIds": [
           "SC-CORE-HELP",
@@ -777,6 +1240,25 @@
         ],
         "businessRuleIds": [
           "BR-CORE-001"
+        ]
+      },
+      {
+        "id": "MOD-SUPPORT",
+        "title": "Внешняя поддержка",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Реализован",
+          "recognized": true
+        },
+        "document": "modules/support.md",
+        "repositoryPaths": [],
+        "useCaseIds": [],
+        "screenIds": [
+          "SC-SUPPORT-PORTAL"
+        ],
+        "businessRuleIds": [
+          "BR-SUPPORT-001"
         ]
       }
     ],
@@ -797,135 +1279,39 @@
           "BR-CORE-001"
         ],
         "screenIds": [
+          "SC-CORE-HELP",
           "SC-CORE-HOME",
           "SC-CORE-REQUEST",
           "SC-CORE-RESULT"
-        ]
-      }
-    ],
-    "screens": [
+        ],
+        "startScreen": "SC-CORE-HOME",
+        "terminalScreens": [
+          "SC-CORE-RESULT"
+        ],
+        "allowCycle": true
+      },
       {
-        "id": "SC-CORE-HOME",
-        "title": "Главная",
-        "moduleId": "MOD-CORE",
-        "kind": "page",
-        "role": "entry",
-        "route": "/",
+        "id": "UC-CORE-02",
+        "title": "UC-CORE-02: Открыть центр поддержки",
         "status": {
           "kind": "done",
           "symbol": "✓",
-          "label": "Готово",
+          "label": "Реализован",
           "recognized": true
         },
-        "errorIds": [],
-        "useCaseIds": [
-          "UC-CORE-01"
-        ],
-        "workItemIds": [],
-        "reachable": true,
-        "line": 9
-      },
-      {
-        "id": "SC-CORE-REQUEST",
-        "title": "Новый запрос",
         "moduleId": "MOD-CORE",
-        "kind": "page",
-        "role": "normal",
-        "route": "/request",
-        "status": {
-          "kind": "in-progress",
-          "symbol": "◐",
-          "label": "В работе",
-          "recognized": true
-        },
-        "errorIds": [
-          "ERR-CORE-INVALID"
+        "document": "use-cases/support.md",
+        "repositoryPaths": [],
+        "businessRuleIds": [],
+        "screenIds": [
+          "SC-CORE-HOME",
+          "SC-SUPPORT-PORTAL"
         ],
-        "document": "screens/SC-CORE-REQUEST.md",
-        "useCaseIds": [
-          "UC-CORE-01"
+        "startScreen": "SC-CORE-HOME",
+        "terminalScreens": [
+          "SC-SUPPORT-PORTAL"
         ],
-        "workItemIds": [
-          "TASK-CORE-001"
-        ],
-        "reachable": true,
-        "line": 10
-      },
-      {
-        "id": "SC-CORE-HELP",
-        "title": "Подсказка",
-        "moduleId": "MOD-CORE",
-        "kind": "modal",
-        "role": "normal",
-        "status": {
-          "kind": "in-progress",
-          "symbol": "◐",
-          "label": "В работе",
-          "recognized": true
-        },
-        "errorIds": [],
-        "useCaseIds": [],
-        "workItemIds": [],
-        "reachable": true,
-        "line": 11
-      },
-      {
-        "id": "SC-CORE-RESULT",
-        "title": "Результат",
-        "moduleId": "MOD-CORE",
-        "kind": "page",
-        "role": "terminal",
-        "route": "/result",
-        "status": {
-          "kind": "planned",
-          "symbol": "◷",
-          "label": "Запланировано",
-          "recognized": true
-        },
-        "errorIds": [],
-        "useCaseIds": [
-          "UC-CORE-01"
-        ],
-        "workItemIds": [
-          "TASK-CORE-001"
-        ],
-        "reachable": true,
-        "line": 12
-      }
-    ],
-    "screenTransitions": [
-      {
-        "fromId": "SC-CORE-HOME",
-        "toId": "SC-CORE-REQUEST",
-        "action": "Создать запрос",
-        "kind": "navigation",
-        "document": "screens/map.md",
-        "line": 18
-      },
-      {
-        "fromId": "SC-CORE-REQUEST",
-        "toId": "SC-CORE-HELP",
-        "action": "Открыть подсказку",
-        "kind": "navigation",
-        "document": "screens/map.md",
-        "line": 19
-      },
-      {
-        "fromId": "SC-CORE-HELP",
-        "toId": "SC-CORE-REQUEST",
-        "action": "Закрыть",
-        "kind": "navigation",
-        "document": "screens/map.md",
-        "line": 20
-      },
-      {
-        "fromId": "SC-CORE-REQUEST",
-        "toId": "SC-CORE-RESULT",
-        "action": "Отправить",
-        "condition": "Данные корректны",
-        "kind": "redirect",
-        "document": "screens/map.md",
-        "line": 21
+        "allowCycle": false
       }
     ],
     "businessRules": [
@@ -936,6 +1322,14 @@
         "document": "modules/core.md",
         "anchor": "br-core-001-результат-создаётся-только-после-проверки-входных-данных",
         "line": 25
+      },
+      {
+        "id": "BR-SUPPORT-001",
+        "title": "Внешний переход явно обозначается на карте",
+        "moduleId": "MOD-SUPPORT",
+        "document": "modules/support.md",
+        "anchor": "br-support-001-внешний-переход-явно-обозначается-на-карте",
+        "line": 25
       }
     ],
     "workItems": [
@@ -943,9 +1337,9 @@
         "id": "TASK-CORE-001",
         "title": "Реализовать основной сценарий",
         "status": {
-          "kind": "not-started",
-          "symbol": "○",
-          "label": "Черновик",
+          "kind": "in-progress",
+          "symbol": "◐",
+          "label": "В работе",
           "recognized": true
         },
         "type": "Feature",
@@ -953,20 +1347,577 @@
         "owner": "Команда проекта",
         "moduleId": "MOD-CORE",
         "useCaseId": "UC-CORE-01",
+        "flowId": "FLOW-CORE-REQUEST",
         "screenIds": [
+          "SC-CORE-HOME",
           "SC-CORE-REQUEST",
+          "SC-CORE-HELP",
           "SC-CORE-RESULT"
+        ],
+        "transitionIds": [
+          "TR-CORE-001",
+          "TR-CORE-002",
+          "TR-CORE-003",
+          "TR-CORE-004",
+          "TR-CORE-005"
         ],
         "dependsOn": [],
         "document": "work/TASK-CORE-001-main-scenario.md",
         "anchor": "task-core-001-реализовать-основной-сценарий",
-        "criteria": [],
-        "verificationMatrix": [],
+        "criteria": [
+          {
+            "line": 32,
+            "indent": 0,
+            "completed": false,
+            "text": "AC-01 С главного экрана можно открыть новый запрос."
+          },
+          {
+            "line": 33,
+            "indent": 0,
+            "completed": false,
+            "text": "AC-02 Из запроса можно открыть подсказку."
+          },
+          {
+            "line": 34,
+            "indent": 0,
+            "completed": false,
+            "text": "AC-03 Подсказку можно закрыть с возвратом к запросу."
+          },
+          {
+            "line": 35,
+            "indent": 0,
+            "completed": false,
+            "text": "AC-04 Корректный запрос открывает результат."
+          },
+          {
+            "line": 36,
+            "indent": 0,
+            "completed": false,
+            "text": "AC-05 Некорректный запрос остаётся на текущем экране с ошибкой."
+          }
+        ],
+        "verificationMatrix": [
+          {
+            "criterionId": "AC-01",
+            "criterion": "С главного экрана можно открыть новый запрос.",
+            "completed": false,
+            "commands": [
+              "test -f ./d[o]cs/screens/SC-CORE-HOME.md"
+            ],
+            "transitions": [
+              "TR-CORE-001"
+            ],
+            "verificationReferences": [
+              "TestOpenRequest"
+            ]
+          },
+          {
+            "criterionId": "AC-02",
+            "criterion": "Из запроса можно открыть подсказку.",
+            "completed": false,
+            "commands": [
+              "test -f ./d[o]cs/screens/SC-CORE-HELP.md"
+            ],
+            "transitions": [
+              "TR-CORE-002"
+            ],
+            "verificationReferences": [
+              "TestOpenHelp"
+            ]
+          },
+          {
+            "criterionId": "AC-03",
+            "criterion": "Подсказку можно закрыть с возвратом к запросу.",
+            "completed": false,
+            "commands": [
+              "test -f ./d[o]cs/screens/SC-CORE-HELP.md"
+            ],
+            "transitions": [
+              "TR-CORE-003"
+            ],
+            "verificationReferences": [
+              "TestCloseHelp"
+            ]
+          },
+          {
+            "criterionId": "AC-04",
+            "criterion": "Корректный запрос открывает результат.",
+            "completed": false,
+            "commands": [
+              "test -f ./d[o]cs/screens/SC-CORE-RESULT.md"
+            ],
+            "transitions": [
+              "TR-CORE-004"
+            ],
+            "verificationReferences": [
+              "TestSubmitRequest"
+            ]
+          },
+          {
+            "criterionId": "AC-05",
+            "criterion": "Некорректный запрос остаётся на текущем экране с ошибкой.",
+            "completed": false,
+            "commands": [
+              "test -f ./d[o]cs/contracts/api.md"
+            ],
+            "transitions": [
+              "TR-CORE-005"
+            ],
+            "verificationReferences": [
+              "TestInvalidRequest"
+            ]
+          }
+        ],
+        "checks": [
+          {
+            "target": "AC-01",
+            "commands": [
+              "test -f ./d[o]cs/screens/SC-CORE-HOME.md"
+            ],
+            "line": 41
+          },
+          {
+            "target": "AC-02",
+            "commands": [
+              "test -f ./d[o]cs/screens/SC-CORE-HELP.md"
+            ],
+            "line": 43
+          },
+          {
+            "target": "AC-03",
+            "commands": [
+              "test -f ./d[o]cs/screens/SC-CORE-HELP.md"
+            ],
+            "line": 45
+          },
+          {
+            "target": "AC-04",
+            "commands": [
+              "test -f ./d[o]cs/screens/SC-CORE-RESULT.md"
+            ],
+            "line": 47
+          },
+          {
+            "target": "AC-05",
+            "commands": [
+              "test -f ./d[o]cs/contracts/api.md"
+            ],
+            "line": 49
+          }
+        ],
+        "repositoryPaths": [
+          "docs/contracts/api.md",
+          "docs/screens/",
+          "docs/use-cases/core.md"
+        ],
+        "result": "Основной сценарий выполняется согласно критериям приёмки."
+      },
+      {
+        "id": "TASK-SUPPORT-002",
+        "title": "Проверить внешний переход",
+        "status": {
+          "kind": "not-started",
+          "symbol": "○",
+          "label": "Черновик",
+          "recognized": true
+        },
+        "type": "Feature",
+        "priority": "Средний",
+        "owner": "Integration Team",
+        "moduleId": "MOD-SUPPORT",
+        "useCaseId": "UC-CORE-02",
+        "screenIds": [
+          "SC-CORE-HOME",
+          "SC-SUPPORT-PORTAL"
+        ],
+        "transitionIds": [
+          "TR-CORE-006"
+        ],
+        "dependsOn": [],
+        "document": "work/TASK-SUPPORT-002-external-support.md",
+        "anchor": "task-support-002-проверить-внешний-переход",
+        "criteria": [
+          {
+            "line": 19,
+            "indent": 0,
+            "completed": false,
+            "text": "AC-01 Внешний переход ведёт на SC-SUPPORT-PORTAL."
+          }
+        ],
+        "verificationMatrix": [
+          {
+            "criterionId": "AC-01",
+            "criterion": "Внешний переход ведёт на SC-SUPPORT-PORTAL.",
+            "completed": false,
+            "commands": [],
+            "transitions": [
+              "TR-CORE-006"
+            ],
+            "verificationReferences": [
+              "TestOpenSupportCenter"
+            ]
+          }
+        ],
         "checks": [],
         "repositoryPaths": [],
-        "result": "Основной сценарий выполняется согласно критериям приёмки."
+        "result": "Пользователь может открыть внешний центр поддержки с главной страницы."
       }
     ]
   },
+  "screens": [
+    {
+      "id": "SC-CORE-HELP",
+      "title": "Подсказка",
+      "description": "Контекстная помощь при заполнении запроса.",
+      "module": "MOD-CORE",
+      "type": "modal",
+      "status": "in-progress",
+      "updated": "2026-07-29",
+      "parent": "SC-CORE-REQUEST",
+      "states": [
+        {
+          "id": "DEFAULT"
+        }
+      ],
+      "incomingTransitions": [
+        "TR-CORE-002"
+      ],
+      "outgoingTransitions": [
+        "TR-CORE-003"
+      ],
+      "useCases": [
+        "UC-CORE-01"
+      ],
+      "workItems": [
+        "TASK-CORE-001"
+      ],
+      "contracts": [],
+      "document": "screens/SC-CORE-HELP.md"
+    },
+    {
+      "id": "SC-CORE-HOME",
+      "title": "Главная",
+      "description": "Начальный экран основного сценария.",
+      "module": "MOD-CORE",
+      "type": "page",
+      "status": "implemented",
+      "route": "/",
+      "updated": "2026-07-29",
+      "states": [
+        {
+          "id": "DEFAULT"
+        }
+      ],
+      "incomingTransitions": [],
+      "outgoingTransitions": [
+        "TR-CORE-001",
+        "TR-CORE-006"
+      ],
+      "useCases": [
+        "UC-CORE-01",
+        "UC-CORE-02"
+      ],
+      "workItems": [
+        "TASK-CORE-001",
+        "TASK-SUPPORT-002"
+      ],
+      "contracts": [],
+      "document": "screens/SC-CORE-HOME.md"
+    },
+    {
+      "id": "SC-CORE-REQUEST",
+      "title": "Новый запрос",
+      "description": "Экран принимает данные основного пользовательского запроса.",
+      "module": "MOD-CORE",
+      "type": "screen",
+      "status": "in-progress",
+      "route": "/request",
+      "preview": "assets/screens/request.png",
+      "component": "web/pages/request/",
+      "owner": "Frontend Team",
+      "updated": "2026-07-29",
+      "parent": "SC-CORE-HOME",
+      "states": [
+        {
+          "id": "DEFAULT",
+          "title": "Исходное состояние",
+          "preview": "assets/screens/request.png"
+        },
+        {
+          "id": "INVALID-INPUT",
+          "title": "Некорректные данные"
+        }
+      ],
+      "incomingTransitions": [
+        "TR-CORE-001",
+        "TR-CORE-003",
+        "TR-CORE-005"
+      ],
+      "outgoingTransitions": [
+        "TR-CORE-002",
+        "TR-CORE-004",
+        "TR-CORE-005"
+      ],
+      "useCases": [
+        "UC-CORE-01"
+      ],
+      "workItems": [
+        "TASK-CORE-001"
+      ],
+      "contracts": [
+        "contracts/api.md"
+      ],
+      "document": "screens/SC-CORE-REQUEST.md"
+    },
+    {
+      "id": "SC-CORE-RESULT",
+      "title": "Результат",
+      "description": "Конечный экран успешного сценария.",
+      "module": "MOD-CORE",
+      "type": "page",
+      "status": "planned",
+      "route": "/result",
+      "updated": "2026-07-29",
+      "parent": "SC-CORE-HOME",
+      "states": [
+        {
+          "id": "DEFAULT"
+        }
+      ],
+      "incomingTransitions": [
+        "TR-CORE-004"
+      ],
+      "outgoingTransitions": [],
+      "useCases": [
+        "UC-CORE-01"
+      ],
+      "workItems": [
+        "TASK-CORE-001"
+      ],
+      "contracts": [],
+      "document": "screens/SC-CORE-RESULT.md"
+    },
+    {
+      "id": "SC-SUPPORT-PORTAL",
+      "title": "Центр поддержки",
+      "description": "Внешняя конечная страница сценария поддержки. Preview намеренно отсутствует, чтобы продемонстрировать безопасный placeholder.",
+      "module": "MOD-SUPPORT",
+      "type": "external",
+      "status": "implemented",
+      "route": "https://support.example.com/",
+      "owner": "Integration Team",
+      "updated": "2026-07-29",
+      "states": [
+        {
+          "id": "DEFAULT"
+        }
+      ],
+      "incomingTransitions": [
+        "TR-CORE-006"
+      ],
+      "outgoingTransitions": [],
+      "useCases": [
+        "UC-CORE-02"
+      ],
+      "workItems": [
+        "TASK-SUPPORT-002"
+      ],
+      "contracts": [],
+      "document": "screens/SC-SUPPORT-PORTAL.md"
+    }
+  ],
+  "transitions": [
+    {
+      "id": "TR-CORE-003",
+      "useCase": "UC-CORE-01",
+      "source": "SC-CORE-HELP",
+      "target": "SC-CORE-REQUEST",
+      "action": "Закрыть",
+      "condition": "Всегда",
+      "type": "return",
+      "document": "screens/SC-CORE-HELP.md",
+      "line": 16
+    },
+    {
+      "id": "TR-CORE-001",
+      "useCase": "UC-CORE-01",
+      "source": "SC-CORE-HOME",
+      "target": "SC-CORE-REQUEST",
+      "action": "Создать запрос",
+      "condition": "Всегда",
+      "type": "navigation",
+      "document": "screens/SC-CORE-HOME.md",
+      "line": 16
+    },
+    {
+      "id": "TR-CORE-006",
+      "useCase": "UC-CORE-02",
+      "source": "SC-CORE-HOME",
+      "target": "SC-SUPPORT-PORTAL",
+      "action": "Открыть центр поддержки",
+      "condition": "Всегда",
+      "type": "external",
+      "document": "screens/SC-CORE-HOME.md",
+      "line": 17
+    },
+    {
+      "id": "TR-CORE-002",
+      "useCase": "UC-CORE-01",
+      "source": "SC-CORE-REQUEST",
+      "target": "SC-CORE-HELP",
+      "action": "Открыть подсказку",
+      "condition": "Всегда",
+      "state": "DEFAULT",
+      "type": "navigation",
+      "document": "screens/SC-CORE-REQUEST.md",
+      "line": 27
+    },
+    {
+      "id": "TR-CORE-004",
+      "useCase": "UC-CORE-01",
+      "source": "SC-CORE-REQUEST",
+      "target": "SC-CORE-RESULT",
+      "action": "Отправить",
+      "condition": "Данные корректны",
+      "state": "DEFAULT",
+      "contract": "contracts/api.md",
+      "type": "redirect",
+      "document": "screens/SC-CORE-REQUEST.md",
+      "line": 28
+    },
+    {
+      "id": "TR-CORE-005",
+      "useCase": "UC-CORE-01",
+      "source": "SC-CORE-REQUEST",
+      "target": "SC-CORE-REQUEST",
+      "action": "Отправить",
+      "condition": "Данные некорректны",
+      "state": "INVALID-INPUT",
+      "error": "INVALID_INPUT",
+      "message": "Входные данные не прошли проверку.",
+      "contract": "contracts/api.md",
+      "type": "error",
+      "document": "screens/SC-CORE-REQUEST.md",
+      "line": 29
+    }
+  ],
+  "playableFlows": [
+    {
+      "useCase": "UC-CORE-01",
+      "startScreen": "SC-CORE-HOME",
+      "reachableScreens": [
+        "SC-CORE-HELP",
+        "SC-CORE-HOME",
+        "SC-CORE-REQUEST",
+        "SC-CORE-RESULT"
+      ],
+      "terminalScreens": [
+        "SC-CORE-RESULT"
+      ],
+      "transitions": [
+        "TR-CORE-003",
+        "TR-CORE-001",
+        "TR-CORE-002",
+        "TR-CORE-004",
+        "TR-CORE-005"
+      ],
+      "result": "При успехе результат создан; при ошибке состояние не изменено.",
+      "valid": true,
+      "issueCodes": []
+    },
+    {
+      "useCase": "UC-CORE-02",
+      "startScreen": "SC-CORE-HOME",
+      "reachableScreens": [
+        "SC-CORE-HOME",
+        "SC-SUPPORT-PORTAL"
+      ],
+      "terminalScreens": [
+        "SC-SUPPORT-PORTAL"
+      ],
+      "transitions": [
+        "TR-CORE-006"
+      ],
+      "result": "Пользователь находится во внешнем центре поддержки.",
+      "valid": true,
+      "issueCodes": []
+    }
+  ],
+  "hotspots": [
+    {
+      "screen": "SC-CORE-REQUEST",
+      "transition": "TR-CORE-004",
+      "x": 82,
+      "y": 84,
+      "width": 13,
+      "height": 9
+    },
+    {
+      "screen": "SC-CORE-REQUEST",
+      "transition": "TR-CORE-002",
+      "x": 21,
+      "y": 72,
+      "width": 13,
+      "height": 6
+    }
+  ],
+  "errorDefinitions": [
+    {
+      "id": "INVALID_INPUT",
+      "message": "Входные данные не прошли проверку.",
+      "document": "contracts/api.md",
+      "line": 25
+    }
+  ],
+  "traceability": [
+    {
+      "useCase": "UC-CORE-01",
+      "screen": "SC-CORE-HOME",
+      "transition": "TR-CORE-001",
+      "task": "TASK-CORE-001",
+      "criterion": "AC-01",
+      "verification": "TestOpenRequest"
+    },
+    {
+      "useCase": "UC-CORE-01",
+      "screen": "SC-CORE-REQUEST",
+      "transition": "TR-CORE-002",
+      "task": "TASK-CORE-001",
+      "criterion": "AC-02",
+      "verification": "TestOpenHelp"
+    },
+    {
+      "useCase": "UC-CORE-01",
+      "screen": "SC-CORE-HELP",
+      "transition": "TR-CORE-003",
+      "task": "TASK-CORE-001",
+      "criterion": "AC-03",
+      "verification": "TestCloseHelp"
+    },
+    {
+      "useCase": "UC-CORE-01",
+      "screen": "SC-CORE-REQUEST",
+      "transition": "TR-CORE-004",
+      "task": "TASK-CORE-001",
+      "criterion": "AC-04",
+      "verification": "TestSubmitRequest"
+    },
+    {
+      "useCase": "UC-CORE-01",
+      "screen": "SC-CORE-REQUEST",
+      "transition": "TR-CORE-005",
+      "task": "TASK-CORE-001",
+      "criterion": "AC-05",
+      "verification": "TestInvalidRequest"
+    },
+    {
+      "useCase": "UC-CORE-02",
+      "screen": "SC-CORE-HOME",
+      "transition": "TR-CORE-006",
+      "task": "TASK-SUPPORT-002",
+      "criterion": "AC-01",
+      "verification": "TestOpenSupportCenter"
+    }
+  ],
   "issues": []
 }

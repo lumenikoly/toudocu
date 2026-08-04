@@ -1,21 +1,28 @@
 # {{SCREEN_ID}}: {{SCREEN_TITLE}}
 
 - Идентификатор: {{SCREEN_ID}}
+- Тип: {{SCREEN_TYPE}}
 - Модуль: {{MODULE_ID}}
 - Статус: {{SCREEN_STATUS}}
 {{OPTIONAL_ROUTE_METADATA}}
+{{OPTIONAL_PREVIEW_METADATA}}
+{{OPTIONAL_PARENT_METADATA}}
 {{OPTIONAL_COMPONENT_METADATA}}
 - Последнее обновление: {{YYYY-MM-DD}}
 
 {{SCREEN_PURPOSE}}
 
-## Действия
+## Состояния
 
-- {{ACTION}}
+| ID | Название | Превью |
+|---|---|---|
+{{STATE_ROWS}}
 
-## Состояния и ошибки
+## Переходы
 
-{{STATES_AND_ERRORS}}
+| ID | Сценарий | Действие | Условие | Результат | Состояние | Ошибка | Сообщение | Контракт | Тип |
+|---|---|---|---|---|---|---|---|---|---|
+{{TRANSITION_ROWS}}
 
 ## Связанные сценарии
 

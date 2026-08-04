@@ -203,6 +203,7 @@
     $$('[data-filter-scope]').forEach((scope) => {
       const items = $$('[data-filter-item]', scope);
       const controls = $$('[data-filter-control]', scope);
+      const resetButtons = $$('[data-filter-reset]', scope);
       const count = $('[data-filter-count]', scope);
       const empty = $('[data-filter-empty]', scope);
       if (!items.length || !controls.length) return;
@@ -218,7 +219,9 @@
             if (!value || value === 'all') return true;
             const itemValue = normalize(item.dataset[key] || '');
             if (key === 'search' || key === 'route') return itemValue.includes(value);
-            if (key === 'usecase') return itemValue.split(' ').includes(value);
+            if (key === 'usecase') {
+              return String(item.dataset[key] || '').split('|').map(normalize).includes(value);
+            }
             return itemValue === value;
           });
           item.hidden = !matches;
@@ -230,6 +233,15 @@
 
       controls.forEach((control) => {
         control.addEventListener(control.tagName === 'INPUT' ? 'input' : 'change', apply);
+      });
+      resetButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          controls.forEach((control) => {
+            control.value = control.tagName === 'SELECT' ? 'all' : '';
+          });
+          apply();
+          controls[0]?.focus();
+        });
       });
       apply();
     });
@@ -748,7 +760,6 @@
   initializeCollapsibleSections();
   initializeCodeCopy();
   initializeMermaid();
-  initializeScreenMap();
   initializeTocTracking();
   initializePrint();
 })();

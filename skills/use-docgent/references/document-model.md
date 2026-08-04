@@ -40,8 +40,8 @@ types are optional.
 | `modules/*.md` | Stable component boundaries and rules | Requires a unique `MOD-*` and validates relationships |
 | `use-cases/*.md` | Observable actor behavior | Requires a unique `UC-*` and an existing module |
 | `flows/*.md` | A reusable visual process | Requires a unique `FLOW-*`, Mermaid, and a use-case or architecture relationship |
-| `screens/map.md` | A product-wide screen graph | Parses the screen catalog and transitions; validates `SC-*`, modules, routes, and topology |
-| `screens/SC-*.md` | Detailed behavior of a significant screen | Requires a catalogued `SC-*`; computed transitions stay in the central map |
+| `screens/SC-*.md` | A significant screen and its outgoing transitions | Parses metadata, states and `TR-*`; validates modules, routes and topology |
+| `screens/hotspots.json` | Optional percentage-based interactive areas | Validates screen and transition references and geometry |
 | `decisions/*.md` | Durable decisions | Requires a unique `ADR-*` |
 | `work/TASK-*.md` | Agent- or CI-readable work | Requires exactly one task and status-dependent fields |
 | `architecture/`, `contracts/`, `guides/`, `reference/` | Specialized human documentation | Classifies and renders the document |
@@ -62,7 +62,8 @@ When opting into a typed entity:
   `### BR-AREA-001: Title`;
 - give decisions unique `ADR-*` IDs;
 - give reusable flows unique `FLOW-*` IDs and link them to requirements;
-- give screens unique `SC-<AREA>-<NAME>` IDs and keep transitions in `screens/map.md`;
+- give screens unique `SC-<AREA>-<NAME>` IDs and transitions unique
+  `TR-<AREA>-<NUMBER>` IDs;
 - give work items unique `TASK-AREA-NNN` IDs;
 - keep IDs stable when titles or filenames change;
 - update all references together when identity genuinely changes;
@@ -78,9 +79,9 @@ The module template includes purpose, code location, boundaries, business
 rules, invariants, stable interfaces, and related use cases. The use-case
 template includes its main scenario, postconditions, rules, and implementation.
 The flow template contains a Mermaid visualization and an explicit requirements
-link. The screen-map template contains the catalog and transitions; the screen
-template adds details without duplicating the graph. The ADR template includes
-context, decision, and consequences.
+link. Each screen template contains that screen's metadata, states and outgoing
+transitions; Docgent derives the catalog, map and playable flows from those
+files. The ADR template includes context, decision, and consequences.
 
 Docgent reports missing recommended sections as warnings. Use these sections
 when they add information; do not create empty or speculative prose. If the
@@ -94,7 +95,7 @@ Common schema-driven anti-patterns include:
 | Module | It mirrors a directory without a stable product or ownership boundary |
 | Use case | It restates functions or routes without observable actor behavior |
 | Flow | Its nodes are copied from code structure rather than one reusable scenario |
-| Screen map | Its catalog is derived from router entries instead of product navigation |
+| Screen model | Its screens or transitions are derived from router entries instead of product navigation |
 | ADR | No durable decision or considered tradeoff can be evidenced |
 | Roadmap or status | Desired work is presented as current fact or global scope is inferred from local checklists |
 | Task | Scope, criteria, or commands are invented to complete the task schema |
@@ -107,38 +108,38 @@ and edges are visualization only: Docgent does not derive relationships from
 them. Derive the diagram from the scenario; do not start from a generic
 start-to-finish graph and retrofit meaning.
 
-Use `screens/map.md` for the product-wide navigation graph. Its two tables are
-the machine-readable source of truth for the declared graph, while product
-information architecture and user journeys determine which screens belong in
-it:
+Use one `screens/SC-*.md` file for every significant screen. Metadata and the
+outgoing transition table are the machine-readable source of truth:
 
 ```md
-## Screen catalog
+# SC-PUBLIC-HOME: Home
 
-| ID | Screen | Module | Type | Role | Route | Status | Errors |
-|---|---|---|---|---|---|---|---|
-| SC-PUBLIC-HOME | Home | MOD-PUBLIC | page | entry | `/` | Planned | — |
-| SC-ACCOUNT-OVERVIEW | Account overview | MOD-ACCOUNT | page | terminal | `/account` | Planned | — |
+- Identifier: SC-PUBLIC-HOME
+- Type: Page
+- Module: MOD-PUBLIC
+- Status: Planned
+- Route: `/`
 
 ## Transitions
 
-| From | Action | Condition | To | Type |
+| ID | Use case | Action | Condition | Result |
 |---|---|---|---|---|
-| SC-PUBLIC-HOME | Open account | Signed in | SC-ACCOUNT-OVERVIEW | navigation |
+| TR-PUBLIC-001 | UC-PUBLIC-01 | Open account | Signed in | SC-ACCOUNT-OVERVIEW |
 ```
 
 Follow these constraints:
 
-- use `page` or `modal` for Type;
-- use `normal`, `entry`, `terminal`, or `entry-terminal` for Role;
-- use `navigation` or `redirect` for transition Type;
-- use a blank cell or `—` for an absent route, condition, or error list;
-- declare at least one entry screen and mark valid exits as terminal;
-- reference existing uppercase `MOD-*` and `SC-*` IDs only;
-- treat routes as case-sensitive; duplicate routes produce a warning;
-- do not use external URLs as transition targets in the v1 graph;
-- use `ERR-*` values for catalog filtering; Docgent does not resolve them
-  against a separate error catalog.
+- use Screen, Page, Modal window, Panel, External page, or System state for Type;
+- reference existing uppercase `MOD-*`, `UC-*`, and `SC-*` IDs only;
+- treat routes as case-sensitive; duplicate routes are errors;
+- declare start and terminal screens on the use case;
+- describe self-transitions with a state, error, or explanation;
+- keep previews local, inside repository root, and use only raster formats.
+
+Transition Type may be navigation, error, redirect, return, or external. The
+generated map distinguishes them by stroke pattern or geometry, not color
+alone. Optional `screens/hotspots.json` uses percentage coordinates and must
+reference an existing transition from the same screen.
 
 Use the router only to confirm routes for screens already justified by product
 navigation. Do not catalog technical redirects, wildcard or layout routes, or
@@ -146,12 +147,8 @@ internal component states as screens. Every transition must represent a
 meaningful user action. Put the detailed behavior of one scenario in a
 `FLOW-*` document instead of duplicating it in the product-wide map.
 
-Do not add or edit a Mermaid fence in `screens/map.md`. Docgent generates the
-`flowchart LR` visualization from the catalog and transition tables.
-
-Detailed `screens/SC-*.md` documents are optional. When present, repeated
-module, status, and route metadata must match the catalog. Do not duplicate
-transition tables in screen documents.
+Do not maintain a separate Mermaid source or `screens/map.md`. Docgent derives
+the catalog, SVG map and playable flows from the screen documents.
 
 Use cases and tasks can select screens with:
 
@@ -163,9 +160,9 @@ Unknown screen IDs are errors. In templates, the whole-line placeholders
 `OPTIONAL_SCREENS_METADATA`, `OPTIONAL_FLOW_METADATA`,
 `OPTIONAL_ROUTE_METADATA`, and `OPTIONAL_COMPONENT_METADATA` mean: replace the
 placeholder with one complete metadata line, or delete the line.
-`FLOW_DIAGRAM`, `SCREEN_ROWS`, and `TRANSITION_ROWS` must be replaced with the
-complete evidence-backed Mermaid source or table rows; the templates do not
-provide a default topology.
+`FLOW_DIAGRAM` and `TRANSITION_ROWS` must be replaced with complete
+evidence-backed Mermaid source or table rows; templates do not provide a
+default topology.
 
 ## Work-item contract
 
@@ -192,10 +189,10 @@ Tasks may declare an optional `Flow`/`Process` field with an existing `FLOW-*`.
 It adds the flow document to task context but does not replace the use case or
 acceptance criteria.
 
-Tasks may also declare `Screens` with one or more existing `SC-*` IDs. Task
-context then includes those screen records, their incident transitions,
-`screens/map.md`, and matching screen documents. Screens do not replace task
-scope or acceptance criteria.
+Tasks may also declare `Screens` and `Transitions` with existing `SC-*` and
+`TR-*` IDs. Task context includes those screen records, incident transitions,
+and matching screen documents. These links do not replace task scope or
+acceptance criteria.
 
 Put checkboxes only in acceptance criteria. Start every criterion with one
 unique `AC-*` and give it exactly one verification entry:

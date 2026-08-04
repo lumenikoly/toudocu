@@ -4,6 +4,9 @@
 - Статус: {{STATUS}}
 - Актор: {{ACTOR}}
 - Модуль: {{MODULE_ID}}
+- Начальный экран: {{START_SCREEN_ID}}
+- Конечные экраны: {{TERMINAL_SCREEN_IDS}}
+{{OPTIONAL_ALLOW_CYCLE_METADATA}}
 {{OPTIONAL_SCREENS_METADATA}}
 - Приоритет: {{PRIORITY}}
 - Последнее обновление: {{DATE}}

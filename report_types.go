@@ -130,20 +130,55 @@ type ReportProject struct {
 	Summary     string     `json:"summary"`
 }
 
+type ReportKnowledge struct {
+	Modules       []KnowledgeModule  `json:"modules"`
+	UseCases      []KnowledgeUseCase `json:"useCases"`
+	BusinessRules []BusinessRule     `json:"businessRules"`
+	WorkItems     []WorkItem         `json:"workItems"`
+}
+
+type ReportScreen struct {
+	ID                  string        `json:"id"`
+	Title               string        `json:"title"`
+	Description         string        `json:"description,omitempty"`
+	Module              string        `json:"module"`
+	Type                string        `json:"type"`
+	Status              string        `json:"status"`
+	Route               string        `json:"route,omitempty"`
+	Preview             string        `json:"preview,omitempty"`
+	Component           string        `json:"component,omitempty"`
+	Owner               string        `json:"owner,omitempty"`
+	Updated             string        `json:"updated,omitempty"`
+	Parent              string        `json:"parent,omitempty"`
+	States              []ScreenState `json:"states"`
+	IncomingTransitions []string      `json:"incomingTransitions"`
+	OutgoingTransitions []string      `json:"outgoingTransitions"`
+	UseCases            []string      `json:"useCases"`
+	WorkItems           []string      `json:"workItems"`
+	Contracts           []string      `json:"contracts"`
+	Document            string        `json:"document"`
+}
+
 type ProjectReport struct {
-	SchemaVersion   int                  `json:"schemaVersion"`
-	Generator       GeneratorInfo        `json:"generator"`
-	GeneratedAt     time.Time            `json:"generatedAt"`
-	SourceDirectory string               `json:"sourceDirectory"`
-	StaleDays       int                  `json:"staleDays"`
-	Project         ReportProject        `json:"project"`
-	CurrentStatus   CurrentStatus        `json:"currentStatus"`
-	Stats           Stats                `json:"stats"`
-	Documents       []ReportDocument     `json:"documents"`
-	Roadmap         []ReportRoadmapStage `json:"roadmap"`
-	Risks           []ReportRisk         `json:"risks"`
-	Knowledge       KnowledgeModel       `json:"knowledge"`
-	Issues          []Issue              `json:"issues"`
+	SchemaVersion    int                  `json:"schemaVersion"`
+	Generator        GeneratorInfo        `json:"generator"`
+	GeneratedAt      time.Time            `json:"generatedAt"`
+	SourceDirectory  string               `json:"sourceDirectory"`
+	StaleDays        int                  `json:"staleDays"`
+	Project          ReportProject        `json:"project"`
+	CurrentStatus    CurrentStatus        `json:"currentStatus"`
+	Stats            Stats                `json:"stats"`
+	Documents        []ReportDocument     `json:"documents"`
+	Roadmap          []ReportRoadmapStage `json:"roadmap"`
+	Risks            []ReportRisk         `json:"risks"`
+	Knowledge        ReportKnowledge      `json:"knowledge"`
+	Screens          []ReportScreen       `json:"screens"`
+	Transitions      []ScreenTransition   `json:"transitions"`
+	PlayableFlows    []PlayableFlow       `json:"playableFlows"`
+	Hotspots         []Hotspot            `json:"hotspots"`
+	ErrorDefinitions []ErrorDefinition    `json:"errorDefinitions"`
+	Traceability     []TraceabilityRow    `json:"traceability"`
+	Issues           []Issue              `json:"issues"`
 }
 
 type TaskContextDocument struct {

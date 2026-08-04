@@ -14,6 +14,9 @@ Docgent настраивается аргументами CLI; отдельны�
 | stale days | `90` |
 | format | `text` |
 | task timeout | `10m` |
+| serve host | `127.0.0.1` |
+| serve port | `8080` |
+| screen map | включена при наличии `screens/SC-*.md` |
 
 ## Repository root
 
@@ -53,6 +56,20 @@ mtime файла. `--stale-days 0` отключает warning об устаре�
 
 Без `--strict` ненулевой exit code дают errors. В strict mode любой warning
 также завершает команду с кодом `1`.
+
+## Screen Map
+
+`--screen-map` явно включает страницу карты, а `--no-screen-map` отключает
+только её. Каталог экранов, страницы документов, playable flows, traceability
+и коллекции `report.json` продолжают генерироваться.
+
+Параметры допустимы для `build` и `serve` и не меняют исходный Markdown.
+
+## Local server
+
+`serve` по умолчанию использует `127.0.0.1:8080`. `--host` и `--port`
+принимаются только этой командой. Адрес `0.0.0.0` разрешает доступ из локальной
+сети, но сервер не предоставляет TLS или авторизацию и выводит предупреждение.
 
 ## Mermaid
 

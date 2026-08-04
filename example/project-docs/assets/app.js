@@ -203,6 +203,7 @@
     $$('[data-filter-scope]').forEach((scope) => {
       const items = $$('[data-filter-item]', scope);
       const controls = $$('[data-filter-control]', scope);
+      const resetButtons = $$('[data-filter-reset]', scope);
       const count = $('[data-filter-count]', scope);
       const empty = $('[data-filter-empty]', scope);
       if (!items.length || !controls.length) return;
@@ -218,7 +219,9 @@
             if (!value || value === 'all') return true;
             const itemValue = normalize(item.dataset[key] || '');
             if (key === 'search' || key === 'route') return itemValue.includes(value);
-            if (key === 'usecase') return itemValue.split(' ').includes(value);
+            if (key === 'usecase') {
+              return String(item.dataset[key] || '').split('|').map(normalize).includes(value);
+            }
             return itemValue === value;
           });
           item.hidden = !matches;
@@ -230,6 +233,15 @@
 
       controls.forEach((control) => {
         control.addEventListener(control.tagName === 'INPUT' ? 'input' : 'change', apply);
+      });
+      resetButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          controls.forEach((control) => {
+            control.value = control.tagName === 'SELECT' ? 'all' : '';
+          });
+          apply();
+          controls[0]?.focus();
+        });
       });
       apply();
     });
@@ -343,9 +355,114 @@
     });
   }
 
+  function initializeDiagramViewport({ stage, target, zoomIn, zoomOut, fitButton, fullscreenButton }) {
+    if (!stage || !target) return null;
+    let view = { scale: 1, x: 0, y: 0 };
+    let dragging = null;
+    let nativeFullscreen = false;
+
+    function applyTransform() {
+      const svg = $('svg', target);
+      if (!svg) return;
+      svg.style.transformOrigin = 'center center';
+      svg.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.scale})`;
+    }
+
+    function fit() {
+      view = { scale: 1, x: 0, y: 0 };
+      applyTransform();
+    }
+
+    function updateFullscreenButton() {
+      if (!fullscreenButton) return;
+      const expanded = document.fullscreenElement === stage || stage.classList.contains('is-fullscreen-fallback');
+      fullscreenButton.textContent = expanded ? 'Выйти' : 'На весь экран';
+      fullscreenButton.setAttribute('aria-label', expanded ? 'Выйти из полноэкранного режима' : 'Открыть на весь экран');
+    }
+
+    zoomIn?.addEventListener('click', () => {
+      view.scale = Math.min(3, view.scale + 0.15);
+      applyTransform();
+    });
+    zoomOut?.addEventListener('click', () => {
+      view.scale = Math.max(0.45, view.scale - 0.15);
+      applyTransform();
+    });
+    fitButton?.addEventListener('click', fit);
+    fullscreenButton?.addEventListener('click', async () => {
+      if (document.fullscreenElement === stage) {
+        await document.exitFullscreen();
+      } else if (stage.classList.contains('is-fullscreen-fallback')) {
+        stage.classList.remove('is-fullscreen-fallback');
+      } else if (stage.requestFullscreen) {
+        try {
+          await stage.requestFullscreen();
+        } catch {
+          stage.classList.add('is-fullscreen-fallback');
+        }
+      } else {
+        stage.classList.add('is-fullscreen-fallback');
+      }
+      updateFullscreenButton();
+      fit();
+    });
+    document.addEventListener('fullscreenchange', () => {
+      const expanded = document.fullscreenElement === stage;
+      if (!expanded && !nativeFullscreen) return;
+      nativeFullscreen = expanded;
+      updateFullscreenButton();
+      fit();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || !stage.classList.contains('is-fullscreen-fallback')) return;
+      stage.classList.remove('is-fullscreen-fallback');
+      updateFullscreenButton();
+      fit();
+    });
+    stage.addEventListener('wheel', (event) => {
+      if (!event.target.closest('svg')) return;
+      event.preventDefault();
+      view.scale = Math.max(0.45, Math.min(3, view.scale + (event.deltaY < 0 ? 0.1 : -0.1)));
+      applyTransform();
+    }, { passive: false });
+    stage.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0 || !event.target.closest('svg')) return;
+      dragging = { x: event.clientX, y: event.clientY, originX: view.x, originY: view.y };
+      stage.setPointerCapture(event.pointerId);
+      stage.classList.add('is-panning');
+    });
+    stage.addEventListener('pointermove', (event) => {
+      if (!dragging) return;
+      view.x = dragging.originX + event.clientX - dragging.x;
+      view.y = dragging.originY + event.clientY - dragging.y;
+      applyTransform();
+    });
+    const stopPan = () => {
+      dragging = null;
+      stage.classList.remove('is-panning');
+    };
+    stage.addEventListener('pointerup', stopPan);
+    stage.addEventListener('pointercancel', stopPan);
+    updateFullscreenButton();
+
+    return { fit };
+  }
+
   function initializeMermaid() {
     const containers = $$('[data-mermaid-container]').filter((container) => $('[data-mermaid-diagram]', container) && !container.matches('[data-screen-map-diagram]'));
     if (!containers.length) return;
+    const viewports = new Map();
+    containers.forEach((container) => {
+      const viewport = initializeDiagramViewport({
+        stage: $('[data-mermaid-stage]', container),
+        target: $('[data-mermaid-diagram]', container),
+        zoomIn: $('[data-mermaid-zoom-in]', container),
+        zoomOut: $('[data-mermaid-zoom-out]', container),
+        fitButton: $('[data-mermaid-fit]', container),
+        fullscreenButton: $('[data-mermaid-fullscreen]', container),
+      });
+      if (viewport) viewports.set(container, viewport);
+    });
 
     const showError = (container) => {
       container.classList.add('has-error');
@@ -380,6 +497,7 @@
         target.textContent = source;
         try {
           await window.mermaid.run({ nodes: [target] });
+          viewports.get(container)?.fit();
         } catch {
           showError(container);
         }
@@ -423,8 +541,14 @@
     let mode = 'all';
     let selected = '';
     let renderQueue = Promise.resolve();
-    let view = { scale: 1, x: 0, y: 0 };
-    let dragging = null;
+    const viewport = initializeDiagramViewport({
+      stage,
+      target,
+      zoomIn: $('[data-screen-zoom-in]', workspace),
+      zoomOut: $('[data-screen-zoom-out]', workspace),
+      fitButton: $('[data-screen-fit]', workspace),
+      fullscreenButton: $('[data-screen-fullscreen]', workspace),
+    });
 
     const mermaidText = (value) => String(value || '')
       .replace(/\\/g, '\\\\')
@@ -518,18 +642,6 @@
       return lines.join('\n');
     }
 
-    function applyTransform() {
-      const svg = $('svg', target);
-      if (!svg) return;
-      svg.style.transformOrigin = 'center center';
-      svg.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.scale})`;
-    }
-
-    function fit() {
-      view = { scale: 1, x: 0, y: 0 };
-      applyTransform();
-    }
-
     function bindNodes() {
       screens.forEach((screen) => {
         const node = $(`.node-${nodeIds.get(screen.id)}`, target);
@@ -574,7 +686,7 @@
       target.textContent = source;
       try {
         await window.mermaid.run({ nodes: [target] });
-        fit();
+        viewport?.fit();
         bindNodes();
       } catch {
         diagram.classList.add('has-error');
@@ -614,51 +726,6 @@
     pathTo?.addEventListener('change', scheduleRender);
     $$('[data-screen-select]').forEach((button) => button.addEventListener('click', () => selectScreen(button.dataset.screenSelect, false)));
 
-    $('[data-screen-zoom-in]', workspace)?.addEventListener('click', () => {
-      view.scale = Math.min(3, view.scale + 0.15);
-      applyTransform();
-    });
-    $('[data-screen-zoom-out]', workspace)?.addEventListener('click', () => {
-      view.scale = Math.max(0.45, view.scale - 0.15);
-      applyTransform();
-    });
-    $('[data-screen-fit]', workspace)?.addEventListener('click', fit);
-    $('[data-screen-fullscreen]', workspace)?.addEventListener('click', async () => {
-      if (document.fullscreenElement === stage) await document.exitFullscreen();
-      else if (stage.requestFullscreen) await stage.requestFullscreen();
-      else stage.classList.toggle('is-fullscreen-fallback');
-      fit();
-    });
-    document.addEventListener('fullscreenchange', () => {
-      const button = $('[data-screen-fullscreen]', workspace);
-      if (button) button.textContent = document.fullscreenElement === stage ? 'Выйти' : 'На весь экран';
-      fit();
-    });
-    stage.addEventListener('wheel', (event) => {
-      if (!event.target.closest('svg')) return;
-      event.preventDefault();
-      view.scale = Math.max(0.45, Math.min(3, view.scale + (event.deltaY < 0 ? 0.1 : -0.1)));
-      applyTransform();
-    }, { passive: false });
-    stage.addEventListener('pointerdown', (event) => {
-      if (event.button !== 0 || !event.target.closest('svg')) return;
-      dragging = { x: event.clientX, y: event.clientY, originX: view.x, originY: view.y };
-      stage.setPointerCapture(event.pointerId);
-      stage.classList.add('is-panning');
-    });
-    stage.addEventListener('pointermove', (event) => {
-      if (!dragging) return;
-      view.x = dragging.originX + event.clientX - dragging.x;
-      view.y = dragging.originY + event.clientY - dragging.y;
-      applyTransform();
-    });
-    const stopPan = () => {
-      dragging = null;
-      stage.classList.remove('is-panning');
-    };
-    stage.addEventListener('pointerup', stopPan);
-    stage.addEventListener('pointercancel', stopPan);
-
     const hashRow = $$('[data-screen-row]').find((row) => `#${row.id}` === window.location.hash);
     if (hashRow) {
       selected = hashRow.dataset.screenRow;
@@ -693,7 +760,6 @@
   initializeCollapsibleSections();
   initializeCodeCopy();
   initializeMermaid();
-  initializeScreenMap();
   initializeTocTracking();
   initializePrint();
 })();

@@ -42,6 +42,8 @@ func PrintHelp(w io.Writer) {
       --clean                  Очистить выходной каталог
       --open                   Открыть результат в браузере
       --strict                 Предупреждения дают ненулевой exit code
+      --screen-map             Генерировать карту экранов (по умолчанию)
+      --no-screen-map          Не генерировать страницу карты экранов
       --host <адрес>           Адрес serve, по умолчанию 127.0.0.1
       --port <число>           Порт serve, по умолчанию 8080
       --format text|json       Формат check, task context и task check
@@ -65,6 +67,7 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 	options := Options{Command: "build", StaleDays: 90, RepositoryRef: "main", Format: "text", Timeout: 10 * time.Minute, Host: "127.0.0.1", Port: 8080}
 	help, version := false, false
 	timeoutSpecified, hostSpecified, portSpecified := false, false, false
+	screenMapOption := ""
 	args := append([]string{}, argv...)
 	if len(args) > 0 {
 		switch args[0] {
@@ -239,6 +242,18 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			options.Open = true
 		case arg == "--strict":
 			options.Strict = true
+		case arg == "--screen-map":
+			if screenMapOption == "off" {
+				return options, false, false, fmt.Errorf("--screen-map и --no-screen-map нельзя использовать вместе")
+			}
+			screenMapOption = "on"
+			options.NoScreenMap = false
+		case arg == "--no-screen-map":
+			if screenMapOption == "on" {
+				return options, false, false, fmt.Errorf("--screen-map и --no-screen-map нельзя использовать вместе")
+			}
+			screenMapOption = "off"
+			options.NoScreenMap = true
 		case strings.HasPrefix(arg, "-"):
 			return options, false, false, fmt.Errorf("неизвестный параметр: %s", arg)
 		default:
@@ -288,6 +303,9 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 	}
 	if options.Command != "serve" && (hostSpecified || portSpecified) {
 		return options, false, false, fmt.Errorf("--host и --port доступны только для serve")
+	}
+	if screenMapOption != "" && options.Command != "build" && options.Command != "serve" {
+		return options, false, false, fmt.Errorf("--screen-map и --no-screen-map доступны только для build и serve")
 	}
 	if options.Command == "task-check" || options.Command == "task-context" {
 		if workItemHeadingRE.FindStringSubmatch(options.TaskID+": check") == nil {

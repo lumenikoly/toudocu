@@ -14,6 +14,8 @@ var activeAssetExtensions = map[string]struct{}{".html": {}, ".htm": {}, ".xhtml
 var safeImageExtensions = map[string]struct{}{".png": {}, ".jpg": {}, ".jpeg": {}, ".gif": {}, ".webp": {}, ".avif": {}, ".bmp": {}}
 var reservedOutputAssets = map[string]struct{}{
 	"assets/style.css": {}, "assets/app.js": {}, "assets/search-index.js": {},
+	"assets/screen-map.css": {}, "assets/screen-map.js": {},
+	"assets/playable-flow.css": {}, "assets/playable-flow.js": {},
 	"assets/mermaid.tiny.js": {}, "assets/mermaid.LICENSE.txt": {}, "report.json": {},
 }
 

@@ -161,6 +161,30 @@ func commandsForVerificationLine(line, criterionID string) []string {
 	return nil
 }
 
+func traceabilityForVerificationLine(line, criterionID string) ([]string, string, bool) {
+	text := strings.TrimSpace(stripInlineMarkdown(line))
+	text = strings.TrimSpace(strings.TrimLeft(text, "-*+ "))
+	parts := []string{}
+	for _, part := range regexp.MustCompile(`\s*(?:→|->|=>)\s*`).Split(text, -1) {
+		if value := strings.TrimSpace(part); value != "" {
+			parts = append(parts, value)
+		}
+	}
+	if len(parts) < 3 || !strings.EqualFold(parts[0], criterionID) {
+		return nil, "", false
+	}
+	transitionIDs := []string{}
+	for _, value := range splitReferences(parts[1]) {
+		if strings.HasPrefix(strings.ToUpper(value), "TR-") {
+			transitionIDs = append(transitionIDs, strings.ToUpper(value))
+		}
+	}
+	if len(transitionIDs) == 0 {
+		return nil, "", false
+	}
+	return uniqueStrings(transitionIDs), strings.TrimSpace(strings.Join(parts[2:], " → ")), true
+}
+
 func parseCriteriaAndVerification(model *Model, document *Document, item parsedWorkItem, required bool) ([]Task, []CriterionVerification, []VerificationCheck) {
 	criteriaSection, criteriaFound := workSection(item, "критерии приёмки", "критерии приемки", "acceptance criteria")
 	if !criteriaFound {
@@ -193,6 +217,8 @@ func parseCriteriaAndVerification(model *Model, document *Document, item parsedW
 
 	verificationSection, verificationFound := workSection(item, "проверка", "verification")
 	commandsByID := map[string][]string{}
+	transitionsByID := map[string][]string{}
+	referencesByID := map[string][]string{}
 	checks := []VerificationCheck{}
 	seenTargets := map[string]bool{}
 	if verificationFound {
@@ -210,6 +236,17 @@ func parseCriteriaAndVerification(model *Model, document *Document, item parsedW
 			if strings.HasPrefix(target, "AC-") {
 				if _, exists := byID[target]; !exists {
 					addKnowledgeIssue(model, document, "error", "unknown-criterion-verification", "Проверка ссылается на неизвестный критерий "+target+".", lineIndex+1)
+					continue
+				}
+			}
+			if strings.HasPrefix(target, "AC-") {
+				if transitionIDs, reference, trace := traceabilityForVerificationLine(line, target); trace {
+					transitionsByID[target] = append(transitionsByID[target], transitionIDs...)
+					if reference == "" {
+						addKnowledgeIssue(model, document, "error", "empty-traceability-verification", "Для связи "+target+" с переходом не указана проверка.", lineIndex+1)
+					} else {
+						referencesByID[target] = append(referencesByID[target], reference)
+					}
 					continue
 				}
 			}
@@ -242,7 +279,10 @@ func parseCriteriaAndVerification(model *Model, document *Document, item parsedW
 			addKnowledgeIssue(model, document, "error", "missing-criterion-verification", "Для критерия "+criterion.id+" отсутствует команда в разделе «Проверка».", criterion.task.Line)
 		}
 		text := strings.TrimSpace(criterionIDRE.ReplaceAllString(criterion.task.Text, ""))
-		matrix = append(matrix, CriterionVerification{CriterionID: criterion.id, Criterion: text, Completed: criterion.task.Completed, Commands: commands})
+		matrix = append(matrix, CriterionVerification{
+			CriterionID: criterion.id, Criterion: text, Completed: criterion.task.Completed, Commands: commands,
+			Transitions: uniqueStrings(transitionsByID[criterion.id]), References: uniqueStrings(referencesByID[criterion.id]),
+		})
 	}
 	return tasks, matrix, checks
 }
@@ -376,8 +416,9 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 		ID: match[1], Title: match[2], Status: StatusFor(item.Metadata["status"]), Type: typeName,
 		Priority: item.Metadata["priority"], Owner: item.Metadata["owner"], ModuleID: item.Metadata["module"],
 		UseCaseID: useCaseID, FlowID: strings.TrimSpace(item.Metadata["flow"]),
-		ScreenIDs: splitReferences(item.Metadata["screens"]),
-		DependsOn: splitReferences(item.Metadata["dependsOn"]), Document: document.SourcePath,
+		ScreenIDs:     splitReferences(item.Metadata["screens"]),
+		TransitionIDs: splitReferences(item.Metadata["transitions"]),
+		DependsOn:     splitReferences(item.Metadata["dependsOn"]), Document: document.SourcePath,
 		Anchor: item.Heading.ID, Criteria: criteria, Verification: verification, Checks: checks,
 		RepositoryPaths: repositoryPaths, line: item.Heading.Line + 1,
 		Result: strings.TrimSpace(resultSection.Text), Blocker: strings.TrimSpace(blockerSection.Text),
@@ -488,7 +529,13 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 		case "module":
 			modules = append(modules, KnowledgeModule{ID: stableID, Title: document.Title, Status: document.Status, Document: document.SourcePath, RepositoryPaths: repositoryPathsFor(document), UseCaseIDs: []string{}, ScreenIDs: []string{}, BusinessRuleIDs: []string{}})
 		case "use-case":
-			useCases = append(useCases, KnowledgeUseCase{ID: stableID, Title: document.Title, Status: document.Status, ModuleID: document.Metadata["module"], Document: document.SourcePath, RepositoryPaths: repositoryPathsFor(document), BusinessRuleIDs: []string{}, ScreenIDs: splitReferences(document.Metadata["screens"])})
+			useCases = append(useCases, KnowledgeUseCase{
+				ID: stableID, Title: document.Title, Status: document.Status, ModuleID: document.Metadata["module"],
+				Document: document.SourcePath, RepositoryPaths: repositoryPathsFor(document), BusinessRuleIDs: []string{},
+				ScreenIDs: splitReferences(document.Metadata["screens"]), StartScreenID: strings.TrimSpace(document.Metadata["startScreen"]),
+				TerminalScreens: splitReferences(document.Metadata["terminalScreens"]),
+				AllowCycle:      containsString([]string{"да", "yes", "true", "1"}, canonicalText(document.Metadata["allowCycle"])),
+			})
 		}
 		if document.Type == "module" {
 			for _, heading := range document.Headings {
@@ -601,7 +648,11 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 			return naturalCompare(modules[i].BusinessRuleIDs[a], modules[i].BusinessRuleIDs[b]) < 0
 		})
 	}
-	return KnowledgeModel{Modules: modules, UseCases: useCases, Screens: []KnowledgeScreen{}, Transitions: []ScreenTransition{}, BusinessRules: businessRules, WorkItems: workItems}
+	return KnowledgeModel{
+		Modules: modules, UseCases: useCases, Screens: []KnowledgeScreen{}, Transitions: []ScreenTransition{},
+		BusinessRules: businessRules, WorkItems: workItems, PlayableFlows: []PlayableFlow{}, Hotspots: []Hotspot{},
+		Errors: []ErrorDefinition{}, Traceability: []TraceabilityRow{},
+	}
 }
 
 func fallbackDash(value string) string {
@@ -883,17 +934,6 @@ func buildSearchIndex(model *Model) []SearchItem {
 			description = document.PlainText
 		}
 		result = append(result, SearchItem{Title: document.Title, Path: document.SourcePath, URL: document.OutputPath, Type: document.Type, TypeLabel: document.TypeLabel, Status: document.Metadata["status"], Owner: document.Metadata["owner"], Description: truncate(description, 220), Text: text})
-	}
-	for _, screen := range model.Knowledge.Screens {
-		if screen.Document != "" {
-			continue
-		}
-		result = append(result, SearchItem{
-			Title: screen.ID + ": " + screen.Title, Path: "screens/map.md", URL: "screens/map.html#screen-" + slugify(screen.ID),
-			Type: "screen", TypeLabel: typeLabels["screen"], Status: screen.Status.Label,
-			Description: strings.TrimSpace(strings.Join([]string{screen.ModuleID, screen.Route}, " · ")),
-			Text:        canonicalText(strings.Join([]string{screen.ID, screen.Title, screen.ModuleID, screen.Route, strings.Join(screen.ErrorIDs, " ")}, " ")),
-		})
 	}
 	return result
 }

@@ -471,7 +471,7 @@ func TestGenerateSite(t *testing.T) {
 	if err := json.Unmarshal(reportBytes, &report); err != nil {
 		t.Fatal(err)
 	}
-	if report.SchemaVersion != 1 || report.Documents == nil || report.Issues == nil || report.CurrentStatus.ActiveWork == nil || report.CurrentStatus.Blockers == nil {
+	if report.SchemaVersion != 1 || report.Documents == nil || report.Issues == nil || report.Screens == nil || report.Transitions == nil || report.PlayableFlows == nil || report.Hotspots == nil || report.Traceability == nil || report.CurrentStatus.ActiveWork == nil || report.CurrentStatus.Blockers == nil {
 		t.Fatalf("unstable report collections: %#v", report)
 	}
 	foundDirectoryTarget := false
@@ -589,6 +589,16 @@ func TestCLIArguments(t *testing.T) {
 	}
 	if _, _, _, err := ParseArguments([]string{"./docs", "--force"}); err == nil || !strings.Contains(err.Error(), "неизвестный параметр") {
 		t.Fatalf("--force must be rejected as an unknown option, got %v", err)
+	}
+	noMap, _, _, err := ParseArguments([]string{"build", "./docs", "--no-screen-map"})
+	if err != nil || !noMap.NoScreenMap {
+		t.Fatalf("--no-screen-map not parsed: %#v, %v", noMap, err)
+	}
+	if _, _, _, err := ParseArguments([]string{"build", "./docs", "--screen-map", "--no-screen-map"}); err == nil {
+		t.Fatal("conflicting screen map options must be rejected")
+	}
+	if _, _, _, err := ParseArguments([]string{"check", "./docs", "--no-screen-map"}); err == nil {
+		t.Fatal("screen map build option must be rejected by check")
 	}
 }
 

@@ -12,9 +12,9 @@ import (
 
 const Version = "1.1.0-go"
 
-var fieldOrder = []string{"status", "type", "stage", "version", "owner", "author", "actor", "priority", "criticality", "module", "useCase", "flow", "screens", "route", "component", "errors", "dependsOn", "source", "date", "plannedDate", "updated", "probability", "impact", "id", "tags"}
+var fieldOrder = []string{"status", "type", "stage", "version", "owner", "author", "actor", "priority", "criticality", "module", "useCase", "flow", "screens", "transitions", "startScreen", "terminalScreens", "allowCycle", "route", "preview", "parentScreen", "component", "errors", "dependsOn", "source", "date", "plannedDate", "updated", "probability", "impact", "id", "tags"}
 
-var typeIcons = map[string]string{"overview": "⌂", "status": "◐", "roadmap": "→", "risks": "!", "ideas": "✦", "notes": "✎", "changelog": "↻", "use-case": "◎", "module": "▦", "architecture": "◇", "contract": "⇄", "decision": "◆", "flow": "⇢", "screen-map": "⌗", "screen": "▣", "guide": "◫", "work": "☑", "reference": "≡", "document": "•"}
+var typeIcons = map[string]string{"overview": "⌂", "status": "◐", "roadmap": "→", "risks": "!", "ideas": "✦", "notes": "✎", "changelog": "↻", "use-case": "◎", "module": "▦", "architecture": "◇", "contract": "⇄", "decision": "◆", "flow": "⇢", "screen-map": "⌗", "screen-index": "⌗", "screen": "▣", "guide": "◫", "work": "☑", "reference": "≡", "document": "•"}
 
 func renderStatusChip(status StatusInfo) string {
 	return fmt.Sprintf(`<span class="status-chip status-%s" title="%s"><span aria-hidden="true">%s</span><span>%s</span></span>`, escapeAttr(status.Kind), escapeAttr(status.Label), escapeHTML(status.Symbol), escapeHTML(status.Label))
@@ -41,10 +41,14 @@ func metricCard(label string, value any, detail string) string {
 }
 
 func outputForDirectory(model *Model, directory string) string {
-	if directory == "screens" {
-		if document := model.DocByPath["screens/map.md"]; document != nil {
-			return document.OutputPath
+	if directory == "screens" && len(model.Knowledge.Screens) > 0 {
+		if model.ScreenMapEnabled {
+			return "screens/index.html"
 		}
+		return "screens/catalog.html"
+	}
+	if directory == "flows" && len(model.Knowledge.PlayableFlows) > 0 {
+		return "flows/index.html"
 	}
 	if document := model.DocByPath[path.Join(directory, "index.md")]; document != nil {
 		return document.OutputPath
@@ -63,6 +67,11 @@ func renderNavigation(model *Model, current string) string {
 			rootDocs = append(rootDocs, document)
 		} else {
 			groups[first] = append(groups[first], document)
+		}
+	}
+	if len(model.Knowledge.Screens) > 0 {
+		if _, exists := groups["screens"]; !exists {
+			groups["screens"] = []*Document{}
 		}
 	}
 	writeDoc := func(document *Document) {
@@ -84,13 +93,63 @@ func renderNavigation(model *Model, current string) string {
 	sort.SliceStable(keys, func(i, j int) bool { return naturalCompare(keys[i], keys[j]) < 0 })
 	for _, key := range keys {
 		target := outputForDirectory(model, key)
+		if key == "flows" {
+			for _, document := range groups[key] {
+				if !strings.EqualFold(document.FileName, "index.md") {
+					target = document.OutputPath
+					break
+				}
+			}
+		}
 		active := ""
-		if target == current {
+		if target == current || key == "screens" && current == "flows/index.html" {
 			active = " is-active"
+		}
+		if key == "screens" {
+			for _, flow := range model.Knowledge.PlayableFlows {
+				if current == "flows/"+flow.UseCaseID+".html" {
+					active = " is-active"
+					break
+				}
+			}
 		}
 		label := directoryLabel(key)
 		groupID := "nav-group-" + slugify(key)
 		fmt.Fprintf(&b, `<li class="nav-item nav-folder" data-nav-folder="%s"><div class="nav-folder-row"><button class="nav-folder-toggle" type="button" data-nav-folder-toggle aria-expanded="true" aria-controls="%s" aria-label="Свернуть раздел %s"><span aria-hidden="true">▾</span></button><a class="nav-folder-link%s" href="%s"><span>%s</span></a></div><ul id="%s">`, escapeAttr(key), escapeAttr(groupID), escapeAttr(label), active, escapeAttr(relativeURL(current, target)), escapeHTML(label), escapeAttr(groupID))
+		if key == "screens" && len(model.Knowledge.Screens) > 0 {
+			generatedPages := []struct{ title, target, icon string }{
+				{"Каталог экранов", "screens/catalog.html", "▣"},
+				{"User flows", "flows/index.html", "⇢"},
+			}
+			if model.ScreenMapEnabled {
+				generatedPages = append([]struct{ title, target, icon string }{{"Карта экранов", "screens/index.html", "⌗"}}, generatedPages...)
+			}
+			for _, generated := range generatedPages {
+				activeClass := ""
+				if current == generated.target {
+					activeClass = " is-active"
+				}
+				fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span class="nav-icon" aria-hidden="true">%s</span><span>%s</span></a></li>`, activeClass, escapeAttr(relativeURL(current, generated.target)), generated.icon, generated.title)
+			}
+			if len(model.Knowledge.PlayableFlows) > 0 {
+				b.WriteString(`<li class="nav-subsection-label"><span aria-hidden="true">▶</span><span>Playable flows</span></li>`)
+				for _, flow := range model.Knowledge.PlayableFlows {
+					title := flow.UseCaseID
+					if useCase := findUseCase(model, flow.UseCaseID); useCase != nil {
+						title += " · " + screenTitleForUseCase(*useCase)
+					}
+					target := "flows/" + flow.UseCaseID + ".html"
+					activeClass := ""
+					aria := ""
+					if current == target {
+						activeClass = " is-active"
+						aria = ` aria-current="page"`
+					}
+					fmt.Fprintf(&b, `<li class="nav-item nav-playable-item"><a class="nav-link%s" href="%s"%s><span class="nav-icon" aria-hidden="true">↳</span><span>%s</span></a></li>`,
+						activeClass, escapeAttr(relativeURL(current, target)), aria, escapeHTML(title))
+				}
+			}
+		}
 		docs := groups[key]
 		sort.SliceStable(docs, func(i, j int) bool { return documentLess(docs[i], docs[j]) })
 		for _, doc := range docs {
@@ -107,6 +166,13 @@ func renderNavigation(model *Model, current string) string {
 		active = " is-active"
 	}
 	fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span class="nav-icon">⚑</span><span>Качество документации</span></a></li>`, active, escapeAttr(relativeURL(current, model.HealthOutputPath)))
+	if len(model.Knowledge.Screens) > 0 {
+		active = ""
+		if current == "traceability.html" {
+			active = " is-active"
+		}
+		fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span class="nav-icon">⇥</span><span>Traceability</span></a></li>`, active, escapeAttr(relativeURL(current, "traceability.html")))
+	}
 	b.WriteString(`</ul></nav>`)
 	return b.String()
 }
@@ -127,7 +193,16 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 	if strings.Contains(content, `data-mermaid-diagram`) {
 		mermaidScript = `<script src="` + escapeAttr(prefix) + `assets/mermaid.tiny.js" defer></script>`
 	}
-	return `<!doctype html><html lang="ru" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="` + escapeAttr(description) + `"><title>` + escapeHTML(fullTitle) + `</title><link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/style.css"><script src="` + escapeAttr(prefix) + `assets/search-index.js" defer></script>` + mermaidScript + `<script src="` + escapeAttr(prefix) + `assets/app.js" defer></script></head><body data-root-prefix="` + escapeAttr(prefix) + `" data-task-filter="all"><a class="skip-link" href="#main-content">Перейти к содержимому</a><header class="site-header"><div class="brand-area"><button class="icon-button sidebar-toggle" type="button" data-sidebar-toggle aria-label="Открыть навигацию">☰</button><a class="brand" href="` + escapeAttr(relativeURL(current, "index.html")) + `"><span class="brand-mark">DG</span><span class="brand-text">` + escapeHTML(model.Project.Title) + `</span></a></div><div class="global-search" role="search"><div class="search-input-wrap"><input type="search" data-global-search placeholder="Поиск по документации" aria-label="Поиск по документации"><span class="search-shortcut">/</span></div><div class="search-results" id="global-search-results" data-search-results role="listbox" hidden></div></div><div class="header-actions"><button class="icon-button" type="button" data-print aria-label="Печать">⎙</button><button class="icon-button" type="button" data-theme-toggle aria-label="Переключить тему">☾</button></div></header><div class="site-layout"><aside class="sidebar">` + renderNavigation(model, current) + `</aside><div class="main-area"><main id="main-content" class="page-grid` + gridClass + `"><div class="page-content">` + content + `</div>` + tocHTML + `</main><footer class="site-footer">Сгенерировано Docgent ` + Version + `</footer></div></div></body></html>`
+	extraStyles, extraScripts := "", ""
+	if strings.Contains(content, `data-screen-map`) {
+		extraStyles += `<link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/screen-map.css">`
+		extraScripts += `<script src="` + escapeAttr(prefix) + `assets/screen-map.js" defer></script>`
+	}
+	if strings.Contains(content, `data-playable-flow`) {
+		extraStyles += `<link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/playable-flow.css">`
+		extraScripts += `<script src="` + escapeAttr(prefix) + `assets/playable-flow.js" defer></script>`
+	}
+	return `<!doctype html><html lang="ru" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="` + escapeAttr(description) + `"><title>` + escapeHTML(fullTitle) + `</title><link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/style.css">` + extraStyles + `<script src="` + escapeAttr(prefix) + `assets/search-index.js" defer></script>` + mermaidScript + `<script src="` + escapeAttr(prefix) + `assets/app.js" defer></script>` + extraScripts + `</head><body data-root-prefix="` + escapeAttr(prefix) + `" data-task-filter="all"><a class="skip-link" href="#main-content">Перейти к содержимому</a><header class="site-header"><div class="brand-area"><button class="icon-button sidebar-toggle" type="button" data-sidebar-toggle aria-label="Открыть навигацию">☰</button><a class="brand" href="` + escapeAttr(relativeURL(current, "index.html")) + `"><span class="brand-mark">DG</span><span class="brand-text">` + escapeHTML(model.Project.Title) + `</span></a></div><div class="global-search" role="search"><div class="search-input-wrap"><input type="search" data-global-search placeholder="Поиск по документации" aria-label="Поиск по документации"><span class="search-shortcut">/</span></div><div class="search-results" id="global-search-results" data-search-results role="listbox" hidden></div></div><div class="header-actions"><button class="icon-button" type="button" data-print aria-label="Печать">⎙</button><button class="icon-button" type="button" data-theme-toggle aria-label="Переключить тему">☾</button></div></header><div class="site-layout"><aside class="sidebar">` + renderNavigation(model, current) + `</aside><div class="main-area"><main id="main-content" class="page-grid` + gridClass + `"><div class="page-content">` + content + `</div>` + tocHTML + `</main><footer class="site-footer">Сгенерировано Docgent ` + Version + `</footer></div></div></body></html>`
 }
 
 func breadcrumbs(model *Model, current, title string) string {
@@ -200,9 +275,6 @@ func renderRelated(model *Model, document *Document) string {
 }
 
 func renderDocumentPage(model *Model, document *Document) string {
-	if document.Type == "screen-map" {
-		return renderScreenMapPage(model, document)
-	}
 	resolver := linkResolverFor(model, document)
 	taskCompletionByLine := map[int]bool{}
 	if document.Type == "roadmap" {
@@ -508,12 +580,36 @@ func BuildReport(model *Model) ProjectReport {
 		Stage: model.Project.Stage, Version: model.Project.Version, Owner: model.Project.Owner,
 		Updated: model.Project.Updated, Summary: model.Project.Summary,
 	}
+	screens := make([]ReportScreen, 0, len(model.Knowledge.Screens))
+	for _, screen := range model.Knowledge.Screens {
+		status := screen.Status.Kind
+		if status == "done" {
+			status = "implemented"
+		}
+		screens = append(screens, ReportScreen{
+			ID: screen.ID, Title: screen.Title, Description: screen.Description,
+			Module: screen.ModuleID, Type: screen.Kind, Status: status,
+			Route: screen.Route, Preview: screen.Preview, Component: screen.Component, Owner: screen.Owner,
+			Updated: screen.Updated, Parent: screen.ParentID, States: append([]ScreenState{}, screen.States...),
+			IncomingTransitions: append([]string{}, screen.IncomingTransitionIDs...),
+			OutgoingTransitions: append([]string{}, screen.OutgoingTransitionIDs...),
+			UseCases:            append([]string{}, screen.UseCaseIDs...), WorkItems: append([]string{}, screen.WorkItemIDs...),
+			Contracts: append([]string{}, screen.ContractDocuments...), Document: screen.Document,
+		})
+	}
 	return ProjectReport{
 		SchemaVersion: 1, Generator: GeneratorInfo{Name: "Docgent", Version: Version},
 		GeneratedAt: model.GeneratedAt, SourceDirectory: pathBase(model.RootDirectory),
 		StaleDays: model.StaleDays, Project: project, CurrentStatus: model.CurrentStatus,
 		Stats: model.Stats, Documents: documents, Roadmap: roadmap, Risks: risks,
-		Knowledge: model.Knowledge, Issues: append([]Issue{}, model.Issues...),
+		Knowledge: ReportKnowledge{
+			Modules: model.Knowledge.Modules, UseCases: model.Knowledge.UseCases,
+			BusinessRules: model.Knowledge.BusinessRules, WorkItems: model.Knowledge.WorkItems,
+		},
+		Screens: screens, Transitions: model.Knowledge.Transitions,
+		PlayableFlows: model.Knowledge.PlayableFlows, Hotspots: model.Knowledge.Hotspots,
+		ErrorDefinitions: model.Knowledge.Errors, Traceability: model.Knowledge.Traceability,
+		Issues: append([]Issue{}, model.Issues...),
 	}
 }
 
@@ -547,6 +643,7 @@ func ensureOutputSafety(inputDirectory, outputDirectory string) error {
 
 // GenerateSite writes a fully static, file:// compatible portal.
 func GenerateSite(model *Model, options Options) (GenerateResult, error) {
+	model.ScreenMapEnabled = !options.NoScreenMap
 	output, err := filepath.Abs(options.OutputDirectory)
 	if err != nil {
 		return GenerateResult{}, err
@@ -564,7 +661,7 @@ func GenerateSite(model *Model, options Options) (GenerateResult, error) {
 	if err = mkdirp(output); err != nil {
 		return GenerateResult{}, err
 	}
-	for _, asset := range []string{"style.css", "app.js", "mermaid.tiny.js", "mermaid.LICENSE.txt"} {
+	for _, asset := range []string{"style.css", "app.js", "screen-map.css", "screen-map.js", "playable-flow.css", "playable-flow.js", "mermaid.tiny.js", "mermaid.LICENSE.txt"} {
 		if err = copyFSFile(EmbeddedFiles, "assets/"+asset, filepath.Join(output, "assets", asset)); err != nil {
 			return GenerateResult{}, err
 		}
@@ -586,13 +683,33 @@ func GenerateSite(model *Model, options Options) (GenerateResult, error) {
 	}
 	pages := 1
 	for _, document := range model.Documents {
-		if document.SourcePath == "index.md" {
+		if document.SourcePath == "index.md" || document.Type == "screen-index" {
 			continue
 		}
 		if err = writeFileEnsured(filepath.Join(output, filepath.FromSlash(document.OutputPath)), []byte(renderDocumentPage(model, document))); err != nil {
 			return GenerateResult{}, err
 		}
 		pages++
+	}
+	if len(model.Knowledge.Screens) > 0 {
+		generatedPages := map[string]string{
+			"screens/catalog.html": renderScreenCatalogPage(model, "screens/catalog.html"),
+			"flows/index.html":     renderFlowIndexPage(model, "flows/index.html"),
+			"traceability.html":    renderTraceabilityPage(model, "traceability.html"),
+		}
+		if model.ScreenMapEnabled {
+			generatedPages["screens/index.html"] = renderScreenMapPage(model, "screens/index.html")
+		}
+		for _, flow := range model.Knowledge.PlayableFlows {
+			target := "flows/" + flow.UseCaseID + ".html"
+			generatedPages[target] = renderPlayableFlowPage(model, flow, target)
+		}
+		for target, pageHTML := range generatedPages {
+			if err = writeFileEnsured(filepath.Join(output, filepath.FromSlash(target)), []byte(pageHTML)); err != nil {
+				return GenerateResult{}, err
+			}
+			pages++
+		}
 	}
 	directories := make([]string, 0, len(model.Directories))
 	for d := range model.Directories {
@@ -621,5 +738,5 @@ func GenerateSite(model *Model, options Options) (GenerateResult, error) {
 	if err = writeFileEnsured(filepath.Join(output, model.ReportOutputPath), report); err != nil {
 		return GenerateResult{}, err
 	}
-	return GenerateResult{OutputDirectory: output, Pages: pages, Assets: len(model.Assets) + 5}, nil
+	return GenerateResult{OutputDirectory: output, Pages: pages, Assets: len(model.Assets) + 9}, nil
 }

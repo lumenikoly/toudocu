@@ -2,11 +2,20 @@
 
 ## Unreleased
 
-- Добавлена типизированная карта экранов `screens/map.md`: каталог `SC-*`,
-  переходы, связи с use cases и задачами, графовая валидация и расширение JSON
-  schema v1.
-- Портал получил страницу «Экраны» с Mermaid `flowchart LR`, четырьмя режимами,
-  pan/zoom, полноэкранным просмотром, подсветкой и фильтруемым каталогом.
+- Добавлена единая модель экранов из `screens/SC-*.md`: состояния, уникальные
+  `TR-*`, use cases, безопасные raster previews, hotspots и графовая валидация.
+- Портал получил DOM-карту с SVG-связями, режимами по модулю, статусу, use case
+  и sitemap, pan/zoom/fit, инспектором и доступным каталогом.
+- Добавлены автономные playable flows с действиями, состояниями, ошибками,
+  историей, возвратом, reset, завершением сценария и hotspot fallback.
+- Карточки карты показывают входящие и исходящие переходы; return и external
+  получили отдельную геометрию, hotspots проявляются при hover и focus, а
+  завершение flow ведёт к карте и исходному use case.
+- User flows и Playable flows объединены в разделе навигации «Экраны».
+- `report.json` schema v1 дополнен top-level коллекциями `screens`,
+  `transitions`, `playableFlows`, `hotspots`, `errorDefinitions` и
+  `traceability`.
+- `build` и `serve` поддерживают `--screen-map` и `--no-screen-map`.
 - Добавлена встроенная Mermaid Tiny 11.16.0: автономный рендеринг `flowchart`,
   `stateDiagram-v2` и `sequenceDiagram`, строгая конфигурация, fallback с
   исходным кодом и поддержка светлой/тёмной темы.

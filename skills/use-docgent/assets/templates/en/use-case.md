@@ -4,6 +4,9 @@
 - Status: {{STATUS}}
 - Actor: {{ACTOR}}
 - Module: {{MODULE_ID}}
+- Start screen: {{START_SCREEN_ID}}
+- Terminal screens: {{TERMINAL_SCREEN_IDS}}
+{{OPTIONAL_ALLOW_CYCLE_METADATA}}
 {{OPTIONAL_SCREENS_METADATA}}
 - Priority: {{PRIORITY}}
 - Last updated: {{DATE}}

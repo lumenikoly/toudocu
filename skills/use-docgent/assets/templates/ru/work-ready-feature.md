@@ -7,6 +7,7 @@
 - Сценарий: {{USE_CASE_ID}}
 {{OPTIONAL_FLOW_METADATA}}
 {{OPTIONAL_SCREENS_METADATA}}
+{{OPTIONAL_TRANSITIONS_METADATA}}
 - Владелец: {{OWNER}}
 - Последнее обновление: {{DATE}}
 
@@ -32,6 +33,7 @@
 
 ## Проверка
 
+- `AC-01` → `{{TRANSITION_ID}}` → `{{VERIFICATION_REFERENCE}}`
 - `AC-01` → `{{ACCEPTANCE_COMMAND}}`
 
 ## Влияние на документацию

@@ -17,6 +17,7 @@ type Options struct {
 	Clean           bool
 	Open            bool
 	Strict          bool
+	NoScreenMap     bool
 	Format          string
 	ReportPath      string
 	Timeout         time.Duration
@@ -205,32 +206,92 @@ type KnowledgeUseCase struct {
 	RepositoryPaths []string   `json:"repositoryPaths"`
 	BusinessRuleIDs []string   `json:"businessRuleIds"`
 	ScreenIDs       []string   `json:"screenIds"`
+	StartScreenID   string     `json:"startScreen,omitempty"`
+	TerminalScreens []string   `json:"terminalScreens"`
+	AllowCycle      bool       `json:"allowCycle"`
+}
+
+type ScreenState struct {
+	ID      string `json:"id"`
+	Title   string `json:"title,omitempty"`
+	Preview string `json:"preview,omitempty"`
 }
 
 type KnowledgeScreen struct {
-	ID          string     `json:"id"`
-	Title       string     `json:"title"`
-	ModuleID    string     `json:"moduleId"`
-	Kind        string     `json:"kind"`
-	Role        string     `json:"role"`
-	Route       string     `json:"route,omitempty"`
-	Status      StatusInfo `json:"status"`
-	ErrorIDs    []string   `json:"errorIds"`
-	Document    string     `json:"document,omitempty"`
-	UseCaseIDs  []string   `json:"useCaseIds"`
-	WorkItemIDs []string   `json:"workItemIds"`
-	Reachable   bool       `json:"reachable"`
-	Line        int        `json:"line"`
+	ID                    string        `json:"id"`
+	Title                 string        `json:"title"`
+	Description           string        `json:"description,omitempty"`
+	ModuleID              string        `json:"module"`
+	Kind                  string        `json:"type"`
+	Route                 string        `json:"route,omitempty"`
+	Status                StatusInfo    `json:"status"`
+	Preview               string        `json:"preview,omitempty"`
+	Component             string        `json:"component,omitempty"`
+	Owner                 string        `json:"owner,omitempty"`
+	Updated               string        `json:"updated,omitempty"`
+	ParentID              string        `json:"parent,omitempty"`
+	States                []ScreenState `json:"states"`
+	Document              string        `json:"document"`
+	UseCaseIDs            []string      `json:"useCases"`
+	WorkItemIDs           []string      `json:"workItems"`
+	ContractDocuments     []string      `json:"contracts"`
+	IncomingTransitionIDs []string      `json:"incomingTransitions"`
+	OutgoingTransitionIDs []string      `json:"outgoingTransitions"`
+	Reachable             bool          `json:"reachable"`
+	Line                  int           `json:"line"`
 }
 
 type ScreenTransition struct {
-	FromID    string `json:"fromId"`
-	ToID      string `json:"toId"`
+	ID        string `json:"id"`
+	UseCaseID string `json:"useCase,omitempty"`
+	FromID    string `json:"source"`
+	ToID      string `json:"target"`
 	Action    string `json:"action"`
-	Condition string `json:"condition,omitempty"`
-	Kind      string `json:"kind"`
+	Condition string `json:"condition"`
+	StateID   string `json:"state,omitempty"`
+	ErrorID   string `json:"error,omitempty"`
+	Message   string `json:"message,omitempty"`
+	Contract  string `json:"contract,omitempty"`
+	Kind      string `json:"type"`
 	Document  string `json:"document"`
 	Line      int    `json:"line"`
+}
+
+type PlayableFlow struct {
+	UseCaseID        string   `json:"useCase"`
+	StartScreenID    string   `json:"startScreen"`
+	ReachableScreens []string `json:"reachableScreens"`
+	TerminalScreens  []string `json:"terminalScreens"`
+	TransitionIDs    []string `json:"transitions"`
+	Result           string   `json:"result,omitempty"`
+	Valid            bool     `json:"valid"`
+	IssueCodes       []string `json:"issueCodes"`
+}
+
+type Hotspot struct {
+	ScreenID       string  `json:"screen"`
+	TransitionID   string  `json:"transition"`
+	X              float64 `json:"x"`
+	Y              float64 `json:"y"`
+	Width          float64 `json:"width"`
+	Height         float64 `json:"height"`
+	AllowDuplicate bool    `json:"allowDuplicate,omitempty"`
+}
+
+type ErrorDefinition struct {
+	ID       string `json:"id"`
+	Message  string `json:"message"`
+	Document string `json:"document"`
+	Line     int    `json:"line"`
+}
+
+type TraceabilityRow struct {
+	UseCaseID    string `json:"useCase,omitempty"`
+	ScreenID     string `json:"screen"`
+	TransitionID string `json:"transition"`
+	TaskID       string `json:"task"`
+	CriterionID  string `json:"criterion"`
+	Verification string `json:"verification"`
 }
 
 type BusinessRule struct {
@@ -254,6 +315,7 @@ type WorkItem struct {
 	UseCaseID       string                  `json:"useCaseId,omitempty"`
 	FlowID          string                  `json:"flowId,omitempty"`
 	ScreenIDs       []string                `json:"screenIds"`
+	TransitionIDs   []string                `json:"transitionIds"`
 	DependsOn       []string                `json:"dependsOn"`
 	Document        string                  `json:"document"`
 	Anchor          string                  `json:"anchor"`
@@ -273,6 +335,8 @@ type CriterionVerification struct {
 	Criterion   string   `json:"criterion"`
 	Completed   bool     `json:"completed"`
 	Commands    []string `json:"commands"`
+	Transitions []string `json:"transitions"`
+	References  []string `json:"verificationReferences"`
 }
 
 type VerificationCheck struct {
@@ -288,6 +352,10 @@ type KnowledgeModel struct {
 	Transitions   []ScreenTransition `json:"screenTransitions"`
 	BusinessRules []BusinessRule     `json:"businessRules"`
 	WorkItems     []WorkItem         `json:"workItems"`
+	PlayableFlows []PlayableFlow     `json:"playableFlows"`
+	Hotspots      []Hotspot          `json:"hotspots"`
+	Errors        []ErrorDefinition  `json:"errorDefinitions"`
+	Traceability  []TraceabilityRow  `json:"traceability"`
 }
 
 type ProjectInfo struct {
@@ -389,6 +457,7 @@ type Model struct {
 	SearchIndex      []SearchItem
 	HealthOutputPath string
 	ReportOutputPath string
+	ScreenMapEnabled bool
 }
 
 type GenerateResult struct {

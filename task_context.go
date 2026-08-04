@@ -128,9 +128,6 @@ func BuildTaskContext(model *Model, taskID string) (TaskContextReport, error) {
 				report.ScreenTransitions = append(report.ScreenTransitions, transition)
 			}
 		}
-		if mapDocument := model.DocByPath["screens/map.md"]; mapDocument != nil {
-			documentPaths[mapDocument.SourcePath] = true
-		}
 	}
 	for _, rule := range report.BusinessRules {
 		documentPaths[rule.Document] = true

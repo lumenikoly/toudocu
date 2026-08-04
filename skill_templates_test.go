@@ -28,69 +28,85 @@ The user can continue from the start screen.
 `)
 
 			replacements := map[string]string{
-				"{{SCREEN_MAP_SUMMARY}}":          "Product navigation.",
-				"{{SCREEN_ROWS}}":                 "| SC-CORE-HOME | Home | MOD-CORE | page | entry | `/` | Запланировано | — |\n| SC-CORE-WORKSPACE | Workspace | MOD-CORE | page | terminal | `/workspace` | Запланировано | — |",
-				"{{TRANSITION_ROWS}}":             "| SC-CORE-HOME | Open workspace | — | SC-CORE-WORKSPACE | navigation |",
-				"{{MODULE_ID}}":                   "MOD-CORE",
-				"{{ACTION}}":                      "Continue",
-				"{{USE_CASE_ID}}":                 "UC-CORE-01",
-				"{{USE_CASE_TITLE}}":              "Continue",
-				"{{STATUS}}":                      "Запланировано",
-				"{{ACTOR}}":                       "User",
-				"{{OPTIONAL_SCREENS_METADATA}}":   "- Экраны: SC-CORE-HOME, SC-CORE-WORKSPACE",
-				"{{PRIORITY}}":                    "Средний",
-				"{{DATE}}":                        "2026-07-28",
-				"{{USE_CASE_SUMMARY}}":            "The user opens the workspace from the home page.",
-				"{{INPUT}}":                       "A valid request.",
-				"{{PRECONDITION}}":                "The home page is open.",
-				"{{MAIN_STEP}}":                   "The user opens the workspace.",
-				"{{ERROR_SCENARIOS}}":             "No error scenario is defined.",
-				"{{POSTCONDITIONS}}":              "The workspace is open.",
-				"{{BUSINESS_RULE_ID}}":            "BR-CORE-001",
-				"{{BUSINESS_RULE_REFERENCE}}":     "Continue is allowed.",
-				"{{MODULE_TITLE}}":                "Core",
-				"{{MODULE_FILE}}":                 "core.md",
-				"{{FLOW_ID}}":                     "FLOW-CORE-01",
-				"{{FLOW_TITLE}}":                  "Continue",
-				"{{FLOW_SUMMARY}}":                "Detailed workspace navigation.",
-				"{{FLOW_DIAGRAM}}":                "flowchart TD\n    Home[\"Home\"] -->|Open workspace| Workspace[\"Workspace\"]",
-				"{{USE_CASE_LINK}}":               "../use-cases/core.md",
-				"{{SCREEN_ID}}":                   "SC-CORE-HOME",
-				"{{SCREEN_TITLE}}":                "Home",
-				"{{SCREEN_STATUS}}":               "Запланировано",
-				"{{OPTIONAL_ROUTE_METADATA}}":     "- Маршрут: `/`",
-				"{{OPTIONAL_COMPONENT_METADATA}}": "- Компонент: `web/home/`",
-				"{{YYYY-MM-DD}}":                  "2026-07-28",
-				"{{SCREEN_PURPOSE}}":              "Provides the product entry point.",
-				"{{STATES_AND_ERRORS}}":           "The screen has its default state.",
-				"{{TASK_ID}}":                     "TASK-CORE-001",
-				"{{TASK_TITLE}}":                  "Implement continue",
-				"{{OPTIONAL_FLOW_METADATA}}":      "- Процесс: FLOW-CORE-01",
-				"{{OWNER}}":                       "Team",
-				"{{RESULT}}":                      "The continue path works.",
-				"{{SCOPE_PATH}}":                  "docs",
-				"{{OUT_OF_SCOPE}}":                "Other scenarios.",
-				"{{ACCEPTANCE_CRITERION}}":        "Open workspace navigates to SC-CORE-WORKSPACE.",
-				"{{PLAN_STEP}}":                   "Implement the documented transition.",
-				"{{ACCEPTANCE_COMMAND}}":          "go test ./...",
-				"{{DOCUMENTATION_IMPACT}}":        "Update the screen map.",
+				"{{TRANSITION_ROWS}}":               "| TR-CORE-001 | UC-CORE-01 | Open workspace | Always | SC-CORE-WORKSPACE | DEFAULT | — | — | — | navigation |",
+				"{{MODULE_ID}}":                     "MOD-CORE",
+				"{{USE_CASE_ID}}":                   "UC-CORE-01",
+				"{{USE_CASE_TITLE}}":                "Continue",
+				"{{STATUS}}":                        "Запланировано",
+				"{{ACTOR}}":                         "User",
+				"{{OPTIONAL_SCREENS_METADATA}}":     "- Экраны: SC-CORE-HOME, SC-CORE-WORKSPACE",
+				"{{START_SCREEN_ID}}":               "SC-CORE-HOME",
+				"{{TERMINAL_SCREEN_IDS}}":           "SC-CORE-WORKSPACE",
+				"{{OPTIONAL_ALLOW_CYCLE_METADATA}}": "",
+				"{{PRIORITY}}":                      "Средний",
+				"{{DATE}}":                          "2026-07-28",
+				"{{USE_CASE_SUMMARY}}":              "The user opens the workspace from the home page.",
+				"{{INPUT}}":                         "A valid request.",
+				"{{PRECONDITION}}":                  "The home page is open.",
+				"{{MAIN_STEP}}":                     "The user opens the workspace.",
+				"{{ERROR_SCENARIOS}}":               "No error scenario is defined.",
+				"{{POSTCONDITIONS}}":                "The workspace is open.",
+				"{{BUSINESS_RULE_ID}}":              "BR-CORE-001",
+				"{{BUSINESS_RULE_REFERENCE}}":       "Continue is allowed.",
+				"{{MODULE_TITLE}}":                  "Core",
+				"{{MODULE_FILE}}":                   "core.md",
+				"{{FLOW_ID}}":                       "FLOW-CORE-01",
+				"{{FLOW_TITLE}}":                    "Continue",
+				"{{FLOW_SUMMARY}}":                  "Detailed workspace navigation.",
+				"{{FLOW_DIAGRAM}}":                  "flowchart TD\n    Home[\"Home\"] -->|Open workspace| Workspace[\"Workspace\"]",
+				"{{USE_CASE_LINK}}":                 "../use-cases/core.md",
+				"{{SCREEN_ID}}":                     "SC-CORE-HOME",
+				"{{SCREEN_TITLE}}":                  "Home",
+				"{{SCREEN_STATUS}}":                 "Запланировано",
+				"{{SCREEN_TYPE}}":                   "Страница",
+				"{{OPTIONAL_ROUTE_METADATA}}":       "- Маршрут: `/`",
+				"{{OPTIONAL_PREVIEW_METADATA}}":     "",
+				"{{OPTIONAL_PARENT_METADATA}}":      "",
+				"{{OPTIONAL_COMPONENT_METADATA}}":   "- Компонент: `web/home/`",
+				"{{YYYY-MM-DD}}":                    "2026-07-28",
+				"{{SCREEN_PURPOSE}}":                "Provides the product entry point.",
+				"{{STATE_ROWS}}":                    "| DEFAULT | Default | — |",
+				"{{TASK_ID}}":                       "TASK-CORE-001",
+				"{{TASK_TITLE}}":                    "Implement continue",
+				"{{OPTIONAL_FLOW_METADATA}}":        "- Процесс: FLOW-CORE-01",
+				"{{OPTIONAL_TRANSITIONS_METADATA}}": "- Переходы: TR-CORE-001",
+				"{{TRANSITION_ID}}":                 "TR-CORE-001",
+				"{{VERIFICATION_REFERENCE}}":        "TestOpenWorkspace",
+				"{{OWNER}}":                         "Team",
+				"{{RESULT}}":                        "The continue path works.",
+				"{{SCOPE_PATH}}":                    "docs",
+				"{{OUT_OF_SCOPE}}":                  "Other scenarios.",
+				"{{ACCEPTANCE_CRITERION}}":          "Open workspace navigates to SC-CORE-WORKSPACE.",
+				"{{PLAN_STEP}}":                     "Implement the documented transition.",
+				"{{ACCEPTANCE_COMMAND}}":            "go test ./...",
+				"{{DOCUMENTATION_IMPACT}}":          "Update the screen map.",
 			}
 			if language == "en" {
-				replacements["{{SCREEN_ROWS}}"] = "| SC-CORE-HOME | Home | MOD-CORE | page | entry | `/` | Planned | — |\n| SC-CORE-WORKSPACE | Workspace | MOD-CORE | page | terminal | `/workspace` | Planned | — |"
 				replacements["{{STATUS}}"] = "Planned"
 				replacements["{{SCREEN_STATUS}}"] = "Planned"
 				replacements["{{PRIORITY}}"] = "Medium"
 				replacements["{{OPTIONAL_SCREENS_METADATA}}"] = "- Screens: SC-CORE-HOME, SC-CORE-WORKSPACE"
+				replacements["{{SCREEN_TYPE}}"] = "Page"
 				replacements["{{OPTIONAL_ROUTE_METADATA}}"] = "- Route: `/`"
 				replacements["{{OPTIONAL_COMPONENT_METADATA}}"] = "- Component: `web/home/`"
 				replacements["{{OPTIONAL_FLOW_METADATA}}"] = "- Flow: FLOW-CORE-01"
+				replacements["{{OPTIONAL_TRANSITIONS_METADATA}}"] = "- Transitions: TR-CORE-001"
 			}
 
-			writeSkillTemplate(t, docs, language, "screen-map.md", "screens/map.md", replacements)
 			writeSkillTemplate(t, docs, language, "use-case.md", "use-cases/core.md", replacements)
 			writeSkillTemplate(t, docs, language, "flow.md", "flows/core.md", replacements)
 			writeSkillTemplate(t, docs, language, "screen.md", "screens/SC-CORE-HOME.md", replacements)
 			writeSkillTemplate(t, docs, language, "work-ready-feature.md", "work/TASK-CORE-001.md", replacements)
+			writeTestFile(t, docs, "screens/SC-CORE-WORKSPACE.md", `# SC-CORE-WORKSPACE: Workspace
+
+- Идентификатор: SC-CORE-WORKSPACE
+- Тип: Страница
+- Модуль: MOD-CORE
+- Статус: Запланировано
+- Маршрут: /workspace
+
+Terminal screen.
+`)
 
 			model, err := BuildDocumentationModel(Options{
 				InputDirectory: docs,
@@ -121,15 +137,10 @@ The user can continue from the start screen.
 
 func TestUseDocgentTemplatesDoNotInventSemanticStructure(t *testing.T) {
 	for _, language := range []string{"ru", "en"} {
-		screenMap := readSkillTemplate(t, language, "screen-map.md")
-		for _, placeholder := range []string{"{{SCREEN_ROWS}}", "{{TRANSITION_ROWS}}"} {
-			if !strings.Contains(screenMap, placeholder) {
-				t.Errorf("%s/screen-map.md does not contain %s", language, placeholder)
-			}
-		}
-		for _, forbidden := range []string{"{{START_SCREEN_TITLE}}", "{{RESULT_SCREEN_TITLE}}", "SC-{{AREA}}-START", "SC-{{AREA}}-RESULT"} {
-			if strings.Contains(screenMap, forbidden) {
-				t.Errorf("%s/screen-map.md contains schema-driven example %s", language, forbidden)
+		screen := readSkillTemplate(t, language, "screen.md")
+		for _, placeholder := range []string{"{{STATE_ROWS}}", "{{TRANSITION_ROWS}}"} {
+			if !strings.Contains(screen, placeholder) {
+				t.Errorf("%s/screen.md does not contain %s", language, placeholder)
 			}
 		}
 

@@ -7,6 +7,7 @@
 - Use case: {{USE_CASE_ID}}
 {{OPTIONAL_FLOW_METADATA}}
 {{OPTIONAL_SCREENS_METADATA}}
+{{OPTIONAL_TRANSITIONS_METADATA}}
 - Owner: {{OWNER}}
 - Last updated: {{DATE}}
 
@@ -32,6 +33,7 @@
 
 ## Verification
 
+- `AC-01` -> `{{TRANSITION_ID}}` -> `{{VERIFICATION_REFERENCE}}`
 - `AC-01` -> `{{ACCEPTANCE_COMMAND}}`
 
 ## Documentation impact

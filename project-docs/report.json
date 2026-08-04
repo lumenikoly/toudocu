@@ -1,0 +1,2837 @@
+{
+  "schemaVersion": 1,
+  "generator": {
+    "name": "Docgent",
+    "version": "1.1.0-go"
+  },
+  "generatedAt": "2026-07-29T13:20:36.648765683Z",
+  "sourceDirectory": "docs",
+  "staleDays": 90,
+  "project": {
+    "title": "Docgent",
+    "description": "Docgent — dependency-free CLI на Go для проверяемой проектной документации в структурированном Markdown и автономного HTML-портала, работающего через file:// .",
+    "status": {
+      "kind": "in-progress",
+      "symbol": "◐",
+      "label": "В работе",
+      "recognized": true
+    },
+    "stage": "Полная реализация документной модели и визуального портала",
+    "version": "1.1.0-go",
+    "owner": "Команда Docgent",
+    "updated": "2026-07-29",
+    "summary": "CLI проверяет, собирает и локально раздаёт документацию, формирует типизированные JSON-отчёты, выдаёт контекст выбранной задачи и выполняет её проверки только по явной команде. Встроенная Mermaid Tiny отображает связанные процессы без CDN или Node.js. Безопасность путей, HTML, диаграмм, HTTP-раздачи и process timeout проверяется негативными тестами. Экранная модель формирует каталог, карту с SVG-связями, sitemap, фильтры, playable flows, hotspots и traceability. Карта и сценарии работают через file:// , поддерживают клавиатуру, touch, состояния, ошибки и fallback без preview. Активные задачи, блокеры и следующий результат вычисляются из work items и roadmap и отображаются в HTML автоматически."
+  },
+  "currentStatus": {
+    "activeWork": [],
+    "blockers": [],
+    "nextResult": {
+      "id": "DLV-RELEASE-02",
+      "text": "DLV-RELEASE-02 Подготовлен и опубликован следующий стабильный релиз.",
+      "kind": "deliverable",
+      "declaredCompleted": false,
+      "effectiveCompleted": false,
+      "completionSource": "roadmap-checkbox",
+      "document": "roadmap.md",
+      "line": 25
+    }
+  },
+  "stats": {
+    "documents": 29,
+    "totalTasks": 9,
+    "completedTasks": 8,
+    "remainingTasks": 1,
+    "taskProgress": 89,
+    "documentsComplete": 1,
+    "documentsInProgress": 2,
+    "documentsNotStarted": 0,
+    "documentsWithoutTasks": 26,
+    "staleDocuments": 0,
+    "documentsWithoutDescription": 1,
+    "documentsWithoutStatus": 0,
+    "brokenLinks": 0,
+    "warnings": 0,
+    "errors": 0,
+    "modules": 4,
+    "moduleStatuses": {
+      "done": 4
+    },
+    "useCases": 6,
+    "useCaseStatuses": {
+      "done": 6
+    },
+    "screens": 0,
+    "screensDone": 0,
+    "screensInProgress": 0,
+    "screensPlanned": 0,
+    "screensUnreachable": 0,
+    "risks": 3,
+    "openRisks": 2,
+    "decisions": 1
+  },
+  "documents": [
+    {
+      "id": "",
+      "sourcePath": "index.md",
+      "outputPath": "index.html",
+      "type": "overview",
+      "title": "Docgent",
+      "description": "Docgent — dependency-free CLI на Go для проверяемой проектной документации в структурированном Markdown и автономного HTML-портала, работающего через file:// .",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-29T12:57:19.883584387Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "reference/features.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/features.md",
+          "href": "reference/features.html"
+        },
+        {
+          "destination": "status.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "status.md",
+          "href": "status.html"
+        },
+        {
+          "destination": "roadmap.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "roadmap.md",
+          "href": "roadmap.html"
+        },
+        {
+          "destination": "ideas.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "ideas.md",
+          "href": "ideas.html"
+        },
+        {
+          "destination": "notes.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "notes.md",
+          "href": "notes.html"
+        },
+        {
+          "destination": "architecture/overview.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "architecture/overview.md",
+          "href": "architecture/overview.html"
+        },
+        {
+          "destination": "modules/",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "directory",
+          "target": "modules/index.html",
+          "href": "modules/index.html"
+        },
+        {
+          "destination": "use-cases/",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "directory",
+          "target": "use-cases/index.html",
+          "href": "use-cases/index.html"
+        },
+        {
+          "destination": "flows/",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "directory",
+          "target": "flows/index.html",
+          "href": "flows/index.html"
+        },
+        {
+          "destination": "guides/screens.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/screens.md",
+          "href": "guides/screens.html"
+        },
+        {
+          "destination": "contracts/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "contracts/cli.html"
+        },
+        {
+          "destination": "decisions/",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "directory",
+          "target": "decisions/index.html",
+          "href": "decisions/index.html"
+        },
+        {
+          "destination": "risks.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "risks.md",
+          "href": "risks.html"
+        },
+        {
+          "destination": "guides/testing.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/testing.md",
+          "href": "guides/testing.html"
+        },
+        {
+          "destination": "guides/work-items.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/work-items.md",
+          "href": "guides/work-items.html"
+        },
+        {
+          "destination": "reference/configuration.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/configuration.md",
+          "href": "reference/configuration.html"
+        },
+        {
+          "destination": "work/",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "directory",
+          "target": "work/index.html",
+          "href": "work/index.html"
+        }
+      ],
+      "backlinks": [],
+      "relatedDocuments": [
+        "reference/features.md",
+        "status.md",
+        "roadmap.md",
+        "ideas.md",
+        "notes.md",
+        "architecture/overview.md",
+        "guides/screens.md",
+        "contracts/cli.md",
+        "risks.md",
+        "guides/testing.md",
+        "guides/work-items.md",
+        "reference/configuration.md"
+      ]
+    },
+    {
+      "id": "",
+      "sourcePath": "status.md",
+      "outputPath": "status.html",
+      "type": "status",
+      "title": "Текущее состояние",
+      "description": "Основные пользовательские потоки реализованы и покрыты автоматическими проверками; текущий фокус — стабилизация контракта и подготовка следующего релиза.",
+      "metadata": {
+        "owner": "Команда Docgent",
+        "stage": "Полная реализация документной модели и визуального портала",
+        "status": "В работе",
+        "updated": "2026-07-29",
+        "version": "1.1.0-go"
+      },
+      "status": {
+        "kind": "in-progress",
+        "symbol": "◐",
+        "label": "В работе",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-29T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "index.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "roadmap.md",
+      "outputPath": "roadmap.html",
+      "type": "roadmap",
+      "title": "Дорожная карта",
+      "description": "Roadmap определяет продуктовый охват Docgent; состояние связанных UC- вычисляется из документов пользовательских сценариев.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 9,
+        "completed": 8,
+        "remaining": 1,
+        "percent": 89
+      },
+      "updatedAt": "2026-07-29T12:07:07.83484021Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "index.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "risks.md",
+      "outputPath": "risks.html",
+      "type": "risks",
+      "title": "Риски",
+      "description": "Актуальные технические и эксплуатационные риски Docgent.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 9,
+        "completed": 8,
+        "remaining": 1,
+        "percent": 89
+      },
+      "updatedAt": "2026-07-26T09:18:59.974403389Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "index.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "ideas.md",
+      "outputPath": "ideas.html",
+      "type": "ideas",
+      "title": "Идеи развития",
+      "description": "Свободное пространство для идей функций и будущих планов. Содержимое не требует статуса, идентификаторов или обязательных разделов.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-27T20:57:46.365500173Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "index.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "notes.md",
+      "outputPath": "notes.html",
+      "type": "notes",
+      "title": "Заметки",
+      "description": "Свободное пространство для наблюдений, контекста и рабочих записей. Содержимое не имеет обязательной структуры: при необходимости его можно делить на разделы и оформлять списками.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-27T20:57:46.365500173Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "index.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "architecture/overview.md",
+      "outputPath": "architecture/overview.html",
+      "type": "architecture",
+      "title": "Архитектура Docgent",
+      "description": "Docgent реализован как один Go-модуль с линейным конвейером: Markdown-файлы преобразуются в проверенную проектную модель, из которой формируются HTML и JSON-представления.",
+      "metadata": {
+        "owner": "Команда Docgent",
+        "status": "Готово",
+        "updated": "2026-07-29"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Готово",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-29T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../flows/FLOW-DOCS-BUILD.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-DOCS-BUILD.md",
+          "href": "../flows/FLOW-DOCS-BUILD.html"
+        },
+        {
+          "destination": "../flows/FLOW-DOCS-CHECK.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-DOCS-CHECK.md",
+          "href": "../flows/FLOW-DOCS-CHECK.html"
+        },
+        {
+          "destination": "../flows/FLOW-DOCS-SERVE.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-DOCS-SERVE.md",
+          "href": "../flows/FLOW-DOCS-SERVE.html"
+        },
+        {
+          "destination": "../flows/FLOW-TASK-WORKFLOW.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-TASK-WORKFLOW.md",
+          "href": "../flows/FLOW-TASK-WORKFLOW.html"
+        }
+      ],
+      "backlinks": [
+        "index.md"
+      ],
+      "relatedDocuments": [
+        "flows/FLOW-DOCS-BUILD.md",
+        "flows/FLOW-DOCS-CHECK.md",
+        "flows/FLOW-DOCS-SERVE.md",
+        "flows/FLOW-TASK-WORKFLOW.md"
+      ]
+    },
+    {
+      "id": "CON-CLI-V1",
+      "sourcePath": "contracts/cli.md",
+      "outputPath": "contracts/cli.html",
+      "type": "contract",
+      "title": "CLI-контракт Docgent v1",
+      "description": "Контракт фиксирует публичные команды, exit codes и машинные JSON-форматы Docgent.",
+      "metadata": {
+        "id": "CON-CLI-V1",
+        "owner": "Команда Docgent",
+        "status": "Готово",
+        "updated": "2026-07-29"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Готово",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-29T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../guides/work-items.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/work-items.md",
+          "href": "../guides/work-items.html"
+        }
+      ],
+      "backlinks": [
+        "index.md",
+        "flows/FLOW-DOCS-BUILD.md",
+        "flows/FLOW-DOCS-SERVE.md",
+        "flows/FLOW-TASK-WORKFLOW.md",
+        "guides/work-items.md",
+        "modules/cli.md",
+        "modules/model.md",
+        "reference/features.md",
+        "use-cases/build-portal.md",
+        "use-cases/serve-portal.md",
+        "use-cases/task-check.md",
+        "use-cases/task-workflow.md"
+      ],
+      "relatedDocuments": [
+        "guides/work-items.md"
+      ]
+    },
+    {
+      "id": "ADR-001",
+      "sourcePath": "decisions/001-dependency-free.md",
+      "outputPath": "decisions/001-dependency-free.html",
+      "type": "decision",
+      "title": "ADR-001: Dependency-free Go CLI",
+      "description": "Docgent поставляется одним Go-бинарником и не использует внешние модули или runtime-зависимости.",
+      "metadata": {
+        "author": "Команда Docgent",
+        "date": "2026-07-25",
+        "id": "ADR-001",
+        "status": "Принято",
+        "updated": "2026-07-26"
+      },
+      "status": {
+        "kind": "accepted",
+        "symbol": "✓",
+        "label": "Принято",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-26T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "FLOW-DOCS-BUILD",
+      "sourcePath": "flows/FLOW-DOCS-BUILD.md",
+      "outputPath": "flows/FLOW-DOCS-BUILD.html",
+      "type": "flow",
+      "title": "FLOW-DOCS-BUILD: Сборка автономного портала",
+      "description": "Схема визуализирует конвейер команды build . Требования к результату, exit codes и безопасной очистке определяет UC-DOCS-01, а не диаграмма.",
+      "metadata": {
+        "id": "FLOW-DOCS-BUILD",
+        "module": "MOD-SITE",
+        "updated": "2026-07-28",
+        "useCase": "UC-DOCS-01"
+      },
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-28T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../use-cases/build-portal.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/build-portal.md",
+          "href": "../use-cases/build-portal.html"
+        },
+        {
+          "destination": "../use-cases/build-portal.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/build-portal.md",
+          "href": "../use-cases/build-portal.html"
+        },
+        {
+          "destination": "../modules/site.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/site.md",
+          "href": "../modules/site.html"
+        },
+        {
+          "destination": "../modules/model.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/model.md",
+          "href": "../modules/model.html"
+        },
+        {
+          "destination": "../contracts/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "../contracts/cli.html"
+        }
+      ],
+      "backlinks": [
+        "architecture/overview.md",
+        "flows/FLOW-DOCS-SERVE.md",
+        "modules/site.md",
+        "use-cases/build-portal.md"
+      ],
+      "relatedDocuments": [
+        "use-cases/build-portal.md",
+        "modules/site.md",
+        "modules/model.md",
+        "contracts/cli.md"
+      ]
+    },
+    {
+      "id": "FLOW-DOCS-CHECK",
+      "sourcePath": "flows/FLOW-DOCS-CHECK.md",
+      "outputPath": "flows/FLOW-DOCS-CHECK.html",
+      "type": "flow",
+      "title": "FLOW-DOCS-CHECK: Проверка документационного контракта",
+      "description": "Схема показывает read-only проверку документации. Полный набор правил и условия успешного завершения определяет UC-DOCS-02.",
+      "metadata": {
+        "id": "FLOW-DOCS-CHECK",
+        "module": "MOD-MODEL",
+        "updated": "2026-07-28",
+        "useCase": "UC-DOCS-02"
+      },
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-28T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../use-cases/check-documentation.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/check-documentation.md",
+          "href": "../use-cases/check-documentation.html"
+        },
+        {
+          "destination": "../use-cases/check-documentation.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/check-documentation.md",
+          "href": "../use-cases/check-documentation.html"
+        },
+        {
+          "destination": "../modules/model.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/model.md",
+          "href": "../modules/model.html"
+        },
+        {
+          "destination": "../modules/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/cli.md",
+          "href": "../modules/cli.html"
+        },
+        {
+          "destination": "../guides/testing.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/testing.md",
+          "href": "../guides/testing.html"
+        }
+      ],
+      "backlinks": [
+        "architecture/overview.md",
+        "modules/cli.md",
+        "modules/model.md",
+        "use-cases/check-documentation.md"
+      ],
+      "relatedDocuments": [
+        "use-cases/check-documentation.md",
+        "modules/model.md",
+        "modules/cli.md",
+        "guides/testing.md"
+      ]
+    },
+    {
+      "id": "FLOW-DOCS-SERVE",
+      "sourcePath": "flows/FLOW-DOCS-SERVE.md",
+      "outputPath": "flows/FLOW-DOCS-SERVE.html",
+      "type": "flow",
+      "title": "FLOW-DOCS-SERVE: Локальный просмотр портала",
+      "description": "Схема визуализирует жизненный цикл команды serve . Сетевые ограничения, ошибочные сценарии и постусловия определяет UC-DOCS-03.",
+      "metadata": {
+        "id": "FLOW-DOCS-SERVE",
+        "module": "MOD-SITE",
+        "updated": "2026-07-28",
+        "useCase": "UC-DOCS-03"
+      },
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-28T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../use-cases/serve-portal.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/serve-portal.md",
+          "href": "../use-cases/serve-portal.html"
+        },
+        {
+          "destination": "../use-cases/serve-portal.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/serve-portal.md",
+          "href": "../use-cases/serve-portal.html"
+        },
+        {
+          "destination": "FLOW-DOCS-BUILD.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-DOCS-BUILD.md",
+          "href": "FLOW-DOCS-BUILD.html"
+        },
+        {
+          "destination": "../modules/site.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/site.md",
+          "href": "../modules/site.html"
+        },
+        {
+          "destination": "../contracts/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "../contracts/cli.html"
+        }
+      ],
+      "backlinks": [
+        "architecture/overview.md",
+        "modules/cli.md",
+        "modules/site.md",
+        "use-cases/serve-portal.md"
+      ],
+      "relatedDocuments": [
+        "use-cases/serve-portal.md",
+        "flows/FLOW-DOCS-BUILD.md",
+        "modules/site.md",
+        "contracts/cli.md"
+      ]
+    },
+    {
+      "id": "FLOW-TASK-WORKFLOW",
+      "sourcePath": "flows/FLOW-TASK-WORKFLOW.md",
+      "outputPath": "flows/FLOW-TASK-WORKFLOW.html",
+      "type": "flow",
+      "title": "FLOW-TASK-WORKFLOW: Работа с проверяемой задачей",
+      "description": "Схема связывает read-only получение контекста и явный запуск проверок. Контракт этих операций определяют UC-TASK-01 и UC-TASK-02.",
+      "metadata": {
+        "id": "FLOW-TASK-WORKFLOW",
+        "module": "MOD-CLI",
+        "updated": "2026-07-28",
+        "useCase": "UC-TASK-01, UC-TASK-02"
+      },
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-28T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../use-cases/task-workflow.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/task-workflow.md",
+          "href": "../use-cases/task-workflow.html"
+        },
+        {
+          "destination": "../use-cases/task-check.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/task-check.md",
+          "href": "../use-cases/task-check.html"
+        },
+        {
+          "destination": "../use-cases/task-workflow.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/task-workflow.md",
+          "href": "../use-cases/task-workflow.html"
+        },
+        {
+          "destination": "../use-cases/task-check.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/task-check.md",
+          "href": "../use-cases/task-check.html"
+        },
+        {
+          "destination": "../modules/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/cli.md",
+          "href": "../modules/cli.html"
+        },
+        {
+          "destination": "../guides/work-items.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/work-items.md",
+          "href": "../guides/work-items.html"
+        },
+        {
+          "destination": "../contracts/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "../contracts/cli.html"
+        }
+      ],
+      "backlinks": [
+        "architecture/overview.md",
+        "modules/cli.md",
+        "modules/model.md",
+        "use-cases/task-check.md",
+        "use-cases/task-workflow.md"
+      ],
+      "relatedDocuments": [
+        "use-cases/task-workflow.md",
+        "use-cases/task-check.md",
+        "modules/cli.md",
+        "guides/work-items.md",
+        "contracts/cli.md"
+      ]
+    },
+    {
+      "id": "",
+      "sourcePath": "guides/screens.md",
+      "outputPath": "guides/screens.html",
+      "type": "guide",
+      "title": "Карта экранов и playable flows",
+      "description": "Docgent строит карту, каталог, пошаговые сценарии и traceability из документов screens/SC- .md . Отдельный screens/map.md не используется.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-29T12:58:45.268464305Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "index.md",
+        "reference/features.md",
+        "use-cases/screen-map.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "guides/testing.md",
+      "outputPath": "guides/testing.html",
+      "type": "guide",
+      "title": "Проверка изменений Docgent",
+      "description": "Руководство задаёт единый локальный и CI-цикл для кода и собственной документации проекта.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-26T20:53:46.728434865Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "index.md",
+        "flows/FLOW-DOCS-CHECK.md",
+        "use-cases/check-documentation.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "guides/work-items.md",
+      "outputPath": "guides/work-items.html",
+      "type": "guide",
+      "title": "Рабочие задачи",
+      "description": "Docgent хранит каждую рабочую задачу в отдельном файле work/TASK- .md . Задача описывает ожидаемый результат, допустимую область изменений, критерии приёмки и команды проверки.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-28T16:22:59.941500381Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../contracts/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "../contracts/cli.html"
+        }
+      ],
+      "backlinks": [
+        "index.md",
+        "contracts/cli.md",
+        "flows/FLOW-TASK-WORKFLOW.md",
+        "modules/model.md",
+        "reference/features.md",
+        "use-cases/task-check.md",
+        "use-cases/task-workflow.md"
+      ],
+      "relatedDocuments": [
+        "contracts/cli.md"
+      ]
+    },
+    {
+      "id": "MOD-CLI",
+      "sourcePath": "modules/cli.md",
+      "outputPath": "modules/cli.html",
+      "type": "module",
+      "title": "CLI и workflow задач",
+      "description": "Модуль предоставляет команды Docgent, компактный контекст задачи и управляемое выполнение объявленных проверок.",
+      "metadata": {
+        "id": "MOD-CLI",
+        "owner": "Команда Docgent",
+        "status": "Готово",
+        "updated": "2026-07-29"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Готово",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-29T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../contracts/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "../contracts/cli.html"
+        },
+        {
+          "destination": "../use-cases/task-workflow.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/task-workflow.md",
+          "href": "../use-cases/task-workflow.html"
+        },
+        {
+          "destination": "../use-cases/task-check.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/task-check.md",
+          "href": "../use-cases/task-check.html"
+        },
+        {
+          "destination": "../use-cases/check-documentation.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/check-documentation.md",
+          "href": "../use-cases/check-documentation.html"
+        },
+        {
+          "destination": "../use-cases/serve-portal.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/serve-portal.md",
+          "href": "../use-cases/serve-portal.html"
+        },
+        {
+          "destination": "../flows/FLOW-DOCS-CHECK.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-DOCS-CHECK.md",
+          "href": "../flows/FLOW-DOCS-CHECK.html"
+        },
+        {
+          "destination": "../flows/FLOW-DOCS-SERVE.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-DOCS-SERVE.md",
+          "href": "../flows/FLOW-DOCS-SERVE.html"
+        },
+        {
+          "destination": "../flows/FLOW-TASK-WORKFLOW.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-TASK-WORKFLOW.md",
+          "href": "../flows/FLOW-TASK-WORKFLOW.html"
+        }
+      ],
+      "backlinks": [
+        "flows/FLOW-DOCS-CHECK.md",
+        "flows/FLOW-TASK-WORKFLOW.md",
+        "use-cases/check-documentation.md",
+        "use-cases/serve-portal.md",
+        "use-cases/task-check.md",
+        "use-cases/task-workflow.md"
+      ],
+      "relatedDocuments": [
+        "contracts/cli.md",
+        "use-cases/task-workflow.md",
+        "use-cases/task-check.md",
+        "use-cases/check-documentation.md",
+        "use-cases/serve-portal.md",
+        "flows/FLOW-DOCS-CHECK.md",
+        "flows/FLOW-DOCS-SERVE.md",
+        "flows/FLOW-TASK-WORKFLOW.md"
+      ]
+    },
+    {
+      "id": "MOD-MARKDOWN",
+      "sourcePath": "modules/markdown.md",
+      "outputPath": "modules/markdown.html",
+      "type": "module",
+      "title": "Безопасный Markdown",
+      "description": "Модуль разбирает поддерживаемое подмножество Markdown и создаёт безопасные HTML-фрагменты без исполнения встроенного содержимого.",
+      "metadata": {
+        "id": "MOD-MARKDOWN",
+        "owner": "Команда Docgent",
+        "status": "Готово",
+        "updated": "2026-07-28"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Готово",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-28T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../use-cases/build-portal.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/build-portal.md",
+          "href": "../use-cases/build-portal.html"
+        },
+        {
+          "destination": "../use-cases/check-documentation.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/check-documentation.md",
+          "href": "../use-cases/check-documentation.html"
+        }
+      ],
+      "backlinks": [
+        "use-cases/build-portal.md"
+      ],
+      "relatedDocuments": [
+        "use-cases/build-portal.md",
+        "use-cases/check-documentation.md"
+      ]
+    },
+    {
+      "id": "MOD-MODEL",
+      "sourcePath": "modules/model.md",
+      "outputPath": "modules/model.html",
+      "type": "module",
+      "title": "Проектная модель и валидация",
+      "description": "Модуль читает каталог документации, строит связанную модель проекта и формирует диагностику структуры, идентификаторов, путей и зависимостей.",
+      "metadata": {
+        "id": "MOD-MODEL",
+        "owner": "Команда Docgent",
+        "status": "Готово",
+        "updated": "2026-07-29"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Готово",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-29T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../contracts/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "../contracts/cli.html"
+        },
+        {
+          "destination": "../guides/work-items.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/work-items.md",
+          "href": "../guides/work-items.html"
+        },
+        {
+          "destination": "../use-cases/check-documentation.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/check-documentation.md",
+          "href": "../use-cases/check-documentation.html"
+        },
+        {
+          "destination": "../use-cases/task-workflow.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/task-workflow.md",
+          "href": "../use-cases/task-workflow.html"
+        },
+        {
+          "destination": "../use-cases/task-check.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/task-check.md",
+          "href": "../use-cases/task-check.html"
+        },
+        {
+          "destination": "../flows/FLOW-DOCS-CHECK.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-DOCS-CHECK.md",
+          "href": "../flows/FLOW-DOCS-CHECK.html"
+        },
+        {
+          "destination": "../flows/FLOW-TASK-WORKFLOW.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-TASK-WORKFLOW.md",
+          "href": "../flows/FLOW-TASK-WORKFLOW.html"
+        }
+      ],
+      "backlinks": [
+        "flows/FLOW-DOCS-BUILD.md",
+        "flows/FLOW-DOCS-CHECK.md",
+        "use-cases/check-documentation.md",
+        "use-cases/screen-map.md",
+        "use-cases/task-check.md",
+        "use-cases/task-workflow.md"
+      ],
+      "relatedDocuments": [
+        "contracts/cli.md",
+        "guides/work-items.md",
+        "use-cases/check-documentation.md",
+        "use-cases/task-workflow.md",
+        "use-cases/task-check.md",
+        "flows/FLOW-DOCS-CHECK.md",
+        "flows/FLOW-TASK-WORKFLOW.md"
+      ]
+    },
+    {
+      "id": "MOD-SITE",
+      "sourcePath": "modules/site.md",
+      "outputPath": "modules/site.html",
+      "type": "module",
+      "title": "Статический портал",
+      "description": "Модуль формирует автономные HTML-страницы, навигацию, поиск и типизированный report.json из готовой проектной модели.",
+      "metadata": {
+        "id": "MOD-SITE",
+        "owner": "Команда Docgent",
+        "status": "Готово",
+        "updated": "2026-07-29"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Готово",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-29T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../use-cases/build-portal.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/build-portal.md",
+          "href": "../use-cases/build-portal.html"
+        },
+        {
+          "destination": "../use-cases/serve-portal.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/serve-portal.md",
+          "href": "../use-cases/serve-portal.html"
+        },
+        {
+          "destination": "../use-cases/screen-map.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/screen-map.md",
+          "href": "../use-cases/screen-map.html"
+        },
+        {
+          "destination": "../flows/FLOW-DOCS-BUILD.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-DOCS-BUILD.md",
+          "href": "../flows/FLOW-DOCS-BUILD.html"
+        },
+        {
+          "destination": "../flows/FLOW-DOCS-SERVE.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-DOCS-SERVE.md",
+          "href": "../flows/FLOW-DOCS-SERVE.html"
+        }
+      ],
+      "backlinks": [
+        "flows/FLOW-DOCS-BUILD.md",
+        "flows/FLOW-DOCS-SERVE.md",
+        "use-cases/build-portal.md",
+        "use-cases/screen-map.md",
+        "use-cases/serve-portal.md"
+      ],
+      "relatedDocuments": [
+        "use-cases/build-portal.md",
+        "use-cases/serve-portal.md",
+        "use-cases/screen-map.md",
+        "flows/FLOW-DOCS-BUILD.md",
+        "flows/FLOW-DOCS-SERVE.md"
+      ]
+    },
+    {
+      "id": "",
+      "sourcePath": "reference/configuration.md",
+      "outputPath": "reference/configuration.html",
+      "type": "reference",
+      "title": "Справочник конфигурации",
+      "description": "Docgent настраивается аргументами CLI; отдельный конфигурационный файл не требуется.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-29T12:59:19.840820534Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "index.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "reference/features.md",
+      "outputPath": "reference/features.html",
+      "type": "reference",
+      "title": "Каталог возможностей",
+      "description": "Страница перечисляет реализованные возможности Docgent и указывает, где зафиксирован их подробный контракт. Источником истины остаются Markdown-файлы: портал и JSON не редактируют их и не хранят отдельную модель.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-29T13:00:41.741679902Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../contracts/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "../contracts/cli.html"
+        },
+        {
+          "destination": "../guides/screens.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/screens.md",
+          "href": "../guides/screens.html"
+        },
+        {
+          "destination": "../guides/work-items.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/work-items.md",
+          "href": "../guides/work-items.html"
+        }
+      ],
+      "backlinks": [
+        "index.md"
+      ],
+      "relatedDocuments": [
+        "contracts/cli.md",
+        "guides/screens.md",
+        "guides/work-items.md"
+      ]
+    },
+    {
+      "id": "UC-DOCS-01",
+      "sourcePath": "use-cases/build-portal.md",
+      "outputPath": "use-cases/build-portal.html",
+      "type": "use-case",
+      "title": "UC-DOCS-01: Создать автономный портал",
+      "description": "Разработчик преобразует каталог проектной документации в статический портал, который можно открыть с диска без HTTP-сервера.",
+      "metadata": {
+        "actor": "Разработчик",
+        "id": "UC-DOCS-01",
+        "module": "MOD-SITE",
+        "priority": "Высокий",
+        "status": "Готово",
+        "updated": "2026-07-28"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Готово",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-28T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../modules/site.md#br-site-001-очистка-output-не-затрагивает-защищённые-каталоги",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/site.md",
+          "href": "../modules/site.html#br-site-001-очистка-output-не-затрагивает-защищённые-каталоги"
+        },
+        {
+          "destination": "../modules/site.md#br-site-002-портал-работает-через-file-protocol",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/site.md",
+          "href": "../modules/site.html#br-site-002-портал-работает-через-file-protocol"
+        },
+        {
+          "destination": "../modules/markdown.md#br-md-001-пользовательский-html-всегда-экранируется",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/markdown.md",
+          "href": "../modules/markdown.html#br-md-001-пользовательский-html-всегда-экранируется"
+        },
+        {
+          "destination": "../modules/markdown.md#br-md-002-опасные-протоколы-и-активные-assets-блокируются",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/markdown.md",
+          "href": "../modules/markdown.html#br-md-002-опасные-протоколы-и-активные-assets-блокируются"
+        },
+        {
+          "destination": "../modules/markdown.md#br-md-003-mermaid-остаётся-визуализацией",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/markdown.md",
+          "href": "../modules/markdown.html#br-md-003-mermaid-остаётся-визуализацией"
+        },
+        {
+          "destination": "../modules/site.md#br-site-004-mermaid-работает-автономно-и-в-строгом-режиме",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/site.md",
+          "href": "../modules/site.html#br-site-004-mermaid-работает-автономно-и-в-строгом-режиме"
+        },
+        {
+          "destination": "../flows/FLOW-DOCS-BUILD.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-DOCS-BUILD.md",
+          "href": "../flows/FLOW-DOCS-BUILD.html"
+        },
+        {
+          "destination": "../modules/site.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/site.md",
+          "href": "../modules/site.html"
+        },
+        {
+          "destination": "../modules/markdown.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/markdown.md",
+          "href": "../modules/markdown.html"
+        },
+        {
+          "destination": "../contracts/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "../contracts/cli.html"
+        }
+      ],
+      "backlinks": [
+        "flows/FLOW-DOCS-BUILD.md",
+        "modules/markdown.md",
+        "modules/site.md"
+      ],
+      "relatedDocuments": [
+        "modules/site.md",
+        "modules/markdown.md",
+        "flows/FLOW-DOCS-BUILD.md",
+        "contracts/cli.md"
+      ]
+    },
+    {
+      "id": "UC-DOCS-02",
+      "sourcePath": "use-cases/check-documentation.md",
+      "outputPath": "use-cases/check-documentation.html",
+      "type": "use-case",
+      "title": "UC-DOCS-02: Проверить документацию",
+      "description": "Разработчик или CI-процесс проверяет документационный контракт без генерации сайта и без выполнения команд рабочих задач.",
+      "metadata": {
+        "actor": "Разработчик или CI-процесс",
+        "id": "UC-DOCS-02",
+        "module": "MOD-MODEL",
+        "priority": "Высокий",
+        "status": "Готово",
+        "updated": "2026-07-28"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Готово",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-28T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../modules/model.md#br-model-001-roadmap-является-единственным-источником-глобального-охвата",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/model.md",
+          "href": "../modules/model.html#br-model-001-roadmap-является-единственным-источником-глобального-охвата"
+        },
+        {
+          "destination": "../modules/model.md#br-model-002-ссылки-не-выходят-за-repository-root",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/model.md",
+          "href": "../modules/model.html#br-model-002-ссылки-не-выходят-за-repository-root"
+        },
+        {
+          "destination": "../modules/model.md#br-model-003-готовая-к-работе-задача-имеет-полный-проверяемый-контракт",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/model.md",
+          "href": "../modules/model.html#br-model-003-готовая-к-работе-задача-имеет-полный-проверяемый-контракт"
+        },
+        {
+          "destination": "../modules/cli.md#br-cli-002-проверки-запускаются-только-явно",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/cli.md",
+          "href": "../modules/cli.html#br-cli-002-проверки-запускаются-только-явно"
+        },
+        {
+          "destination": "../flows/FLOW-DOCS-CHECK.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-DOCS-CHECK.md",
+          "href": "../flows/FLOW-DOCS-CHECK.html"
+        },
+        {
+          "destination": "../modules/model.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/model.md",
+          "href": "../modules/model.html"
+        },
+        {
+          "destination": "../modules/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/cli.md",
+          "href": "../modules/cli.html"
+        },
+        {
+          "destination": "../guides/testing.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/testing.md",
+          "href": "../guides/testing.html"
+        }
+      ],
+      "backlinks": [
+        "flows/FLOW-DOCS-CHECK.md",
+        "modules/cli.md",
+        "modules/markdown.md",
+        "modules/model.md"
+      ],
+      "relatedDocuments": [
+        "modules/model.md",
+        "modules/cli.md",
+        "flows/FLOW-DOCS-CHECK.md",
+        "guides/testing.md"
+      ]
+    },
+    {
+      "id": "UC-DOCS-04",
+      "sourcePath": "use-cases/screen-map.md",
+      "outputPath": "use-cases/screen-map.html",
+      "type": "use-case",
+      "title": "UC-DOCS-04: Исследовать карту экранов",
+      "description": "Разработчик исследует пользовательскую навигацию и проигрывает документированные сценарии в автономном портале.",
+      "metadata": {
+        "actor": "Разработчик",
+        "id": "UC-DOCS-04",
+        "module": "MOD-SITE",
+        "priority": "Высокий",
+        "status": "Готово",
+        "updated": "2026-07-29"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Готово",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-29T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../modules/model.md#br-model-004-документы-экранов-являются-источником-графа",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/model.md",
+          "href": "../modules/model.html#br-model-004-документы-экранов-являются-источником-графа"
+        },
+        {
+          "destination": "../modules/site.md#br-site-005-карта-экранов-работает-автономно",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/site.md",
+          "href": "../modules/site.html#br-site-005-карта-экранов-работает-автономно"
+        },
+        {
+          "destination": "../guides/screens.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/screens.md",
+          "href": "../guides/screens.html"
+        },
+        {
+          "destination": "../modules/model.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/model.md",
+          "href": "../modules/model.html"
+        },
+        {
+          "destination": "../modules/site.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/site.md",
+          "href": "../modules/site.html"
+        }
+      ],
+      "backlinks": [
+        "modules/site.md"
+      ],
+      "relatedDocuments": [
+        "modules/model.md",
+        "modules/site.md",
+        "guides/screens.md"
+      ]
+    },
+    {
+      "id": "UC-DOCS-03",
+      "sourcePath": "use-cases/serve-portal.md",
+      "outputPath": "use-cases/serve-portal.html",
+      "type": "use-case",
+      "title": "UC-DOCS-03: Просматривать документацию на локальном сервере",
+      "description": "Разработчик просматривает портал через локальный HTTP-сервер и получает обновлённую сборку после изменения исходной документации.",
+      "metadata": {
+        "actor": "Разработчик",
+        "id": "UC-DOCS-03",
+        "module": "MOD-SITE",
+        "priority": "Средний",
+        "status": "Готово",
+        "updated": "2026-07-28"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Готово",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-28T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../modules/site.md#br-site-003-dev-сервер-не-раскрывает-исходный-репозиторий",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/site.md",
+          "href": "../modules/site.html#br-site-003-dev-сервер-не-раскрывает-исходный-репозиторий"
+        },
+        {
+          "destination": "../flows/FLOW-DOCS-SERVE.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-DOCS-SERVE.md",
+          "href": "../flows/FLOW-DOCS-SERVE.html"
+        },
+        {
+          "destination": "../modules/site.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/site.md",
+          "href": "../modules/site.html"
+        },
+        {
+          "destination": "../modules/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/cli.md",
+          "href": "../modules/cli.html"
+        },
+        {
+          "destination": "../contracts/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "../contracts/cli.html"
+        }
+      ],
+      "backlinks": [
+        "flows/FLOW-DOCS-SERVE.md",
+        "modules/cli.md",
+        "modules/site.md"
+      ],
+      "relatedDocuments": [
+        "modules/site.md",
+        "flows/FLOW-DOCS-SERVE.md",
+        "modules/cli.md",
+        "contracts/cli.md"
+      ]
+    },
+    {
+      "id": "UC-TASK-02",
+      "sourcePath": "use-cases/task-check.md",
+      "outputPath": "use-cases/task-check.html",
+      "type": "use-case",
+      "title": "UC-TASK-02: Выполнить проверки рабочей задачи",
+      "description": "Исполнитель явно запускает команды проверки выбранной задачи и получает полный отчёт по критериям приёмки.",
+      "metadata": {
+        "actor": "Исполнитель — разработчик или программный агент",
+        "id": "UC-TASK-02",
+        "module": "MOD-CLI",
+        "priority": "Высокий",
+        "status": "Готово",
+        "updated": "2026-07-28"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Готово",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-28T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../modules/cli.md#br-cli-002-проверки-запускаются-только-явно",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/cli.md",
+          "href": "../modules/cli.html#br-cli-002-проверки-запускаются-только-явно"
+        },
+        {
+          "destination": "../modules/cli.md#br-cli-003-timeout-завершает-дерево-процессов",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/cli.md",
+          "href": "../modules/cli.html#br-cli-003-timeout-завершает-дерево-процессов"
+        },
+        {
+          "destination": "../modules/model.md#br-model-003-готовая-к-работе-задача-имеет-полный-проверяемый-контракт",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/model.md",
+          "href": "../modules/model.html#br-model-003-готовая-к-работе-задача-имеет-полный-проверяемый-контракт"
+        },
+        {
+          "destination": "../flows/FLOW-TASK-WORKFLOW.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-TASK-WORKFLOW.md",
+          "href": "../flows/FLOW-TASK-WORKFLOW.html"
+        },
+        {
+          "destination": "../modules/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/cli.md",
+          "href": "../modules/cli.html"
+        },
+        {
+          "destination": "../modules/model.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/model.md",
+          "href": "../modules/model.html"
+        },
+        {
+          "destination": "../contracts/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "../contracts/cli.html"
+        },
+        {
+          "destination": "../guides/work-items.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/work-items.md",
+          "href": "../guides/work-items.html"
+        }
+      ],
+      "backlinks": [
+        "flows/FLOW-TASK-WORKFLOW.md",
+        "modules/cli.md",
+        "modules/model.md"
+      ],
+      "relatedDocuments": [
+        "modules/cli.md",
+        "modules/model.md",
+        "flows/FLOW-TASK-WORKFLOW.md",
+        "contracts/cli.md",
+        "guides/work-items.md"
+      ]
+    },
+    {
+      "id": "UC-TASK-01",
+      "sourcePath": "use-cases/task-workflow.md",
+      "outputPath": "use-cases/task-workflow.html",
+      "type": "use-case",
+      "title": "UC-TASK-01: Получить контекст рабочей задачи",
+      "description": "Исполнитель получает ограниченный контекст одной рабочей задачи перед изменением кода или документации.",
+      "metadata": {
+        "actor": "Исполнитель — разработчик или программный агент",
+        "id": "UC-TASK-01",
+        "module": "MOD-CLI",
+        "priority": "Высокий",
+        "status": "Готово",
+        "updated": "2026-07-28"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Готово",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-28T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../modules/cli.md#br-cli-001-контекст-задачи-не-исполняет-команды",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/cli.md",
+          "href": "../modules/cli.html#br-cli-001-контекст-задачи-не-исполняет-команды"
+        },
+        {
+          "destination": "../flows/FLOW-TASK-WORKFLOW.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-TASK-WORKFLOW.md",
+          "href": "../flows/FLOW-TASK-WORKFLOW.html"
+        },
+        {
+          "destination": "../modules/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/cli.md",
+          "href": "../modules/cli.html"
+        },
+        {
+          "destination": "../modules/model.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/model.md",
+          "href": "../modules/model.html"
+        },
+        {
+          "destination": "../contracts/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "../contracts/cli.html"
+        },
+        {
+          "destination": "../guides/work-items.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/work-items.md",
+          "href": "../guides/work-items.html"
+        }
+      ],
+      "backlinks": [
+        "flows/FLOW-TASK-WORKFLOW.md",
+        "modules/cli.md",
+        "modules/model.md"
+      ],
+      "relatedDocuments": [
+        "modules/cli.md",
+        "flows/FLOW-TASK-WORKFLOW.md",
+        "modules/model.md",
+        "contracts/cli.md",
+        "guides/work-items.md"
+      ]
+    },
+    {
+      "id": "",
+      "sourcePath": "work/TASK-DOCS-001-self-documentation.md",
+      "outputPath": "work/TASK-DOCS-001-self-documentation.html",
+      "type": "work",
+      "title": "TASK-DOCS-001: Добавить самодокументацию Docgent",
+      "description": "",
+      "metadata": {
+        "module": "MOD-MODEL",
+        "owner": "Команда Docgent",
+        "priority": "Высокий",
+        "status": "Выполнено",
+        "type": "Documentation",
+        "updated": "2026-07-26",
+        "useCase": "UC-DOCS-02"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Выполнено",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 3,
+        "completed": 3,
+        "remaining": 0,
+        "percent": 100
+      },
+      "updatedAt": "2026-07-26T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    }
+  ],
+  "roadmap": [
+    {
+      "title": "Реализовано",
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Готово",
+        "recognized": true
+      },
+      "plannedDate": "",
+      "taskStats": {
+        "total": 8,
+        "completed": 8,
+        "remaining": 0,
+        "percent": 100
+      },
+      "items": [
+        {
+          "id": "UC-DOCS-01",
+          "text": "UC-DOCS-01 Пользователь создаёт автономный портал документации.",
+          "kind": "use-case",
+          "declaredCompleted": true,
+          "effectiveCompleted": true,
+          "completionSource": "use-case-status",
+          "targetDocument": "use-cases/build-portal.md",
+          "targetStatus": {
+            "kind": "done",
+            "symbol": "✓",
+            "label": "Готово",
+            "recognized": true
+          },
+          "document": "roadmap.md",
+          "line": 11
+        },
+        {
+          "id": "UC-DOCS-02",
+          "text": "UC-DOCS-02 Пользователь проверяет структуру и связи документации.",
+          "kind": "use-case",
+          "declaredCompleted": true,
+          "effectiveCompleted": true,
+          "completionSource": "use-case-status",
+          "targetDocument": "use-cases/check-documentation.md",
+          "targetStatus": {
+            "kind": "done",
+            "symbol": "✓",
+            "label": "Готово",
+            "recognized": true
+          },
+          "document": "roadmap.md",
+          "line": 12
+        },
+        {
+          "id": "UC-DOCS-03",
+          "text": "UC-DOCS-03 Пользователь просматривает документацию на локальном сервере.",
+          "kind": "use-case",
+          "declaredCompleted": true,
+          "effectiveCompleted": true,
+          "completionSource": "use-case-status",
+          "targetDocument": "use-cases/serve-portal.md",
+          "targetStatus": {
+            "kind": "done",
+            "symbol": "✓",
+            "label": "Готово",
+            "recognized": true
+          },
+          "document": "roadmap.md",
+          "line": 13
+        },
+        {
+          "id": "UC-DOCS-04",
+          "text": "UC-DOCS-04 Пользователь исследует карту экранов и переходы.",
+          "kind": "use-case",
+          "declaredCompleted": true,
+          "effectiveCompleted": true,
+          "completionSource": "use-case-status",
+          "targetDocument": "use-cases/screen-map.md",
+          "targetStatus": {
+            "kind": "done",
+            "symbol": "✓",
+            "label": "Готово",
+            "recognized": true
+          },
+          "document": "roadmap.md",
+          "line": 14
+        },
+        {
+          "id": "UC-TASK-01",
+          "text": "UC-TASK-01 Исполнитель получает контекст выбранной задачи.",
+          "kind": "use-case",
+          "declaredCompleted": true,
+          "effectiveCompleted": true,
+          "completionSource": "use-case-status",
+          "targetDocument": "use-cases/task-workflow.md",
+          "targetStatus": {
+            "kind": "done",
+            "symbol": "✓",
+            "label": "Готово",
+            "recognized": true
+          },
+          "document": "roadmap.md",
+          "line": 15
+        },
+        {
+          "id": "UC-TASK-02",
+          "text": "UC-TASK-02 Исполнитель запускает проверки выбранной задачи.",
+          "kind": "use-case",
+          "declaredCompleted": true,
+          "effectiveCompleted": true,
+          "completionSource": "use-case-status",
+          "targetDocument": "use-cases/task-check.md",
+          "targetStatus": {
+            "kind": "done",
+            "symbol": "✓",
+            "label": "Готово",
+            "recognized": true
+          },
+          "document": "roadmap.md",
+          "line": 16
+        },
+        {
+          "id": "CON-CLI-V1",
+          "text": "CON-CLI-V1 Зафиксирован публичный CLI-контракт ProjectReport schema v1.",
+          "kind": "contract",
+          "declaredCompleted": true,
+          "effectiveCompleted": true,
+          "completionSource": "roadmap-checkbox",
+          "targetDocument": "contracts/cli.md",
+          "targetStatus": {
+            "kind": "done",
+            "symbol": "✓",
+            "label": "Готово",
+            "recognized": true
+          },
+          "document": "roadmap.md",
+          "line": 17
+        },
+        {
+          "id": "DLV-SELF-DOCS-01",
+          "text": "DLV-SELF-DOCS-01 Репозиторий содержит собственную проверяемую документацию.",
+          "kind": "deliverable",
+          "declaredCompleted": true,
+          "effectiveCompleted": true,
+          "completionSource": "roadmap-checkbox",
+          "document": "roadmap.md",
+          "line": 18
+        }
+      ],
+      "document": "roadmap.md",
+      "anchor": "реализовано"
+    },
+    {
+      "title": "Следующий релиз",
+      "status": {
+        "kind": "planned",
+        "symbol": "◷",
+        "label": "Запланировано",
+        "recognized": true
+      },
+      "plannedDate": "",
+      "taskStats": {
+        "total": 1,
+        "completed": 0,
+        "remaining": 1,
+        "percent": 0
+      },
+      "items": [
+        {
+          "id": "DLV-RELEASE-02",
+          "text": "DLV-RELEASE-02 Подготовлен и опубликован следующий стабильный релиз.",
+          "kind": "deliverable",
+          "declaredCompleted": false,
+          "effectiveCompleted": false,
+          "completionSource": "roadmap-checkbox",
+          "document": "roadmap.md",
+          "line": 25
+        }
+      ],
+      "document": "roadmap.md",
+      "anchor": "следующий-релиз"
+    }
+  ],
+  "risks": [
+    {
+      "id": "RISK-01",
+      "title": "Расхождение с полным Markdown",
+      "status": {
+        "kind": "open",
+        "symbol": "◇",
+        "label": "Открыт",
+        "recognized": true
+      },
+      "probability": "Средняя",
+      "impact": "Среднее",
+      "owner": "Команда Docgent",
+      "taskStats": {
+        "total": 3,
+        "completed": 2,
+        "remaining": 1,
+        "percent": 67
+      },
+      "document": "risks.md",
+      "anchor": "risk-01-расхождение-с-полным-markdown"
+    },
+    {
+      "id": "RISK-02",
+      "title": "Выполнение доверенных команд задачи",
+      "status": {
+        "kind": "risk-accepted",
+        "symbol": "≈",
+        "label": "Риск принят",
+        "recognized": true
+      },
+      "probability": "Низкая",
+      "impact": "Высокое",
+      "owner": "Пользователь репозитория",
+      "taskStats": {
+        "total": 3,
+        "completed": 3,
+        "remaining": 0,
+        "percent": 100
+      },
+      "document": "risks.md",
+      "anchor": "risk-02-выполнение-доверенных-команд-задачи"
+    },
+    {
+      "id": "RISK-03",
+      "title": "Ошибка при очистке output",
+      "status": {
+        "kind": "in-progress",
+        "symbol": "◐",
+        "label": "Снижается",
+        "recognized": true
+      },
+      "probability": "Низкая",
+      "impact": "Высокое",
+      "owner": "Команда Docgent",
+      "taskStats": {
+        "total": 3,
+        "completed": 3,
+        "remaining": 0,
+        "percent": 100
+      },
+      "document": "risks.md",
+      "anchor": "risk-03-ошибка-при-очистке-output"
+    }
+  ],
+  "knowledge": {
+    "modules": [
+      {
+        "id": "MOD-CLI",
+        "title": "CLI и workflow задач",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Готово",
+          "recognized": true
+        },
+        "document": "modules/cli.md",
+        "repositoryPaths": [],
+        "useCaseIds": [
+          "UC-TASK-01",
+          "UC-TASK-02"
+        ],
+        "screenIds": [],
+        "businessRuleIds": [
+          "BR-CLI-001",
+          "BR-CLI-002",
+          "BR-CLI-003"
+        ]
+      },
+      {
+        "id": "MOD-MARKDOWN",
+        "title": "Безопасный Markdown",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Готово",
+          "recognized": true
+        },
+        "document": "modules/markdown.md",
+        "repositoryPaths": [],
+        "useCaseIds": [],
+        "screenIds": [],
+        "businessRuleIds": [
+          "BR-MD-001",
+          "BR-MD-002",
+          "BR-MD-003"
+        ]
+      },
+      {
+        "id": "MOD-MODEL",
+        "title": "Проектная модель и валидация",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Готово",
+          "recognized": true
+        },
+        "document": "modules/model.md",
+        "repositoryPaths": [],
+        "useCaseIds": [
+          "UC-DOCS-02"
+        ],
+        "screenIds": [],
+        "businessRuleIds": [
+          "BR-MODEL-001",
+          "BR-MODEL-002",
+          "BR-MODEL-003",
+          "BR-MODEL-004"
+        ]
+      },
+      {
+        "id": "MOD-SITE",
+        "title": "Статический портал",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Готово",
+          "recognized": true
+        },
+        "document": "modules/site.md",
+        "repositoryPaths": [],
+        "useCaseIds": [
+          "UC-DOCS-01",
+          "UC-DOCS-03",
+          "UC-DOCS-04"
+        ],
+        "screenIds": [],
+        "businessRuleIds": [
+          "BR-SITE-001",
+          "BR-SITE-002",
+          "BR-SITE-003",
+          "BR-SITE-004",
+          "BR-SITE-005"
+        ]
+      }
+    ],
+    "useCases": [
+      {
+        "id": "UC-DOCS-01",
+        "title": "UC-DOCS-01: Создать автономный портал",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Готово",
+          "recognized": true
+        },
+        "moduleId": "MOD-SITE",
+        "document": "use-cases/build-portal.md",
+        "repositoryPaths": [],
+        "businessRuleIds": [
+          "BR-MD-001",
+          "BR-MD-002",
+          "BR-MD-003",
+          "BR-SITE-001",
+          "BR-SITE-002",
+          "BR-SITE-004"
+        ],
+        "screenIds": [],
+        "terminalScreens": [],
+        "allowCycle": false
+      },
+      {
+        "id": "UC-DOCS-02",
+        "title": "UC-DOCS-02: Проверить документацию",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Готово",
+          "recognized": true
+        },
+        "moduleId": "MOD-MODEL",
+        "document": "use-cases/check-documentation.md",
+        "repositoryPaths": [],
+        "businessRuleIds": [
+          "BR-CLI-002",
+          "BR-MODEL-001",
+          "BR-MODEL-002",
+          "BR-MODEL-003"
+        ],
+        "screenIds": [],
+        "terminalScreens": [],
+        "allowCycle": false
+      },
+      {
+        "id": "UC-DOCS-04",
+        "title": "UC-DOCS-04: Исследовать карту экранов",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Готово",
+          "recognized": true
+        },
+        "moduleId": "MOD-SITE",
+        "document": "use-cases/screen-map.md",
+        "repositoryPaths": [],
+        "businessRuleIds": [
+          "BR-MODEL-004",
+          "BR-SITE-005"
+        ],
+        "screenIds": [],
+        "terminalScreens": [],
+        "allowCycle": false
+      },
+      {
+        "id": "UC-DOCS-03",
+        "title": "UC-DOCS-03: Просматривать документацию на локальном сервере",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Готово",
+          "recognized": true
+        },
+        "moduleId": "MOD-SITE",
+        "document": "use-cases/serve-portal.md",
+        "repositoryPaths": [],
+        "businessRuleIds": [
+          "BR-SITE-003"
+        ],
+        "screenIds": [],
+        "terminalScreens": [],
+        "allowCycle": false
+      },
+      {
+        "id": "UC-TASK-02",
+        "title": "UC-TASK-02: Выполнить проверки рабочей задачи",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Готово",
+          "recognized": true
+        },
+        "moduleId": "MOD-CLI",
+        "document": "use-cases/task-check.md",
+        "repositoryPaths": [],
+        "businessRuleIds": [
+          "BR-CLI-002",
+          "BR-CLI-003",
+          "BR-MODEL-003"
+        ],
+        "screenIds": [],
+        "terminalScreens": [],
+        "allowCycle": false
+      },
+      {
+        "id": "UC-TASK-01",
+        "title": "UC-TASK-01: Получить контекст рабочей задачи",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Готово",
+          "recognized": true
+        },
+        "moduleId": "MOD-CLI",
+        "document": "use-cases/task-workflow.md",
+        "repositoryPaths": [],
+        "businessRuleIds": [
+          "BR-CLI-001"
+        ],
+        "screenIds": [],
+        "terminalScreens": [],
+        "allowCycle": false
+      }
+    ],
+    "businessRules": [
+      {
+        "id": "BR-CLI-001",
+        "title": "Контекст задачи не исполняет команды",
+        "moduleId": "MOD-CLI",
+        "document": "modules/cli.md",
+        "anchor": "br-cli-001-контекст-задачи-не-исполняет-команды",
+        "line": 33
+      },
+      {
+        "id": "BR-CLI-002",
+        "title": "Проверки запускаются только явно",
+        "moduleId": "MOD-CLI",
+        "document": "modules/cli.md",
+        "anchor": "br-cli-002-проверки-запускаются-только-явно",
+        "line": 38
+      },
+      {
+        "id": "BR-CLI-003",
+        "title": "Timeout завершает дерево процессов",
+        "moduleId": "MOD-CLI",
+        "document": "modules/cli.md",
+        "anchor": "br-cli-003-timeout-завершает-дерево-процессов",
+        "line": 43
+      },
+      {
+        "id": "BR-MD-001",
+        "title": "Пользовательский HTML всегда экранируется",
+        "moduleId": "MOD-MARKDOWN",
+        "document": "modules/markdown.md",
+        "anchor": "br-md-001-пользовательский-html-всегда-экранируется",
+        "line": 30
+      },
+      {
+        "id": "BR-MD-002",
+        "title": "Опасные протоколы и активные assets блокируются",
+        "moduleId": "MOD-MARKDOWN",
+        "document": "modules/markdown.md",
+        "anchor": "br-md-002-опасные-протоколы-и-активные-assets-блокируются",
+        "line": 35
+      },
+      {
+        "id": "BR-MD-003",
+        "title": "Mermaid остаётся визуализацией",
+        "moduleId": "MOD-MARKDOWN",
+        "document": "modules/markdown.md",
+        "anchor": "br-md-003-mermaid-остаётся-визуализацией",
+        "line": 40
+      },
+      {
+        "id": "BR-MODEL-001",
+        "title": "Roadmap является единственным источником глобального охвата",
+        "moduleId": "MOD-MODEL",
+        "document": "modules/model.md",
+        "anchor": "br-model-001-roadmap-является-единственным-источником-глобального-охвата",
+        "line": 30
+      },
+      {
+        "id": "BR-MODEL-002",
+        "title": "Ссылки не выходят за repository root",
+        "moduleId": "MOD-MODEL",
+        "document": "modules/model.md",
+        "anchor": "br-model-002-ссылки-не-выходят-за-repository-root",
+        "line": 36
+      },
+      {
+        "id": "BR-MODEL-003",
+        "title": "Готовая к работе задача имеет полный проверяемый контракт",
+        "moduleId": "MOD-MODEL",
+        "document": "modules/model.md",
+        "anchor": "br-model-003-готовая-к-работе-задача-имеет-полный-проверяемый-контракт",
+        "line": 42
+      },
+      {
+        "id": "BR-MODEL-004",
+        "title": "Документы экранов являются источником графа",
+        "moduleId": "MOD-MODEL",
+        "document": "modules/model.md",
+        "anchor": "br-model-004-документы-экранов-являются-источником-графа",
+        "line": 47
+      },
+      {
+        "id": "BR-SITE-001",
+        "title": "Очистка output не затрагивает защищённые каталоги",
+        "moduleId": "MOD-SITE",
+        "document": "modules/site.md",
+        "anchor": "br-site-001-очистка-output-не-затрагивает-защищённые-каталоги",
+        "line": 29
+      },
+      {
+        "id": "BR-SITE-002",
+        "title": "Портал работает через file protocol",
+        "moduleId": "MOD-SITE",
+        "document": "modules/site.md",
+        "anchor": "br-site-002-портал-работает-через-file-protocol",
+        "line": 34
+      },
+      {
+        "id": "BR-SITE-003",
+        "title": "Dev-сервер не раскрывает исходный репозиторий",
+        "moduleId": "MOD-SITE",
+        "document": "modules/site.md",
+        "anchor": "br-site-003-dev-сервер-не-раскрывает-исходный-репозиторий",
+        "line": 39
+      },
+      {
+        "id": "BR-SITE-004",
+        "title": "Mermaid работает автономно и в строгом режиме",
+        "moduleId": "MOD-SITE",
+        "document": "modules/site.md",
+        "anchor": "br-site-004-mermaid-работает-автономно-и-в-строгом-режиме",
+        "line": 45
+      },
+      {
+        "id": "BR-SITE-005",
+        "title": "Карта экранов работает автономно",
+        "moduleId": "MOD-SITE",
+        "document": "modules/site.md",
+        "anchor": "br-site-005-карта-экранов-работает-автономно",
+        "line": 52
+      }
+    ],
+    "workItems": [
+      {
+        "id": "TASK-DOCS-001",
+        "title": "Добавить самодокументацию Docgent",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Выполнено",
+          "recognized": true
+        },
+        "type": "Documentation",
+        "priority": "Высокий",
+        "owner": "Команда Docgent",
+        "moduleId": "MOD-MODEL",
+        "useCaseId": "UC-DOCS-02",
+        "screenIds": [],
+        "transitionIds": [],
+        "dependsOn": [],
+        "document": "work/TASK-DOCS-001-self-documentation.md",
+        "anchor": "task-docs-001-добавить-самодокументацию-docgent",
+        "criteria": [
+          {
+            "line": 29,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-01 Самодокументация проходит docgent check --strict без замечаний."
+          },
+          {
+            "line": 30,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-02 Модули, сценарии, правила, roadmap и CLI-контракт связаны стабильными ID."
+          },
+          {
+            "line": 31,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-03 README содержит прямую ссылку на исходную документацию проекта."
+          }
+        ],
+        "verificationMatrix": [
+          {
+            "criterionId": "AC-01",
+            "criterion": "Самодокументация проходит docgent check --strict без замечаний.",
+            "completed": true,
+            "commands": [
+              "go run ./cmd/docgent check ./d[o]cs --strict --stale-days 0"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-02",
+            "criterion": "Модули, сценарии, правила, roadmap и CLI-контракт связаны стабильными ID.",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestKnowledgeModel|TestMinimalDocumentationCheckAndBuild'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-03",
+            "criterion": "README содержит прямую ссылку на исходную документацию проекта.",
+            "completed": true,
+            "commands": [
+              "grep -q 'Проектная документация Docgent' README.md"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          }
+        ],
+        "checks": [
+          {
+            "target": "AC-01",
+            "commands": [
+              "go run ./cmd/docgent check ./d[o]cs --strict --stale-days 0"
+            ],
+            "line": 42
+          },
+          {
+            "target": "AC-02",
+            "commands": [
+              "go test ./... -run 'TestKnowledgeModel|TestMinimalDocumentationCheckAndBuild'"
+            ],
+            "line": 43
+          },
+          {
+            "target": "AC-03",
+            "commands": [
+              "grep -q 'Проектная документация Docgent' README.md"
+            ],
+            "line": 44
+          },
+          {
+            "target": "ALL",
+            "commands": [
+              "go test ./..."
+            ],
+            "line": 45
+          },
+          {
+            "target": "DOCS",
+            "commands": [
+              "go run ./cmd/docgent check ./docs --strict --stale-days 0"
+            ],
+            "line": 46
+          }
+        ],
+        "repositoryPaths": [
+          "docs/",
+          "README.md"
+        ],
+        "result": "Репозиторий содержит собственную согласованную документацию, которая описывает текущую реализацию и проходит строгую проверку самим Docgent."
+      }
+    ]
+  },
+  "screens": [],
+  "transitions": [],
+  "playableFlows": [],
+  "hotspots": [],
+  "errorDefinitions": [],
+  "traceability": [],
+  "issues": []
+}

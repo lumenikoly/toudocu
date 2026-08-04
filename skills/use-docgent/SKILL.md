@@ -1,6 +1,6 @@
 ---
 name: use-docgent
-description: Create, update, validate, and build adaptable project documentation managed by the Docgent CLI. Use when Codex needs to initialize or revise Docgent Markdown; work with modules, use cases, FLOW-* Mermaid processes, screens/map.md product maps, SC-* screen documents, roadmap items, risks, ADRs, contracts, guides, references, or TASK-* work items; fix integrity diagnostics; obtain task context; run explicitly requested trusted task verification; or generate the static portal.
+description: Create, update, validate, and build adaptable project documentation managed by the Docgent CLI. Use when Codex needs to initialize or revise Docgent Markdown; work with modules, use cases, FLOW-* Mermaid processes, SC-* screen documents and TR-* transitions, roadmap items, risks, ADRs, contracts, guides, references, or TASK-* work items; fix integrity diagnostics; obtain task context; run explicitly requested trusted task verification; or generate the static portal.
 ---
 
 # Use Docgent

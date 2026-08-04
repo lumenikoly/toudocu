@@ -80,21 +80,19 @@ typed documents only for semantics the project will use:
 - add a use case when observable behavior should link to a module;
 - add a flow when a reusable Mermaid visualization should link to a use case or
   architecture document;
-- add `screens/map.md` when product navigation needs stable `SC-*`, a searchable
-  catalog, or graph validation;
-- add `screens/SC-*.md` only when a significant screen needs its own purpose,
-  actions, states, errors, route, component, or acceptance context;
+- add `screens/SC-*.md` when product navigation needs stable `SC-*`, a
+  searchable catalog, graph validation, actions, states or acceptance context;
 - add a roadmap when the project wants global progress aggregation;
 - add a work item when an agent or CI needs a checkable task contract.
 
 When adding related types, create targets before references: module and rules,
-then use case, then optional screen map or flow, then roadmap or work item.
+then use case, then screen documents or flow, then roadmap or work item.
 Replace every template placeholder before validation. A map or flow never
 replaces prose requirements or acceptance criteria.
 
 Do not let the template select the entities or topology. Whole-section
-placeholders such as `FLOW_DIAGRAM`, `SCREEN_ROWS`, and `TRANSITION_ROWS` must
-be replaced with content derived from product or repository evidence.
+placeholders such as `FLOW_DIAGRAM` and `TRANSITION_ROWS` must be replaced with
+content derived from product or repository evidence.
 
 ## Task workflow
 
@@ -111,8 +109,8 @@ report. Inspect source artifacts when the compact context is insufficient.
 `task context` never executes checks.
 
 A task with `Flow` includes its `FLOW-*` document. A task with `Screens`
-includes selected screen records, incident transitions, `screens/map.md`, and
-matching `SC-*` documents.
+includes selected screen records, incident transitions, and matching `SC-*`
+documents.
 
 Run:
 
@@ -140,6 +138,11 @@ Build only when requested or required for verification. Reuse the project's
 generated-output convention; otherwise select a dedicated disposable
 directory. Add `--clean` only after verifying the resolved output is neither
 input, its ancestor, a system root, nor an unsafe symlink target.
+
+When `screens/SC-*.md` exists, the build includes a catalog, Screen Map,
+playable flows and traceability by default. Use `--no-screen-map` only to omit
+the interactive map page; it does not remove screen documents, flows or JSON
+collections.
 
 Use `serve` on `127.0.0.1` by default. It has no TLS or authentication. Use
 `--host 0.0.0.0` only for an explicitly requested trusted local-network

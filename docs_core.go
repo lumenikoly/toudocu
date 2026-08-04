@@ -17,7 +17,7 @@ var typeLabels = map[string]string{
 	"risks": "Риски", "changelog": "История изменений", "use-case": "Пользовательский сценарий",
 	"module": "Модуль", "architecture": "Архитектура", "contract": "Контрактный каталог",
 	"decision": "Архитектурное решение", "flow": "Процесс", "guide": "Руководство", "work": "Рабочие задачи",
-	"reference": "Справочник", "screen-map": "Карта экранов", "screen": "Экран",
+	"reference": "Справочник", "screen-map": "Устаревшая карта экранов", "screen-index": "Раздел экранов", "screen": "Экран",
 	"notes": "Заметки", "ideas": "Идеи развития", "document": "Документ",
 }
 
@@ -97,6 +97,9 @@ func ClassifyDocument(relativePath string) string {
 	case "screens":
 		if base == "map.md" {
 			return "screen-map"
+		}
+		if base == "index.md" {
+			return "screen-index"
 		}
 		return "screen"
 	}
@@ -470,7 +473,7 @@ func BuildDocumentationModel(options Options) (*Model, error) {
 		RepositoryRef: options.RepositoryRef, GeneratedAt: now.UTC(), StaleDays: staleDays,
 		DocByPath: map[string]*Document{}, Directories: map[string]struct{}{}, Assets: map[string]string{},
 		Collections: map[string][]*Document{}, Knowledge: KnowledgeModel{},
-		HealthOutputPath: "health.html", ReportOutputPath: "report.json",
+		HealthOutputPath: "health.html", ReportOutputPath: "report.json", ScreenMapEnabled: true,
 	}
 	if model.RepositoryRef == "" {
 		model.RepositoryRef = "main"
@@ -531,7 +534,10 @@ func directoryLabel(directory string) string {
 }
 
 func directoryHasSourceIndex(model *Model, directory string) bool {
-	if directory == "screens" && model.DocByPath["screens/map.md"] != nil {
+	if directory == "screens" && len(model.Knowledge.Screens) > 0 {
+		return true
+	}
+	if directory == "flows" && len(model.Knowledge.PlayableFlows) > 0 {
 		return true
 	}
 	return model.DocByPath[path.Join(directory, "index.md")] != nil
