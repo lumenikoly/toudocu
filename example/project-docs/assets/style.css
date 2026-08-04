@@ -145,7 +145,34 @@ button, a { -webkit-tap-highlight-color: transparent; }
   cursor: pointer;
 }
 .icon-button:hover { border-color: var(--border-strong); background: var(--surface-soft); }
+.icon-button:disabled { cursor: wait; opacity: 0.68; }
 .sidebar-toggle { display: none; }
+.server-rebuild-icon {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+.server-rebuild.is-rebuilding .server-rebuild-icon { animation: server-rebuild-spin 800ms linear infinite; }
+.server-rebuild.has-error { border-color: var(--danger); color: var(--danger); }
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+@keyframes server-rebuild-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .server-rebuild.is-rebuilding .server-rebuild-icon { animation: none; }
+}
 
 .global-search { position: relative; width: min(680px, 100%); justify-self: center; }
 .search-input-wrap { position: relative; }
@@ -580,10 +607,14 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 .page-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
+  gap: 8px;
   margin-top: 14px;
 }
-.collapse-all-button {
+.dashboard-page-actions { margin-bottom: 14px; }
+.collapse-all-button,
+.document-context-button {
   display: inline-flex;
   align-items: center;
   min-height: 40px;
@@ -599,17 +630,40 @@ button, a { -webkit-tap-highlight-color: transparent; }
   font-weight: 700;
   transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease, transform 100ms ease;
 }
-.collapse-all-button:hover {
+.collapse-all-button:hover,
+.document-context-button:hover {
   background: var(--surface-soft);
   color: var(--text);
   box-shadow: inset 0 0 0 1px var(--border-strong), 0 3px 9px rgba(28, 39, 49, 0.07);
 }
-.collapse-all-button:focus-visible {
+.collapse-all-button:focus-visible,
+.document-context-button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
-.collapse-all-button:active {
+.collapse-all-button:active,
+.document-context-button:active {
   transform: scale(0.96);
+}
+.document-context-icon {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  flex: 0 0 27px;
+  place-items: center;
+  border-radius: 7px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 16px;
+  line-height: 1;
+}
+.document-context-button[data-copy-state="success"] {
+  color: var(--success);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--success) 42%, var(--border));
+}
+.document-context-button[data-copy-state="error"] {
+  color: var(--danger);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger) 42%, var(--border));
 }
 .collapse-all-icon {
   position: relative;
@@ -1442,7 +1496,7 @@ html[data-color-scheme="dark"] .scheme-toggle-indicator { background: var(--text
 
 @media print {
   :root { --bg: #fff; --surface: #fff; --text: #111; --muted: #555; --border: #ccc; }
-  .site-header, .sidebar, .page-toc, .document-toolbar, .site-footer, .copy-code, .section-toggle, .diagram-tools, .screen-map-tools { display: none !important; }
+  .site-header, .sidebar, .page-toc, .document-toolbar, .site-footer, .copy-code, .document-context-button, .section-toggle, .diagram-tools, .screen-map-tools { display: none !important; }
   .site-layout, .page-grid { display: block; }
   .page-grid { padding: 0; }
   .doc-content, .card, .metric-card { box-shadow: none; break-inside: avoid; }

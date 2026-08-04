@@ -145,7 +145,34 @@ button, a { -webkit-tap-highlight-color: transparent; }
   cursor: pointer;
 }
 .icon-button:hover { border-color: var(--border-strong); background: var(--surface-soft); }
+.icon-button:disabled { cursor: wait; opacity: 0.68; }
 .sidebar-toggle { display: none; }
+.server-rebuild-icon {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+.server-rebuild.is-rebuilding .server-rebuild-icon { animation: server-rebuild-spin 800ms linear infinite; }
+.server-rebuild.has-error { border-color: var(--danger); color: var(--danger); }
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+@keyframes server-rebuild-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .server-rebuild.is-rebuilding .server-rebuild-icon { animation: none; }
+}
 
 .global-search { position: relative; width: min(680px, 100%); justify-self: center; }
 .search-input-wrap { position: relative; }

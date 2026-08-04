@@ -308,6 +308,8 @@ var scaffoldSpecs = map[string]scaffoldSpec{
 	"flow":     {prefix: "FLOW-", directory: "flows"},
 	"screen":   {prefix: "SC-", directory: "screens"},
 	"decision": {prefix: "ADR-", directory: "decisions"},
+	"standard": {prefix: "STD-", directory: "quality"},
+	"runbook":  {prefix: "RB-", directory: "runbooks"},
 }
 
 func validScaffoldID(kind, id string) bool {
@@ -329,6 +331,10 @@ func renderEntityScaffold(kind, id, title, language, date string) string {
 			return fmt.Sprintf("# %s: %s\n\n- Идентификатор: %s\n- Статус: Черновик\n- Последнее обновление: %s\n\n## Процесс\n", id, title, id, date)
 		case "screen":
 			return fmt.Sprintf("# %s: %s\n\n- Идентификатор: %s\n- Статус: Черновик\n- Последнее обновление: %s\n\n## Назначение\n\n## Состояния\n\n## Переходы\n", id, title, id, date)
+		case "standard":
+			return fmt.Sprintf("# %s: %s\n\n- Идентификатор: %s\n- Статус: Черновик\n- Последнее обновление: %s\n- Область: \n\n## Правила\n\n## Автоматические проверки\n", id, title, id, date)
+		case "runbook":
+			return fmt.Sprintf("# %s: %s\n\n- Идентификатор: %s\n- Статус: Черновик\n- Среда: \n- Риск: \n\n## Предварительные условия\n\n## Процедура\n\n## Проверка\n\n## Откат\n", id, title, id)
 		default:
 			return fmt.Sprintf("# %s: %s\n\n- Идентификатор: %s\n- Статус: Предложено\n- Дата: %s\n\n## Контекст\n\n## Решение\n\n## Последствия\n", id, title, id, date)
 		}
@@ -342,6 +348,10 @@ func renderEntityScaffold(kind, id, title, language, date string) string {
 		return fmt.Sprintf("# %s: %s\n\n- Identifier: %s\n- Status: Draft\n- Last updated: %s\n\n## Process\n", id, title, id, date)
 	case "screen":
 		return fmt.Sprintf("# %s: %s\n\n- Identifier: %s\n- Status: Draft\n- Last updated: %s\n\n## Purpose\n\n## States\n\n## Transitions\n", id, title, id, date)
+	case "standard":
+		return fmt.Sprintf("# %s: %s\n\n- Identifier: %s\n- Status: Draft\n- Last updated: %s\n- Scope: \n\n## Rules\n\n## Automated checks\n", id, title, id, date)
+	case "runbook":
+		return fmt.Sprintf("# %s: %s\n\n- Identifier: %s\n- Status: Draft\n- Environment: \n- Risk: \n\n## Prerequisites\n\n## Procedure\n\n## Verification\n\n## Rollback\n", id, title, id)
 	default:
 		return fmt.Sprintf("# %s: %s\n\n- Identifier: %s\n- Status: Proposed\n- Date: %s\n\n## Context\n\n## Decision\n\n## Consequences\n", id, title, id, date)
 	}

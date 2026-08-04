@@ -50,6 +50,14 @@ func taskContextDocument(document *Document) TaskContextDocument {
 			for _, name := range []string{"states", "состояния", "transitions", "переходы"} {
 				selected[canonicalText(name)] = true
 			}
+		case "standard":
+			for _, name := range []string{"rules", "правила", "automated checks", "automatic checks", "автоматические проверки"} {
+				selected[canonicalText(name)] = true
+			}
+		case "runbook":
+			for _, name := range []string{"prerequisites", "предварительные условия", "предпосылки", "procedure", "процедура", "verification", "проверка", "rollback", "откат", "stop conditions", "условия остановки"} {
+				selected[canonicalText(name)] = true
+			}
 		}
 		for _, section := range document.Sections {
 			if selected[canonicalText(section.Title)] {
@@ -101,6 +109,8 @@ func BuildTaskContext(model *Model, taskID string) (TaskContextReport, error) {
 		Screens:           []KnowledgeScreen{},
 		ScreenTransitions: []ScreenTransition{},
 		BusinessRules:     []BusinessRule{},
+		Standards:         []KnowledgeStandard{},
+		Runbooks:          []KnowledgeRunbook{},
 		Dependencies:      []WorkItem{},
 		Dependents:        []WorkItem{},
 		Documents:         []TaskContextDocument{},
@@ -195,6 +205,18 @@ func BuildTaskContext(model *Model, taskID string) (TaskContextReport, error) {
 	}
 	for _, rule := range report.BusinessRules {
 		documentPaths[rule.Document] = true
+	}
+	for _, standard := range model.Knowledge.Standards {
+		if containsString(item.StandardIDs, standard.ID) {
+			report.Standards = append(report.Standards, standard)
+			documentPaths[standard.Document] = true
+		}
+	}
+	for _, runbook := range model.Knowledge.Runbooks {
+		if containsString(item.RunbookIDs, runbook.ID) {
+			report.Runbooks = append(report.Runbooks, runbook)
+			documentPaths[runbook.Document] = true
+		}
 	}
 	for _, path := range item.DocumentationPaths {
 		documentPaths[path] = true

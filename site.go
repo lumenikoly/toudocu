@@ -12,9 +12,9 @@ import (
 
 const Version = "1.1.0-go"
 
-var fieldOrder = []string{"status", "type", "stage", "version", "owner", "author", "actor", "priority", "criticality", "module", "useCase", "flow", "screens", "transitions", "startScreen", "terminalScreens", "allowCycle", "route", "preview", "parentScreen", "component", "errors", "dependsOn", "source", "date", "plannedDate", "updated", "probability", "impact", "id", "tags"}
+var fieldOrder = []string{"status", "type", "stage", "version", "owner", "author", "actor", "priority", "criticality", "module", "useCase", "flow", "screens", "transitions", "standards", "runbooks", "startScreen", "terminalScreens", "allowCycle", "route", "preview", "parentScreen", "component", "environment", "risk", "lastVerified", "supersededBy", "errors", "dependsOn", "source", "date", "plannedDate", "updated", "probability", "impact", "scope", "id", "tags"}
 
-var typeIcons = map[string]string{"overview": "⌂", "status": "◐", "roadmap": "→", "risks": "!", "ideas": "✦", "notes": "✎", "changelog": "↻", "use-case": "◎", "module": "▦", "architecture": "◇", "contract": "⇄", "decision": "◆", "flow": "⇢", "screen-map": "⌗", "screen-index": "⌗", "screen": "▣", "guide": "◫", "work": "☑", "reference": "≡", "document": "•"}
+var typeIcons = map[string]string{"overview": "⌂", "status": "◐", "roadmap": "→", "risks": "!", "ideas": "✦", "notes": "✎", "changelog": "↻", "use-case": "◎", "module": "▦", "architecture": "◇", "contract": "⇄", "decision": "◆", "flow": "⇢", "screen-map": "⌗", "screen-index": "⌗", "screen": "▣", "guide": "◫", "work": "☑", "reference": "≡", "standard": "✓", "quality-index": "✓", "runbook": "↻", "runbook-index": "↻", "document": "•"}
 
 func renderStatusChip(status StatusInfo) string {
 	return fmt.Sprintf(`<span class="status-chip status-%s" title="%s"><span aria-hidden="true">%s</span><span>%s</span></span>`, escapeAttr(status.Kind), escapeAttr(status.Label), escapeHTML(status.Symbol), escapeHTML(status.Label))
@@ -63,10 +63,20 @@ func outputForDirectory(model *Model, directory string) string {
 	if directory == "screens" && len(model.Knowledge.Screens) > 0 {
 		return "screens/catalog.html"
 	}
+	if directory == "quality" || directory == "runbooks" {
+		return path.Join(directory, "index.html")
+	}
 	if document := model.DocByPath[path.Join(directory, "index.md")]; document != nil {
 		return document.OutputPath
 	}
 	return path.Join(directory, "index.html")
+}
+
+func modelDirectoryLabel(model *Model, directory string) string {
+	if manifest := model.DocByPath[path.Join(directory, "index.md")]; manifest != nil && manifest.Title != "" {
+		return manifest.Title
+	}
+	return directoryLabel(directory)
 }
 
 func renderNavigation(model *Model, current string) string {
@@ -124,8 +134,10 @@ func renderNavigation(model *Model, current string) string {
 		"use-cases":    60,
 		"processes":    70,
 		"reference":    80,
-		"screens":      90,
-		"work":         100,
+		"quality":      85,
+		"runbooks":     90,
+		"screens":      100,
+		"work":         110,
 	}
 	sort.SliceStable(keys, func(i, j int) bool {
 		left, leftKnown := navigationOrder[keys[i]]
@@ -153,7 +165,7 @@ func renderNavigation(model *Model, current string) string {
 		if key == "screens" && strings.HasPrefix(current, "screens/") {
 			active = " is-active"
 		}
-		label := directoryLabel(key)
+		label := modelDirectoryLabel(model, key)
 		groupID := "nav-group-" + slugify(key)
 		docs := groups[key]
 		sort.SliceStable(docs, func(i, j int) bool { return documentLess(docs[i], docs[j]) })
@@ -270,7 +282,8 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 	schemeLabel := colorSchemeLabel(config.ColorScheme)
 	themeSelect := `<label class="header-select site-theme-select"><span class="header-select-visual" aria-hidden="true"><span class="site-theme-indicator" data-site-theme-indicator>` + escapeHTML(themeIndicator) + `</span><span data-site-theme-label>` + escapeHTML(themeLabel) + `</span></span><select data-site-theme-select aria-label="Тема оформления">` + selectOptions(config.Theme, []selectOption{{"classic", "Классика"}, {"paper", "Бумага"}, {"terminal", "Терминал"}}) + `</select></label>`
 	schemeSelect := `<label class="header-select scheme-select"><span class="header-select-visual" aria-hidden="true"><span class="scheme-toggle-indicator"></span><span data-theme-label>` + escapeHTML(schemeLabel) + `</span></span><select data-color-scheme-select aria-label="Цветовая схема">` + selectOptions(config.ColorScheme, []selectOption{{"system", "Система"}, {"light", "Светлая"}, {"dark", "Тёмная"}}) + `</select></label>`
-	return `<!doctype html><html lang="ru" data-theme="` + escapeAttr(initialTheme) + `"` + attributes + `><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="` + escapeAttr(description) + `"><title>` + escapeHTML(fullTitle) + `</title><link rel="icon" href="` + escapeAttr(relativeURL(current, favicon)) + `">` + earlyTheme + `<link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/style.css">` + extraStyles + `<script src="` + escapeAttr(prefix) + `assets/search-index.js" defer></script>` + mermaidScript + `<script src="` + escapeAttr(prefix) + `assets/app.js" defer></script>` + extraScripts + `</head><body data-root-prefix="` + escapeAttr(prefix) + `" data-task-filter="all"><a class="skip-link" href="#main-content">Перейти к содержимому</a><header class="site-header"><div class="brand-area"><button class="icon-button sidebar-toggle" type="button" data-sidebar-toggle aria-label="Открыть навигацию">☰</button><a class="brand" href="` + escapeAttr(relativeURL(current, "index.html")) + `">` + brandMark + `<span class="brand-text">` + escapeHTML(model.Project.Title) + `</span></a></div><div class="global-search" role="search"><div class="search-input-wrap"><input type="search" data-global-search placeholder="Поиск по документации" aria-label="Поиск по документации"><span class="search-shortcut">/</span></div><div class="search-results" id="global-search-results" data-search-results role="listbox" hidden></div></div><div class="header-actions"><button class="icon-button" type="button" data-print aria-label="Печать">⎙</button>` + themeSelect + schemeSelect + `</div></header><div class="site-layout"><aside class="sidebar">` + renderNavigation(model, current) + `</aside><div class="main-area"><main id="main-content" class="page-grid` + gridClass + `"><div class="page-content">` + content + `</div>` + tocHTML + `</main><footer class="site-footer">` + footer + `</footer></div></div></body></html>`
+	rebuildButton := `<button class="icon-button server-rebuild" type="button" data-server-rebuild aria-label="Пересобрать документацию" title="Пересобрать документацию" hidden><svg class="server-rebuild-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 5v6h-6"/></svg></button><span class="visually-hidden" data-server-rebuild-status aria-live="polite"></span>`
+	return `<!doctype html><html lang="ru" data-theme="` + escapeAttr(initialTheme) + `"` + attributes + `><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="` + escapeAttr(description) + `"><title>` + escapeHTML(fullTitle) + `</title><link rel="icon" href="` + escapeAttr(relativeURL(current, favicon)) + `">` + earlyTheme + `<link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/style.css">` + extraStyles + `<script src="` + escapeAttr(prefix) + `assets/search-index.js" defer></script>` + mermaidScript + `<script src="` + escapeAttr(prefix) + `assets/app.js" defer></script>` + extraScripts + `</head><body data-root-prefix="` + escapeAttr(prefix) + `" data-task-filter="all"><a class="skip-link" href="#main-content">Перейти к содержимому</a><header class="site-header"><div class="brand-area"><button class="icon-button sidebar-toggle" type="button" data-sidebar-toggle aria-label="Открыть навигацию">☰</button><a class="brand" href="` + escapeAttr(relativeURL(current, "index.html")) + `">` + brandMark + `<span class="brand-text">` + escapeHTML(model.Project.Title) + `</span></a></div><div class="global-search" role="search"><div class="search-input-wrap"><input type="search" data-global-search placeholder="Поиск по документации" aria-label="Поиск по документации"><span class="search-shortcut">/</span></div><div class="search-results" id="global-search-results" data-search-results role="listbox" hidden></div></div><div class="header-actions"><button class="icon-button" type="button" data-print aria-label="Печать">⎙</button>` + rebuildButton + themeSelect + schemeSelect + `</div></header><div class="site-layout"><aside class="sidebar">` + renderNavigation(model, current) + `</aside><div class="main-area"><main id="main-content" class="page-grid` + gridClass + `"><div class="page-content">` + content + `</div>` + tocHTML + `</main><footer class="site-footer">` + footer + `</footer></div></div></body></html>`
 }
 
 type selectOption struct {
@@ -705,6 +718,49 @@ func renderDirectoryPage(model *Model, directory string) string {
 	return pageShell(model, current, directoryLabel(directory), directoryLabel(directory), content, "")
 }
 
+func renderKnowledgeCatalogPage(model *Model, kind string) string {
+	current := path.Join(kind, "index.html")
+	title := modelDirectoryLabel(model, kind)
+	var cards strings.Builder
+	if kind == "quality" {
+		for _, standard := range model.Knowledge.Standards {
+			document := model.DocByPath[standard.Document]
+			if document != nil {
+				cards.WriteString(docCard(current, document))
+			}
+		}
+		content := breadcrumbs(model, current, title) +
+			`<header class="page-header"><h1>` + escapeHTML(title) + `</h1><p class="page-lead">Версионируемые стандарты проекта и их автоматические проверки.</p></header>` +
+			`<section data-filter-scope>` + filterControls(true, false) + `<div class="collection-summary">Показано: <strong data-filter-count></strong></div><div class="card-grid">` +
+			cards.String() + `</div><div class="empty-state" data-filter-empty hidden>Стандарты не найдены.</div></section>`
+		return pageShell(model, current, title, title, content, "")
+	}
+	for _, runbook := range model.Knowledge.Runbooks {
+		document := model.DocByPath[runbook.Document]
+		if document == nil {
+			continue
+		}
+		searchText := strings.Join([]string{runbook.ID, runbook.Title, runbook.Owner, runbook.Environment, runbook.Risk}, " ")
+		cards.WriteString(`<article class="document-card" data-filter-item data-search="` + escapeAttr(searchText) +
+			`" data-status="` + escapeAttr(document.Status.Kind) + `" data-freshness="` + escapeAttr(runbook.Freshness) +
+			`"><div class="card-kicker">` + renderStatusChip(document.Status) + `<span class="badge">` + escapeHTML(runbook.Freshness) +
+			`</span></div><h3><a href="` + escapeAttr(relativeURL(current, document.OutputPath)) + `">` + escapeHTML(runbook.Title) +
+			`</a></h3><p>` + escapeHTML(truncate(document.Description, 180)) + `</p><p class="table-subtext">Среда: ` +
+			escapeHTML(fallbackDash(runbook.Environment)) + ` · Риск: ` + escapeHTML(fallbackDash(runbook.Risk)) +
+			` · Последняя проверка: ` + escapeHTML(fallbackDash(runbook.LastVerified)) + `</p><div class="card-path">` +
+			escapeHTML(runbook.Document) + `</div></article>`)
+	}
+	controls := `<div class="collection-controls"><input type="search" data-filter-control="search" placeholder="Фильтр" aria-label="Фильтр runbooks">` +
+		`<select data-filter-control="freshness"><option value="all">Любая свежесть</option><option value="recent">Recent</option><option value="review-required">Review required</option><option value="overdue">Overdue</option></select></div>`
+	content := breadcrumbs(model, current, title) +
+		`<header class="page-header"><h1>` + escapeHTML(title) + `</h1><p class="page-lead">Эксплуатационные процедуры и состояние их проверки.</p></header>` +
+		`<section class="metric-grid">` + metricCard("Всего", model.Stats.RunbooksTotal, "") + metricCard("Recent", model.Stats.RunbooksRecent, "") +
+		metricCard("Review required", model.Stats.RunbooksReviewRequired, "") + metricCard("Overdue", model.Stats.RunbooksOverdue, "") + `</section>` +
+		`<section data-filter-scope>` + controls + `<div class="collection-summary">Показано: <strong data-filter-count></strong></div><div class="card-grid">` +
+		cards.String() + `</div><div class="empty-state" data-filter-empty hidden>Runbooks не найдены.</div></section>`
+	return pageShell(model, current, title, title, content, "")
+}
+
 func renderHealthPage(model *Model) string {
 	current := model.HealthOutputPath
 	var rows strings.Builder
@@ -812,7 +868,8 @@ func BuildReport(model *Model) ProjectReport {
 		Stats: model.Stats, Documents: documents, Roadmap: roadmap, Risks: risks,
 		Knowledge: ReportKnowledge{
 			Modules: model.Knowledge.Modules, UseCases: model.Knowledge.UseCases,
-			Flows: model.Knowledge.Flows, BusinessRules: model.Knowledge.BusinessRules, WorkItems: model.Knowledge.WorkItems,
+			Flows: model.Knowledge.Flows, Standards: model.Knowledge.Standards, Runbooks: model.Knowledge.Runbooks,
+			BusinessRules: model.Knowledge.BusinessRules, WorkItems: model.Knowledge.WorkItems,
 		},
 		Screens: screens, Transitions: model.Knowledge.Transitions,
 		PlayableFlows: model.Knowledge.PlayableFlows, Hotspots: model.Knowledge.Hotspots,
@@ -897,7 +954,7 @@ func GenerateSite(model *Model, options Options) (GenerateResult, error) {
 	pages := 1
 	for _, document := range model.Documents {
 		directory := strings.Split(document.SourcePath, "/")[0]
-		typedCatalogIndex := strings.EqualFold(document.FileName, "index.md") && (directory == "use-cases" || directory == "flows")
+		typedCatalogIndex := strings.EqualFold(document.FileName, "index.md") && (directory == "use-cases" || directory == "flows" || directory == "quality" || directory == "runbooks")
 		if document.SourcePath == "index.md" || document.Type == "screen-index" || typedCatalogIndex {
 			continue
 		}
@@ -938,13 +995,23 @@ func GenerateSite(model *Model, options Options) (GenerateResult, error) {
 			pages++
 		}
 	}
+	for _, kind := range []string{"quality", "runbooks"} {
+		if _, exists := model.Directories[kind]; !exists {
+			continue
+		}
+		target := path.Join(kind, "index.html")
+		if err = writeFileEnsured(filepath.Join(output, filepath.FromSlash(target)), []byte(renderKnowledgeCatalogPage(model, kind))); err != nil {
+			return GenerateResult{}, err
+		}
+		pages++
+	}
 	directories := make([]string, 0, len(model.Directories))
 	for d := range model.Directories {
 		directories = append(directories, d)
 	}
 	sort.SliceStable(directories, func(i, j int) bool { return naturalCompare(directories[i], directories[j]) < 0 })
 	for _, directory := range directories {
-		if directory == "use-cases" || directory == "flows" {
+		if directory == "use-cases" || directory == "flows" || directory == "quality" || directory == "runbooks" {
 			continue
 		}
 		if directoryHasSourceIndex(model, directory) {

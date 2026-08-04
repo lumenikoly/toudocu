@@ -101,7 +101,11 @@ func planTaskCommands(item WorkItem) ([]plannedCommand, bool) {
 			commands = append(commands, plannedCommand{Command: command, Targets: []string{check.Target}})
 		}
 	}
-	return commands, targets["ALL"] && targets["DOCS"]
+	full := targets["ALL"] && targets["DOCS"]
+	if len(item.StandardIDs) > 0 {
+		full = full && targets["QUALITY"]
+	}
+	return commands, full
 }
 
 func taskVerifyValidation(model *Model, taskID, target, mode string) (*WorkItem, []Issue) {

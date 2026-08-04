@@ -22,7 +22,7 @@ func PrintHelp(w io.Writer) {
   docgent serve [каталог-документации] [параметры]
   docgent search "<запрос>" [каталог-документации] [--limit N] [--format text|json]
   docgent task init [каталог-документации] --area AREA --title TITLE --type TYPE [--lang en|ru]
-  docgent scaffold module|use-case|flow|screen|decision ID [каталог-документации] --title TITLE [--lang en|ru]
+  docgent scaffold module|use-case|flow|screen|decision|standard|runbook ID [каталог-документации] --title TITLE [--lang en|ru]
   docgent task ready TASK-ID [каталог-документации] [--strict] [--format text|json]
   docgent task context TASK-ID [каталог-документации] [параметры]
   docgent task verify TASK-ID [каталог-документации] (--dry-run|--run) [параметры]
@@ -94,7 +94,7 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			args = args[2:]
 		case "scaffold":
 			if len(args) < 3 {
-				return options, false, false, fmt.Errorf("использование: docgent scaffold module|use-case|flow|screen|decision ID [каталог-документации]")
+				return options, false, false, fmt.Errorf("использование: docgent scaffold module|use-case|flow|screen|decision|standard|runbook ID [каталог-документации]")
 			}
 			options.Command, options.EntityKind, options.EntityID = "scaffold", args[1], args[2]
 			args = args[3:]

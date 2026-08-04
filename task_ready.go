@@ -34,6 +34,16 @@ func taskRelatedDocumentPaths(model *Model, item *WorkItem) map[string]bool {
 			paths[flow.Document] = true
 		}
 	}
+	for _, standard := range model.Knowledge.Standards {
+		if containsString(item.StandardIDs, standard.ID) {
+			paths[standard.Document] = true
+		}
+	}
+	for _, runbook := range model.Knowledge.Runbooks {
+		if containsString(item.RunbookIDs, runbook.ID) {
+			paths[runbook.Document] = true
+		}
+	}
 	for _, screen := range model.Knowledge.Screens {
 		if containsString(item.ScreenIDs, screen.ID) {
 			paths[screen.Document] = true
@@ -63,6 +73,7 @@ func referencedEntityIssues(model *Model, item *WorkItem) []Issue {
 		return containsString(values, expected)
 	}
 	moduleIDs, useCaseIDs, flowIDs, screenIDs, transitionIDs := []string{}, []string{}, []string{}, []string{}, []string{}
+	standardIDs, runbookIDs := []string{}, []string{}
 	for _, value := range model.Knowledge.Modules {
 		moduleIDs = append(moduleIDs, value.ID)
 	}
@@ -78,6 +89,12 @@ func referencedEntityIssues(model *Model, item *WorkItem) []Issue {
 	for _, value := range model.Knowledge.Transitions {
 		transitionIDs = append(transitionIDs, value.ID)
 	}
+	for _, value := range model.Knowledge.Standards {
+		standardIDs = append(standardIDs, value.ID)
+	}
+	for _, value := range model.Knowledge.Runbooks {
+		runbookIDs = append(runbookIDs, value.ID)
+	}
 	check := func(kind, id string, values []string) {
 		if id != "" && !exists(values, id) {
 			issues = append(issues, readinessIssue("missing-task-"+kind, "Связанная сущность не найдена: "+id+".", item))
@@ -91,6 +108,12 @@ func referencedEntityIssues(model *Model, item *WorkItem) []Issue {
 	}
 	for _, id := range item.TransitionIDs {
 		check("transition", id, transitionIDs)
+	}
+	for _, id := range item.StandardIDs {
+		check("standard", id, standardIDs)
+	}
+	for _, id := range item.RunbookIDs {
+		check("runbook", id, runbookIDs)
 	}
 	for _, criterion := range item.Verification {
 		for _, id := range criterion.Transitions {
@@ -243,7 +266,11 @@ func taskReadiness(model *Model, taskID string, strict bool) (*WorkItem, []Issue
 			issues = append(issues, readinessIssue("invalid-criterion-verification", "Для "+criterion.CriterionID+" требуется ровно одна исполняемая verification mapping.", item))
 		}
 	}
-	for _, target := range []string{"ALL", "DOCS"} {
+	requiredTargets := []string{"ALL", "DOCS"}
+	if len(item.StandardIDs) > 0 {
+		requiredTargets = append(requiredTargets, "QUALITY")
+	}
+	for _, target := range requiredTargets {
 		if seen[target] != 1 {
 			issues = append(issues, readinessIssue("missing-verification-target", "Требуется ровно одна verification mapping для "+target+".", item))
 		}

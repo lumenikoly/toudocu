@@ -4,32 +4,22 @@
 
 Docgent — dependency-free Go CLI. Сохраняйте реализацию небольшой, предсказуемой и безопасной.
 
-## Источники истины
+## Навигация
 
-- модель и валидация: `docs_core.go`, `documentation_links.go`, `knowledge.go`, `screens.go`;
-- Markdown: `markdown_parse.go`, `markdown_render.go`;
-- HTML и JSON: `site.go`, `process_site.go`, `screen_site.go`, `site_config.go`, `report_types.go`;
-- CLI и workflow задач: `cli.go`, `search.go`, `scaffold.go`, `task_*.go`, `cmd/docgent/main.go`;
-- поведенческий контракт: `*_test.go`;
-- браузерные ресурсы: `assets/`.
+- правила Go-кода и обязательный цикл проверки:
+  [`STD-GO-001`](docs/quality/STD-GO-001.md);
+- правила исходной документации, generated output и semantic review:
+  [`STD-DOCS-001`](docs/quality/STD-DOCS-001.md);
+- эксплуатационные процедуры: `docs/runbooks/`, только если раздел существует
+  и содержит реальный `RB-*`;
+- неизвестный верхнеуровневый раздел с Markdown: собственный `index.md` с
+  `Тип: Custom`, владельцем и описанием;
+- архитектура и источники истины:
+  [`docs/architecture/overview.md`](docs/architecture/overview.md);
+- workflow work items: [`docs/guides/work-items.md`](docs/guides/work-items.md).
 
-## Правила изменений
-
-1. Не добавляйте внешнюю зависимость без доказанной необходимости.
-2. Сохраняйте обратную совместимость с вызовом `docgent ./docs ...`.
-3. Новое правило валидации должно иметь тест.
-4. Исправление безопасности должно иметь негативный тест.
-5. `roadmap.md` определяет глобальный охват; состояние явно связанного `UC-*` берётся из use case. Остальные локальные чек-листы не агрегируйте.
-6. Не ослабляйте проверки `repository-root` и безопасного `--clean`.
-7. Сгенерированные каталоги `build/`, `dist/`, `example/site/`, `project-docs/` и `example/project-docs/` не являются источником истины; отслеживаемые порталы пересобирайте из Markdown, а не редактируйте вручную.
-
-## Проверка
-
-```bash
-gofmt -w .
-go vet ./...
-go test ./...
-go test -race ./...
-```
+Перед изменением просмотрите явно связанные стандарты и runbook, затем
+проверьте `Область` остальных стандартов. CLI намеренно не угадывает
+применимость по glob.
 
 Не используй Context7 для этого проекта

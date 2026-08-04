@@ -1,6 +1,7 @@
 package docgent
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net"
@@ -11,6 +12,8 @@ import (
 	"sync"
 	"time"
 )
+
+const rebuildEndpoint = "/__docgent/rebuild"
 
 type documentationServer struct {
 	options     Options
@@ -52,6 +55,34 @@ func (s *documentationServer) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	w.Header().Set("Cache-Control", "no-store")
 	s.mu.Lock()
 	defer s.mu.Unlock()
+
+	if r.URL.Path == rebuildEndpoint {
+		if r.Method != http.MethodPost {
+			w.Header().Set("Allow", http.MethodPost)
+			http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
+			return
+		}
+		if r.Header.Get("X-Docgent-Action") != "rebuild" {
+			http.Error(w, "Запрос на пересборку отклонён", http.StatusForbidden)
+			return
+		}
+		model, result, err := s.rebuild()
+		if err != nil {
+			fmt.Fprintln(s.stderr, "Не удалось пересобрать документацию:", err)
+			http.Error(w, "Не удалось пересобрать документацию: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		if err := json.NewEncoder(w).Encode(map[string]int{
+			"documents": model.Stats.Documents,
+			"errors":    model.Stats.Errors,
+			"pages":     result.Pages,
+			"warnings":  model.Stats.Warnings,
+		}); err != nil {
+			fmt.Fprintln(s.stderr, "Не удалось отправить результат пересборки:", err)
+		}
+		return
+	}
 
 	if (r.Method == http.MethodGet || r.Method == http.MethodHead) && requestNeedsRebuild(r.URL.Path) {
 		if _, _, err := s.rebuild(); err != nil {

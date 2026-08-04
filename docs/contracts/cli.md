@@ -14,7 +14,7 @@ Docgent.
 |---|---|---|
 | `check` | отсутствуют | diagnostics или `ProjectReport` |
 | `build` | записывает output, при `--clean` безопасно очищает его | автономный портал и `report.json` |
-| `serve` | собирает output и запускает локальный HTTP-сервер | портал с пересборкой при обновлении HTML |
+| `serve` | собирает output и запускает локальный HTTP-сервер | портал с автоматической и ручной пересборкой HTML |
 | `search` | отсутствуют | `SearchReport` по свежим Markdown |
 | `task init` | атомарно создаёт новый `TASK-*` или `BUG-*` по типу | `TaskInitReport` |
 | `scaffold` | атомарно создаёт выбранную сущность | `ScaffoldReport` |
@@ -33,7 +33,7 @@ Docgent.
 ```text
 docgent search "<query>" [docs-dir] [--limit N] [--format text|json]
 docgent task init [docs-dir] --area AREA --title TITLE --type TYPE [--lang en|ru]
-docgent scaffold module|use-case|flow|screen|decision ID [docs-dir] --title TITLE [--lang en|ru]
+  docgent scaffold module|use-case|flow|screen|decision|standard|runbook ID [docs-dir] --title TITLE [--lang en|ru]
 docgent task ready TASK-ID [docs-dir] [--strict] [--format text|json]
 docgent task context TASK-ID [docs-dir] [--format text|json]
 docgent task verify TASK-ID [docs-dir] (--dry-run|--run) [--target TARGET] [--report FILE] [--timeout DURATION] [--format text|json]
@@ -75,6 +75,13 @@ docgent task restore TASK-ID [docs-dir] [--repository-root DIR] [--format text|j
 `127.0.0.1` и `8080`. Для доступа из локальной сети требуется явный
 `--host 0.0.0.0`.
 
+Пока работает `serve`, запрос HTML автоматически пересобирает портал. Кнопка
+ручной пересборки в хедере появляется после проверки служебного endpoint,
+отправляет `POST` с anti-form заголовком, повторно строит модель и HTML и после
+успеха перезагружает текущую страницу. Это не авторизация и не проверка origin.
+Listener при этом не закрывается и сохраняет адрес. В статическом портале
+кнопка скрыта.
+
 `--report` и `--timeout` разрешены только для `task verify`.
 `task verify --run` разрешён только для статусов Ready, In Progress, Blocked и
 Done; безопасный `--dry-run` также можно использовать для полного Draft.
@@ -95,9 +102,16 @@ Done; безопасный `--dry-run` также можно использов�
   перемещения; policy-блокировка возвращает `1` и `TaskMoveReport`.
 - `serve` возвращает `1`, если первоначальная сборка или запуск listener
   завершились ошибкой; ошибка последующей пересборки возвращается клиенту как
-  HTTP 500, не останавливая сервер.
+  HTTP 500, не останавливая сервер; при ошибке ручной пересборки кнопка получает
+  error-состояние, доступное сообщение объявляется через live region, а запрос
+  можно повторить.
 
 ## ProjectReport schema v1
+
+Schema v1 аддитивно включает `knowledge.standards`, `knowledge.runbooks`,
+`standardIds`/`runbookIds` у `WorkItem`, typed collections task context и
+четыре runbook-метрики в `stats`. Пустые коллекции сериализуются как `[]`;
+версия schema и генератора не меняется.
 
 `check --format json` и сгенерированный `report.json` содержат:
 

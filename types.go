@@ -229,6 +229,31 @@ type KnowledgeFlow struct {
 	Document   string   `json:"document"`
 }
 
+type KnowledgeStandard struct {
+	ID              string     `json:"id"`
+	Title           string     `json:"title"`
+	Status          StatusInfo `json:"status"`
+	Owner           string     `json:"owner,omitempty"`
+	Scope           string     `json:"scope,omitempty"`
+	Updated         string     `json:"updated,omitempty"`
+	SupersededBy    string     `json:"supersededBy,omitempty"`
+	Rules           string     `json:"rules,omitempty"`
+	AutomaticChecks string     `json:"automaticChecks,omitempty"`
+	Document        string     `json:"document"`
+}
+
+type KnowledgeRunbook struct {
+	ID           string     `json:"id"`
+	Title        string     `json:"title"`
+	Status       StatusInfo `json:"status"`
+	Owner        string     `json:"owner,omitempty"`
+	Environment  string     `json:"environment,omitempty"`
+	Risk         string     `json:"risk,omitempty"`
+	LastVerified string     `json:"lastVerified,omitempty"`
+	Freshness    string     `json:"freshness"`
+	Document     string     `json:"document"`
+}
+
 type ScreenState struct {
 	ID      string `json:"id"`
 	Title   string `json:"title,omitempty"`
@@ -340,6 +365,8 @@ type WorkItem struct {
 	FlowID              string                  `json:"flowId,omitempty"`
 	ScreenIDs           []string                `json:"screenIds"`
 	TransitionIDs       []string                `json:"transitionIds"`
+	StandardIDs         []string                `json:"standardIds"`
+	RunbookIDs          []string                `json:"runbookIds"`
 	DependsOn           []string                `json:"dependsOn"`
 	Document            string                  `json:"document"`
 	Anchor              string                  `json:"anchor"`
@@ -377,17 +404,19 @@ type VerificationCheck struct {
 }
 
 type KnowledgeModel struct {
-	Modules       []KnowledgeModule  `json:"modules"`
-	UseCases      []KnowledgeUseCase `json:"useCases"`
-	Flows         []KnowledgeFlow    `json:"flows"`
-	Screens       []KnowledgeScreen  `json:"screens"`
-	Transitions   []ScreenTransition `json:"screenTransitions"`
-	BusinessRules []BusinessRule     `json:"businessRules"`
-	WorkItems     []WorkItem         `json:"workItems"`
-	PlayableFlows []PlayableFlow     `json:"playableFlows"`
-	Hotspots      []Hotspot          `json:"hotspots"`
-	Errors        []ErrorDefinition  `json:"errorDefinitions"`
-	Traceability  []TraceabilityRow  `json:"traceability"`
+	Modules       []KnowledgeModule   `json:"modules"`
+	UseCases      []KnowledgeUseCase  `json:"useCases"`
+	Flows         []KnowledgeFlow     `json:"flows"`
+	Standards     []KnowledgeStandard `json:"standards"`
+	Runbooks      []KnowledgeRunbook  `json:"runbooks"`
+	Screens       []KnowledgeScreen   `json:"screens"`
+	Transitions   []ScreenTransition  `json:"screenTransitions"`
+	BusinessRules []BusinessRule      `json:"businessRules"`
+	WorkItems     []WorkItem          `json:"workItems"`
+	PlayableFlows []PlayableFlow      `json:"playableFlows"`
+	Hotspots      []Hotspot           `json:"hotspots"`
+	Errors        []ErrorDefinition   `json:"errorDefinitions"`
+	Traceability  []TraceabilityRow   `json:"traceability"`
 }
 
 type ProjectInfo struct {
@@ -459,6 +488,10 @@ type Stats struct {
 	RegressionBugs              int            `json:"regressionBugs"`
 	UnreproducedBugs            int            `json:"unreproducedBugs"`
 	BlockedBugs                 int            `json:"blockedBugs"`
+	RunbooksTotal               int            `json:"runbooksTotal"`
+	RunbooksRecent              int            `json:"runbooksRecent"`
+	RunbooksReviewRequired      int            `json:"runbooksReviewRequired"`
+	RunbooksOverdue             int            `json:"runbooksOverdue"`
 }
 
 type SearchItem struct {

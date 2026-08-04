@@ -4,7 +4,7 @@
     "name": "Docgent",
     "version": "1.1.0-go"
   },
-  "generatedAt": "2026-07-30T18:49:37.190326384Z",
+  "generatedAt": "2026-07-30T21:33:45.514753572Z",
   "sourceDirectory": "docs",
   "staleDays": 0,
   "project": {
@@ -90,7 +90,17 @@
     "screensUnreachable": 0,
     "risks": 1,
     "openRisks": 1,
-    "decisions": 1
+    "decisions": 1,
+    "openBugs": 0,
+    "criticalBugs": 0,
+    "highSeverityBugs": 0,
+    "regressionBugs": 0,
+    "unreproducedBugs": 0,
+    "blockedBugs": 0,
+    "runbooksTotal": 0,
+    "runbooksRecent": 0,
+    "runbooksReviewRequired": 0,
+    "runbooksOverdue": 0
   },
   "documents": [
     {
@@ -1433,6 +1443,8 @@
         "document": "flows/FLOW-CORE-REQUEST.md"
       }
     ],
+    "standards": [],
+    "runbooks": [],
     "businessRules": [
       {
         "id": "BR-CORE-001",
@@ -1470,7 +1482,9 @@
           "recognized": true
         },
         "type": "Feature",
+        "archived": false,
         "priority": "Высокий",
+        "updated": "2026-07-29",
         "owner": "Команда проекта",
         "moduleId": "MOD-CORE",
         "useCaseId": "UC-CORE-01",
@@ -1488,6 +1502,8 @@
           "TR-CORE-004",
           "TR-CORE-005"
         ],
+        "standardIds": [],
+        "runbookIds": [],
         "dependsOn": [],
         "document": "work/TASK-CORE-001-main-scenario.md",
         "anchor": "task-core-001-реализовать-основной-сценарий",
@@ -1529,7 +1545,7 @@
             "criterion": "С главного экрана можно открыть новый запрос.",
             "completed": false,
             "commands": [
-              "test -f ./d[o]cs/screens/SC-CORE-HOME.md"
+              "test -f ./docs/screens/SC-CORE-HOME.md"
             ],
             "transitions": [
               "TR-CORE-001"
@@ -1543,7 +1559,7 @@
             "criterion": "Из запроса можно открыть подсказку.",
             "completed": false,
             "commands": [
-              "test -f ./d[o]cs/screens/SC-CORE-HELP.md"
+              "test -f ./docs/screens/SC-CORE-HELP.md"
             ],
             "transitions": [
               "TR-CORE-002"
@@ -1557,7 +1573,7 @@
             "criterion": "Подсказку можно закрыть с возвратом к запросу.",
             "completed": false,
             "commands": [
-              "test -f ./d[o]cs/screens/SC-CORE-HELP.md"
+              "test -f ./docs/screens/SC-CORE-HELP.md"
             ],
             "transitions": [
               "TR-CORE-003"
@@ -1571,7 +1587,7 @@
             "criterion": "Корректный запрос открывает результат.",
             "completed": false,
             "commands": [
-              "test -f ./d[o]cs/screens/SC-CORE-RESULT.md"
+              "test -f ./docs/screens/SC-CORE-RESULT.md"
             ],
             "transitions": [
               "TR-CORE-004"
@@ -1585,7 +1601,7 @@
             "criterion": "Некорректный запрос остаётся на текущем экране с ошибкой.",
             "completed": false,
             "commands": [
-              "test -f ./d[o]cs/contracts/api.md"
+              "test -f ./docs/contracts/api.md"
             ],
             "transitions": [
               "TR-CORE-005"
@@ -1599,35 +1615,35 @@
           {
             "target": "AC-01",
             "commands": [
-              "test -f ./d[o]cs/screens/SC-CORE-HOME.md"
+              "test -f ./docs/screens/SC-CORE-HOME.md"
             ],
             "line": 51
           },
           {
             "target": "AC-02",
             "commands": [
-              "test -f ./d[o]cs/screens/SC-CORE-HELP.md"
+              "test -f ./docs/screens/SC-CORE-HELP.md"
             ],
             "line": 53
           },
           {
             "target": "AC-03",
             "commands": [
-              "test -f ./d[o]cs/screens/SC-CORE-HELP.md"
+              "test -f ./docs/screens/SC-CORE-HELP.md"
             ],
             "line": 55
           },
           {
             "target": "AC-04",
             "commands": [
-              "test -f ./d[o]cs/screens/SC-CORE-RESULT.md"
+              "test -f ./docs/screens/SC-CORE-RESULT.md"
             ],
             "line": 57
           },
           {
             "target": "AC-05",
             "commands": [
-              "test -f ./d[o]cs/contracts/api.md"
+              "test -f ./docs/contracts/api.md"
             ],
             "line": 59
           },
@@ -1670,7 +1686,9 @@
           "recognized": true
         },
         "type": "Feature",
+        "archived": false,
         "priority": "Средний",
+        "updated": "2026-07-29",
         "owner": "Integration Team",
         "moduleId": "MOD-SUPPORT",
         "useCaseId": "UC-CORE-02",
@@ -1681,6 +1699,8 @@
         "transitionIds": [
           "TR-CORE-006"
         ],
+        "standardIds": [],
+        "runbookIds": [],
         "dependsOn": [],
         "document": "work/TASK-SUPPORT-002-external-support.md",
         "anchor": "task-support-002-проверить-внешний-переход",

@@ -4,9 +4,9 @@
     "name": "Docgent",
     "version": "1.1.0-go"
   },
-  "generatedAt": "2026-07-30T19:17:02.142004758Z",
+  "generatedAt": "2026-07-30T21:34:35.038892174Z",
   "sourceDirectory": "docs",
-  "staleDays": 90,
+  "staleDays": 0,
   "project": {
     "title": "Docgent",
     "description": "Docgent — dependency-free CLI на Go для проверяемой проектной документации в структурированном Markdown и автономного HTML-портала, работающего через file:// .",
@@ -37,17 +37,17 @@
     }
   },
   "stats": {
-    "documents": 34,
+    "documents": 39,
     "totalTasks": 10,
     "completedTasks": 9,
     "remainingTasks": 1,
     "taskProgress": 90,
-    "documentsComplete": 3,
+    "documentsComplete": 4,
     "documentsInProgress": 2,
     "documentsNotStarted": 0,
-    "documentsWithoutTasks": 29,
+    "documentsWithoutTasks": 33,
     "staleDocuments": 0,
-    "documentsWithoutDescription": 3,
+    "documentsWithoutDescription": 4,
     "documentsWithoutStatus": 0,
     "brokenLinks": 0,
     "warnings": 0,
@@ -67,7 +67,17 @@
     "screensUnreachable": 0,
     "risks": 3,
     "openRisks": 2,
-    "decisions": 2
+    "decisions": 2,
+    "openBugs": 0,
+    "criticalBugs": 0,
+    "highSeverityBugs": 0,
+    "regressionBugs": 0,
+    "unreproducedBugs": 0,
+    "blockedBugs": 0,
+    "runbooksTotal": 0,
+    "runbooksRecent": 0,
+    "runbooksReviewRequired": 0,
+    "runbooksOverdue": 0
   },
   "documents": [
     {
@@ -90,7 +100,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-30T18:47:33.530663992Z",
+      "updatedAt": "2026-07-30T21:28:24.989211682Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -216,6 +226,22 @@
           "href": "guides/testing.html"
         },
         {
+          "destination": "quality/",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "quality/index.md",
+          "href": "quality/index.html"
+        },
+        {
+          "destination": "guides/quality-runbooks.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/quality-runbooks.md",
+          "href": "guides/quality-runbooks.html"
+        },
+        {
           "destination": "guides/work-items.md",
           "broken": false,
           "blocked": false,
@@ -253,6 +279,8 @@
         "contracts/cli.md",
         "risks.md",
         "guides/testing.md",
+        "quality/index.md",
+        "guides/quality-runbooks.md",
         "guides/work-items.md",
         "reference/configuration.md"
       ]
@@ -791,7 +819,7 @@
       "metadata": {
         "id": "FLOW-DOCS-SERVE",
         "module": "MOD-SITE",
-        "updated": "2026-07-28",
+        "updated": "2026-07-30",
         "useCase": "UC-DOCS-03"
       },
       "status": {
@@ -806,7 +834,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-28T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -993,6 +1021,37 @@
     },
     {
       "id": "",
+      "sourcePath": "guides/quality-runbooks.md",
+      "outputPath": "guides/quality-runbooks.html",
+      "type": "guide",
+      "title": "Standards, Runbooks и Custom-разделы",
+      "description": "Руководство описывает авторский контракт опциональных разделов. Глобально обязателен только index.md ; отсутствие manifest у появившегося quality/ , runbooks/ или custom-раздела является warning и становится gate только с --strict .",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-30T21:28:24.988211672Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "index.md",
+        "reference/features.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
       "sourcePath": "guides/screens.md",
       "outputPath": "guides/screens.html",
       "type": "guide",
@@ -1061,7 +1120,7 @@
       "outputPath": "guides/work-items.html",
       "type": "guide",
       "title": "Рабочие задачи",
-      "description": "Docgent хранит каждую рабочую задачу в отдельном файле work/TASK- .md . Задача описывает ожидаемый результат, допустимую область изменений, критерии приёмки и команды проверки.",
+      "description": "Docgent хранит каждый рабочий элемент в отдельном файле work/ .md . Функциональность, обслуживание, документация и исследования используют TASK- , а баги — BUG- . Все типы остаются одной сущностью WorkItem , используют общие статусы, зависимости, команды context/verify и годовой архив.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -1075,7 +1134,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-29T20:54:23.282151122Z",
+      "updatedAt": "2026-07-30T21:22:04.708333498Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1292,7 +1351,7 @@
         "id": "MOD-MODEL",
         "owner": "Команда Docgent",
         "status": "Готово",
-        "updated": "2026-07-29"
+        "updated": "2026-07-31"
       },
       "status": {
         "kind": "done",
@@ -1306,7 +1365,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-29T00:00:00Z",
+      "updatedAt": "2026-07-31T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1326,6 +1385,14 @@
           "targetKind": "document",
           "target": "guides/work-items.md",
           "href": "../guides/work-items.html"
+        },
+        {
+          "destination": "../quality/",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "quality/index.md",
+          "href": "../quality/index.html"
         },
         {
           "destination": "../use-cases/check-documentation.md",
@@ -1380,6 +1447,7 @@
       "relatedDocuments": [
         "contracts/cli.md",
         "guides/work-items.md",
+        "quality/index.md",
         "use-cases/check-documentation.md",
         "use-cases/task-workflow.md",
         "use-cases/task-verify.md",
@@ -1476,6 +1544,131 @@
     },
     {
       "id": "",
+      "sourcePath": "quality/index.md",
+      "outputPath": "quality/index.html",
+      "type": "quality-index",
+      "title": "Стандарты качества",
+      "description": "Раздел фиксирует подтверждённые правила разработки и ведения документации Docgent. Стандарты применяются по явно указанной области и не являются источником команд task verify : исполняемые команды остаются в work item.",
+      "metadata": {
+        "owner": "Команда Docgent"
+      },
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-30T21:21:01.512683757Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "STD-GO-001.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "quality/STD-GO-001.md",
+          "href": "STD-GO-001.html"
+        },
+        {
+          "destination": "STD-DOCS-001.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "quality/STD-DOCS-001.md",
+          "href": "STD-DOCS-001.html"
+        }
+      ],
+      "backlinks": [
+        "index.md",
+        "modules/model.md"
+      ],
+      "relatedDocuments": [
+        "quality/STD-GO-001.md",
+        "quality/STD-DOCS-001.md"
+      ]
+    },
+    {
+      "id": "STD-DOCS-001",
+      "sourcePath": "quality/STD-DOCS-001.md",
+      "outputPath": "quality/STD-DOCS-001.html",
+      "type": "standard",
+      "title": "STD-DOCS-001: Проверяемая документация",
+      "description": "Стандарт удерживает Markdown источником истины и отделяет подтверждённые глобальные правила от локальных или сгенерированных представлений.",
+      "metadata": {
+        "id": "STD-DOCS-001",
+        "owner": "Команда Docgent",
+        "scope": "Исходная документация, шаблоны skill и отслеживаемые порталы",
+        "status": "Действует",
+        "updated": "2026-07-31"
+      },
+      "status": {
+        "kind": "in-progress",
+        "symbol": "◐",
+        "label": "Действует",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-31T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "quality/index.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "STD-GO-001",
+      "sourcePath": "quality/STD-GO-001.md",
+      "outputPath": "quality/STD-GO-001.html",
+      "type": "standard",
+      "title": "STD-GO-001: Качество Go-кода",
+      "description": "Стандарт сохраняет реализацию Docgent небольшой, предсказуемой, dependency-free и проверяемой на поддерживаемых Go-платформах.",
+      "metadata": {
+        "id": "STD-GO-001",
+        "owner": "Команда Docgent",
+        "scope": "Go-код и тесты репозитория",
+        "status": "Действует",
+        "updated": "2026-07-31"
+      },
+      "status": {
+        "kind": "in-progress",
+        "symbol": "◐",
+        "label": "Действует",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-31T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "quality/index.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
       "sourcePath": "reference/configuration.md",
       "outputPath": "reference/configuration.html",
       "type": "reference",
@@ -1494,7 +1687,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-30T18:31:26.592960508Z",
+      "updatedAt": "2026-07-30T20:37:43.660898001Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1524,7 +1717,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-30T19:12:14.848602821Z",
+      "updatedAt": "2026-07-30T21:31:33.492086731Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1536,6 +1729,14 @@
           "targetKind": "document",
           "target": "contracts/cli.md",
           "href": "../contracts/cli.html"
+        },
+        {
+          "destination": "../guides/quality-runbooks.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/quality-runbooks.md",
+          "href": "../guides/quality-runbooks.html"
         },
         {
           "destination": "../guides/screens.md",
@@ -1560,6 +1761,7 @@
       ],
       "relatedDocuments": [
         "contracts/cli.md",
+        "guides/quality-runbooks.md",
         "guides/screens.md",
         "guides/work-items.md"
       ]
@@ -1702,7 +1904,7 @@
         "module": "MOD-MODEL",
         "priority": "Высокий",
         "status": "Готово",
-        "updated": "2026-07-28"
+        "updated": "2026-07-31"
       },
       "status": {
         "kind": "done",
@@ -1716,7 +1918,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-28T00:00:00Z",
+      "updatedAt": "2026-07-31T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1894,7 +2096,7 @@
         "module": "MOD-SITE",
         "priority": "Средний",
         "status": "Готово",
-        "updated": "2026-07-28"
+        "updated": "2026-07-30"
       },
       "status": {
         "kind": "done",
@@ -1908,7 +2110,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-28T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2321,6 +2523,43 @@
         "percent": 100
       },
       "updatedAt": "2026-07-26T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "work/TASK-DOCS-002.md",
+      "outputPath": "work/TASK-DOCS-002.html",
+      "type": "work",
+      "title": "TASK-DOCS-002: Добавить расширяемые Quality, Runbooks и Custom-разделы",
+      "description": "",
+      "metadata": {
+        "module": "MOD-MODEL",
+        "owner": "Команда Docgent",
+        "priority": "Высокий",
+        "standards": "STD-GO-001, STD-DOCS-001",
+        "status": "Выполнено",
+        "type": "Feature",
+        "updated": "2026-07-31",
+        "useCase": "UC-DOCS-02"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Выполнено",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 11,
+        "completed": 11,
+        "remaining": 0,
+        "percent": 100
+      },
+      "updatedAt": "2026-07-31T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2948,6 +3187,41 @@
         "document": "flows/FLOW-TASK-WORKFLOW.md"
       }
     ],
+    "standards": [
+      {
+        "id": "STD-DOCS-001",
+        "title": "STD-DOCS-001: Проверяемая документация",
+        "status": {
+          "kind": "in-progress",
+          "symbol": "◐",
+          "label": "Действует",
+          "recognized": true
+        },
+        "owner": "Команда Docgent",
+        "scope": "Исходная документация, шаблоны skill и отслеживаемые порталы",
+        "updated": "2026-07-31",
+        "rules": "Глобальный охват определяет roadmap.md ; состояние явно связанного UC- берётся из use case. Остальные локальные чек-листы не агрегируются. Сгенерированные build/ , dist/ , example/site/ , project-docs/ и example/project-docs/ не редактируются как источник истины. Отслеживаемые порталы пересобираются из Markdown после semantic review и структурной проверки. Типизированный документ создаётся только для подтверждённой семантики; неизвестные владелец, дата, статус или процедура не изобретаются ради отсутствия предупреждения. Явно связанные стандарты и runbook читаются вместе с task context; область других применимых стандартов проверяется автором без glob-эвристик CLI. docs/runbooks/ создаётся только при наличии реальной эксплуатационной процедуры.",
+        "automaticChecks": "go run ./cmd/docgent check ./docs --strict --stale-days 0 ; тесты целостности шаблонов и публичного JSON schema; тесты ссылок, стабильных ID, task context и портальной навигации. Команды запускаются из work item или доверенного CI workflow, а не напрямую из этого стандарта.",
+        "document": "quality/STD-DOCS-001.md"
+      },
+      {
+        "id": "STD-GO-001",
+        "title": "STD-GO-001: Качество Go-кода",
+        "status": {
+          "kind": "in-progress",
+          "symbol": "◐",
+          "label": "Действует",
+          "recognized": true
+        },
+        "owner": "Команда Docgent",
+        "scope": "Go-код и тесты репозитория",
+        "updated": "2026-07-31",
+        "rules": "Не добавлять внешнюю зависимость без доказанной необходимости. Сохранять обратную совместимость с вызовом docgent ./docs ... . Каждое новое правило валидации сопровождать поведенческим тестом. Каждое исправление безопасности сопровождать негативным тестом. Не ослаблять проверки repository-root и безопасного --clean . Сохранять обычные check , build , serve и task context неисполняющими команды work item.",
+        "automaticChecks": "gofmt -w . ; go vet ./... ; go test ./... ; go test -race ./... . Команды запускаются из work item или доверенного CI workflow, а не напрямую из этого стандарта.",
+        "document": "quality/STD-GO-001.md"
+      }
+    ],
+    "runbooks": [],
     "businessRules": [
       {
         "id": "BR-CLI-001",
@@ -3067,7 +3341,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-004-mermaid-работает-автономно-и-в-строгом-режиме",
-        "line": 48
+        "line": 50
       },
       {
         "id": "BR-SITE-005",
@@ -3075,7 +3349,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-005-карта-экранов-работает-автономно",
-        "line": 55
+        "line": 57
       },
       {
         "id": "BR-SITE-006",
@@ -3083,7 +3357,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-006-темы-не-расширяют-доверенную-поверхность",
-        "line": 71
+        "line": 73
       }
     ],
     "workItems": [
@@ -3097,13 +3371,17 @@
           "recognized": true
         },
         "type": "Feature",
+        "archived": false,
         "priority": "Высокий",
+        "updated": "2026-07-29",
         "owner": "Команда Docgent",
         "moduleId": "MOD-CLI",
         "useCaseId": "UC-TASK-03",
         "flowId": "FLOW-TASK-WORKFLOW",
         "screenIds": [],
         "transitionIds": [],
+        "standardIds": [],
+        "runbookIds": [],
         "dependsOn": [],
         "document": "work/TASK-CLI-001.md",
         "anchor": "task-cli-001-реализовать-полный-workflow-рабочей-задачи",
@@ -3281,12 +3559,16 @@
           "recognized": true
         },
         "type": "Documentation",
+        "archived": false,
         "priority": "Высокий",
+        "updated": "2026-07-26",
         "owner": "Команда Docgent",
         "moduleId": "MOD-MODEL",
         "useCaseId": "UC-DOCS-02",
         "screenIds": [],
         "transitionIds": [],
+        "standardIds": [],
+        "runbookIds": [],
         "dependsOn": [],
         "document": "work/TASK-DOCS-001-self-documentation.md",
         "anchor": "task-docs-001-добавить-самодокументацию-docgent",
@@ -3316,7 +3598,7 @@
             "criterion": "Самодокументация проходит docgent check --strict без замечаний.",
             "completed": true,
             "commands": [
-              "go run ./cmd/docgent check ./d[o]cs --strict --stale-days 0"
+              "go run ./cmd/docgent check ./docs --strict --stale-days 0"
             ],
             "transitions": [],
             "verificationReferences": []
@@ -3346,7 +3628,7 @@
           {
             "target": "AC-01",
             "commands": [
-              "go run ./cmd/docgent check ./d[o]cs --strict --stale-days 0"
+              "go run ./cmd/docgent check ./docs --strict --stale-days 0"
             ],
             "line": 42
           },
@@ -3392,6 +3674,234 @@
         ]
       },
       {
+        "id": "TASK-DOCS-002",
+        "title": "Добавить расширяемые Quality, Runbooks и Custom-разделы",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Выполнено",
+          "recognized": true
+        },
+        "type": "Feature",
+        "archived": false,
+        "priority": "Высокий",
+        "updated": "2026-07-31",
+        "owner": "Команда Docgent",
+        "moduleId": "MOD-MODEL",
+        "useCaseId": "UC-DOCS-02",
+        "screenIds": [],
+        "transitionIds": [],
+        "standardIds": [
+          "STD-GO-001",
+          "STD-DOCS-001"
+        ],
+        "runbookIds": [],
+        "dependsOn": [],
+        "document": "work/TASK-DOCS-002.md",
+        "anchor": "task-docs-002-добавить-расширяемые-quality-runbooks-и-custom-разделы",
+        "criteria": [
+          {
+            "line": 59,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-01 Standards, runbooks и custom manifests валидируются с разделением errors и warnings."
+          },
+          {
+            "line": 60,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-02 Freshness учитывает границы --stale-days, включая отключение age-based overdue значением 0."
+          },
+          {
+            "line": 61,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-03 Task references, conditional QUALITY, context и additive JSON сохраняют пустые коллекции как []."
+          },
+          {
+            "line": 62,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-04 RU/EN scaffolds создаются атомарно и не изобретают владельца или дату проверки runbook."
+          },
+          {
+            "line": 63,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-05 Автономный портал сохраняет processes и добавляет каталоги, фильтры и четыре runbook-метрики."
+          },
+          {
+            "line": 64,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-06 Self-documentation содержит только подтверждённые стандарты и не создаёт фиктивный runbook."
+          }
+        ],
+        "verificationMatrix": [
+          {
+            "criterionId": "AC-01",
+            "criterion": "Standards, runbooks и custom manifests валидируются с разделением errors и warnings.",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestQualityMetadataStatusAliasesAndValidationBoundaries|TestTypedKnowledgeErrorsAndCustomManifest'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-02",
+            "criterion": "Freshness учитывает границы --stale-days, включая отключение age-based overdue значением 0.",
+            "completed": true,
+            "commands": [
+              "go test ./... -run TestStandardsRunbooksAndFreshness"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-03",
+            "criterion": "Task references, conditional QUALITY, context и additive JSON сохраняют пустые коллекции как [].",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestQualityTaskContextAndConditionalVerification|TestQualityDanglingReferencesAndAdditiveJSON'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-04",
+            "criterion": "RU/EN scaffolds создаются атомарно и не изобретают владельца или дату проверки runbook.",
+            "completed": true,
+            "commands": [
+              "go test ./... -run TestStandardAndRunbookScaffoldsAndCatalogs"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-05",
+            "criterion": "Автономный портал сохраняет processes и добавляет каталоги, фильтры и четыре runbook-метрики.",
+            "completed": true,
+            "commands": [
+              "go test ./... -run TestStandardAndRunbookScaffoldsAndCatalogs"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-06",
+            "criterion": "Self-documentation содержит только подтверждённые стандарты и не создаёт фиктивный runbook.",
+            "completed": true,
+            "commands": [
+              "go run ./cmd/docgent check ./docs --strict --stale-days 0"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          }
+        ],
+        "checks": [
+          {
+            "target": "AC-01",
+            "commands": [
+              "go test ./... -run 'TestQualityMetadataStatusAliasesAndValidationBoundaries|TestTypedKnowledgeErrorsAndCustomManifest'"
+            ],
+            "line": 76
+          },
+          {
+            "target": "AC-02",
+            "commands": [
+              "go test ./... -run TestStandardsRunbooksAndFreshness"
+            ],
+            "line": 77
+          },
+          {
+            "target": "AC-03",
+            "commands": [
+              "go test ./... -run 'TestQualityTaskContextAndConditionalVerification|TestQualityDanglingReferencesAndAdditiveJSON'"
+            ],
+            "line": 78
+          },
+          {
+            "target": "AC-04",
+            "commands": [
+              "go test ./... -run TestStandardAndRunbookScaffoldsAndCatalogs"
+            ],
+            "line": 79
+          },
+          {
+            "target": "AC-05",
+            "commands": [
+              "go test ./... -run TestStandardAndRunbookScaffoldsAndCatalogs"
+            ],
+            "line": 80
+          },
+          {
+            "target": "AC-06",
+            "commands": [
+              "go run ./cmd/docgent check ./docs --strict --stale-days 0"
+            ],
+            "line": 81
+          },
+          {
+            "target": "ALL",
+            "commands": [
+              "go test ./..."
+            ],
+            "line": 82
+          },
+          {
+            "target": "DOCS",
+            "commands": [
+              "go run ./cmd/docgent check ./docs --strict --stale-days 0"
+            ],
+            "line": 83
+          },
+          {
+            "target": "QUALITY",
+            "commands": [
+              "go test ./... -run 'TestStandardsRunbooks|TestQualityTask|TestStandardAndRunbook|TestTypedKnowledge'"
+            ],
+            "line": 84
+          }
+        ],
+        "repositoryPaths": [
+          "AGENTS.md",
+          "docs/",
+          "docs_core.go",
+          "knowledge.go",
+          "markdown_parse.go",
+          "quality.go",
+          "quality_test.go",
+          "report_types.go",
+          "scaffold.go",
+          "site.go",
+          "skills/use-docgent/",
+          "task_context.go",
+          "task_ready.go",
+          "task_verify.go",
+          "types.go"
+        ],
+        "result": "Docgent поддерживает опциональные стандарты STD- , эксплуатационные процедуры RB- , пользовательские верхнеуровневые разделы, их task-связи, schema-v1 коллекции, scaffolds и автономные каталоги портала.",
+        "behaviorChange": "Было Неизвестные каталоги оставались полностью free-form, а Quality и Runbooks не имели типизированных контрактов, task-связей и специализированного портала. Станет Появившиеся quality/ , runbooks/ и custom-разделы получают явные manifest и typed validation без новых глобально обязательных файлов; task workflow переносит только явно связанные STD- и RB- .",
+        "before": "Неизвестные каталоги оставались полностью free-form, а Quality и Runbooks не имели типизированных контрактов, task-связей и специализированного портала.",
+        "after": "Появившиеся quality/ , runbooks/ и custom-разделы получают явные manifest и typed validation без новых глобально обязательных файлов; task workflow переносит только явно связанные STD- и RB- .",
+        "outOfScope": "внешние зависимости; автоматическое сопоставление task scope с glob-областью стандарта; выполнение команд напрямую из стандарта; создание собственного runbook без реальной эксплуатационной процедуры; изменение версии schema v1 или генератора.",
+        "plan": "Добавить typed model, diagnostics, freshness и custom manifests. Расширить task workflow, schema v1 и scaffolds. Добавить специализированные каталоги и тесты портала. Обновить self-documentation и пройти semantic review. Выполнить полный Go-цикл, strict-check и безопасную пересборку портала.",
+        "documentationImpact": "Обновлены README.md , CHANGELOG.md , docs/index.md , docs/modules/model.md , docs/use-cases/check-documentation.md , docs/contracts/cli.md , docs/reference/features.md , docs/guides/work-items.md и skills/use-docgent/SKILL.md ; добавлены руководство docs/guides/quality-runbooks.md , исходный раздел docs/quality/ , обновлённая reference-модель skill и восемь RU/EN skill-шаблонов standards, runbooks и их manifest. Сгенерированные порталы остаются производными от Markdown.",
+        "documentationPaths": [
+          "CHANGELOG.md",
+          "contracts/cli.md",
+          "guides/quality-runbooks.md",
+          "guides/work-items.md",
+          "index.md",
+          "modules/model.md",
+          "README.md",
+          "reference/features.md",
+          "skills/use-docgent/SKILL.md",
+          "use-cases/check-documentation.md"
+        ]
+      },
+      {
         "id": "TASK-SITE-001",
         "title": "Добавить копирование контекста документа",
         "status": {
@@ -3401,12 +3911,16 @@
           "recognized": true
         },
         "type": "Feature",
+        "archived": false,
         "priority": "Средний",
+        "updated": "2026-07-30",
         "owner": "Команда Docgent",
         "moduleId": "MOD-SITE",
         "useCaseId": "UC-DOCS-01",
         "screenIds": [],
         "transitionIds": [],
+        "standardIds": [],
+        "runbookIds": [],
         "dependsOn": [],
         "document": "work/TASK-SITE-001.md",
         "anchor": "task-site-001-добавить-копирование-контекста-документа",

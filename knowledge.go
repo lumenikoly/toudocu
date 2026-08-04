@@ -15,7 +15,7 @@ var (
 	riskHeadingRE           = regexp.MustCompile(`^([A-Za-zА-Яа-я]+[-_ ]?\d+)\s*[:—-]\s*(.+)$`)
 	businessRuleReferenceRE = regexp.MustCompile(`\bBR-[A-Z0-9-]+\b`)
 	criterionIDRE           = regexp.MustCompile(`\bAC-[A-Z0-9-]+\b`)
-	verificationTargetRE    = regexp.MustCompile(`\b(?:AC-[A-Z0-9-]+|ALL|DOCS)\b`)
+	verificationTargetRE    = regexp.MustCompile(`\b(?:AC-[A-Z0-9-]+|ALL|DOCS|QUALITY)\b`)
 	roadmapIDRE             = regexp.MustCompile(`\b(?:UC|CON|CONTRACT|DLV|DELIVERABLE)-[A-Z0-9-]+\b`)
 	codeSpanRE              = regexp.MustCompile("`+([^`\\n]+?)`+")
 )
@@ -248,7 +248,7 @@ func parseCriteriaAndVerification(model *Model, document *Document, item parsedW
 				continue
 			}
 			if len(targets) > 1 {
-				addKnowledgeIssue(model, document, "error", "ambiguous-verification-target", "Одна запись проверки должна ссылаться ровно на один target AC-*, ALL или DOCS.", lineIndex+1)
+				addKnowledgeIssue(model, document, "error", "ambiguous-verification-target", "Одна запись проверки должна ссылаться ровно на один target AC-*, ALL, DOCS или QUALITY.", lineIndex+1)
 				continue
 			}
 			target := targets[0]
@@ -654,7 +654,11 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 		for _, check := range checks {
 			declared[check.Target] = true
 		}
-		for _, target := range []string{"ALL", "DOCS"} {
+		requiredTargets := []string{"ALL", "DOCS"}
+		if len(splitReferences(item.Metadata["standards"])) > 0 {
+			requiredTargets = append(requiredTargets, "QUALITY")
+		}
+		for _, target := range requiredTargets {
 			if !declared[target] {
 				code := "missing-task-check"
 				if statusName == "done" {
@@ -710,6 +714,8 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 		UseCaseID: useCaseID, FlowID: strings.TrimSpace(item.Metadata["flow"]),
 		ScreenIDs:     splitReferences(item.Metadata["screens"]),
 		TransitionIDs: splitReferences(item.Metadata["transitions"]),
+		StandardIDs:   splitReferences(item.Metadata["standards"]),
+		RunbookIDs:    splitReferences(item.Metadata["runbooks"]),
 		DependsOn:     splitReferences(item.Metadata["dependsOn"]), Document: document.SourcePath,
 		Anchor: item.Heading.ID, Criteria: criteria, Verification: verification, Checks: checks,
 		RepositoryPaths: repositoryPaths, line: item.Heading.Line + 1,
@@ -1142,6 +1148,17 @@ func buildStats(model *Model) Stats {
 		completed += stage.TaskStats.Completed
 	}
 	stats := Stats{Documents: len(model.Documents), TotalTasks: total, CompletedTasks: completed, RemainingTasks: total - completed, TaskProgress: progress(completed, total), ModuleStatuses: countStatuses(model.Collections["module"]), UseCaseStatuses: countStatuses(model.Collections["use-case"]), Modules: len(model.Collections["module"]), UseCases: len(model.Collections["use-case"]), Screens: len(model.Knowledge.Screens), Risks: len(model.Risks), Decisions: len(model.Collections["decision"])}
+	stats.RunbooksTotal = len(model.Knowledge.Runbooks)
+	for _, runbook := range model.Knowledge.Runbooks {
+		switch runbook.Freshness {
+		case "recent":
+			stats.RunbooksRecent++
+		case "overdue":
+			stats.RunbooksOverdue++
+		case "review-required":
+			stats.RunbooksReviewRequired++
+		}
+	}
 	for _, screen := range model.Knowledge.Screens {
 		switch screen.Status.Kind {
 		case "done":

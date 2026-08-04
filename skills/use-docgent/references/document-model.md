@@ -43,9 +43,16 @@ types are optional.
 | `screens/SC-*.md` | A significant screen and its outgoing transitions | Parses metadata, states and `TR-*`; validates modules, routes and topology |
 | `screens/hotspots.json` | Optional percentage-based interactive areas | Validates screen and transition references and geometry |
 | `decisions/*.md` | Durable decisions | Requires a unique `ADR-*` |
+| `quality/STD-*.md` | Enforceable project standards | Requires a unique `STD-*`; validates status and replacement links |
+| `runbooks/RB-*.md` | Operational procedures | Requires a unique `RB-*`; derives review freshness |
 | `work/TASK-*.md`, `work/BUG-*.md`, and yearly archive paths | Agent- or CI-readable work and terminal history | Requires exactly one work item, status-dependent fields, and terminal archive status |
 | `architecture/`, `contracts/`, `guides/`, `reference/` | Specialized human documentation | Classifies and renders the document |
 | Any other path | Free-form documentation | Renders safely without a typed entity contract |
+
+When an unknown top-level directory contains Markdown, its `index.md` is a
+custom-section manifest with `Type: Custom`, an owner, and a description. Its
+H1 supplies the navigation title. Do not infer a typed category from filenames,
+document count, or prose.
 
 Use one H1 and a concise introduction when useful. These improve navigation but
 are not reasons to invent project metadata. Narrative content may use any
@@ -236,6 +243,12 @@ bug document keeps checkboxes only in acceptance criteria.
 Completed tasks require all criteria checked, plus `ALL` and `DOCS` targets and
 completed dependencies. Blocked tasks require a Blocker section; cancelled
 tasks require a Cancellation reason.
+
+Tasks may explicitly list `Standards`/`Стандарты` and
+`Affected runbooks`/`Затронутые runbooks`. Task context includes those `STD-*`
+and `RB-*` records and documents without matching scope globs automatically.
+When Standards is non-empty, readiness and full verification also require
+exactly one `QUALITY` mapping whose command is declared by the task.
 
 Keep active tasks in `work/`. Only Done and Cancelled tasks belong under
 `work/archive/YYYY/`; malformed archive paths and nonterminal archived tasks are

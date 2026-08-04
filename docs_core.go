@@ -19,6 +19,8 @@ var typeLabels = map[string]string{
 	"decision": "Архитектурное решение", "flow": "Процесс", "guide": "Руководство", "work": "Рабочие задачи",
 	"reference": "Справочник", "screen-map": "Устаревшая карта экранов", "screen-index": "Раздел экранов", "screen": "Экран",
 	"notes": "Заметки", "ideas": "Идеи развития", "document": "Документ",
+	"standard": "Стандарт", "quality-index": "Стандарты качества",
+	"runbook": "Runbook", "runbook-index": "Runbooks",
 }
 
 var folderLabels = map[string]string{
@@ -26,6 +28,7 @@ var folderLabels = map[string]string{
 	"contracts": "Контракты", "decisions": "Решения", "flows": "Процессы", "guides": "Руководства",
 	"work": "Рабочие задачи", "reference": "Справочник",
 	"processes": "Процессы", "screens": "Экраны",
+	"quality": "Стандарты качества", "runbooks": "Runbooks",
 }
 
 var rootOrder = map[string]int{
@@ -42,7 +45,7 @@ type statusGroup struct {
 var statusGroups = []statusGroup{
 	{Kind: "not-started", Symbol: "○", Values: []string{"не начато", "не начат", "not started", "new", "черновик", "draft"}},
 	{Kind: "planned", Symbol: "◷", Values: []string{"запланировано", "запланирован", "planned", "proposed", "предложено", "предложен", "готово к работе", "ready"}},
-	{Kind: "in-progress", Symbol: "◐", Values: []string{"в работе", "работа", "in progress", "work in progress", "active", "активен", "снижается"}},
+	{Kind: "in-progress", Symbol: "◐", Values: []string{"в работе", "работа", "in progress", "work in progress", "active", "effective", "действует", "активен", "снижается"}},
 	{Kind: "blocked", Symbol: "!", Values: []string{"заблокировано", "заблокирован", "blocked"}},
 	{Kind: "paused", Symbol: "Ⅱ", Values: []string{"приостановлено", "приостановлен", "paused", "on hold"}},
 	{Kind: "done", Symbol: "✓", Values: []string{"готово", "готов", "выполнено", "выполнен", "завершено", "завершен", "реализовано", "реализован", "done", "complete", "completed", "implemented", "закрыт", "закрыто", "closed"}},
@@ -50,8 +53,9 @@ var statusGroups = []statusGroup{
 	{Kind: "accepted", Symbol: "✓", Values: []string{"принято", "принят", "accepted"}},
 	{Kind: "rejected", Symbol: "×", Values: []string{"отклонено", "отклонен", "rejected"}},
 	{Kind: "cancelled", Symbol: "×", Values: []string{"отменено", "отменен", "cancelled", "canceled"}},
-	{Kind: "superseded", Symbol: "↪", Values: []string{"заменено", "заменен", "superseded"}},
+	{Kind: "superseded", Symbol: "↪", Values: []string{"заменено", "заменен", "заменён", "superseded", "replaced"}},
 	{Kind: "obsolete", Symbol: "⌁", Values: []string{"устарело", "устарел", "deprecated", "obsolete"}},
+	{Kind: "review-required", Symbol: "!", Values: []string{"требует проверки", "requires review", "review required"}},
 	{Kind: "risk-accepted", Symbol: "≈", Values: []string{"риск принят", "risk accepted"}},
 }
 
@@ -94,6 +98,16 @@ func ClassifyDocument(relativePath string) string {
 		return "work"
 	case "reference":
 		return "reference"
+	case "quality":
+		if base == "index.md" {
+			return "quality-index"
+		}
+		return "standard"
+	case "runbooks":
+		if base == "index.md" {
+			return "runbook-index"
+		}
+		return "runbook"
 	case "screens":
 		if base == "map.md" {
 			return "screen-map"
@@ -539,10 +553,12 @@ func BuildDocumentationModel(options Options) (*Model, error) {
 		validateDocumentBasics(model, document)
 	}
 	validateGlobalStructure(model)
+	validateSectionManifests(model)
 	resolveLinks(model)
 	connectUseCasesAndModules(model)
 	validateMermaidDocuments(model)
 	model.Knowledge = buildKnowledgeModel(model)
+	validateTypedKnowledge(model)
 	buildScreenKnowledge(model)
 	model.Risks = buildRisks(model)
 	model.RoadmapStages = buildRoadmapStages(model)

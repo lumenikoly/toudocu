@@ -56,11 +56,16 @@ apply typed contracts only when the project uses the corresponding capability.
    `modules/`, `use-cases/`, `flows/`, `screens/`, `decisions/`, `roadmap.md`,
    and `work/` only when the project benefits from their machine-readable
    semantics.
+   Use `quality/STD-*.md` for enforceable standards and `runbooks/RB-*.md` for
+   real operational procedures. For an unknown top-level section, add an
+   `index.md` manifest with `Type: Custom`, owner, description, and useful H1.
 4. For a new module, use case, flow, screen, or decision, prefer the atomic CLI
    scaffold when available:
 
    ```bash
    docgent scaffold module MOD-AREA ./docs --title "Title" --lang en
+   docgent scaffold standard STD-AREA-001 ./docs --title "Title" --lang en
+   docgent scaffold runbook RB-AREA-001 ./docs --title "Title" --lang en
    ```
 
    Then use the closest template from `assets/templates/ru/` or
@@ -126,6 +131,9 @@ apply typed contracts only when the project uses the corresponding capability.
 4. Treat an existing Ready+ task as an explicit contract: respect its result,
    scope, exclusions, criteria, dependencies, module, use case, flow, screens,
    and rules.
+   Read every explicitly linked standard and runbook. Also review the `Scope`
+   of other standards for applicability; do not infer applicability from a
+   task glob alone.
 5. Use checkboxes in `Acceptance criteria` and `Plan` when progress tracking is
    useful. Keep `AC-*` identifiers and verification mappings on acceptance
    criteria; plan steps do not require them.

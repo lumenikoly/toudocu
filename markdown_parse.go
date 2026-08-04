@@ -24,6 +24,8 @@ var fieldAliases = map[string]string{
 	"flow": "flow", "process": "flow", "процесс": "flow",
 	"screens": "screens", "screens affected": "screens", "экраны": "screens", "затронутые экраны": "screens",
 	"transitions": "transitions", "transitions affected": "transitions", "переходы": "transitions", "затронутые переходы": "transitions",
+	"standards": "standards", "стандарты": "standards",
+	"affected runbooks": "runbooks", "runbooks affected": "runbooks", "затронутые runbooks": "runbooks",
 	"route": "route", "маршрут": "route",
 	"preview": "preview", "превью": "preview",
 	"parent screen": "parentScreen", "parent": "parentScreen", "родительский экран": "parentScreen", "родитель": "parentScreen",
@@ -40,6 +42,11 @@ var fieldAliases = map[string]string{
 	"impact": "impact", "влияние": "impact",
 	"id": "id", "identifier": "id", "идентификатор": "id",
 	"tags": "tags", "теги": "tags",
+	"scope": "scope", "область": "scope",
+	"environment": "environment", "среда": "environment",
+	"risk": "risk", "риск": "risk",
+	"last verified": "lastVerified", "last review": "lastVerified", "последняя проверка": "lastVerified",
+	"superseded by": "supersededBy", "replaced by": "supersededBy", "заменён": "supersededBy", "заменен": "supersededBy",
 }
 
 var displayFieldNames = map[string]string{
@@ -50,6 +57,8 @@ var displayFieldNames = map[string]string{
 	"flow":            "Процесс",
 	"screens":         "Экраны",
 	"transitions":     "Переходы",
+	"standards":       "Стандарты",
+	"runbooks":        "Затронутые runbooks",
 	"route":           "Маршрут",
 	"preview":         "Превью",
 	"parentScreen":    "Родительский экран",
@@ -60,6 +69,8 @@ var displayFieldNames = map[string]string{
 	"errors":          "Ошибки",
 	"plannedDate":     "Плановая дата", "updated": "Последнее обновление", "probability": "Вероятность",
 	"impact": "Влияние", "id": "Идентификатор", "tags": "Теги", "type": "Тип", "source": "Источник",
+	"scope": "Область", "environment": "Среда", "risk": "Риск", "lastVerified": "Последняя проверка",
+	"supersededBy": "Заменён",
 }
 
 var (

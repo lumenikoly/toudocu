@@ -205,11 +205,13 @@ type ReportProject struct {
 }
 
 type ReportKnowledge struct {
-	Modules       []KnowledgeModule  `json:"modules"`
-	UseCases      []KnowledgeUseCase `json:"useCases"`
-	Flows         []KnowledgeFlow    `json:"flows"`
-	BusinessRules []BusinessRule     `json:"businessRules"`
-	WorkItems     []WorkItem         `json:"workItems"`
+	Modules       []KnowledgeModule   `json:"modules"`
+	UseCases      []KnowledgeUseCase  `json:"useCases"`
+	Flows         []KnowledgeFlow     `json:"flows"`
+	Standards     []KnowledgeStandard `json:"standards"`
+	Runbooks      []KnowledgeRunbook  `json:"runbooks"`
+	BusinessRules []BusinessRule      `json:"businessRules"`
+	WorkItems     []WorkItem          `json:"workItems"`
 }
 
 type ReportScreen struct {
@@ -280,6 +282,8 @@ type TaskContextReport struct {
 	Module            *KnowledgeModule      `json:"module,omitempty"`
 	UseCase           *KnowledgeUseCase     `json:"useCase,omitempty"`
 	Flow              *KnowledgeFlow        `json:"flow,omitempty"`
+	Standards         []KnowledgeStandard   `json:"standards"`
+	Runbooks          []KnowledgeRunbook    `json:"runbooks"`
 	Screens           []KnowledgeScreen     `json:"screens"`
 	ScreenTransitions []ScreenTransition    `json:"screenTransitions"`
 	BusinessRules     []BusinessRule        `json:"businessRules"`

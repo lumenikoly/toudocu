@@ -312,7 +312,7 @@
       resetButtons.forEach((button) => {
         button.addEventListener('click', () => {
           controls.forEach((control) => {
-            control.value = control.tagName === 'SELECT' ? 'all' : '';
+            control.value = control.dataset.filterDefault || (control.tagName === 'SELECT' ? 'all' : '');
           });
           apply();
           controls[0]?.focus();
@@ -923,6 +923,51 @@
     $('[data-print]')?.addEventListener('click', () => window.print());
   }
 
+  async function initializeServerRebuild() {
+    const button = $('[data-server-rebuild]');
+    const status = $('[data-server-rebuild-status]');
+    if (!button || !/^https?:$/.test(window.location.protocol)) return;
+
+    try {
+      const probe = await fetch(`${rootPrefix}__docgent/rebuild`, {
+        method: 'GET',
+        cache: 'no-store',
+      });
+      if (probe.status !== 405 || !probe.headers.get('Allow')?.split(/\s*,\s*/).includes('POST')) return;
+    } catch {
+      return;
+    }
+
+    button.hidden = false;
+    button.addEventListener('click', async () => {
+      if (button.disabled) return;
+      button.disabled = true;
+      button.classList.add('is-rebuilding');
+      button.setAttribute('aria-label', 'Перегенерация HTML');
+      if (status) status.textContent = 'Пересборка модели и HTML.';
+      try {
+        const response = await fetch(`${rootPrefix}__docgent/rebuild`, {
+          method: 'POST',
+          headers: { Accept: 'application/json', 'X-Docgent-Action': 'rebuild' },
+        });
+        if (!response.ok) {
+          const message = (await response.text()).trim();
+          throw new Error(message || `HTTP ${response.status}`);
+        }
+        if (status) status.textContent = 'Документация обновлена. Перезагрузка страницы.';
+        window.location.reload();
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        button.disabled = false;
+        button.classList.remove('is-rebuilding');
+        button.classList.add('has-error');
+        button.setAttribute('aria-label', 'Не удалось обновить документацию. Повторить');
+        button.title = `Не удалось обновить документацию: ${message}`;
+        if (status) status.textContent = `Не удалось обновить документацию: ${message}. Повторите попытку.`;
+      }
+    });
+  }
+
   initializeTheme();
   initializeSiteTheme();
   initializeHeroSummary();
@@ -937,4 +982,5 @@
   initializeUseCaseTabs();
   initializeTocTracking();
   initializePrint();
+  initializeServerRebuild();
 })();

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Добавлены опциональные `quality/STD-*`, `runbooks/RB-*`, custom manifests,
+  task-связи `Standards`/`Affected runbooks`, verification target `QUALITY`,
+  RU/EN scaffolds и специализированные каталоги портала.
+- В хедер портала при работе через `serve` добавлена кнопка «Пересобрать
+  документацию»: сервер перегенерирует модель и HTML, а браузер после успеха
+  перезагружает текущую страницу без смены адреса listener.
 - Verification target теперь определяется только по левой части mapping, поэтому
   команды с `docs`, `ALL` или `AC-*` больше не создают ложную неоднозначность.
 - Readiness принимает существующие безопасные каталоги в documentation impact,

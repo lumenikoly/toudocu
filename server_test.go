@@ -1,6 +1,7 @@
 package docgent
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -84,12 +85,62 @@ func TestDocumentationServerServesAndRebuilds(t *testing.T) {
 	}
 
 	assertRequestContains(http.MethodGet, "/", "Первая версия.")
+	assertRequestContains(http.MethodGet, "/", "data-server-rebuild")
 	assertRequestContains(http.MethodHead, "/", "")
 	assertRequestContains(http.MethodGet, "/assets/style.css", "font-family")
 	assertRequestContains(http.MethodGet, "/report.json", `"schemaVersion": 1`)
 
 	writeTestFile(t, docs, "index.md", "# Серверный проект\n\nВторая версия после обновления.\n")
 	assertRequestContains(http.MethodGet, "/", "Вторая версия после обновления.")
+}
+
+func TestDocumentationServerRebuildEndpointRegeneratesSite(t *testing.T) {
+	options, docs := serveTestOptions(t)
+	var stderr strings.Builder
+	handler, _, _, err := newDocumentationServer(options, &stderr)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	writeTestFile(t, docs, "index.md", "# Серверный проект\n\nВерсия после пересборки.\n")
+	request := httptest.NewRequest(http.MethodPost, rebuildEndpoint, nil)
+	request.Header.Set("X-Docgent-Action", "rebuild")
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, request)
+	if response.Code != http.StatusOK {
+		t.Fatalf("status=%d body=%s stderr=%s", response.Code, response.Body.String(), stderr.String())
+	}
+	if response.Header().Get("Content-Type") != "application/json; charset=utf-8" {
+		t.Fatalf("content type: %q", response.Header().Get("Content-Type"))
+	}
+	var result map[string]int
+	if err := json.Unmarshal(response.Body.Bytes(), &result); err != nil {
+		t.Fatal(err)
+	}
+	if result["pages"] == 0 || result["documents"] == 0 {
+		t.Fatalf("unexpected rebuild result: %#v", result)
+	}
+	generated, err := os.ReadFile(filepath.Join(options.OutputDirectory, "index.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(generated), "Версия после пересборки.") {
+		t.Fatal("rebuild endpoint did not regenerate HTML")
+	}
+
+	wrongMethod := httptest.NewRequest(http.MethodGet, rebuildEndpoint, nil)
+	wrongMethodResponse := httptest.NewRecorder()
+	handler.ServeHTTP(wrongMethodResponse, wrongMethod)
+	if wrongMethodResponse.Code != http.StatusMethodNotAllowed || wrongMethodResponse.Header().Get("Allow") != http.MethodPost {
+		t.Fatalf("GET status=%d allow=%q", wrongMethodResponse.Code, wrongMethodResponse.Header().Get("Allow"))
+	}
+
+	missingHeader := httptest.NewRequest(http.MethodPost, rebuildEndpoint, nil)
+	missingHeaderResponse := httptest.NewRecorder()
+	handler.ServeHTTP(missingHeaderResponse, missingHeader)
+	if missingHeaderResponse.Code != http.StatusForbidden {
+		t.Fatalf("POST without action header status=%d", missingHeaderResponse.Code)
+	}
 }
 
 func TestDocumentationServerDoesNotExposeSourceOrPartialBuild(t *testing.T) {
