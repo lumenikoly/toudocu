@@ -1,0 +1,7 @@
+/docgent
+/dist/
+/build/
+/example/site/
+*.out
+*.test
+.DS_Store
