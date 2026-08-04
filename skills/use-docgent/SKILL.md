@@ -56,10 +56,18 @@ apply typed contracts only when the project uses the corresponding capability.
    `modules/`, `use-cases/`, `flows/`, `screens/`, `decisions/`, `roadmap.md`,
    and `work/` only when the project benefits from their machine-readable
    semantics.
-4. Select the closest template from `assets/templates/ru/` or
-   `assets/templates/en/`. Templates are starting points, not a required
-   starter pack. Remove unsupported optional sections instead of filling them
-   with plausible placeholders.
+4. For a new module, use case, flow, screen, or decision, prefer the atomic CLI
+   scaffold when available:
+
+   ```bash
+   docgent scaffold module MOD-AREA ./docs --title "Title" --lang en
+   ```
+
+   Then use the closest template from `assets/templates/ru/` or
+   `assets/templates/en/` to enrich only evidence-backed sections. For other
+   document types, start directly from the closest template. Templates are
+   starting points, not a required starter pack. Remove unsupported optional
+   sections instead of filling them with plausible placeholders.
 5. Replace every `{{PLACEHOLDER}}`. Use `rg` when available, or an equivalent
    text search, to find unresolved placeholders.
 6. Keep statements observable and specific. Update related documents together

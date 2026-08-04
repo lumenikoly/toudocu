@@ -1,4 +1,4 @@
 interface:
   display_name: "Use Docgent"
-  short_description: "Создавайте Docgent docs, flows и карты экранов"
-  default_prompt: "Используй $use-docgent, чтобы создать или обновить Docgent-документацию, flow или карту экранов проекта."
+  short_description: "Ведите Docgent docs, задачи и проверки"
+  default_prompt: "Используй $use-docgent, чтобы создать или проверить Docgent-документацию, задачу и статический портал проекта."

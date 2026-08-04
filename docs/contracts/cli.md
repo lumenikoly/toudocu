@@ -1,9 +1,9 @@
-# CLI-контракт Docgent v2
+# CLI-контракт Docgent v1
 
 - Идентификатор: CON-CLI-V1
 - Статус: Готово
 - Владелец: Команда Docgent
-- Последнее обновление: 2026-07-29
+- Последнее обновление: 2026-07-30
 
 Контракт фиксирует публичные команды, exit codes и машинные JSON-форматы
 Docgent.
@@ -91,7 +91,7 @@ Done; безопасный `--dry-run` также можно использов�
   завершились ошибкой; ошибка последующей пересборки возвращается клиенту как
   HTTP 500, не останавливая сервер.
 
-## ProjectReport schema v2
+## ProjectReport schema v1
 
 `check --format json` и сгенерированный `report.json` содержат:
 
@@ -110,7 +110,7 @@ Done; безопасный `--dry-run` также можно использов�
 Пустые коллекции имеют вид `[]`. Строки business rules, criteria, roadmap и
 issues начинаются с единицы.
 
-## TaskContextReport schema v2
+## TaskContextReport schema v1
 
 Read-only отчёт содержит полный `WorkItem`, `requiredReads`, business rules,
 зависимости, documentation-impact документы и фиксированные разделы связанных
@@ -118,7 +118,7 @@ module, use case, flow и screens.
 
 Команда не выполняет содержимое `checks`.
 
-## Новые отчёты schema v1
+## Workflow reports schema v1
 
 `SearchReport`, `TaskInitReport`, `ScaffoldReport` и `TaskReadyReport`
 используют schema v1.
@@ -139,6 +139,5 @@ module, use case, flow и screens.
 
 ## Совместимость
 
-ProjectReport и TaskContextReport используют schema v2. Остальные отчёты
-workflow используют schema v1. Несовместимое изменение требует новой версии
-соответствующей схемы.
+Все публичные отчёты используют schema v1. Контракт развивается напрямую без
+legacy-слоя, преобразователей и параллельной выдачи нескольких версий схемы.

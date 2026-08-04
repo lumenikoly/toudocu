@@ -2,7 +2,7 @@
 
 - Статус: Готово
 - Владелец: Команда Docgent
-- Последнее обновление: 2026-07-29
+- Последнее обновление: 2026-07-30
 
 Docgent реализован как один Go-модуль с линейным конвейером: Markdown-файлы
 преобразуются в проверенную проектную модель, из которой формируются HTML и
@@ -14,7 +14,7 @@ JSON-представления.
 локально и не требует базы данных, сервера, npm или сетевого доступа. Встроенный
 browser bundle Mermaid является vendored asset и не добавляет runtime-зависимость. Человек
 работает с Markdown и HTML, агент или CI — с CLI exit code и JSON ProjectReport
-schema v2.
+schema v1.
 
 ## Основные компоненты
 
@@ -24,8 +24,8 @@ schema v2.
 | Markdown | Безопасный разбор и HTML-рендеринг | `markdown_parse.go`, `markdown_render.go` |
 | Модель знаний | Валидация документов, ID и связей | `docs_core.go`, `knowledge.go`, `documentation_links.go` |
 | Screen graph | Экраны, переходы, flows, hotspots и traceability | `screens.go`, `screen_site.go` |
-| Task workflow | Контекст и выполнение проверок задачи | `task_context.go`, `task_verify.go` |
-| Site | HTML, навигация, поиск, Screen Map и JSON-отчёт | `site.go`, `screen_site.go`, `assets/` |
+| Task workflow | Поиск, scaffold, readiness, контекст и выполнение проверок | `search.go`, `scaffold.go`, `task_*.go` |
+| Site | HTML, каталоги процессов, Screen Map, конфигурация и JSON-отчёт | `site.go`, `process_site.go`, `screen_site.go`, `site_config.go`, `report_types.go`, `assets/` |
 
 ## Поток данных
 
@@ -35,8 +35,8 @@ schema v2.
 4. Валидаторы строят связи модулей, сценариев, процессов, правил, задач,
    roadmap, экранов и переходов.
 5. `check` возвращает diagnostics, а `task context` — ограниченный срез модели.
-6. `build` создаёт автономный портал, полный каталог процессов, Screen Map,
-   проигрываемые сценарии и `ProjectReport`.
+6. `build` создаёт автономный портал, раздельные каталоги use cases и
+   процессов, Screen Map, проигрываемые сценарии и `ProjectReport`.
 7. Только `task verify --run` запускает объявленные команды из корня репозитория.
 
 Подробные визуальные представления вынесены в отдельные документы:
@@ -53,8 +53,8 @@ schema v2.
   из diagram source запрещена.
 - Пути output, repository links и report проходят проверки выхода за границы.
 - Команды work item считаются доверенным кодом и требуют явного запуска.
-- Сгенерированные `build/`, `dist/` и `example/site/` не являются источником
-  истины.
+- Сгенерированные `build/`, `dist/`, `example/site/`, `project-docs/` и
+  `example/project-docs/` не являются источником истины.
 
 ## Отказоустойчивость
 
@@ -66,5 +66,5 @@ schema v2.
 
 - пакет намеренно остаётся плоским, пока разделение не уменьшает связанность;
 - собственный Markdown subset увеличивает ответственность тестов;
-- публичная JSON-схема меняется только с сохранением явной совместимости или
-  новой версии.
+- публичная JSON-схема зафиксирована как v1; legacy-слой и параллельные версии
+  не поддерживаются.

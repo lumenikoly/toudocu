@@ -95,7 +95,7 @@ func BuildTaskContext(model *Model, taskID string) (TaskContextReport, error) {
 		return TaskContextReport{}, fmt.Errorf("task context доступен только для Ready, In Progress, Blocked или Done")
 	}
 	report := TaskContextReport{
-		SchemaVersion: 2, Kind: "task-context",
+		SchemaVersion: 1, Kind: "task-context",
 		Generator:         GeneratorInfo{Name: "Docgent", Version: Version},
 		Task:              *item,
 		Screens:           []KnowledgeScreen{},

@@ -545,7 +545,7 @@ func TestGenerateSite(t *testing.T) {
 	if err := json.Unmarshal(reportBytes, &report); err != nil {
 		t.Fatal(err)
 	}
-	if report.SchemaVersion != 2 || report.Documents == nil || report.Issues == nil || report.Screens == nil || report.Transitions == nil || report.PlayableFlows == nil || report.Hotspots == nil || report.Traceability == nil || report.CurrentStatus.ActiveWork == nil || report.CurrentStatus.Blockers == nil {
+	if report.SchemaVersion != 1 || report.Documents == nil || report.Issues == nil || report.Screens == nil || report.Transitions == nil || report.PlayableFlows == nil || report.Hotspots == nil || report.Traceability == nil || report.CurrentStatus.ActiveWork == nil || report.CurrentStatus.Blockers == nil {
 		t.Fatalf("unstable report collections: %#v", report)
 	}
 	foundDirectoryTarget := false
@@ -957,7 +957,7 @@ func TestRoadmapCompletionIsDerivedAndRendered(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, part := range []string{`"schemaVersion":2`, `"declaredCompleted":false`, `"effectiveCompleted":true`, `"completionSource":"use-case-status"`} {
+	for _, part := range []string{`"schemaVersion":1`, `"declaredCompleted":false`, `"effectiveCompleted":true`, `"completionSource":"use-case-status"`} {
 		if !strings.Contains(string(report), part) {
 			t.Fatalf("missing %s in %s", part, report)
 		}

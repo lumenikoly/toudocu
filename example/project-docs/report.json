@@ -1,12 +1,12 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 1,
   "generator": {
     "name": "Docgent",
     "version": "1.1.0-go"
   },
-  "generatedAt": "2026-07-30T18:15:43.855748217Z",
+  "generatedAt": "2026-07-30T18:49:37.190326384Z",
   "sourceDirectory": "docs",
-  "staleDays": 90,
+  "staleDays": 0,
   "project": {
     "title": "Service Desk Showcase",
     "description": "Демонстрационный проект показывает возможности Docgent на документации небольшого сервиса обращений: от модели требований и задач до интерактивной карты экранов и проигрываемых сценариев.",
@@ -19,8 +19,8 @@
     "stage": "Интерактивный прототип",
     "version": "0.1.0",
     "owner": "Команда проекта",
-    "updated": "2026-07-29",
-    "summary": "Портал показывает документы всех основных типов, единый каталог UC- и FLOW- , автономные Mermaid-диаграммы, карту экранов с пятью видами переходов, два проигрываемых сценария, raster preview, fallback без изображения, hotspots и traceability рабочей задачи. Активные задачи, блокеры и следующий результат автоматически выводятся в HTML-представлении из work items и roadmap."
+    "updated": "2026-07-30",
+    "summary": "Портал показывает документы всех основных типов, раздельные каталоги UC- и FLOW- , автономные Mermaid-диаграммы, карту экранов с пятью видами переходов, два проигрываемых сценария, raster preview, fallback без изображения, hotspots и traceability рабочей задачи. Активные задачи, блокеры и следующий результат автоматически выводятся в HTML-представлении из work items и roadmap."
   },
   "currentStatus": {
     "activeWork": [
@@ -113,7 +113,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-29T18:18:48.009211105Z",
+      "updatedAt": "2026-07-30T18:30:57.778685452Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -235,7 +235,7 @@
         "owner": "Команда проекта",
         "stage": "Интерактивный прототип",
         "status": "В работе",
-        "updated": "2026-07-29",
+        "updated": "2026-07-30",
         "version": "0.1.0"
       },
       "status": {
@@ -250,7 +250,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-29T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,

@@ -185,7 +185,7 @@ func TestTaskReadyContextAndVerifyDryRun(t *testing.T) {
 		t.Fatal(err)
 	}
 	context, err := BuildTaskContext(model, "TASK-AUTH-021")
-	if err != nil || context.SchemaVersion != 2 || len(context.RequiredReads) == 0 || context.Task.Before == "" {
+	if err != nil || context.SchemaVersion != 1 || len(context.RequiredReads) == 0 || context.Task.Before == "" {
 		t.Fatalf("context: %#v %v", context, err)
 	}
 	var stdout, stderr bytes.Buffer

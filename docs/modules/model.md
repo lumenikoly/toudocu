@@ -64,7 +64,7 @@ diagnostics.
 ## Стабильные интерфейсы
 
 - `BuildDocumentationModel(Options)`;
-- `ProjectReport` schema v2;
+- `ProjectReport` schema v1;
 - коды `Issue`;
 - правила ID и структуры, описанные в [CLI-контракте](../contracts/cli.md).
 - статусы, типы и формат задач из [руководства по рабочим задачам](../guides/work-items.md).

@@ -14,13 +14,18 @@ Docgent поставляется одним Go-бинарником без вн�
 | Строгая проверка | `docgent check ./docs --strict` | warning также даёт exit code `1` |
 | Сборка портала | `docgent build ./docs` | автономный HTML и `report.json` |
 | Локальный просмотр | `docgent serve ./docs` | HTTP-сервер с пересборкой HTML |
+| Поиск документов | `docgent search "query" ./docs` | `SearchReport` по свежим Markdown |
+| Создание задачи | `docgent task init ./docs --area AREA --title TITLE --type TYPE` | новый Draft и `TaskInitReport` |
+| Создание сущности | `docgent scaffold module|use-case|flow|screen|decision ID ./docs --title TITLE` | атомарный scaffold и `ScaffoldReport` |
+| Проверка готовности | `docgent task ready TASK-ID ./docs` | read-only `TaskReadyReport` |
 | Контекст задачи | `docgent task context TASK-ID ./docs` | read-only `TaskContextReport` |
 | Проверка задачи | `docgent task verify TASK-ID ./docs --dry-run|--run` | план или выполнение команд и `TaskVerifyReport` |
 | Версия | `docgent version` | версия генератора |
 
-Вызов `docgent ./docs` сохраняется как сокращение для `build`. Отдельной команды
-`init` нет: минимальный проект создаётся обычным файлом `docs/index.md`.
-Параметры и exit codes определены в [CLI-контракте](../contracts/cli.md).
+Вызов `docgent ./docs` сохраняется как сокращение для `build`. Отдельной
+верхнеуровневой команды `init` нет: минимальный проект создаётся обычным файлом
+`docs/index.md`; `task init` создаёт только work item. Параметры и exit codes
+определены в [CLI-контракте](../contracts/cli.md).
 
 ## Документная модель
 
@@ -76,16 +81,17 @@ Docgent распознаёт:
 ## Процессы и пользовательские сценарии
 
 «Пользовательские сценарии» — самостоятельный верхнеуровневый раздел и
-каноническая точка входа для `UC-*`. `processes/index.html` — полный сводный
-каталог поведения проекта. Он показывает и позволяет совместно фильтровать:
+каноническая точка входа для `UC-*`. Раздел «Процессы» перечисляет именованные
+визуальные и межсистемные документы `FLOW-*`. Каталоги разделены:
 
-- `UC-*` — требования и пользовательский результат;
-- `FLOW-*` — именованные визуальные или межсистемные процессы.
+- `use-cases/index.html` показывает требования и пользовательский результат;
+- `processes/index.html` показывает процессы и фильтрует их по модулю и
+  связанному сценарию;
+- `flows/index.html` сохраняет совместимое типизированное представление
+  `FLOW-*`, но не получает отдельного пункта навигации.
 
-В дереве «Процессов» сценарии повторно не перечисляются: там находятся
-«Все процессы», «Визуальные процессы» и документы `FLOW-*`. Дополнительно
-генерируются типизированные каталоги `use-cases/index.html` и
-`flows/index.html`. Канонические документы получают стабильные URL по ID:
+Документы `FLOW-*` являются прямыми дочерними пунктами «Процессов».
+Канонические документы получают стабильные URL по ID:
 
 - `use-cases/UC-*.html`;
 - `flows/FLOW-*.html`.
@@ -102,6 +108,10 @@ Docgent распознаёт:
 - `screens/catalog.html` — фильтруемый каталог;
 - `screens/SC-*.html` — документы экранов со связями;
 - `traceability.html` — связь use case, screen, transition, task, criterion и verification.
+
+Родительский пункт «Экраны» ведёт в `screens/catalog.html`. При включённой
+общей карте `screens/index.html` добавляется отдельным дочерним пунктом;
+`--no-screen-map` удаляет только эту страницу и ссылку.
 
 Карточка карты показывает preview или placeholder, ID, название, маршрут,
 статус, модуль и количество входящих и исходящих переходов. Доступны режимы:
@@ -169,7 +179,7 @@ Timeout завершает дерево процессов, а stdout и stderr 
 
 ## JSON и автоматизация
 
-`check --format json` и `report.json` используют чистую schema v2 и содержат:
+`check --format json` и `report.json` используют чистую schema v1 и содержат:
 
 - сведения о генераторе, проекте, текущем состоянии и статистике;
 - документы, разрешённые ссылки, backlinks и related documents;
@@ -178,10 +188,8 @@ Timeout завершает дерево процессов, а stdout и stderr 
 - типизированные flows и двусторонние связи `UC ↔ FLOW`;
 - traceability matrix и diagnostics.
 
-`task context` использует schema v2, а остальные task reports — schema v1 с
-полем `kind`.
-До первого релиза контракт развивается напрямую в v1 без параллельной
-версии схемы.
+`task context` и остальные task reports используют schema v1 с полем `kind`.
+Контракт развивается напрямую в v1 без параллельной версии схемы.
 
 ## Безопасность и отказоустойчивость
 

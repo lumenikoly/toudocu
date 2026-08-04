@@ -31,7 +31,7 @@
    Done.
 4. Docgent собирает полный task contract, фиксированные разделы связанных
    сущностей, documentation-impact документы, business rules и diagnostics.
-5. Docgent возвращает `TaskContextReport` schema v2 с `requiredReads`.
+5. Docgent возвращает `TaskContextReport` schema v1 с `requiredReads`.
 6. Исполнитель использует результат, область изменений и ограничения задачи
    для планирования работы.
 

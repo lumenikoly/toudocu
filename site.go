@@ -712,7 +712,7 @@ func BuildReport(model *Model) ProjectReport {
 		})
 	}
 	return ProjectReport{
-		SchemaVersion: 2, Generator: GeneratorInfo{Name: "Docgent", Version: Version},
+		SchemaVersion: 1, Generator: GeneratorInfo{Name: "Docgent", Version: Version},
 		GeneratedAt: model.GeneratedAt, SourceDirectory: pathBase(model.RootDirectory),
 		StaleDays: model.StaleDays, Project: project, CurrentStatus: model.CurrentStatus,
 		Stats: model.Stats, Documents: documents, Roadmap: roadmap, Risks: risks,

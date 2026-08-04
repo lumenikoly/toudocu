@@ -53,7 +53,7 @@ CLI предоставляет `search`, `task init`, `scaffold`, `task ready`, 
 - [x] `AC-02` Search, init и scaffold соблюдают ranking, ID-based paths и atomic create.
 - [x] `AC-03` Ready и context возвращают полный локальный контракт без изменения файлов и выполнения команд.
 - [x] `AC-04` Verify поддерживает dry-run, targeted и full run с безопасным отчётом и ограниченным выводом.
-- [x] `AC-05` ProjectReport и TaskContextReport используют schema v2, а новые отчёты — schema v1.
+- [x] `AC-05` Все публичные JSON-отчёты используют единую schema v1.
 
 ## План
 

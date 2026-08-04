@@ -642,7 +642,7 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	if err := json.Unmarshal(reportData, &report); err != nil {
 		t.Fatal(err)
 	}
-	if report.SchemaVersion != 2 || len(report.Screens) != 4 || len(report.Transitions) != 5 || len(report.PlayableFlows) != 1 {
+	if report.SchemaVersion != 1 || len(report.Screens) != 4 || len(report.Transitions) != 5 || len(report.PlayableFlows) != 1 {
 		t.Fatalf("unexpected report v1: %#v", report)
 	}
 	if strings.Contains(string(reportData), `"screenTransitions"`) {

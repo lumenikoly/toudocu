@@ -64,7 +64,7 @@ Docgent создаёт нейтральные каркасы и проверяе
 ## Стабильные интерфейсы
 
 - команды и параметры из [CLI-контракта](../contracts/cli.md);
-- `ProjectReport` и `TaskContextReport` schema v2;
+- `ProjectReport` и `TaskContextReport` schema v1;
 - `SearchReport`, `TaskInitReport`, `ScaffoldReport`, `TaskReadyReport` и
   `TaskVerifyReport` schema v1;
 - exit code `0` только при успешном результате операции.
