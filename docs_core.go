@@ -14,7 +14,7 @@ var defaultExcludes = []string{".git", ".hg", ".svn", "node_modules", "vendor", 
 
 var typeLabels = map[string]string{
 	"overview": "Обзор проекта", "status": "Текущее состояние", "roadmap": "Дорожная карта",
-	"risks": "Риски", "changelog": "История изменений", "use-case": "Пользовательский сценарий",
+	"risks": "Риски", "changelog": "Журнал изменений проекта", "use-case": "Пользовательский сценарий",
 	"module": "Модуль", "architecture": "Архитектура", "contract": "Контрактный каталог",
 	"decision": "Архитектурное решение", "flow": "Процесс", "guide": "Руководство", "work": "Рабочие задачи",
 	"reference": "Справочник", "screen-map": "Устаревшая карта экранов", "screen-index": "Раздел экранов", "screen": "Экран",
@@ -33,7 +33,7 @@ var folderLabels = map[string]string{
 
 var rootOrder = map[string]int{
 	"index.md": 0, "status.md": 1, "roadmap.md": 2, "risks.md": 3,
-	"ideas.md": 4, "notes.md": 5, "changelog.md": 6, "glossary.md": 7,
+	"ideas.md": 4, "notes.md": 5, "glossary.md": 6,
 }
 
 type statusGroup struct {
@@ -72,8 +72,6 @@ func ClassifyDocument(relativePath string) string {
 		return "roadmap"
 	case "risks.md":
 		return "risks"
-	case "changelog.md":
-		return "changelog"
 	case "notes.md":
 		return "notes"
 	case "ideas.md":
@@ -121,6 +119,84 @@ func ClassifyDocument(relativePath string) string {
 		return "document"
 	}
 	return "document"
+}
+
+const (
+	projectChangelogFile   = "CHANGELOG.md"
+	projectChangelogOutput = "project-changelog.html"
+)
+
+func loadProjectChangelog(repositoryRoot string, staleDays int, now time.Time) (*Document, *Issue) {
+	filePath := filepath.Join(repositoryRoot, projectChangelogFile)
+	info, err := os.Lstat(filePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, ptrIssue(newIssue("warning", "project-changelog-unavailable", "Не удалось проверить корневой CHANGELOG.md: "+err.Error(), projectChangelogFile, 0))
+	}
+	if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() {
+		return nil, ptrIssue(newIssue("warning", "project-changelog-unavailable", "Корневой CHANGELOG.md должен быть обычным файлом; вкладка журнала скрыта.", projectChangelogFile, 0))
+	}
+	contentBytes, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, ptrIssue(newIssue("warning", "project-changelog-unavailable", "Не удалось прочитать корневой CHANGELOG.md: "+err.Error(), projectChangelogFile, 0))
+	}
+	content := string(contentBytes)
+	parsed := AnalyzeMarkdown(content)
+	title := parsed.Title
+	if title == "" {
+		title = "Журнал изменений проекта"
+	}
+	updatedAt := info.ModTime().UTC()
+	if value := parsed.Metadata["updated"]; value != "" {
+		if parsedDate, ok := parseDate(value); ok {
+			updatedAt = parsedDate
+		}
+	} else if value := parsed.Metadata["date"]; value != "" {
+		if parsedDate, ok := parseDate(value); ok {
+			updatedAt = parsedDate
+		}
+	}
+	completed := 0
+	for _, task := range parsed.Tasks {
+		if task.Completed {
+			completed++
+		}
+	}
+	return &Document{
+		ID: projectChangelogFile, AbsolutePath: filePath, SourcePath: projectChangelogFile,
+		OutputPath: projectChangelogOutput, Directory: ".", FileName: projectChangelogFile,
+		Type: "changelog", TypeLabel: typeLabels["changelog"], Title: title, Description: parsed.Description,
+		Content: content, Lines: parsed.Lines, Headings: parsed.Headings, HeadingByLine: parsed.HeadingByLine,
+		Sections: parsed.Sections, Metadata: parsed.Metadata, MetadataExtras: parsed.MetadataExtras,
+		MetadataLineIndexes: parsed.MetadataLineIndexes, Tasks: parsed.Tasks,
+		TaskStats: TaskStats{Total: len(parsed.Tasks), Completed: completed, Remaining: len(parsed.Tasks) - completed, Percent: progress(completed, len(parsed.Tasks))},
+		Links:     parsed.Links, PlainText: parsed.PlainText, MTime: info.ModTime().UTC(), UpdatedAt: updatedAt,
+		AgeDays: int(now.UTC().Sub(updatedAt).Hours() / 24), Stale: staleDays > 0 && int(now.UTC().Sub(updatedAt).Hours()/24) > staleDays,
+		Status: StatusFor(""),
+	}, nil
+}
+
+func ptrIssue(issue Issue) *Issue { return &issue }
+
+func projectChangelogFingerprint(repositoryRoot string) string {
+	filePath := filepath.Join(repositoryRoot, projectChangelogFile)
+	info, err := os.Lstat(filePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "missing"
+		}
+		return "stat-error:" + err.Error()
+	}
+	if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() {
+		return "unavailable:" + info.Mode().String()
+	}
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return "read-error:" + err.Error()
+	}
+	return "content:" + contentDigest(content)
 }
 
 func outputPathForDocument(relativePath string) string {
@@ -483,6 +559,9 @@ func validateArchitectureDocuments(model *Model) {
 
 func assignUniqueOutputPaths(model *Model) {
 	used := map[string]*Document{}
+	if model.ProjectChangelog != nil {
+		used[strings.ToLower(model.ProjectChangelog.OutputPath)] = model.ProjectChangelog
+	}
 	for _, document := range model.Documents {
 		if id := strings.TrimSpace(document.Metadata["id"]); safeStableID(id) {
 			switch document.Type {
@@ -584,6 +663,15 @@ func buildDocumentationModel(options Options, overlay map[string][]byte) (*Model
 		model.RepositoryRef = "main"
 	}
 	files := scanMarkdownFiles(root, options.Excludes, &model.Issues)
+	if filepath.Clean(root) == filepath.Clean(repositoryRoot) {
+		filtered := files[:0]
+		for _, file := range files {
+			if file.RelativePath != projectChangelogFile {
+				filtered = append(filtered, file)
+			}
+		}
+		files = filtered
+	}
 	for _, file := range files {
 		document := createDocument(file, root, staleDays, now, &model.Issues, overlay)
 		if document == nil {
@@ -591,6 +679,11 @@ func buildDocumentationModel(options Options, overlay map[string][]byte) (*Model
 		}
 		model.Documents = append(model.Documents, document)
 		model.DocByPath[document.SourcePath] = document
+	}
+	if changelog, issue := loadProjectChangelog(repositoryRoot, staleDays, now); issue != nil {
+		model.Issues = append(model.Issues, *issue)
+	} else {
+		model.ProjectChangelog = changelog
 	}
 	sort.SliceStable(model.Documents, func(i, j int) bool { return documentLess(model.Documents[i], model.Documents[j]) })
 	assignUniqueOutputPaths(model)

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Портал автоматически показывает корневой `CHANGELOG.md` как «Журнал
+  изменений проекта» по маршруту `project-changelog.html` и включает его в
+  portal search. Файл не меняет `ProjectReport`, task context, semantic model
+  или editor workspace; `docs/changelog.md` остаётся обычным Markdown.
 - Добавлены `docgent changes`, `changes file` и `task changes` с Git-backed
   commit/index/working-tree snapshots, schema-v1 JSON, text/Markdown reports,
   filters, task impact и exit codes 0–4.

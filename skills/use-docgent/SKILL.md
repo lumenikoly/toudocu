@@ -102,9 +102,13 @@ outside the explicit init workflow.
    only when an explicit relationship exists.
 7. Keep global progress in `roadmap.md` if the project uses a roadmap. Do not
    add requirement checklists to `status.md`.
-8. Preserve source Markdown as the source of truth. Never edit generated site
+8. When a repository-root `CHANGELOG.md` exists, treat it as the canonical
+   release journal. Update it only for evidence-backed user-facing release
+   changes; do not duplicate it in `docs/changelog.md` or create it merely to
+   obtain a portal tab. A `docs/changelog.md` file is ordinary Markdown.
+9. Preserve source Markdown as the source of truth. Never edit generated site
    output as documentation.
-9. Treat Mermaid as visualization only. Keep requirements and acceptance
+10. Treat Mermaid as visualization only. Keep requirements and acceptance
    criteria in prose, and use only validated `flowchart`, `stateDiagram-v2`, or
    `sequenceDiagram` blocks. Put concrete request sequences and significant
    service interactions in `FLOW-*` documents. Link a product flow through
@@ -113,9 +117,9 @@ outside the explicit init workflow.
    the architecture document instead. Keep simple endpoint operations in API
    contracts. For screen maps, edit the catalog and transition tables instead
    of the generated Mermaid source.
-10. Complete the author review and any risk-based independent review before
+11. Complete the author review and any risk-based independent review before
     treating Docgent validation as the final structural gate.
-11. Keep `architecture/overview.md` as the direct map of every Markdown file
+12. Keep `architecture/overview.md` as the direct map of every Markdown file
     below `architecture/`. Give every detailed architecture document one
     non-empty architectural question and use the separate overview/detail
     templates. Leave FLOW, CONTRACT, REFERENCE, RUNBOOK, ADR, and MODULE content

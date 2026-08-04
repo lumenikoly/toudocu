@@ -54,7 +54,7 @@ func (s *documentationServer) rebuild() (*Model, GenerateResult, error) {
 	if err != nil {
 		return nil, GenerateResult{}, err
 	}
-	_, revision, err := s.workspace.scan(model)
+	revision, err := s.workspaceRevision(model)
 	if err != nil {
 		return nil, GenerateResult{}, err
 	}
@@ -68,6 +68,14 @@ func (s *documentationServer) rebuild() (*Model, GenerateResult, error) {
 	s.revision = revision
 	s.changesCache = map[string]*ChangeSetReport{}
 	return model, result, nil
+}
+
+func (s *documentationServer) workspaceRevision(model *Model) (string, error) {
+	_, revision, err := s.workspace.scan(model)
+	if err != nil {
+		return "", err
+	}
+	return contentDigest([]byte(revision + "\n" + projectChangelogFingerprint(model.RepositoryRoot))), nil
 }
 
 func requestNeedsRebuild(requestPath string) bool {
@@ -142,7 +150,7 @@ func (s *documentationServer) watch(ctx context.Context) {
 			return
 		case <-ticker.C:
 			s.mu.Lock()
-			_, candidate, err := s.workspace.scan(s.model)
+			candidate, err := s.workspaceRevision(s.model)
 			changed := err == nil && candidate != s.revision
 			s.mu.Unlock()
 			if !changed {
@@ -154,7 +162,7 @@ func (s *documentationServer) watch(ctx context.Context) {
 			case <-time.After(200 * time.Millisecond):
 			}
 			s.mu.Lock()
-			_, stable, stableErr := s.workspace.scan(s.model)
+			stable, stableErr := s.workspaceRevision(s.model)
 			if stableErr == nil && stable == candidate && stable != s.revision {
 				if _, _, rebuildErr := s.rebuild(); rebuildErr != nil {
 					fmt.Fprintln(s.stderr, "Не удалось пересобрать документацию после внешнего изменения:", rebuildErr)

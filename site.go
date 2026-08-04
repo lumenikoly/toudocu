@@ -60,7 +60,7 @@ func documentContextPath(model *Model, document *Document) string {
 }
 
 func renderDocumentContextButton(model *Model, document *Document) string {
-	if document == nil {
+	if document == nil || document == model.ProjectChangelog {
 		return ""
 	}
 	copyButton := `<button class="document-context-button" type="button" data-copy-document-context data-document-context-title="` +
@@ -137,7 +137,7 @@ func renderNavigation(model *Model, current string) string {
 			groups["screens"] = []*Document{}
 		}
 	}
-	writeDoc := func(document *Document) {
+	writeDoc := func(document *Document, label string) {
 		active := ""
 		aria := ""
 		if document.OutputPath == current {
@@ -151,10 +151,16 @@ func renderNavigation(model *Model, current string) string {
 			statusTitle = ` title="` + escapeAttr("Статус: "+statusLabel) + `"`
 			accessibleStatus = `<span class="visually-hidden"> · Статус: ` + escapeHTML(statusLabel) + `</span>`
 		}
-		fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"%s><span class="nav-icon%s" aria-hidden="true"%s>%s</span><span>%s</span>%s</a></li>`, active, escapeAttr(relativeURL(current, document.OutputPath)), aria, escapeAttr(statusClass), statusTitle, escapeHTML(glyph), escapeHTML(document.Title), accessibleStatus)
+		if label == "" {
+			label = document.Title
+		}
+		fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"%s><span class="nav-icon%s" aria-hidden="true"%s>%s</span><span>%s</span>%s</a></li>`, active, escapeAttr(relativeURL(current, document.OutputPath)), aria, escapeAttr(statusClass), statusTitle, escapeHTML(glyph), escapeHTML(label), accessibleStatus)
 	}
 	for _, doc := range rootDocs {
-		writeDoc(doc)
+		writeDoc(doc, "")
+	}
+	if model.ProjectChangelog != nil {
+		writeDoc(model.ProjectChangelog, "Журнал изменений проекта")
 	}
 	keys := make([]string, 0, len(groups))
 	for key := range groups {
@@ -232,7 +238,7 @@ func renderNavigation(model *Model, current string) string {
 		if key == "processes" {
 			for _, doc := range docs {
 				if doc.Type == "flow" && !strings.EqualFold(doc.FileName, "index.md") {
-					writeDoc(doc)
+					writeDoc(doc, "")
 				}
 			}
 			b.WriteString(`</ul></li>`)
@@ -248,7 +254,7 @@ func renderNavigation(model *Model, current string) string {
 					continue
 				}
 			}
-			writeDoc(doc)
+			writeDoc(doc, "")
 		}
 		b.WriteString(`</ul></li>`)
 	}
@@ -270,6 +276,18 @@ func renderNavigation(model *Model, current string) string {
 	}
 	b.WriteString(`</ul></nav>`)
 	return b.String()
+}
+
+func projectChangelogSearchItem(document *Document) SearchItem {
+	description := document.Description
+	if description == "" {
+		description = document.PlainText
+	}
+	return SearchItem{
+		Title: document.Title, Path: projectChangelogFile, URL: document.OutputPath,
+		Type: document.Type, TypeLabel: document.TypeLabel, Description: truncate(description, 220),
+		Text: canonicalText(strings.Join([]string{document.Title, projectChangelogFile, document.PlainText}, " ")),
+	}
 }
 
 func pageShell(model *Model, current, title, description, content, toc string) string {
@@ -1005,7 +1023,11 @@ func generateSite(model *Model, options Options, serve bool) (GenerateResult, er
 			serveAssetCount++
 		}
 	}
-	searchJSON, err := jsonForScript(model.SearchIndex)
+	searchIndex := append([]SearchItem{}, model.SearchIndex...)
+	if model.ProjectChangelog != nil {
+		searchIndex = append(searchIndex, projectChangelogSearchItem(model.ProjectChangelog))
+	}
+	searchJSON, err := jsonForScript(searchIndex)
 	if err != nil {
 		return GenerateResult{}, err
 	}
@@ -1040,6 +1062,14 @@ func generateSite(model *Model, options Options, serve bool) (GenerateResult, er
 			return GenerateResult{}, err
 		}
 		pages++
+	}
+	if model.ProjectChangelog != nil {
+		if err = writeFileEnsured(filepath.Join(output, projectChangelogOutput), []byte(renderDocumentPage(model, model.ProjectChangelog))); err != nil {
+			return GenerateResult{}, err
+		}
+		pages++
+	} else if removeErr := os.Remove(filepath.Join(output, projectChangelogOutput)); removeErr != nil && !os.IsNotExist(removeErr) {
+		return GenerateResult{}, removeErr
 	}
 	if len(model.Knowledge.UseCases)+len(model.Knowledge.Flows) > 0 {
 		processPages := map[string]string{

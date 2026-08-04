@@ -53,6 +53,7 @@ func (f editorFile) summary() editorFileSummary {
 
 type editorWorkspace struct {
 	root           string
+	repositoryRoot string
 	output         string
 	excludes       map[string]struct{}
 	modelOptions   Options
@@ -88,6 +89,14 @@ func newEditorWorkspace(options Options) (*editorWorkspace, error) {
 	if err != nil {
 		return nil, err
 	}
+	repositoryRoot := options.RepositoryRoot
+	if repositoryRoot == "" {
+		repositoryRoot = filepath.Dir(root)
+	}
+	repositoryRoot, err = filepath.Abs(repositoryRoot)
+	if err != nil {
+		return nil, err
+	}
 	excludes := map[string]struct{}{}
 	for _, value := range append(append([]string{}, defaultExcludes...), options.Excludes...) {
 		if value = strings.TrimSpace(value); value != "" {
@@ -98,7 +107,7 @@ func newEditorWorkspace(options Options) (*editorWorkspace, error) {
 	if ensureInside(root, output) {
 		outputRelative = toPosixRelative(root, output)
 	}
-	return &editorWorkspace{root: root, output: output, excludes: excludes, modelOptions: options, outputRelative: outputRelative}, nil
+	return &editorWorkspace{root: root, repositoryRoot: repositoryRoot, output: output, excludes: excludes, modelOptions: options, outputRelative: outputRelative}, nil
 }
 
 func editorLanguage(filePath string) (string, bool) {
@@ -136,6 +145,9 @@ func (w *editorWorkspace) scan(model *Model) ([]editorFile, string, error) {
 			return nil
 		}
 		relative := toPosixRelative(w.root, filePath)
+		if filepath.Clean(w.root) == filepath.Clean(w.repositoryRoot) && relative == projectChangelogFile {
+			return nil
+		}
 		info, err := os.Lstat(filePath)
 		if err != nil {
 			return err
@@ -208,6 +220,9 @@ func validateEditorPath(value string) error {
 func (w *editorWorkspace) resolve(value string, allowMissingFinal bool) (string, os.FileInfo, error) {
 	if err := validateEditorPath(value); err != nil {
 		return "", nil, err
+	}
+	if filepath.Clean(w.root) == filepath.Clean(w.repositoryRoot) && value == projectChangelogFile {
+		return "", nil, workspaceFailure("path_forbidden", "корневой CHANGELOG.md доступен только как portal journal")
 	}
 	current := w.root
 	parts := strings.Split(value, "/")

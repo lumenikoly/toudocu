@@ -549,6 +549,7 @@ type Model struct {
 	CurrentStatus    CurrentStatus
 	Stats            Stats
 	SearchIndex      []SearchItem
+	ProjectChangelog *Document
 	HealthOutputPath string
 	ReportOutputPath string
 	ScreenMapEnabled bool
