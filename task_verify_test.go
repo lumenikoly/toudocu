@@ -115,6 +115,82 @@ func taskVerifyFixture(status string, completed bool, commands map[string]string
 ` + extra
 }
 
+func TestTaskVerificationTargetsComeOnlyFromMappingLeftSide(t *testing.T) {
+	root, docs, _ := createFixture(t)
+	commands := map[string]string{
+		"AC-01": "make docs-check",
+		"AC-02": "printf 'ALL AC-99'",
+		"ALL":   "test -f ./docs/index.md",
+		"DOCS":  "go run ./cmd/docgent check ./docs --strict",
+	}
+	writeTestFile(t, docs, "work/TASK-AUTH-020-verify.md", taskVerifyFixture("Готово к работе", false, commands, ""))
+	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ready := BuildTaskReady(model, "TASK-AUTH-020", false)
+	if !ready.ContractComplete || !ready.ReadyForWork {
+		t.Fatalf("command target names made the contract invalid: %#v", ready)
+	}
+	item, err := findWorkItem(model, "TASK-AUTH-020")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(item.Checks) != len(commands) {
+		t.Fatalf("unexpected checks: %#v", item.Checks)
+	}
+	for _, check := range item.Checks {
+		if got := strings.Join(check.Commands, "\n"); got != commands[check.Target] {
+			t.Fatalf("%s command = %q, want %q", check.Target, got, commands[check.Target])
+		}
+	}
+	report := executeTaskVerify(model, Options{
+		TaskID: "TASK-AUTH-020", VerifyMode: "dry-run", Target: "AC-01", Format: "json",
+	}, io.Discard, io.Discard, &fakeCommandRunner{})
+	if report.Status != "planned" || len(report.Commands) != 1 || report.Commands[0].Command != commands["AC-01"] {
+		t.Fatalf("targeted dry-run: %#v", report)
+	}
+}
+
+func TestTaskVerificationStillRejectsMultipleLeftSideTargets(t *testing.T) {
+	root, docs, _ := createFixture(t)
+	commands := map[string]string{"AC-01": "pass", "AC-02": "pass", "ALL": "pass", "DOCS": "pass"}
+	content := strings.Replace(
+		taskVerifyFixture("Готово к работе", false, commands, ""),
+		"- `AC-01` → `pass`",
+		"- `AC-01` `DOCS` → `pass`",
+		1,
+	)
+	writeTestFile(t, docs, "work/TASK-AUTH-020-verify.md", content)
+	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !hasIssueCode(model.Issues, "ambiguous-verification-target") {
+		t.Fatalf("multiple left-side targets were accepted: %#v", model.Issues)
+	}
+}
+
+func TestTaskVerificationLegacyCodeSpansWithoutArrow(t *testing.T) {
+	root, docs, _ := createFixture(t)
+	commands := map[string]string{"AC-01": "make docs-check", "AC-02": "pass", "ALL": "pass", "DOCS": "pass"}
+	content := strings.Replace(
+		taskVerifyFixture("Готово к работе", false, commands, ""),
+		"- `AC-01` → `make docs-check`",
+		"- `AC-01` `make docs-check`",
+		1,
+	)
+	writeTestFile(t, docs, "work/TASK-AUTH-020-verify.md", content)
+	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ready := BuildTaskReady(model, "TASK-AUTH-020", false)
+	if !ready.ContractComplete || !ready.ReadyForWork {
+		t.Fatalf("legacy code-span mapping failed: %#v", ready)
+	}
+}
+
 func TestExecuteTaskVerifyDeduplicatesAndContinues(t *testing.T) {
 	root, docs, _ := createFixture(t)
 	commands := map[string]string{"AC-01": "pass", "AC-02": "pass", "ALL": "fail", "DOCS": "timeout"}

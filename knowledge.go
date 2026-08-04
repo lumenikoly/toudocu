@@ -161,6 +161,25 @@ func commandsForVerificationLine(line, criterionID string) []string {
 	return nil
 }
 
+func targetsForVerificationLine(line string) []string {
+	text := strings.ToUpper(stripInlineMarkdown(line))
+	delimiterIndex := -1
+	for _, delimiter := range []string{"→", "->", "=>"} {
+		if index := strings.Index(text, delimiter); index >= 0 && (delimiterIndex < 0 || index < delimiterIndex) {
+			delimiterIndex = index
+		}
+	}
+	if delimiterIndex >= 0 {
+		text = text[:delimiterIndex]
+	} else {
+		text = strings.TrimSpace(strings.TrimLeft(text, "-*+ "))
+		if fields := strings.Fields(text); len(fields) > 0 {
+			text = fields[0]
+		}
+	}
+	return uniqueStrings(verificationTargetRE.FindAllString(text, -1))
+}
+
 func traceabilityForVerificationLine(line, criterionID string) ([]string, string, bool) {
 	text := strings.TrimSpace(stripInlineMarkdown(line))
 	text = strings.TrimSpace(strings.TrimLeft(text, "-*+ "))
@@ -224,7 +243,7 @@ func parseCriteriaAndVerification(model *Model, document *Document, item parsedW
 	if verificationFound {
 		for lineIndex := verificationSection.Heading.Line + 1; lineIndex < verificationSection.EndLine; lineIndex++ {
 			line := document.Lines[lineIndex]
-			targets := uniqueStrings(verificationTargetRE.FindAllString(strings.ToUpper(stripInlineMarkdown(line)), -1))
+			targets := targetsForVerificationLine(line)
 			if len(targets) == 0 {
 				continue
 			}

@@ -151,7 +151,7 @@ func documentationImpactIssues(model *Model, item *WorkItem) []Issue {
 		unsafe := false
 		resolvedRoot, _ := resolvePathForSafety(model.RepositoryRoot)
 		for _, candidate := range candidates {
-			if info, err := os.Stat(candidate); err == nil && !info.IsDir() {
+			if _, err := os.Stat(candidate); err == nil {
 				resolved, resolveErr := resolvePathForSafety(candidate)
 				if resolveErr != nil || !ensureInside(resolvedRoot, resolved) {
 					unsafe = true

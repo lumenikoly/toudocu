@@ -39,7 +39,7 @@
 
 ## Проверка
 
-- `AC-01` → `go run ./cmd/docgent check ./d[o]cs --strict --stale-days 0`
+- `AC-01` → `go run ./cmd/docgent check ./docs --strict --stale-days 0`
 - `AC-02` → `go test ./... -run 'TestKnowledgeModel|TestMinimalDocumentationCheckAndBuild'`
 - `AC-03` → `grep -q 'Проектная документация Docgent' README.md`
 - `ALL` → `go test ./...`

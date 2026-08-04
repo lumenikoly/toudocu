@@ -48,15 +48,15 @@
 ## Проверка
 
 - `AC-01` → `TR-CORE-001` → `TestOpenRequest`
-- `AC-01` → `test -f ./d[o]cs/screens/SC-CORE-HOME.md`
+- `AC-01` → `test -f ./docs/screens/SC-CORE-HOME.md`
 - `AC-02` → `TR-CORE-002` → `TestOpenHelp`
-- `AC-02` → `test -f ./d[o]cs/screens/SC-CORE-HELP.md`
+- `AC-02` → `test -f ./docs/screens/SC-CORE-HELP.md`
 - `AC-03` → `TR-CORE-003` → `TestCloseHelp`
-- `AC-03` → `test -f ./d[o]cs/screens/SC-CORE-HELP.md`
+- `AC-03` → `test -f ./docs/screens/SC-CORE-HELP.md`
 - `AC-04` → `TR-CORE-004` → `TestSubmitRequest`
-- `AC-04` → `test -f ./d[o]cs/screens/SC-CORE-RESULT.md`
+- `AC-04` → `test -f ./docs/screens/SC-CORE-RESULT.md`
 - `AC-05` → `TR-CORE-005` → `TestInvalidRequest`
-- `AC-05` → `test -f ./d[o]cs/contracts/api.md`
+- `AC-05` → `test -f ./docs/contracts/api.md`
 - `ALL` → `go test ./...`
 - `DOCS` → `go run ./cmd/docgent check ./example/docs --repository-root ./example`
 

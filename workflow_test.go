@@ -199,6 +199,34 @@ func TestTaskReadyContextAndVerifyDryRun(t *testing.T) {
 	}
 }
 
+func TestTaskReadyAcceptsSafeDocumentationImpactDirectory(t *testing.T) {
+	root, docs, _ := createFixture(t)
+	content := strings.Replace(completeTaskFixture("Ready"), "`docs/index.md`", "`docs/`", 1)
+	writeTestFile(t, docs, "work/TASK-AUTH-021.md", content)
+	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ready := BuildTaskReady(model, "TASK-AUTH-021", false)
+	if !ready.ContractComplete || !ready.ReadyForWork {
+		t.Fatalf("safe documentation-impact directory failed readiness: %#v", ready)
+	}
+}
+
+func TestTaskReadyRejectsDocumentationImpactDirectoryOutsideRoot(t *testing.T) {
+	root, docs, _ := createFixture(t)
+	content := strings.Replace(completeTaskFixture("Ready"), "`docs/index.md`", "`../../../`", 1)
+	writeTestFile(t, docs, "work/TASK-AUTH-021.md", content)
+	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ready := BuildTaskReady(model, "TASK-AUTH-021", false)
+	if !hasIssueCode(ready.Issues, "unsafe-documentation-impact-path") {
+		t.Fatalf("outside documentation-impact directory was accepted: %#v", ready)
+	}
+}
+
 func TestTaskVerifyTargetAndUnknownTarget(t *testing.T) {
 	root, docs, _ := createFixture(t)
 	writeTestFile(t, docs, "work/TASK-AUTH-021.md", completeTaskFixture("Ready"))
