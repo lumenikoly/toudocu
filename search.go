@@ -100,7 +100,11 @@ func SearchDocumentation(model *Model, query string, limit int) (SearchReport, e
 				}
 			}
 		}
-		match := SearchMatch{Type: document.Type, Title: document.Title, Path: document.SourcePath, MatchedSections: sections}
+		archived, archiveYear, _ := taskArchivePathInfo(document.SourcePath)
+		match := SearchMatch{
+			Type: document.Type, Title: document.Title, Path: document.SourcePath,
+			Archived: archived, ArchiveYear: archiveYear, MatchedSections: sections,
+		}
 		if containsType([]string{"module", "use-case", "flow", "screen", "decision", "work"}, document.Type) {
 			match.ID = id
 		}

@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 func completeTaskFixture(status string) string {
@@ -69,6 +70,8 @@ func TestNewCLIFormsAndRemovedTaskCheck(t *testing.T) {
 		{"task", "ready", "TASK-CLI-001", "./docs", "--strict", "--format", "json"},
 		{"task", "context", "TASK-CLI-001", "./docs", "--format", "json"},
 		{"task", "verify", "TASK-CLI-001", "./docs", "--dry-run", "--target", "AC-01"},
+		{"task", "archive", "TASK-CLI-001", "./docs", "--format", "json"},
+		{"task", "restore", "TASK-CLI-001", "./docs", "--format", "json"},
 	}
 	for _, args := range cases {
 		if _, _, _, err := ParseArguments(args); err != nil {
@@ -113,11 +116,12 @@ func TestTaskInitAndScaffoldAtomicCreate(t *testing.T) {
 		t.Fatal(err)
 	}
 	writeTestFile(t, docs, "work/TASK-CLI-999-old.md", "# Existing\n")
+	writeTestFile(t, docs, "work/archive/2025/legacy-name.md", "# TASK-CLI-1200: Archived\n")
 	report, err := InitTask(Options{InputDirectory: docs, Area: "CLI", Title: "Next", TaskType: "Bug", Language: "en"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if report.ID != "TASK-CLI-1000" || report.Path != "work/TASK-CLI-1000.md" {
+	if report.ID != "TASK-CLI-1201" || report.Path != "work/TASK-CLI-1201.md" {
 		t.Fatalf("allocation: %#v", report)
 	}
 	data, _ := os.ReadFile(filepath.Join(docs, filepath.FromSlash(report.Path)))
@@ -141,6 +145,196 @@ func TestTaskInitAndScaffoldAtomicCreate(t *testing.T) {
 	}
 	if _, _, _, err := ParseArguments([]string{"task", "init", docs, "--area", "CLI", "--title", "Injected\nmetadata", "--type", "Feature"}); err == nil {
 		t.Fatal("CLI accepted multiline task title")
+	}
+}
+
+func terminalTaskFixture(status string) string {
+	content := completeTaskFixture(status)
+	if status == "Done" {
+		content = strings.Replace(content, "- [ ] `AC-01`", "- [x] `AC-01`", 1)
+	}
+	if status == "Cancelled" {
+		content += "\n## Cancellation reason\n\nThe request is no longer needed.\n"
+	}
+	return content
+}
+
+func TestTaskArchiveAndRestoreRoundTrip(t *testing.T) {
+	root, docs, _ := createFixture(t)
+	original := terminalTaskFixture("Done")
+	writeTestFile(t, docs, "work/TASK-AUTH-021.md", original)
+	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	archived, err := MoveTask(model, Options{TaskID: "TASK-AUTH-021", Now: time.Date(2031, 4, 5, 0, 0, 0, 0, time.Local)}, "archive")
+	if err != nil || archived.Status != "archived" || archived.DestinationPath != "work/archive/2031/TASK-AUTH-021.md" {
+		t.Fatalf("archive: %#v %v", archived, err)
+	}
+	archivedPath := filepath.Join(docs, filepath.FromSlash(archived.DestinationPath))
+	data, err := os.ReadFile(archivedPath)
+	if err != nil || string(data) != original {
+		t.Fatalf("archived content changed: %v\n%s", err, data)
+	}
+	if _, err := os.Stat(filepath.Join(docs, "work", "TASK-AUTH-021.md")); !os.IsNotExist(err) {
+		t.Fatalf("source still exists after archive: %v", err)
+	}
+
+	model, err = BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	item, err := findWorkItem(model, "TASK-AUTH-021")
+	if err != nil || !item.Archived || item.ArchiveYear != "2031" {
+		t.Fatalf("archive metadata: %#v %v", item, err)
+	}
+	search, err := SearchDocumentation(model, "TASK AUTH 021", 20)
+	if err != nil || len(search.Results) != 1 || !search.Results[0].Archived || search.Results[0].ArchiveYear != "2031" {
+		t.Fatalf("archive search: %#v %v", search, err)
+	}
+	restored, err := MoveTask(model, Options{TaskID: "TASK-AUTH-021"}, "restore")
+	if err != nil || restored.Status != "restored" || restored.DestinationPath != "work/TASK-AUTH-021.md" {
+		t.Fatalf("restore: %#v %v", restored, err)
+	}
+	data, err = os.ReadFile(filepath.Join(docs, "work", "TASK-AUTH-021.md"))
+	if err != nil || string(data) != original {
+		t.Fatalf("restored content changed: %v\n%s", err, data)
+	}
+}
+
+func TestTaskArchiveEligibilityAndArchiveValidation(t *testing.T) {
+	root, docs, _ := createFixture(t)
+	writeTestFile(t, docs, "work/TASK-AUTH-021.md", completeTaskFixture("Ready"))
+	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	report, err := MoveTask(model, Options{TaskID: "TASK-AUTH-021"}, "archive")
+	if err != nil || report.Status != "blocked" || !hasIssueCode(report.Issues, "task-not-terminal") {
+		t.Fatalf("nonterminal archive: %#v %v", report, err)
+	}
+
+	if err := os.Rename(
+		filepath.Join(docs, "work", "TASK-AUTH-021.md"),
+		func() string {
+			target := filepath.Join(docs, "work", "archive", "2031", "TASK-AUTH-021.md")
+			if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+				t.Fatal(err)
+			}
+			return target
+		}(),
+	); err != nil {
+		t.Fatal(err)
+	}
+	model, err = BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !hasIssueCode(model.Issues, "nonterminal-archived-task") {
+		t.Fatalf("manual nonterminal archive was accepted: %#v", model.Issues)
+	}
+	restored, err := MoveTask(model, Options{TaskID: "TASK-AUTH-021"}, "restore")
+	if err != nil || restored.Status != "restored" {
+		t.Fatalf("restore must repair a manually archived active task: %#v %v", restored, err)
+	}
+}
+
+func TestTaskArchiveRejectsInvalidLayoutAndUnsafeDestination(t *testing.T) {
+	t.Run("invalid layout", func(t *testing.T) {
+		root, docs, _ := createFixture(t)
+		writeTestFile(t, docs, "work/archive/not-a-year/TASK-AUTH-021.md", terminalTaskFixture("Done"))
+		model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !hasIssueCode(model.Issues, "invalid-task-archive-path") {
+			t.Fatalf("invalid archive layout was accepted: %#v", model.Issues)
+		}
+	})
+
+	t.Run("collision", func(t *testing.T) {
+		root, docs, _ := createFixture(t)
+		writeTestFile(t, docs, "work/TASK-AUTH-021.md", terminalTaskFixture("Done"))
+		other := strings.Replace(terminalTaskFixture("Done"), "TASK-AUTH-021", "TASK-AUTH-099", 1)
+		writeTestFile(t, docs, "work/archive/2031/TASK-AUTH-021.md", other)
+		model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+		if err != nil {
+			t.Fatal(err)
+		}
+		report, err := MoveTask(model, Options{
+			TaskID: "TASK-AUTH-021",
+			Now:    time.Date(2031, 1, 1, 0, 0, 0, 0, time.Local),
+		}, "archive")
+		if err != nil || !hasIssueCode(report.Issues, "unsafe-task-move") {
+			t.Fatalf("archive collision was accepted: %#v %v", report, err)
+		}
+	})
+
+	t.Run("symlink archive directory", func(t *testing.T) {
+		root, docs, _ := createFixture(t)
+		writeTestFile(t, docs, "work/TASK-AUTH-021.md", terminalTaskFixture("Done"))
+		outside := t.TempDir()
+		if err := os.MkdirAll(filepath.Join(docs, "work"), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Symlink(outside, filepath.Join(docs, "work", "archive")); err != nil {
+			t.Skipf("symlink unavailable: %v", err)
+		}
+		model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+		if err != nil {
+			t.Fatal(err)
+		}
+		report, err := MoveTask(model, Options{TaskID: "TASK-AUTH-021"}, "archive")
+		if err != nil || !hasIssueCode(report.Issues, "unsafe-task-move") {
+			t.Fatalf("symlink destination was accepted: %#v %v", report, err)
+		}
+	})
+}
+
+func TestTaskArchiveBlocksIncomingAndChangingOutgoingLinks(t *testing.T) {
+	t.Run("incoming", func(t *testing.T) {
+		root, docs, _ := createFixture(t)
+		writeTestFile(t, docs, "work/TASK-AUTH-021.md", terminalTaskFixture("Done"))
+		writeTestFile(t, docs, "guides/task.md", "# Task link\n\n[Task](../work/TASK-AUTH-021.md)\n")
+		model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+		if err != nil {
+			t.Fatal(err)
+		}
+		report, err := MoveTask(model, Options{TaskID: "TASK-AUTH-021"}, "archive")
+		if err != nil || !hasIssueCode(report.Issues, "task-move-incoming-link") {
+			t.Fatalf("incoming link did not block: %#v %v", report, err)
+		}
+	})
+
+	t.Run("outgoing", func(t *testing.T) {
+		root, docs, _ := createFixture(t)
+		content := strings.Replace(terminalTaskFixture("Done"), "Update `docs/index.md`.", "Update [module](../modules/auth.md).", 1)
+		writeTestFile(t, docs, "work/TASK-AUTH-021.md", content)
+		model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+		if err != nil {
+			t.Fatal(err)
+		}
+		report, err := MoveTask(model, Options{TaskID: "TASK-AUTH-021"}, "archive")
+		if err != nil || !hasIssueCode(report.Issues, "task-move-outgoing-link") {
+			t.Fatalf("changing outgoing link did not block: %#v %v", report, err)
+		}
+	})
+}
+
+func TestTaskArchiveCLIJSON(t *testing.T) {
+	root, docs, _ := createFixture(t)
+	writeTestFile(t, docs, "work/TASK-AUTH-021.md", terminalTaskFixture("Cancelled"))
+	var stdout, stderr bytes.Buffer
+	code := RunCLI([]string{
+		"task", "archive", "TASK-AUTH-021", docs,
+		"--repository-root", root, "--format", "json", "--stale-days", "0",
+	}, &stdout, &stderr)
+	var report TaskMoveReport
+	if code != 0 || stderr.Len() != 0 {
+		t.Fatalf("code=%d stderr=%s stdout=%s", code, stderr.String(), stdout.String())
+	}
+	if err := json.Unmarshal(stdout.Bytes(), &report); err != nil || report.Status != "archived" || report.Kind != "task-archive" {
+		t.Fatalf("archive JSON: %#v %v\n%s", report, err, stdout.String())
 	}
 }
 

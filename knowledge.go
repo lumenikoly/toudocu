@@ -702,7 +702,17 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 				addKnowledgeIssue(model, document, "error", "work-item-count", fmt.Sprintf("Документ work должен содержать ровно одну задачу TASK-*; найдено: %d.", len(items)), 0)
 			}
 			for _, item := range items {
-				workItems = append(workItems, validateWorkItem(model, document, item))
+				validated := validateWorkItem(model, document, item)
+				archived, archiveYear, archivePathValid := taskArchivePathInfo(document.SourcePath)
+				validated.Archived = archived
+				validated.ArchiveYear = archiveYear
+				if archived && !archivePathValid {
+					addKnowledgeIssue(model, document, "error", "invalid-task-archive-path", "Архивная задача должна находиться в work/archive/YYYY/*.md.", item.Heading.Line+1)
+				}
+				if archived && validated.statusName != "done" && validated.statusName != "cancelled" {
+					addKnowledgeIssue(model, document, "error", "nonterminal-archived-task", "В архиве разрешены только задачи Done и Cancelled.", item.Heading.Line+1)
+				}
+				workItems = append(workItems, validated)
 			}
 		}
 	}
@@ -1102,7 +1112,13 @@ func buildSearchIndex(model *Model) []SearchItem {
 		if description == "" {
 			description = document.PlainText
 		}
-		result = append(result, SearchItem{Title: document.Title, Path: document.SourcePath, URL: document.OutputPath, Type: document.Type, TypeLabel: document.TypeLabel, Status: document.Metadata["status"], Owner: document.Metadata["owner"], Description: truncate(description, 220), Text: text})
+		archived, archiveYear, _ := taskArchivePathInfo(document.SourcePath)
+		result = append(result, SearchItem{
+			Title: document.Title, Path: document.SourcePath, URL: document.OutputPath,
+			Type: document.Type, TypeLabel: document.TypeLabel, Status: document.Metadata["status"],
+			Archived: archived, ArchiveYear: archiveYear, Owner: document.Metadata["owner"],
+			Description: truncate(description, 220), Text: text,
+		})
 	}
 	return result
 }

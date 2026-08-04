@@ -195,6 +195,12 @@ func renderNavigation(model *Model, current string) string {
 			if strings.EqualFold(doc.FileName, "index.md") || doc.Type == "screen-map" {
 				continue
 			}
+			if key == "work" {
+				archived, _, _ := taskArchivePathInfo(doc.SourcePath)
+				if archived {
+					continue
+				}
+			}
 			writeDoc(doc)
 		}
 		b.WriteString(`</ul></li>`)
@@ -432,19 +438,36 @@ func renderDocumentPage(model *Model, document *Document) string {
 }
 
 func docCard(current string, document *Document) string {
-	return `<article class="document-card" data-filter-item data-search="` + escapeAttr(document.Title+" "+document.Description+" "+document.SourcePath) + `" data-status="` + escapeAttr(document.Status.Kind) + `" data-type="` + escapeAttr(document.Type) + `" data-owner="` + escapeAttr(document.Metadata["owner"]) + `"><div class="card-kicker">` + renderStatusChip(document.Status) + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span></div><h3><a href="` + escapeAttr(relativeURL(current, document.OutputPath)) + `">` + escapeHTML(document.Title) + `</a></h3><p>` + escapeHTML(truncate(document.Description, 180)) + `</p>` + renderProgress(document.TaskStats, "Задачи") + `<div class="card-path">` + escapeHTML(document.SourcePath) + `</div></article>`
+	archived, archiveYear, _ := taskArchivePathInfo(document.SourcePath)
+	archiveState := "active"
+	archiveBadge := ""
+	if archived {
+		archiveState = "archived"
+		archiveBadge = `<span class="badge">Архив ` + escapeHTML(archiveYear) + `</span>`
+	}
+	return `<article class="document-card" data-filter-item data-search="` + escapeAttr(document.Title+" "+document.Description+" "+document.SourcePath) + `" data-status="` + escapeAttr(document.Status.Kind) + `" data-type="` + escapeAttr(document.Type) + `" data-owner="` + escapeAttr(document.Metadata["owner"]) + `" data-archive="` + archiveState + `"><div class="card-kicker">` + renderStatusChip(document.Status) + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + archiveBadge + `</div><h3><a href="` + escapeAttr(relativeURL(current, document.OutputPath)) + `">` + escapeHTML(document.Title) + `</a></h3><p>` + escapeHTML(truncate(document.Description, 180)) + `</p>` + renderProgress(document.TaskStats, "Задачи") + `<div class="card-path">` + escapeHTML(document.SourcePath) + `</div></article>`
 }
 
 func filterControls(includeStatus, includeType bool) string {
 	statusControl := ""
 	if includeStatus {
-		statusControl = `<select data-filter-control="status"><option value="all">Все статусы</option><option value="done">Готово</option><option value="in-progress">В работе</option><option value="planned">Запланировано</option><option value="blocked">Заблокировано</option></select>`
+		statusControl = `<select data-filter-control="status"><option value="all">Все статусы</option><option value="not-started">Черновик</option><option value="done">Готово</option><option value="in-progress">В работе</option><option value="planned">Запланировано</option><option value="blocked">Заблокировано</option><option value="cancelled">Отменено</option></select>`
 	}
 	typeControl := ""
 	if includeType {
 		typeControl = `<select data-filter-control="type"><option value="all">Все типы</option><option value="module">Модули</option><option value="use-case">Сценарии</option><option value="screen-map">Карты экранов</option><option value="screen">Экраны</option><option value="flow">Процессы</option><option value="architecture">Архитектура</option><option value="decision">Решения</option><option value="work">Задачи</option></select>`
 	}
 	return `<div class="collection-controls"><input type="search" data-filter-control="search" placeholder="Фильтр" aria-label="Фильтр">` + statusControl + typeControl + `</div>`
+}
+
+func workFilterControls(includeStatus bool) string {
+	statusControl := ""
+	if includeStatus {
+		statusControl = `<select data-filter-control="status"><option value="all">Все статусы</option><option value="not-started">Черновик</option><option value="done">Готово</option><option value="in-progress">В работе</option><option value="planned">Запланировано</option><option value="blocked">Заблокировано</option><option value="cancelled">Отменено</option></select>`
+	}
+	return `<div class="collection-controls"><input type="search" data-filter-control="search" placeholder="Фильтр" aria-label="Фильтр">` +
+		statusControl +
+		`<select data-filter-control="archive" data-filter-default="active"><option value="active" selected>Активные</option><option value="archived">Архив</option><option value="all">Все</option></select></div>`
 }
 
 func documentsHaveDifferentStatuses(documents []*Document) bool {
@@ -517,6 +540,9 @@ func renderDashboard(model *Model) string {
 	var docs strings.Builder
 	for _, document := range model.Documents {
 		if document.SourcePath == "index.md" {
+			continue
+		}
+		if archived, _, _ := taskArchivePathInfo(document.SourcePath); archived {
 			continue
 		}
 		docs.WriteString(docCard("index.html", document))
@@ -624,8 +650,12 @@ func renderDirectoryPage(model *Model, directory string) string {
 		cards.WriteString(docCard(current, doc))
 	}
 	collection := `<div class="card-grid">` + cards.String() + `</div>`
-	if len(docs) > 1 {
-		collection = `<section data-filter-scope>` + filterControls(documentsHaveDifferentStatuses(docs), false) + `<div class="collection-summary">Показано: <strong data-filter-count></strong></div>` + collection + `<div class="empty-state" data-filter-empty hidden>Ничего не найдено.</div></section>`
+	if len(docs) > 1 || directory == "work" && len(docs) > 0 {
+		controls := filterControls(documentsHaveDifferentStatuses(docs), false)
+		if directory == "work" {
+			controls = workFilterControls(documentsHaveDifferentStatuses(docs))
+		}
+		collection = `<section data-filter-scope>` + controls + `<div class="collection-summary">Показано: <strong data-filter-count></strong></div>` + collection + `<div class="empty-state" data-filter-empty hidden>Ничего не найдено.</div></section>`
 	}
 	content := breadcrumbs(model, current, directoryLabel(directory)) + `<header class="page-header"><h1>` + escapeHTML(directoryLabel(directory)) + `</h1><p class="page-lead">Документы раздела: ` + fmt.Sprint(len(docs)) + `.</p></header>` + collection
 	return pageShell(model, current, directoryLabel(directory), directoryLabel(directory), content, "")

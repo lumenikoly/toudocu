@@ -76,6 +76,8 @@ type SearchMatch struct {
 	Type            string   `json:"type"`
 	Title           string   `json:"title"`
 	Path            string   `json:"path"`
+	Archived        bool     `json:"archived"`
+	ArchiveYear     string   `json:"archiveYear,omitempty"`
 	MatchedSections []string `json:"matchedSections"`
 }
 
@@ -98,6 +100,25 @@ type TaskInitReport struct {
 	Type          string        `json:"type"`
 	Language      string        `json:"language"`
 	Path          string        `json:"path"`
+}
+
+type TaskMoveTask struct {
+	ID     string     `json:"id"`
+	Title  string     `json:"title"`
+	Status StatusInfo `json:"status"`
+	Type   string     `json:"type,omitempty"`
+}
+
+type TaskMoveReport struct {
+	SchemaVersion   int           `json:"schemaVersion"`
+	Kind            string        `json:"kind"`
+	Generator       GeneratorInfo `json:"generator"`
+	Status          string        `json:"status"`
+	Task            TaskMoveTask  `json:"task"`
+	SourcePath      string        `json:"sourcePath,omitempty"`
+	DestinationPath string        `json:"destinationPath,omitempty"`
+	ArchiveYear     string        `json:"archiveYear,omitempty"`
+	Issues          []Issue       `json:"issues"`
 }
 
 type ScaffoldReport struct {

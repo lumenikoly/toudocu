@@ -26,6 +26,8 @@ func PrintHelp(w io.Writer) {
   docgent task ready TASK-ID [каталог-документации] [--strict] [--format text|json]
   docgent task context TASK-ID [каталог-документации] [параметры]
   docgent task verify TASK-ID [каталог-документации] (--dry-run|--run) [параметры]
+  docgent task archive TASK-ID [каталог-документации] [--format text|json]
+  docgent task restore TASK-ID [каталог-документации] [--format text|json]
   docgent version
 
 Примеры:
@@ -37,6 +39,8 @@ func PrintHelp(w io.Writer) {
   docgent task ready TASK-CORE-001 ./docs --format json
   docgent task context TASK-CORE-001 ./docs --format json
   docgent task verify TASK-CORE-001 ./docs --dry-run --format json
+  docgent task archive TASK-CORE-001 ./docs --format json
+  docgent task restore TASK-CORE-001 ./docs --format json
 
 Параметры:
   -o, --output <каталог>       Выходной каталог
@@ -104,20 +108,20 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			args = args[1:]
 		case "task":
 			if len(args) < 2 {
-				return options, false, false, fmt.Errorf("использование: docgent task init|ready|context|verify ...")
+				return options, false, false, fmt.Errorf("использование: docgent task init|ready|context|verify|archive|restore ...")
 			}
 			switch args[1] {
 			case "init":
 				options.Command = "task-init"
 				args = args[2:]
 				goto parseOptions
-			case "ready", "context", "verify":
+			case "ready", "context", "verify", "archive", "restore":
 				if len(args) < 3 {
 					return options, false, false, fmt.Errorf("для task %s требуется TASK-ID", args[1])
 				}
 				options.Command = "task-" + args[1]
 			default:
-				return options, false, false, fmt.Errorf("использование: docgent task init|ready|context|verify ...")
+				return options, false, false, fmt.Errorf("использование: docgent task init|ready|context|verify|archive|restore ...")
 			}
 			options.TaskID = args[2]
 			args = args[3:]
@@ -399,7 +403,8 @@ parseOptions:
 	if screenMapOption != "" && options.Command != "build" && options.Command != "serve" {
 		return options, false, false, fmt.Errorf("--screen-map и --no-screen-map доступны только для build и serve")
 	}
-	if options.Command == "task-ready" || options.Command == "task-context" || options.Command == "task-verify" {
+	if options.Command == "task-ready" || options.Command == "task-context" || options.Command == "task-verify" ||
+		options.Command == "task-archive" || options.Command == "task-restore" {
 		if !taskIDRE.MatchString(options.TaskID) {
 			return options, false, false, fmt.Errorf("TASK-ID должен иметь формат TASK-AREA-NNN")
 		}
@@ -591,6 +596,28 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 			printSearchText(stdout, report)
 		}
 		return 0
+	}
+	if options.Command == "task-archive" || options.Command == "task-restore" {
+		operation := strings.TrimPrefix(options.Command, "task-")
+		report, err := MoveTask(model, options, operation)
+		if err != nil {
+			fmt.Fprintln(stderr, "Ошибка:", err)
+			return 1
+		}
+		if options.Format == "json" {
+			data, marshalErr := json.MarshalIndent(report, "", "  ")
+			if marshalErr != nil {
+				fmt.Fprintln(stderr, "Ошибка:", marshalErr)
+				return 1
+			}
+			fmt.Fprintln(stdout, string(data))
+		} else {
+			printTaskMoveText(stdout, report)
+		}
+		if report.Status == "archived" || report.Status == "restored" {
+			return 0
+		}
+		return 1
 	}
 	if options.Command == "task-verify" {
 		report := executeTaskVerify(model, options, stdout, stderr, osCommandRunner{})

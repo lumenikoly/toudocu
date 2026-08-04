@@ -133,6 +133,9 @@ apply typed contracts only when the project uses the corresponding capability.
    repository is trusted and the user explicitly asked to execute or verify the
    task. It executes repository shell commands with the current user's
    permissions.
+8. Archive only a validated Done or Cancelled task with `task archive`; restore
+   it with `task restore`. These commands move one Markdown file without
+   changing its status or content and block when direct links would break.
 
 ## Validate and deliver
 

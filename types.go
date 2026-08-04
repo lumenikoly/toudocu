@@ -327,6 +327,8 @@ type WorkItem struct {
 	Title               string                  `json:"title"`
 	Status              StatusInfo              `json:"status"`
 	Type                string                  `json:"type,omitempty"`
+	Archived            bool                    `json:"archived"`
+	ArchiveYear         string                  `json:"archiveYear,omitempty"`
 	Priority            string                  `json:"priority,omitempty"`
 	Owner               string                  `json:"owner,omitempty"`
 	ModuleID            string                  `json:"moduleId,omitempty"`
@@ -456,6 +458,8 @@ type SearchItem struct {
 	Type        string `json:"type"`
 	TypeLabel   string `json:"typeLabel"`
 	Status      string `json:"status"`
+	Archived    bool   `json:"archived"`
+	ArchiveYear string `json:"archiveYear,omitempty"`
 	Owner       string `json:"owner"`
 	Description string `json:"description"`
 	Text        string `json:"text"`

@@ -25,6 +25,33 @@ func TestEmbeddedMermaidVersionIsPinned(t *testing.T) {
 	}
 }
 
+func TestArchivedTasksAreFilteredFromDefaultPortalSurfaces(t *testing.T) {
+	root, docs, _ := createFixture(t)
+	active := strings.Replace(completeTaskFixture("Ready"), "Add verification workflow", "Active portal task", 1)
+	archived := strings.Replace(terminalTaskFixture("Done"), "Add verification workflow", "Archived portal task", 1)
+	archived = strings.Replace(archived, "TASK-AUTH-021", "TASK-AUTH-022", 1)
+	writeTestFile(t, docs, "work/TASK-AUTH-021.md", active)
+	writeTestFile(t, docs, "work/archive/2031/TASK-AUTH-022.md", archived)
+	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	catalog := renderDirectoryPage(model, "work")
+	for _, expected := range []string{`data-filter-default="active"`, `data-archive="active"`, `data-archive="archived"`, "Archived portal task"} {
+		if !strings.Contains(catalog, expected) {
+			t.Fatalf("work catalog missing %q", expected)
+		}
+	}
+	navigation := renderNavigation(model, "work/index.html")
+	if !strings.Contains(navigation, "Active portal task") || strings.Contains(navigation, "Archived portal task") {
+		t.Fatalf("unexpected work navigation: %s", navigation)
+	}
+	dashboard := renderDashboard(model)
+	if !strings.Contains(dashboard, "Active portal task") || strings.Contains(dashboard, "Archived portal task") {
+		t.Fatalf("unexpected dashboard archive visibility")
+	}
+}
+
 func writeTestFile(t *testing.T, root, relative, content string) {
 	t.Helper()
 	target := filepath.Join(root, filepath.FromSlash(relative))

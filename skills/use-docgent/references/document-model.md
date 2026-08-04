@@ -43,7 +43,7 @@ types are optional.
 | `screens/SC-*.md` | A significant screen and its outgoing transitions | Parses metadata, states and `TR-*`; validates modules, routes and topology |
 | `screens/hotspots.json` | Optional percentage-based interactive areas | Validates screen and transition references and geometry |
 | `decisions/*.md` | Durable decisions | Requires a unique `ADR-*` |
-| `work/TASK-*.md` | Agent- or CI-readable work | Requires exactly one task and status-dependent fields |
+| `work/TASK-*.md`, `work/archive/YYYY/TASK-*.md` | Agent- or CI-readable work and terminal history | Requires exactly one task, status-dependent fields, and terminal archive status |
 | `architecture/`, `contracts/`, `guides/`, `reference/` | Specialized human documentation | Classifies and renders the document |
 | Any other path | Free-form documentation | Renders safely without a typed entity contract |
 
@@ -225,6 +225,11 @@ require `AC-*` identifiers or verification entries:
 Completed tasks require all criteria checked, plus `ALL` and `DOCS` targets and
 completed dependencies. Blocked tasks require a Blocker section; cancelled
 tasks require a Cancellation reason.
+
+Keep active tasks in `work/`. Only Done and Cancelled tasks belong under
+`work/archive/YYYY/`; malformed archive paths and nonterminal archived tasks are
+errors. IDs and dependencies are global across active and archived tasks, and
+task-number allocation scans both locations.
 
 Treat code spans in Scope as repository-relative paths. Each path or glob must
 exist and remain inside `--repository-root`.

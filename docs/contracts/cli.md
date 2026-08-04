@@ -22,6 +22,8 @@ Docgent.
 | `task context` | отсутствуют | `TaskContextReport` выбранной Ready+ задачи |
 | `task verify --dry-run` | отсутствуют | план `TaskVerifyReport` |
 | `task verify --run` | исполняет доверенные команды задачи | `TaskVerifyReport` |
+| `task archive` | без перезаписи перемещает один терминальный `TASK-*` в `work/archive/YYYY/` | `TaskMoveReport` |
+| `task restore` | без перезаписи возвращает один архивный `TASK-*` в `work/` | `TaskMoveReport` |
 | `version` | отсутствуют | версия генератора |
 
 Вызов `docgent ./docs ...` эквивалентен `docgent build ./docs ...`.
@@ -35,6 +37,8 @@ docgent scaffold module|use-case|flow|screen|decision ID [docs-dir] --title TITL
 docgent task ready TASK-ID [docs-dir] [--strict] [--format text|json]
 docgent task context TASK-ID [docs-dir] [--format text|json]
 docgent task verify TASK-ID [docs-dir] (--dry-run|--run) [--target TARGET] [--report FILE] [--timeout DURATION] [--format text|json]
+docgent task archive TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]
+docgent task restore TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]
 ```
 
 В каталоге документации глобально ожидается только `index.md`. `status.md`,
@@ -87,6 +91,8 @@ Done; безопасный `--dry-run` также можно использов�
 - при `--strict` наличие warning также приводит к `1`;
 - `task ready` возвращает `0` для `contract_ready` и `ready`;
 - `task verify` возвращает `0` для `planned` и `passed`.
+- `task archive` и `task restore` возвращают `0` только после успешного
+  перемещения; policy-блокировка возвращает `1` и `TaskMoveReport`.
 - `serve` возвращает `1`, если первоначальная сборка или запуск listener
   завершились ошибкой; ошибка последующей пересборки возвращается клиенту как
   HTTP 500, не останавливая сервер.
@@ -122,6 +128,11 @@ module, use case, flow и screens.
 
 `SearchReport`, `TaskInitReport`, `ScaffoldReport` и `TaskReadyReport`
 используют schema v1.
+
+`WorkItem` и результаты поиска содержат `archived` и optional `archiveYear`.
+`TaskMoveReport` использует schema v1 и содержит `kind`, итоговый `status`
+(`archived`, `restored` или `blocked`), снимок задачи, исходный и целевой пути,
+optional `archiveYear` и issues. Команды перемещения не редактируют Markdown.
 
 ## TaskVerifyReport schema v1
 

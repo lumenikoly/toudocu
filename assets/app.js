@@ -312,7 +312,7 @@
       resetButtons.forEach((button) => {
         button.addEventListener('click', () => {
           controls.forEach((control) => {
-            control.value = control.tagName === 'SELECT' ? 'all' : '';
+            control.value = control.dataset.filterDefault || (control.tagName === 'SELECT' ? 'all' : '');
           });
           apply();
           controls[0]?.focus();

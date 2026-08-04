@@ -3,6 +3,7 @@ package docgent
 import (
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -71,27 +72,51 @@ func scaffoldDate(now time.Time) string {
 }
 
 func nextTaskNumber(docsDir, area string) (int, error) {
-	entries, err := os.ReadDir(filepath.Join(docsDir, "work"))
-	if err != nil && !os.IsNotExist(err) {
-		return 0, err
-	}
+	workDirectory := filepath.Join(docsDir, "work")
 	prefix := "TASK-" + area + "-"
 	maximum := 0
-	for _, entry := range entries {
-		if entry.IsDir() || !strings.EqualFold(filepath.Ext(entry.Name()), ".md") {
-			continue
+
+	consider := func(value string) {
+		if !strings.HasPrefix(value, prefix) {
+			return
 		}
-		name := strings.TrimSuffix(entry.Name(), filepath.Ext(entry.Name()))
-		if !strings.HasPrefix(name, prefix) {
-			continue
+		suffix := strings.TrimPrefix(value, prefix)
+		end := 0
+		for end < len(suffix) && suffix[end] >= '0' && suffix[end] <= '9' {
+			end++
 		}
-		suffix := strings.TrimPrefix(name, prefix)
-		digits := strings.TrimLeftFunc(suffix, func(r rune) bool { return r >= '0' && r <= '9' })
-		digits = suffix[:len(suffix)-len(digits)]
-		number, err := strconv.Atoi(digits)
+		number, err := strconv.Atoi(suffix[:end])
 		if err == nil && number > maximum {
 			maximum = number
 		}
+	}
+	err := filepath.WalkDir(workDirectory, func(filePath string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if entry.Type()&os.ModeSymlink != 0 {
+			if entry.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if entry.IsDir() || !strings.EqualFold(filepath.Ext(entry.Name()), ".md") {
+			return nil
+		}
+		consider(strings.TrimSuffix(entry.Name(), filepath.Ext(entry.Name())))
+		content, readErr := os.ReadFile(filePath)
+		if readErr != nil {
+			return readErr
+		}
+		for _, heading := range AnalyzeMarkdown(string(content)).Headings {
+			if match := workItemHeadingRE.FindStringSubmatch(heading.Title); match != nil {
+				consider(match[1])
+			}
+		}
+		return nil
+	})
+	if err != nil && !os.IsNotExist(err) {
+		return 0, err
 	}
 	return maximum + 1, nil
 }

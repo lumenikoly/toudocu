@@ -48,6 +48,8 @@ structural check both pass.
 | `task context` | No | Read full Ready+ task-local context |
 | `task verify --dry-run` | No | Inspect the verification plan |
 | `task verify --run` | Executes trusted repository commands | Verify an explicitly requested task |
+| `task archive` | Moves one file | Archive one valid Done or Cancelled task |
+| `task restore` | Moves one file | Restore one task from the yearly archive |
 
 Prefer JSON for agent diagnosis and text for human confirmation:
 
@@ -125,6 +127,18 @@ documents.
 Task lists are allowed in both `Acceptance criteria` and `Plan`. Acceptance
 criteria retain unique `AC-*` identifiers and verification mappings; plan
 checkboxes track implementation steps and need neither.
+
+Keep active task files in `work/`. Archive a terminal task only through:
+
+```bash
+docgent task archive TASK-AREA-001 ./docs --format json
+docgent task restore TASK-AREA-001 ./docs --format json
+```
+
+The archive path is `work/archive/YYYY/`. Archive and restore preserve Markdown
+and status, and block when a direct Markdown link would change resolution.
+Relationships by `TASK-*` ID remain valid. Do not delete archived tasks that
+still participate in dependencies or traceability.
 
 Run:
 

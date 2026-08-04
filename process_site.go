@@ -141,7 +141,7 @@ func renderProcessCatalogPage(model *Model, current, onlyType string) string {
 }
 
 func renderUseCaseRelations(model *Model, useCase KnowledgeUseCase, current string) string {
-	var module, screens, tasks, repositoryPaths, traceability strings.Builder
+	var module, screens, activeTasks, archivedTasks, repositoryPaths, traceability strings.Builder
 	for _, candidate := range model.Knowledge.Modules {
 		if candidate.ID != useCase.ModuleID {
 			continue
@@ -164,10 +164,17 @@ func renderUseCaseRelations(model *Model, useCase KnowledgeUseCase, current stri
 	for _, item := range model.Knowledge.WorkItems {
 		if item.UseCaseID == useCase.ID {
 			if document := model.DocByPath[item.Document]; document != nil {
-				tasks.WriteString(`<li><a href="` + escapeAttr(relativeURL(current, document.OutputPath)) + `"><code>` + escapeHTML(item.ID) + `</code> · ` + escapeHTML(item.Title) + `</a></li>`)
+				row := `<li><a href="` + escapeAttr(relativeURL(current, document.OutputPath)) + `"><code>` + escapeHTML(item.ID) + `</code> · ` + escapeHTML(item.Title) + `</a>`
+				if item.Archived {
+					row += ` <span class="badge">Архив ` + escapeHTML(item.ArchiveYear) + `</span>`
+					archivedTasks.WriteString(row + `</li>`)
+				} else {
+					activeTasks.WriteString(row + `</li>`)
+				}
 			}
 		}
 	}
+	tasks := activeTasks.String() + archivedTasks.String()
 	for _, repositoryPath := range useCase.RepositoryPaths {
 		repositoryPaths.WriteString(`<li><code>` + escapeHTML(repositoryPath) + `</code></li>`)
 	}
@@ -180,7 +187,7 @@ func renderUseCaseRelations(model *Model, useCase KnowledgeUseCase, current stri
 	return `<div class="usecase-relations-grid"><section><h2>Связанные процессы</h2>` + processLinks +
 		`</section><section><h2>Модуль</h2><ul class="related-list">` + fallbackList(module.String()) +
 		`</ul></section><section><h2>Экраны</h2><ul class="related-list">` + fallbackList(screens.String()) +
-		`</ul></section><section><h2>Рабочие задачи</h2><ul class="related-list">` + fallbackList(tasks.String()) +
+		`</ul></section><section><h2>Рабочие задачи</h2><ul class="related-list">` + fallbackList(tasks) +
 		`</ul></section><section><h2>Расположение в коде</h2><ul class="related-list">` + fallbackList(repositoryPaths.String()) +
 		`</ul></section></div><section class="dashboard-section"><h2>Проверяемость</h2><div class="data-table"><table><thead><tr><th>Переход</th><th>Задача</th><th>Критерий</th><th>Проверка</th></tr></thead><tbody>` +
 		fallbackTraceability(traceability.String()) + `</tbody></table></div></section>`
