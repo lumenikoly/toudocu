@@ -41,6 +41,29 @@ func documentStableID(document *Document) string {
 	return ""
 }
 
+func metadataSearchTerms(document *Document, includeKeys bool) []string {
+	keys := make([]string, 0, len(document.Metadata))
+	for key := range document.Metadata {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	terms := make([]string, 0, len(keys)*2+len(document.MetadataExtras)*2)
+	for _, key := range keys {
+		if includeKeys {
+			terms = append(terms, key)
+		}
+		terms = append(terms, document.Metadata[key])
+	}
+	for _, extra := range document.MetadataExtras {
+		if includeKeys {
+			terms = append(terms, extra.Key)
+		}
+		terms = append(terms, extra.Value)
+	}
+	return terms
+}
+
 func SearchDocumentation(model *Model, query string, limit int) (SearchReport, error) {
 	terms := uniqueStrings(searchWords(query))
 	if len(terms) == 0 {
@@ -56,13 +79,7 @@ func SearchDocumentation(model *Model, query string, limit int) (SearchReport, e
 	found := []ranked{}
 	for _, document := range model.Documents {
 		id := documentStableID(document)
-		metadata := []string{}
-		for key, value := range document.Metadata {
-			metadata = append(metadata, key, value)
-		}
-		for _, extra := range document.MetadataExtras {
-			metadata = append(metadata, extra.Key, extra.Value)
-		}
+		metadata := metadataSearchTerms(document, true)
 		all := strings.Join([]string{id, document.Title, strings.Join(metadata, " "), document.SourcePath, document.PlainText}, " ")
 		if !containsAllWords(all, terms) {
 			continue

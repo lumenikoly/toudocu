@@ -638,11 +638,23 @@ acceptance criteria, verification или передача между испол�
 ## Разработка
 
 ```bash
-gofmt -w .
-go vet ./...
-go test ./...
-go test -race ./...
+make check
 ```
+
+## Подготовка релиза 0.0.1
+
+Локальная сборка не создаёт тег и не обращается к GitHub:
+
+```bash
+make release
+(cd dist && sha256sum -c checksums.txt)
+./dist/docgent-linux-amd64 version
+```
+
+Каталог `dist/` содержит пять бинарников, `LICENSE`, third-party notices,
+лицензии встроенных browser assets и `checksums.txt`. Для публикации используется
+тег `0.0.1` без префикса `v`; workflow отклоняет тег, который не совпадает с
+выводом `docgent version`.
 
 ## Лицензия
 

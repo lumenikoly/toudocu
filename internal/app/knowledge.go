@@ -1290,10 +1290,7 @@ func pathBase(value string) string {
 func buildSearchIndex(model *Model) []SearchItem {
 	result := make([]SearchItem, 0, len(model.Documents))
 	for _, document := range model.Documents {
-		metadata := []string{}
-		for _, v := range document.Metadata {
-			metadata = append(metadata, v)
-		}
+		metadata := metadataSearchTerms(document, false)
 		tasks := []string{}
 		for _, task := range document.Tasks {
 			tasks = append(tasks, task.Text)

@@ -5,10 +5,13 @@ DOCGENT := go run $(CMD)
 DOCS_DIR := docs
 DEMO_DOCS_DIR := example/docs
 
-.PHONY: fmt vet test build docs docs-serve demo demo-serve clean release
+.PHONY: fmt fmt-check vet test check build docs docs-serve demo demo-serve clean release
 
 fmt:
 	gofmt -w .
+
+fmt-check:
+	test -z "$$(gofmt -l .)"
 
 vet:
 	go vet ./...
@@ -16,6 +19,11 @@ vet:
 test: vet
 	go test ./...
 	go test -race ./...
+
+check: fmt-check test
+	go mod verify
+	$(DOCGENT) check ./$(DOCS_DIR) --repository-root . --strict --stale-days 0
+	$(DOCGENT) check ./$(DEMO_DOCS_DIR) --repository-root ./example --strict --stale-days 0
 
 build:
 	CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o $(BINARY) $(CMD)
@@ -33,7 +41,7 @@ demo:
 demo-serve:
 	$(DOCGENT) serve ./$(DEMO_DOCS_DIR)
 
-release: test
+release: check
 	rm -rf $(DIST)
 	mkdir -p $(DIST)
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o $(DIST)/docgent-linux-amd64 $(CMD)

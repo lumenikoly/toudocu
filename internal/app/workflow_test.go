@@ -110,6 +110,36 @@ func TestSearchDocumentationRankingAndSections(t *testing.T) {
 	}
 }
 
+func TestSearchIndexMetadataOrderIsDeterministic(t *testing.T) {
+	document := &Document{
+		Title:      "Release",
+		SourcePath: "status.md",
+		OutputPath: "status.html",
+		Type:       "status",
+		Metadata: Metadata{
+			"status":  "Ready",
+			"owner":   "Docgent Team",
+			"version": "0.0.1",
+		},
+		MetadataExtras: []MetadataExtra{{Key: "Channel", Value: "stable"}},
+	}
+	model := &Model{Documents: []*Document{document}}
+
+	first := buildSearchIndex(model)
+	second := buildSearchIndex(model)
+	if len(first) != 1 || len(second) != 1 || first[0].Text != second[0].Text {
+		t.Fatalf("search index changed between builds: %#v %#v", first, second)
+	}
+	want := "release status md docgent team ready 0 0 1 stable"
+	if first[0].Text != want {
+		t.Fatalf("search index metadata order = %q, want %q", first[0].Text, want)
+	}
+	terms := strings.Join(metadataSearchTerms(document, true), " ")
+	if terms != "owner Docgent Team status Ready version 0.0.1 Channel stable" {
+		t.Fatalf("CLI metadata order = %q", terms)
+	}
+}
+
 func TestTaskInitAndScaffoldAtomicCreate(t *testing.T) {
 	root := t.TempDir()
 	docs := filepath.Join(root, "docs")

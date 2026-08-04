@@ -7,6 +7,9 @@ import (
 )
 
 func TestPublicAPIFacadeDelegatesToInternalImplementation(t *testing.T) {
+	if docgent.Version != "0.0.1" {
+		t.Fatalf("Version = %q, want 0.0.1", docgent.Version)
+	}
 	if actual := docgent.ClassifyDocument("architecture/overview.md"); actual != "architecture" {
 		t.Fatalf("ClassifyDocument() = %q, want architecture", actual)
 	}

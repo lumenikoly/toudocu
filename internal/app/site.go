@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-const Version = "1.1.0-go"
+const Version = "0.0.1"
 
 var fieldOrder = []string{"status", "type", "stage", "version", "owner", "author", "actor", "priority", "criticality", "module", "useCase", "flow", "screens", "transitions", "standards", "runbooks", "startScreen", "terminalScreens", "allowCycle", "route", "preview", "parentScreen", "component", "environment", "risk", "lastVerified", "supersededBy", "errors", "dependsOn", "source", "date", "plannedDate", "updated", "probability", "impact", "scope", "id", "tags"}
 
