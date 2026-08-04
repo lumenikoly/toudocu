@@ -26,8 +26,9 @@ type RenderContext struct {
 }
 
 type RenderOptions struct {
-	SkipH1           bool
-	SuppressMetadata bool
+	SkipH1             bool
+	SuppressMetadata   bool
+	InteractiveMermaid bool
 }
 
 type renderEntry struct {
@@ -398,11 +399,16 @@ func renderInline(input string, context RenderContext, depth int) string {
 	return text
 }
 
-func renderMermaid(source string, valid bool) string {
+func renderMermaid(source string, valid, interactive bool) string {
 	sourceHTML := escapeHTML(source)
 	var b strings.Builder
 	b.WriteString(`<figure class="mermaid-diagram" data-mermaid-container>`)
-	if valid {
+	if valid && interactive {
+		b.WriteString(`<div class="mermaid-stage" data-mermaid-stage>`)
+		b.WriteString(`<div class="diagram-tools" role="group" aria-label="Масштаб диаграммы"><button type="button" data-mermaid-zoom-out aria-label="Уменьшить">−</button><button type="button" data-mermaid-fit>Вписать</button><button type="button" data-mermaid-zoom-in aria-label="Увеличить">+</button><button type="button" data-mermaid-fullscreen>На весь экран</button></div>`)
+		b.WriteString(`<pre class="mermaid" data-mermaid-diagram aria-label="Диаграмма Mermaid">` + sourceHTML + `</pre>`)
+		b.WriteString(`<p class="mermaid-error" data-mermaid-error role="alert" hidden>Не удалось отобразить диаграмму.</p></div>`)
+	} else if valid {
 		b.WriteString(`<pre class="mermaid" data-mermaid-diagram aria-label="Диаграмма Mermaid">` + sourceHTML + `</pre>`)
 		b.WriteString(`<p class="mermaid-error" data-mermaid-error role="alert" hidden>Не удалось отобразить диаграмму.</p>`)
 	} else {
@@ -452,7 +458,7 @@ func renderBlocks(entries []renderEntry, context RenderContext, options RenderOp
 			source := strings.Join(code, "\n")
 			if isMermaidFenceInfo(languageRaw) {
 				block := analyzeMermaidBlock(entry.Index, entry.Index+len(code)+1, source, closed)
-				b.WriteString(renderMermaid(source, len(block.Problems) == 0))
+				b.WriteString(renderMermaid(source, len(block.Problems) == 0, options.InteractiveMermaid))
 				continue
 			}
 			languageClass, languageLabel := "", ""
@@ -626,7 +632,11 @@ func renderDocumentMarkdown(document *Document, resolver LinkResolver, taskCompl
 		Metadata: document.Metadata, MetadataExtras: document.MetadataExtras, MetadataLineIndexes: document.MetadataLineIndexes,
 		Tasks: document.Tasks, Links: document.Links, Sections: document.Sections, PlainText: document.PlainText,
 	}
-	return RenderMarkdown(parsed, RenderContext{ResolveLink: resolver, HeadingByLine: document.HeadingByLine, TaskCompletionByLine: taskCompletionByLine}, RenderOptions{SkipH1: true, SuppressMetadata: true})
+	return RenderMarkdown(parsed, RenderContext{ResolveLink: resolver, HeadingByLine: document.HeadingByLine, TaskCompletionByLine: taskCompletionByLine}, RenderOptions{
+		SkipH1:             true,
+		SuppressMetadata:   true,
+		InteractiveMermaid: document.Type == "flow",
+	})
 }
 
 func RenderMarkdownFragment(markdown string, context RenderContext) string {

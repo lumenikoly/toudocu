@@ -675,6 +675,23 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .copy-code { position: absolute; top: 7px; right: 7px; z-index: 3; padding: 3px 7px; border: 1px solid #37414d; border-radius: 6px; background: #202731; color: #c7d0da; cursor: pointer; font-size: 11px; }
 .copy-code:hover { background: #2a3440; }
 .mermaid-diagram { margin: 1.5em 0; }
+.mermaid-stage {
+  position: relative;
+  min-height: 160px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+.mermaid-stage.is-panning { cursor: grabbing; user-select: none; }
+.mermaid-stage:fullscreen,
+.mermaid-stage.is-fullscreen-fallback {
+  min-height: 100vh;
+  border: 0;
+  border-radius: 0;
+  background: var(--surface);
+}
+.mermaid-stage.is-fullscreen-fallback { position: fixed; inset: 0; z-index: 100; }
 .mermaid-diagram > .mermaid {
   overflow-x: auto;
   min-height: 80px;
@@ -685,7 +702,35 @@ button, a { -webkit-tap-highlight-color: transparent; }
   background: var(--surface-soft);
   text-align: center;
 }
+.mermaid-stage > .mermaid {
+  display: grid;
+  min-height: 160px;
+  place-items: center;
+  overflow: visible;
+  margin: 0;
+  padding: 58px 20px 20px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: grab;
+  text-align: center;
+}
 .mermaid-diagram > .mermaid svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+.mermaid-stage > .mermaid svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  transition: transform 140ms ease;
+  will-change: transform;
+}
+.mermaid-stage:fullscreen > .mermaid,
+.mermaid-stage.is-fullscreen-fallback > .mermaid { min-height: 100vh; }
+.mermaid-stage:fullscreen > .mermaid svg,
+.mermaid-stage.is-fullscreen-fallback > .mermaid svg {
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 88px);
+}
 .mermaid-error {
   margin: 0;
   padding: 14px 16px;
@@ -759,6 +804,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   background-color: var(--surface);
 }
 .screen-map-stage.is-fullscreen-fallback { position: fixed; inset: 0; z-index: 100; }
+.diagram-tools,
 .screen-map-tools {
   position: absolute;
   top: 12px;
@@ -771,6 +817,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   background: color-mix(in srgb, var(--surface) 94%, transparent);
   box-shadow: 0 6px 18px rgba(18, 28, 45, 0.08);
 }
+.diagram-tools button,
 .screen-map-tools button {
   min-width: 36px;
   min-height: 34px;
@@ -784,8 +831,12 @@ button, a { -webkit-tap-highlight-color: transparent; }
   font-size: 12px;
   font-weight: 750;
 }
+.diagram-tools button:last-child,
 .screen-map-tools button:last-child { border-right: 0; }
+.diagram-tools button:hover,
 .screen-map-tools button:hover { background: var(--surface-soft); }
+.diagram-tools button:focus-visible,
+.screen-map-tools button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .screen-map-stage .mermaid-diagram { min-height: 560px; margin: 0; }
 .screen-map-stage .mermaid-diagram > .mermaid {
   display: grid;
@@ -1009,13 +1060,14 @@ body[data-task-filter="complete"] .task-item.is-open { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .screen-map-modes .toolbar-button,
+  .mermaid-stage > .mermaid svg,
   .screen-map-stage .mermaid-diagram > .mermaid svg,
   .screen-catalog-table tbody tr { transition: none; }
 }
 
 @media print {
   :root { --bg: #fff; --surface: #fff; --text: #111; --muted: #555; --border: #ccc; }
-  .site-header, .sidebar, .page-toc, .document-toolbar, .site-footer, .copy-code, .section-toggle { display: none !important; }
+  .site-header, .sidebar, .page-toc, .document-toolbar, .site-footer, .copy-code, .section-toggle, .diagram-tools, .screen-map-tools { display: none !important; }
   .site-layout, .page-grid { display: block; }
   .page-grid { padding: 0; }
   .doc-content, .card, .metric-card { box-shadow: none; break-inside: avoid; }

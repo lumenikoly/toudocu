@@ -322,6 +322,22 @@ sequenceDiagram
 			t.Fatalf("valid Mermaid model produced issue: %#v", issue)
 		}
 	}
+	output := filepath.Join(root, "site")
+	if _, err := GenerateSite(model, Options{OutputDirectory: output}); err != nil {
+		t.Fatal(err)
+	}
+	flowHTML, err := os.ReadFile(filepath.Join(output, "flows", "login.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, part := range []string{
+		`data-mermaid-stage`, `data-mermaid-diagram`, `data-mermaid-zoom-out`,
+		`data-mermaid-fit`, `data-mermaid-zoom-in`, `data-mermaid-fullscreen`,
+	} {
+		if !strings.Contains(string(flowHTML), part) {
+			t.Fatalf("flow Mermaid page missing %q: %s", part, flowHTML)
+		}
+	}
 }
 
 func TestMermaidContractErrors(t *testing.T) {
@@ -502,6 +518,9 @@ func TestGenerateMermaidSiteAssetsAndMarkup(t *testing.T) {
 		if !strings.Contains(html, part) {
 			t.Fatalf("Mermaid page missing %q: %s", part, html)
 		}
+	}
+	if strings.Contains(html, `data-mermaid-stage`) {
+		t.Fatalf("non-flow Mermaid page must keep the static diagram layout: %s", html)
 	}
 	if strings.Contains(html, `type="module"`) || strings.Contains(html, "cdn.") {
 		t.Fatalf("Mermaid page must be file:// compatible and offline: %s", html)

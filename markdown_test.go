@@ -107,8 +107,13 @@ func TestAnalyzeMermaidBlocks(t *testing.T) {
 
 func TestRenderMermaidBlockAndFallback(t *testing.T) {
 	valid := AnalyzeMarkdown("# Diagram\n\n```mermaid\nstateDiagram-v2\n[*] --> Ready\n```\n")
-	html := RenderMarkdown(valid, RenderContext{}, RenderOptions{})
-	for _, part := range []string{`data-mermaid-container`, `data-mermaid-diagram`, `class="mermaid-source"`, "Показать исходный код", "stateDiagram-v2"} {
+	html := RenderMarkdown(valid, RenderContext{}, RenderOptions{InteractiveMermaid: true})
+	for _, part := range []string{
+		`data-mermaid-container`, `data-mermaid-stage`, `data-mermaid-diagram`,
+		`data-mermaid-zoom-out`, `data-mermaid-fit`, `data-mermaid-zoom-in`,
+		`data-mermaid-fullscreen`, `class="mermaid-source"`, "Показать исходный код",
+		"stateDiagram-v2",
+	} {
 		if !strings.Contains(html, part) {
 			t.Fatalf("valid Mermaid HTML missing %q: %s", part, html)
 		}
@@ -116,7 +121,7 @@ func TestRenderMermaidBlockAndFallback(t *testing.T) {
 
 	invalid := AnalyzeMarkdown("# Diagram\n\n```mermaid\njourney\n```\n")
 	html = RenderMarkdown(invalid, RenderContext{}, RenderOptions{})
-	if strings.Contains(html, `data-mermaid-diagram`) || !strings.Contains(html, "Не удалось отобразить диаграмму.") {
+	if strings.Contains(html, `data-mermaid-diagram`) || strings.Contains(html, `data-mermaid-stage`) || !strings.Contains(html, "Не удалось отобразить диаграмму.") {
 		t.Fatalf("invalid Mermaid must use fallback: %s", html)
 	}
 }
