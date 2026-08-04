@@ -61,7 +61,8 @@ When opting into a typed entity:
 - declare business rules as module headings such as
   `### BR-AREA-001: Title`;
 - give decisions unique `ADR-*` IDs;
-- give reusable flows unique `FLOW-*` IDs and link them to requirements;
+- give reusable flows unique `FLOW-*` IDs and link product flows to one or more
+  requirements;
 - give screens unique `SC-<AREA>-<NAME>` IDs and transitions unique
   `TR-<AREA>-<NUMBER>` IDs;
 - give work items unique `TASK-AREA-NNN` IDs;
@@ -78,10 +79,13 @@ checklists do not contribute to global progress.
 The module template includes purpose, code location, boundaries, business
 rules, invariants, stable interfaces, and related use cases. The use-case
 template includes its main scenario, postconditions, rules, and implementation.
-The flow template contains a Mermaid visualization and an explicit requirements
-link. Each screen template contains that screen's metadata, states and outgoing
-transitions; Docgent derives the catalog, map and playable flows from those
-files. The ADR template includes context, decision, and consequences.
+The flow template contains a Mermaid visualization and explicit links to its
+requirements or architecture source. A product flow may list one or more
+`UC-*` values in `Scenario`; Docgent builds both the `FLOW → UC` list and the
+reverse `UC → FLOW` relationships. Each screen template contains that screen's
+metadata, states and outgoing transitions; Docgent derives the catalog, map and
+playable flows from those files. The ADR template includes context, decision,
+and consequences.
 
 Docgent reports missing recommended sections as warnings. Use these sections
 when they add information; do not create empty or speculative prose. If the
@@ -103,13 +107,15 @@ Common schema-driven anti-patterns include:
 ## Flows and screen maps
 
 Use one `FLOW-*` document for one significant scenario, branch, error path, or
-service interaction. Link it to an existing use case through `Scenario`, or to
-an architecture document when the flow is genuinely architectural. Put
-concrete request sequences in `flows/`; keep component, boundary, and dependency
-overviews in architecture, and leave simple endpoint operations in API
-contracts. Mermaid node labels and edges are visualization only: Docgent does
-not derive relationships from them. Derive the diagram from the scenario; do
-not start from a generic start-to-finish graph and retrofit meaning.
+service interaction. For a product flow, list one or more existing `UC-*`
+values in the `Scenario` field; Docgent creates the reverse relationship on
+every listed use case. For a genuinely architectural flow, omit `Scenario` and
+link an architecture document instead. Put concrete request sequences in
+`flows/`; keep component, boundary, and dependency overviews in architecture,
+and leave simple endpoint operations in API contracts. Mermaid node labels and
+edges are visualization only: Docgent does not derive relationships from them.
+Derive the diagram from the scenario; do not start from a generic
+start-to-finish graph and retrofit meaning.
 
 Use one `screens/SC-*.md` file for every significant screen. Metadata and the
 outgoing transition table are the machine-readable source of truth:
@@ -163,6 +169,10 @@ Unknown screen IDs are errors. In templates, the whole-line placeholders
 `OPTIONAL_SCREENS_METADATA`, `OPTIONAL_FLOW_METADATA`,
 `OPTIONAL_ROUTE_METADATA`, and `OPTIONAL_COMPONENT_METADATA` mean: replace the
 placeholder with one complete metadata line, or delete the line.
+In a flow template, replace `OPTIONAL_USE_CASES_METADATA` with a complete
+`Scenario` metadata line containing one or more `UC-*`, or delete the line for
+an architectural flow. Replace `RELATED_DOCUMENT_LINKS` with one or more
+Markdown links to the listed use cases or to the architecture document.
 `FLOW_DIAGRAM` and `TRANSITION_ROWS` must be replaced with complete
 evidence-backed Mermaid source or table rows; templates do not provide a
 default topology.
@@ -197,8 +207,10 @@ Tasks may also declare `Screens` and `Transitions` with existing `SC-*` and
 and matching screen documents. These links do not replace task scope or
 acceptance criteria.
 
-Put checkboxes only in acceptance criteria. Start every criterion with one
-unique `AC-*` and give it exactly one verification entry:
+Checkboxes are allowed in both acceptance criteria and plan. Start every
+acceptance criterion with one unique `AC-*` and give it exactly one verification
+entry. Plan items may be numbered steps, bullets, or checkboxes and do not
+require `AC-*` identifiers or verification entries:
 
 ```md
 ## Acceptance criteria

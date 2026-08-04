@@ -13,15 +13,19 @@
 ```mermaid
 sequenceDiagram
     actor User as Пользователь
-    participant UI as Service Desk UI
-    participant API as Core API
-    User->>UI: Отправить запрос
-    UI->>API: validate(request)
+    participant UI as Web Frontend
+    participant API as Backend API
+    participant DB as PostgreSQL
+    User->>UI: Ввести заголовок и описание
+    UI->>API: POST /api/v1/requests
+    API->>API: Проверить и нормализовать данные
     alt Данные корректны
-        API-->>UI: created(result)
-        UI-->>User: Показать результат
+        API->>DB: INSERT request
+        DB-->>API: id, created_at
+        API-->>UI: 201 Created
+        UI-->>User: Показать номер обращения
     else Данные некорректны
-        API-->>UI: INVALID_INPUT
+        API-->>UI: 400 INVALID_INPUT
         UI-->>User: Остаться на форме с ошибкой
     end
 ```

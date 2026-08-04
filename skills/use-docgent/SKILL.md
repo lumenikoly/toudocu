@@ -71,9 +71,12 @@ apply typed contracts only when the project uses the corresponding capability.
 9. Treat Mermaid as visualization only. Keep requirements and acceptance
    criteria in prose, and use only validated `flowchart`, `stateDiagram-v2`, or
    `sequenceDiagram` blocks. Put concrete request sequences and significant
-   service interactions in `FLOW-*` documents linked through `Scenario`; keep
-   simple endpoint operations in API contracts. For screen maps, edit the
-   catalog and transition tables instead of the generated Mermaid source.
+   service interactions in `FLOW-*` documents. Link a product flow through
+   `Scenario` to one or more `UC-*`; Docgent derives the reverse `UC ↔ FLOW`
+   relationships. For a genuinely architectural flow, omit `Scenario` and link
+   the architecture document instead. Keep simple endpoint operations in API
+   contracts. For screen maps, edit the catalog and transition tables instead
+   of the generated Mermaid source.
 10. Complete the author review and any risk-based independent review before
     treating Docgent validation as the final structural gate.
 
@@ -103,8 +106,11 @@ apply typed contracts only when the project uses the corresponding capability.
 2. Treat an existing non-draft task as an explicit contract: respect its result,
    scope, exclusions, criteria, dependencies, module, use case, flow, screens,
    and rules.
-3. Do not broaden changes beyond task scope without user direction.
-4. Run `task check` only when the repository is trusted and the user explicitly
+3. Use checkboxes in `Acceptance criteria` and `Plan` when progress tracking is
+   useful. Keep `AC-*` identifiers and verification mappings on acceptance
+   criteria; plan steps do not require them.
+4. Do not broaden changes beyond task scope without user direction.
+5. Run `task check` only when the repository is trusted and the user explicitly
    asked to execute or verify the task. It executes repository shell commands
    with the current user's permissions.
 

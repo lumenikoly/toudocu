@@ -4,7 +4,7 @@
     "name": "Docgent",
     "version": "1.1.0-go"
   },
-  "generatedAt": "2026-07-29T17:55:02.472939705Z",
+  "generatedAt": "2026-07-29T18:26:21.797622628Z",
   "sourceDirectory": "docs",
   "staleDays": 90,
   "project": {
@@ -113,7 +113,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-29T16:09:42.746744667Z",
+      "updatedAt": "2026-07-29T18:18:48.009211105Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -386,7 +386,7 @@
       "outputPath": "architecture/overview.html",
       "type": "architecture",
       "title": "Архитектура проекта",
-      "description": "Service Desk разделяет основной пользовательский интерфейс и внешний центр поддержки. Эта страница также демонстрирует архитектурный sequenceDiagram .",
+      "description": "Service Desk использует трёхслойную архитектуру: браузерный фронтенд отвечает за пользовательский интерфейс, backend API выполняет бизнес-правила, а PostgreSQL хранит обращения. Внешний Support Center остаётся за границей управляемой системы.",
       "metadata": {
         "owner": "Architecture Team",
         "status": "В работе",
@@ -408,9 +408,29 @@
       "stale": false,
       "warnings": 0,
       "errors": 0,
-      "links": [],
+      "links": [
+        {
+          "destination": "../flows/FLOW-CORE-REQUEST.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-CORE-REQUEST.md",
+          "href": "../flows/FLOW-CORE-REQUEST.html"
+        },
+        {
+          "destination": "../flows/FLOW-CORE-ENTRY.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-CORE-ENTRY.md",
+          "href": "../flows/FLOW-CORE-ENTRY.html"
+        }
+      ],
       "backlinks": [],
-      "relatedDocuments": []
+      "relatedDocuments": [
+        "flows/FLOW-CORE-REQUEST.md",
+        "flows/FLOW-CORE-ENTRY.md"
+      ]
     },
     {
       "id": "CON-CORE-API",
@@ -418,7 +438,7 @@
       "outputPath": "contracts/api.html",
       "type": "contract",
       "title": "API-контракт",
-      "description": "Описание стабильных входов, выходов и ошибок системы.",
+      "description": "REST-контракт между Web Frontend и Backend API. Все ответы имеют Content-Type: application/json ; время передаётся в UTC по RFC 3339.",
       "metadata": {
         "id": "CON-CORE-API"
       },
@@ -434,7 +454,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-29T12:02:31.139394266Z",
+      "updatedAt": "2026-07-29T18:19:48.356890411Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -450,19 +470,19 @@
       "sourcePath": "decisions/000-decision.md",
       "outputPath": "decisions/000-decision.html",
       "type": "decision",
-      "title": "ADR-000: Базовое архитектурное решение",
-      "description": "Краткое описание решения.",
+      "title": "ADR-000: Разделить Web Frontend, Backend API и PostgreSQL",
+      "description": "Service Desk реализуется как три изолированных слоя с явными интерфейсами.",
       "metadata": {
         "author": "Architecture Team",
         "date": "2026-07-25",
         "id": "ADR-000",
-        "status": "Предложено",
-        "updated": "2026-07-25"
+        "status": "Принято",
+        "updated": "2026-07-29"
       },
       "status": {
-        "kind": "planned",
-        "symbol": "◷",
-        "label": "Предложено",
+        "kind": "accepted",
+        "symbol": "✓",
+        "label": "Принято",
         "recognized": true
       },
       "taskStats": {
@@ -471,7 +491,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-25T00:00:00Z",
+      "updatedAt": "2026-07-29T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -534,7 +554,9 @@
           "href": "../screens/SC-CORE-HOME.html"
         }
       ],
-      "backlinks": [],
+      "backlinks": [
+        "architecture/overview.md"
+      ],
       "relatedDocuments": [
         "use-cases/core.md",
         "use-cases/support.md",
@@ -589,6 +611,7 @@
         }
       ],
       "backlinks": [
+        "architecture/overview.md",
         "use-cases/core.md"
       ],
       "relatedDocuments": [
@@ -630,12 +653,12 @@
       "outputPath": "modules/core.html",
       "type": "module",
       "title": "Основной модуль",
-      "description": "Основной модуль демонстрирует рекомендуемую структуру описания кода и правил.",
+      "description": "Основной модуль объединяет backend-логику создания обращений и стабильный контракт, используемый Web Frontend.",
       "metadata": {
         "id": "MOD-CORE",
         "owner": "Команда проекта",
         "status": "В работе",
-        "updated": "2026-07-25"
+        "updated": "2026-07-29"
       },
       "status": {
         "kind": "in-progress",
@@ -649,7 +672,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-25T00:00:00Z",
+      "updatedAt": "2026-07-29T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -732,7 +755,7 @@
       "outputPath": "reference/configuration.html",
       "type": "reference",
       "title": "Конфигурация",
-      "description": "Справочник параметров проекта.",
+      "description": "Справочник параметров целевого развёртывания Service Desk. Секретные значения передаются Backend API через окружение и никогда не встраиваются во Frontend.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -746,7 +769,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-25T20:07:08.135516508Z",
+      "updatedAt": "2026-07-29T18:18:48.009211105Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -956,7 +979,7 @@
       "outputPath": "use-cases/UC-CORE-01.html",
       "type": "use-case",
       "title": "UC-CORE-01: Основной пользовательский сценарий",
-      "description": "Пользователь получает основной результат проекта.",
+      "description": "Пользователь регистрирует обращение и получает его номер.",
       "metadata": {
         "actor": "Пользователь",
         "allowCycle": "Да",
@@ -1305,7 +1328,8 @@
           "SC-CORE-RESULT"
         ],
         "businessRuleIds": [
-          "BR-CORE-001"
+          "BR-CORE-001",
+          "BR-CORE-002"
         ]
       },
       {
@@ -1342,7 +1366,8 @@
         "document": "use-cases/core.md",
         "repositoryPaths": [],
         "businessRuleIds": [
-          "BR-CORE-001"
+          "BR-CORE-001",
+          "BR-CORE-002"
         ],
         "flowIds": [
           "FLOW-CORE-ENTRY",
@@ -1415,7 +1440,15 @@
         "moduleId": "MOD-CORE",
         "document": "modules/core.md",
         "anchor": "br-core-001-результат-создаётся-только-после-проверки-входных-данных",
-        "line": 25
+        "line": 31
+      },
+      {
+        "id": "BR-CORE-002",
+        "title": "Идентификатор обращения создаётся на сервере",
+        "moduleId": "MOD-CORE",
+        "document": "modules/core.md",
+        "anchor": "br-core-002-идентификатор-обращения-создаётся-на-сервере",
+        "line": 35
       },
       {
         "id": "BR-SUPPORT-001",
@@ -1888,7 +1921,7 @@
       "condition": "Данные некорректны",
       "state": "INVALID-INPUT",
       "error": "INVALID_INPUT",
-      "message": "Входные данные не прошли проверку.",
+      "message": "Проверьте заполнение обязательных полей.",
       "contract": "contracts/api.md",
       "type": "error",
       "document": "screens/SC-CORE-REQUEST.md",
@@ -1915,7 +1948,7 @@
         "TR-CORE-004",
         "TR-CORE-005"
       ],
-      "result": "При успехе результат создан; при ошибке состояние не изменено.",
+      "result": "При успехе обращение сохранено со статусом new ; при ошибке новая запись отсутствует.",
       "valid": true,
       "issueCodes": []
     },
@@ -1958,9 +1991,27 @@
   "errorDefinitions": [
     {
       "id": "INVALID_INPUT",
-      "message": "Входные данные не прошли проверку.",
+      "message": "Проверьте заполнение обязательных полей.",
       "document": "contracts/api.md",
-      "line": 25
+      "line": 44
+    },
+    {
+      "id": "UNSUPPORTED_MEDIA_TYPE",
+      "message": "Ожидается тело запроса в формате JSON.",
+      "document": "contracts/api.md",
+      "line": 45
+    },
+    {
+      "id": "INTERNAL_ERROR",
+      "message": "Не удалось обработать обращение.",
+      "document": "contracts/api.md",
+      "line": 46
+    },
+    {
+      "id": "STORAGE_UNAVAILABLE",
+      "message": "Хранилище временно недоступно.",
+      "document": "contracts/api.md",
+      "line": 47
     }
   ],
   "traceability": [

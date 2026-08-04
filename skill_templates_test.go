@@ -54,6 +54,8 @@ The user can continue from the start screen.
 				"{{FLOW_TITLE}}":                    "Continue",
 				"{{FLOW_SUMMARY}}":                  "Detailed workspace navigation.",
 				"{{FLOW_DIAGRAM}}":                  "flowchart TD\n    Home[\"Home\"] -->|Open workspace| Workspace[\"Workspace\"]",
+				"{{OPTIONAL_USE_CASES_METADATA}}":   "- Сценарий: UC-CORE-01, UC-CORE-02",
+				"{{RELATED_DOCUMENT_LINKS}}":        "- [UC-CORE-01](../use-cases/core.md)\n- [UC-CORE-02](../use-cases/secondary.md)",
 				"{{USE_CASE_LINK}}":                 "../use-cases/core.md",
 				"{{SCREEN_ID}}":                     "SC-CORE-HOME",
 				"{{SCREEN_TITLE}}":                  "Home",
@@ -91,9 +93,18 @@ The user can continue from the start screen.
 				replacements["{{OPTIONAL_COMPONENT_METADATA}}"] = "- Component: `web/home/`"
 				replacements["{{OPTIONAL_FLOW_METADATA}}"] = "- Flow: FLOW-CORE-01"
 				replacements["{{OPTIONAL_TRANSITIONS_METADATA}}"] = "- Transitions: TR-CORE-001"
+				replacements["{{OPTIONAL_USE_CASES_METADATA}}"] = "- Use case: UC-CORE-01, UC-CORE-02"
 			}
 
 			writeSkillTemplate(t, docs, language, "use-case.md", "use-cases/core.md", replacements)
+			writeTestFile(t, docs, "use-cases/secondary.md", `# UC-CORE-02: Review
+
+- Identifier: UC-CORE-02
+- Status: Planned
+- Module: MOD-CORE
+
+The user reviews the workspace.
+`)
 			writeSkillTemplate(t, docs, language, "flow.md", "flows/core.md", replacements)
 			writeSkillTemplate(t, docs, language, "screen.md", "screens/SC-CORE-HOME.md", replacements)
 			writeSkillTemplate(t, docs, language, "work-ready-feature.md", "work/TASK-CORE-001.md", replacements)
@@ -124,6 +135,14 @@ Terminal screen.
 			if len(model.Knowledge.Screens) != 2 || len(model.Knowledge.Transitions) != 1 {
 				t.Fatalf("unexpected screen graph: %#v", model.Knowledge)
 			}
+			if len(model.Knowledge.Flows) != 1 || strings.Join(model.Knowledge.Flows[0].UseCaseIDs, ",") != "UC-CORE-01,UC-CORE-02" {
+				t.Fatalf("flow does not contain both use cases: %#v", model.Knowledge.Flows)
+			}
+			for _, useCase := range model.Knowledge.UseCases {
+				if strings.Join(useCase.FlowIDs, ",") != "FLOW-CORE-01" {
+					t.Fatalf("%s does not contain the reverse flow relationship: %#v", useCase.ID, useCase.FlowIDs)
+				}
+			}
 			context, err := BuildTaskContext(model, "TASK-CORE-001")
 			if err != nil {
 				t.Fatal(err)
@@ -145,8 +164,10 @@ func TestUseDocgentTemplatesDoNotInventSemanticStructure(t *testing.T) {
 		}
 
 		flow := readSkillTemplate(t, language, "flow.md")
-		if !strings.Contains(flow, "{{FLOW_DIAGRAM}}") {
-			t.Errorf("%s/flow.md does not contain FLOW_DIAGRAM", language)
+		for _, placeholder := range []string{"{{FLOW_DIAGRAM}}", "{{OPTIONAL_USE_CASES_METADATA}}", "{{RELATED_DOCUMENT_LINKS}}"} {
+			if !strings.Contains(flow, placeholder) {
+				t.Errorf("%s/flow.md does not contain %s", language, placeholder)
+			}
 		}
 		for _, forbidden := range []string{"{{START}}", "{{FINISH}}", "Start --> Finish"} {
 			if strings.Contains(flow, forbidden) {
@@ -163,6 +184,20 @@ func TestUseDocgentTemplatesDoNotInventSemanticStructure(t *testing.T) {
 				t.Errorf("%s/decision.md requires invented polarity %s", language, forbidden)
 			}
 		}
+	}
+}
+
+func TestUseDocgentWorkItemReferenceAllowsCriteriaAndPlanChecklists(t *testing.T) {
+	content, err := os.ReadFile(filepath.Join("skills", "use-docgent", "references", "document-model.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	reference := string(content)
+	if !strings.Contains(reference, "Checkboxes are allowed in both acceptance criteria and plan.") {
+		t.Fatal("document-model reference does not allow checkboxes in both acceptance criteria and plan")
+	}
+	if strings.Contains(reference, "Put checkboxes only in acceptance criteria.") {
+		t.Fatal("document-model reference still restricts checkboxes to acceptance criteria")
 	}
 }
 

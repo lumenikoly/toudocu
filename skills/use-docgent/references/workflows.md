@@ -78,8 +78,8 @@ typed documents only for semantics the project will use:
 
 - add a module when stable ownership, boundaries, or business rules matter;
 - add a use case when observable behavior should link to a module;
-- add a flow when a reusable Mermaid visualization should link to a use case or
-  architecture document;
+- add a flow when a reusable Mermaid visualization should link through
+  `Scenario` to one or more use cases, or directly to an architecture document;
 - add `screens/SC-*.md` when product navigation needs stable `SC-*`, a
   searchable catalog, graph validation, actions, states or acceptance context;
 - add a roadmap when the project wants global progress aggregation;
@@ -90,9 +90,14 @@ then use case, then screen documents or flow, then roadmap or work item.
 Replace every template placeholder before validation. A map or flow never
 replaces prose requirements or acceptance criteria.
 
-Do not let the template select the entities or topology. Whole-section
-placeholders such as `FLOW_DIAGRAM` and `TRANSITION_ROWS` must be replaced with
-content derived from product or repository evidence.
+Do not let the template select the entities or topology. In a flow template,
+replace `OPTIONAL_USE_CASES_METADATA` with the complete `Scenario` metadata line
+containing one or more `UC-*`, or with an empty value for an architectural
+flow. Replace `RELATED_DOCUMENT_LINKS` with one or more links to those use cases
+or to the relevant architecture document. Docgent derives reverse `UC ↔ FLOW`
+relationships from the `Scenario` list. Whole-section placeholders such as
+`FLOW_DIAGRAM` and `TRANSITION_ROWS` must be replaced with content derived from
+product or repository evidence.
 
 ## Task workflow
 
@@ -111,6 +116,10 @@ report. Inspect source artifacts when the compact context is insufficient.
 A task with `Flow` includes its `FLOW-*` document. A task with `Screens`
 includes selected screen records, incident transitions, and matching `SC-*`
 documents.
+
+Task lists are allowed in both `Acceptance criteria` and `Plan`. Acceptance
+criteria retain unique `AC-*` identifiers and verification mappings; plan
+checkboxes track implementation steps and need neither.
 
 Run:
 

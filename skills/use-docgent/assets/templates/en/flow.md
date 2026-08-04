@@ -1,7 +1,7 @@
 # {{FLOW_ID}}: {{FLOW_TITLE}}
 
 - Identifier: {{FLOW_ID}}
-- Use case: {{USE_CASE_ID}}
+{{OPTIONAL_USE_CASES_METADATA}}
 - Module: {{MODULE_ID}}
 - Last updated: {{DATE}}
 
@@ -15,4 +15,4 @@
 
 ## Related documents
 
-- [{{USE_CASE_ID}}]({{USE_CASE_LINK}})
+{{RELATED_DOCUMENT_LINKS}}

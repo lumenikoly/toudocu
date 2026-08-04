@@ -1,7 +1,7 @@
 # {{FLOW_ID}}: {{FLOW_TITLE}}
 
 - Идентификатор: {{FLOW_ID}}
-- Сценарий: {{USE_CASE_ID}}
+{{OPTIONAL_USE_CASES_METADATA}}
 - Модуль: {{MODULE_ID}}
 - Последнее обновление: {{DATE}}
 
@@ -15,4 +15,4 @@
 
 ## Связанные документы
 
-- [{{USE_CASE_ID}}]({{USE_CASE_LINK}})
+{{RELATED_DOCUMENT_LINKS}}
