@@ -1,0 +1,4 @@
+interface:
+  display_name: "Use Docgent"
+  short_description: "Создавайте и проверяйте документацию Docgent"
+  default_prompt: "Используй $use-docgent, чтобы создать или обновить проверяемую документацию этого проекта."

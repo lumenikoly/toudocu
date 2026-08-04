@@ -357,6 +357,25 @@ XML и JavaScript-ресурсы из документации. Символич
 - [рабочие задачи](docs/guides/work-items.md);
 - [проверка изменений](docs/guides/testing.md).
 
+## Skill для AI-агентов
+
+В каталоге [`skills/use-docgent`](skills/use-docgent) находится Codex-skill,
+который помогает агенту создавать и обновлять документы, исправлять diagnostics
+Docgent и безопасно работать с `TASK-*`.
+
+Для локальной установки скопируйте каталог skill в `~/.codex/skills`:
+
+```bash
+mkdir -p ~/.codex/skills
+cp -R ./skills/use-docgent ~/.codex/skills/
+```
+
+После установки skill можно вызвать явно:
+
+```text
+$use-docgent создай проверяемую документацию этого проекта
+```
+
 ## Разработка
 
 ```bash

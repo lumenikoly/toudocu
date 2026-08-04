@@ -1,0 +1,38 @@
+# {{USE_CASE_ID}}: {{USE_CASE_TITLE}}
+
+- Identifier: {{USE_CASE_ID}}
+- Status: {{STATUS}}
+- Actor: {{ACTOR}}
+- Module: {{MODULE_ID}}
+- Priority: {{PRIORITY}}
+- Last updated: {{DATE}}
+
+{{USE_CASE_SUMMARY}}
+
+## Inputs
+
+- {{INPUT}}
+
+## Preconditions
+
+- {{PRECONDITION}}
+
+## Main scenario
+
+1. {{MAIN_STEP}}
+
+## Error scenarios
+
+{{ERROR_SCENARIOS}}
+
+## Postconditions
+
+{{POSTCONDITIONS}}
+
+## Business rules
+
+- {{BUSINESS_RULE_ID}} — {{BUSINESS_RULE_REFERENCE}}
+
+## Implementation
+
+- [{{MODULE_TITLE}}](../modules/{{MODULE_FILE}})
