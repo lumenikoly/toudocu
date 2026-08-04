@@ -27,8 +27,10 @@ Docgent.
 | `version` | отсутствуют | версия генератора |
 
 Вызов `docgent ./docs ...` эквивалентен `docgent build ./docs ...`.
-Историческая команда верхнего уровня `init` и прежняя `task check` отсутствуют
-без alias.
+Историческая команда верхнего уровня `init`, skill-level имя `refresh` и
+прежняя `task check` отсутствуют без alias. Вызовы `docgent init` и `docgent
+refresh` отклоняются как неизвестные команды; `$use-docgent init`,
+`$use-docgent refresh` и `$use-docgent refresh diff` принадлежат AI-skill.
 
 ```text
 docgent search "<query>" [docs-dir] [--limit N] [--format text|json]
@@ -41,9 +43,12 @@ docgent task archive TASK-ID [docs-dir] [--repository-root DIR] [--format text|j
 docgent task restore TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]
 ```
 
-В каталоге документации глобально ожидается только `index.md`. `status.md`,
-`roadmap.md` и типизированные каталоги необязательны; правила конкретного типа
-применяются, только если соответствующий документ существует.
+В каталоге документации глобально ожидаются `index.md` и
+`architecture/overview.md`. Overview обязан иметь тип `Architecture Overview`,
+а каждый другой `architecture/**/*.md` — непустой архитектурный вопрос и
+прямую локальную ссылку из overview. Архитектурные broken/blocked links являются
+errors. `status.md`, `roadmap.md` и остальные типизированные каталоги
+необязательны; правила конкретного типа применяются при его наличии.
 
 Статусы, типы, обязательные поля, разделы и команды `TASK-*`/`BUG-*` описаны в
 [руководстве по рабочим задачам](../guides/work-items.md).
@@ -106,12 +111,30 @@ Done; безопасный `--dry-run` также можно использов�
   error-состояние, доступное сообщение объявляется через live region, а запрос
   можно повторить.
 
+## Architecture diagnostics
+
+Структурный контракт архитектуры использует стабильные error codes:
+
+- `missing-architecture-overview`;
+- `invalid-architecture-overview-type`;
+- `missing-architecture-question`;
+- `unlisted-architecture-document`.
+
+Неработающие и заблокированные локальные ссылки сохраняют общие коды
+`broken-link` и `blocked-link`, но внутри `architecture/` имеют severity
+`error`. Необязательный стабильный ID архитектурного документа участвует в
+общей проверке `duplicate-id`. CLI не оценивает пунктуацию, вопросительные
+слова и архитектурный смысл непустого вопроса.
+
 ## ProjectReport schema v1
 
 Schema v1 аддитивно включает `knowledge.standards`, `knowledge.runbooks`,
 `standardIds`/`runbookIds` у `WorkItem`, typed collections task context и
 четыре runbook-метрики в `stats`. Пустые коллекции сериализуются как `[]`;
 версия schema и генератора не меняется.
+
+Architecture overview и подробные ответы сериализуются как обычные documents с
+`type: "architecture"`; различие остаётся в `sourcePath` и `metadata`.
 
 `check --format json` и сгенерированный `report.json` содержат:
 

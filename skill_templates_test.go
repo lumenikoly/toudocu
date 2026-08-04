@@ -1,6 +1,7 @@
 package docgent
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,6 +14,7 @@ func TestUseDocgentFlowAndScreenTemplates(t *testing.T) {
 			root := t.TempDir()
 			docs := filepath.Join(root, "docs")
 			writeTestFile(t, docs, "index.md", "# Template fixture\n\nDocgent skill template fixture.\n")
+			writeArchitectureOverview(t, docs, "")
 			writeTestFile(t, docs, "modules/core.md", `# Core
 
 - Идентификатор: MOD-CORE
@@ -256,11 +258,151 @@ func TestUseDocgentInitContract(t *testing.T) {
 		"reversed",
 		"conflicting",
 		"no `index.md`",
+		"`missing-architecture-overview` may be the only error",
+		"`docs/architecture/overview.md`",
+		"as legacy\n   architecture",
+		"stop without migrating or rewriting",
 		"ordinary project-wide Docgent check",
 		"Do not create a `TASK-*` merely because init is running",
 	} {
 		if !strings.Contains(initReference, expected) {
 			t.Errorf("init reference does not contain %q", expected)
+		}
+	}
+}
+
+func TestUseDocgentRefreshContract(t *testing.T) {
+	skill := readUseDocgentFile(t, "SKILL.md")
+	for _, expected := range []string{
+		"explicitly invokes `$use-docgent refresh`",
+		"`$use-docgent\nrefresh diff`",
+		"[references/refresh.md](references/refresh.md)",
+		"Neither form is a Docgent\nGo CLI command or an initialization request",
+	} {
+		if !strings.Contains(skill, expected) {
+			t.Errorf("SKILL.md does not define refresh contract %q", expected)
+		}
+	}
+
+	refresh := readUseDocgentFile(t, filepath.Join("references", "refresh.md"))
+	for _, expected := range []string{
+		"`$use-docgent refresh`",
+		"`$use-docgent refresh diff`",
+		"inventory every source Markdown document",
+		"`git diff --name-only HEAD --`",
+		"`git ls-files --others --exclude-standard`",
+		"staged and unstaged tracked changes",
+		"Do not compare with a merge-base or\n   default branch",
+		"If Git or `HEAD` is unavailable",
+		"links, backlinks, stable IDs",
+		"Exclude generated portals",
+		"does not\n   change code to make a document true",
+		"unresolved\n   findings",
+		"Creating, deleting, renaming, or merging a document",
+		"Update every\n   affected link, ID reference",
+		"only when content or declared\n   relationships actually change",
+		"Never advance `Last verified`",
+		"Never edit generated portal output as documentation",
+		"Obtain independent semantic review",
+		"Rebuild a portal only when it is tracked",
+		"Refresh never performs initialization",
+	} {
+		if !strings.Contains(refresh, expected) {
+			t.Errorf("refresh reference does not contain %q", expected)
+		}
+	}
+
+	initReference := readUseDocgentFile(t, filepath.Join("references", "init.md"))
+	if strings.Contains(initReference, "$use-docgent refresh") {
+		t.Fatal("init reference must not route refresh")
+	}
+
+	for _, language := range []string{"ru", "en"} {
+		guidance := readUseDocgentFile(t, filepath.Join("assets", "project-guidance", language+".md"))
+		for _, expected := range []string{"$use-docgent refresh", "$use-docgent refresh diff", "HEAD"} {
+			if !strings.Contains(guidance, expected) {
+				t.Errorf("%s guidance does not contain %q", language, expected)
+			}
+		}
+	}
+}
+
+func TestUseDocgentArchitectureTemplates(t *testing.T) {
+	for _, language := range []string{"ru", "en"} {
+		t.Run(language, func(t *testing.T) {
+			overview := readSkillTemplate(t, language, "architecture-overview.md")
+			detail := readSkillTemplate(t, language, "architecture-detail.md")
+			for _, expected := range []string{"Architecture Overview", "{{SYSTEM_BOUNDARY}}", "{{ARCHITECTURE_QUESTION_LINKS}}", "{{OPTIONAL_CONTEXT_DIAGRAM}}"} {
+				if !strings.Contains(overview, expected) {
+					t.Errorf("%s architecture overview does not contain %q", language, expected)
+				}
+			}
+			for _, expected := range []string{"Architecture", "{{ARCHITECTURE_QUESTION}}", "{{SHORT_ANSWER}}", "{{SCOPE}}", "{{ADAPTABLE_SECTIONS}}"} {
+				if !strings.Contains(detail, expected) {
+					t.Errorf("%s architecture detail does not contain %q", language, expected)
+				}
+			}
+			if _, err := os.Stat(filepath.Join("skills", "use-docgent", "assets", "templates", language, "architecture.md")); !os.IsNotExist(err) {
+				t.Errorf("%s monolithic architecture template still exists: %v", language, err)
+			}
+
+			root := t.TempDir()
+			docs := filepath.Join(root, "docs")
+			writeTestFile(t, docs, "index.md", "# Project\n\nProject documentation.\n")
+			replacements := map[string]string{
+				"{{PROJECT_TITLE}}":               "Project",
+				"{{SYSTEM_BOUNDARY_SUMMARY}}":     "The system serves one documented client.",
+				"{{SYSTEM_BOUNDARY}}":             "The system accepts requests from the client and returns results.",
+				"{{ARCHITECTURE_QUESTION_LINKS}}": "- [How is runtime responsibility split](runtime.md)",
+				"{{OPTIONAL_CONTEXT_DIAGRAM}}":    "",
+			}
+			writeSkillTemplate(t, docs, language, "architecture-overview.md", "architecture/overview.md", replacements)
+			replacements = map[string]string{
+				"{{ARCHITECTURE_TITLE}}":    "Runtime responsibility",
+				"{{ARCHITECTURE_QUESTION}}": "How is runtime responsibility split",
+				"{{SHORT_ANSWER}}":          "One process owns parsing and validation.",
+				"{{SCOPE}}":                 "Runtime components inside the process.",
+				"{{ADAPTABLE_SECTIONS}}":    "## Components\n\nThe parser produces the validated model.",
+			}
+			writeSkillTemplate(t, docs, language, "architecture-detail.md", "architecture/runtime.md", replacements)
+			model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, issue := range model.Issues {
+				if issue.Severity == "error" {
+					t.Fatalf("instantiated %s architecture templates produced an error: %#v", language, issue)
+				}
+			}
+		})
+	}
+}
+
+func TestUseDocgentArchitectureGuidanceAndSemanticGate(t *testing.T) {
+	for _, language := range []string{"ru", "en"} {
+		guidance := readUseDocgentFile(t, filepath.Join("assets", "project-guidance", language+".md"))
+		for _, expected := range []string{"architecture/overview.md", "FLOW-*", "CONTRACT", "REFERENCE", "RUNBOOK", "ADR", "MODULE"} {
+			if !strings.Contains(guidance, expected) {
+				t.Errorf("%s architecture guidance does not contain %q", language, expected)
+			}
+		}
+	}
+
+	gate := readUseDocgentFile(t, filepath.Join("references", "semantic-gate.md"))
+	for i := 1; i <= 13; i++ {
+		code := fmt.Sprintf("ARCH%03d", i)
+		if strings.Count(gate, code) == 0 {
+			t.Errorf("semantic gate must define %s", code)
+		}
+	}
+	for _, expected := range []string{
+		"Review `architecture/overview.md` separately",
+		"a transitive link is not",
+		"any non-empty question text",
+		"Punctuation, question",
+	} {
+		if !strings.Contains(gate, expected) {
+			t.Errorf("semantic gate does not contain %q", expected)
 		}
 	}
 }
@@ -322,7 +464,7 @@ func TestUseDocgentMetadata(t *testing.T) {
 	metadata := readUseDocgentFile(t, filepath.Join("agents", "openai.yaml"))
 	for _, expected := range []string{
 		`display_name: "Use Docgent"`,
-		`short_description: "Подключайте и ведите Docgent по необходимости"`,
+		`short_description: "Подключайте, обновляйте и проверяйте Docgent"`,
 		`default_prompt: "Используй $use-docgent init, чтобы явно подключить Docgent к этому проекту."`,
 	} {
 		if !strings.Contains(metadata, expected) {

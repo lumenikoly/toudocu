@@ -71,6 +71,7 @@ func createFixture(t *testing.T) (string, string, string) {
 		t.Fatal(err)
 	}
 	writeTestFile(t, docs, "index.md", "# Test Project\n\nОписание тестового проекта.\n\n- [x] Общая задача\n\n[Статус](status.md)\n")
+	writeArchitectureOverview(t, docs, "")
 	writeTestFile(t, docs, "status.md", "# Состояние\n\n- Статус: В работе\n- Этап: MVP\n- Последнее обновление: 2026-07-24\n\nТекущее состояние.\n\n## Краткое состояние\n\nОсновной поток работает.\n")
 	writeTestFile(t, docs, "roadmap.md", "# Roadmap\n\nПлан.\n\n## MVP\n\n- Статус: В работе\n- Плановая дата: 2026-09-01\n\n- [x] `DLV-DOCS-01` Документация готова.\n- [ ] `UC-AUTH-01` Пользователь входит.\n")
 	writeTestFile(t, docs, "risks.md", "# Риски\n\nОписание рисков.\n\n## RISK-01: Тестовый риск\n\n- Статус: Открыт\n- Вероятность: Высокая\n- Влияние: Среднее\n- Владелец: Team\n\n- [ ] Снизить риск\n")
@@ -204,10 +205,206 @@ func buildFixture(t *testing.T, docs string) *Model {
 	return model
 }
 
+func writeArchitectureOverview(t *testing.T, docs, links string) {
+	t.Helper()
+	writeTestFile(t, docs, "architecture/overview.md", `# Architecture
+
+- Document type: Architecture Overview
+
+System architecture map.
+
+## Questions
+
+`+links+`
+`)
+}
+
+func architectureIssueCodes(model *Model) map[string][]Issue {
+	result := map[string][]Issue{}
+	for _, issue := range model.Issues {
+		result[issue.Code] = append(result[issue.Code], issue)
+	}
+	return result
+}
+
+func TestArchitectureContract(t *testing.T) {
+	t.Run("overview is mandatory", func(t *testing.T) {
+		root := t.TempDir()
+		docs := filepath.Join(root, "docs")
+		writeTestFile(t, docs, "index.md", "# Project\n")
+		model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(architectureIssueCodes(model)["missing-architecture-overview"]) != 1 {
+			t.Fatalf("missing overview diagnostic not found: %#v", model.Issues)
+		}
+	})
+
+	t.Run("details remain validated when overview is absent", func(t *testing.T) {
+		root := t.TempDir()
+		docs := filepath.Join(root, "docs")
+		writeTestFile(t, docs, "index.md", "# Project\n")
+		writeTestFile(t, docs, "architecture/legacy.md", "# Legacy\n\nAnswer.\n")
+		model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+		if err != nil {
+			t.Fatal(err)
+		}
+		codes := architectureIssueCodes(model)
+		for _, code := range []string{"missing-architecture-overview", "missing-architecture-question", "unlisted-architecture-document"} {
+			if len(codes[code]) != 1 {
+				t.Fatalf("legacy detail must produce %s: %#v", code, model.Issues)
+			}
+		}
+	})
+
+	t.Run("overview type is exact", func(t *testing.T) {
+		root := t.TempDir()
+		docs := filepath.Join(root, "docs")
+		writeTestFile(t, docs, "index.md", "# Project\n")
+		writeTestFile(t, docs, "architecture/overview.md", "# Architecture\n\n- Document type: Architecture\n\nMap.\n")
+		model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(architectureIssueCodes(model)["invalid-architecture-overview-type"]) != 1 {
+			t.Fatalf("invalid overview type diagnostic not found: %#v", model.Issues)
+		}
+	})
+
+	t.Run("detail requires a non-empty question", func(t *testing.T) {
+		for _, metadata := range []string{"", "- Architecture question:\n"} {
+			root := t.TempDir()
+			docs := filepath.Join(root, "docs")
+			writeTestFile(t, docs, "index.md", "# Project\n")
+			writeArchitectureOverview(t, docs, "[Detail](detail.md)")
+			writeTestFile(t, docs, "architecture/detail.md", "# Detail\n\n"+metadata+"\nAnswer.\n")
+			model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(architectureIssueCodes(model)["missing-architecture-question"]) != 1 {
+				t.Fatalf("missing question diagnostic not found for %q: %#v", metadata, model.Issues)
+			}
+		}
+	})
+
+	t.Run("question does not require punctuation", func(t *testing.T) {
+		root := t.TempDir()
+		docs := filepath.Join(root, "docs")
+		writeTestFile(t, docs, "index.md", "# Project\n")
+		writeArchitectureOverview(t, docs, "[Detail](nested/detail.md)")
+		writeTestFile(t, docs, "architecture/nested/detail.md", "# Detail\n\n- Architecture question: Runtime responsibility split\n\nAnswer.\n")
+		model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+		if err != nil {
+			t.Fatal(err)
+		}
+		codes := architectureIssueCodes(model)
+		for _, code := range []string{"missing-architecture-question", "unlisted-architecture-document"} {
+			if len(codes[code]) != 0 {
+				t.Fatalf("valid recursive detail produced %s: %#v", code, codes[code])
+			}
+		}
+	})
+
+	t.Run("overview map must link every detail directly", func(t *testing.T) {
+		root := t.TempDir()
+		docs := filepath.Join(root, "docs")
+		writeTestFile(t, docs, "index.md", "# Project\n")
+		writeArchitectureOverview(t, docs, "[First](first.md)")
+		writeTestFile(t, docs, "architecture/first.md", "# First\n\n- Architecture question: First boundary\n\n[Second](nested/second.md)\n")
+		writeTestFile(t, docs, "architecture/nested/second.md", "# Second\n\n- Architecture question: Second boundary\n\nAnswer.\n")
+		model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+		if err != nil {
+			t.Fatal(err)
+		}
+		issues := architectureIssueCodes(model)["unlisted-architecture-document"]
+		if len(issues) != 1 || issues[0].DocumentPath != "architecture/nested/second.md" {
+			t.Fatalf("transitively linked detail must be unlisted: %#v", issues)
+		}
+	})
+
+	t.Run("architecture link diagnostics are errors", func(t *testing.T) {
+		root := t.TempDir()
+		docs := filepath.Join(root, "docs")
+		writeTestFile(t, docs, "index.md", "# Project\n")
+		writeArchitectureOverview(t, docs, "[Detail](detail.md)\n\n[Missing](missing.md)")
+		writeTestFile(t, docs, "architecture/detail.md", "# Detail\n\n- Architecture question: Trust boundary\n\n[Blocked](/etc/passwd)\n")
+		model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+		if err != nil {
+			t.Fatal(err)
+		}
+		codes := architectureIssueCodes(model)
+		for _, code := range []string{"broken-link", "blocked-link"} {
+			if len(codes[code]) != 1 || codes[code][0].Severity != "error" {
+				t.Fatalf("%s must be one architecture error: %#v", code, codes[code])
+			}
+		}
+	})
+
+	t.Run("optional architecture IDs keep global uniqueness", func(t *testing.T) {
+		root := t.TempDir()
+		docs := filepath.Join(root, "docs")
+		writeTestFile(t, docs, "index.md", "# Project\n")
+		writeTestFile(t, docs, "architecture/overview.md", `# Architecture
+
+- Document type: Architecture Overview
+- Identifier: ARCH-SHARED
+
+System map.
+
+[Detail](detail.md)
+`)
+		writeTestFile(t, docs, "architecture/detail.md", `# Detail
+
+- Document type: Architecture
+- Architecture question: Runtime boundary
+- Identifier: ARCH-SHARED
+
+Answer.
+`)
+		model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+		if err != nil {
+			t.Fatal(err)
+		}
+		issues := architectureIssueCodes(model)["duplicate-id"]
+		if len(issues) != 1 || issues[0].Severity != "error" {
+			t.Fatalf("optional architecture ID must retain duplicate-id behavior: %#v", issues)
+		}
+	})
+}
+
+func TestArchitectureSchemaContract(t *testing.T) {
+	root := t.TempDir()
+	docs := filepath.Join(root, "docs")
+	writeTestFile(t, docs, "index.md", "# Project\n")
+	writeArchitectureOverview(t, docs, "")
+	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	report := BuildReport(model)
+	if report.SchemaVersion != 1 {
+		t.Fatalf("schema version=%d", report.SchemaVersion)
+	}
+	for _, document := range report.Documents {
+		if document.SourcePath == "architecture/overview.md" {
+			if document.Type != "architecture" {
+				t.Fatalf("overview type=%q", document.Type)
+			}
+			if document.Metadata["documentType"] != "Architecture Overview" {
+				t.Fatalf("overview metadata=%#v", document.Metadata)
+			}
+			return
+		}
+	}
+	t.Fatal("architecture overview missing from report")
+}
+
 func TestModelAndStatistics(t *testing.T) {
 	_, docs, _ := createFixture(t)
 	model := buildFixture(t, docs)
-	if model.Project.Title != "Test Project" || model.Stats.Documents != 7 || model.Stats.TotalTasks != 2 || model.Stats.CompletedTasks != 1 || len(model.Risks) != 1 || len(model.RoadmapStages) != 1 || model.Stats.BrokenLinks != 0 {
+	if model.Project.Title != "Test Project" || model.Stats.Documents != 8 || model.Stats.TotalTasks != 2 || model.Stats.CompletedTasks != 1 || len(model.Risks) != 1 || len(model.RoadmapStages) != 1 || model.Stats.BrokenLinks != 0 {
 		t.Fatalf("unexpected model: %#v %#v", model.Project, model.Stats)
 	}
 	module := model.DocByPath["modules/auth.md"]
@@ -755,6 +952,9 @@ func TestCLIArguments(t *testing.T) {
 	if _, _, _, err := ParseArguments([]string{"init"}); err == nil || !strings.Contains(err.Error(), "неизвестная команда") {
 		t.Fatalf("init must be rejected as an unknown command, got %v", err)
 	}
+	if _, _, _, err := ParseArguments([]string{"refresh"}); err == nil || !strings.Contains(err.Error(), "неизвестная команда") {
+		t.Fatalf("refresh must be rejected as an unknown command, got %v", err)
+	}
 	if _, _, _, err := ParseArguments([]string{"./docs", "--force"}); err == nil || !strings.Contains(err.Error(), "неизвестный параметр") {
 		t.Fatalf("--force must be rejected as an unknown option, got %v", err)
 	}
@@ -1263,6 +1463,7 @@ func TestMinimalDocumentationCheckAndBuild(t *testing.T) {
 	root := t.TempDir()
 	docs := filepath.Join(root, "docs")
 	writeTestFile(t, docs, "index.md", "# Минимальный проект\n\nКраткое описание проекта.\n\n## Подробности\n\nУникальное содержимое главной страницы.\n")
+	writeArchitectureOverview(t, docs, "")
 	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
 	if err != nil {
 		t.Fatal(err)
@@ -1291,7 +1492,7 @@ func TestMinimalDocumentationCheckAndBuild(t *testing.T) {
 	if !strings.Contains(html, "Уникальное содержимое главной страницы.") {
 		t.Fatalf("index.md body is missing from dashboard: %s", html)
 	}
-	for _, absent := range []string{"Дорожная карта", "Вычисляемое состояние", "Открытые риски", "metric-label\">Модули", "Не указан"} {
+	for _, absent := range []string{"Дорожная карта", "Вычисляемое состояние", "Открытые риски", "metric-label\">Модули"} {
 		if strings.Contains(html, absent) {
 			t.Fatalf("minimal dashboard contains optional block %q", absent)
 		}

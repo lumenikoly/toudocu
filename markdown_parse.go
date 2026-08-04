@@ -17,6 +17,8 @@ var fieldAliases = map[string]string{
 	"reproducibility": "reproducibility", "воспроизводимость": "reproducibility",
 	"regression": "regression", "регрессия": "regression",
 	"type": "type", "тип": "type",
+	"document type": "documentType", "тип документа": "documentType",
+	"architecture question": "architectureQuestion", "архитектурный вопрос": "architectureQuestion",
 	"source": "source", "источник": "source",
 	"criticality": "criticality", "критичность": "criticality",
 	"module": "module", "модуль": "module",
@@ -68,7 +70,8 @@ var displayFieldNames = map[string]string{
 	"component":       "Компонент",
 	"errors":          "Ошибки",
 	"plannedDate":     "Плановая дата", "updated": "Последнее обновление", "probability": "Вероятность",
-	"impact": "Влияние", "id": "Идентификатор", "tags": "Теги", "type": "Тип", "source": "Источник",
+	"impact": "Влияние", "id": "Идентификатор", "tags": "Теги", "type": "Тип",
+	"documentType": "Тип документа", "architectureQuestion": "Архитектурный вопрос", "source": "Источник",
 	"scope": "Область", "environment": "Среда", "risk": "Риск", "lastVerified": "Последняя проверка",
 	"supersededBy": "Заменён",
 }

@@ -27,7 +27,8 @@
 
 CLI не интерпретирует пользовательский запрос. `task ready` и `task context`
 только читают данные, а `task verify --run` запускает команды после локального
-validation gate.
+validation gate. Prompt-workflows `$use-docgent init`, `$use-docgent refresh`
+и `$use-docgent refresh diff` находятся за границей Go CLI.
 
 ## Бизнес-правила
 
@@ -59,6 +60,8 @@ Docgent создаёт нейтральные каркасы и проверяе
 - каждая команда запускается из repository root;
 - stdout и stderr ограничены последним 1 MiB каждого потока;
 - обратная совместимость вызова `docgent ./docs ...` сохраняется.
+- зарезервированные skill-level имена `init` и `refresh` отклоняются как
+  неизвестные команды Go CLI;
 - `serve` по умолчанию слушает только loopback; сетевой доступ включается явно.
 
 ## Стабильные интерфейсы

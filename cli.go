@@ -98,8 +98,8 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			}
 			options.Command, options.EntityKind, options.EntityID = "scaffold", args[1], args[2]
 			args = args[3:]
-		case "init":
-			return options, false, false, fmt.Errorf("неизвестная команда: init")
+		case "init", "refresh":
+			return options, false, false, fmt.Errorf("неизвестная команда: %s", args[0])
 		case "version":
 			version = true
 			args = args[1:]

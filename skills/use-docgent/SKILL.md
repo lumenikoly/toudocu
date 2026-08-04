@@ -1,6 +1,6 @@
 ---
 name: use-docgent
-description: Create, update, validate, and build adaptable project documentation managed by the Docgent CLI. Use for explicit Docgent documentation work; modules, use cases, FLOW-* processes, SC-* screens and TR-* transitions; roadmap, risks, ADRs, contracts, guides, references, or TASK-* work items; integrity diagnostics; task context or verification; and static portals. Initialize project documentation and managed AGENTS.md guidance only when the user explicitly invokes `$use-docgent init`; never initialize implicitly. Do not use for ordinary code work without semantic documentation impact.
+description: Create, update, refresh, validate, and build adaptable project documentation managed by the Docgent CLI. Use for explicit Docgent documentation work; full-project or HEAD-diff currency reviews; modules, use cases, FLOW-* processes, SC-* screens and TR-* transitions; roadmap, risks, ADRs, contracts, guides, references, or TASK-* work items; integrity diagnostics; task context or verification; and static portals. Initialize project documentation and managed AGENTS.md guidance only when the user explicitly invokes `$use-docgent init`; never initialize implicitly. Do not use for ordinary code work without semantic documentation impact.
 ---
 
 # Use Docgent
@@ -8,6 +8,16 @@ description: Create, update, validate, and build adaptable project documentation
 Use Docgent to protect safety and explicit relationships, not to force every
 project into one documentation structure. Keep ordinary Markdown lightweight;
 apply typed contracts only when the project uses the corresponding capability.
+
+## Refresh only when explicitly requested
+
+When the user explicitly invokes `$use-docgent refresh` or `$use-docgent
+refresh diff`, read [references/refresh.md](references/refresh.md) and follow
+its complete evidence, update, review, validation, and reporting workflow.
+`refresh` reviews the full documentation set; `refresh diff` starts from staged,
+unstaged, and untracked changes relative to `HEAD` and expands to affected
+documentation. Both forms may change documentation. Neither form is a Docgent
+Go CLI command or an initialization request.
 
 ## Initialize only when explicitly requested
 
@@ -61,8 +71,10 @@ outside the explicit init workflow.
 
 1. Apply the semantic gate. Prefer updating an existing source of truth and add
    a document only when it communicates a distinct, evidence-backed purpose.
-2. For a new project, create a neutral `index.md` first. Add more documents only
-   when they communicate known information.
+2. For a new project, create a neutral `index.md` and the required
+   `architecture/overview.md` first. Keep the overview question map empty until
+   evidence supports detailed answers. Add more documents only when they
+   communicate known information.
 3. Use ordinary Markdown in untyped paths for free-form documentation. Use
    `modules/`, `use-cases/`, `flows/`, `screens/`, `decisions/`, `roadmap.md`,
    and `work/` only when the project benefits from their machine-readable
@@ -103,6 +115,11 @@ outside the explicit init workflow.
    of the generated Mermaid source.
 10. Complete the author review and any risk-based independent review before
     treating Docgent validation as the final structural gate.
+11. Keep `architecture/overview.md` as the direct map of every Markdown file
+    below `architecture/`. Give every detailed architecture document one
+    non-empty architectural question and use the separate overview/detail
+    templates. Leave FLOW, CONTRACT, REFERENCE, RUNBOOK, ADR, and MODULE content
+    in their corresponding sources of truth.
 
 ## Interpret validation correctly
 

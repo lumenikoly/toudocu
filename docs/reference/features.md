@@ -23,14 +23,37 @@ Docgent поставляется одним Go-бинарником без вн�
 | Версия | `docgent version` | версия генератора |
 
 Вызов `docgent ./docs` сохраняется как сокращение для `build`. Отдельной
-верхнеуровневой команды `init` нет: минимальный проект создаётся обычным файлом
-`docs/index.md`; `task init` создаёт только work item. Параметры и exit codes
+верхнеуровневой команды `init` нет: минимальный проект создаётся файлами
+`docs/index.md` и `docs/architecture/overview.md`; `task init` создаёт только
+work item. Параметры и exit codes
 определены в [CLI-контракте](../contracts/cli.md).
+
+## Skill workflows актуализации
+
+Устанавливаемый `use-docgent` предоставляет две изменяющие prompt-команды,
+которые не входят в Go CLI:
+
+- `$use-docgent refresh` сверяет весь набор исходных Markdown-документов с
+  текущим кодом, тестами, публичными интерфейсами, schemas, configuration, CI,
+  требованиями и решениями;
+- `$use-docgent refresh diff` начинает со staged, unstaged и untracked файлов
+  относительно `HEAD` и добавляет зависимые документы по ссылкам, stable ID,
+  task relationships и изменённому публичному поведению.
+
+Refresh обновляет только evidence-backed источники, не меняет код ради
+согласования с текстом и не выполняет init. Даты меняются только вместе с
+содержанием или связями; runbook review date требует фактической проверки.
+Доказуемые delete, rename и stable-ID migration обновляют все ссылки вместе.
+После semantic и structural gates пересобираются только tracked или явно
+предписанные проектом portals.
 
 ## Документная модель
 
-Минимальная документация содержит только `index.md`. По мере необходимости
-Docgent распознаёт:
+Минимальная документация содержит `index.md` и карту
+`architecture/overview.md` с типом `Architecture Overview`. Каждый другой
+`architecture/**/*.md` отвечает на один непустой архитектурный вопрос и
+должен быть напрямую указан в overview. По мере необходимости Docgent
+распознаёт:
 
 - `status.md`, `roadmap.md`, `risks.md`, `ideas.md` и `notes.md`;
 - модули `MOD-*`, use cases `UC-*` и процессы `FLOW-*`;
@@ -44,6 +67,12 @@ Docgent распознаёт:
 Модель проверяет обязательные поля и разделы, уникальность стабильных ID,
 статусы, зависимости, локальные и repository-ссылки, anchors, устаревание,
 согласованность roadmap, task scope и traceability.
+
+Архитектурные diagnostics являются errors и используют коды
+`missing-architecture-overview`, `invalid-architecture-overview-type`,
+`missing-architecture-question`, `unlisted-architecture-document`,
+`broken-link` и `blocked-link`. Пунктуация и смысл вопроса остаются semantic
+gate, а schema v1 сохраняет `documents[].type: "architecture"`.
 
 Полный авторский контракт новых разделов и freshness описан в руководстве
 [Standards, Runbooks и Custom-разделы](../guides/quality-runbooks.md).

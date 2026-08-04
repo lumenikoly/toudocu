@@ -1,9 +1,9 @@
 # Standards, Runbooks и Custom-разделы
 
 Руководство описывает авторский контракт опциональных разделов. Глобально
-обязателен только `index.md`; отсутствие manifest у появившегося
-`quality/`, `runbooks/` или custom-раздела является warning и становится gate
-только с `--strict`.
+обязательны `index.md` и `architecture/overview.md`; отсутствие manifest у
+появившегося `quality/`, `runbooks/` или custom-раздела является warning и
+становится gate только с `--strict`.
 
 ## Стандарты
 

@@ -13,6 +13,7 @@ func createScreenFixture(t *testing.T) (string, string) {
 	root := t.TempDir()
 	docs := filepath.Join(root, "docs")
 	writeTestFile(t, docs, "index.md", "# Проект\n\nОписание проекта.\n")
+	writeArchitectureOverview(t, docs, "")
 	writeTestFile(t, docs, "modules/auth.md", "# MOD-AUTH: Авторизация\n\n- Идентификатор: MOD-AUTH\n- Статус: В работе\n\nМодуль авторизации.\n")
 	writeTestFile(t, docs, "modules/account.md", "# MOD-ACCOUNT: Аккаунт\n\n- Идентификатор: MOD-ACCOUNT\n- Статус: Запланировано\n\nЛичный кабинет.\n")
 	writeTestFile(t, docs, "contracts/auth.md", `# CON-AUTH: Ошибки входа
@@ -493,6 +494,9 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	if !strings.Contains(mapPage, "3 вход.") || !strings.Contains(mapPage, "3 исх.") {
 		t.Fatalf("screen cards must expose incoming and outgoing transition counts: %s", mapData)
 	}
+	if !strings.Contains(mapPage, `data-map-labels`) {
+		t.Fatal("screen map must expose a separate transition label layer")
+	}
 	mapNavigation := navigationFolderHTML(t, mapPage, "screens")
 	if !strings.Contains(mapNavigation, `nav-folder-link is-active" href="catalog.html"`) {
 		t.Fatal("screens parent must link to the catalog and remain active on the map")
@@ -602,7 +606,9 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 		"screen-edge-external-inner",
 		"MODULE_COLUMN_GAP = 144",
 		"MODULE_ROW_GAP = 112",
-		"function normalEdgeGeometry",
+		"function routeAroundObstacles",
+		"function findLabelPlacement",
+		"function createTransitionLabel",
 		"function measureVisibleCards",
 	} {
 		if !strings.Contains(string(mapScript), expected) {

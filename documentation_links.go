@@ -211,13 +211,21 @@ func resolveLinks(model *Model) {
 				case resolved.RepositoryAsset:
 					reason = "Ресурс за пределами документации нельзя встраивать или открыть без repository URL."
 				}
-				addDocumentIssue(model, document, newIssue("warning", "blocked-link", reason, document.SourcePath, link.Line+1))
+				severity := "warning"
+				if document.Type == "architecture" {
+					severity = "error"
+				}
+				addDocumentIssue(model, document, newIssue(severity, "blocked-link", reason, document.SourcePath, link.Line+1))
 			} else if resolved.Broken {
 				suffix := ""
 				if resolved.BrokenAnchor {
 					suffix = " (не найден якорь)"
 				}
-				addDocumentIssue(model, document, newIssue("warning", "broken-link", "Неработающая ссылка: "+link.Destination+suffix, document.SourcePath, link.Line+1))
+				severity := "warning"
+				if document.Type == "architecture" {
+					severity = "error"
+				}
+				addDocumentIssue(model, document, newIssue(severity, "broken-link", "Неработающая ссылка: "+link.Destination+suffix, document.SourcePath, link.Line+1))
 			}
 			if resolved.TargetDocument != nil && resolved.TargetDocument != document && !link.Image {
 				key := document.SourcePath + "->" + resolved.TargetDocument.SourcePath

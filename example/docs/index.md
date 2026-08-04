@@ -18,7 +18,8 @@ Web Frontend принимает данные обращения, Backend API п�
 ## Основные возможности
 
 - связанная модель модулей, use cases, бизнес-правил и контрактов;
-- трёхслойная архитектура Web Frontend, Backend API и PostgreSQL;
+- карта архитектурных вопросов и отдельные ответы о контексте, компонентах,
+  данных, доверии и deployment;
 - roadmap, риски, решения и рабочие задачи;
 - Mermaid flowchart, state diagram и sequence diagram;
 - раздельные каталоги пользовательских сценариев `UC-*` и процессов `FLOW-*`
@@ -44,7 +45,7 @@ Web Frontend принимает данные обращения, Backend API п�
 - [Пользовательские сценарии](use-cases/)
 - [Процессы](flows/)
 - [Модули](modules/)
-- [Архитектура](architecture/)
+- [Архитектура](architecture/overview.md)
 - [Контракты](contracts/)
 - [Дорожная карта](roadmap.md)
 - [Риски](risks.md)

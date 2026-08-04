@@ -4,7 +4,7 @@
     "name": "Docgent",
     "version": "1.1.0-go"
   },
-  "generatedAt": "2026-07-30T21:33:45.514753572Z",
+  "generatedAt": "2026-07-31T13:48:21.979657235Z",
   "sourceDirectory": "docs",
   "staleDays": 0,
   "project": {
@@ -58,7 +58,7 @@
     }
   },
   "stats": {
-    "documents": 24,
+    "documents": 29,
     "totalTasks": 4,
     "completedTasks": 2,
     "remainingTasks": 2,
@@ -66,7 +66,7 @@
     "documentsComplete": 0,
     "documentsInProgress": 1,
     "documentsNotStarted": 3,
-    "documentsWithoutTasks": 20,
+    "documentsWithoutTasks": 25,
     "staleDocuments": 0,
     "documentsWithoutDescription": 2,
     "documentsWithoutStatus": 0,
@@ -123,7 +123,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-30T18:30:57.778685452Z",
+      "updatedAt": "2026-07-31T09:00:01.419129524Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -169,12 +169,12 @@
           "href": "modules/index.html"
         },
         {
-          "destination": "architecture/",
+          "destination": "architecture/overview.md",
           "broken": false,
           "blocked": false,
-          "targetKind": "directory",
-          "target": "architecture/index.html",
-          "href": "architecture/index.html"
+          "targetKind": "document",
+          "target": "architecture/overview.md",
+          "href": "architecture/overview.html"
         },
         {
           "destination": "contracts/",
@@ -228,6 +228,7 @@
       "backlinks": [],
       "relatedDocuments": [
         "status.md",
+        "architecture/overview.md",
         "roadmap.md",
         "risks.md",
         "ideas.md",
@@ -392,20 +393,19 @@
     },
     {
       "id": "",
-      "sourcePath": "architecture/overview.md",
-      "outputPath": "architecture/overview.html",
+      "sourcePath": "architecture/component-model.md",
+      "outputPath": "architecture/component-model.html",
       "type": "architecture",
-      "title": "Архитектура проекта",
-      "description": "Service Desk использует трёхслойную архитектуру: браузерный фронтенд отвечает за пользовательский интерфейс, backend API выполняет бизнес-правила, а PostgreSQL хранит обращения. Внешний Support Center остаётся за границей управляемой системы.",
+      "title": "Компонентная модель Service Desk",
+      "description": "Web Frontend отвечает за представление и предварительную проверку, Backend API повторно валидирует запрос и владеет бизнес-операцией, PostgreSQL обеспечивает транзакционное хранение. Ни один слой не принимает ответственность соседнего.",
       "metadata": {
-        "owner": "Architecture Team",
-        "status": "В работе",
-        "updated": "2026-07-29"
+        "architectureQuestion": "Как компоненты Service Desk делят ответственность?",
+        "documentType": "Architecture"
       },
       "status": {
-        "kind": "in-progress",
-        "symbol": "◐",
-        "label": "В работе",
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
         "recognized": true
       },
       "taskStats": {
@@ -414,7 +414,263 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-29T00:00:00Z",
+      "updatedAt": "2026-07-31T08:58:45.592910174Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../decisions/000-decision.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "decisions/000-decision.md",
+          "href": "../decisions/000-decision.html"
+        },
+        {
+          "destination": "../modules/core.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/core.md",
+          "href": "../modules/core.html"
+        },
+        {
+          "destination": "../flows/FLOW-CORE-REQUEST.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-CORE-REQUEST.md",
+          "href": "../flows/FLOW-CORE-REQUEST.html"
+        },
+        {
+          "destination": "../contracts/api.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/api.md",
+          "href": "../contracts/api.html"
+        }
+      ],
+      "backlinks": [
+        "architecture/overview.md"
+      ],
+      "relatedDocuments": [
+        "decisions/000-decision.md",
+        "modules/core.md",
+        "flows/FLOW-CORE-REQUEST.md",
+        "contracts/api.md"
+      ]
+    },
+    {
+      "id": "",
+      "sourcePath": "architecture/data-ownership.md",
+      "outputPath": "architecture/data-ownership.html",
+      "type": "architecture",
+      "title": "Владение данными обращения",
+      "description": "Backend API владеет смыслом и допустимыми изменениями обращения, PostgreSQL — его зафиксированным состоянием, а Web Frontend — только пользовательским черновиком до отправки и отображением подтверждённого результата.",
+      "metadata": {
+        "architectureQuestion": "Кто владеет данными обращения и их изменением?",
+        "documentType": "Architecture"
+      },
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-31T08:58:45.594837926Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../contracts/api.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/api.md",
+          "href": "../contracts/api.html"
+        },
+        {
+          "destination": "../modules/core.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/core.md",
+          "href": "../modules/core.html"
+        }
+      ],
+      "backlinks": [
+        "architecture/overview.md"
+      ],
+      "relatedDocuments": [
+        "contracts/api.md",
+        "modules/core.md"
+      ]
+    },
+    {
+      "id": "",
+      "sourcePath": "architecture/deployment-topology.md",
+      "outputPath": "architecture/deployment-topology.html",
+      "type": "architecture",
+      "title": "Топология развёртывания Service Desk",
+      "description": "Статический Web Frontend публикуется за HTTPS reverse proxy, Backend API работает в приватном сегменте за тем же публичным входом, а PostgreSQL — в отдельном приватном сегменте с доступом только от backend.",
+      "metadata": {
+        "architectureQuestion": "Как компоненты размещаются в целевой топологии MVP?",
+        "documentType": "Architecture"
+      },
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-31T09:04:25.008537822Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../reference/configuration.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/configuration.md",
+          "href": "../reference/configuration.html"
+        },
+        {
+          "destination": "../decisions/000-decision.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "decisions/000-decision.md",
+          "href": "../decisions/000-decision.html"
+        }
+      ],
+      "backlinks": [
+        "architecture/overview.md"
+      ],
+      "relatedDocuments": [
+        "reference/configuration.md",
+        "decisions/000-decision.md"
+      ]
+    },
+    {
+      "id": "",
+      "sourcePath": "architecture/overview.md",
+      "outputPath": "architecture/overview.html",
+      "type": "architecture",
+      "title": "Архитектура Service Desk",
+      "description": "Service Desk принимает обращения пользователя через браузер, сохраняет их в управляемом backend и может перевести пользователя во внешний Support Center. Пользователь и Support Center находятся за границей управляемой системы.",
+      "metadata": {
+        "documentType": "Architecture Overview"
+      },
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-31T08:58:45.592910174Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "system-context.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "architecture/system-context.md",
+          "href": "system-context.html"
+        },
+        {
+          "destination": "component-model.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "architecture/component-model.md",
+          "href": "component-model.html"
+        },
+        {
+          "destination": "data-ownership.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "architecture/data-ownership.md",
+          "href": "data-ownership.html"
+        },
+        {
+          "destination": "trust-boundaries.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "architecture/trust-boundaries.md",
+          "href": "trust-boundaries.html"
+        },
+        {
+          "destination": "deployment-topology.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "architecture/deployment-topology.md",
+          "href": "deployment-topology.html"
+        }
+      ],
+      "backlinks": [
+        "index.md"
+      ],
+      "relatedDocuments": [
+        "architecture/system-context.md",
+        "architecture/component-model.md",
+        "architecture/data-ownership.md",
+        "architecture/trust-boundaries.md",
+        "architecture/deployment-topology.md"
+      ]
+    },
+    {
+      "id": "",
+      "sourcePath": "architecture/system-context.md",
+      "outputPath": "architecture/system-context.html",
+      "type": "architecture",
+      "title": "Системный контекст Service Desk",
+      "description": "Управляемая граница включает Web Frontend, Backend API и PostgreSQL. Пользователь обращается к ней через HTTPS, а внешний Support Center получает только отдельный переход пользователя и не участвует в создании обращения.",
+      "metadata": {
+        "architectureQuestion": "Какие стороны взаимодействуют с Service Desk и где проходит системная граница?",
+        "documentType": "Architecture"
+      },
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-31T08:58:45.592910174Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -428,18 +684,82 @@
           "href": "../flows/FLOW-CORE-REQUEST.html"
         },
         {
-          "destination": "../flows/FLOW-CORE-ENTRY.md",
+          "destination": "../contracts/api.md",
           "broken": false,
           "blocked": false,
           "targetKind": "document",
-          "target": "flows/FLOW-CORE-ENTRY.md",
-          "href": "../flows/FLOW-CORE-ENTRY.html"
+          "target": "contracts/api.md",
+          "href": "../contracts/api.html"
+        },
+        {
+          "destination": "../modules/support.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/support.md",
+          "href": "../modules/support.html"
         }
       ],
-      "backlinks": [],
+      "backlinks": [
+        "architecture/overview.md"
+      ],
       "relatedDocuments": [
         "flows/FLOW-CORE-REQUEST.md",
-        "flows/FLOW-CORE-ENTRY.md"
+        "contracts/api.md",
+        "modules/support.md"
+      ]
+    },
+    {
+      "id": "",
+      "sourcePath": "architecture/trust-boundaries.md",
+      "outputPath": "architecture/trust-boundaries.html",
+      "type": "architecture",
+      "title": "Границы доверия Service Desk",
+      "description": "Публичный браузер и внешний Support Center находятся вне доверенной зоны; Backend API повторно проверяет каждый запрос на публичной HTTPS-границе, а PostgreSQL и её учётные данные остаются в приватной зоне backend.",
+      "metadata": {
+        "architectureQuestion": "Где проходят границы доверия Service Desk?",
+        "documentType": "Architecture"
+      },
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-31T08:58:45.595372627Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../contracts/api.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/api.md",
+          "href": "../contracts/api.html"
+        },
+        {
+          "destination": "../modules/support.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/support.md",
+          "href": "../modules/support.html"
+        }
+      ],
+      "backlinks": [
+        "architecture/overview.md"
+      ],
+      "relatedDocuments": [
+        "contracts/api.md",
+        "modules/support.md"
       ]
     },
     {
@@ -470,6 +790,10 @@
       "errors": 0,
       "links": [],
       "backlinks": [
+        "architecture/component-model.md",
+        "architecture/data-ownership.md",
+        "architecture/system-context.md",
+        "architecture/trust-boundaries.md",
         "modules/core.md",
         "use-cases/core.md"
       ],
@@ -506,7 +830,10 @@
       "warnings": 0,
       "errors": 0,
       "links": [],
-      "backlinks": [],
+      "backlinks": [
+        "architecture/component-model.md",
+        "architecture/deployment-topology.md"
+      ],
       "relatedDocuments": []
     },
     {
@@ -564,9 +891,7 @@
           "href": "../screens/SC-CORE-HOME.html"
         }
       ],
-      "backlinks": [
-        "architecture/overview.md"
-      ],
+      "backlinks": [],
       "relatedDocuments": [
         "use-cases/core.md",
         "use-cases/support.md",
@@ -621,7 +946,8 @@
         }
       ],
       "backlinks": [
-        "architecture/overview.md",
+        "architecture/component-model.md",
+        "architecture/system-context.md",
         "use-cases/core.md"
       ],
       "relatedDocuments": [
@@ -705,6 +1031,8 @@
         }
       ],
       "backlinks": [
+        "architecture/component-model.md",
+        "architecture/data-ownership.md",
         "use-cases/core.md",
         "use-cases/support.md"
       ],
@@ -753,6 +1081,8 @@
         }
       ],
       "backlinks": [
+        "architecture/system-context.md",
+        "architecture/trust-boundaries.md",
         "use-cases/support.md"
       ],
       "relatedDocuments": [
@@ -784,7 +1114,9 @@
       "warnings": 0,
       "errors": 0,
       "links": [],
-      "backlinks": [],
+      "backlinks": [
+        "architecture/deployment-topology.md"
+      ],
       "relatedDocuments": []
     },
     {

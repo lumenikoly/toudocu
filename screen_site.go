@@ -201,7 +201,7 @@ func renderScreenMapWorkspace(model *Model, current, initialUseCase string, embe
 		`<button type="button" data-map-zoom-in aria-label="Увеличить">+</button><button type="button" data-map-fullscreen>На весь экран</button></div></div>` +
 		`<div class="screen-map-shell"><div class="screen-map-stage" data-map-stage tabindex="0" aria-label="Интерактивная карта экранов">` +
 		`<div class="screen-map-viewport" data-map-viewport><div class="screen-map-groups" data-map-groups></div><svg class="screen-map-edges" data-map-edges aria-hidden="true"></svg>` +
-		`<div class="screen-map-nodes" data-map-nodes>` + cards.String() + `</div></div><p class="screen-map-empty" data-map-empty hidden>Нет экранов для выбранного режима.</p></div>` +
+		`<div class="screen-map-nodes" data-map-nodes>` + cards.String() + `</div><div class="screen-map-labels" data-map-labels></div></div><p class="screen-map-empty" data-map-empty hidden>Нет экранов для выбранного режима.</p></div>` +
 		`<aside class="screen-inspector" data-map-inspector aria-live="polite"><div class="screen-inspector-empty"><strong>Выберите экран</strong><span>Здесь появятся состояния, связи и затронутые документы.</span></div></aside></div>` +
 		`<p class="screen-map-status" data-map-summary aria-live="polite"></p><script type="application/json" data-screen-map-data>` +
 		jsonScript(screenMapData(model, current)) + `</script></section>`

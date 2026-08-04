@@ -16,18 +16,16 @@
 .screen-map-stage:fullscreen { background-color: var(--surface); }
 .screen-map-viewport { position: absolute; transform-origin: 0 0; transition: transform 140ms ease-out; }
 .screen-map-stage.is-panning .screen-map-viewport { transition: none; }
-.screen-map-groups, .screen-map-edges, .screen-map-nodes { position: absolute; inset: 0; overflow: visible; }
+.screen-map-groups, .screen-map-edges, .screen-map-nodes, .screen-map-labels { position: absolute; inset: 0; overflow: visible; }
 .screen-map-groups { pointer-events: none; z-index: 0; }
 .screen-map-edges { pointer-events: none; z-index: 1; }
 .screen-map-nodes { z-index: 2; }
+.screen-map-labels { pointer-events: none; z-index: 3; }
 .screen-module-group { position: absolute; border: 1px dashed color-mix(in srgb, var(--accent) 34%, var(--border)); border-radius: 16px; background: color-mix(in srgb, var(--accent) 4%, transparent); }
 .screen-module-group strong { position: absolute; top: 12px; left: 16px; padding: 2px 7px; border-radius: 5px; background: var(--surface); color: var(--accent-strong); font-size: 11px; letter-spacing: .04em; }
 .screen-edge { pointer-events: visibleStroke; cursor: pointer; outline: none; }
-.screen-edge:focus-visible path { stroke: var(--accent); stroke-width: 4; opacity: 1; }
 .screen-edge path { fill: none; stroke: var(--muted); stroke-width: 1.7; opacity: .68; }
-.screen-edge text { fill: var(--muted); font-size: 11px; paint-order: stroke; stroke: var(--surface); stroke-width: 5px; stroke-linejoin: round; }
-.screen-edge text > tspan:first-child { font-weight: 650; }
-.screen-edge .screen-edge-condition { font-size: 10px; font-weight: 400; }
+.screen-edge-leader { stroke-width: 1.2; stroke-dasharray: 2 4; }
 .screen-edge-error path { stroke-dasharray: 4 6; }
 .screen-edge-redirect path { stroke-dasharray: 10 5; }
 .screen-edge-external .screen-edge-external-outer { stroke: var(--muted); stroke-width: 7; opacity: .72; }
@@ -38,9 +36,18 @@
 .screen-edge-external:focus .screen-edge-external-outer { stroke: var(--accent); stroke-width: 7; opacity: 1; }
 .screen-edge-external.is-related .screen-edge-external-inner,
 .screen-edge-external:focus .screen-edge-external-inner { stroke: var(--surface); stroke-width: 2.5; opacity: 1; }
-.screen-edge.is-related text { fill: var(--accent-strong); font-weight: 700; }
 .screen-edge.is-muted { opacity: .16; }
 .screen-map-edges marker path { fill: var(--muted); stroke: none; }
+.screen-edge-label { position: absolute; display: grid; width: max-content; min-width: 72px; max-width: 176px; min-height: 32px; margin: 0; padding: 5px 8px; transform: translate(-50%, -50%); border: 1px solid color-mix(in srgb, var(--muted) 34%, var(--border)); border-radius: 6px; background: var(--surface); color: var(--muted); font: inherit; font-size: 11px; line-height: 1.25; text-align: center; pointer-events: auto; cursor: pointer; }
+.screen-edge-label > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.screen-edge-label-action { font-weight: 650; }
+.screen-edge-label-condition { color: color-mix(in srgb, var(--muted) 86%, var(--text)); font-size: 10px; white-space: nowrap; }
+.screen-edge-label:not(.has-condition) .screen-edge-label-action { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; white-space: normal; }
+.screen-edge-label.has-condition .screen-edge-label-action { white-space: nowrap; }
+.screen-edge-label:hover, .screen-edge-label:focus-visible { border-color: var(--accent); color: var(--accent-strong); outline: none; }
+.screen-edge-label:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent); }
+.screen-edge-label.is-related { border-color: var(--accent); color: var(--accent-strong); font-weight: 700; }
+.screen-edge-label.is-muted { opacity: .2; }
 .screen-node { position: absolute; width: 278px; min-height: 248px; margin: 0; overflow: hidden; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); box-shadow: 0 3px 8px rgb(15 23 42 / .08); cursor: pointer; transition: border-color 140ms ease, box-shadow 140ms ease, opacity 140ms ease; }
 .screen-node:hover, .screen-node:focus-visible { border-color: var(--accent); box-shadow: 0 5px 8px rgb(15 23 42 / .14); outline: none; }
 .screen-node.is-selected { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent), 0 5px 8px rgb(15 23 42 / .14); }

@@ -1,4 +1,4 @@
 interface:
   display_name: "Use Docgent"
-  short_description: "Подключайте и ведите Docgent по необходимости"
+  short_description: "Подключайте, обновляйте и проверяйте Docgent"
   default_prompt: "Используй $use-docgent init, чтобы явно подключить Docgent к этому проекту."

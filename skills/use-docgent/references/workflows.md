@@ -20,6 +20,11 @@ Use `docgent` from `PATH`. In the Docgent source repository, substitute
 `$use-docgent init` prompt follows [init.md](init.md); other document creation
 uses the bundled templates.
 
+The Go CLI also has no `refresh` command. Explicit `$use-docgent refresh` and
+`$use-docgent refresh diff` prompts follow [refresh.md](refresh.md). The first
+reviews all source documentation; the second scopes evidence from the current
+worktree relative to `HEAD` and includes affected documentation.
+
 ## Documentation gate
 
 For every documentation change, use this sequence:
@@ -80,8 +85,10 @@ behavior. Report warnings intentionally left unresolved.
 
 ## New documentation
 
-Create a neutral `index.md` first. Add free-form documents as needed. Opt into
-typed documents only for semantics the project will use:
+Create a neutral `index.md` and required `architecture/overview.md` first. Keep
+its question map empty until evidence supports a distinct detailed answer. Add
+free-form documents as needed. Opt into typed documents only for semantics the
+project will use:
 
 - add a module when stable ownership, boundaries, or business rules matter;
 - add a use case when observable behavior should link to a module;

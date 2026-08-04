@@ -4,7 +4,7 @@
     "name": "Docgent",
     "version": "1.1.0-go"
   },
-  "generatedAt": "2026-07-30T21:34:35.038892174Z",
+  "generatedAt": "2026-07-31T13:48:21.00172188Z",
   "sourceDirectory": "docs",
   "staleDays": 0,
   "project": {
@@ -37,17 +37,17 @@
     }
   },
   "stats": {
-    "documents": 39,
+    "documents": 46,
     "totalTasks": 10,
     "completedTasks": 9,
     "remainingTasks": 1,
     "taskProgress": 90,
-    "documentsComplete": 4,
+    "documentsComplete": 7,
     "documentsInProgress": 2,
     "documentsNotStarted": 0,
-    "documentsWithoutTasks": 33,
+    "documentsWithoutTasks": 37,
     "staleDocuments": 0,
-    "documentsWithoutDescription": 4,
+    "documentsWithoutDescription": 7,
     "documentsWithoutStatus": 0,
     "brokenLinks": 0,
     "warnings": 0,
@@ -100,7 +100,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-30T21:28:24.989211682Z",
+      "updatedAt": "2026-07-31T10:03:37.896148232Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -443,20 +443,19 @@
     },
     {
       "id": "",
-      "sourcePath": "architecture/overview.md",
-      "outputPath": "architecture/overview.html",
+      "sourcePath": "architecture/failure-isolation.md",
+      "outputPath": "architecture/failure-isolation.html",
       "type": "architecture",
-      "title": "Архитектура Docgent",
-      "description": "Docgent реализован как один Go-модуль с линейным конвейером: Markdown-файлы преобразуются в проверенную проектную модель, из которой формируются HTML и JSON-представления.",
+      "title": "Изоляция ошибок документации и проверок",
+      "description": "Ошибки чтения и структуры превращаются в привязанные к документам diagnostics и не открывают путь к исполнению. Явно запущенные проверки задачи выполняются последовательно в отдельной границе процесса, а их сбои, timeout и ограниченный вывод фиксируются в отчёте. Сам Docgent не переписывает исходный Markdown, но разрешённые shell-команды имеют права текущего пользователя и могут менять репозиторий.",
       "metadata": {
-        "owner": "Команда Docgent",
-        "status": "Готово",
-        "updated": "2026-07-30"
+        "architectureQuestion": "Как изолируются ошибки документации и запускаемых проверок?",
+        "documentType": "Architecture"
       },
       "status": {
-        "kind": "done",
-        "symbol": "✓",
-        "label": "Готово",
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
         "recognized": true
       },
       "taskStats": {
@@ -465,19 +464,11 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-31T09:03:51.353861727Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
       "links": [
-        {
-          "destination": "../flows/FLOW-DOCS-BUILD.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "flows/FLOW-DOCS-BUILD.md",
-          "href": "../flows/FLOW-DOCS-BUILD.html"
-        },
         {
           "destination": "../flows/FLOW-DOCS-CHECK.md",
           "broken": false,
@@ -485,14 +476,6 @@
           "targetKind": "document",
           "target": "flows/FLOW-DOCS-CHECK.md",
           "href": "../flows/FLOW-DOCS-CHECK.html"
-        },
-        {
-          "destination": "../flows/FLOW-DOCS-SERVE.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "flows/FLOW-DOCS-SERVE.md",
-          "href": "../flows/FLOW-DOCS-SERVE.html"
         },
         {
           "destination": "../flows/FLOW-TASK-WORKFLOW.md",
@@ -504,13 +487,303 @@
         }
       ],
       "backlinks": [
+        "architecture/overview.md"
+      ],
+      "relatedDocuments": [
+        "flows/FLOW-DOCS-CHECK.md",
+        "flows/FLOW-TASK-WORKFLOW.md"
+      ]
+    },
+    {
+      "id": "",
+      "sourcePath": "architecture/overview.md",
+      "outputPath": "architecture/overview.html",
+      "type": "architecture",
+      "title": "Архитектура Docgent",
+      "description": "Docgent — локальный dependency-free Go CLI между исходным каталогом Markdown и двумя потребителями проверенной модели: автоматизацией через CLI/JSON и читателем автономного HTML-портала. Сеть, база данных и внешний runtime в границу системы не входят.",
+      "metadata": {
+        "documentType": "Architecture Overview"
+      },
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-31T08:58:45.589039552Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "system-boundary.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "architecture/system-boundary.md",
+          "href": "system-boundary.html"
+        },
+        {
+          "destination": "runtime-components.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "architecture/runtime-components.md",
+          "href": "runtime-components.html"
+        },
+        {
+          "destination": "trust-boundaries.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "architecture/trust-boundaries.md",
+          "href": "trust-boundaries.html"
+        },
+        {
+          "destination": "failure-isolation.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "architecture/failure-isolation.md",
+          "href": "failure-isolation.html"
+        }
+      ],
+      "backlinks": [
         "index.md"
       ],
       "relatedDocuments": [
-        "flows/FLOW-DOCS-BUILD.md",
+        "architecture/system-boundary.md",
+        "architecture/runtime-components.md",
+        "architecture/trust-boundaries.md",
+        "architecture/failure-isolation.md"
+      ]
+    },
+    {
+      "id": "",
+      "sourcePath": "architecture/runtime-components.md",
+      "outputPath": "architecture/runtime-components.html",
+      "type": "architecture",
+      "title": "Разделение ответственности runtime-компонентов",
+      "description": "Runtime образует последовательный конвейер: CLI нормализует операцию, Markdown слой извлекает безопасное представление, модель проверяет структуру и связи, а выбранный потребитель возвращает отчёт, строит портал или выполняет отдельно разрешённый task workflow.",
+      "metadata": {
+        "architectureQuestion": "Как runtime-компоненты делят ответственность?",
+        "documentType": "Architecture"
+      },
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-31T08:58:45.589039552Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../modules/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/cli.md",
+          "href": "../modules/cli.html"
+        },
+        {
+          "destination": "../modules/markdown.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/markdown.md",
+          "href": "../modules/markdown.html"
+        },
+        {
+          "destination": "../modules/model.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/model.md",
+          "href": "../modules/model.html"
+        },
+        {
+          "destination": "../modules/site.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/site.md",
+          "href": "../modules/site.html"
+        },
+        {
+          "destination": "../flows/FLOW-DOCS-CHECK.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-DOCS-CHECK.md",
+          "href": "../flows/FLOW-DOCS-CHECK.html"
+        },
+        {
+          "destination": "../flows/FLOW-DOCS-BUILD.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-DOCS-BUILD.md",
+          "href": "../flows/FLOW-DOCS-BUILD.html"
+        },
+        {
+          "destination": "../flows/FLOW-TASK-WORKFLOW.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-TASK-WORKFLOW.md",
+          "href": "../flows/FLOW-TASK-WORKFLOW.html"
+        }
+      ],
+      "backlinks": [
+        "architecture/overview.md"
+      ],
+      "relatedDocuments": [
+        "modules/cli.md",
+        "modules/markdown.md",
+        "modules/model.md",
+        "modules/site.md",
         "flows/FLOW-DOCS-CHECK.md",
-        "flows/FLOW-DOCS-SERVE.md",
+        "flows/FLOW-DOCS-BUILD.md",
         "flows/FLOW-TASK-WORKFLOW.md"
+      ]
+    },
+    {
+      "id": "",
+      "sourcePath": "architecture/system-boundary.md",
+      "outputPath": "architecture/system-boundary.html",
+      "type": "architecture",
+      "title": "Системная граница Docgent",
+      "description": "Docgent ограничен одним локальным процессом, который читает документацию и репозиторий, строит проверенную модель и выдаёт diagnostics либо производные представления. Пользователь, агент, CI и браузер остаются взаимодействующими сторонами за этой границей.",
+      "metadata": {
+        "architectureQuestion": "Где проходит системная граница Docgent и кто с ней взаимодействует?",
+        "documentType": "Architecture"
+      },
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-31T08:58:45.589039552Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../contracts/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "../contracts/cli.html"
+        },
+        {
+          "destination": "../decisions/001-dependency-free.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "decisions/001-dependency-free.md",
+          "href": "../decisions/001-dependency-free.html"
+        },
+        {
+          "destination": "../decisions/ADR-002.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "decisions/ADR-002.md",
+          "href": "../decisions/ADR-002.html"
+        }
+      ],
+      "backlinks": [
+        "architecture/overview.md"
+      ],
+      "relatedDocuments": [
+        "contracts/cli.md",
+        "decisions/001-dependency-free.md",
+        "decisions/ADR-002.md"
+      ]
+    },
+    {
+      "id": "",
+      "sourcePath": "architecture/trust-boundaries.md",
+      "outputPath": "architecture/trust-boundaries.html",
+      "type": "architecture",
+      "title": "Границы доверия Docgent",
+      "description": "Markdown, ссылки, assets и Mermaid source считаются недоверенными данными; repository root и выбранные output/report paths задают файловую границу; команды work item считаются доверенным кодом только после отдельного явного разрешения на запуск.",
+      "metadata": {
+        "architectureQuestion": "Где проходят границы доверия?",
+        "documentType": "Architecture"
+      },
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-31T08:58:45.589039552Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../contracts/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "../contracts/cli.html"
+        },
+        {
+          "destination": "../modules/markdown.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/markdown.md",
+          "href": "../modules/markdown.html"
+        },
+        {
+          "destination": "../modules/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/cli.md",
+          "href": "../modules/cli.html"
+        }
+      ],
+      "backlinks": [
+        "architecture/overview.md"
+      ],
+      "relatedDocuments": [
+        "contracts/cli.md",
+        "modules/markdown.md",
+        "modules/cli.md"
       ]
     },
     {
@@ -554,6 +827,8 @@
       ],
       "backlinks": [
         "index.md",
+        "architecture/system-boundary.md",
+        "architecture/trust-boundaries.md",
         "flows/FLOW-DOCS-BUILD.md",
         "flows/FLOW-DOCS-SERVE.md",
         "flows/FLOW-TASK-WORKFLOW.md",
@@ -602,7 +877,9 @@
       "warnings": 0,
       "errors": 0,
       "links": [],
-      "backlinks": [],
+      "backlinks": [
+        "architecture/system-boundary.md"
+      ],
       "relatedDocuments": []
     },
     {
@@ -637,6 +914,7 @@
       "errors": 0,
       "links": [],
       "backlinks": [
+        "architecture/system-boundary.md",
         "use-cases/UC-TASK-03.md"
       ],
       "relatedDocuments": []
@@ -713,7 +991,7 @@
         }
       ],
       "backlinks": [
-        "architecture/overview.md",
+        "architecture/runtime-components.md",
         "flows/FLOW-DOCS-SERVE.md",
         "modules/site.md",
         "use-cases/build-portal.md"
@@ -797,7 +1075,8 @@
         }
       ],
       "backlinks": [
-        "architecture/overview.md",
+        "architecture/failure-isolation.md",
+        "architecture/runtime-components.md",
         "modules/cli.md",
         "modules/model.md",
         "use-cases/check-documentation.md"
@@ -881,7 +1160,6 @@
         }
       ],
       "backlinks": [
-        "architecture/overview.md",
         "modules/cli.md",
         "modules/site.md",
         "use-cases/serve-portal.md"
@@ -973,7 +1251,8 @@
         }
       ],
       "backlinks": [
-        "architecture/overview.md",
+        "architecture/failure-isolation.md",
+        "architecture/runtime-components.md",
         "modules/cli.md",
         "modules/model.md",
         "use-cases/task-verify.md",
@@ -1025,7 +1304,7 @@
       "outputPath": "guides/quality-runbooks.html",
       "type": "guide",
       "title": "Standards, Runbooks и Custom-разделы",
-      "description": "Руководство описывает авторский контракт опциональных разделов. Глобально обязателен только index.md ; отсутствие manifest у появившегося quality/ , runbooks/ или custom-раздела является warning и становится gate только с --strict .",
+      "description": "Руководство описывает авторский контракт опциональных разделов. Глобально обязательны index.md и architecture/overview.md ; отсутствие manifest у появившегося quality/ , runbooks/ или custom-раздела является warning и становится gate только с --strict .",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -1039,7 +1318,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-30T21:28:24.988211672Z",
+      "updatedAt": "2026-07-31T09:00:46.039679568Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1070,7 +1349,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-30T18:47:33.530663992Z",
+      "updatedAt": "2026-07-31T13:44:36.047014071Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1102,7 +1381,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-29T20:47:51.163360539Z",
+      "updatedAt": "2026-07-31T09:00:46.042172051Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1134,7 +1413,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-30T21:22:04.708333498Z",
+      "updatedAt": "2026-07-31T10:04:56.077920215Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1265,6 +1544,8 @@
         }
       ],
       "backlinks": [
+        "architecture/runtime-components.md",
+        "architecture/trust-boundaries.md",
         "flows/FLOW-DOCS-CHECK.md",
         "flows/FLOW-TASK-WORKFLOW.md",
         "use-cases/check-documentation.md",
@@ -1333,6 +1614,8 @@
         }
       ],
       "backlinks": [
+        "architecture/runtime-components.md",
+        "architecture/trust-boundaries.md",
         "use-cases/build-portal.md"
       ],
       "relatedDocuments": [
@@ -1436,6 +1719,7 @@
         }
       ],
       "backlinks": [
+        "architecture/runtime-components.md",
         "flows/FLOW-DOCS-BUILD.md",
         "flows/FLOW-DOCS-CHECK.md",
         "use-cases/check-documentation.md",
@@ -1527,6 +1811,7 @@
         }
       ],
       "backlinks": [
+        "architecture/runtime-components.md",
         "flows/FLOW-DOCS-BUILD.md",
         "flows/FLOW-DOCS-SERVE.md",
         "use-cases/build-portal.md",
@@ -1717,7 +2002,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-30T21:31:33.492086731Z",
+      "updatedAt": "2026-07-31T10:03:37.894148212Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1946,6 +2231,14 @@
           "targetKind": "document",
           "target": "modules/model.md",
           "href": "../modules/model.html#br-model-003-готовая-к-работе-задача-имеет-полный-проверяемый-контракт"
+        },
+        {
+          "destination": "../modules/model.md#br-model-005-overview-является-прямой-картой-архитектурных-вопросов",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/model.md",
+          "href": "../modules/model.html#br-model-005-overview-является-прямой-картой-архитектурных-вопросов"
         },
         {
           "destination": "../modules/cli.md#br-cli-002-проверки-запускаются-только-явно",
@@ -2459,6 +2752,43 @@
     },
     {
       "id": "",
+      "sourcePath": "work/TASK-ARCH-001.md",
+      "outputPath": "work/TASK-ARCH-001.html",
+      "type": "work",
+      "title": "TASK-ARCH-001: Внедрить вопросно-ориентированную архитектурную документацию",
+      "description": "",
+      "metadata": {
+        "module": "MOD-MODEL",
+        "owner": "Команда Docgent",
+        "priority": "Высокий",
+        "standards": "STD-GO-001, STD-DOCS-001",
+        "status": "Выполнено",
+        "type": "Feature",
+        "updated": "2026-07-31",
+        "useCase": "UC-DOCS-02"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Выполнено",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 12,
+        "completed": 12,
+        "remaining": 0,
+        "percent": 100
+      },
+      "updatedAt": "2026-07-31T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
       "sourcePath": "work/TASK-CLI-001.md",
       "outputPath": "work/TASK-CLI-001.html",
       "type": "work",
@@ -2546,6 +2876,78 @@
         "type": "Feature",
         "updated": "2026-07-31",
         "useCase": "UC-DOCS-02"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Выполнено",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 11,
+        "completed": 11,
+        "remaining": 0,
+        "percent": 100
+      },
+      "updatedAt": "2026-07-31T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "work/TASK-DOCS-003.md",
+      "outputPath": "work/TASK-DOCS-003.html",
+      "type": "work",
+      "title": "TASK-DOCS-003: Добавить явную инициализацию skill",
+      "description": "",
+      "metadata": {
+        "module": "MOD-MODEL",
+        "owner": "Команда Docgent",
+        "priority": "Высокий",
+        "standards": "STD-GO-001, STD-DOCS-001",
+        "status": "Выполнено",
+        "type": "Documentation",
+        "updated": "2026-07-31"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Выполнено",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 8,
+        "completed": 8,
+        "remaining": 0,
+        "percent": 100
+      },
+      "updatedAt": "2026-07-31T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "work/TASK-DOCS-004.md",
+      "outputPath": "work/TASK-DOCS-004.html",
+      "type": "work",
+      "title": "TASK-DOCS-004: Добавить refresh workflow для актуализации документации",
+      "description": "",
+      "metadata": {
+        "module": "MOD-MODEL",
+        "owner": "Команда Docgent",
+        "priority": "Высокий",
+        "standards": "STD-GO-001, STD-DOCS-001",
+        "status": "Выполнено",
+        "type": "Documentation",
+        "updated": "2026-07-31"
       },
       "status": {
         "kind": "done",
@@ -2951,7 +3353,8 @@
           "BR-MODEL-001",
           "BR-MODEL-002",
           "BR-MODEL-003",
-          "BR-MODEL-004"
+          "BR-MODEL-004",
+          "BR-MODEL-005"
         ]
       },
       {
@@ -3025,7 +3428,8 @@
           "BR-CLI-002",
           "BR-MODEL-001",
           "BR-MODEL-002",
-          "BR-MODEL-003"
+          "BR-MODEL-003",
+          "BR-MODEL-005"
         ],
         "flowIds": [
           "FLOW-DOCS-CHECK"
@@ -3200,7 +3604,7 @@
         "owner": "Команда Docgent",
         "scope": "Исходная документация, шаблоны skill и отслеживаемые порталы",
         "updated": "2026-07-31",
-        "rules": "Глобальный охват определяет roadmap.md ; состояние явно связанного UC- берётся из use case. Остальные локальные чек-листы не агрегируются. Сгенерированные build/ , dist/ , example/site/ , project-docs/ и example/project-docs/ не редактируются как источник истины. Отслеживаемые порталы пересобираются из Markdown после semantic review и структурной проверки. Типизированный документ создаётся только для подтверждённой семантики; неизвестные владелец, дата, статус или процедура не изобретаются ради отсутствия предупреждения. Явно связанные стандарты и runbook читаются вместе с task context; область других применимых стандартов проверяется автором без glob-эвристик CLI. docs/runbooks/ создаётся только при наличии реальной эксплуатационной процедуры.",
+        "rules": "Глобальный охват определяет roadmap.md ; состояние явно связанного UC- берётся из use case. Остальные локальные чек-листы не агрегируются. Сгенерированные build/ , dist/ , example/site/ , project-docs/ и example/project-docs/ не редактируются как источник истины. Отслеживаемые порталы пересобираются из Markdown после semantic review и структурной проверки. Типизированный документ создаётся только для подтверждённой семантики; неизвестные владелец, дата, статус или процедура не изобретаются ради отсутствия предупреждения. Явно связанные стандарты и runbook читаются вместе с task context; область других применимых стандартов проверяется автором без glob-эвристик CLI. docs/runbooks/ создаётся только при наличии реальной эксплуатационной процедуры. docs/architecture/overview.md является обязательной картой; каждый другой Markdown-файл в architecture/ отвечает на один явный архитектурный вопрос и добавляется прямой ссылкой из overview. Подробности FLOW, CONTRACT, REFERENCE, RUNBOOK, ADR и MODULE остаются в соответствующих источниках истины, а semantic gate проверяет архитектурную форму и смысл по ARCH001 – ARCH013 . $use-docgent refresh и $use-docgent refresh diff обновляют исходную документацию только по текущим repository evidence; даты меняются вместе с содержанием или связями, а Last verified требует фактической проверки runbook.",
         "automaticChecks": "go run ./cmd/docgent check ./docs --strict --stale-days 0 ; тесты целостности шаблонов и публичного JSON schema; тесты ссылок, стабильных ID, task context и портальной навигации. Команды запускаются из work item или доверенного CI workflow, а не напрямую из этого стандарта.",
         "document": "quality/STD-DOCS-001.md"
       },
@@ -3229,7 +3633,7 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-001-контекст-задачи-не-исполняет-команды",
-        "line": 34
+        "line": 35
       },
       {
         "id": "BR-CLI-002",
@@ -3237,7 +3641,7 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-002-проверки-запускаются-только-явно",
-        "line": 39
+        "line": 40
       },
       {
         "id": "BR-CLI-003",
@@ -3245,7 +3649,7 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-003-timeout-завершает-дерево-процессов",
-        "line": 44
+        "line": 45
       },
       {
         "id": "BR-CLI-004",
@@ -3253,7 +3657,7 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-004-docgent-не-интерпретирует-пользовательский-запрос",
-        "line": 49
+        "line": 50
       },
       {
         "id": "BR-MD-001",
@@ -3312,6 +3716,14 @@
         "line": 47
       },
       {
+        "id": "BR-MODEL-005",
+        "title": "Overview является прямой картой архитектурных вопросов",
+        "moduleId": "MOD-MODEL",
+        "document": "modules/model.md",
+        "anchor": "br-model-005-overview-является-прямой-картой-архитектурных-вопросов",
+        "line": 53
+      },
+      {
         "id": "BR-SITE-001",
         "title": "Очистка output не затрагивает защищённые каталоги",
         "moduleId": "MOD-SITE",
@@ -3361,6 +3773,222 @@
       }
     ],
     "workItems": [
+      {
+        "id": "TASK-ARCH-001",
+        "title": "Внедрить вопросно-ориентированную архитектурную документацию",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Выполнено",
+          "recognized": true
+        },
+        "type": "Feature",
+        "archived": false,
+        "priority": "Высокий",
+        "updated": "2026-07-31",
+        "owner": "Команда Docgent",
+        "moduleId": "MOD-MODEL",
+        "useCaseId": "UC-DOCS-02",
+        "screenIds": [],
+        "transitionIds": [],
+        "standardIds": [
+          "STD-GO-001",
+          "STD-DOCS-001"
+        ],
+        "runbookIds": [],
+        "dependsOn": [],
+        "document": "work/TASK-ARCH-001.md",
+        "anchor": "task-arch-001-внедрить-вопросно-ориентированную-архитектурную-документацию",
+        "criteria": [
+          {
+            "line": 61,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-01 Обычный check выдаёт стабильные errors для отсутствующего или"
+          },
+          {
+            "line": 64,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-02 Архитектурные broken/blocked links являются errors, а"
+          },
+          {
+            "line": 66,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-03 JSON schema остаётся v1, и overview сериализуется с"
+          },
+          {
+            "line": 68,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-04 RU/EN skill assets содержат раздельные overview/detail templates,"
+          },
+          {
+            "line": 71,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-05 Managed guidance и semantic gate синхронно задают границы типов,"
+          },
+          {
+            "line": 73,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-06 Архитектура Docgent и Service Desk разделена на подтверждённые"
+          }
+        ],
+        "verificationMatrix": [
+          {
+            "criterionId": "AC-01",
+            "criterion": "Обычный check выдаёт стабильные errors для отсутствующего или",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestArchitectureContract'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-02",
+            "criterion": "Архитектурные broken/blocked links являются errors, а",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestArchitectureContract'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-03",
+            "criterion": "JSON schema остаётся v1, и overview сериализуется с",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestArchitectureSchemaContract'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-04",
+            "criterion": "RU/EN skill assets содержат раздельные overview/detail templates,",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestUseDocgentArchitecture|TestUseDocgentInitContract'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-05",
+            "criterion": "Managed guidance и semantic gate синхронно задают границы типов,",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestUseDocgentArchitecture'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-06",
+            "criterion": "Архитектура Docgent и Service Desk разделена на подтверждённые",
+            "completed": true,
+            "commands": [
+              "go run ./cmd/docgent build ./docs --output ./project-docs --repository-root . --clean --strict --stale-days 0 \u0026\u0026 go run ./cmd/docgent build ./example/docs --output ./example/project-docs --repository-root ./example --clean --strict --stale-days 0"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          }
+        ],
+        "checks": [
+          {
+            "target": "AC-01",
+            "commands": [
+              "go test ./... -run 'TestArchitectureContract'"
+            ],
+            "line": 88
+          },
+          {
+            "target": "AC-02",
+            "commands": [
+              "go test ./... -run 'TestArchitectureContract'"
+            ],
+            "line": 89
+          },
+          {
+            "target": "AC-03",
+            "commands": [
+              "go test ./... -run 'TestArchitectureSchemaContract'"
+            ],
+            "line": 90
+          },
+          {
+            "target": "AC-04",
+            "commands": [
+              "go test ./... -run 'TestUseDocgentArchitecture|TestUseDocgentInitContract'"
+            ],
+            "line": 91
+          },
+          {
+            "target": "AC-05",
+            "commands": [
+              "go test ./... -run 'TestUseDocgentArchitecture'"
+            ],
+            "line": 92
+          },
+          {
+            "target": "AC-06",
+            "commands": [
+              "go run ./cmd/docgent build ./docs --output ./project-docs --repository-root . --clean --strict --stale-days 0 \u0026\u0026 go run ./cmd/docgent build ./example/docs --output ./example/project-docs --repository-root ./example --clean --strict --stale-days 0"
+            ],
+            "line": 93
+          },
+          {
+            "target": "ALL",
+            "commands": [
+              "go test -count=1 ./..."
+            ],
+            "line": 94
+          },
+          {
+            "target": "DOCS",
+            "commands": [
+              "go run ./cmd/docgent check ./docs --repository-root . --strict --stale-days 0 \u0026\u0026 go run ./cmd/docgent check ./example/docs --repository-root ./example --strict --stale-days 0"
+            ],
+            "line": 95
+          },
+          {
+            "target": "QUALITY",
+            "commands": [
+              "go test ./... -run 'TestArchitectureContract|TestArchitectureSchemaContract|TestUseDocgentArchitecture'"
+            ],
+            "line": 96
+          }
+        ],
+        "repositoryPaths": [
+          "AGENTS.md",
+          "CHANGELOG.md",
+          "docs/",
+          "docs_core.go",
+          "documentation_links.go",
+          "example/docs/",
+          "example/project-docs/",
+          "integration_test.go",
+          "markdown_parse.go",
+          "project-docs/",
+          "README.md",
+          "screens_test.go",
+          "skill_templates_test.go",
+          "skills/use-docgent/"
+        ],
+        "result": "docs/architecture/overview.md является обязательной картой архитектуры, а каждый другой Markdown-документ в architecture/ отвечает на один явный архитектурный вопрос и напрямую перечислен в overview.",
+        "behaviorChange": "Было Каталог architecture/ был необязательным набором специализированных Markdown-документов без обязательной карты, явного вопроса и повышенной строгости локальных ссылок. Станет Обычный check требует корректный architecture overview, один непустой вопрос для каждого подробного документа, прямую рекурсивную карту документов и безопасные существующие локальные ссылки. Skill предоставляет раздельные RU/EN-шаблоны, безопасный init и semantic gate ARCH001 – ARCH013 .",
+        "before": "Каталог architecture/ был необязательным набором специализированных Markdown-документов без обязательной карты, явного вопроса и повышенной строгости локальных ссылок.",
+        "after": "Обычный check требует корректный architecture overview, один непустой вопрос для каждого подробного документа, прямую рекурсивную карту документов и безопасные существующие локальные ссылки. Skill предоставляет раздельные RU/EN-шаблоны, безопасный init и semantic gate ARCH001 – ARCH013 .",
+        "outOfScope": "новая Go-команда docgent init ; изменение ProjectReport schema v1 или типа documents[].type ; автоматическая миграция legacy-архитектуры; проверка пунктуации, вопросительных слов или архитектурного смысла в CLI; документы Docgent о deployment или владении данными без подтверждённого архитектурного вопроса.",
+        "plan": "Добавить metadata aliases и структурные architecture diagnostics. Расширить behavioral и schema contract tests. Обновить templates, init workflow, managed guidance и semantic gate. Мигрировать документацию Docgent и демонстрационного Service Desk. Выполнить независимый semantic review и устранить замечания. Пройти полный Go/Docgent verification и пересобрать portals.",
+        "documentationImpact": "Обновляются публичный архитектурный контракт, skill init и guidance, самодокументация Docgent, демонстрационный Service Desk, README, CLI/reference, модель, use case, changelog, стандарт документации и отслеживаемые portals.",
+        "documentationPaths": []
+      },
       {
         "id": "TASK-CLI-001",
         "title": "Реализовать полный workflow рабочей задачи",
@@ -3899,6 +4527,385 @@
           "reference/features.md",
           "skills/use-docgent/SKILL.md",
           "use-cases/check-documentation.md"
+        ]
+      },
+      {
+        "id": "TASK-DOCS-003",
+        "title": "Добавить явную инициализацию skill",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Выполнено",
+          "recognized": true
+        },
+        "type": "Documentation",
+        "archived": false,
+        "priority": "Высокий",
+        "updated": "2026-07-31",
+        "owner": "Команда Docgent",
+        "moduleId": "MOD-MODEL",
+        "screenIds": [],
+        "transitionIds": [],
+        "standardIds": [
+          "STD-GO-001",
+          "STD-DOCS-001"
+        ],
+        "runbookIds": [],
+        "dependsOn": [],
+        "document": "work/TASK-DOCS-003.md",
+        "anchor": "task-docs-003-добавить-явную-инициализацию-skill",
+        "criteria": [
+          {
+            "line": 49,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-01 Skill трактует $use-docgent init как единственный явный"
+          },
+          {
+            "line": 52,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-02 Русский и английский блоки используют одинаковые стабильные"
+          },
+          {
+            "line": 54,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-03 Task workflow создаёт новый work item только для существенной"
+          },
+          {
+            "line": 56,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-04 Metadata skill описывает явный init и остаётся валидной."
+          }
+        ],
+        "verificationMatrix": [
+          {
+            "criterionId": "AC-01",
+            "criterion": "Skill трактует $use-docgent init как единственный явный",
+            "completed": true,
+            "commands": [
+              "go test ./... -run TestUseDocgentInitContract"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-02",
+            "criterion": "Русский и английский блоки используют одинаковые стабильные",
+            "completed": true,
+            "commands": [
+              "go test ./... -run TestUseDocgentProjectGuidanceTemplates"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-03",
+            "criterion": "Task workflow создаёт новый work item только для существенной",
+            "completed": true,
+            "commands": [
+              "go test ./... -run TestUseDocgentTaskCreationThreshold"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-04",
+            "criterion": "Metadata skill описывает явный init и остаётся валидной.",
+            "completed": true,
+            "commands": [
+              "go test ./... -run TestUseDocgentMetadata"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          }
+        ],
+        "checks": [
+          {
+            "target": "AC-01",
+            "commands": [
+              "go test ./... -run TestUseDocgentInitContract"
+            ],
+            "line": 67
+          },
+          {
+            "target": "AC-02",
+            "commands": [
+              "go test ./... -run TestUseDocgentProjectGuidanceTemplates"
+            ],
+            "line": 68
+          },
+          {
+            "target": "AC-03",
+            "commands": [
+              "go test ./... -run TestUseDocgentTaskCreationThreshold"
+            ],
+            "line": 69
+          },
+          {
+            "target": "AC-04",
+            "commands": [
+              "go test ./... -run TestUseDocgentMetadata"
+            ],
+            "line": 70
+          },
+          {
+            "target": "ALL",
+            "commands": [
+              "go test ./..."
+            ],
+            "line": 71
+          },
+          {
+            "target": "DOCS",
+            "commands": [
+              "go run ./cmd/docgent check ./docs --strict --stale-days 0"
+            ],
+            "line": 72
+          },
+          {
+            "target": "QUALITY",
+            "commands": [
+              "go test ./... -run 'TestUseDocgent'"
+            ],
+            "line": 73
+          }
+        ],
+        "repositoryPaths": [
+          "CHANGELOG.md",
+          "docs/guides/work-items.md",
+          "docs/work/TASK-DOCS-003.md",
+          "README.md",
+          "skill_templates_test.go",
+          "skills/use-docgent/"
+        ],
+        "result": "Пользователь явно подключает Docgent к проекту через $use-docgent init ; skill создаёт минимальную документацию при необходимости и безопасно устанавливает ограниченные правила использования в AGENTS.md .",
+        "behaviorChange": "Было Skill не имел отдельного onboarding-вызова, а workflow безусловно предлагал создавать TASK- для каждого нового запроса. Станет Только явный $use-docgent init выполняет preflight, создаёт отсутствующий docs/index.md , устанавливает управляемый блок AGENTS.md и запускает структурную проверку. Обычные вызовы не меняют project instructions, а новые TASK- создаются только для существенной работы.",
+        "before": "Skill не имел отдельного onboarding-вызова, а workflow безусловно предлагал создавать TASK- для каждого нового запроса.",
+        "after": "Только явный $use-docgent init выполняет preflight, создаёт отсутствующий docs/index.md , устанавливает управляемый блок AGENTS.md и запускает структурную проверку. Обычные вызовы не меняют project instructions, а новые TASK- создаются только для существенной работы.",
+        "outOfScope": "новая команда Go CLI docgent init ; автоматическое изменение AGENTS.md при неявном срабатывании skill; внешний runtime или dependency для слияния Markdown; создание полного starter pack документации.",
+        "plan": "Добавить init reference и RU/EN project-guidance assets. Синхронизировать SKILL.md, workflow и metadata. Зафиксировать contract тестами и пользовательской документацией. Выполнить semantic review и полный verification cycle.",
+        "documentationImpact": "Обновлены skills/use-docgent/ , README.md , CHANGELOG.md , docs/guides/work-items.md и skill templates test.go . Публичные Go API, CLI и JSON schema не меняются; generated portals не редактируются.",
+        "documentationPaths": [
+          "CHANGELOG.md",
+          "guides/work-items.md",
+          "README.md",
+          "skill_templates_test.go"
+        ]
+      },
+      {
+        "id": "TASK-DOCS-004",
+        "title": "Добавить refresh workflow для актуализации документации",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Выполнено",
+          "recognized": true
+        },
+        "type": "Documentation",
+        "archived": false,
+        "priority": "Высокий",
+        "updated": "2026-07-31",
+        "owner": "Команда Docgent",
+        "moduleId": "MOD-MODEL",
+        "screenIds": [],
+        "transitionIds": [],
+        "standardIds": [
+          "STD-GO-001",
+          "STD-DOCS-001"
+        ],
+        "runbookIds": [],
+        "dependsOn": [],
+        "document": "work/TASK-DOCS-004.md",
+        "anchor": "task-docs-004-добавить-refresh-workflow-для-актуализации-документации",
+        "criteria": [
+          {
+            "line": 54,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-01 Skill маршрутизирует $use-docgent refresh и `$use-docgent"
+          },
+          {
+            "line": 56,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-02 Полный режим проверяет всю документацию, а diff-режим использует"
+          },
+          {
+            "line": 59,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-03 Workflow применяет evidence-first update, безопасную политику"
+          },
+          {
+            "line": 62,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-04 Semantic и structural gates предшествуют условной пересборке"
+          },
+          {
+            "line": 64,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-05 RU/EN guidance, metadata и пользовательская документация"
+          },
+          {
+            "line": 66,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-06 Go CLI по-прежнему отклоняет docgent refresh, а полный цикл"
+          }
+        ],
+        "verificationMatrix": [
+          {
+            "criterionId": "AC-01",
+            "criterion": "Skill маршрутизирует $use-docgent refresh и `$use-docgent",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestUseDocgentRefresh'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-02",
+            "criterion": "Полный режим проверяет всю документацию, а diff-режим использует",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestUseDocgentRefresh'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-03",
+            "criterion": "Workflow применяет evidence-first update, безопасную политику",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestUseDocgentRefresh'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-04",
+            "criterion": "Semantic и structural gates предшествуют условной пересборке",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestUseDocgentRefresh'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-05",
+            "criterion": "RU/EN guidance, metadata и пользовательская документация",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestUseDocgentRefresh|TestUseDocgentMetadata|TestUseDocgentProjectGuidanceTemplates'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-06",
+            "criterion": "Go CLI по-прежнему отклоняет docgent refresh, а полный цикл",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestCLIArguments|TestUseDocgentRefresh'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          }
+        ],
+        "checks": [
+          {
+            "target": "AC-01",
+            "commands": [
+              "go test ./... -run 'TestUseDocgentRefresh'"
+            ],
+            "line": 79
+          },
+          {
+            "target": "AC-02",
+            "commands": [
+              "go test ./... -run 'TestUseDocgentRefresh'"
+            ],
+            "line": 80
+          },
+          {
+            "target": "AC-03",
+            "commands": [
+              "go test ./... -run 'TestUseDocgentRefresh'"
+            ],
+            "line": 81
+          },
+          {
+            "target": "AC-04",
+            "commands": [
+              "go test ./... -run 'TestUseDocgentRefresh'"
+            ],
+            "line": 82
+          },
+          {
+            "target": "AC-05",
+            "commands": [
+              "go test ./... -run 'TestUseDocgentRefresh|TestUseDocgentMetadata|TestUseDocgentProjectGuidanceTemplates'"
+            ],
+            "line": 83
+          },
+          {
+            "target": "AC-06",
+            "commands": [
+              "go test ./... -run 'TestCLIArguments|TestUseDocgentRefresh'"
+            ],
+            "line": 84
+          },
+          {
+            "target": "ALL",
+            "commands": [
+              "go test -count=1 ./..."
+            ],
+            "line": 85
+          },
+          {
+            "target": "DOCS",
+            "commands": [
+              "go run ./cmd/docgent check ./docs --repository-root . --strict --stale-days 0 \u0026\u0026 go run ./cmd/docgent check ./example/docs --repository-root ./example --strict --stale-days 0"
+            ],
+            "line": 86
+          },
+          {
+            "target": "QUALITY",
+            "commands": [
+              "go test ./... -run 'TestUseDocgent'"
+            ],
+            "line": 87
+          }
+        ],
+        "repositoryPaths": [
+          "AGENTS.md",
+          "CHANGELOG.md",
+          "cli.go",
+          "docs/",
+          "example/project-docs/",
+          "integration_test.go",
+          "project-docs/",
+          "README.md",
+          "skill_templates_test.go",
+          "skills/use-docgent/"
+        ],
+        "result": "Пользователь явно запускает полный или diff-ограниченный refresh документации; skill сверяет Markdown с текущими источниками истины, применяет доказуемые обновления и завершает работу semantic и structural gates.",
+        "behaviorChange": "Было Skill обновлял документацию только по конкретному запросу и не имел явного workflow для систематического ревью актуальности. Станет $use-docgent refresh проверяет весь проект, а $use-docgent refresh diff проверяет staged, unstaged и untracked изменения относительно HEAD и зависимую документацию. Оба режима могут обновлять, удалять и переименовывать документы при однозначной доказательной базе.",
+        "before": "Skill обновлял документацию только по конкретному запросу и не имел явного workflow для систематического ревью актуальности.",
+        "after": "$use-docgent refresh проверяет весь проект, а $use-docgent refresh diff проверяет staged, unstaged и untracked изменения относительно HEAD и зависимую документацию. Оба режима могут обновлять, удалять и переименовывать документы при однозначной доказательной базе.",
+        "outOfScope": "новая Go-команда docgent refresh ; отдельный read-only refresh workflow; merge-base или сравнение с default branch; изменение кода ради согласования с документацией; обновление Last verified без фактической проверки runbook.",
+        "plan": "Добавить refresh reference и маршрутизацию команд. Синхронизировать managed guidance, metadata и self-documentation. Зафиксировать полный, diff, safety и no-CLI contracts тестами. Провести независимый semantic review и устранить замечания. Выполнить полный verification и пересобрать tracked portals.",
+        "documentationImpact": "Обновляются публичный workflow skill, RU/EN managed guidance, README, changelog, self-documentation, корневой AGENTS.md и оба tracked portal.",
+        "documentationPaths": [
+          "AGENTS.md"
         ]
       },
       {

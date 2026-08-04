@@ -50,13 +50,23 @@ diagnostics.
 типизированную модель `SC-*` и `TR-*`. Произвольная Mermaid-грамматика не
 разбирается как требования или связи.
 
+### BR-MODEL-005: Overview является прямой картой архитектурных вопросов
+
+`architecture/overview.md` обязателен и имеет тип `Architecture Overview`.
+Каждый другой Markdown-файл под `architecture/` задаёт один непустой
+архитектурный вопрос и напрямую связан из overview; транзитивная ссылка не
+считается листингом.
+
 ## Инварианты
 
 - каждый стабильный ID уникален в своей проектной модели;
 - стандарты `STD-*` и runbook `RB-*` уникальны, а work item ссылается только на
   существующие typed documents;
-- минимальная документация требует только `index.md`; manifest появившегося
-  quality, runbooks или custom-раздела проверяется предупреждениями;
+- минимальная документация требует `index.md` и
+  `architecture/overview.md`; manifest появившегося quality, runbooks или
+  custom-раздела проверяется предупреждениями;
+- архитектурные broken/blocked links являются errors, а форма непустого
+  вопроса остаётся semantic review;
 - экранные переходы ссылаются только на существующие `SC-*`;
 - screen routes уникальны, а previews и hotspots не выходят за repository root;
 - каждый проигрываемый сценарий достигает terminal screen либо содержит diagnostic;
@@ -69,6 +79,7 @@ diagnostics.
 
 - `BuildDocumentationModel(Options)`;
 - `ProjectReport` schema v1;
+- архитектурные документы сохраняют `documents[].type = architecture`;
 - коды `Issue`;
 - правила ID и структуры, описанные в [CLI-контракте](../contracts/cli.md).
 - статусы, типы и формат задач из [руководства по рабочим задачам](../guides/work-items.md).

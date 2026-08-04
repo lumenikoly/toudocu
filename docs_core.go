@@ -413,6 +413,9 @@ func validateGlobalStructure(model *Model) {
 	if model.DocByPath["index.md"] == nil {
 		model.Issues = append(model.Issues, newIssue("warning", "missing-index", "Отсутствует обязательный файл index.md.", "", 0))
 	}
+	if model.DocByPath["architecture/overview.md"] == nil {
+		model.Issues = append(model.Issues, newIssue("error", "missing-architecture-overview", "Отсутствует обязательный файл architecture/overview.md.", "architecture/overview.md", 0))
+	}
 	titles := map[string][]*Document{}
 	for _, document := range model.Documents {
 		key := canonicalText(document.Title)
@@ -425,6 +428,51 @@ func validateGlobalStructure(model *Model) {
 			for _, document := range group {
 				addDocumentIssue(model, document, newIssue("warning", "duplicate-title", fmt.Sprintf("Заголовок «%s» используется в нескольких документах.", document.Title), document.SourcePath, 0))
 			}
+		}
+	}
+}
+
+func validateArchitectureDocuments(model *Model) {
+	overview := model.DocByPath["architecture/overview.md"]
+	if overview != nil && strings.TrimSpace(overview.Metadata["documentType"]) != "Architecture Overview" {
+		addDocumentIssue(model, overview, newIssue(
+			"error",
+			"invalid-architecture-overview-type",
+			"architecture/overview.md должен содержать поле «Тип документа: Architecture Overview».",
+			overview.SourcePath,
+			0,
+		))
+	}
+
+	listed := map[string]struct{}{}
+	if overview != nil {
+		for _, link := range overview.ResolvedLinks {
+			if link.TargetDocument != nil && link.TargetDocument.Type == "architecture" && link.TargetDocument != overview && !link.Image {
+				listed[link.TargetDocument.SourcePath] = struct{}{}
+			}
+		}
+	}
+	for _, document := range model.Collections["architecture"] {
+		if document == overview {
+			continue
+		}
+		if strings.TrimSpace(document.Metadata["architectureQuestion"]) == "" {
+			addDocumentIssue(model, document, newIssue(
+				"error",
+				"missing-architecture-question",
+				"Подробный архитектурный документ должен содержать непустое поле «Архитектурный вопрос».",
+				document.SourcePath,
+				0,
+			))
+		}
+		if _, ok := listed[document.SourcePath]; !ok {
+			addDocumentIssue(model, document, newIssue(
+				"error",
+				"unlisted-architecture-document",
+				"Подробный архитектурный документ должен быть указан прямой локальной ссылкой из architecture/overview.md.",
+				document.SourcePath,
+				0,
+			))
 		}
 	}
 }
@@ -555,6 +603,7 @@ func BuildDocumentationModel(options Options) (*Model, error) {
 	validateGlobalStructure(model)
 	validateSectionManifests(model)
 	resolveLinks(model)
+	validateArchitectureDocuments(model)
 	connectUseCasesAndModules(model)
 	validateMermaidDocuments(model)
 	model.Knowledge = buildKnowledgeModel(model)

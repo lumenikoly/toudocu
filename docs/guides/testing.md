@@ -58,5 +58,6 @@ go run ./cmd/docgent task verify TASK-DOCS-001 ./docs --dry-run --format json
 1. форматирование не создаёт diff;
 2. vet, обычные и race-тесты проходят;
 3. `docgent check ./docs --strict` не содержит warnings и errors;
-4. пример и минимальный проект только с `index.md` остаются валидными;
+4. пример и минимальный проект с `index.md` и architecture overview остаются
+   валидными;
 5. поведение и публичные контракты отражены в документации.

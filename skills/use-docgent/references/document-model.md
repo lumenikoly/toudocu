@@ -46,7 +46,9 @@ types are optional.
 | `quality/STD-*.md` | Enforceable project standards | Requires a unique `STD-*`; validates status and replacement links |
 | `runbooks/RB-*.md` | Operational procedures | Requires a unique `RB-*`; derives review freshness |
 | `work/TASK-*.md`, `work/BUG-*.md`, and yearly archive paths | Agent- or CI-readable work and terminal history | Requires exactly one work item, status-dependent fields, and terminal archive status |
-| `architecture/`, `contracts/`, `guides/`, `reference/` | Specialized human documentation | Classifies and renders the document |
+| `architecture/overview.md` | Required architecture boundary and question map | Requires `Architecture Overview` and direct links to every detailed architecture document |
+| Other `architecture/**/*.md` | One evidence-backed architectural question per document | Requires document type `Architecture`, one non-empty question, and a direct overview listing |
+| `contracts/`, `guides/`, `reference/` | Specialized human documentation | Classifies and renders the document |
 | Any other path | Free-form documentation | Renders safely without a typed entity contract |
 
 When an unknown top-level directory contains Markdown, its `index.md` is a
