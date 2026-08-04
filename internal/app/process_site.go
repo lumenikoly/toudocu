@@ -113,10 +113,10 @@ func renderProcessRows(model *Model, current, onlyType string) string {
 }
 
 func renderProcessCatalogPage(model *Model, current, onlyType string) string {
-	title := "Процессы"
+	title := modelDirectoryLabel(model, "flows")
 	description := "Бизнес-, технические, операционные и межмодульные процессы."
-	badge := "Процессы"
-	badgeTarget := "processes/index.html"
+	badge := title
+	badgeTarget := sectionCatalogOutput(SectionFlows)
 	summary := "FLOW связан с пользовательскими сценариями"
 	if onlyType == "use-case" {
 		title = "Пользовательские сценарии"

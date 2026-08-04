@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `flows/index.html` больше не создаётся: единственный каталог `FLOW-*` —
+  `processes/index.html`, а URL отдельных `flows/FLOW-*.html` сохранены.
 - Портал автоматически показывает корневой `CHANGELOG.md` как «Журнал
   изменений проекта» по маршруту `project-changelog.html` и включает его в
   portal search. Файл не меняет `ProjectReport`, task context, semantic model

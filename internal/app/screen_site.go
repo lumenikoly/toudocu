@@ -230,7 +230,7 @@ func renderScreenMapPage(model *Model, current string) string {
 	content := breadcrumbs(model, current, "Карта экранов") +
 		`<header class="page-header screen-map-header"><div class="page-kicker"><span class="badge">Screen map</span><a class="badge" href="` +
 		escapeAttr(relativeURL(current, "screens/catalog.html")) + `">Каталог</a><a class="badge" href="` +
-		escapeAttr(relativeURL(current, "processes/index.html")) + `">Процессы</a></div><h1>Карта экранов</h1><p class="page-lead">Экраны, состояния и переходы из Markdown-модели проекта.</p></header>` +
+		escapeAttr(relativeURL(current, sectionCatalogOutput(SectionFlows))) + `">` + escapeHTML(modelDirectoryLabel(model, "flows")) + `</a></div><h1>Карта экранов</h1><p class="page-lead">Экраны, состояния и переходы из Markdown-модели проекта.</p></header>` +
 		renderScreenMapWorkspace(model, current, "", false)
 	return pageShell(model, current, "Карта экранов", "Интерактивная карта экранов", content, "")
 }

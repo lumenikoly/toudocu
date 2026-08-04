@@ -23,14 +23,6 @@ var typeLabels = map[string]string{
 	"runbook": "Runbook", "runbook-index": "Runbooks",
 }
 
-var folderLabels = map[string]string{
-	"use-cases": "Пользовательские сценарии", "modules": "Модули", "architecture": "Архитектура",
-	"contracts": "Контракты", "decisions": "Решения", "flows": "Процессы", "guides": "Руководства",
-	"work": "Рабочие задачи", "reference": "Справочник",
-	"processes": "Процессы", "screens": "Экраны",
-	"quality": "Стандарты качества", "runbooks": "Runbooks",
-}
-
 var rootOrder = map[string]int{
 	"index.md": 0, "status.md": 1, "roadmap.md": 2, "risks.md": 3,
 	"ideas.md": 4, "notes.md": 5, "glossary.md": 6,
@@ -62,7 +54,7 @@ var statusGroups = []statusGroup{
 func ClassifyDocument(relativePath string) string {
 	normalized := strings.ToLower(normalizeSlashes(relativePath))
 	base := path.Base(normalized)
-	first := strings.Split(normalized, "/")[0]
+	section := sectionTypeForPath(normalized)
 	switch normalized {
 	case "index.md":
 		return "overview"
@@ -77,36 +69,36 @@ func ClassifyDocument(relativePath string) string {
 	case "ideas.md":
 		return "ideas"
 	}
-	switch first {
-	case "use-cases":
+	switch section {
+	case SectionUseCases:
 		return "use-case"
-	case "modules":
+	case SectionModules:
 		return "module"
-	case "architecture":
+	case SectionArchitecture:
 		return "architecture"
-	case "contracts":
+	case SectionContracts:
 		return "contract"
-	case "decisions":
+	case SectionDecisions:
 		return "decision"
-	case "flows":
+	case SectionFlows:
 		return "flow"
-	case "guides":
+	case SectionGuides:
 		return "guide"
-	case "work":
+	case SectionWork:
 		return "work"
-	case "reference":
+	case SectionReference:
 		return "reference"
-	case "quality":
+	case SectionQuality:
 		if base == "index.md" {
 			return "quality-index"
 		}
 		return "standard"
-	case "runbooks":
+	case SectionRunbooks:
 		if base == "index.md" {
 			return "runbook-index"
 		}
 		return "runbook"
-	case "screens":
+	case SectionScreens:
 		if base == "map.md" {
 			return "screen-map"
 		}
@@ -327,6 +319,7 @@ func createDocument(file scannedFile, root string, staleDays int, now time.Time,
 	content := string(contentBytes)
 	parsed := AnalyzeMarkdown(content)
 	typeName := ClassifyDocument(file.RelativePath)
+	section := sectionTypeForPath(file.RelativePath)
 	fallback := strings.TrimSuffix(path.Base(file.RelativePath), path.Ext(file.RelativePath))
 	fallback = strings.ReplaceAll(strings.ReplaceAll(fallback, "-", " "), "_", " ")
 	if fallback != "" {
@@ -359,7 +352,7 @@ func createDocument(file scannedFile, root string, staleDays int, now time.Time,
 	return &Document{
 		ID: file.RelativePath, AbsolutePath: file.AbsolutePath, SourcePath: normalizeSlashes(file.RelativePath),
 		OutputPath: outputPathForDocument(file.RelativePath), Directory: directory, FileName: path.Base(file.RelativePath),
-		Type: typeName, TypeLabel: typeLabels[typeName], Title: title, Description: parsed.Description,
+		Type: typeName, SectionType: section, TypeLabel: typeLabels[typeName], Title: title, Description: parsed.Description,
 		Content: content, Lines: parsed.Lines, Headings: parsed.Headings, HeadingByLine: parsed.HeadingByLine,
 		Sections: parsed.Sections, Metadata: parsed.Metadata, MetadataExtras: parsed.MetadataExtras,
 		MetadataLineIndexes: parsed.MetadataLineIndexes, Tasks: parsed.Tasks,
@@ -703,6 +696,7 @@ func buildDocumentationModel(options Options, overlay map[string][]byte) (*Model
 		validateDocumentBasics(model, document)
 	}
 	validateGlobalStructure(model)
+	validateBuiltinSectionConfiguration(model)
 	validateSectionManifests(model)
 	resolveLinks(model)
 	validateArchitectureDocuments(model)
@@ -724,11 +718,36 @@ func buildDocumentationModel(options Options, overlay map[string][]byte) (*Model
 	return model, nil
 }
 
-func directoryLabel(directory string) string {
-	base := path.Base(directory)
-	if label := folderLabels[base]; label != "" {
-		return label
+func validateBuiltinSectionConfiguration(model *Model) {
+	config := model.SiteConfig.Project
+	if config.Locale == "" {
+		model.Issues = append(model.Issues, newIssue("warning", "missing-project-locale", "Для локализованных встроенных разделов укажите project.locale в .docgent/config.yml.", ".docgent/config.yml", 0))
 	}
+	complete := len(config.Sections) == len(BuiltinSections)
+	if !complete {
+		model.Issues = append(model.Issues, newIssue("warning", "incomplete-project-sections", "Для локализованных встроенных разделов укажите полный project.sections в .docgent/config.yml.", ".docgent/config.yml", 0))
+	}
+	if config.Locale == "" || !complete {
+		return
+	}
+	for _, spec := range BuiltinSections {
+		document := model.DocByPath[path.Join(spec.SourceDir, spec.EntryFile)]
+		if document == nil {
+			continue
+		}
+		if canonicalText(document.Title) != canonicalText(config.Sections[spec.Type]) {
+			addDocumentIssue(model, document, newIssue("warning", "builtin-section-title-mismatch", fmt.Sprintf("H1 встроенного раздела должен совпадать с project.sections.%s.", spec.Type), document.SourcePath, 0))
+		}
+	}
+}
+
+func directoryLabel(directory string) string {
+	if section := sectionTypeForPath(directory); section != "" {
+		if spec, ok := sectionSpec(section); ok {
+			return spec.EnglishTitle
+		}
+	}
+	base := path.Base(directory)
 	label := strings.ReplaceAll(strings.ReplaceAll(base, "-", " "), "_", " ")
 	if label == "" {
 		return "Документы"

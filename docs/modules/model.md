@@ -83,6 +83,7 @@ diagnostics.
 - `BuildDocumentationModel(Options)`;
 - `ProjectReport` schema v1;
 - архитектурные документы сохраняют `documents[].type = architecture`;
+- `documents[].sectionType` аддитивно передаёт стабильный встроенный раздел;
 - коды `Issue`;
 - правила ID и структуры, описанные в [CLI-контракте](../contracts/cli.md).
 - статусы, типы и формат задач из [руководства по рабочим задачам](../guides/work-items.md).

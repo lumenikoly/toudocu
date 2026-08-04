@@ -4,7 +4,7 @@
     "name": "Docgent",
     "version": "1.1.0-go"
   },
-  "generatedAt": "2026-08-01T20:20:55.145211866Z",
+  "generatedAt": "2026-08-03T08:42:49.944317948Z",
   "sourceDirectory": "docs",
   "staleDays": 0,
   "project": {
@@ -37,17 +37,17 @@
     }
   },
   "stats": {
-    "documents": 57,
+    "documents": 58,
     "totalTasks": 10,
     "completedTasks": 9,
     "remainingTasks": 1,
     "taskProgress": 90,
-    "documentsComplete": 9,
+    "documentsComplete": 10,
     "documentsInProgress": 2,
     "documentsNotStarted": 0,
     "documentsWithoutTasks": 46,
     "staleDocuments": 0,
-    "documentsWithoutDescription": 9,
+    "documentsWithoutDescription": 10,
     "documentsWithoutStatus": 0,
     "brokenLinks": 0,
     "warnings": 0,
@@ -448,6 +448,7 @@
       "sourcePath": "architecture/documentation-changes.md",
       "outputPath": "architecture/documentation-changes.html",
       "type": "architecture",
+      "sectionType": "architecture",
       "title": "Архитектура просмотра изменений документации",
       "description": "Docgent разрешает явно выбранные локальные Git-состояния, представляет каждую сторону ленивым snapshot и объединяет Git metadata с нормализованными документными сущностями в один versioned ChangeSetReport .",
       "metadata": {
@@ -483,6 +484,7 @@
       "sourcePath": "architecture/failure-isolation.md",
       "outputPath": "architecture/failure-isolation.html",
       "type": "architecture",
+      "sectionType": "architecture",
       "title": "Изоляция ошибок документации и проверок",
       "description": "Ошибки чтения и структуры превращаются в привязанные к документам diagnostics и не открывают путь к исполнению. Явно запущенные проверки задачи выполняются последовательно в отдельной границе процесса, а их сбои, timeout и ограниченный вывод фиксируются в отчёте. Только editor API режима serve меняет выбранный workspace-файл по CAS; разрешённые shell-команды имеют права текущего пользователя и могут менять весь репозиторий.",
       "metadata": {
@@ -536,7 +538,8 @@
       "sourcePath": "architecture/overview.md",
       "outputPath": "architecture/overview.html",
       "type": "architecture",
-      "title": "Архитектура Docgent",
+      "sectionType": "architecture",
+      "title": "Архитектура",
       "description": "Docgent — локальный dependency-free Go CLI между исходным каталогом документации и двумя потребителями проверенной модели: автоматизацией через CLI/JSON и читателем автономного HTML-портала. Опциональный serve добавляет локальный HTTP/editor runtime; база данных и внешний runtime в границу системы не входят.",
       "metadata": {
         "documentType": "Architecture Overview"
@@ -553,7 +556,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T19:59:40.181265153Z",
+      "updatedAt": "2026-08-03T08:06:13.269515639Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -615,6 +618,7 @@
       "sourcePath": "architecture/runtime-components.md",
       "outputPath": "architecture/runtime-components.html",
       "type": "architecture",
+      "sectionType": "architecture",
       "title": "Разделение ответственности runtime-компонентов",
       "description": "Runtime образует последовательный конвейер: CLI нормализует операцию, Markdown слой извлекает безопасное представление, модель проверяет структуру и связи, а выбранный потребитель возвращает отчёт, строит портал или выполняет отдельно разрешённый task workflow.",
       "metadata": {
@@ -722,6 +726,7 @@
       "sourcePath": "architecture/system-boundary.md",
       "outputPath": "architecture/system-boundary.html",
       "type": "architecture",
+      "sectionType": "architecture",
       "title": "Системная граница Docgent",
       "description": "Docgent ограничен одним локальным процессом, который читает документацию и репозиторий, строит проверенную модель и выдаёт diagnostics либо производные представления. В serve тот же процесс принимает ограниченные editor-запросы и атомарно сохраняет выбранный workspace-файл. Пользователь, агент, CI и браузер остаются взаимодействующими сторонами за этой границей.",
       "metadata": {
@@ -784,6 +789,7 @@
       "sourcePath": "architecture/trust-boundaries.md",
       "outputPath": "architecture/trust-boundaries.html",
       "type": "architecture",
+      "sectionType": "architecture",
       "title": "Границы доверия Docgent",
       "description": "Markdown, ссылки, assets и Mermaid source считаются недоверенными данными; repository root и выбранные output/report paths задают файловую границу; команды work item считаются доверенным кодом только после отдельного явного разрешения на запуск.",
       "metadata": {
@@ -846,6 +852,7 @@
       "sourcePath": "contracts/changes-http.md",
       "outputPath": "contracts/changes-http.html",
       "type": "contract",
+      "sectionType": "contracts",
       "title": "HTTP-контракт Documentation Changes v1",
       "description": "Все endpoints read-only, используют Cache-Control: no-store , принимают только локальные Git revisions и ограничивают доступ documentation roots.",
       "metadata": {
@@ -881,6 +888,7 @@
       "sourcePath": "contracts/cli.md",
       "outputPath": "contracts/cli.html",
       "type": "contract",
+      "sectionType": "contracts",
       "title": "CLI-контракт Docgent v1",
       "description": "Контракт фиксирует публичные команды, exit codes и машинные JSON-форматы Docgent.",
       "metadata": {
@@ -968,6 +976,7 @@
       "sourcePath": "contracts/editor-http.md",
       "outputPath": "contracts/editor-http.html",
       "type": "contract",
+      "sectionType": "contracts",
       "title": "CONTRACT-EDITOR-HTTP: Локальный editor API",
       "description": "Контракт определяет действующий same-origin API локального workspace. Все маршруты имеют префикс / docgent/api/editor , всегда возвращают Cache-Control: no-store и не выдают CORS-заголовки. JSON-ответы содержат schemaVersion: 1 .",
       "metadata": {
@@ -1009,6 +1018,7 @@
       "sourcePath": "decisions/001-dependency-free.md",
       "outputPath": "decisions/001-dependency-free.html",
       "type": "decision",
+      "sectionType": "decisions",
       "title": "ADR-001: Dependency-free Go CLI",
       "description": "Docgent поставляется одним Go-бинарником и не требует runtime-зависимостей. Единственное исключение для внешнего Go module зафиксировано в ADR-003 и не добавляет сеть либо соседние runtime-файлы.",
       "metadata": {
@@ -1056,6 +1066,7 @@
       "sourcePath": "decisions/ADR-002.md",
       "outputPath": "decisions/ADR-002.html",
       "type": "decision",
+      "sectionType": "decisions",
       "title": "ADR-002: Граница ответственности Agent и Docgent",
       "description": "Решение фиксирует границу между детерминированной механикой CLI и смысловой работой исполнителя.",
       "metadata": {
@@ -1093,6 +1104,7 @@
       "sourcePath": "decisions/ADR-003.md",
       "outputPath": "decisions/ADR-003.html",
       "type": "decision",
+      "sectionType": "decisions",
       "title": "ADR-003: Поддерживаемый YAML parser для OpenAPI diff",
       "description": "Docgent использует один закреплённый pure-Go YAML module для корректного OpenAPI diff, сохраняя поставку одним автономным бинарником.",
       "metadata": {
@@ -1129,6 +1141,7 @@
       "sourcePath": "flows/FLOW-DOCS-BUILD.md",
       "outputPath": "flows/FLOW-DOCS-BUILD.html",
       "type": "flow",
+      "sectionType": "flows",
       "title": "FLOW-DOCS-BUILD: Сборка автономного портала",
       "description": "Схема визуализирует конвейер команды build . Требования к результату, exit codes и безопасной очистке определяет UC-DOCS-01, а не диаграмма.",
       "metadata": {
@@ -1213,6 +1226,7 @@
       "sourcePath": "flows/FLOW-DOCS-CHANGES.md",
       "outputPath": "flows/FLOW-DOCS-CHANGES.html",
       "type": "flow",
+      "sectionType": "flows",
       "title": "FLOW-DOCS-CHANGES: Построение и просмотр изменений документации",
       "description": "Процесс показывает путь от явно выбранного Git-диапазона к ленивым представлениям одного детерминированного change set.",
       "metadata": {
@@ -1277,6 +1291,7 @@
       "sourcePath": "flows/FLOW-DOCS-CHECK.md",
       "outputPath": "flows/FLOW-DOCS-CHECK.html",
       "type": "flow",
+      "sectionType": "flows",
       "title": "FLOW-DOCS-CHECK: Проверка документационного контракта",
       "description": "Схема показывает read-only проверку документации. Полный набор правил и условия успешного завершения определяет UC-DOCS-02.",
       "metadata": {
@@ -1362,6 +1377,7 @@
       "sourcePath": "flows/FLOW-DOCS-SERVE.md",
       "outputPath": "flows/FLOW-DOCS-SERVE.html",
       "type": "flow",
+      "sectionType": "flows",
       "title": "FLOW-DOCS-SERVE: Локальный просмотр портала",
       "description": "Схема визуализирует жизненный цикл команды serve . Сетевые ограничения, ошибочные сценарии и постусловия определяет UC-DOCS-03.",
       "metadata": {
@@ -1455,6 +1471,7 @@
       "sourcePath": "flows/FLOW-TASK-WORKFLOW.md",
       "outputPath": "flows/FLOW-TASK-WORKFLOW.html",
       "type": "flow",
+      "sectionType": "flows",
       "title": "FLOW-TASK-WORKFLOW: Работа с проверяемой задачей",
       "description": "Схема связывает подготовку контракта, read-only получение контекста и явный запуск проверок.",
       "metadata": {
@@ -1552,6 +1569,7 @@
       "sourcePath": "guides/documentation-changes.md",
       "outputPath": "guides/documentation-changes.html",
       "type": "guide",
+      "sectionType": "guides",
       "title": "Просмотр изменений документации",
       "description": "Docgent использует Git как единственный источник старой и новой версии. Он не создаёт snapshots, не выполняет fetch и не изменяет history, refs, index или working tree. Раздел доступен только в serve по адресу /changes/ ; обычный build остаётся автономным представлением текущей документации и не требует Git history.",
       "metadata": {},
@@ -1611,6 +1629,7 @@
       "sourcePath": "guides/processes.md",
       "outputPath": "guides/processes.html",
       "type": "guide",
+      "sectionType": "guides",
       "title": "Процессы и пользовательские сценарии",
       "description": "«Пользовательские сценарии» и «Процессы» являются самостоятельными верхнеуровневыми разделами для двух связанных, но не взаимозаменяемых сущностей:",
       "metadata": {},
@@ -1626,7 +1645,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-30T18:47:33.529896651Z",
+      "updatedAt": "2026-08-03T08:35:23.681576149Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1641,6 +1660,7 @@
       "sourcePath": "guides/quality-runbooks.md",
       "outputPath": "guides/quality-runbooks.html",
       "type": "guide",
+      "sectionType": "guides",
       "title": "Standards, Runbooks и Custom-разделы",
       "description": "Руководство описывает авторский контракт опциональных разделов. Глобально обязательны index.md и architecture/overview.md ; отсутствие manifest у появившегося quality/ , runbooks/ или custom-раздела является warning и становится gate только с --strict .",
       "metadata": {},
@@ -1672,6 +1692,7 @@
       "sourcePath": "guides/screens.md",
       "outputPath": "guides/screens.html",
       "type": "guide",
+      "sectionType": "guides",
       "title": "Карта экранов и проигрываемые пользовательские сценарии",
       "description": "Docgent строит карту, каталог, пошаговые сценарии и traceability из документов screens/SC- .md . Отдельный screens/map.md не используется.",
       "metadata": {},
@@ -1704,6 +1725,7 @@
       "sourcePath": "guides/testing.md",
       "outputPath": "guides/testing.html",
       "type": "guide",
+      "sectionType": "guides",
       "title": "Проверка изменений Docgent",
       "description": "Руководство задаёт единый локальный и CI-цикл для кода и собственной документации проекта.",
       "metadata": {},
@@ -1736,6 +1758,7 @@
       "sourcePath": "guides/work-items.md",
       "outputPath": "guides/work-items.html",
       "type": "guide",
+      "sectionType": "guides",
       "title": "Рабочие задачи",
       "description": "Docgent хранит каждый рабочий элемент в отдельном файле work/ .md . Функциональность, обслуживание, документация и исследования используют TASK- , а баги — BUG- . Все типы остаются одной сущностью WorkItem , используют общие статусы, зависимости, команды context/verify и годовой архив.",
       "metadata": {},
@@ -1783,6 +1806,7 @@
       "sourcePath": "modules/cli.md",
       "outputPath": "modules/cli.html",
       "type": "module",
+      "sectionType": "modules",
       "title": "CLI и workflow задач",
       "description": "Модуль предоставляет команды Docgent и детерминированный workflow от поиска и каркаса задачи до контекста и управляемого выполнения объявленных проверок.",
       "metadata": {
@@ -1909,6 +1933,7 @@
       "sourcePath": "modules/markdown.md",
       "outputPath": "modules/markdown.html",
       "type": "module",
+      "sectionType": "modules",
       "title": "Безопасный Markdown",
       "description": "Модуль разбирает поддерживаемое подмножество Markdown и создаёт безопасные HTML-фрагменты без исполнения встроенного содержимого.",
       "metadata": {
@@ -1966,6 +1991,7 @@
       "sourcePath": "modules/MOD-CHANGES.md",
       "outputPath": "modules/MOD-CHANGES.html",
       "type": "module",
+      "sectionType": "modules",
       "title": "MOD-CHANGES: Изменения документации",
       "description": "Модуль превращает явно выбранные Git-состояния исходной документации в детерминированный отчёт для CLI, CI и локального портала.",
       "metadata": {
@@ -2013,6 +2039,7 @@
       "sourcePath": "modules/model.md",
       "outputPath": "modules/model.html",
       "type": "module",
+      "sectionType": "modules",
       "title": "Проектная модель и валидация",
       "description": "Модуль читает каталог документации, строит связанную модель проекта и формирует диагностику структуры, идентификаторов, путей и зависимостей.",
       "metadata": {
@@ -2129,6 +2156,7 @@
       "sourcePath": "modules/site.md",
       "outputPath": "modules/site.html",
       "type": "module",
+      "sectionType": "modules",
       "title": "Статический портал",
       "description": "Модуль формирует автономные HTML-страницы, навигацию, поиск и типизированный report.json из готовой проектной модели.",
       "metadata": {
@@ -2226,6 +2254,7 @@
       "sourcePath": "quality/index.md",
       "outputPath": "quality/index.html",
       "type": "quality-index",
+      "sectionType": "quality",
       "title": "Стандарты качества",
       "description": "Раздел фиксирует подтверждённые правила разработки и ведения документации Docgent. Стандарты применяются по явно указанной области и не являются источником команд task verify : исполняемые команды остаются в work item.",
       "metadata": {
@@ -2279,6 +2308,7 @@
       "sourcePath": "quality/STD-DOCS-001.md",
       "outputPath": "quality/STD-DOCS-001.html",
       "type": "standard",
+      "sectionType": "quality",
       "title": "STD-DOCS-001: Проверяемая документация",
       "description": "Стандарт удерживает Markdown источником истины и отделяет подтверждённые глобальные правила от локальных или сгенерированных представлений.",
       "metadata": {
@@ -2315,6 +2345,7 @@
       "sourcePath": "quality/STD-GO-001.md",
       "outputPath": "quality/STD-GO-001.html",
       "type": "standard",
+      "sectionType": "quality",
       "title": "STD-GO-001: Качество Go-кода",
       "description": "Стандарт сохраняет реализацию Docgent небольшой, предсказуемой, dependency-free и проверяемой на поддерживаемых Go-платформах.",
       "metadata": {
@@ -2351,6 +2382,7 @@
       "sourcePath": "reference/changes-report.md",
       "outputPath": "reference/changes-report.html",
       "type": "reference",
+      "sectionType": "reference",
       "title": "ChangeSetReport schema v1",
       "description": "docgent changes --format json возвращает детерминированный отчёт с schemaVersion , repository/branch/HEAD/dirty, resolved base/target, changeSetDigest , file/line/entity/classification summary, changes[] , task impact и diagnostics.",
       "metadata": {},
@@ -2382,6 +2414,7 @@
       "sourcePath": "reference/configuration.md",
       "outputPath": "reference/configuration.html",
       "type": "reference",
+      "sectionType": "reference",
       "title": "Справочник конфигурации",
       "description": "CLI работает без конфигурационного файла. Необязательный \u003crepository-root\u003e/.docgent/config.yml настраивает портал и автоматически читается командами build , check и serve .",
       "metadata": {},
@@ -2397,7 +2430,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T20:28:51.161577803Z",
+      "updatedAt": "2026-08-03T08:11:35.86343659Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2412,6 +2445,7 @@
       "sourcePath": "reference/features.md",
       "outputPath": "reference/features.html",
       "type": "reference",
+      "sectionType": "reference",
       "title": "Каталог возможностей",
       "description": "Страница перечисляет реализованные возможности Docgent и указывает, где зафиксирован их подробный контракт. Источником истины остаются Markdown-файлы: портал и JSON не редактируют их и не хранят отдельную модель.",
       "metadata": {},
@@ -2427,7 +2461,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-01T18:43:42.238140091Z",
+      "updatedAt": "2026-08-03T08:35:23.681576149Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2490,6 +2524,7 @@
       "sourcePath": "use-cases/build-portal.md",
       "outputPath": "use-cases/UC-DOCS-01.html",
       "type": "use-case",
+      "sectionType": "use-cases",
       "title": "UC-DOCS-01: Создать автономный портал",
       "description": "Разработчик преобразует каталог проектной документации в статический портал, который можно открыть с диска без HTTP-сервера.",
       "metadata": {
@@ -2615,6 +2650,7 @@
       "sourcePath": "use-cases/check-documentation.md",
       "outputPath": "use-cases/UC-DOCS-02.html",
       "type": "use-case",
+      "sectionType": "use-cases",
       "title": "UC-DOCS-02: Проверить документацию",
       "description": "Разработчик или CI-процесс проверяет документационный контракт без генерации сайта и без выполнения команд рабочих задач.",
       "metadata": {
@@ -2733,6 +2769,7 @@
       "sourcePath": "use-cases/screen-map.md",
       "outputPath": "use-cases/UC-DOCS-04.html",
       "type": "use-case",
+      "sectionType": "use-cases",
       "title": "UC-DOCS-04: Исследовать карту экранов",
       "description": "Разработчик исследует пользовательскую навигацию и проигрывает документированные сценарии в автономном портале.",
       "metadata": {
@@ -2815,6 +2852,7 @@
       "sourcePath": "use-cases/serve-portal.md",
       "outputPath": "use-cases/UC-DOCS-03.html",
       "type": "use-case",
+      "sectionType": "use-cases",
       "title": "UC-DOCS-03: Просматривать документацию на локальном сервере",
       "description": "Разработчик просматривает и редактирует документацию через локальный HTTP-сервер и получает обновлённую модель и портал после сохранения или внешнего изменения.",
       "metadata": {
@@ -2917,6 +2955,7 @@
       "sourcePath": "use-cases/task-verify.md",
       "outputPath": "use-cases/UC-TASK-02.html",
       "type": "use-case",
+      "sectionType": "use-cases",
       "title": "UC-TASK-02: Проверить рабочую задачу",
       "description": "Исполнитель сначала получает план проверок без выполнения, а затем при явном выборе запускает все или один target и получает полный отчёт.",
       "metadata": {
@@ -3027,6 +3066,7 @@
       "sourcePath": "use-cases/task-workflow.md",
       "outputPath": "use-cases/UC-TASK-01.html",
       "type": "use-case",
+      "sectionType": "use-cases",
       "title": "UC-TASK-01: Получить контекст рабочей задачи",
       "description": "Исполнитель получает ограниченный контекст одной рабочей задачи перед изменением кода или документации.",
       "metadata": {
@@ -3121,6 +3161,7 @@
       "sourcePath": "use-cases/UC-DOCS-05.md",
       "outputPath": "use-cases/UC-DOCS-05.html",
       "type": "use-case",
+      "sectionType": "use-cases",
       "title": "UC-DOCS-05: Просматривать изменения документации",
       "description": "Разработчик рассматривает изменения исходной документации в терминах Git, отрендерированных страниц и проектных сущностей перед завершением задачи.",
       "metadata": {
@@ -3211,6 +3252,7 @@
       "sourcePath": "use-cases/UC-TASK-03.md",
       "outputPath": "use-cases/UC-TASK-03.html",
       "type": "use-case",
+      "sectionType": "use-cases",
       "title": "UC-TASK-03: Подготовить новую рабочую задачу",
       "description": "Исполнитель находит релевантные документы, создаёт нейтральный каркас задачи и доводит её контракт до состояния, пригодного для ручного перевода в Ready.",
       "metadata": {
@@ -3296,6 +3338,7 @@
       "sourcePath": "work/TASK-ARCH-001.md",
       "outputPath": "work/TASK-ARCH-001.html",
       "type": "work",
+      "sectionType": "work",
       "title": "TASK-ARCH-001: Внедрить вопросно-ориентированную архитектурную документацию",
       "description": "",
       "metadata": {
@@ -3333,6 +3376,7 @@
       "sourcePath": "work/TASK-CHANGES-001.md",
       "outputPath": "work/TASK-CHANGES-001.html",
       "type": "work",
+      "sectionType": "work",
       "title": "TASK-CHANGES-001: Просмотр изменений документации",
       "description": "",
       "metadata": {
@@ -3371,6 +3415,7 @@
       "sourcePath": "work/TASK-CLI-001.md",
       "outputPath": "work/TASK-CLI-001.html",
       "type": "work",
+      "sectionType": "work",
       "title": "TASK-CLI-001: Реализовать полный workflow рабочей задачи",
       "description": "",
       "metadata": {
@@ -3408,6 +3453,7 @@
       "sourcePath": "work/TASK-DOCS-001-self-documentation.md",
       "outputPath": "work/TASK-DOCS-001-self-documentation.html",
       "type": "work",
+      "sectionType": "work",
       "title": "TASK-DOCS-001: Добавить самодокументацию Docgent",
       "description": "",
       "metadata": {
@@ -3444,6 +3490,7 @@
       "sourcePath": "work/TASK-DOCS-002.md",
       "outputPath": "work/TASK-DOCS-002.html",
       "type": "work",
+      "sectionType": "work",
       "title": "TASK-DOCS-002: Добавить расширяемые Quality, Runbooks и Custom-разделы",
       "description": "",
       "metadata": {
@@ -3481,6 +3528,7 @@
       "sourcePath": "work/TASK-DOCS-003.md",
       "outputPath": "work/TASK-DOCS-003.html",
       "type": "work",
+      "sectionType": "work",
       "title": "TASK-DOCS-003: Добавить явную инициализацию skill",
       "description": "",
       "metadata": {
@@ -3517,6 +3565,7 @@
       "sourcePath": "work/TASK-DOCS-004.md",
       "outputPath": "work/TASK-DOCS-004.html",
       "type": "work",
+      "sectionType": "work",
       "title": "TASK-DOCS-004: Добавить refresh workflow для актуализации документации",
       "description": "",
       "metadata": {
@@ -3550,9 +3599,47 @@
     },
     {
       "id": "",
+      "sourcePath": "work/TASK-MODEL-001.md",
+      "outputPath": "work/TASK-MODEL-001.html",
+      "type": "work",
+      "sectionType": "work",
+      "title": "TASK-MODEL-001: Стабилизировать встроенные разделы и маршрут FLOW",
+      "description": "",
+      "metadata": {
+        "module": "MOD-MODEL",
+        "owner": "Команда Docgent",
+        "priority": "Высокий",
+        "standards": "STD-GO-001, STD-DOCS-001",
+        "status": "Выполнено",
+        "type": "Maintenance",
+        "updated": "2026-08-03"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Выполнено",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 12,
+        "completed": 12,
+        "remaining": 0,
+        "percent": 100
+      },
+      "updatedAt": "2026-08-03T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
       "sourcePath": "work/TASK-SITE-001.md",
       "outputPath": "work/TASK-SITE-001.html",
       "type": "work",
+      "sectionType": "work",
       "title": "TASK-SITE-001: Добавить копирование контекста документа",
       "description": "",
       "metadata": {
@@ -3609,6 +3696,7 @@
       "sourcePath": "work/TASK-SITE-002.md",
       "outputPath": "work/TASK-SITE-002.html",
       "type": "work",
+      "sectionType": "work",
       "title": "TASK-SITE-002: Редактирование исходной документации в serve",
       "description": "",
       "metadata": {
@@ -4497,7 +4585,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-006-темы-не-расширяют-доверенную-поверхность",
-        "line": 75
+        "line": 78
       },
       {
         "id": "BR-SITE-007",
@@ -4505,7 +4593,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-007-build-и-serve-имеют-разные-возможности",
-        "line": 87
+        "line": 90
       },
       {
         "id": "BR-SITE-008",
@@ -4513,7 +4601,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-008-запись-защищена-optimistic-concurrency",
-        "line": 93
+        "line": 96
       }
     ],
     "workItems": [
@@ -6030,6 +6118,232 @@
         "documentationPaths": [
           "AGENTS.md"
         ]
+      },
+      {
+        "id": "TASK-MODEL-001",
+        "title": "Стабилизировать встроенные разделы и маршрут FLOW",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Выполнено",
+          "recognized": true
+        },
+        "type": "Maintenance",
+        "archived": false,
+        "priority": "Высокий",
+        "updated": "2026-08-03",
+        "owner": "Команда Docgent",
+        "moduleId": "MOD-MODEL",
+        "screenIds": [],
+        "transitionIds": [],
+        "standardIds": [
+          "STD-GO-001",
+          "STD-DOCS-001"
+        ],
+        "runbookIds": [],
+        "dependsOn": [],
+        "document": "work/TASK-MODEL-001.md",
+        "anchor": "task-model-001-стабилизировать-встроенные-разделы-и-маршрут-flow",
+        "criteria": [
+          {
+            "line": 45,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-01 Двенадцать SectionType имеют стабильный порядок и derived lookup."
+          },
+          {
+            "line": 46,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-02 Config принимает project-only locale и полный sections map."
+          },
+          {
+            "line": 47,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-03 Некорректные locale отклоняются, а неизвестные корректные locale допустимы."
+          },
+          {
+            "line": 48,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-04 Навигация, routes, HTML lang и report используют SectionType."
+          },
+          {
+            "line": 49,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-05 Полный Go и строгий documentation verification проходят."
+          },
+          {
+            "line": 50,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-06 Каталог FLOW существует только как processes/index.html, его"
+          },
+          {
+            "line": 53,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-07 Демо-проект задаёт полные локализованные project.locale и"
+          }
+        ],
+        "verificationMatrix": [
+          {
+            "criterionId": "AC-01",
+            "criterion": "Двенадцать SectionType имеют стабильный порядок и derived lookup.",
+            "completed": true,
+            "commands": [
+              "go test ./... -run TestBuiltinSectionsStableOrderAndLookups"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-02",
+            "criterion": "Config принимает project-only locale и полный sections map.",
+            "completed": true,
+            "commands": [
+              "go test ./... -run TestProjectLocaleConfiguration"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-03",
+            "criterion": "Некорректные locale отклоняются, а неизвестные корректные locale допустимы.",
+            "completed": true,
+            "commands": [
+              "go test ./... -run TestProjectLocaleConfiguration"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-04",
+            "criterion": "Навигация, routes, HTML lang и report используют SectionType.",
+            "completed": true,
+            "commands": [
+              "go test ./... -run TestMissingProjectConfigurationUsesEnglishAndWarning"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-05",
+            "criterion": "Полный Go и строгий documentation verification проходят.",
+            "completed": true,
+            "commands": [
+              "go vet ./... \u0026\u0026 go test ./... \u0026\u0026 go test -race ./..."
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-06",
+            "criterion": "Каталог FLOW существует только как processes/index.html, его",
+            "completed": true,
+            "commands": [
+              "go test ./... -run TestScreenPortalAndReportV1"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-07",
+            "criterion": "Демо-проект задаёт полные локализованные project.locale и",
+            "completed": true,
+            "commands": [
+              "go run ./cmd/docgent check ./example/docs --repository-root ./example --strict --stale-days 0"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          }
+        ],
+        "checks": [
+          {
+            "target": "AC-01",
+            "commands": [
+              "go test ./... -run TestBuiltinSectionsStableOrderAndLookups"
+            ],
+            "line": 58
+          },
+          {
+            "target": "AC-02",
+            "commands": [
+              "go test ./... -run TestProjectLocaleConfiguration"
+            ],
+            "line": 59
+          },
+          {
+            "target": "AC-03",
+            "commands": [
+              "go test ./... -run TestProjectLocaleConfiguration"
+            ],
+            "line": 60
+          },
+          {
+            "target": "AC-04",
+            "commands": [
+              "go test ./... -run TestMissingProjectConfigurationUsesEnglishAndWarning"
+            ],
+            "line": 61
+          },
+          {
+            "target": "AC-05",
+            "commands": [
+              "go vet ./... \u0026\u0026 go test ./... \u0026\u0026 go test -race ./..."
+            ],
+            "line": 62
+          },
+          {
+            "target": "AC-06",
+            "commands": [
+              "go test ./... -run TestScreenPortalAndReportV1"
+            ],
+            "line": 63
+          },
+          {
+            "target": "AC-07",
+            "commands": [
+              "go run ./cmd/docgent check ./example/docs --repository-root ./example --strict --stale-days 0"
+            ],
+            "line": 64
+          },
+          {
+            "target": "ALL",
+            "commands": [
+              "go vet ./... \u0026\u0026 go test ./... \u0026\u0026 go test -race ./..."
+            ],
+            "line": 65
+          },
+          {
+            "target": "DOCS",
+            "commands": [
+              "go run ./cmd/docgent check ./docs --repository-root . --strict --stale-days 0 \u0026\u0026 go run ./cmd/docgent check ./example/docs --repository-root ./example --strict --stale-days 0"
+            ],
+            "line": 66
+          },
+          {
+            "target": "QUALITY",
+            "commands": [
+              "go test ./..."
+            ],
+            "line": 67
+          }
+        ],
+        "repositoryPaths": [
+          "$use-docgent",
+          "internal/app/sections.go"
+        ],
+        "result": "Модель и портал используют упорядоченный реестр встроенных разделов, локализованные project-названия, аддитивный JSON sectionType и единственный каталог FLOW- по маршруту processes/index.html .",
+        "behaviorChange": "Было Навигация и классификация built-in разделов зависели от строк каталогов, а название раздела могло неявно происходить из H1. Станет Стабильный SectionType и project configuration определяют маршрут, порядок, название и JSON-представление built-in раздела; flows остаётся source directory и маршрутом отдельных документов, а его каталогом становится только processes .",
+        "before": "Навигация и классификация built-in разделов зависели от строк каталогов, а название раздела могло неявно происходить из H1.",
+        "after": "Стабильный SectionType и project configuration определяют маршрут, порядок, название и JSON-представление built-in раздела; flows остаётся source directory и маршрутом отдельных документов, а его каталогом становится только processes .",
+        "outOfScope": "многолокальная сборка одного портала; миграционный fallback от H1 для built-in разделов.",
+        "plan": "Добавить SectionType, реестр и locale/config contracts. Перевести модель, JSON и навигацию на registry. Зафиксировать поведение тестами и обновить документацию. Удалить legacy-каталог flows/index.html и пересобрать порталы. Добавить полную project-конфигурацию демонстрационного портала.",
+        "documentationImpact": "Обновлены reference configuration, module contracts, CLI contract, README и init/refresh instructions skill. Generated portal пересобирается только после успешной строгой structural проверки.",
+        "documentationPaths": []
       },
       {
         "id": "TASK-SITE-001",

@@ -85,13 +85,14 @@ func metricCard(label string, value any, detail string) string {
 }
 
 func outputForDirectory(model *Model, directory string) string {
-	if directory == "processes" {
-		return "processes/index.html"
+	section := sectionTypeForPath(directory)
+	if sectionRoute(section) != "" && sectionRoute(section) != directory {
+		return sectionCatalogOutput(section)
 	}
-	if directory == "screens" && len(model.Knowledge.Screens) > 0 {
+	if section == SectionScreens && len(model.Knowledge.Screens) > 0 {
 		return "screens/catalog.html"
 	}
-	if directory == "quality" || directory == "runbooks" {
+	if section == SectionQuality || section == SectionRunbooks {
 		return path.Join(directory, "index.html")
 	}
 	if document := model.DocByPath[path.Join(directory, "index.md")]; document != nil {
@@ -101,6 +102,15 @@ func outputForDirectory(model *Model, directory string) string {
 }
 
 func modelDirectoryLabel(model *Model, directory string) string {
+	if section := sectionTypeForPath(directory); section != "" {
+		if model.SiteConfig.Project.Locale != "" && len(model.SiteConfig.Project.Sections) == len(BuiltinSections) && strings.TrimSpace(model.SiteConfig.Project.Sections[section]) != "" {
+			title := model.SiteConfig.Project.Sections[section]
+			return title
+		}
+		if spec, ok := sectionSpec(section); ok {
+			return spec.EnglishTitle
+		}
+	}
 	if manifest := model.DocByPath[path.Join(directory, "index.md")]; manifest != nil && manifest.Title != "" {
 		return manifest.Title
 	}
@@ -111,30 +121,31 @@ func renderNavigation(model *Model, current string) string {
 	var b strings.Builder
 	b.WriteString(`<nav aria-label="Документация"><div class="nav-title">Проект</div><ul class="nav-tree">`)
 	rootDocs := []*Document{}
-	groups := map[string][]*Document{}
+	sectionGroups := map[SectionType][]*Document{}
+	customGroups := map[string][]*Document{}
 	for _, document := range model.Documents {
 		first := strings.Split(document.SourcePath, "/")[0]
 		if !strings.Contains(document.SourcePath, "/") {
 			rootDocs = append(rootDocs, document)
-		} else if first == "flows" {
-			groups["processes"] = append(groups["processes"], document)
+		} else if document.SectionType != "" {
+			sectionGroups[document.SectionType] = append(sectionGroups[document.SectionType], document)
 		} else {
-			groups[first] = append(groups[first], document)
+			customGroups[first] = append(customGroups[first], document)
 		}
 	}
 	if len(model.Knowledge.UseCases) > 0 {
-		if _, exists := groups["use-cases"]; !exists {
-			groups["use-cases"] = []*Document{}
+		if _, exists := sectionGroups[SectionUseCases]; !exists {
+			sectionGroups[SectionUseCases] = []*Document{}
 		}
 	}
 	if len(model.Knowledge.UseCases)+len(model.Knowledge.Flows) > 0 {
-		if _, exists := groups["processes"]; !exists {
-			groups["processes"] = []*Document{}
+		if _, exists := sectionGroups[SectionFlows]; !exists {
+			sectionGroups[SectionFlows] = []*Document{}
 		}
 	}
 	if len(model.Knowledge.Screens) > 0 {
-		if _, exists := groups["screens"]; !exists {
-			groups["screens"] = []*Document{}
+		if _, exists := sectionGroups[SectionScreens]; !exists {
+			sectionGroups[SectionScreens] = []*Document{}
 		}
 	}
 	writeDoc := func(document *Document, label string) {
@@ -162,55 +173,25 @@ func renderNavigation(model *Model, current string) string {
 	if model.ProjectChangelog != nil {
 		writeDoc(model.ProjectChangelog, "Журнал изменений проекта")
 	}
-	keys := make([]string, 0, len(groups))
-	for key := range groups {
-		keys = append(keys, key)
-	}
-	navigationOrder := map[string]int{
-		"architecture": 10,
-		"contracts":    20,
-		"decisions":    30,
-		"guides":       40,
-		"modules":      50,
-		"use-cases":    60,
-		"processes":    70,
-		"reference":    80,
-		"quality":      85,
-		"runbooks":     90,
-		"screens":      100,
-		"work":         110,
-	}
-	sort.SliceStable(keys, func(i, j int) bool {
-		left, leftKnown := navigationOrder[keys[i]]
-		right, rightKnown := navigationOrder[keys[j]]
-		if leftKnown && rightKnown {
-			return left < right
-		}
-		if leftKnown != rightKnown {
-			return leftKnown
-		}
-		return naturalCompare(keys[i], keys[j]) < 0
-	})
-	for _, key := range keys {
-		target := outputForDirectory(model, key)
+	writeGroup := func(section SectionType, directory, groupKey string, docs []*Document) {
+		target := outputForDirectory(model, directory)
 		active := ""
 		if target == current {
 			active = " is-active"
 		}
-		if key == "use-cases" && strings.HasPrefix(current, "use-cases/") {
+		if section == SectionUseCases && strings.HasPrefix(current, "use-cases/") {
 			active = " is-active"
 		}
-		if key == "processes" && (strings.HasPrefix(current, "processes/") || strings.HasPrefix(current, "flows/")) {
+		if section == SectionFlows && (strings.HasPrefix(current, sectionRoute(section)+"/") || strings.HasPrefix(current, "flows/")) {
 			active = " is-active"
 		}
-		if key == "screens" && strings.HasPrefix(current, "screens/") {
+		if section == SectionScreens && strings.HasPrefix(current, "screens/") {
 			active = " is-active"
 		}
-		label := modelDirectoryLabel(model, key)
-		groupID := "nav-group-" + slugify(key)
-		docs := groups[key]
+		label := modelDirectoryLabel(model, directory)
+		groupID := "nav-group-" + slugify(groupKey)
 		sort.SliceStable(docs, func(i, j int) bool { return documentLess(docs[i], docs[j]) })
-		if key == "processes" {
+		if section == SectionFlows {
 			hasFlowDocuments := false
 			for _, doc := range docs {
 				if doc.Type == "flow" && !strings.EqualFold(doc.FileName, "index.md") {
@@ -221,11 +202,11 @@ func renderNavigation(model *Model, current string) string {
 			if !hasFlowDocuments {
 				fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span class="nav-icon" aria-hidden="true">⇢</span><span>%s</span></a></li>`,
 					active, escapeAttr(relativeURL(current, target)), escapeHTML(label))
-				continue
+				return
 			}
 		}
-		fmt.Fprintf(&b, `<li class="nav-item nav-folder" data-nav-folder="%s"><div class="nav-folder-row"><button class="nav-folder-toggle" type="button" data-nav-folder-toggle aria-expanded="true" aria-controls="%s" aria-label="Свернуть раздел %s"><span aria-hidden="true">▾</span></button><a class="nav-folder-link%s" href="%s"><span>%s</span></a></div><ul id="%s">`, escapeAttr(key), escapeAttr(groupID), escapeAttr(label), active, escapeAttr(relativeURL(current, target)), escapeHTML(label), escapeAttr(groupID))
-		if key == "screens" && model.ScreenMapEnabled {
+		fmt.Fprintf(&b, `<li class="nav-item nav-folder" data-nav-folder="%s"><div class="nav-folder-row"><button class="nav-folder-toggle" type="button" data-nav-folder-toggle aria-expanded="true" aria-controls="%s" aria-label="Свернуть раздел %s"><span aria-hidden="true">▾</span></button><a class="nav-folder-link%s" href="%s"><span>%s</span></a></div><ul id="%s">`, escapeAttr(groupKey), escapeAttr(groupID), escapeAttr(label), active, escapeAttr(relativeURL(current, target)), escapeHTML(label), escapeAttr(groupID))
+		if section == SectionScreens && model.ScreenMapEnabled {
 			activeClass := ""
 			aria := ""
 			if current == "screens/index.html" {
@@ -235,20 +216,20 @@ func renderNavigation(model *Model, current string) string {
 			fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"%s><span class="nav-icon" aria-hidden="true">⌗</span><span>Карта экранов</span></a></li>`,
 				activeClass, escapeAttr(relativeURL(current, "screens/index.html")), aria)
 		}
-		if key == "processes" {
+		if section == SectionFlows {
 			for _, doc := range docs {
 				if doc.Type == "flow" && !strings.EqualFold(doc.FileName, "index.md") {
 					writeDoc(doc, "")
 				}
 			}
 			b.WriteString(`</ul></li>`)
-			continue
+			return
 		}
 		for _, doc := range docs {
 			if strings.EqualFold(doc.FileName, "index.md") || doc.Type == "screen-map" {
 				continue
 			}
-			if key == "work" {
+			if section == SectionWork {
 				archived, _, _ := taskArchivePathInfo(doc.SourcePath)
 				if archived {
 					continue
@@ -257,6 +238,21 @@ func renderNavigation(model *Model, current string) string {
 			writeDoc(doc, "")
 		}
 		b.WriteString(`</ul></li>`)
+	}
+	for _, spec := range BuiltinSections {
+		docs, exists := sectionGroups[spec.Type]
+		if !exists {
+			continue
+		}
+		writeGroup(spec.Type, spec.SourceDir, spec.Route, docs)
+	}
+	keys := make([]string, 0, len(customGroups))
+	for key := range customGroups {
+		keys = append(keys, key)
+	}
+	sort.SliceStable(keys, func(i, j int) bool { return naturalCompare(keys[i], keys[j]) < 0 })
+	for _, key := range keys {
+		writeGroup("", key, key, customGroups[key])
 	}
 	b.WriteString(`</ul><div class="nav-title">Контроль</div><ul class="nav-tree">`)
 	active := ""
@@ -344,7 +340,11 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 		serveAssets = `<link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/serve.css"><script src="` + escapeAttr(prefix) + `assets/serve.js" defer></script>`
 		serveRevision = `<meta name="docgent-revision" content="` + escapeAttr(model.serveRevision) + `">`
 	}
-	return `<!doctype html><html lang="ru" data-theme="` + escapeAttr(initialTheme) + `"` + attributes + `><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` + serveRevision + `<meta name="description" content="` + escapeAttr(description) + `"><title>` + escapeHTML(fullTitle) + `</title><link rel="icon" href="` + escapeAttr(relativeURL(current, favicon)) + `">` + earlyTheme + `<link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/style.css">` + extraStyles + serveAssets + `<script src="` + escapeAttr(prefix) + `assets/search-index.js" defer></script>` + mermaidScript + `<script src="` + escapeAttr(prefix) + `assets/app.js" defer></script>` + extraScripts + `</head><body data-root-prefix="` + escapeAttr(prefix) + `" data-task-filter="all"><a class="skip-link" href="#main-content">Перейти к содержимому</a><header class="site-header"><div class="brand-area"><button class="icon-button sidebar-toggle" type="button" data-sidebar-toggle aria-label="Открыть навигацию">☰</button><a class="brand" href="` + escapeAttr(relativeURL(current, "index.html")) + `">` + brandMark + `<span class="brand-text">` + escapeHTML(model.Project.Title) + `</span></a></div><div class="global-search" role="search"><div class="search-input-wrap"><input type="search" data-global-search placeholder="Поиск по документации" aria-label="Поиск по документации"><span class="search-shortcut">/</span></div><div class="search-results" id="global-search-results" data-search-results role="listbox" hidden></div></div><div class="header-actions"><button class="icon-button" type="button" data-print aria-label="Печать">⎙</button>` + rebuildButton + themeSelect + schemeSelect + `</div></header><div class="site-layout"><aside class="sidebar">` + renderNavigation(model, current) + `</aside><div class="main-area"><main id="main-content" class="page-grid` + gridClass + `"><div class="page-content">` + content + `</div>` + tocHTML + `</main><footer class="site-footer">` + footer + `</footer></div></div></body></html>`
+	locale := model.SiteConfig.Project.Locale
+	if locale == "" {
+		locale = "en"
+	}
+	return `<!doctype html><html lang="` + escapeAttr(locale) + `" data-theme="` + escapeAttr(initialTheme) + `"` + attributes + `><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` + serveRevision + `<meta name="description" content="` + escapeAttr(description) + `"><title>` + escapeHTML(fullTitle) + `</title><link rel="icon" href="` + escapeAttr(relativeURL(current, favicon)) + `">` + earlyTheme + `<link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/style.css">` + extraStyles + serveAssets + `<script src="` + escapeAttr(prefix) + `assets/search-index.js" defer></script>` + mermaidScript + `<script src="` + escapeAttr(prefix) + `assets/app.js" defer></script>` + extraScripts + `</head><body data-root-prefix="` + escapeAttr(prefix) + `" data-task-filter="all"><a class="skip-link" href="#main-content">Перейти к содержимому</a><header class="site-header"><div class="brand-area"><button class="icon-button sidebar-toggle" type="button" data-sidebar-toggle aria-label="Открыть навигацию">☰</button><a class="brand" href="` + escapeAttr(relativeURL(current, "index.html")) + `">` + brandMark + `<span class="brand-text">` + escapeHTML(model.Project.Title) + `</span></a></div><div class="global-search" role="search"><div class="search-input-wrap"><input type="search" data-global-search placeholder="Поиск по документации" aria-label="Поиск по документации"><span class="search-shortcut">/</span></div><div class="search-results" id="global-search-results" data-search-results role="listbox" hidden></div></div><div class="header-actions"><button class="icon-button" type="button" data-print aria-label="Печать">⎙</button>` + rebuildButton + themeSelect + schemeSelect + `</div></header><div class="site-layout"><aside class="sidebar">` + renderNavigation(model, current) + `</aside><div class="main-area"><main id="main-content" class="page-grid` + gridClass + `"><div class="page-content">` + content + `</div>` + tocHTML + `</main><footer class="site-footer">` + footer + `</footer></div></div></body></html>`
 }
 
 type selectOption struct {
@@ -882,7 +882,7 @@ func BuildReport(model *Model) ProjectReport {
 		}
 		documents = append(documents, ReportDocument{
 			ID: doc.Metadata["id"], SourcePath: doc.SourcePath, OutputPath: doc.OutputPath,
-			Type: doc.Type, Title: doc.Title, Description: doc.Description, Metadata: doc.Metadata,
+			Type: doc.Type, SectionType: doc.SectionType, Title: doc.Title, Description: doc.Description, Metadata: doc.Metadata,
 			Status: doc.Status, TaskStats: doc.TaskStats, UpdatedAt: doc.UpdatedAt, Stale: doc.Stale,
 			Warnings: len(doc.Warnings), Errors: len(doc.Errors), Links: links,
 			Backlinks: backlinks, RelatedDocuments: related,
@@ -1073,9 +1073,8 @@ func generateSite(model *Model, options Options, serve bool) (GenerateResult, er
 	}
 	if len(model.Knowledge.UseCases)+len(model.Knowledge.Flows) > 0 {
 		processPages := map[string]string{
-			"processes/index.html": renderProcessCatalogPage(model, "processes/index.html", "flow"),
-			"use-cases/index.html": renderProcessCatalogPage(model, "use-cases/index.html", "use-case"),
-			"flows/index.html":     renderProcessCatalogPage(model, "flows/index.html", "flow"),
+			sectionCatalogOutput(SectionFlows):    renderProcessCatalogPage(model, sectionCatalogOutput(SectionFlows), "flow"),
+			sectionCatalogOutput(SectionUseCases): renderProcessCatalogPage(model, sectionCatalogOutput(SectionUseCases), "use-case"),
 		}
 		for target, pageHTML := range processPages {
 			if err = writeFileEnsured(filepath.Join(output, filepath.FromSlash(target)), []byte(pageHTML)); err != nil {

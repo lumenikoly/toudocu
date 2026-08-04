@@ -50,14 +50,18 @@ another implicit skill trigger. The Docgent Go CLI has no `init` command.
    context diagram unless repository evidence supports it. Do not create
    detailed architecture documents, typed entities, owners, statuses, or
    relationships without evidence.
-3. Select `assets/project-guidance/ru.md` or
+3. Create or complete `.docgent/config.yml` with `project.locale` and all
+   built-in `project.sections` titles from the selected `en` or `ru` locale
+   pack in [`assets/locale-packs.md`](../assets/locale-packs.md). Apply those canonical titles only to built-in entry documents created
+   by this workflow; do not rewrite existing H1 headings.
+4. Select `assets/project-guidance/ru.md` or
    `assets/project-guidance/en.md`.
-4. Upsert the complete asset into the repository-root `AGENTS.md`:
+5. Upsert the complete asset into the repository-root `AGENTS.md`:
    - create the file with the block when it does not exist;
    - append the block after one blank line when both markers are absent;
    - replace from the start marker through the end marker when both occur once;
    - preserve every byte outside the managed block.
-5. Do not create a `TASK-*` merely because init is running. Create one only when
+6. Do not create a `TASK-*` merely because init is running. Create one only when
    the user or existing repository policy explicitly requires it.
 
 Do not install or refresh project guidance outside this explicit init workflow.

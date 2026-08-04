@@ -66,7 +66,11 @@ For every document in scope:
 4. Do not create statuses, owners, entities, links, or procedures to silence a
    diagnostic. Do not create a `TASK-*` merely because refresh is running; use
    the normal task threshold.
-5. Never edit generated portal output as documentation. Preserve unrelated
+5. Ensure `project.locale` and the complete built-in `project.sections` map
+   exist. Use the selected `en`/`ru` [locale pack](../assets/locale-packs.md) when available; for another
+   valid locale preserve an explicit one-time map. Update H1 only for existing
+   built-in entry documents, never custom section manifests.
+6. Never edit generated portal output as documentation. Preserve unrelated
    working-tree changes, including changes that existed before refresh.
 
 ## Review, validate, and publish

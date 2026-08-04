@@ -450,6 +450,13 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	sections := make(map[SectionType]string, len(BuiltinSections))
+	for _, spec := range BuiltinSections {
+		sections[spec.Type] = spec.EnglishTitle
+	}
+	sections[SectionFlows] = "Documented Processes"
+	model.SiteConfig.Project.Locale = "en"
+	model.SiteConfig.Project.Sections = sections
 	output := filepath.Join(root, "site")
 	if _, err := GenerateSite(model, Options{InputDirectory: docs, OutputDirectory: output}); err != nil {
 		t.Fatal(err)
@@ -457,10 +464,9 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	for file, expected := range map[string]string{
 		"screens/index.html":        `data-screen-map`,
 		"screens/catalog.html":      `Каталог экранов`,
-		"processes/index.html":      `Процессы`,
+		"processes/index.html":      `Documented Processes`,
 		"use-cases/index.html":      `Пользовательские сценарии`,
 		"use-cases/UC-AUTH-01.html": `data-playable-flow`,
-		"flows/index.html":          `Процессы`,
 		"traceability.html":         `Traceability Matrix`,
 		"assets/screen-map.js":      `computeVisible`,
 		"assets/playable-flow.js":   `function activate`,
@@ -536,7 +542,7 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 		`Открыть use case`,
 		`data-nav-folder="use-cases"`,
 		`data-nav-folder="processes"`,
-		`Пользовательские сценарии`,
+		`Use Cases`,
 		`FLOW-AUTH-LOGIN`,
 		`Расположение в коде`,
 	} {
@@ -577,6 +583,9 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	if !strings.Contains(navigationFolderHTML(t, processPage, "processes"), `nav-folder-link is-active`) {
 		t.Fatal("aggregate catalog must activate the processes section")
 	}
+	if !strings.Contains(navigationFolderHTML(t, processPage, "processes"), `>Documented Processes<`) {
+		t.Fatal("processes navigation label must come from project.sections.flows")
+	}
 	if strings.Contains(navigationFolderHTML(t, processPage, "use-cases"), `nav-folder-link is-active`) {
 		t.Fatal("aggregate catalog must not activate the user-scenarios section")
 	}
@@ -585,6 +594,16 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	}
 	if !strings.Contains(processPage, `data-type="flow"`) || !strings.Contains(processPage, `FLOW-AUTH-LOGIN`) {
 		t.Fatal("processes catalog must retain flow documents")
+	}
+	if _, err := os.Stat(filepath.Join(output, "flows", "index.html")); !os.IsNotExist(err) {
+		t.Fatalf("legacy flows catalog must not be generated: %v", err)
+	}
+	flowDocument, err := os.ReadFile(filepath.Join(output, "flows", "FLOW-AUTH-LOGIN.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(navigationFolderHTML(t, string(flowDocument), "processes"), `nav-folder-link is-active`) {
+		t.Fatal("flow document must activate the processes section")
 	}
 	useCaseCatalogData, err := os.ReadFile(filepath.Join(output, "use-cases", "index.html"))
 	if err != nil {
@@ -686,7 +705,7 @@ func TestProcessesNavigationWithoutFlowsIsPlainLink(t *testing.T) {
 	if strings.Contains(navigation, `data-nav-folder="processes"`) {
 		t.Fatal("processes without flow documents must not expose an empty folder toggle")
 	}
-	if !strings.Contains(navigation, `<a class="nav-link" href="../processes/index.html"><span class="nav-icon" aria-hidden="true">⇢</span><span>Процессы</span></a>`) {
+	if !strings.Contains(navigation, `<a class="nav-link" href="../processes/index.html"><span class="nav-icon" aria-hidden="true">⇢</span><span>Processes</span></a>`) {
 		t.Fatal("processes without flow documents must remain available as a plain catalog link")
 	}
 }

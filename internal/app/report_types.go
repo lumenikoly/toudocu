@@ -157,6 +157,7 @@ type ReportDocument struct {
 	SourcePath       string       `json:"sourcePath"`
 	OutputPath       string       `json:"outputPath"`
 	Type             string       `json:"type"`
+	SectionType      SectionType  `json:"sectionType,omitempty"`
 	Title            string       `json:"title"`
 	Description      string       `json:"description"`
 	Metadata         Metadata     `json:"metadata"`

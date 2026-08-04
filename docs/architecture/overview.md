@@ -1,4 +1,4 @@
-# Архитектура Docgent
+# Архитектура
 
 - Тип документа: Architecture Overview
 

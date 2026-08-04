@@ -158,6 +158,8 @@ Schema v1 аддитивно включает `knowledge.standards`, `knowledge.
 
 Architecture overview и подробные ответы сериализуются как обычные documents с
 `type: "architecture"`; различие остаётся в `sourcePath` и `metadata`.
+Каждый документ аддитивно содержит `sectionType` для известного встроенного
+раздела; это не изменяет прежний `type`.
 
 `check --format json` и сгенерированный `report.json` содержат:
 

@@ -4,9 +4,9 @@
     "name": "Docgent",
     "version": "1.1.0-go"
   },
-  "generatedAt": "2026-08-01T08:35:03.090794106Z",
+  "generatedAt": "2026-08-03T08:42:49.206298736Z",
   "sourceDirectory": "docs",
-  "staleDays": 90,
+  "staleDays": 0,
   "project": {
     "title": "Service Desk Showcase",
     "description": "Демонстрационный проект показывает возможности Docgent на документации небольшого сервиса обращений: от модели требований и задач до интерактивной карты экранов и проигрываемых сценариев.",
@@ -396,6 +396,7 @@
       "sourcePath": "architecture/component-model.md",
       "outputPath": "architecture/component-model.html",
       "type": "architecture",
+      "sectionType": "architecture",
       "title": "Компонентная модель Service Desk",
       "description": "Web Frontend отвечает за представление и предварительную проверку, Backend API повторно валидирует запрос и владеет бизнес-операцией, PostgreSQL обеспечивает транзакционное хранение. Ни один слой не принимает ответственность соседнего.",
       "metadata": {
@@ -467,6 +468,7 @@
       "sourcePath": "architecture/data-ownership.md",
       "outputPath": "architecture/data-ownership.html",
       "type": "architecture",
+      "sectionType": "architecture",
       "title": "Владение данными обращения",
       "description": "Backend API владеет смыслом и допустимыми изменениями обращения, PostgreSQL — его зафиксированным состоянием, а Web Frontend — только пользовательским черновиком до отправки и отображением подтверждённого результата.",
       "metadata": {
@@ -520,6 +522,7 @@
       "sourcePath": "architecture/deployment-topology.md",
       "outputPath": "architecture/deployment-topology.html",
       "type": "architecture",
+      "sectionType": "architecture",
       "title": "Топология развёртывания Service Desk",
       "description": "Статический Web Frontend публикуется за HTTPS reverse proxy, Backend API работает в приватном сегменте за тем же публичным входом, а PostgreSQL — в отдельном приватном сегменте с доступом только от backend.",
       "metadata": {
@@ -573,6 +576,7 @@
       "sourcePath": "architecture/overview.md",
       "outputPath": "architecture/overview.html",
       "type": "architecture",
+      "sectionType": "architecture",
       "title": "Архитектура Service Desk",
       "description": "Service Desk принимает обращения пользователя через браузер, сохраняет их в управляемом backend и может перевести пользователя во внешний Support Center. Пользователь и Support Center находятся за границей управляемой системы.",
       "metadata": {
@@ -652,6 +656,7 @@
       "sourcePath": "architecture/system-context.md",
       "outputPath": "architecture/system-context.html",
       "type": "architecture",
+      "sectionType": "architecture",
       "title": "Системный контекст Service Desk",
       "description": "Управляемая граница включает Web Frontend, Backend API и PostgreSQL. Пользователь обращается к ней через HTTPS, а внешний Support Center получает только отдельный переход пользователя и не участвует в создании обращения.",
       "metadata": {
@@ -714,6 +719,7 @@
       "sourcePath": "architecture/trust-boundaries.md",
       "outputPath": "architecture/trust-boundaries.html",
       "type": "architecture",
+      "sectionType": "architecture",
       "title": "Границы доверия Service Desk",
       "description": "Публичный браузер и внешний Support Center находятся вне доверенной зоны; Backend API повторно проверяет каждый запрос на публичной HTTPS-границе, а PostgreSQL и её учётные данные остаются в приватной зоне backend.",
       "metadata": {
@@ -767,6 +773,7 @@
       "sourcePath": "contracts/api.md",
       "outputPath": "contracts/api.html",
       "type": "contract",
+      "sectionType": "contracts",
       "title": "API-контракт",
       "description": "REST-контракт между Web Frontend и Backend API. Все ответы имеют Content-Type: application/json ; время передаётся в UTC по RFC 3339.",
       "metadata": {
@@ -804,6 +811,7 @@
       "sourcePath": "decisions/000-decision.md",
       "outputPath": "decisions/000-decision.html",
       "type": "decision",
+      "sectionType": "decisions",
       "title": "ADR-000: Разделить Web Frontend, Backend API и PostgreSQL",
       "description": "Service Desk реализуется как три изолированных слоя с явными интерфейсами.",
       "metadata": {
@@ -841,6 +849,7 @@
       "sourcePath": "flows/FLOW-CORE-ENTRY.md",
       "outputPath": "flows/FLOW-CORE-ENTRY.html",
       "type": "flow",
+      "sectionType": "flows",
       "title": "FLOW-CORE-ENTRY: Маршрутизация с главной",
       "description": "Переиспользуемый процесс показывает развилку между внутренним сценарием создания обращения и переходом во внешний центр поддержки. Связь с двумя UC- демонстрирует двустороннюю модель процессов.",
       "metadata": {
@@ -903,6 +912,7 @@
       "sourcePath": "flows/FLOW-CORE-REQUEST.md",
       "outputPath": "flows/FLOW-CORE-REQUEST.html",
       "type": "flow",
+      "sectionType": "flows",
       "title": "FLOW-CORE-REQUEST: Создание запроса",
       "description": "Диаграммы визуализируют основной сценарий и состояния формы. Источником переходов для Screen Map остаются документы screens/SC- .md .",
       "metadata": {
@@ -960,6 +970,7 @@
       "sourcePath": "guides/testing.md",
       "outputPath": "guides/testing.html",
       "type": "guide",
+      "sectionType": "guides",
       "title": "Тестирование",
       "description": "Команды и правила проверки изменений.",
       "metadata": {},
@@ -988,6 +999,7 @@
       "sourcePath": "modules/core.md",
       "outputPath": "modules/core.html",
       "type": "module",
+      "sectionType": "modules",
       "title": "Основной модуль",
       "description": "Основной модуль объединяет backend-логику создания обращений и стабильный контракт, используемый Web Frontend.",
       "metadata": {
@@ -1046,6 +1058,7 @@
       "sourcePath": "modules/support.md",
       "outputPath": "modules/support.html",
       "type": "module",
+      "sectionType": "modules",
       "title": "Внешняя поддержка",
       "description": "Модуль описывает границу перехода из Service Desk во внешний Support Center.",
       "metadata": {
@@ -1094,6 +1107,7 @@
       "sourcePath": "reference/configuration.md",
       "outputPath": "reference/configuration.html",
       "type": "reference",
+      "sectionType": "reference",
       "title": "Конфигурация",
       "description": "Справочник параметров целевого развёртывания Service Desk. Секретные значения передаются Backend API через окружение и никогда не встраиваются во Frontend.",
       "metadata": {},
@@ -1124,6 +1138,7 @@
       "sourcePath": "screens/SC-CORE-HELP.md",
       "outputPath": "screens/SC-CORE-HELP.html",
       "type": "screen",
+      "sectionType": "screens",
       "title": "SC-CORE-HELP: Подсказка",
       "description": "Контекстная помощь при заполнении запроса.",
       "metadata": {
@@ -1159,6 +1174,7 @@
       "sourcePath": "screens/SC-CORE-HOME.md",
       "outputPath": "screens/SC-CORE-HOME.html",
       "type": "screen",
+      "sectionType": "screens",
       "title": "SC-CORE-HOME: Главная",
       "description": "Начальный экран основного сценария.",
       "metadata": {
@@ -1196,6 +1212,7 @@
       "sourcePath": "screens/SC-CORE-REQUEST.md",
       "outputPath": "screens/SC-CORE-REQUEST.html",
       "type": "screen",
+      "sectionType": "screens",
       "title": "SC-CORE-REQUEST: Новый запрос",
       "description": "Экран принимает данные основного пользовательского запроса.",
       "metadata": {
@@ -1248,6 +1265,7 @@
       "sourcePath": "screens/SC-CORE-RESULT.md",
       "outputPath": "screens/SC-CORE-RESULT.html",
       "type": "screen",
+      "sectionType": "screens",
       "title": "SC-CORE-RESULT: Результат",
       "description": "Конечный экран успешного сценария.",
       "metadata": {
@@ -1284,6 +1302,7 @@
       "sourcePath": "screens/SC-SUPPORT-PORTAL.md",
       "outputPath": "screens/SC-SUPPORT-PORTAL.html",
       "type": "screen",
+      "sectionType": "screens",
       "title": "SC-SUPPORT-PORTAL: Центр поддержки",
       "description": "Внешняя конечная страница сценария поддержки. Preview намеренно отсутствует, чтобы продемонстрировать безопасный placeholder.",
       "metadata": {
@@ -1320,6 +1339,7 @@
       "sourcePath": "use-cases/core.md",
       "outputPath": "use-cases/UC-CORE-01.html",
       "type": "use-case",
+      "sectionType": "use-cases",
       "title": "UC-CORE-01: Основной пользовательский сценарий",
       "description": "Пользователь регистрирует обращение и получает его номер.",
       "metadata": {
@@ -1393,6 +1413,7 @@
       "sourcePath": "use-cases/support.md",
       "outputPath": "use-cases/UC-CORE-02.html",
       "type": "use-case",
+      "sectionType": "use-cases",
       "title": "UC-CORE-02: Открыть центр поддержки",
       "description": "Пользователь переходит из Service Desk во внешний центр поддержки.",
       "metadata": {
@@ -1454,6 +1475,7 @@
       "sourcePath": "work/TASK-CORE-001-main-scenario.md",
       "outputPath": "work/TASK-CORE-001-main-scenario.html",
       "type": "work",
+      "sectionType": "work",
       "title": "TASK-CORE-001: Реализовать основной сценарий",
       "description": "",
       "metadata": {
@@ -1493,6 +1515,7 @@
       "sourcePath": "work/TASK-SUPPORT-002-external-support.md",
       "outputPath": "work/TASK-SUPPORT-002-external-support.html",
       "type": "work",
+      "sectionType": "work",
       "title": "TASK-SUPPORT-002: Проверить внешний переход",
       "description": "",
       "metadata": {

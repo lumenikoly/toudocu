@@ -12,9 +12,7 @@
 `/use-cases/index.html` перечисляет `UC-*`, а `/processes/index.html` —
 `FLOW-*`. Оба каталога поддерживают поиск и фильтры по своим связям. Документы
 `FLOW-*` являются прямыми дочерними пунктами раздела «Процессы» без
-промежуточных группировок.
-`/flows/index.html` сохраняется как совместимый типизированный маршрут к тому
-же каталогу `FLOW-*`, но не дублируется в основном дереве навигации.
+промежуточных группировок. `/flows/index.html` не создаётся.
 
 ## Пользовательский сценарий
 
@@ -96,7 +94,6 @@ sequenceDiagram
 ```text
 /processes/index.html
 /use-cases/index.html
-/flows/index.html
 /use-cases/UC-AUTH-01.html
 /flows/FLOW-AUTH-LOGIN.html
 /screens/SC-AUTH-LOGIN.html

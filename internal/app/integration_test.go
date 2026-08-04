@@ -804,10 +804,13 @@ func TestGenerateSite(t *testing.T) {
 	if result.Pages < 10 {
 		t.Fatalf("pages=%d", result.Pages)
 	}
-	for _, name := range []string{"index.html", "health.html", "report.json", "assets/style.css", "assets/app.js", "assets/search-index.js", "modules/auth.html", "modules/index.html", "processes/index.html", "use-cases/UC-AUTH-01.html", "use-cases/index.html", "flows/index.html"} {
+	for _, name := range []string{"index.html", "health.html", "report.json", "assets/style.css", "assets/app.js", "assets/search-index.js", "modules/auth.html", "modules/index.html", "processes/index.html", "use-cases/UC-AUTH-01.html", "use-cases/index.html"} {
 		if _, err := os.Stat(filepath.Join(output, filepath.FromSlash(name))); err != nil {
 			t.Fatalf("missing %s: %v", name, err)
 		}
+	}
+	if _, err := os.Stat(filepath.Join(output, "flows", "index.html")); !os.IsNotExist(err) {
+		t.Fatalf("legacy flows catalog must not be generated: %v", err)
 	}
 	if _, err := os.Stat(filepath.Join(output, "use-cases", "login.html")); !os.IsNotExist(err) {
 		t.Fatalf("source-filename URL must not be generated when a stable UC ID exists: %v", err)
@@ -1534,6 +1537,7 @@ func TestMinimalDocumentationCheckAndBuild(t *testing.T) {
 	docs := filepath.Join(root, "docs")
 	writeTestFile(t, docs, "index.md", "# Минимальный проект\n\nКраткое описание проекта.\n\n## Подробности\n\nУникальное содержимое главной страницы.\n")
 	writeArchitectureOverview(t, docs, "")
+	writeSiteConfig(t, root, "project:\n  locale: ru\n  sections:\n    architecture: Architecture\n    modules: Модули\n    use-cases: Пользовательские сценарии\n    flows: Процессы\n    screens: Экраны\n    decisions: Архитектурные решения\n    contracts: Контракты\n    quality: Стандарты качества\n    runbooks: Runbooks\n    reference: Справочник\n    work: Рабочие задачи\n    guides: Руководства\n")
 	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
 	if err != nil {
 		t.Fatal(err)

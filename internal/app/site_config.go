@@ -46,6 +46,13 @@ type SiteConfig struct {
 	Footer       FooterConfig
 	Hero         HeroConfig
 	Changes      ChangesConfig
+	Project      ProjectConfig
+}
+
+// ProjectConfig controls stable built-in section names for one portal locale.
+type ProjectConfig struct {
+	Locale   string
+	Sections map[SectionType]string
 }
 
 func defaultSiteConfig() SiteConfig {
@@ -181,7 +188,7 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 		values[path] = configScalar{value: value, line: line, quoted: quoted}
 	}
 
-	allowedMaps := map[string]bool{"site": true, "site.footer": true, "site.hero": true, "changes": true, "changes.exclude": true}
+	allowedMaps := map[string]bool{"site": true, "site.footer": true, "site.hero": true, "changes": true, "changes.exclude": true, "project": true, "project.sections": true}
 	allowedScalars := map[string]bool{
 		"site.title": true, "site.logo": true, "site.favicon": true, "site.theme": true,
 		"site.colorScheme": true, "site.accent": true, "site.density": true, "site.contentWidth": true,
@@ -189,6 +196,10 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 		"changes.defaultBaseRef": true, "changes.renameSimilarity": true, "changes.includeTaskArtifacts": true,
 		"changes.includeAssets": true, "changes.semanticDiff": true, "changes.renderedDiff": true,
 		"changes.maxSourceDiffBytes": true, "changes.maxRenderedFileBytes": true,
+		"project.locale": true,
+	}
+	for _, spec := range BuiltinSections {
+		allowedScalars["project.sections."+string(spec.Type)] = true
 	}
 	for key, scalar := range values {
 		if scalar.value == "" && allowedMaps[key] {
@@ -202,6 +213,20 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 			return config, fmt.Errorf("config.yml:%d: %s должен быть строкой", scalar.line, key)
 		}
 		switch key {
+		case "project.locale":
+			locale, ok := normalizeLocale(scalar.value)
+			if !ok {
+				return config, fmt.Errorf("config.yml:%d: project.locale должен быть корректным BCP-47-style locale", scalar.line)
+			}
+			config.Project.Locale = locale
+		case "project.sections.architecture", "project.sections.modules", "project.sections.use-cases", "project.sections.flows", "project.sections.screens", "project.sections.decisions", "project.sections.contracts", "project.sections.quality", "project.sections.runbooks", "project.sections.reference", "project.sections.work", "project.sections.guides":
+			if strings.TrimSpace(scalar.value) == "" {
+				return config, fmt.Errorf("config.yml:%d: %s не может быть пустым", scalar.line, key)
+			}
+			if config.Project.Sections == nil {
+				config.Project.Sections = map[SectionType]string{}
+			}
+			config.Project.Sections[SectionType(strings.TrimPrefix(key, "project.sections."))] = scalar.value
 		case "site.title":
 			config.Title = scalar.value
 		case "site.logo":
@@ -268,7 +293,7 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 	}
 	config.Changes.Exclude = changeExcludes
 	if _, ok := values["site"]; !ok {
-		if _, changesOnly := values["changes"]; changesOnly {
+		if _, changesOnly := values["changes"]; changesOnly || values["project"].line > 0 {
 			return config, validateSiteConfig(config)
 		}
 		return config, fmt.Errorf("config.yml: отсутствует корневая карта site")

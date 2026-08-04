@@ -146,6 +146,7 @@ type Document struct {
 	Directory           string
 	FileName            string
 	Type                string
+	SectionType         SectionType
 	TypeLabel           string
 	Title               string
 	Description         string
