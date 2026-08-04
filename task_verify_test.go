@@ -28,6 +28,15 @@ type fakeCommandRunner struct {
 	commands []string
 }
 
+func hasIssueCode(issues []Issue, code string) bool {
+	for _, issue := range issues {
+		if issue.Code == code {
+			return true
+		}
+	}
+	return false
+}
+
 func (runner *fakeCommandRunner) Run(ctx context.Context, command, _ string, stdout, stderr io.Writer) (int, error) {
 	runner.mu.Lock()
 	runner.commands = append(runner.commands, command)
@@ -48,7 +57,7 @@ func (runner *fakeCommandRunner) Run(ctx context.Context, command, _ string, std
 	return 0, nil
 }
 
-func taskCheckFixture(status string, completed bool, commands map[string]string, extra string) string {
+func taskVerifyFixture(status string, completed bool, commands map[string]string, extra string) string {
 	mark := " "
 	if completed {
 		mark = "x"
@@ -63,6 +72,16 @@ func taskCheckFixture(status string, completed bool, commands map[string]string,
 ## Результат
 
 Проверки выполнены и записаны в отчёт.
+
+## Изменение поведения
+
+### Было
+
+Проверки не выполнялись.
+
+### Станет
+
+Проверки выполняются по контракту.
 
 ## Область изменения
 
@@ -96,10 +115,10 @@ func taskCheckFixture(status string, completed bool, commands map[string]string,
 ` + extra
 }
 
-func TestExecuteTaskCheckDeduplicatesAndContinues(t *testing.T) {
+func TestExecuteTaskVerifyDeduplicatesAndContinues(t *testing.T) {
 	root, docs, _ := createFixture(t)
 	commands := map[string]string{"AC-01": "pass", "AC-02": "pass", "ALL": "fail", "DOCS": "timeout"}
-	writeTestFile(t, docs, "work/TASK-AUTH-020-check.md", taskCheckFixture("В работе", false, commands, ""))
+	writeTestFile(t, docs, "work/TASK-AUTH-020-verify.md", taskVerifyFixture("В работе", false, commands, ""))
 	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
 	if err != nil {
 		t.Fatal(err)
@@ -109,7 +128,7 @@ func TestExecuteTaskCheckDeduplicatesAndContinues(t *testing.T) {
 		"fail":    {exitCode: 2, stderr: "failed\n"},
 		"timeout": {wait: true},
 	}}
-	report := executeTaskCheck(model, Options{TaskID: "TASK-AUTH-020", Format: "json", Timeout: 50 * time.Millisecond}, io.Discard, io.Discard, runner)
+	report := executeTaskVerify(model, Options{TaskID: "TASK-AUTH-020", VerifyMode: "run", Format: "json", Timeout: 50 * time.Millisecond}, io.Discard, io.Discard, runner)
 	if report.Status != "failed" || !report.FullVerification || len(report.Commands) != 3 {
 		t.Fatalf("unexpected report: %#v", report)
 	}
@@ -127,10 +146,10 @@ func TestExecuteTaskCheckDeduplicatesAndContinues(t *testing.T) {
 	}
 }
 
-func TestExecuteTaskCheckReportsStartError(t *testing.T) {
+func TestExecuteTaskVerifyReportsStartError(t *testing.T) {
 	root, docs, _ := createFixture(t)
 	commands := map[string]string{"AC-01": "start", "AC-02": "pass", "ALL": "pass", "DOCS": "pass"}
-	writeTestFile(t, docs, "work/TASK-AUTH-020-check.md", taskCheckFixture("Черновик", false, commands, ""))
+	writeTestFile(t, docs, "work/TASK-AUTH-020-verify.md", taskVerifyFixture("В работе", false, commands, ""))
 	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
 	if err != nil {
 		t.Fatal(err)
@@ -139,53 +158,79 @@ func TestExecuteTaskCheckReportsStartError(t *testing.T) {
 		"start": {startError: true},
 		"pass":  {},
 	}}
-	report := executeTaskCheck(model, Options{TaskID: "TASK-AUTH-020", Format: "json"}, io.Discard, io.Discard, runner)
+	report := executeTaskVerify(model, Options{TaskID: "TASK-AUTH-020", VerifyMode: "run", Format: "json"}, io.Discard, io.Discard, runner)
 	if report.Status != "failed" || report.Commands[0].Status != "start_error" || report.Commands[0].ExitCode != nil || len(runner.commands) != 2 {
 		t.Fatalf("report: %#v commands=%#v", report, runner.commands)
 	}
 }
 
-func TestTaskCheckValidationGateIsTaskLocal(t *testing.T) {
+func TestTaskVerifyValidationGateIsTaskLocal(t *testing.T) {
 	root, docs, _ := createFixture(t)
 	commands := map[string]string{"AC-01": "pass", "AC-02": "pass", "ALL": "pass", "DOCS": "pass"}
-	writeTestFile(t, docs, "work/TASK-AUTH-020-check.md", taskCheckFixture("Отменено", false, commands, "\n## Причина отмены\n\nПроверяется допустимость запуска для любого статуса.\n"))
+	writeTestFile(t, docs, "work/TASK-AUTH-020-verify.md", taskVerifyFixture("В работе", false, commands, ""))
 	writeTestFile(t, docs, "modules/duplicate.md", "# Duplicate\n\n- Идентификатор: MOD-AUTH\n- Статус: В работе\n\nDuplicate module.\n")
 	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
 	if err != nil {
 		t.Fatal(err)
 	}
 	runner := &fakeCommandRunner{outcomes: map[string]fakeCommandOutcome{"pass": {}}}
-	report := executeTaskCheck(model, Options{TaskID: "TASK-AUTH-020", Format: "json"}, io.Discard, io.Discard, runner)
-	if report.Status != "passed" || len(report.ValidationIssues) != 0 || len(report.Issues) == 0 || len(runner.commands) != 1 {
-		t.Fatalf("unrelated issue blocked task: %#v %#v", report, runner.commands)
+	report := executeTaskVerify(model, Options{TaskID: "TASK-AUTH-020", VerifyMode: "run", Format: "json"}, io.Discard, io.Discard, runner)
+	if report.Status != "blocked" || len(report.ValidationIssues) == 0 || len(report.Issues) == 0 || len(runner.commands) != 0 {
+		t.Fatalf("linked duplicate ID must block task: %#v %#v", report, runner.commands)
 	}
 
-	writeTestFile(t, docs, "work/TASK-AUTH-020-check.md", strings.Replace(taskCheckFixture("В работе", false, commands, ""), "`docs/`", "`missing/`", 1))
+	writeTestFile(t, docs, "work/TASK-AUTH-020-verify.md", strings.Replace(taskVerifyFixture("В работе", false, commands, ""), "`docs/`", "`missing/`", 1))
 	model, err = BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
 	if err != nil {
 		t.Fatal(err)
 	}
 	runner = &fakeCommandRunner{outcomes: map[string]fakeCommandOutcome{"pass": {}}}
-	report = executeTaskCheck(model, Options{TaskID: "TASK-AUTH-020", Format: "json"}, io.Discard, io.Discard, runner)
+	report = executeTaskVerify(model, Options{TaskID: "TASK-AUTH-020", VerifyMode: "run", Format: "json"}, io.Discard, io.Discard, runner)
 	if report.Status != "blocked" || len(report.ValidationIssues) == 0 || len(runner.commands) != 0 {
 		t.Fatalf("task-local issue did not block: %#v %#v", report, runner.commands)
 	}
 }
 
-func TestTaskCheckCLIJSONAndReportFile(t *testing.T) {
+func TestTaskVerifyRunRejectsDraftAndCancelled(t *testing.T) {
+	for _, status := range []string{"Черновик", "Отменено"} {
+		t.Run(status, func(t *testing.T) {
+			root, docs, _ := createFixture(t)
+			commands := map[string]string{"AC-01": "pass", "AC-02": "pass", "ALL": "pass", "DOCS": "pass"}
+			extra := ""
+			if status == "Отменено" {
+				extra = "\n## Причина отмены\n\nРабота отменена.\n"
+			}
+			writeTestFile(t, docs, "work/TASK-AUTH-020-verify.md", taskVerifyFixture(status, false, commands, extra))
+			model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+			if err != nil {
+				t.Fatal(err)
+			}
+			runner := &fakeCommandRunner{outcomes: map[string]fakeCommandOutcome{"pass": {}}}
+			report := executeTaskVerify(model, Options{TaskID: "TASK-AUTH-020", VerifyMode: "run", Format: "json"}, io.Discard, io.Discard, runner)
+			if report.Status != "blocked" || !hasIssueCode(report.ValidationIssues, "invalid-task-verify-state") {
+				t.Fatalf("run must be blocked for %s: %#v", status, report)
+			}
+			if len(runner.commands) != 0 {
+				t.Fatalf("commands executed for %s: %#v", status, runner.commands)
+			}
+		})
+	}
+}
+
+func TestTaskVerifyCLIJSONAndReportFile(t *testing.T) {
 	root, docs, _ := createFixture(t)
 	commands := map[string]string{"AC-01": "go version", "AC-02": "go version", "ALL": "go version", "DOCS": "go version"}
-	writeTestFile(t, docs, "work/TASK-AUTH-020-check.md", taskCheckFixture("Черновик", false, commands, ""))
+	writeTestFile(t, docs, "work/TASK-AUTH-020-verify.md", taskVerifyFixture("Готово к работе", false, commands, ""))
 	reportPath := filepath.Join(root, "reports", "task.json")
 	var stdout, stderr bytes.Buffer
 	code := RunCLI([]string{
-		"task", "check", "TASK-AUTH-020", docs,
+		"task", "verify", "TASK-AUTH-020", docs, "--run",
 		"--repository-root", root, "--format", "json", "--report", reportPath, "--timeout", "30s", "--stale-days", "0",
 	}, &stdout, &stderr)
 	if code != 0 || stderr.Len() != 0 {
 		t.Fatalf("code=%d stderr=%s stdout=%s", code, stderr.String(), stdout.String())
 	}
-	var report TaskCheckReport
+	var report TaskVerifyReport
 	if err := json.Unmarshal(stdout.Bytes(), &report); err != nil {
 		t.Fatalf("stdout is not pure JSON: %v\n%s", err, stdout.String())
 	}
@@ -196,7 +241,7 @@ func TestTaskCheckCLIJSONAndReportFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var fileReport TaskCheckReport
+	var fileReport TaskVerifyReport
 	if err := json.Unmarshal(fileData, &fileReport); err != nil || fileReport.Task.ID != report.Task.ID {
 		t.Fatalf("saved report: %v %#v", err, fileReport)
 	}
@@ -210,7 +255,7 @@ func TestTaskContextCLIJSONDoesNotExecuteCommands(t *testing.T) {
 		"ALL":   "command-that-must-never-execute",
 		"DOCS":  "command-that-must-never-execute",
 	}
-	writeTestFile(t, docs, "work/TASK-AUTH-020-context.md", taskCheckFixture("Черновик", false, commands, ""))
+	writeTestFile(t, docs, "work/TASK-AUTH-020-context.md", taskVerifyFixture("Готово к работе", false, commands, ""))
 
 	var stdout, stderr bytes.Buffer
 	code := RunCLI([]string{
@@ -240,7 +285,7 @@ func TestOrdinaryCheckDoesNotExecuteTaskCommands(t *testing.T) {
 		"ALL":   "command-that-must-never-execute",
 		"DOCS":  "command-that-must-never-execute",
 	}
-	writeTestFile(t, docs, "work/TASK-AUTH-020-check.md", taskCheckFixture("Черновик", false, commands, ""))
+	writeTestFile(t, docs, "work/TASK-AUTH-020-verify.md", taskVerifyFixture("Черновик", false, commands, ""))
 	var stdout, stderr bytes.Buffer
 	code := RunCLI([]string{"check", docs, "--repository-root", root, "--stale-days", "0"}, &stdout, &stderr)
 	if code != 0 || stderr.Len() != 0 || !strings.Contains(stdout.String(), "Ошибок: 0") {

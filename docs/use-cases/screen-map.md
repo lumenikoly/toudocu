@@ -51,7 +51,7 @@
 
 ## Постусловия
 
-HTML и ProjectReport schema v1 содержат согласованные screens, transitions,
+HTML и ProjectReport schema v2 содержат согласованные screens, transitions,
 проигрываемые сценарии и traceability. Исходный Markdown не изменяется.
 
 ## Бизнес-правила

@@ -15,7 +15,7 @@ Docgent поставляется одним Go-бинарником без вн�
 | Сборка портала | `docgent build ./docs` | автономный HTML и `report.json` |
 | Локальный просмотр | `docgent serve ./docs` | HTTP-сервер с пересборкой HTML |
 | Контекст задачи | `docgent task context TASK-ID ./docs` | read-only `TaskContextReport` |
-| Проверка задачи | `docgent task check TASK-ID ./docs` | выполнение объявленных команд и `TaskCheckReport` |
+| Проверка задачи | `docgent task verify TASK-ID ./docs --dry-run|--run` | план или выполнение команд и `TaskVerifyReport` |
 | Версия | `docgent version` | версия генератора |
 
 Вызов `docgent ./docs` сохраняется как сокращение для `build`. Отдельной команды
@@ -158,7 +158,7 @@ Feature, Bug, Maintenance, Documentation и Research, зависимости, sc
 `task context` не выполняет команды и возвращает только относящиеся к задаче
 модули, use cases, экраны, переходы, правила, зависимости и diagnostics.
 
-`task check` сначала применяет task-local validation gate, затем
+`task verify --run` сначала применяет task-local validation gate, затем
 последовательно запускает уникальные команды `AC-*`, `ALL` и `DOCS` из
 repository root. Ошибка одной команды не скрывает результаты остальных.
 Timeout завершает дерево процессов, а stdout и stderr сохраняются ограниченным
@@ -169,7 +169,7 @@ Timeout завершает дерево процессов, а stdout и stderr 
 
 ## JSON и автоматизация
 
-`check --format json` и `report.json` используют чистую schema v1 и содержат:
+`check --format json` и `report.json` используют чистую schema v2 и содержат:
 
 - сведения о генераторе, проекте, текущем состоянии и статистике;
 - документы, разрешённые ссылки, backlinks и related documents;
@@ -178,7 +178,8 @@ Timeout завершает дерево процессов, а stdout и stderr 
 - типизированные flows и двусторонние связи `UC ↔ FLOW`;
 - traceability matrix и diagnostics.
 
-`task context` и `task check` имеют отдельные schema v1 с полем `kind`.
+`task context` использует schema v2, а остальные task reports — schema v1 с
+полем `kind`.
 До первого релиза контракт развивается напрямую в v1 без параллельной
 версии схемы.
 

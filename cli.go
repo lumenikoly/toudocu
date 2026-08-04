@@ -20,16 +20,23 @@ func PrintHelp(w io.Writer) {
   docgent [build] [каталог-документации] [параметры]
   docgent check [каталог-документации] [параметры]
   docgent serve [каталог-документации] [параметры]
-  docgent task check TASK-ID [каталог-документации] [параметры]
+  docgent search "<запрос>" [каталог-документации] [--limit N] [--format text|json]
+  docgent task init [каталог-документации] --area AREA --title TITLE --type TYPE [--lang en|ru]
+  docgent scaffold module|use-case|flow|screen|decision ID [каталог-документации] --title TITLE [--lang en|ru]
+  docgent task ready TASK-ID [каталог-документации] [--strict] [--format text|json]
   docgent task context TASK-ID [каталог-документации] [параметры]
+  docgent task verify TASK-ID [каталог-документации] (--dry-run|--run) [параметры]
   docgent version
 
 Примеры:
   docgent build ./docs --output ./build/project-docs --clean
   docgent check ./docs --strict
   docgent serve ./docs --host 0.0.0.0 --port 8080
-  docgent task check TASK-CORE-001 ./docs --format json
+  docgent search "task workflow" ./docs --format json
+  docgent task init ./docs --area CORE --title "Новая задача" --type Feature
+  docgent task ready TASK-CORE-001 ./docs --format json
   docgent task context TASK-CORE-001 ./docs --format json
+  docgent task verify TASK-CORE-001 ./docs --dry-run --format json
 
 Параметры:
   -o, --output <каталог>       Выходной каталог
@@ -46,9 +53,9 @@ func PrintHelp(w io.Writer) {
       --no-screen-map          Не генерировать страницу карты экранов
       --host <адрес>           Адрес serve, по умолчанию 127.0.0.1
       --port <число>           Порт serve, по умолчанию 8080
-      --format text|json       Формат check, task context и task check
-      --report <файл>          Сохранить JSON-отчёт task check
-      --timeout <duration>     Timeout каждой команды task check, по умолчанию 10m
+      --format text|json       Формат машинных отчётов
+      --report <файл>          Сохранить JSON-отчёт task verify
+      --timeout <duration>     Timeout каждой команды task verify, по умолчанию 10m
   -h, --help                   Справка
   -v, --version                Версия
 `, Version)
@@ -64,9 +71,10 @@ func takeArgValue(args []string, index *int, option string) (string, error) {
 
 // ParseArguments parses both the backwards-compatible build form and explicit subcommands.
 func ParseArguments(argv []string) (Options, bool, bool, error) {
-	options := Options{Command: "build", StaleDays: 90, RepositoryRef: "main", Format: "text", Timeout: 10 * time.Minute, Host: "127.0.0.1", Port: 8080}
+	options := Options{Command: "build", StaleDays: 90, RepositoryRef: "main", Format: "text", Timeout: 10 * time.Minute, Host: "127.0.0.1", Port: 8080, Language: "en", Limit: 20}
 	help, version := false, false
 	timeoutSpecified, hostSpecified, portSpecified := false, false, false
+	titleSpecified, languageSpecified, limitSpecified, outputSpecified := false, false, false, false
 	screenMapOption := ""
 	args := append([]string{}, argv...)
 	if len(args) > 0 {
@@ -74,6 +82,18 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 		case "build", "check", "serve":
 			options.Command = args[0]
 			args = args[1:]
+		case "search":
+			if len(args) < 2 {
+				return options, false, false, fmt.Errorf("использование: docgent search \"<query>\" [каталог-документации]")
+			}
+			options.Command, options.Query = "search", args[1]
+			args = args[2:]
+		case "scaffold":
+			if len(args) < 3 {
+				return options, false, false, fmt.Errorf("использование: docgent scaffold module|use-case|flow|screen|decision ID [каталог-документации]")
+			}
+			options.Command, options.EntityKind, options.EntityID = "scaffold", args[1], args[2]
+			args = args[3:]
 		case "init":
 			return options, false, false, fmt.Errorf("неизвестная команда: init")
 		case "version":
@@ -83,21 +103,27 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			help = true
 			args = args[1:]
 		case "task":
-			if len(args) < 3 {
-				return options, false, false, fmt.Errorf("использование: docgent task check|context TASK-ID [каталог-документации]")
+			if len(args) < 2 {
+				return options, false, false, fmt.Errorf("использование: docgent task init|ready|context|verify ...")
 			}
 			switch args[1] {
-			case "check":
-				options.Command = "task-check"
-			case "context":
-				options.Command = "task-context"
+			case "init":
+				options.Command = "task-init"
+				args = args[2:]
+				goto parseOptions
+			case "ready", "context", "verify":
+				if len(args) < 3 {
+					return options, false, false, fmt.Errorf("для task %s требуется TASK-ID", args[1])
+				}
+				options.Command = "task-" + args[1]
 			default:
-				return options, false, false, fmt.Errorf("использование: docgent task check|context TASK-ID [каталог-документации]")
+				return options, false, false, fmt.Errorf("использование: docgent task init|ready|context|verify ...")
 			}
 			options.TaskID = args[2]
 			args = args[3:]
 		}
 	}
+parseOptions:
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
 		switch {
@@ -116,16 +142,82 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 				return options, false, false, e
 			}
 			options.OutputDirectory = v
+			outputSpecified = true
 		case strings.HasPrefix(arg, "--output="):
 			options.OutputDirectory = strings.TrimPrefix(arg, "--output=")
+			outputSpecified = true
 		case arg == "-t" || arg == "--title":
 			v, e := takeArgValue(args, &i, arg)
 			if e != nil {
 				return options, false, false, e
 			}
 			options.Title = v
+			titleSpecified = true
 		case strings.HasPrefix(arg, "--title="):
 			options.Title = strings.TrimPrefix(arg, "--title=")
+			titleSpecified = true
+		case arg == "--area":
+			v, e := takeArgValue(args, &i, arg)
+			if e != nil {
+				return options, false, false, e
+			}
+			options.Area = v
+		case strings.HasPrefix(arg, "--area="):
+			options.Area = strings.TrimPrefix(arg, "--area=")
+		case arg == "--type":
+			v, e := takeArgValue(args, &i, arg)
+			if e != nil {
+				return options, false, false, e
+			}
+			options.TaskType = v
+		case strings.HasPrefix(arg, "--type="):
+			options.TaskType = strings.TrimPrefix(arg, "--type=")
+		case arg == "--lang":
+			v, e := takeArgValue(args, &i, arg)
+			if e != nil {
+				return options, false, false, e
+			}
+			options.Language = v
+			languageSpecified = true
+		case strings.HasPrefix(arg, "--lang="):
+			options.Language = strings.TrimPrefix(arg, "--lang=")
+			languageSpecified = true
+		case arg == "--limit":
+			v, e := takeArgValue(args, &i, arg)
+			if e != nil {
+				return options, false, false, e
+			}
+			n, e := strconv.Atoi(v)
+			if e != nil || n < 1 || n > 100 {
+				return options, false, false, fmt.Errorf("--limit должен быть числом от 1 до 100")
+			}
+			options.Limit = n
+			limitSpecified = true
+		case strings.HasPrefix(arg, "--limit="):
+			n, e := strconv.Atoi(strings.TrimPrefix(arg, "--limit="))
+			if e != nil || n < 1 || n > 100 {
+				return options, false, false, fmt.Errorf("--limit должен быть числом от 1 до 100")
+			}
+			options.Limit = n
+			limitSpecified = true
+		case arg == "--dry-run":
+			if options.VerifyMode != "" {
+				return options, false, false, fmt.Errorf("--dry-run и --run нельзя использовать вместе")
+			}
+			options.VerifyMode = "dry-run"
+		case arg == "--run":
+			if options.VerifyMode != "" {
+				return options, false, false, fmt.Errorf("--dry-run и --run нельзя использовать вместе")
+			}
+			options.VerifyMode = "run"
+		case arg == "--target":
+			v, e := takeArgValue(args, &i, arg)
+			if e != nil {
+				return options, false, false, e
+			}
+			options.Target = strings.ToUpper(v)
+		case strings.HasPrefix(arg, "--target="):
+			options.Target = strings.ToUpper(strings.TrimPrefix(arg, "--target="))
 		case arg == "--exclude":
 			v, e := takeArgValue(args, &i, arg)
 			if e != nil {
@@ -307,12 +399,12 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 	if screenMapOption != "" && options.Command != "build" && options.Command != "serve" {
 		return options, false, false, fmt.Errorf("--screen-map и --no-screen-map доступны только для build и serve")
 	}
-	if options.Command == "task-check" || options.Command == "task-context" {
-		if workItemHeadingRE.FindStringSubmatch(options.TaskID+": check") == nil {
+	if options.Command == "task-ready" || options.Command == "task-context" || options.Command == "task-verify" {
+		if !taskIDRE.MatchString(options.TaskID) {
 			return options, false, false, fmt.Errorf("TASK-ID должен иметь формат TASK-AREA-NNN")
 		}
 	}
-	if options.Command == "task-check" {
+	if options.Command == "task-verify" {
 		if options.ReportPath != "" {
 			report, err := filepath.Abs(options.ReportPath)
 			if err != nil {
@@ -337,8 +429,58 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			}
 			options.ReportPath = report
 		}
-	} else if options.ReportPath != "" || timeoutSpecified {
-		return options, false, false, fmt.Errorf("--report и --timeout доступны только для task check")
+		if options.VerifyMode == "" {
+			return options, false, false, fmt.Errorf("task verify требует ровно один режим: --dry-run или --run")
+		}
+	} else if options.ReportPath != "" || timeoutSpecified || options.VerifyMode != "" || options.Target != "" {
+		return options, false, false, fmt.Errorf("--dry-run, --run, --target, --report и --timeout доступны только для task verify")
+	}
+	if options.Command == "task-init" {
+		if options.Area == "" || !titleSpecified || strings.TrimSpace(options.Title) == "" || options.TaskType == "" {
+			return options, false, false, fmt.Errorf("task init требует --area, --title и --type")
+		}
+		if !taskAreaRE.MatchString(options.Area) {
+			return options, false, false, fmt.Errorf("--area должен состоять из A-Z, 0-9 и дефисов и начинаться с буквы")
+		}
+		if !validTaskInitType(options.TaskType) {
+			return options, false, false, fmt.Errorf("--type должен быть Feature, Bug, Maintenance, Documentation или Research")
+		}
+	}
+	if options.Command == "scaffold" && (!titleSpecified || strings.TrimSpace(options.Title) == "") {
+		return options, false, false, fmt.Errorf("scaffold требует --title")
+	}
+	if (options.Command == "task-init" || options.Command == "scaffold") && strings.ContainsAny(options.Title, "\r\n") {
+		return options, false, false, fmt.Errorf("--title должен быть одной строкой")
+	}
+	if options.Command == "scaffold" && !validScaffoldID(options.EntityKind, options.EntityID) {
+		return options, false, false, fmt.Errorf("некорректный %s ID: %s", options.EntityKind, options.EntityID)
+	}
+	if options.Command == "search" && len(searchWords(options.Query)) == 0 {
+		return options, false, false, fmt.Errorf("поисковый запрос не может быть пустым")
+	}
+	if options.Language != "en" && options.Language != "ru" {
+		return options, false, false, fmt.Errorf("--lang должен быть en или ru")
+	}
+	if languageSpecified && options.Command != "task-init" && options.Command != "scaffold" {
+		return options, false, false, fmt.Errorf("--lang доступен только для task init и scaffold")
+	}
+	if limitSpecified && options.Command != "search" {
+		return options, false, false, fmt.Errorf("--limit доступен только для search")
+	}
+	if options.Area != "" && options.Command != "task-init" || options.TaskType != "" && options.Command != "task-init" {
+		return options, false, false, fmt.Errorf("--area и --type доступны только для task init")
+	}
+	if titleSpecified && options.Command != "build" && options.Command != "serve" && options.Command != "task-init" && options.Command != "scaffold" {
+		return options, false, false, fmt.Errorf("--title недоступен для этой команды")
+	}
+	if outputSpecified && options.Command != "build" && options.Command != "serve" {
+		return options, false, false, fmt.Errorf("--output доступен только для build и serve")
+	}
+	if (options.Clean || options.Open) && options.Command != "build" && options.Command != "serve" {
+		return options, false, false, fmt.Errorf("--clean и --open доступны только для build и serve")
+	}
+	if options.Strict && options.Command != "build" && options.Command != "check" && options.Command != "serve" && options.Command != "task-ready" {
+		return options, false, false, fmt.Errorf("--strict недоступен для этой команды")
 	}
 	return options, help, version, nil
 }
@@ -396,6 +538,34 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stdout, Version)
 		return 0
 	}
+	if options.Command == "task-init" {
+		report, err := InitTask(options)
+		if err != nil {
+			fmt.Fprintln(stderr, "Ошибка:", err)
+			return 1
+		}
+		if options.Format == "json" {
+			data, _ := json.MarshalIndent(report, "", "  ")
+			fmt.Fprintln(stdout, string(data))
+		} else {
+			fmt.Fprintf(stdout, "Создана задача %s: %s\n", report.ID, report.Path)
+		}
+		return 0
+	}
+	if options.Command == "scaffold" {
+		report, err := Scaffold(options)
+		if err != nil {
+			fmt.Fprintln(stderr, "Ошибка:", err)
+			return 1
+		}
+		if options.Format == "json" {
+			data, _ := json.MarshalIndent(report, "", "  ")
+			fmt.Fprintln(stdout, string(data))
+		} else {
+			fmt.Fprintf(stdout, "Создан %s %s: %s\n", report.EntityType, report.ID, report.Path)
+		}
+		return 0
+	}
 	if options.Command == "serve" {
 		if err := serveDocumentation(options, stdout, stderr); err != nil {
 			fmt.Fprintln(stderr, "Ошибка:", err)
@@ -408,9 +578,23 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stderr, "Ошибка:", err)
 		return 1
 	}
-	if options.Command == "task-check" {
-		report := executeTaskCheck(model, options, stdout, stderr, osCommandRunner{})
-		data, marshalErr := marshalTaskCheckReport(report)
+	if options.Command == "search" {
+		report, err := SearchDocumentation(model, options.Query, options.Limit)
+		if err != nil {
+			fmt.Fprintln(stderr, "Ошибка:", err)
+			return 1
+		}
+		if options.Format == "json" {
+			data, _ := json.MarshalIndent(report, "", "  ")
+			fmt.Fprintln(stdout, string(data))
+		} else {
+			printSearchText(stdout, report)
+		}
+		return 0
+	}
+	if options.Command == "task-verify" {
+		report := executeTaskVerify(model, options, stdout, stderr, osCommandRunner{})
+		data, marshalErr := marshalTaskVerifyReport(report)
 		if marshalErr != nil {
 			fmt.Fprintln(stderr, "Ошибка:", marshalErr)
 			return 1
@@ -425,12 +609,25 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 		if options.Format == "json" {
 			fmt.Fprintln(stdout, string(data))
 		} else {
-			printTaskCheckText(stdout, report)
+			printTaskVerifyText(stdout, report)
 		}
-		if report.Status != "passed" || reportWriteFailed {
+		if (report.Status != "passed" && report.Status != "planned") || reportWriteFailed {
 			return 1
 		}
 		return 0
+	}
+	if options.Command == "task-ready" {
+		report := BuildTaskReady(model, options.TaskID, options.Strict)
+		if options.Format == "json" {
+			data, _ := json.MarshalIndent(report, "", "  ")
+			fmt.Fprintln(stdout, string(data))
+		} else {
+			printTaskReadyText(stdout, report)
+		}
+		if report.Status == "contract_ready" || report.Status == "ready" {
+			return 0
+		}
+		return 1
 	}
 	if options.Command == "task-context" {
 		report, err := BuildTaskContext(model, options.TaskID)

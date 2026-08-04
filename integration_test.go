@@ -468,7 +468,7 @@ flowchart TD
 `+"```"+`
 `)
 	commands := map[string]string{"AC-01": "pass", "AC-02": "pass", "ALL": "pass", "DOCS": "pass"}
-	task := strings.Replace(taskCheckFixture("Черновик", false, commands, ""), "- Сценарий: UC-AUTH-01", "- Сценарий: UC-AUTH-01\n- Процесс: FLOW-AUTH-LOGIN", 1)
+	task := strings.Replace(taskVerifyFixture("Готово к работе", false, commands, ""), "- Сценарий: UC-AUTH-01", "- Сценарий: UC-AUTH-01\n- Процесс: FLOW-AUTH-LOGIN", 1)
 	writeTestFile(t, docs, "work/TASK-AUTH-020-flow.md", task)
 	model := buildFixture(t, docs)
 	report, err := BuildTaskContext(model, "TASK-AUTH-020")
@@ -545,7 +545,7 @@ func TestGenerateSite(t *testing.T) {
 	if err := json.Unmarshal(reportBytes, &report); err != nil {
 		t.Fatal(err)
 	}
-	if report.SchemaVersion != 1 || report.Documents == nil || report.Issues == nil || report.Screens == nil || report.Transitions == nil || report.PlayableFlows == nil || report.Hotspots == nil || report.Traceability == nil || report.CurrentStatus.ActiveWork == nil || report.CurrentStatus.Blockers == nil {
+	if report.SchemaVersion != 2 || report.Documents == nil || report.Issues == nil || report.Screens == nil || report.Transitions == nil || report.PlayableFlows == nil || report.Hotspots == nil || report.Traceability == nil || report.CurrentStatus.ActiveWork == nil || report.CurrentStatus.Blockers == nil {
 		t.Fatalf("unstable report collections: %#v", report)
 	}
 	foundDirectoryTarget := false
@@ -676,21 +676,21 @@ func TestCLIArguments(t *testing.T) {
 	}
 }
 
-func TestTaskCheckCLIArguments(t *testing.T) {
+func TestTaskVerifyCLIArguments(t *testing.T) {
 	options, _, _, err := ParseArguments([]string{
-		"task", "check", "TASK-AUTH-014", "./docs",
+		"task", "verify", "TASK-AUTH-014", "./docs", "--run",
 		"--repository-root", ".", "--format", "json", "--report", "./task-report.json", "--timeout", "45s",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if options.Command != "task-check" || options.TaskID != "TASK-AUTH-014" || options.Format != "json" || options.Timeout != 45*time.Second || !filepath.IsAbs(options.ReportPath) {
+	if options.Command != "task-verify" || options.TaskID != "TASK-AUTH-014" || options.Format != "json" || options.Timeout != 45*time.Second || !filepath.IsAbs(options.ReportPath) {
 		t.Fatalf("options: %#v", options)
 	}
 	if _, _, _, err := ParseArguments([]string{"check", "./docs", "--timeout", "1s"}); err == nil {
-		t.Fatal("--timeout must be rejected outside task check")
+		t.Fatal("--timeout must be rejected outside task verify")
 	}
-	if _, _, _, err := ParseArguments([]string{"task", "check", "TASK-AUTH-014", "./docs", "--report", "./docs/report.json"}); err == nil {
+	if _, _, _, err := ParseArguments([]string{"task", "verify", "TASK-AUTH-014", "./docs", "--run", "--report", "./docs/report.json"}); err == nil {
 		t.Fatal("--report must not overwrite source documentation")
 	}
 	root := t.TempDir()
@@ -703,7 +703,7 @@ func TestTaskCheckCLIArguments(t *testing.T) {
 		t.Skipf("symlinks unavailable: %v", err)
 	}
 	if _, _, _, err := ParseArguments([]string{
-		"task", "check", "TASK-AUTH-014", docs, "--report", filepath.Join(alias, "report.json"),
+		"task", "verify", "TASK-AUTH-014", docs, "--run", "--report", filepath.Join(alias, "report.json"),
 	}); err == nil {
 		t.Fatal("--report must not overwrite source documentation through a symlink")
 	}
@@ -714,11 +714,12 @@ func TestKnowledgeModel(t *testing.T) {
 	content := "# TASK-AUTH-001: Защитить вход\n\n" +
 		"- Статус: В работе\n- Тип: Feature\n- Приоритет: Высокий\n- Модуль: MOD-AUTH\n- Сценарий: UC-AUTH-01\n\n" +
 		"## Результат\n\nВход проверяет ограничения.\n\n" +
+		"## Изменение поведения\n\n### Было\n\nВход не учитывал ограничение.\n\n### Станет\n\nВход учитывает ограничение.\n\n" +
 		"## Область изменения\n\n- `docs/`\n\n" +
 		"## Не входит в задачу\n\nПрофиль.\n\n" +
 		"## Критерии приёмки\n\n- [x] `AC-01` Неверный пароль отклоняется.\n\n" +
 		"## План\n\n1. Проверить поток.\n2. Изменить реализацию.\n3. Запустить тесты и обновить документацию.\n\n" +
-		"## Проверка\n\n- `AC-01` → `go test ./...`\n\n" +
+		"## Проверка\n\n- `AC-01` → `go test ./...`\n- `ALL` → `go test ./...`\n- `DOCS` → `go test ./...`\n\n" +
 		"## Влияние на документацию\n\nОбновить сценарий входа.\n"
 	writeTestFile(t, docs, "work/TASK-AUTH-001-login.md", content)
 	model := buildFixture(t, docs)
@@ -797,7 +798,7 @@ func TestWorkItemValidationRules(t *testing.T) {
 func TestWorkItemPlanChecklistAllowed(t *testing.T) {
 	_, docs, _ := createFixture(t)
 	content := strings.Replace(
-		taskCheckFixture("Готово к работе", false, map[string]string{
+		taskVerifyFixture("Готово к работе", false, map[string]string{
 			"AC-01": "go test ./...",
 			"AC-02": "go test ./...",
 			"ALL":   "go test ./...",
@@ -956,7 +957,7 @@ func TestRoadmapCompletionIsDerivedAndRendered(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, part := range []string{`"schemaVersion":1`, `"declaredCompleted":false`, `"effectiveCompleted":true`, `"completionSource":"use-case-status"`} {
+	for _, part := range []string{`"schemaVersion":2`, `"declaredCompleted":false`, `"effectiveCompleted":true`, `"completionSource":"use-case-status"`} {
 		if !strings.Contains(string(report), part) {
 			t.Fatalf("missing %s in %s", part, report)
 		}
@@ -977,7 +978,7 @@ func TestRoadmapContractAndDeliverableRemainManual(t *testing.T) {
 func TestComputedStatusAppearsOnDashboardAndStatusPage(t *testing.T) {
 	root, docs, output := createFixture(t)
 	commands := map[string]string{"AC-01": "pass", "AC-02": "pass", "ALL": "pass", "DOCS": "pass"}
-	task := taskCheckFixture("Заблокировано", false, commands, "\n## Блокер\n\nОжидается решение ADR-014.\n")
+	task := taskVerifyFixture("Заблокировано", false, commands, "\n## Блокер\n\nОжидается решение ADR-014.\n")
 	writeTestFile(t, docs, "work/TASK-AUTH-020-check.md", task)
 	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
 	if err != nil {

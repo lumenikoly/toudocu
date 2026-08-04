@@ -32,6 +32,8 @@
 ## Verification
 
 - `AC-01` -> `{{ACCEPTANCE_COMMAND}}`
+- `ALL` -> `{{ALL_COMMAND}}`
+- `DOCS` -> `{{DOCS_COMMAND}}`
 
 ## Documentation impact
 

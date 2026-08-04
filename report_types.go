@@ -7,7 +7,7 @@ type GeneratorInfo struct {
 	Version string `json:"version"`
 }
 
-type TaskCheckTask struct {
+type TaskVerifyTask struct {
 	ID       string     `json:"id"`
 	Title    string     `json:"title"`
 	Status   StatusInfo `json:"status"`
@@ -42,7 +42,7 @@ type TargetExecutionResult struct {
 	Status string `json:"status"`
 }
 
-type TaskCheckSummary struct {
+type TaskVerifySummary struct {
 	TotalCommands    int `json:"totalCommands"`
 	PassedCommands   int `json:"passedCommands"`
 	FailedCommands   int `json:"failedCommands"`
@@ -51,22 +51,75 @@ type TaskCheckSummary struct {
 	CriteriaFailed   int `json:"criteriaFailed"`
 }
 
-type TaskCheckReport struct {
+type TaskVerifyReport struct {
 	SchemaVersion    int                        `json:"schemaVersion"`
 	Kind             string                     `json:"kind"`
 	Generator        GeneratorInfo              `json:"generator"`
-	Task             TaskCheckTask              `json:"task"`
+	Task             TaskVerifyTask             `json:"task"`
 	StartedAt        time.Time                  `json:"startedAt"`
 	FinishedAt       time.Time                  `json:"finishedAt"`
 	DurationMillis   int64                      `json:"durationMillis"`
 	Status           string                     `json:"status"`
+	Mode             string                     `json:"mode"`
+	Target           string                     `json:"target,omitempty"`
 	FullVerification bool                       `json:"fullVerification"`
 	ValidationIssues []Issue                    `json:"validationIssues"`
 	Issues           []Issue                    `json:"issues"`
 	Commands         []CommandExecutionResult   `json:"commands"`
 	Criteria         []CriterionExecutionResult `json:"criteria"`
 	Targets          []TargetExecutionResult    `json:"targets"`
-	Summary          TaskCheckSummary           `json:"summary"`
+	Summary          TaskVerifySummary          `json:"summary"`
+}
+
+type SearchMatch struct {
+	ID              string   `json:"id,omitempty"`
+	Type            string   `json:"type"`
+	Title           string   `json:"title"`
+	Path            string   `json:"path"`
+	MatchedSections []string `json:"matchedSections"`
+}
+
+type SearchReport struct {
+	SchemaVersion int           `json:"schemaVersion"`
+	Kind          string        `json:"kind"`
+	Generator     GeneratorInfo `json:"generator"`
+	Query         string        `json:"query"`
+	Total         int           `json:"total"`
+	Limit         int           `json:"limit"`
+	Results       []SearchMatch `json:"results"`
+}
+
+type TaskInitReport struct {
+	SchemaVersion int           `json:"schemaVersion"`
+	Kind          string        `json:"kind"`
+	Generator     GeneratorInfo `json:"generator"`
+	ID            string        `json:"id"`
+	Title         string        `json:"title"`
+	Type          string        `json:"type"`
+	Language      string        `json:"language"`
+	Path          string        `json:"path"`
+}
+
+type ScaffoldReport struct {
+	SchemaVersion int           `json:"schemaVersion"`
+	Kind          string        `json:"kind"`
+	Generator     GeneratorInfo `json:"generator"`
+	EntityType    string        `json:"entityType"`
+	ID            string        `json:"id"`
+	Title         string        `json:"title"`
+	Language      string        `json:"language"`
+	Path          string        `json:"path"`
+}
+
+type TaskReadyReport struct {
+	SchemaVersion    int            `json:"schemaVersion"`
+	Kind             string         `json:"kind"`
+	Generator        GeneratorInfo  `json:"generator"`
+	Task             TaskVerifyTask `json:"task"`
+	Status           string         `json:"status"`
+	ContractComplete bool           `json:"contractComplete"`
+	ReadyForWork     bool           `json:"readyForWork"`
+	Issues           []Issue        `json:"issues"`
 }
 
 type ReportLink struct {
@@ -183,12 +236,18 @@ type ProjectReport struct {
 }
 
 type TaskContextDocument struct {
-	ID          string     `json:"id,omitempty"`
-	Path        string     `json:"path"`
-	Type        string     `json:"type"`
-	Title       string     `json:"title"`
-	Description string     `json:"description"`
-	Status      StatusInfo `json:"status"`
+	ID          string               `json:"id,omitempty"`
+	Path        string               `json:"path"`
+	Type        string               `json:"type"`
+	Title       string               `json:"title"`
+	Description string               `json:"description"`
+	Status      StatusInfo           `json:"status"`
+	Sections    []TaskContextSection `json:"sections"`
+}
+
+type TaskContextSection struct {
+	Title    string `json:"title"`
+	Markdown string `json:"markdown"`
 }
 
 type TaskContextReport struct {
@@ -199,6 +258,7 @@ type TaskContextReport struct {
 	FullVerification  bool                  `json:"fullVerification"`
 	Module            *KnowledgeModule      `json:"module,omitempty"`
 	UseCase           *KnowledgeUseCase     `json:"useCase,omitempty"`
+	Flow              *KnowledgeFlow        `json:"flow,omitempty"`
 	Screens           []KnowledgeScreen     `json:"screens"`
 	ScreenTransitions []ScreenTransition    `json:"screenTransitions"`
 	BusinessRules     []BusinessRule        `json:"businessRules"`
@@ -206,4 +266,5 @@ type TaskContextReport struct {
 	Dependents        []WorkItem            `json:"dependents"`
 	Documents         []TaskContextDocument `json:"documents"`
 	Issues            []Issue               `json:"issues"`
+	RequiredReads     []string              `json:"requiredReads"`
 }

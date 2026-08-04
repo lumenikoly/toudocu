@@ -14,7 +14,7 @@ JSON-представления.
 локально и не требует базы данных, сервера, npm или сетевого доступа. Встроенный
 browser bundle Mermaid является vendored asset и не добавляет runtime-зависимость. Человек
 работает с Markdown и HTML, агент или CI — с CLI exit code и JSON ProjectReport
-schema v1.
+schema v2.
 
 ## Основные компоненты
 
@@ -24,7 +24,7 @@ schema v1.
 | Markdown | Безопасный разбор и HTML-рендеринг | `markdown_parse.go`, `markdown_render.go` |
 | Модель знаний | Валидация документов, ID и связей | `docs_core.go`, `knowledge.go`, `documentation_links.go` |
 | Screen graph | Экраны, переходы, flows, hotspots и traceability | `screens.go`, `screen_site.go` |
-| Task workflow | Контекст и выполнение проверок задачи | `task_context.go`, `task_check.go` |
+| Task workflow | Контекст и выполнение проверок задачи | `task_context.go`, `task_verify.go` |
 | Site | HTML, навигация, поиск, Screen Map и JSON-отчёт | `site.go`, `screen_site.go`, `assets/` |
 
 ## Поток данных
@@ -37,7 +37,7 @@ schema v1.
 5. `check` возвращает diagnostics, а `task context` — ограниченный срез модели.
 6. `build` создаёт автономный портал, полный каталог процессов, Screen Map,
    проигрываемые сценарии и `ProjectReport`.
-7. Только `task check` запускает объявленные команды из корня репозитория.
+7. Только `task verify --run` запускает объявленные команды из корня репозитория.
 
 Подробные визуальные представления вынесены в отдельные документы:
 
@@ -58,7 +58,7 @@ schema v1.
 
 ## Отказоустойчивость
 
-Ошибки модели не приводят к выполнению команд. `task check` сначала применяет
+Ошибки модели не приводят к выполнению команд. `task verify --run` сначала применяет
 локальный validation gate выбранной задачи. Timeout завершает дерево процессов,
 а stdout и stderr сохраняются ограниченным хвостом.
 

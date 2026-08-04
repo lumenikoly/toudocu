@@ -64,7 +64,7 @@ diagnostics.
 ## Стабильные интерфейсы
 
 - `BuildDocumentationModel(Options)`;
-- `ProjectReport` schema v1;
+- `ProjectReport` schema v2;
 - коды `Issue`;
 - правила ID и структуры, описанные в [CLI-контракте](../contracts/cli.md).
 - статусы, типы и формат задач из [руководства по рабочим задачам](../guides/work-items.md).
@@ -73,7 +73,7 @@ diagnostics.
 
 - [UC-DOCS-02: Проверка документации](../use-cases/check-documentation.md)
 - [UC-TASK-01: Контекст рабочей задачи](../use-cases/task-workflow.md)
-- [UC-TASK-02: Проверка рабочей задачи](../use-cases/task-check.md)
+- [UC-TASK-02: Проверка рабочей задачи](../use-cases/task-verify.md)
 
 ## Связанные процессы
 

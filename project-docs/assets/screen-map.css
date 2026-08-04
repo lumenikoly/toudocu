@@ -1,5 +1,9 @@
 .screen-map-header { padding-bottom: 18px; }
 .screen-map-workspace { border-top: 1px solid var(--border); min-height: 720px; }
+.screen-map-workspace.is-embedded { min-height: 0; border-top: 0; }
+.screen-map-workspace.is-embedded .screen-map-shell { min-height: 580px; }
+.screen-map-workspace.is-embedded .screen-map-stage { min-height: 580px; }
+.screen-map-fixed-mode { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; color: var(--muted); font-size: 13px; }
 .screen-map-toolbar { display: flex; align-items: center; gap: 12px; padding: 12px 0; flex-wrap: wrap; }
 .screen-map-modes, .screen-map-filters, .screen-map-zoom { display: flex; align-items: center; gap: 6px; }
 .screen-map-filters { flex: 1; }
@@ -22,6 +26,8 @@
 .screen-edge:focus-visible path { stroke: var(--accent); stroke-width: 4; opacity: 1; }
 .screen-edge path { fill: none; stroke: var(--muted); stroke-width: 1.7; opacity: .68; }
 .screen-edge text { fill: var(--muted); font-size: 11px; paint-order: stroke; stroke: var(--surface); stroke-width: 5px; stroke-linejoin: round; }
+.screen-edge text > tspan:first-child { font-weight: 650; }
+.screen-edge .screen-edge-condition { font-size: 10px; font-weight: 400; }
 .screen-edge-error path { stroke-dasharray: 4 6; }
 .screen-edge-redirect path { stroke-dasharray: 10 5; }
 .screen-edge-external .screen-edge-external-outer { stroke: var(--muted); stroke-width: 7; opacity: .72; }
@@ -70,9 +76,6 @@
 .screen-map-status { min-height: 20px; margin: 8px 0 0; color: var(--muted); font-size: 12px; }
 .screen-map-empty { position: absolute; inset: 0; display: grid; place-content: center; color: var(--muted); }
 .screen-map-empty[hidden] { display: none; }
-.screen-catalog-preview { display: grid; width: 92px; height: 58px; min-height: 0; place-content: center; object-fit: cover; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-soft); color: var(--muted); font-size: 9px; text-align: center; }
-.screen-catalog-preview strong { font-size: 9px; }
-
 @media (max-width: 900px) {
   .screen-map-shell { grid-template-columns: 1fr; }
   .screen-inspector { max-height: 42svh; border-left: 0; border-top: 1px solid var(--border); }

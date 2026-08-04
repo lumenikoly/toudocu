@@ -489,6 +489,10 @@ func BuildDocumentationModel(options Options) (*Model, error) {
 	if err != nil {
 		return nil, err
 	}
+	siteConfig, brandingAssets, err := loadSiteConfig(repositoryRoot)
+	if err != nil {
+		return nil, err
+	}
 	now := options.Now
 	if now.IsZero() {
 		now = time.Now().UTC()
@@ -501,6 +505,7 @@ func BuildDocumentationModel(options Options) (*Model, error) {
 		RootDirectory: root, RepositoryRoot: repositoryRoot, RepositoryURL: strings.TrimRight(options.RepositoryURL, "/"),
 		RepositoryRef: options.RepositoryRef, GeneratedAt: now.UTC(), StaleDays: staleDays,
 		DocByPath: map[string]*Document{}, Directories: map[string]struct{}{}, Assets: map[string]string{},
+		BrandingAssets: brandingAssets, SiteConfig: siteConfig,
 		Collections: map[string][]*Document{}, Knowledge: KnowledgeModel{},
 		HealthOutputPath: "health.html", ReportOutputPath: "report.json", ScreenMapEnabled: true,
 	}
@@ -541,7 +546,11 @@ func BuildDocumentationModel(options Options) (*Model, error) {
 	buildScreenKnowledge(model)
 	model.Risks = buildRisks(model)
 	model.RoadmapStages = buildRoadmapStages(model)
-	model.Project = buildProjectInfo(model, options.Title)
+	projectTitle := siteConfig.Title
+	if strings.TrimSpace(options.Title) != "" {
+		projectTitle = options.Title
+	}
+	model.Project = buildProjectInfo(model, projectTitle)
 	model.CurrentStatus = buildCurrentStatus(model)
 	model.Stats = buildStats(model)
 	model.SearchIndex = buildSearchIndex(model)

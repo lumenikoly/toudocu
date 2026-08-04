@@ -42,8 +42,12 @@ structural check both pass.
 | `check` | No | Validate safety, links, IDs, and explicit relationships |
 | `build` | Writes output; `--clean` removes safe output | Generate the static portal and report |
 | `serve` | Builds output and starts local HTTP | Preview with rebuilds |
-| `task context` | No | Read a compact task-local model |
-| `task check` | Executes trusted repository commands | Verify an explicitly requested task |
+| `search` | No | Find source documents |
+| `task init` / `scaffold` | Creates one file | Create a neutral ID-based scaffold |
+| `task ready` | No | Validate a full Draft or Ready contract |
+| `task context` | No | Read full Ready+ task-local context |
+| `task verify --dry-run` | No | Inspect the verification plan |
+| `task verify --run` | Executes trusted repository commands | Verify an explicitly requested task |
 
 Prefer JSON for agent diagnosis and text for human confirmation:
 
@@ -101,7 +105,8 @@ product or repository evidence.
 
 ## Task workflow
 
-Start with:
+For a new request, start with `search`, `task init`, semantic filling and
+read-only `task ready`. For implementation, start with:
 
 ```bash
 docgent task context TASK-AREA-001 ./docs \
@@ -124,7 +129,11 @@ checkboxes track implementation steps and need neither.
 Run:
 
 ```bash
-docgent task check TASK-AREA-001 ./docs \
+docgent task verify TASK-AREA-001 ./docs --dry-run \
+  --repository-root . \
+  --format json
+
+docgent task verify TASK-AREA-001 ./docs --run \
   --repository-root . \
   --format json \
   --report ./build/task-report.json \

@@ -182,7 +182,7 @@ absolute path, traversal и symlink блокируются.
 
 Generated portal содержит `/screens/index.html`, каталог,
 `/use-cases/UC-*.html` с вкладками `#overview`, `#map`, `#play`, `#links`,
-`/traceability.html` и top-level screen model в `report.json` schema v1. Все
+`/traceability.html` и top-level screen model в `report.json` schema v2. Все
 страницы работают через `file://`.
 
 ## Что проверяет CLI

@@ -6,6 +6,15 @@ import "time"
 type Options struct {
 	Command         string
 	TaskID          string
+	Query           string
+	EntityKind      string
+	EntityID        string
+	Area            string
+	TaskType        string
+	Language        string
+	Limit           int
+	VerifyMode      string
+	Target          string
 	InputDirectory  string
 	OutputDirectory string
 	Title           string
@@ -314,29 +323,36 @@ type BusinessRule struct {
 }
 
 type WorkItem struct {
-	ID              string                  `json:"id"`
-	Title           string                  `json:"title"`
-	Status          StatusInfo              `json:"status"`
-	Type            string                  `json:"type,omitempty"`
-	Priority        string                  `json:"priority,omitempty"`
-	Owner           string                  `json:"owner,omitempty"`
-	ModuleID        string                  `json:"moduleId,omitempty"`
-	UseCaseID       string                  `json:"useCaseId,omitempty"`
-	FlowID          string                  `json:"flowId,omitempty"`
-	ScreenIDs       []string                `json:"screenIds"`
-	TransitionIDs   []string                `json:"transitionIds"`
-	DependsOn       []string                `json:"dependsOn"`
-	Document        string                  `json:"document"`
-	Anchor          string                  `json:"anchor"`
-	Criteria        []Task                  `json:"criteria"`
-	Verification    []CriterionVerification `json:"verificationMatrix"`
-	Checks          []VerificationCheck     `json:"checks"`
-	RepositoryPaths []string                `json:"repositoryPaths"`
-	Result          string                  `json:"result,omitempty"`
-	Blocker         string                  `json:"blocker,omitempty"`
-	line            int
-	ownerDoc        *Document
-	statusName      string
+	ID                  string                  `json:"id"`
+	Title               string                  `json:"title"`
+	Status              StatusInfo              `json:"status"`
+	Type                string                  `json:"type,omitempty"`
+	Priority            string                  `json:"priority,omitempty"`
+	Owner               string                  `json:"owner,omitempty"`
+	ModuleID            string                  `json:"moduleId,omitempty"`
+	UseCaseID           string                  `json:"useCaseId,omitempty"`
+	FlowID              string                  `json:"flowId,omitempty"`
+	ScreenIDs           []string                `json:"screenIds"`
+	TransitionIDs       []string                `json:"transitionIds"`
+	DependsOn           []string                `json:"dependsOn"`
+	Document            string                  `json:"document"`
+	Anchor              string                  `json:"anchor"`
+	Criteria            []Task                  `json:"criteria"`
+	Verification        []CriterionVerification `json:"verificationMatrix"`
+	Checks              []VerificationCheck     `json:"checks"`
+	RepositoryPaths     []string                `json:"repositoryPaths"`
+	Result              string                  `json:"result,omitempty"`
+	BehaviorChange      string                  `json:"behaviorChange,omitempty"`
+	Before              string                  `json:"before,omitempty"`
+	After               string                  `json:"after,omitempty"`
+	OutOfScope          string                  `json:"outOfScope,omitempty"`
+	Plan                string                  `json:"plan,omitempty"`
+	DocumentationImpact string                  `json:"documentationImpact,omitempty"`
+	DocumentationPaths  []string                `json:"documentationPaths"`
+	Blocker             string                  `json:"blocker,omitempty"`
+	line                int
+	ownerDoc            *Document
+	statusName          string
 }
 
 type CriterionVerification struct {
@@ -456,6 +472,8 @@ type Model struct {
 	DocByPath        map[string]*Document
 	Directories      map[string]struct{}
 	Assets           map[string]string
+	BrandingAssets   map[string]string
+	SiteConfig       SiteConfig
 	Issues           []Issue
 	Collections      map[string][]*Document
 	Risks            []Risk

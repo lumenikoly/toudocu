@@ -10,3 +10,25 @@
 ## Result
 
 {{RESULT}}
+
+## Behavior change
+
+### Before
+
+{{BEFORE}}
+
+### After
+
+{{AFTER}}
+
+## Scope
+
+## Out of scope
+
+## Acceptance criteria
+
+## Plan
+
+## Verification
+
+## Documentation impact

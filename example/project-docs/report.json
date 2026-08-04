@@ -1,10 +1,10 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "generator": {
     "name": "Docgent",
     "version": "1.1.0-go"
   },
-  "generatedAt": "2026-07-29T18:26:21.797622628Z",
+  "generatedAt": "2026-07-30T13:35:17.686143341Z",
   "sourceDirectory": "docs",
   "staleDays": 90,
   "project": {
@@ -1493,31 +1493,31 @@
         "anchor": "task-core-001-реализовать-основной-сценарий",
         "criteria": [
           {
-            "line": 32,
+            "line": 42,
             "indent": 0,
             "completed": false,
             "text": "AC-01 С главного экрана можно открыть новый запрос."
           },
           {
-            "line": 33,
+            "line": 43,
             "indent": 0,
             "completed": false,
             "text": "AC-02 Из запроса можно открыть подсказку."
           },
           {
-            "line": 34,
+            "line": 44,
             "indent": 0,
             "completed": false,
             "text": "AC-03 Подсказку можно закрыть с возвратом к запросу."
           },
           {
-            "line": 35,
+            "line": 45,
             "indent": 0,
             "completed": false,
             "text": "AC-04 Корректный запрос открывает результат."
           },
           {
-            "line": 36,
+            "line": 46,
             "indent": 0,
             "completed": false,
             "text": "AC-05 Некорректный запрос остаётся на текущем экране с ошибкой."
@@ -1601,35 +1601,49 @@
             "commands": [
               "test -f ./d[o]cs/screens/SC-CORE-HOME.md"
             ],
-            "line": 41
+            "line": 51
           },
           {
             "target": "AC-02",
             "commands": [
               "test -f ./d[o]cs/screens/SC-CORE-HELP.md"
             ],
-            "line": 43
+            "line": 53
           },
           {
             "target": "AC-03",
             "commands": [
               "test -f ./d[o]cs/screens/SC-CORE-HELP.md"
             ],
-            "line": 45
+            "line": 55
           },
           {
             "target": "AC-04",
             "commands": [
               "test -f ./d[o]cs/screens/SC-CORE-RESULT.md"
             ],
-            "line": 47
+            "line": 57
           },
           {
             "target": "AC-05",
             "commands": [
               "test -f ./d[o]cs/contracts/api.md"
             ],
-            "line": 49
+            "line": 59
+          },
+          {
+            "target": "ALL",
+            "commands": [
+              "go test ./..."
+            ],
+            "line": 60
+          },
+          {
+            "target": "DOCS",
+            "commands": [
+              "go run ./cmd/docgent check ./example/docs --repository-root ./example"
+            ],
+            "line": 61
           }
         ],
         "repositoryPaths": [
@@ -1637,7 +1651,14 @@
           "docs/screens/",
           "docs/use-cases/core.md"
         ],
-        "result": "Основной сценарий выполняется согласно критериям приёмки."
+        "result": "Основной сценарий выполняется согласно критериям приёмки.",
+        "behaviorChange": "Было Основной экранный сценарий не был связан с проверяемыми переходами. Станет Основной сценарий проходит по документированным переходам и состояниям.",
+        "before": "Основной экранный сценарий не был связан с проверяемыми переходами.",
+        "after": "Основной сценарий проходит по документированным переходам и состояниям.",
+        "outOfScope": "реализация внешнего Support Center; изменение публичного API за пределами CON-CORE-API ; хранение реальных пользовательских данных.",
+        "plan": "Реализовать переход с главной страницы к форме. Добавить подсказку и возврат к форме. Обработать успешную и ошибочную отправку. Связать критерии с переходами и проверками.",
+        "documentationImpact": "Обновляются use case, экранные переходы, flowchart и API-контракт ошибок.",
+        "documentationPaths": []
       },
       {
         "id": "TASK-SUPPORT-002",
@@ -1687,7 +1708,8 @@
         ],
         "checks": [],
         "repositoryPaths": [],
-        "result": "Пользователь может открыть внешний центр поддержки с главной страницы."
+        "result": "Пользователь может открыть внешний центр поддержки с главной страницы.",
+        "documentationPaths": []
       }
     ]
   },

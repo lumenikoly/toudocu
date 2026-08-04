@@ -45,10 +45,10 @@ GOOS=windows GOARCH=amd64 go build -o /tmp/docgent-windows.exe ./cmd/docgent
 
 ```bash
 go run ./cmd/docgent task context TASK-DOCS-001 ./docs --format json
-go run ./cmd/docgent task check TASK-DOCS-001 ./docs --format json
+go run ./cmd/docgent task verify TASK-DOCS-001 ./docs --dry-run --format json
 ```
 
-`task check` запускает команды из документа и должен использоваться только для
+`task verify --run` запускает команды из документа и должен использоваться только для
 доверенной задачи текущего репозитория.
 
 ## Критерий готовности

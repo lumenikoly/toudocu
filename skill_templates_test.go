@@ -76,11 +76,15 @@ The user can continue from the start screen.
 				"{{VERIFICATION_REFERENCE}}":        "TestOpenWorkspace",
 				"{{OWNER}}":                         "Team",
 				"{{RESULT}}":                        "The continue path works.",
+				"{{BEFORE}}":                        "The continue path is unavailable.",
+				"{{AFTER}}":                         "The continue path opens the workspace.",
 				"{{SCOPE_PATH}}":                    "docs",
 				"{{OUT_OF_SCOPE}}":                  "Other scenarios.",
 				"{{ACCEPTANCE_CRITERION}}":          "Open workspace navigates to SC-CORE-WORKSPACE.",
 				"{{PLAN_STEP}}":                     "Implement the documented transition.",
 				"{{ACCEPTANCE_COMMAND}}":            "go test ./...",
+				"{{ALL_COMMAND}}":                   "go test ./...",
+				"{{DOCS_COMMAND}}":                  "go run ./cmd/docgent check ./docs",
 				"{{DOCUMENTATION_IMPACT}}":          "Update the screen map.",
 			}
 			if language == "en" {

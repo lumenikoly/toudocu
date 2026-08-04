@@ -1,7 +1,8 @@
 # Справочник конфигурации
 
-Docgent настраивается аргументами CLI; отдельный конфигурационный файл не
-требуется.
+CLI работает без конфигурационного файла. Необязательный
+`<repository-root>/.docgent/config.yml` настраивает портал и автоматически
+читается командами `build`, `check` и `serve`.
 
 ## Значения по умолчанию
 
@@ -17,13 +18,60 @@ Docgent настраивается аргументами CLI; отдельны�
 | serve host | `127.0.0.1` |
 | serve port | `8080` |
 | screen map | включена при наличии `screens/SC-*.md` |
+| site theme | `classic` |
+| color scheme | `system` |
+| accent | `indigo` |
+| density | `comfortable` |
+| content width | `standard` (920 px) |
+| hero | включён |
+
+## Темы и брендинг портала
+
+```yaml
+site:
+  title: My Project
+  logo: assets/logo.svg
+  favicon: assets/favicon.svg
+  theme: classic
+  colorScheme: system
+  accent: indigo
+  density: comfortable
+  contentWidth: standard
+  footer:
+    text: My Project documentation
+    url: https://example.com
+  hero:
+    enabled: true
+    image: assets/hero.webp
+```
+
+Допустимы темы `classic`, `paper`, `terminal`; схемы `light`, `dark`, `system`;
+акценты `indigo`, `blue`, `teal`, `green`, `amber`, `rose`, `violet`; плотность
+`compact` или `comfortable`; ширина `narrow` (760 px), `standard` (920 px) или
+`wide` (1120 px).
+
+`--title` имеет приоритет над `site.title`, затем используются заголовок
+`index.md` и имя каталога. Footer принимает только экранированный текст и
+необязательный HTTPS URL.
+
+В шапке портала есть выпадающие списки темы (`classic`, `paper`, `terminal`) и
+цветовой схемы (`system`, `light`, `dark`). Выбор сохраняется локально в
+браузере; значения конфигурации остаются начальными для нового посетителя.
+
+Logo, favicon и hero должны быть обычными файлами внутри `.docgent/assets/`;
+абсолютные пути, traversal, symlinks и отсутствующие файлы отклоняются. SVG
+подключается как файл и не встраивается в HTML.
+
+Парсер реализует фиксированный YAML-поднабор: карты, строки, boolean и
+комментарии. Списки, anchors, aliases, multiline, неизвестные и повторные ключи
+не поддерживаются. Custom CSS, web fonts и theme plugins отсутствуют.
 
 ## Repository root
 
 `--repository-root` определяет:
 
 - границу разрешённых ссылок из документации в код;
-- корень выполнения команд `task check`;
+- корень выполнения команд `task verify --run`;
 - базу проверки scope-путей work item.
 
 Путь должен указывать на фактический корень репозитория. Для текущего проекта:
@@ -79,7 +127,7 @@ Mermaid не имеет пользовательских CLI-настроек. D
 - максимум 50 000 UTF-8 байт на блок;
 - `securityLevel: strict`;
 - запрет Mermaid front matter и directives;
-- темы `default` и `dark` вслед за темой портала.
+- вычисленные цвета поверхности, текста, границ и акцента текущей темы.
 
 Эти параметры нельзя переопределить из документации.
 
@@ -96,6 +144,6 @@ Mermaid не имеет пользовательских CLI-настроек. D
 
 ## Task report и timeout
 
-`--report <file.json>` атомарно сохраняет `TaskCheckReport` вне исходного
+`--report <file.json>` атомарно сохраняет `TaskVerifyReport` вне исходного
 каталога документации. `--timeout` задаёт лимит каждой уникальной команды, а не
-всего task check.
+всего task verify.

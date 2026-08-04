@@ -146,13 +146,44 @@ func TestScreenKnowledgeAndPlayableFlow(t *testing.T) {
 	root, docs := createScreenFixture(t)
 	writeTestFile(t, docs, "work/TASK-AUTH-099-screen.md", `# TASK-AUTH-099: Проверить вход
 
-- Статус: Черновик
+- Статус: Готово к работе
 - Тип: Research
+- Модуль: MOD-AUTH
 - Экраны: SC-AUTH-LOGIN
 
 ## Результат
 
 Переход входа исследован.
+
+## Область изменения
+
+- `+"`docs/`"+`
+
+## Не входит в задачу
+
+Изменение экранов.
+
+## Критерии приёмки
+
+- [ ] `+"`AC-01`"+` Переход изучен.
+
+## План
+
+1. Изучить переход.
+
+## Проверка
+
+- `+"`AC-01`"+` → `+"`go test ./...`"+`
+- `+"`ALL`"+` → `+"`go test ./...`"+`
+- `+"`DOCS`"+` → `+"`go test ./...`"+`
+
+## Влияние на документацию
+
+Изменения документации не требуются.
+
+## Обоснование отсутствия сценария
+
+Исследование относится к существующему графу экранов.
 `)
 	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
 	if err != nil {
@@ -185,6 +216,65 @@ func TestScreenKnowledgeAndPlayableFlow(t *testing.T) {
 	}
 	if len(context.Screens) != 1 || len(context.ScreenTransitions) != 5 {
 		t.Fatalf("task context must include incident transitions: %#v", context)
+	}
+}
+
+func TestTaskContextIncludesExplicitTransitionWithoutScreens(t *testing.T) {
+	root, docs := createScreenFixture(t)
+	writeTestFile(t, docs, "work/TASK-AUTH-098-transition.md", `# TASK-AUTH-098: Проверить переход
+
+- Статус: Готово к работе
+- Тип: Research
+- Модуль: MOD-AUTH
+- Переходы: TR-AUTH-001
+
+## Результат
+
+Переход исследован.
+
+## Область изменения
+
+- `+"`docs/`"+`
+
+## Не входит в задачу
+
+Изменение экранов.
+
+## Критерии приёмки
+
+- [ ] `+"`AC-01`"+` Переход изучен.
+
+## План
+
+1. Изучить переход.
+
+## Проверка
+
+- `+"`AC-01`"+` → `+"`go test ./...`"+`
+- `+"`ALL`"+` → `+"`go test ./...`"+`
+- `+"`DOCS`"+` → `+"`go test ./...`"+`
+
+## Влияние на документацию
+
+Изменения документации не требуются.
+
+## Обоснование отсутствия сценария
+
+Исследуется один явно указанный переход.
+`)
+	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	context, err := BuildTaskContext(model, "TASK-AUTH-098")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(context.ScreenTransitions) != 1 || context.ScreenTransitions[0].ID != "TR-AUTH-001" {
+		t.Fatalf("explicit transition missing from context: %#v", context.ScreenTransitions)
+	}
+	if !containsString(context.RequiredReads, "screens/SC-PUBLIC-HOME.md") {
+		t.Fatalf("transition document missing from requiredReads: %#v", context.RequiredReads)
 	}
 }
 
@@ -505,7 +595,7 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	if err := json.Unmarshal(reportData, &report); err != nil {
 		t.Fatal(err)
 	}
-	if report.SchemaVersion != 1 || len(report.Screens) != 4 || len(report.Transitions) != 5 || len(report.PlayableFlows) != 1 {
+	if report.SchemaVersion != 2 || len(report.Screens) != 4 || len(report.Transitions) != 5 || len(report.PlayableFlows) != 1 {
 		t.Fatalf("unexpected report v1: %#v", report)
 	}
 	if strings.Contains(string(reportData), `"screenTransitions"`) {

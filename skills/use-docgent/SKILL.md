@@ -95,7 +95,18 @@ apply typed contracts only when the project uses the corresponding capability.
 
 ## Work with tasks safely
 
-1. Start task work with read-only context:
+1. For a new request, search and create a neutral Draft:
+
+   ```bash
+   docgent search "request terms" ./docs --format json
+   docgent task init ./docs --area AREA --title "Title" --type Feature
+   ```
+
+   Select and fill entities from evidence. Docgent does not interpret the
+   request or change task status.
+2. Validate the complete Draft with `task ready`; change it to Ready only after
+   semantic review.
+3. Start implementation work with read-only context:
 
    ```bash
    docgent task context TASK-AREA-001 ./docs \
@@ -103,16 +114,17 @@ apply typed contracts only when the project uses the corresponding capability.
      --format json
    ```
 
-2. Treat an existing non-draft task as an explicit contract: respect its result,
+4. Treat an existing Ready+ task as an explicit contract: respect its result,
    scope, exclusions, criteria, dependencies, module, use case, flow, screens,
    and rules.
-3. Use checkboxes in `Acceptance criteria` and `Plan` when progress tracking is
+5. Use checkboxes in `Acceptance criteria` and `Plan` when progress tracking is
    useful. Keep `AC-*` identifiers and verification mappings on acceptance
    criteria; plan steps do not require them.
-4. Do not broaden changes beyond task scope without user direction.
-5. Run `task check` only when the repository is trusted and the user explicitly
-   asked to execute or verify the task. It executes repository shell commands
-   with the current user's permissions.
+6. Do not broaden changes beyond task scope without user direction.
+7. Inspect `task verify --dry-run` first. Run `task verify --run` only when the
+   repository is trusted and the user explicitly asked to execute or verify the
+   task. It executes repository shell commands with the current user's
+   permissions.
 
 ## Validate and deliver
 

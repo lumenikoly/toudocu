@@ -18,6 +18,7 @@
 - HTML и отчёт: `site.go`, `report_types.go`;
 - локальная HTTP-раздача: `server.go`;
 - встроенные ресурсы: `embed.go`, `assets/`.
+- конфигурация тем и безопасного брендинга: `site_config.go`.
 
 ## Границы
 
@@ -64,6 +65,18 @@ viewer работают через `file://` на локальных JavaScript 
 различаются формой линии; hotspots проявляются при наведении и фокусе, а
 terminal screen содержит ссылки на карту и описание use case.
 
+### BR-SITE-006: Темы не расширяют доверенную поверхность
+
+`classic`, `paper` и `terminal`, их токены, переключатель цветовой схемы,
+fallback favicon и браузерные ресурсы встроены через `go:embed`. Конфигурация
+выбирает только фиксированные варианты; custom CSS, fonts и theme plugins не
+загружаются.
+
+Пользовательские logo, favicon и hero читаются только как обычные файлы из
+`.docgent/assets/`, проверяются при построении модели и копируются в
+`assets/branding/`. `build`, `check` и `serve` используют одну диагностику и
+остаются offline-first.
+
 ## Инварианты
 
 - исходный `index.md` отображается dashboard, а не дублирующей страницей;
@@ -76,7 +89,7 @@ terminal screen содержит ссылки на карту и описани�
 - `GenerateSite`;
 - `BuildReport`;
 - CLI-команда `serve`;
-- `ProjectReport` schema v1;
+- `ProjectReport` schema v2;
 - HTML entrypoint `index.html` и машинный `report.json`.
 
 ## Связанные сценарии

@@ -86,7 +86,7 @@ func TestDocumentationServerServesAndRebuilds(t *testing.T) {
 	assertRequestContains(http.MethodGet, "/", "Первая версия.")
 	assertRequestContains(http.MethodHead, "/", "")
 	assertRequestContains(http.MethodGet, "/assets/style.css", "font-family")
-	assertRequestContains(http.MethodGet, "/report.json", `"schemaVersion": 1`)
+	assertRequestContains(http.MethodGet, "/report.json", `"schemaVersion": 2`)
 
 	writeTestFile(t, docs, "index.md", "# Серверный проект\n\nВторая версия после обновления.\n")
 	assertRequestContains(http.MethodGet, "/", "Вторая версия после обновления.")

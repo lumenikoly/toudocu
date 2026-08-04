@@ -1,4 +1,4 @@
-# CLI-контракт Docgent v1
+# CLI-контракт Docgent v2
 
 - Идентификатор: CON-CLI-V1
 - Статус: Готово
@@ -15,13 +15,27 @@ Docgent.
 | `check` | отсутствуют | diagnostics или `ProjectReport` |
 | `build` | записывает output, при `--clean` безопасно очищает его | автономный портал и `report.json` |
 | `serve` | собирает output и запускает локальный HTTP-сервер | портал с пересборкой при обновлении HTML |
-| `task context` | отсутствуют | `TaskContextReport` выбранной задачи |
-| `task check` | исполняет доверенные команды задачи | `TaskCheckReport` |
+| `search` | отсутствуют | `SearchReport` по свежим Markdown |
+| `task init` | атомарно создаёт новый `TASK-*` | `TaskInitReport` |
+| `scaffold` | атомарно создаёт выбранную сущность | `ScaffoldReport` |
+| `task ready` | отсутствуют | `TaskReadyReport` |
+| `task context` | отсутствуют | `TaskContextReport` выбранной Ready+ задачи |
+| `task verify --dry-run` | отсутствуют | план `TaskVerifyReport` |
+| `task verify --run` | исполняет доверенные команды задачи | `TaskVerifyReport` |
 | `version` | отсутствуют | версия генератора |
 
 Вызов `docgent ./docs ...` эквивалентен `docgent build ./docs ...`.
-Команда `init` намеренно отсутствует: до первого релиза действует один чистый
-CLI-контракт v1 без legacy-слоя.
+Историческая команда верхнего уровня `init` и прежняя `task check` отсутствуют
+без alias.
+
+```text
+docgent search "<query>" [docs-dir] [--limit N] [--format text|json]
+docgent task init [docs-dir] --area AREA --title TITLE --type TYPE [--lang en|ru]
+docgent scaffold module|use-case|flow|screen|decision ID [docs-dir] --title TITLE [--lang en|ru]
+docgent task ready TASK-ID [docs-dir] [--strict] [--format text|json]
+docgent task context TASK-ID [docs-dir] [--format text|json]
+docgent task verify TASK-ID [docs-dir] (--dry-run|--run) [--target TARGET] [--report FILE] [--timeout DURATION] [--format text|json]
+```
 
 В каталоге документации глобально ожидается только `index.md`. `status.md`,
 `roadmap.md` и типизированные каталоги необязательны; правила конкретного типа
@@ -29,6 +43,7 @@ CLI-контракт v1 без legacy-слоя.
 
 Статусы, типы, обязательные поля, разделы и команды `TASK-*` описаны в
 [руководстве по рабочим задачам](../guides/work-items.md).
+Значение `--title` для `task init` и `scaffold` всегда однострочное.
 
 ## Общие параметры
 
@@ -56,7 +71,9 @@ CLI-контракт v1 без legacy-слоя.
 `127.0.0.1` и `8080`. Для доступа из локальной сети требуется явный
 `--host 0.0.0.0`.
 
-`--report` и `--timeout` разрешены только для `task check`.
+`--report` и `--timeout` разрешены только для `task verify`.
+`task verify --run` разрешён только для статусов Ready, In Progress, Blocked и
+Done; безопасный `--dry-run` также можно использовать для полного Draft.
 
 `--screen-map` и `--no-screen-map` разрешены для `build` и `serve`. Карта
 генерируется по умолчанию при наличии `screens/SC-*.md`; `--no-screen-map`
@@ -68,12 +85,13 @@ CLI-контракт v1 без legacy-слоя.
 - `0` — операция успешно завершена;
 - `1` — ошибка аргументов, I/O, модели, генерации или проверки;
 - при `--strict` наличие warning также приводит к `1`;
-- `task check` возвращает `0` только для итогового статуса `passed`.
+- `task ready` возвращает `0` для `contract_ready` и `ready`;
+- `task verify` возвращает `0` для `planned` и `passed`.
 - `serve` возвращает `1`, если первоначальная сборка или запуск listener
   завершились ошибкой; ошибка последующей пересборки возвращается клиенту как
   HTTP 500, не останавливая сервер.
 
-## ProjectReport schema v1
+## ProjectReport schema v2
 
 `check --format json` и сгенерированный `report.json` содержат:
 
@@ -92,16 +110,20 @@ CLI-контракт v1 без legacy-слоя.
 Пустые коллекции имеют вид `[]`. Строки business rules, criteria, roadmap и
 issues начинаются с единицы.
 
-## TaskContextReport schema v1
+## TaskContextReport schema v2
 
-Read-only отчёт содержит выбранный `WorkItem`, признак `fullVerification`,
-связанные module, use case, screens и incident screen transitions, business
-rules, зависимости, зависимые задачи, компактные сведения о документах и
-относящиеся к контексту issues.
+Read-only отчёт содержит полный `WorkItem`, `requiredReads`, business rules,
+зависимости, documentation-impact документы и фиксированные разделы связанных
+module, use case, flow и screens.
 
 Команда не выполняет содержимое `checks`.
 
-## TaskCheckReport schema v1
+## Новые отчёты schema v1
+
+`SearchReport`, `TaskInitReport`, `ScaffoldReport` и `TaskReadyReport`
+используют schema v1.
+
+## TaskVerifyReport schema v1
 
 Итоговый `status` принимает `passed`, `failed` или `blocked`. Статус команды:
 `passed`, `failed`, `timed_out` или `start_error`.
@@ -117,6 +139,6 @@ rules, зависимости, зависимые задачи, компактн
 
 ## Совместимость
 
-Все публичные отчёты используют schema v1. До первого релиза схема развивается
-как единый чистый контракт без слоя миграции. После релиза несовместимое
-изменение потребует новой версии соответствующей схемы.
+ProjectReport и TaskContextReport используют schema v2. Остальные отчёты
+workflow используют schema v1. Несовместимое изменение требует новой версии
+соответствующей схемы.

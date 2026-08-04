@@ -13,8 +13,8 @@ Validate only promises the documentation makes:
 | Typed path such as `modules/` or `use-cases/` | Opt-in machine-readable entity | Validate its ID and explicit relationships |
 | Stable ID or local link | Declared identity or relationship | Require uniqueness and a valid target |
 | `roadmap.md` checklist item | Declared global scope | Require one supported stable ID |
-| Non-draft `TASK-*` | Executable work contract | Require the complete task schema |
-| `task check` | Permission to execute repository commands | Apply the task validation gate before execution |
+| `task ready` | Read-only readiness request | Require the complete task schema even for Draft |
+| `task verify --run` | Permission to execute repository commands | Apply the task-local validation gate before execution |
 
 Errors protect safety, identity, relationships, and executable contracts.
 Warnings describe editorial completeness, recognized statuses, and staleness.

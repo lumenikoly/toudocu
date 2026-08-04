@@ -104,19 +104,18 @@ func planTaskCommands(item WorkItem) ([]plannedCommand, bool) {
 	return commands, targets["ALL"] && targets["DOCS"]
 }
 
-func taskCheckValidation(model *Model, taskID string, strict bool) (*WorkItem, []Issue) {
-	item, err := findWorkItem(model, taskID)
-	if err != nil {
-		return nil, []Issue{{Severity: "error", Code: "task-selection-failed", Message: err.Error()}}
+func taskVerifyValidation(model *Model, taskID, target, mode string) (*WorkItem, []Issue) {
+	item, issues := taskReadiness(model, taskID, false)
+	if item == nil {
+		return nil, issues
 	}
-	issues := []Issue{}
-	for _, issue := range model.Issues {
-		if issue.DocumentPath != item.Document {
-			continue
-		}
-		if issue.Severity == "error" || (strict && issue.Severity == "warning") {
-			issues = append(issues, issue)
-		}
+	issues = blockingReadinessIssues(issues, false)
+	if mode == "run" && item.statusName != "ready" && item.statusName != "in-progress" && item.statusName != "blocked" && item.statusName != "done" {
+		issues = append(issues, readinessIssue(
+			"invalid-task-verify-state",
+			"task verify --run доступен только для Ready, In Progress, Blocked или Done.",
+			item,
+		))
 	}
 	commands, _ := planTaskCommands(*item)
 	if len(commands) == 0 {
@@ -125,31 +124,48 @@ func taskCheckValidation(model *Model, taskID string, strict bool) (*WorkItem, [
 			Message: "У задачи отсутствуют исполняемые команды проверки.", DocumentPath: item.Document, Line: item.line,
 		})
 	}
+	if target != "" {
+		found := false
+		for _, check := range item.Checks {
+			found = found || check.Target == target
+		}
+		if !found {
+			issues = append(issues, readinessIssue("unknown-verification-target", "Неизвестный verification target: "+target+".", item))
+		}
+	}
 	return item, issues
 }
 
-func taskSnapshot(item *WorkItem, requestedID string) TaskCheckTask {
+func taskSnapshot(item *WorkItem, requestedID string) TaskVerifyTask {
 	if item == nil {
-		return TaskCheckTask{ID: requestedID}
+		return TaskVerifyTask{ID: requestedID}
 	}
-	return TaskCheckTask{
+	return TaskVerifyTask{
 		ID: item.ID, Title: item.Title, Status: item.Status, Type: item.Type, Document: item.Document,
 	}
 }
 
 func aggregateTargetStatus(target string, commands []CommandExecutionResult) string {
 	found := false
+	planned := false
 	for _, command := range commands {
 		if !containsString(command.Targets, target) {
 			continue
 		}
 		found = true
+		if command.Status == "planned" {
+			planned = true
+			continue
+		}
 		if command.Status != "passed" {
 			return "failed"
 		}
 	}
 	if !found {
 		return "not_run"
+	}
+	if planned {
+		return "planned"
 	}
 	return "passed"
 }
@@ -163,7 +179,7 @@ func containsString(values []string, target string) bool {
 	return false
 }
 
-func finishTaskCheckReport(report *TaskCheckReport, item *WorkItem) {
+func finishTaskVerifyReport(report *TaskVerifyReport, item *WorkItem) {
 	report.FinishedAt = time.Now().UTC()
 	report.DurationMillis = report.FinishedAt.Sub(report.StartedAt).Milliseconds()
 	report.Summary.TotalCommands = len(report.Commands)
@@ -172,6 +188,7 @@ func finishTaskCheckReport(report *TaskCheckReport, item *WorkItem) {
 		switch command.Status {
 		case "passed":
 			report.Summary.PassedCommands++
+		case "planned":
 		case "timed_out":
 			report.Summary.TimedOutCommands++
 			report.Summary.FailedCommands++
@@ -183,6 +200,9 @@ func finishTaskCheckReport(report *TaskCheckReport, item *WorkItem) {
 	}
 	if item != nil {
 		for _, criterion := range item.Verification {
+			if report.Target != "" && report.Target != criterion.CriterionID {
+				continue
+			}
 			status := aggregateTargetStatus(criterion.CriterionID, report.Commands)
 			report.Criteria = append(report.Criteria, CriterionExecutionResult{
 				ID: criterion.CriterionID, Description: criterion.Criterion,
@@ -190,12 +210,15 @@ func finishTaskCheckReport(report *TaskCheckReport, item *WorkItem) {
 			})
 			if status == "passed" {
 				report.Summary.CriteriaPassed++
-			} else {
+			} else if status != "planned" {
 				report.Summary.CriteriaFailed++
 			}
 		}
 		seenTargets := map[string]bool{}
 		for _, check := range item.Checks {
+			if report.Target != "" && report.Target != check.Target {
+				continue
+			}
 			if seenTargets[check.Target] {
 				continue
 			}
@@ -208,6 +231,8 @@ func finishTaskCheckReport(report *TaskCheckReport, item *WorkItem) {
 	switch {
 	case len(report.ValidationIssues) > 0:
 		report.Status = "blocked"
+	case len(report.Commands) > 0 && report.Commands[0].Status == "planned":
+		report.Status = "planned"
 	case failed:
 		report.Status = "failed"
 	default:
@@ -215,13 +240,13 @@ func finishTaskCheckReport(report *TaskCheckReport, item *WorkItem) {
 	}
 }
 
-func executeTaskCheck(model *Model, options Options, stdout, stderr io.Writer, runner commandRunner) TaskCheckReport {
+func executeTaskVerify(model *Model, options Options, stdout, stderr io.Writer, runner commandRunner) TaskVerifyReport {
 	startedAt := time.Now().UTC()
-	item, validationIssues := taskCheckValidation(model, options.TaskID, options.Strict)
-	report := TaskCheckReport{
-		SchemaVersion: 1, Kind: "task-check",
+	item, validationIssues := taskVerifyValidation(model, options.TaskID, options.Target, options.VerifyMode)
+	report := TaskVerifyReport{
+		SchemaVersion: 1, Kind: "task-verify",
 		Generator: GeneratorInfo{Name: "Docgent", Version: Version},
-		Task:      taskSnapshot(item, options.TaskID), StartedAt: startedAt,
+		Task:      taskSnapshot(item, options.TaskID), StartedAt: startedAt, Mode: options.VerifyMode, Target: options.Target,
 		ValidationIssues: append([]Issue{}, validationIssues...),
 		Issues:           append([]Issue{}, model.Issues...),
 		Commands:         []CommandExecutionResult{},
@@ -230,12 +255,35 @@ func executeTaskCheck(model *Model, options Options, stdout, stderr io.Writer, r
 	}
 	if item != nil {
 		_, report.FullVerification = planTaskCommands(*item)
+		if options.Target != "" {
+			report.FullVerification = false
+		}
 	}
 	if item == nil || len(validationIssues) > 0 {
-		finishTaskCheckReport(&report, item)
+		finishTaskVerifyReport(&report, item)
 		return report
 	}
 	commands, _ := planTaskCommands(*item)
+	if options.Target != "" {
+		filtered := []plannedCommand{}
+		for _, command := range commands {
+			if containsString(command.Targets, options.Target) {
+				command.Targets = []string{options.Target}
+				filtered = append(filtered, command)
+			}
+		}
+		commands = filtered
+		report.FullVerification = false
+	}
+	if options.VerifyMode == "dry-run" {
+		for index, planned := range commands {
+			report.Commands = append(report.Commands, CommandExecutionResult{
+				Sequence: index + 1, Command: planned.Command, Targets: planned.Targets, Status: "planned",
+			})
+		}
+		finishTaskVerifyReport(&report, item)
+		return report
+	}
 	timeout := options.Timeout
 	if timeout <= 0 {
 		timeout = 10 * time.Minute
@@ -280,11 +328,11 @@ func executeTaskCheck(model *Model, options Options, stdout, stderr io.Writer, r
 			StdoutTruncated: stdoutTruncated, StderrTruncated: stderrTruncated,
 		})
 	}
-	finishTaskCheckReport(&report, item)
+	finishTaskVerifyReport(&report, item)
 	return report
 }
 
-func marshalTaskCheckReport(report TaskCheckReport) ([]byte, error) {
+func marshalTaskVerifyReport(report TaskVerifyReport) ([]byte, error) {
 	return json.MarshalIndent(report, "", "  ")
 }
 
@@ -327,7 +375,7 @@ func writeReportAtomically(target string, data []byte) error {
 	return os.Rename(temporaryName, target)
 }
 
-func printTaskCheckText(stdout io.Writer, report TaskCheckReport) {
+func printTaskVerifyText(stdout io.Writer, report TaskVerifyReport) {
 	fmt.Fprintf(stdout, "\nЗадача: %s\nСтатус проверки: %s\nКоманд: %d, успешно: %d, с ошибкой: %d\nКритериев успешно: %d, неуспешно: %d\n",
 		report.Task.ID, report.Status, report.Summary.TotalCommands, report.Summary.PassedCommands,
 		report.Summary.FailedCommands, report.Summary.CriteriaPassed, report.Summary.CriteriaFailed)

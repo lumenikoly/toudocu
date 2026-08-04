@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- Добавлены встроенные темы `classic`, `paper`, `terminal`, фиксированные
+  варианты accent, плотности и ширины, переключатель `system → light → dark` и
+  отдельные выпадающие списки темы и цветовой схемы с локальным сохранением
+  выбора; Mermaid-цвета согласованы с обоими контролами.
+- `.docgent/config.yml` настраивает title, hero, footer, logo и favicon через
+  строгий YAML-поднабор; branding assets копируются только из
+  `.docgent/assets/`, а runtime-ресурсы остаются offline-first.
+- Добавлены детерминированные `search`, `task init`, `scaffold`, `task ready`,
+  расширенный `task context` и `task verify`; прежняя `task check` удалена.
+- ProjectReport и TaskContextReport переведены на schema v2; SearchReport,
+  TaskInitReport, ScaffoldReport, TaskReadyReport и TaskVerifyReport используют
+  schema v1.
+- Readiness проверяет полный task contract, связанные сущности,
+  documentation-impact пути и безопасный scope нового файла.
+- `task verify --run` блокирует Draft и Cancelled; readiness требует module,
+  task context включает явно связанные transitions, а отсутствующий scope-каталог
+  и многострочный scaffold title отклоняются.
+- Зафиксирована граница Agent/Docgent: CLI не интерпретирует запрос, не меняет
+  статус и не подтверждает acceptance criteria.
 - `sequenceDiagram` теперь подчиняется общим правилам связи Mermaid-документов:
   конкретные последовательности запросов можно описывать в связанных `FLOW-*`
   без обязательной ссылки на архитектуру.
@@ -44,9 +63,10 @@
 - Dashboard показывает содержимое `index.md` и скрывает отсутствующие
   необязательные разделы.
 - Исправлена очистка output через символические ссылки на каталог-предок документации.
-- Timeout `task check` завершает всё дерево процессов на Unix и Windows.
+- Timeout `task verify --run` завершает всё дерево процессов на Unix и Windows.
 - Добавлена read-only команда `task context` с компактным JSON-контекстом для агентов.
-- `ProjectReport`, `TaskCheckReport` и `TaskContextReport` стали типизированным контрактом schema v1; строки в JSON теперь везде 1-based, пустые коллекции имеют вид `[]`.
+- Публичные JSON-отчёты стали типизированными; строки в JSON везде 1-based,
+  пустые коллекции имеют вид `[]`.
 - Черновику задачи достаточно раздела `Результат`; полный workflow-контракт применяется с `Готово к работе`, ограничение плана в 3–7 шагов удалено.
 - Рабочие задачи переведены на правило «одна задача — один файл».
 - Добавлены статусы и типы задач, обязательный план, `AC-*`, команды проверки и влияние на документацию.
@@ -55,7 +75,6 @@
 - Стартовые документы больше не дублируют чек-листы требований в `status.md` и use case.
 - Прогресс связанных `UC-*` в roadmap вычисляется из статуса use case без изменения Markdown.
 - Dashboard и `status.html` показывают вычисляемые активные задачи, блокеры и следующий результат.
-- Добавлена команда `docgent task check` с timeout, дедупликацией команд и отчётом schema v1.
 - Версия генератора обновлена до `1.1.0-go`.
 
 ## 1.0.0-go

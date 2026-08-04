@@ -102,7 +102,7 @@ sequenceDiagram
 /screens/SC-AUTH-LOGIN.html
 ```
 
-Дублирующая страница `/flows/UC-AUTH-01.html` не создаётся. В schema v1
+Дублирующая страница `/flows/UC-AUTH-01.html` не создаётся. В schema v2
 `knowledge.flows[]` содержит `useCaseIds`, а `knowledge.useCases[]` —
 `flowIds`. Экранные ветки по-прежнему находятся в top-level
 `playableFlows[]`.

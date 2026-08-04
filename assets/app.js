@@ -11,28 +11,103 @@
   const rootPrefix = document.body.dataset.rootPrefix || '';
 
   function initializeTheme() {
-    const button = $('[data-theme-toggle]');
-    let stored = null;
-    try { stored = localStorage.getItem('project-docs-theme'); } catch { /* file:// privacy mode */ }
-    const preferred = stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    document.documentElement.dataset.theme = preferred;
+    const select = $('[data-color-scheme-select]');
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    let mode = document.documentElement.dataset.colorScheme || 'system';
 
-    const updateButton = () => {
-      if (!button) return;
-      const dark = document.documentElement.dataset.theme === 'dark';
-      button.textContent = dark ? '☀' : '☾';
-      button.setAttribute('aria-label', dark ? 'Включить светлую тему' : 'Включить тёмную тему');
-      button.title = button.getAttribute('aria-label');
+    const apply = (announce = true) => {
+      const resolved = mode === 'system' ? (media.matches ? 'dark' : 'light') : mode;
+      document.documentElement.dataset.colorScheme = mode;
+      document.documentElement.dataset.theme = resolved;
+      const labels = { system: 'Система', light: 'Светлая', dark: 'Тёмная' };
+      const label = $('[data-theme-label]', select?.closest('.header-select'));
+      if (label) label.textContent = labels[mode];
+      if (select) select.value = mode;
+      if (announce) {
+        document.dispatchEvent(new CustomEvent('docgent:themechange', { detail: { mode, theme: resolved } }));
+      }
     };
-    updateButton();
+    apply(false);
 
-    button?.addEventListener('click', () => {
-      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-      document.documentElement.dataset.theme = next;
-      try { localStorage.setItem('project-docs-theme', next); } catch { /* ignore */ }
-      updateButton();
-      document.dispatchEvent(new CustomEvent('docgent:themechange', { detail: { theme: next } }));
+    select?.addEventListener('change', () => {
+      mode = select.value;
+      try { localStorage.setItem('docgent-color-scheme', mode); } catch { /* file:// privacy mode */ }
+      apply();
     });
+    media.addEventListener?.('change', () => {
+      if (mode === 'system') apply();
+    });
+  }
+
+  function initializeSiteTheme() {
+    const select = $('[data-site-theme-select]');
+    const labels = { classic: 'Классика', paper: 'Бумага', terminal: 'Терминал' };
+    const indicators = { classic: 'C', paper: 'P', terminal: 'T' };
+    let theme = document.documentElement.dataset.siteTheme || 'classic';
+
+    const apply = (announce = true) => {
+      document.documentElement.dataset.siteTheme = theme;
+      const wrapper = select?.closest('.header-select');
+      const label = $('[data-site-theme-label]', wrapper);
+      const indicator = $('[data-site-theme-indicator]', wrapper);
+      if (label) label.textContent = labels[theme];
+      if (indicator) indicator.textContent = indicators[theme];
+      if (select) select.value = theme;
+      if (announce) {
+        document.dispatchEvent(new CustomEvent('docgent:themechange', {
+          detail: { siteTheme: theme, theme: document.documentElement.dataset.theme },
+        }));
+      }
+    };
+    apply(false);
+
+    select?.addEventListener('change', () => {
+      theme = select.value;
+      try { localStorage.setItem('docgent-site-theme', theme); } catch { /* file:// privacy mode */ }
+      apply();
+    });
+  }
+
+  function initializeHeroSummary() {
+    $$('[data-hero-summary]').forEach((summary) => {
+      const text = $('p', summary);
+      const button = $('[data-hero-summary-toggle]', summary);
+      if (!text || !button) return;
+      const fullHeight = text.scrollHeight;
+      summary.classList.add('is-clampable');
+      if (text.clientHeight + 1 >= fullHeight) {
+        summary.classList.remove('is-clampable');
+        return;
+      }
+      button.hidden = false;
+      button.addEventListener('click', () => {
+        const expanded = summary.classList.toggle('is-expanded');
+        button.setAttribute('aria-expanded', String(expanded));
+        button.textContent = expanded ? 'Свернуть' : 'Показать полностью';
+      });
+    });
+  }
+
+  function mermaidThemeConfig() {
+    const styles = getComputedStyle(document.documentElement);
+    const color = (name) => styles.getPropertyValue(name).trim();
+    const dark = document.documentElement.dataset.theme === 'dark';
+    return {
+      theme: 'base',
+      themeVariables: {
+        darkMode: dark,
+        background: color('--bg'),
+        primaryColor: color('--surface-soft'),
+        primaryTextColor: color('--text'),
+        primaryBorderColor: color('--accent'),
+        lineColor: color('--border-strong'),
+        secondaryColor: color('--surface-strong'),
+        tertiaryColor: color('--surface'),
+        noteBkgColor: color('--accent-soft'),
+        noteTextColor: color('--text'),
+        fontFamily: color('--font-body'),
+      },
+    };
   }
 
   function initializeSidebar() {
@@ -484,7 +559,7 @@
         secure: ['secure', 'securityLevel', 'startOnLoad', 'maxTextSize', 'suppressErrorRendering'],
         maxTextSize: 50000,
         suppressErrorRendering: true,
-        theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+        ...mermaidThemeConfig(),
       });
       for (const container of containers) {
         const target = $('[data-mermaid-diagram]', container);
@@ -678,7 +753,7 @@
         secure: ['secure', 'securityLevel', 'startOnLoad', 'maxTextSize', 'suppressErrorRendering'],
         maxTextSize: 50000,
         suppressErrorRendering: true,
-        theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
+        ...mermaidThemeConfig(),
       });
       diagram.classList.remove('has-error');
       if (error) error.hidden = true;
@@ -802,6 +877,8 @@
   }
 
   initializeTheme();
+  initializeSiteTheme();
+  initializeHeroSummary();
   initializeSidebar();
   initializeGlobalSearch();
   initializeCollectionFilters();

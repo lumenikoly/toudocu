@@ -223,6 +223,7 @@ func renderNavigation(model *Model, current string) string {
 
 func pageShell(model *Model, current, title, description, content, toc string) string {
 	prefix := rootPrefix(current)
+	config := model.SiteConfig
 	fullTitle := title + " — " + model.Project.Title
 	if current == "index.html" {
 		fullTitle = model.Project.Title
@@ -246,7 +247,78 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 		extraStyles += `<link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/playable-flow.css">`
 		extraScripts += `<script src="` + escapeAttr(prefix) + `assets/playable-flow.js" defer></script>`
 	}
-	return `<!doctype html><html lang="ru" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="` + escapeAttr(description) + `"><title>` + escapeHTML(fullTitle) + `</title><link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/style.css">` + extraStyles + `<script src="` + escapeAttr(prefix) + `assets/search-index.js" defer></script>` + mermaidScript + `<script src="` + escapeAttr(prefix) + `assets/app.js" defer></script>` + extraScripts + `</head><body data-root-prefix="` + escapeAttr(prefix) + `" data-task-filter="all"><a class="skip-link" href="#main-content">Перейти к содержимому</a><header class="site-header"><div class="brand-area"><button class="icon-button sidebar-toggle" type="button" data-sidebar-toggle aria-label="Открыть навигацию">☰</button><a class="brand" href="` + escapeAttr(relativeURL(current, "index.html")) + `"><span class="brand-mark">DG</span><span class="brand-text">` + escapeHTML(model.Project.Title) + `</span></a></div><div class="global-search" role="search"><div class="search-input-wrap"><input type="search" data-global-search placeholder="Поиск по документации" aria-label="Поиск по документации"><span class="search-shortcut">/</span></div><div class="search-results" id="global-search-results" data-search-results role="listbox" hidden></div></div><div class="header-actions"><button class="icon-button" type="button" data-print aria-label="Печать">⎙</button><button class="icon-button" type="button" data-theme-toggle aria-label="Переключить тему">☾</button></div></header><div class="site-layout"><aside class="sidebar">` + renderNavigation(model, current) + `</aside><div class="main-area"><main id="main-content" class="page-grid` + gridClass + `"><div class="page-content">` + content + `</div>` + tocHTML + `</main><footer class="site-footer">Сгенерировано Docgent ` + Version + `</footer></div></div></body></html>`
+	favicon := "assets/favicon.svg"
+	if custom := brandingOutput(model, "favicon"); custom != "" {
+		favicon = custom
+	}
+	initialTheme := config.ColorScheme
+	if initialTheme == "system" {
+		initialTheme = "light"
+	}
+	earlyTheme := `<script>(function(){var m="` + escapeAttr(config.ColorScheme) + `",t="` + escapeAttr(config.Theme) + `";try{var s=localStorage.getItem("docgent-color-scheme"),u=localStorage.getItem("docgent-site-theme");if(s==="system"||s==="light"||s==="dark")m=s;if(u==="classic"||u==="paper"||u==="terminal")t=u}catch(e){}var d=m==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):m;document.documentElement.dataset.colorScheme=m;document.documentElement.dataset.theme=d;document.documentElement.dataset.siteTheme=t}())</script>`
+	attributes := ` data-site-theme="` + escapeAttr(config.Theme) + `" data-color-scheme="` + escapeAttr(config.ColorScheme) + `" data-accent="` + escapeAttr(config.Accent) + `" data-density="` + escapeAttr(config.Density) + `" data-content-width="` + escapeAttr(config.ContentWidth) + `"`
+	brandMark := `<span class="brand-mark" aria-hidden="true">DG</span>`
+	if logo := brandingOutput(model, "logo"); logo != "" {
+		brandMark = `<img class="brand-logo" src="` + escapeAttr(relativeURL(current, logo)) + `" alt="">`
+	}
+	footer := escapeHTML(config.Footer.Text)
+	if config.Footer.URL != "" {
+		footer = `<a href="` + escapeAttr(config.Footer.URL) + `" rel="noopener noreferrer">` + footer + `</a>`
+	}
+	themeLabel, themeIndicator := siteThemePresentation(config.Theme)
+	schemeLabel := colorSchemeLabel(config.ColorScheme)
+	themeSelect := `<label class="header-select site-theme-select"><span class="header-select-visual" aria-hidden="true"><span class="site-theme-indicator" data-site-theme-indicator>` + escapeHTML(themeIndicator) + `</span><span data-site-theme-label>` + escapeHTML(themeLabel) + `</span></span><select data-site-theme-select aria-label="Тема оформления">` + selectOptions(config.Theme, []selectOption{{"classic", "Классика"}, {"paper", "Бумага"}, {"terminal", "Терминал"}}) + `</select></label>`
+	schemeSelect := `<label class="header-select scheme-select"><span class="header-select-visual" aria-hidden="true"><span class="scheme-toggle-indicator"></span><span data-theme-label>` + escapeHTML(schemeLabel) + `</span></span><select data-color-scheme-select aria-label="Цветовая схема">` + selectOptions(config.ColorScheme, []selectOption{{"system", "Система"}, {"light", "Светлая"}, {"dark", "Тёмная"}}) + `</select></label>`
+	return `<!doctype html><html lang="ru" data-theme="` + escapeAttr(initialTheme) + `"` + attributes + `><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="` + escapeAttr(description) + `"><title>` + escapeHTML(fullTitle) + `</title><link rel="icon" href="` + escapeAttr(relativeURL(current, favicon)) + `">` + earlyTheme + `<link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/style.css">` + extraStyles + `<script src="` + escapeAttr(prefix) + `assets/search-index.js" defer></script>` + mermaidScript + `<script src="` + escapeAttr(prefix) + `assets/app.js" defer></script>` + extraScripts + `</head><body data-root-prefix="` + escapeAttr(prefix) + `" data-task-filter="all"><a class="skip-link" href="#main-content">Перейти к содержимому</a><header class="site-header"><div class="brand-area"><button class="icon-button sidebar-toggle" type="button" data-sidebar-toggle aria-label="Открыть навигацию">☰</button><a class="brand" href="` + escapeAttr(relativeURL(current, "index.html")) + `">` + brandMark + `<span class="brand-text">` + escapeHTML(model.Project.Title) + `</span></a></div><div class="global-search" role="search"><div class="search-input-wrap"><input type="search" data-global-search placeholder="Поиск по документации" aria-label="Поиск по документации"><span class="search-shortcut">/</span></div><div class="search-results" id="global-search-results" data-search-results role="listbox" hidden></div></div><div class="header-actions"><button class="icon-button" type="button" data-print aria-label="Печать">⎙</button>` + themeSelect + schemeSelect + `</div></header><div class="site-layout"><aside class="sidebar">` + renderNavigation(model, current) + `</aside><div class="main-area"><main id="main-content" class="page-grid` + gridClass + `"><div class="page-content">` + content + `</div>` + tocHTML + `</main><footer class="site-footer">` + footer + `</footer></div></div></body></html>`
+}
+
+type selectOption struct {
+	Value string
+	Label string
+}
+
+func selectOptions(current string, options []selectOption) string {
+	var b strings.Builder
+	for _, option := range options {
+		selected := ""
+		if option.Value == current {
+			selected = " selected"
+		}
+		b.WriteString(`<option value="` + escapeAttr(option.Value) + `"` + selected + `>` + escapeHTML(option.Label) + `</option>`)
+	}
+	return b.String()
+}
+
+func siteThemePresentation(theme string) (string, string) {
+	switch theme {
+	case "paper":
+		return "Бумага", "P"
+	case "terminal":
+		return "Терминал", "T"
+	default:
+		return "Классика", "C"
+	}
+}
+
+func colorSchemeLabel(scheme string) string {
+	switch scheme {
+	case "light":
+		return "Светлая"
+	case "dark":
+		return "Тёмная"
+	default:
+		return "Система"
+	}
+}
+
+func brandingOutput(model *Model, kind string) string {
+	prefix := "assets/branding/" + kind + "."
+	for output := range model.BrandingAssets {
+		if strings.HasPrefix(output, prefix) {
+			return output
+		}
+	}
+	return ""
 }
 
 func breadcrumbs(model *Model, current, title string) string {
@@ -471,7 +543,7 @@ func renderDashboard(model *Model) string {
 	}
 	summary := ""
 	if model.Project.Summary != "" {
-		summary = `<p>` + escapeHTML(model.Project.Summary) + `</p>`
+		summary = `<div class="hero-summary" data-hero-summary><p>` + escapeHTML(model.Project.Summary) + `</p><button type="button" data-hero-summary-toggle hidden aria-expanded="false">Показать полностью</button></div>`
 	}
 	meta := ""
 	if values := nonEmpty([]string{model.Project.Stage, model.Project.Version, model.Project.Owner, model.Project.Updated}); len(values) > 0 {
@@ -511,7 +583,21 @@ func renderDashboard(model *Model) string {
 	if docs.Len() > 0 {
 		documentList = `<div data-filter-scope>` + filterControls(true, true) + `<div class="collection-summary">Показано: <strong data-filter-count></strong></div><div class="card-grid">` + docs.String() + `</div><div class="empty-state" data-filter-empty hidden>Ничего не найдено.</div></div>`
 	}
-	content := `<header class="hero">` + status + `<h1>` + escapeHTML(model.Project.Title) + `</h1><p class="page-lead">` + escapeHTML(model.Project.Description) + `</p>` + summary + meta + `</header>` + overview + `<section class="metric-grid">` + metrics.String() + `</section>` + roadmap + computedStatus + riskSection + `<section class="dashboard-section"><div class="section-heading"><div><h2>Документация проекта</h2><p>Поиск, фильтры, статусы и локальные чек-листы.</p></div><a class="section-link" href="` + escapeAttr(model.HealthOutputPath) + `">Качество →</a></div>` + documentList + `</section>`
+	hero := `<header class="page-header"><h1>` + escapeHTML(model.Project.Title) + `</h1><p class="page-lead">` + escapeHTML(model.Project.Description) + `</p></header>`
+	if model.SiteConfig.Hero.Enabled {
+		heroLogo := ""
+		if logo := brandingOutput(model, "logo"); logo != "" {
+			heroLogo = `<img class="hero-logo" src="` + escapeAttr(logo) + `" alt="">`
+		}
+		heroImage := ""
+		heroClass := "hero"
+		if image := brandingOutput(model, "hero"); image != "" {
+			heroClass += " has-image"
+			heroImage = `<div class="hero-media"><img src="` + escapeAttr(image) + `" alt=""></div>`
+		}
+		hero = `<header class="` + heroClass + `"><div class="hero-copy">` + heroLogo + status + `<h1>` + escapeHTML(model.Project.Title) + `</h1><p class="hero-description">` + escapeHTML(model.Project.Description) + `</p>` + summary + meta + `</div>` + heroImage + `</header>`
+	}
+	content := hero + overview + `<section class="metric-grid">` + metrics.String() + `</section>` + roadmap + computedStatus + riskSection + `<section class="dashboard-section"><div class="section-heading"><div><h2>Документация проекта</h2><p>Поиск, фильтры, статусы и локальные чек-листы.</p></div><a class="section-link" href="` + escapeAttr(model.HealthOutputPath) + `">Качество →</a></div>` + documentList + `</section>`
 	return pageShell(model, "index.html", model.Project.Title, model.Project.Description, content, "")
 }
 
@@ -647,7 +733,7 @@ func BuildReport(model *Model) ProjectReport {
 		})
 	}
 	return ProjectReport{
-		SchemaVersion: 1, Generator: GeneratorInfo{Name: "Docgent", Version: Version},
+		SchemaVersion: 2, Generator: GeneratorInfo{Name: "Docgent", Version: Version},
 		GeneratedAt: model.GeneratedAt, SourceDirectory: pathBase(model.RootDirectory),
 		StaleDays: model.StaleDays, Project: project, CurrentStatus: model.CurrentStatus,
 		Stats: model.Stats, Documents: documents, Roadmap: roadmap, Risks: risks,
@@ -710,7 +796,7 @@ func GenerateSite(model *Model, options Options) (GenerateResult, error) {
 	if err = mkdirp(output); err != nil {
 		return GenerateResult{}, err
 	}
-	for _, asset := range []string{"style.css", "app.js", "screen-map.css", "screen-map.js", "playable-flow.css", "playable-flow.js", "mermaid.tiny.js", "mermaid.LICENSE.txt"} {
+	for _, asset := range []string{"style.css", "app.js", "favicon.svg", "screen-map.css", "screen-map.js", "playable-flow.css", "playable-flow.js", "mermaid.tiny.js", "mermaid.LICENSE.txt"} {
 		if err = copyFSFile(EmbeddedFiles, "assets/"+asset, filepath.Join(output, "assets", asset)); err != nil {
 			return GenerateResult{}, err
 		}
@@ -723,6 +809,11 @@ func GenerateSite(model *Model, options Options) (GenerateResult, error) {
 		return GenerateResult{}, err
 	}
 	for outputPath, sourcePath := range model.Assets {
+		if err = copyFileEnsured(sourcePath, filepath.Join(output, filepath.FromSlash(outputPath))); err != nil {
+			return GenerateResult{}, err
+		}
+	}
+	for outputPath, sourcePath := range model.BrandingAssets {
 		if err = copyFileEnsured(sourcePath, filepath.Join(output, filepath.FromSlash(outputPath))); err != nil {
 			return GenerateResult{}, err
 		}
@@ -804,5 +895,5 @@ func GenerateSite(model *Model, options Options) (GenerateResult, error) {
 	if err = writeFileEnsured(filepath.Join(output, model.ReportOutputPath), report); err != nil {
 		return GenerateResult{}, err
 	}
-	return GenerateResult{OutputDirectory: output, Pages: pages, Assets: len(model.Assets) + 9}, nil
+	return GenerateResult{OutputDirectory: output, Pages: pages, Assets: len(model.Assets) + len(model.BrandingAssets) + 10}, nil
 }

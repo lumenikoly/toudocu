@@ -307,17 +307,107 @@ func validateScopePaths(model *Model, document *Document, item parsedWorkItem) [
 			addKnowledgeIssue(model, document, "error", "unsafe-scope-path", "Путь scope выходит за пределы repository-root: "+value+".", scope.Heading.Line+1)
 			continue
 		}
+		resolvedRoot, rootErr := resolvePathForSafety(model.RepositoryRoot)
+		resolvedPath, pathErr := resolvePathForSafety(absolute)
+		if rootErr != nil || pathErr != nil || !ensureInside(resolvedRoot, resolvedPath) {
+			addKnowledgeIssue(model, document, "error", "unsafe-scope-path", "Путь scope выходит за пределы repository-root через символическую ссылку: "+value+".", scope.Heading.Line+1)
+			continue
+		}
 		if strings.ContainsAny(value, "*?[") {
 			matches, _ := filepath.Glob(absolute)
 			if len(matches) == 0 {
 				addKnowledgeIssue(model, document, "error", "missing-scope-path", "Путь scope не существует: "+value+".", scope.Heading.Line+1)
 				continue
 			}
+			unsafe := false
+			for _, match := range matches {
+				resolved, err := resolvePathForSafety(match)
+				if err != nil || !ensureInside(resolvedRoot, resolved) {
+					unsafe = true
+					break
+				}
+			}
+			if unsafe {
+				addKnowledgeIssue(model, document, "error", "unsafe-scope-path", "Совпадение scope выходит за пределы repository-root: "+value+".", scope.Heading.Line+1)
+				continue
+			}
 		} else if _, err := os.Stat(absolute); err != nil {
-			addKnowledgeIssue(model, document, "error", "missing-scope-path", "Путь scope не существует: "+value+".", scope.Heading.Line+1)
-			continue
+			if os.IsNotExist(err) && strings.HasSuffix(value, "/") {
+				addKnowledgeIssue(model, document, "error", "missing-scope-path", "Новый отсутствующий scope-путь должен быть файлом, а не каталогом: "+value+".", scope.Heading.Line+1)
+				continue
+			}
+			parent := filepath.Dir(absolute)
+			info, parentErr := os.Stat(parent)
+			if !os.IsNotExist(err) || parentErr != nil || !info.IsDir() {
+				addKnowledgeIssue(model, document, "error", "missing-scope-path", "Родительский каталог нового файла scope не существует: "+value+".", scope.Heading.Line+1)
+				continue
+			}
 		}
 		result = append(result, value)
+	}
+	result = uniqueStrings(result)
+	sort.SliceStable(result, func(i, j int) bool { return naturalCompare(result[i], result[j]) < 0 })
+	return result
+}
+
+func nestedWorkSection(section workSubsection, names ...string) string {
+	parsed := AnalyzeMarkdown("# Section\n\n" + section.Markdown)
+	targets := map[string]bool{}
+	for _, name := range names {
+		targets[canonicalText(name)] = true
+	}
+	for _, candidate := range parsed.Sections {
+		if targets[canonicalText(candidate.Title)] {
+			return strings.TrimSpace(candidate.Text)
+		}
+	}
+	// AnalyzeMarkdown only exposes H2 sections; demote the original H3 headings.
+	content := regexp.MustCompile(`(?m)^###\s+`).ReplaceAllString(section.Markdown, "## ")
+	parsed = AnalyzeMarkdown("# Section\n\n" + content)
+	for _, candidate := range parsed.Sections {
+		if targets[canonicalText(candidate.Title)] {
+			return strings.TrimSpace(candidate.Text)
+		}
+	}
+	return ""
+}
+
+func documentationPathsFor(model *Model, document *Document, item parsedWorkItem) []string {
+	section, found := workSection(item, "влияние на документацию", "documentation impact")
+	if !found {
+		return []string{}
+	}
+	candidates := []string{}
+	for _, match := range codeSpanRE.FindAllStringSubmatch(section.Markdown, -1) {
+		candidates = append(candidates, strings.TrimSpace(match[1]))
+	}
+	for _, link := range document.Links {
+		if link.Line <= section.Heading.Line || link.Line > section.EndLine || link.Image {
+			continue
+		}
+		candidates = append(candidates, strings.Split(link.Destination, "#")[0])
+	}
+	result := []string{}
+	for _, value := range candidates {
+		value = normalizeSlashes(strings.TrimSpace(value))
+		if value == "" || strings.ContainsAny(value, "*?[") || strings.Contains(value, "://") {
+			continue
+		}
+		repositoryCandidate := filepath.Join(model.RepositoryRoot, filepath.FromSlash(value))
+		docsCandidate := filepath.Join(model.RootDirectory, filepath.FromSlash(value))
+		if strings.HasPrefix(value, "../") {
+			docsCandidate = filepath.Join(filepath.Dir(document.AbsolutePath), filepath.FromSlash(value))
+		}
+		for _, absolute := range []string{repositoryCandidate, docsCandidate} {
+			if info, err := os.Stat(absolute); err == nil && !info.IsDir() {
+				if ensureInside(model.RootDirectory, absolute) {
+					result = append(result, toPosixRelative(model.RootDirectory, absolute))
+				} else if ensureInside(model.RepositoryRoot, absolute) {
+					result = append(result, toPosixRelative(model.RepositoryRoot, absolute))
+				}
+				break
+			}
+		}
 	}
 	result = uniqueStrings(result)
 	sort.SliceStable(result, func(i, j int) bool { return naturalCompare(result[i], result[j]) < 0 })
@@ -352,6 +442,11 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 			requiredWorkSection{[]string{"проверка", "verification"}, "Проверка"},
 			requiredWorkSection{[]string{"влияние на документацию", "documentation impact"}, "Влияние на документацию"},
 		)
+		if typeValid && (typeName == "Feature" || typeName == "Bug") {
+			requiredSections = append(requiredSections,
+				requiredWorkSection{[]string{"изменение поведения", "behavior change"}, "Изменение поведения"},
+			)
+		}
 	}
 	for _, required := range requiredSections {
 		section, found := workSection(item, required.names...)
@@ -359,6 +454,14 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 	}
 
 	criteria, verification, checks := parseCriteriaAndVerification(model, document, item, strictWorkflow)
+	if strictWorkflow && typeValid && (typeName == "Feature" || typeName == "Bug") {
+		behavior, found := workSection(item, "изменение поведения", "behavior change")
+		if found {
+			if nestedWorkSection(behavior, "было", "before") == "" || nestedWorkSection(behavior, "станет", "after") == "" {
+				addKnowledgeIssue(model, document, "error", "incomplete-behavior-change", "Раздел изменения поведения должен содержать непустые «Было» и «Станет».", behavior.Heading.Line+1)
+			}
+		}
+	}
 	checklistLines := map[int]struct{}{}
 	if criteriaSection, found := workSection(item, "критерии приёмки", "критерии приемки", "acceptance criteria"); found {
 		for _, criterion := range criteriaSection.Tasks {
@@ -384,21 +487,27 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 		reason, found := workSection(item, "причина отмены", "cancellation reason")
 		workSectionContentRequired(model, document, item, reason, found, "Причина отмены")
 	}
-	if statusName == "done" {
-		if criteriaSection, found := workSection(item, "критерии приёмки", "критерии приемки", "acceptance criteria"); found {
-			for _, criterion := range criteriaSection.Tasks {
-				if !criterion.Completed {
-					addKnowledgeIssue(model, document, "error", "incomplete-completed-task", "У выполненной задачи все критерии приёмки должны быть отмечены [x].", criterion.Line)
-				}
-			}
-		}
+	if strictWorkflow {
 		declared := map[string]bool{}
 		for _, check := range checks {
 			declared[check.Target] = true
 		}
 		for _, target := range []string{"ALL", "DOCS"} {
 			if !declared[target] {
-				addKnowledgeIssue(model, document, "error", "missing-completed-task-check", "Выполненная задача должна содержать проверку "+target+".", item.Heading.Line+1)
+				code := "missing-task-check"
+				if statusName == "done" {
+					code = "missing-completed-task-check"
+				}
+				addKnowledgeIssue(model, document, "error", code, "Задача должна содержать проверку "+target+".", item.Heading.Line+1)
+			}
+		}
+	}
+	if statusName == "done" {
+		if criteriaSection, found := workSection(item, "критерии приёмки", "критерии приемки", "acceptance criteria"); found {
+			for _, criterion := range criteriaSection.Tasks {
+				if !criterion.Completed {
+					addKnowledgeIssue(model, document, "error", "incomplete-completed-task", "У выполненной задачи все критерии приёмки должны быть отмечены [x].", criterion.Line)
+				}
 			}
 		}
 	}
@@ -415,6 +524,10 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 	}
 
 	resultSection, _ := workSection(item, "результат", "result")
+	behaviorSection, _ := workSection(item, "изменение поведения", "behavior change")
+	outOfScopeSection, _ := workSection(item, "не входит в задачу", "out of scope")
+	planSection, _ := workSection(item, "план", "plan")
+	documentationImpactSection, _ := workSection(item, "влияние на документацию", "documentation impact")
 	blockerSection, _ := workSection(item, "блокер", "blocker")
 	repositoryPaths := append([]string{}, validateScopePaths(model, document, item)...)
 	return WorkItem{
@@ -426,8 +539,16 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 		DependsOn:     splitReferences(item.Metadata["dependsOn"]), Document: document.SourcePath,
 		Anchor: item.Heading.ID, Criteria: criteria, Verification: verification, Checks: checks,
 		RepositoryPaths: repositoryPaths, line: item.Heading.Line + 1,
-		Result: strings.TrimSpace(resultSection.Text), Blocker: strings.TrimSpace(blockerSection.Text),
-		ownerDoc: document, statusName: statusName,
+		Result:              strings.TrimSpace(resultSection.Text),
+		BehaviorChange:      strings.TrimSpace(behaviorSection.Text),
+		Before:              nestedWorkSection(behaviorSection, "было", "before"),
+		After:               nestedWorkSection(behaviorSection, "станет", "after"),
+		OutOfScope:          strings.TrimSpace(outOfScopeSection.Text),
+		Plan:                strings.TrimSpace(planSection.Text),
+		DocumentationImpact: strings.TrimSpace(documentationImpactSection.Text),
+		DocumentationPaths:  documentationPathsFor(model, document, item),
+		Blocker:             strings.TrimSpace(blockerSection.Text),
+		ownerDoc:            document, statusName: statusName,
 	}
 }
 

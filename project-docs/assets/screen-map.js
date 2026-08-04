@@ -7,6 +7,15 @@
   const screens = data.screens || [];
   const transitions = data.transitions || [];
   const flows = data.flows || [];
+  const CARD_WIDTH = 278;
+  const MIN_CARD_HEIGHT = 248;
+  const MODULE_COLUMN_GAP = 144;
+  const MODULE_ROW_GAP = 112;
+  const MODULE_GROUP_GAP = 96;
+  const FLOW_COLUMN_GAP = 180;
+  const FLOW_ROW_GAP = 120;
+  const SITEMAP_COLUMN_GAP = 120;
+  const SITEMAP_ROW_GAP = 160;
   const byId = new Map(screens.map((screen) => [screen.id, screen]));
   const nodeById = new Map([...workspace.querySelectorAll('[data-screen-node]')].map((node) => [node.dataset.screenNode, node]));
   const stage = workspace.querySelector('[data-map-stage]');
@@ -21,7 +30,8 @@
   const useCaseSelect = workspace.querySelector('[data-map-usecase]');
   const statusSelect = workspace.querySelector('[data-map-status]');
   const search = workspace.querySelector('[data-map-search]');
-  let mode = 'all';
+  const initialUseCase = workspace.dataset.mapInitialUsecase || '';
+  let mode = initialUseCase ? 'usecase' : 'all';
   let selected = '';
   let selectedTransition = '';
   let scale = 1;
@@ -33,6 +43,7 @@
   let activeEdges = transitions;
   const positions = new Map();
   let groupBounds = [];
+  let cardHeight = MIN_CARD_HEIGHT;
 
   function selectedFlow() {
     return flows.find((flow) => flow.useCase === useCaseSelect?.value);
@@ -74,21 +85,24 @@
         if (!groups.has(module)) groups.set(module, []);
         groups.get(module).push(id);
       });
-      let cursorX = 40;
+      let cursorX = 48;
       [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0], undefined, { numeric: true })).forEach(([module, members]) => {
         members.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
         const columns = Math.min(2, members.length);
         const rows = Math.ceil(members.length / columns);
-        const width = columns * 310 + 30;
-        const height = rows * 288 + 70;
+        const width = 64 + columns * CARD_WIDTH + Math.max(0, columns - 1) * MODULE_COLUMN_GAP;
+        const height = 96 + rows * cardHeight + Math.max(0, rows - 1) * MODULE_ROW_GAP;
         members.forEach((id, index) => {
-          positions.set(id, { x: cursorX + 20 + (index % columns) * 310, y: 70 + Math.floor(index / columns) * 288 });
+          positions.set(id, {
+            x: cursorX + 32 + (index % columns) * (CARD_WIDTH + MODULE_COLUMN_GAP),
+            y: 96 + Math.floor(index / columns) * (cardHeight + MODULE_ROW_GAP),
+          });
         });
-        groupBounds.push({ module, x: cursorX, y: 30, width, height });
-        cursorX += width + 35;
+        groupBounds.push({ module, x: cursorX, y: 32, width, height });
+        cursorX += width + MODULE_GROUP_GAP;
       });
-      const maxX = Math.max(900, cursorX + 20);
-      const maxY = Math.max(620, ...groupBounds.map((group) => group.y + group.height + 30));
+      const maxX = Math.max(900, cursorX);
+      const maxY = Math.max(620, ...groupBounds.map((group) => group.y + group.height + 128));
       setCanvasSize(maxX, maxY);
       return;
     }
@@ -123,12 +137,18 @@
       members.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
       members.forEach((id, row) => {
         positions.set(id, vertical
-          ? { x: 40 + row * 310, y: 40 + level * 330 }
-          : { x: 40 + level * 350, y: 40 + row * 300 });
+          ? {
+              x: 48 + row * (CARD_WIDTH + SITEMAP_COLUMN_GAP),
+              y: 56 + level * (cardHeight + SITEMAP_ROW_GAP),
+            }
+          : {
+              x: 48 + level * (CARD_WIDTH + FLOW_COLUMN_GAP),
+              y: 56 + row * (cardHeight + FLOW_ROW_GAP),
+            });
       });
     });
-    const maxX = Math.max(900, ...[...positions.values()].map((position) => position.x + 290));
-    const maxY = Math.max(620, ...[...positions.values()].map((position) => position.y + 260));
+    const maxX = Math.max(900, ...[...positions.values()].map((position) => position.x + CARD_WIDTH + 128));
+    const maxY = Math.max(620, ...[...positions.values()].map((position) => position.y + cardHeight + 128));
     setCanvasSize(maxX, maxY);
   }
 
@@ -158,60 +178,117 @@
     });
   }
 
-  function edgePath(edge) {
+  function normalEdgeGeometry(source, target) {
+    const sourceCenter = { x: source.x + CARD_WIDTH / 2, y: source.y + cardHeight / 2 };
+    const targetCenter = { x: target.x + CARD_WIDTH / 2, y: target.y + cardHeight / 2 };
+    const dx = targetCenter.x - sourceCenter.x;
+    const dy = targetCenter.y - sourceCenter.y;
+    if (Math.abs(dx) >= Math.abs(dy) * .85) {
+      const direction = dx >= 0 ? 1 : -1;
+      const x1 = sourceCenter.x + direction * CARD_WIDTH / 2;
+      const y1 = sourceCenter.y;
+      const x2 = targetCenter.x - direction * CARD_WIDTH / 2;
+      const y2 = targetCenter.y;
+      const control = Math.max(72, Math.min(180, Math.abs(x2 - x1) / 2));
+      return {
+        path: `M ${x1} ${y1} C ${x1 + direction * control} ${y1}, ${x2 - direction * control} ${y2}, ${x2} ${y2}`,
+        labelX: (x1 + x2) / 2,
+        labelY: (y1 + y2) / 2 - 14,
+      };
+    }
+    const direction = dy >= 0 ? 1 : -1;
+    const x1 = sourceCenter.x;
+    const y1 = sourceCenter.y + direction * cardHeight / 2;
+    const x2 = targetCenter.x;
+    const y2 = targetCenter.y - direction * cardHeight / 2;
+    const control = Math.max(64, Math.min(160, Math.abs(y2 - y1) / 2));
+    return {
+      path: `M ${x1} ${y1} C ${x1} ${y1 + direction * control}, ${x2} ${y2 - direction * control}, ${x2} ${y2}`,
+      labelX: (x1 + x2) / 2,
+      labelY: (y1 + y2) / 2 - 10,
+    };
+  }
+
+  function selfEdgeGeometry(edge, source) {
+    const rightOccupied = [...positions.entries()].some(([id, position]) => (
+      id !== edge.source
+      && position.x > source.x
+      && position.x - (source.x + CARD_WIDTH) < 200
+      && position.y < source.y + cardHeight
+      && position.y + cardHeight > source.y
+    ));
+    if (!rightOccupied) {
+      const x = source.x + CARD_WIDTH;
+      const y1 = source.y + 70;
+      const y2 = source.y + 178;
+      return {
+        path: `M ${x} ${y1} C ${x + 112} ${y1 - 48}, ${x + 112} ${y2 + 48}, ${x} ${y2}`,
+        labelX: x + 82,
+        labelY: source.y + 54,
+      };
+    }
+    const y = source.y + cardHeight;
+    const x1 = source.x + 72;
+    const x2 = source.x + 206;
+    return {
+      path: `M ${x1} ${y} C ${x1 - 42} ${y + 100}, ${x2 + 42} ${y + 100}, ${x2} ${y}`,
+      labelX: source.x + CARD_WIDTH / 2,
+      labelY: y + 90,
+    };
+  }
+
+  function edgeGeometry(edge) {
     const source = positions.get(edge.source);
     const target = positions.get(edge.target);
-    if (!source || !target) return '';
+    if (!source || !target) return null;
     if (edge.source === edge.target) {
-      const x = source.x + 278;
-      const y = source.y + 80;
-      return `M ${x} ${y} C ${x + 85} ${y - 70}, ${x + 85} ${y + 150}, ${x} ${y + 120}`;
+      return selfEdgeGeometry(edge, source);
     }
     if (edge.type === 'return') {
-      const x1 = source.x + 139, y1 = source.y;
-      const x2 = target.x + 139, y2 = target.y;
-      const lift = Math.min(y1, y2) - 80;
-      const bend = Math.abs(x2 - x1) < 80 ? -90 : 0;
-      return `M ${x1} ${y1} C ${x1 + bend} ${lift}, ${x2 + bend} ${lift}, ${x2} ${y2}`;
+      const sourceCenter = { x: source.x + CARD_WIDTH / 2, y: source.y + cardHeight / 2 };
+      const targetCenter = { x: target.x + CARD_WIDTH / 2, y: target.y + cardHeight / 2 };
+      if (Math.abs(targetCenter.x - sourceCenter.x) < Math.abs(targetCenter.y - sourceCenter.y)) {
+        const x1 = source.x + CARD_WIDTH;
+        const y1 = sourceCenter.y;
+        const x2 = target.x + CARD_WIDTH;
+        const y2 = targetCenter.y;
+        const bendX = Math.max(x1, x2) + 104;
+        return {
+          path: `M ${x1} ${y1} C ${bendX} ${y1}, ${bendX} ${y2}, ${x2} ${y2}`,
+          labelX: bendX,
+          labelY: (y1 + y2) / 2 - 12,
+        };
+      }
+      const x1 = sourceCenter.x;
+      const y1 = source.y;
+      const x2 = targetCenter.x;
+      const y2 = target.y;
+      const lift = Math.min(y1, y2) - 96;
+      return {
+        path: `M ${x1} ${y1} C ${x1} ${lift}, ${x2} ${lift}, ${x2} ${y2}`,
+        labelX: (x1 + x2) / 2,
+        labelY: lift - 10,
+      };
     }
     const vertical = mode === 'sitemap';
     if (vertical) {
-      const x1 = source.x + 139, y1 = source.y + 248, x2 = target.x + 139, y2 = target.y;
+      const x1 = source.x + CARD_WIDTH / 2, y1 = source.y + cardHeight;
+      const x2 = target.x + CARD_WIDTH / 2, y2 = target.y;
       const middle = (y1 + y2) / 2;
-      return `M ${x1} ${y1} C ${x1} ${middle}, ${x2} ${middle}, ${x2} ${y2}`;
-    }
-    const x1 = source.x + 278, y1 = source.y + 115, x2 = target.x, y2 = target.y + 115;
-    const middle = (x1 + x2) / 2;
-    return `M ${x1} ${y1} C ${middle} ${y1}, ${middle} ${y2}, ${x2} ${y2}`;
-  }
-
-  function edgeLabelPosition(edge) {
-    const source = positions.get(edge.source);
-    const target = positions.get(edge.target);
-    if (edge.source === edge.target) {
       return {
-        x: source.x + 345,
-        y: source.y + 55,
+        path: `M ${x1} ${y1} C ${x1} ${middle}, ${x2} ${middle}, ${x2} ${y2}`,
+        labelX: (x1 + x2) / 2,
+        labelY: middle - 10,
       };
     }
-    if (edge.type === 'return') {
-      const bend = Math.abs(target.x - source.x) < 80 ? -70 : 0;
-      return {
-        x: (source.x + target.x + 278) / 2 + bend,
-        y: Math.min(source.y, target.y) - 90,
-      };
-    }
-    return {
-      x: (source.x + target.x + 278) / 2,
-      y: (source.y + target.y + 210) / 2 - 10,
-    };
+    return normalEdgeGeometry(source, target);
   }
 
   function drawEdges() {
     edgeLayer.innerHTML = `<defs><marker id="screen-map-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z"></path></marker></defs>`;
     activeEdges.forEach((edge) => {
-      const pathData = edgePath(edge);
-      if (!pathData) return;
+      const geometry = edgeGeometry(edge);
+      if (!geometry) return;
       const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       group.classList.add('screen-edge', `screen-edge-${edge.type || 'navigation'}`);
       group.dataset.transitionId = edge.id;
@@ -220,20 +297,31 @@
       group.setAttribute('aria-label', `${edge.id}: ${edge.action}, ${edge.condition}`);
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       path.classList.add('screen-edge-path');
-      path.setAttribute('d', pathData);
+      path.setAttribute('d', geometry.path);
       path.setAttribute('marker-end', 'url(#screen-map-arrow)');
       if (edge.type === 'external') {
         const outerPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         outerPath.classList.add('screen-edge-path', 'screen-edge-external-outer');
-        outerPath.setAttribute('d', pathData);
+        outerPath.setAttribute('d', geometry.path);
         path.classList.add('screen-edge-external-inner');
         group.append(outerPath);
       }
       const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      const labelPosition = edgeLabelPosition(edge);
-      label.setAttribute('x', labelPosition.x);
-      label.setAttribute('y', labelPosition.y);
-      label.textContent = edge.condition ? `${edge.action} · ${edge.condition}` : edge.action;
+      label.setAttribute('x', geometry.labelX);
+      label.setAttribute('y', geometry.labelY);
+      label.setAttribute('text-anchor', 'middle');
+      const actionLabel = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+      actionLabel.setAttribute('x', geometry.labelX);
+      actionLabel.textContent = edge.action;
+      label.append(actionLabel);
+      if (edge.condition) {
+        const conditionLabel = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+        conditionLabel.classList.add('screen-edge-condition');
+        conditionLabel.setAttribute('x', geometry.labelX);
+        conditionLabel.setAttribute('dy', '14');
+        conditionLabel.textContent = edge.condition;
+        label.append(conditionLabel);
+      }
       group.append(path, label);
       const choose = (event) => {
         event.stopPropagation();
@@ -323,15 +411,25 @@
     inspector.querySelector('[data-inspector-close]')?.addEventListener('click', () => selectScreen(''));
   }
 
-  function render({ fit = false } = {}) {
-    computeVisible();
+  function measureVisibleCards() {
     nodeById.forEach((node, id) => {
       node.hidden = !visible.has(id);
-      if (visible.has(id)) {
-        const position = positions.get(id);
-        if (position) node.style.transform = `translate(${position.x}px, ${position.y}px)`;
-      }
+      node.style.height = '';
     });
+    cardHeight = Math.max(
+      MIN_CARD_HEIGHT,
+      ...[...nodeById.entries()]
+        .filter(([id]) => visible.has(id))
+        .map(([, node]) => node.offsetHeight),
+    );
+    nodeById.forEach((node, id) => {
+      if (visible.has(id)) node.style.height = `${cardHeight}px`;
+    });
+  }
+
+  function render({ fit = false } = {}) {
+    computeVisible();
+    measureVisibleCards();
     layout();
     nodeById.forEach((node, id) => {
       const position = positions.get(id);
@@ -436,9 +534,17 @@
     if (document.fullscreenElement) document.exitFullscreen?.();
     else stage.requestFullscreen?.();
   });
+  document.addEventListener('docgent:panelshown', (event) => {
+    if (event.target?.contains(workspace)) {
+      window.requestAnimationFrame(() => render({ fit: true }));
+    }
+  });
 
+  if (initialUseCase && useCaseSelect) {
+    useCaseSelect.value = initialUseCase;
+  }
   const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-  if (hash.get('usecase')) {
+  if (!initialUseCase && hash.get('usecase')) {
     mode = 'usecase';
     useCaseSelect.value = hash.get('usecase');
     useCaseSelect.hidden = false;

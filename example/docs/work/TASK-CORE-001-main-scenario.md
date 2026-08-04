@@ -15,6 +15,16 @@
 
 Основной сценарий выполняется согласно критериям приёмки.
 
+## Изменение поведения
+
+### Было
+
+Основной экранный сценарий не был связан с проверяемыми переходами.
+
+### Станет
+
+Основной сценарий проходит по документированным переходам и состояниям.
+
 ## Область изменения
 
 - `docs/screens/`;
@@ -47,6 +57,8 @@
 - `AC-04` → `test -f ./d[o]cs/screens/SC-CORE-RESULT.md`
 - `AC-05` → `TR-CORE-005` → `TestInvalidRequest`
 - `AC-05` → `test -f ./d[o]cs/contracts/api.md`
+- `ALL` → `go test ./...`
+- `DOCS` → `go run ./cmd/docgent check ./example/docs --repository-root ./example`
 
 ## План
 
