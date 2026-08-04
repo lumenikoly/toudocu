@@ -507,6 +507,7 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 	documentIDs := map[string]*Document{}
 	modules := []KnowledgeModule{}
 	useCases := []KnowledgeUseCase{}
+	flows := []KnowledgeFlow{}
 	businessRules := []BusinessRule{}
 	workItems := []WorkItem{}
 
@@ -531,10 +532,15 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 		case "use-case":
 			useCases = append(useCases, KnowledgeUseCase{
 				ID: stableID, Title: document.Title, Status: document.Status, ModuleID: document.Metadata["module"],
-				Document: document.SourcePath, RepositoryPaths: repositoryPathsFor(document), BusinessRuleIDs: []string{},
+				Document: document.SourcePath, RepositoryPaths: repositoryPathsFor(document), BusinessRuleIDs: []string{}, FlowIDs: []string{},
 				ScreenIDs: splitReferences(document.Metadata["screens"]), StartScreenID: strings.TrimSpace(document.Metadata["startScreen"]),
 				TerminalScreens: splitReferences(document.Metadata["terminalScreens"]),
 				AllowCycle:      containsString([]string{"да", "yes", "true", "1"}, canonicalText(document.Metadata["allowCycle"])),
+			})
+		case "flow":
+			flows = append(flows, KnowledgeFlow{
+				ID: stableID, Title: document.Title, ModuleID: document.Metadata["module"],
+				UseCaseIDs: splitReferences(document.Metadata["useCase"]), Document: document.SourcePath,
 			})
 		}
 		if document.Type == "module" {
@@ -608,6 +614,24 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 		}
 		sort.SliceStable(useCase.BusinessRuleIDs, func(i, j int) bool { return naturalCompare(useCase.BusinessRuleIDs[i], useCase.BusinessRuleIDs[j]) < 0 })
 	}
+	for flowIndex := range flows {
+		flow := &flows[flowIndex]
+		flow.UseCaseIDs = uniqueStrings(flow.UseCaseIDs)
+		sort.SliceStable(flow.UseCaseIDs, func(i, j int) bool {
+			return naturalCompare(flow.UseCaseIDs[i], flow.UseCaseIDs[j]) < 0
+		})
+		for _, useCaseID := range flow.UseCaseIDs {
+			if useCase := useCaseByID[useCaseID]; useCase != nil {
+				useCase.FlowIDs = append(useCase.FlowIDs, flow.ID)
+			}
+		}
+	}
+	for useCaseIndex := range useCases {
+		useCases[useCaseIndex].FlowIDs = uniqueStrings(useCases[useCaseIndex].FlowIDs)
+		sort.SliceStable(useCases[useCaseIndex].FlowIDs, func(i, j int) bool {
+			return naturalCompare(useCases[useCaseIndex].FlowIDs[i], useCases[useCaseIndex].FlowIDs[j]) < 0
+		})
+	}
 	for i := range workItems {
 		item := &workItems[i]
 		if item.ModuleID == "" && item.statusName != "draft" {
@@ -649,7 +673,7 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 		})
 	}
 	return KnowledgeModel{
-		Modules: modules, UseCases: useCases, Screens: []KnowledgeScreen{}, Transitions: []ScreenTransition{},
+		Modules: modules, UseCases: useCases, Flows: flows, Screens: []KnowledgeScreen{}, Transitions: []ScreenTransition{},
 		BusinessRules: businessRules, WorkItems: workItems, PlayableFlows: []PlayableFlow{}, Hotspots: []Hotspot{},
 		Errors: []ErrorDefinition{}, Traceability: []TraceabilityRow{},
 	}

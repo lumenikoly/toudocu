@@ -41,14 +41,14 @@ func metricCard(label string, value any, detail string) string {
 }
 
 func outputForDirectory(model *Model, directory string) string {
+	if directory == "processes" {
+		return "processes/index.html"
+	}
 	if directory == "screens" && len(model.Knowledge.Screens) > 0 {
 		if model.ScreenMapEnabled {
 			return "screens/index.html"
 		}
 		return "screens/catalog.html"
-	}
-	if directory == "flows" && len(model.Knowledge.PlayableFlows) > 0 {
-		return "flows/index.html"
 	}
 	if document := model.DocByPath[path.Join(directory, "index.md")]; document != nil {
 		return document.OutputPath
@@ -65,8 +65,20 @@ func renderNavigation(model *Model, current string) string {
 		first := strings.Split(document.SourcePath, "/")[0]
 		if !strings.Contains(document.SourcePath, "/") {
 			rootDocs = append(rootDocs, document)
+		} else if first == "flows" {
+			groups["processes"] = append(groups["processes"], document)
 		} else {
 			groups[first] = append(groups[first], document)
+		}
+	}
+	if len(model.Knowledge.UseCases) > 0 {
+		if _, exists := groups["use-cases"]; !exists {
+			groups["use-cases"] = []*Document{}
+		}
+	}
+	if len(model.Knowledge.UseCases)+len(model.Knowledge.Flows) > 0 {
+		if _, exists := groups["processes"]; !exists {
+			groups["processes"] = []*Document{}
 		}
 	}
 	if len(model.Knowledge.Screens) > 0 {
@@ -90,28 +102,40 @@ func renderNavigation(model *Model, current string) string {
 	for key := range groups {
 		keys = append(keys, key)
 	}
-	sort.SliceStable(keys, func(i, j int) bool { return naturalCompare(keys[i], keys[j]) < 0 })
+	navigationOrder := map[string]int{
+		"architecture": 10,
+		"contracts":    20,
+		"decisions":    30,
+		"guides":       40,
+		"modules":      50,
+		"use-cases":    60,
+		"processes":    70,
+		"reference":    80,
+		"screens":      90,
+		"work":         100,
+	}
+	sort.SliceStable(keys, func(i, j int) bool {
+		left, leftKnown := navigationOrder[keys[i]]
+		right, rightKnown := navigationOrder[keys[j]]
+		if leftKnown && rightKnown {
+			return left < right
+		}
+		if leftKnown != rightKnown {
+			return leftKnown
+		}
+		return naturalCompare(keys[i], keys[j]) < 0
+	})
 	for _, key := range keys {
 		target := outputForDirectory(model, key)
-		if key == "flows" {
-			for _, document := range groups[key] {
-				if !strings.EqualFold(document.FileName, "index.md") {
-					target = document.OutputPath
-					break
-				}
-			}
-		}
 		active := ""
-		if target == current || key == "screens" && current == "flows/index.html" {
+		if target == current {
 			active = " is-active"
 		}
-		if key == "screens" {
-			for _, flow := range model.Knowledge.PlayableFlows {
-				if current == "flows/"+flow.UseCaseID+".html" {
-					active = " is-active"
-					break
-				}
-			}
+		if key == "use-cases" && strings.HasPrefix(current, "use-cases/") {
+			active = " is-active"
+		}
+		if key == "processes" && (strings.HasPrefix(current, "processes/") || strings.HasPrefix(current, "flows/")) {
+			active = " is-active"
 		}
 		label := directoryLabel(key)
 		groupID := "nav-group-" + slugify(key)
@@ -119,7 +143,6 @@ func renderNavigation(model *Model, current string) string {
 		if key == "screens" && len(model.Knowledge.Screens) > 0 {
 			generatedPages := []struct{ title, target, icon string }{
 				{"Каталог экранов", "screens/catalog.html", "▣"},
-				{"User flows", "flows/index.html", "⇢"},
 			}
 			if model.ScreenMapEnabled {
 				generatedPages = append([]struct{ title, target, icon string }{{"Карта экранов", "screens/index.html", "⌗"}}, generatedPages...)
@@ -131,27 +154,48 @@ func renderNavigation(model *Model, current string) string {
 				}
 				fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span class="nav-icon" aria-hidden="true">%s</span><span>%s</span></a></li>`, activeClass, escapeAttr(relativeURL(current, generated.target)), generated.icon, generated.title)
 			}
-			if len(model.Knowledge.PlayableFlows) > 0 {
-				b.WriteString(`<li class="nav-subsection-label"><span aria-hidden="true">▶</span><span>Playable flows</span></li>`)
-				for _, flow := range model.Knowledge.PlayableFlows {
-					title := flow.UseCaseID
-					if useCase := findUseCase(model, flow.UseCaseID); useCase != nil {
-						title += " · " + screenTitleForUseCase(*useCase)
-					}
-					target := "flows/" + flow.UseCaseID + ".html"
-					activeClass := ""
-					aria := ""
-					if current == target {
-						activeClass = " is-active"
-						aria = ` aria-current="page"`
-					}
-					fmt.Fprintf(&b, `<li class="nav-item nav-playable-item"><a class="nav-link%s" href="%s"%s><span class="nav-icon" aria-hidden="true">↳</span><span>%s</span></a></li>`,
-						activeClass, escapeAttr(relativeURL(current, target)), aria, escapeHTML(title))
-				}
-			}
 		}
 		docs := groups[key]
 		sort.SliceStable(docs, func(i, j int) bool { return documentLess(docs[i], docs[j]) })
+		if key == "processes" {
+			generatedPages := []struct{ title, target, icon string }{
+				{"Все процессы", "processes/index.html", "⇢"},
+				{"Визуальные процессы", "flows/index.html", "⇄"},
+			}
+			for _, generated := range generatedPages {
+				activeClass := ""
+				aria := ""
+				if current == generated.target {
+					activeClass = " is-active"
+					aria = ` aria-current="page"`
+				}
+				fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"%s><span class="nav-icon" aria-hidden="true">%s</span><span>%s</span></a></li>`,
+					activeClass, escapeAttr(relativeURL(current, generated.target)), aria, generated.icon, generated.title)
+			}
+			for _, processType := range []struct {
+				label string
+				kind  string
+			}{{"Визуальные процессы", "flow"}} {
+				hasDocuments := false
+				for _, doc := range docs {
+					if doc.Type == processType.kind && !strings.EqualFold(doc.FileName, "index.md") {
+						hasDocuments = true
+						break
+					}
+				}
+				if !hasDocuments {
+					continue
+				}
+				b.WriteString(`<li class="nav-subsection-label"><span aria-hidden="true">▶</span><span>` + escapeHTML(processType.label) + `</span></li>`)
+				for _, doc := range docs {
+					if doc.Type == processType.kind && !strings.EqualFold(doc.FileName, "index.md") {
+						writeDoc(doc)
+					}
+				}
+			}
+			b.WriteString(`</ul></li>`)
+			continue
+		}
 		for _, doc := range docs {
 			if strings.EqualFold(doc.FileName, "index.md") || doc.Type == "screen-map" {
 				continue
@@ -301,6 +345,7 @@ func renderDocumentPage(model *Model, document *Document) string {
 		computedStatus = renderComputedStatus(model, document.OutputPath)
 	}
 	screenConnections := ""
+	flowConnections := ""
 	displayStatus := document.Status
 	if document.Type == "screen" {
 		screenConnections = renderScreenConnections(model, document)
@@ -311,7 +356,11 @@ func renderDocumentPage(model *Model, document *Document) string {
 			}
 		}
 	}
+	if document.Type == "flow" {
+		flowConnections = renderFlowConnections(model, document)
+	}
 	content := breadcrumbs(model, document.OutputPath, document.Title) + `<header class="page-header"><div class="page-kicker">` + renderStatusChip(displayStatus) + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + issues + `</div><h1>` + escapeHTML(document.Title) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` + renderMetadata(document) + renderProgress(document.TaskStats, "Готовность документа") + controls + `<div class="page-actions"><button class="collapse-all-button" type="button" data-collapse-all data-collapse-state="expanded" aria-expanded="true"><span class="collapse-all-icon" aria-hidden="true"><span class="collapse-icon collapse-icon-up">↑</span><span class="collapse-icon collapse-icon-down">↓</span></span><span data-collapse-label>Свернуть разделы</span></button></div></header>` + computedStatus + `<article class="doc-content">` + body + `</article>` + screenConnections + renderRelated(model, document)
+	content += flowConnections
 	return pageShell(model, document.OutputPath, document.Title, document.Description, content, renderTOC(document))
 }
 
@@ -604,7 +653,7 @@ func BuildReport(model *Model) ProjectReport {
 		Stats: model.Stats, Documents: documents, Roadmap: roadmap, Risks: risks,
 		Knowledge: ReportKnowledge{
 			Modules: model.Knowledge.Modules, UseCases: model.Knowledge.UseCases,
-			BusinessRules: model.Knowledge.BusinessRules, WorkItems: model.Knowledge.WorkItems,
+			Flows: model.Knowledge.Flows, BusinessRules: model.Knowledge.BusinessRules, WorkItems: model.Knowledge.WorkItems,
 		},
 		Screens: screens, Transitions: model.Knowledge.Transitions,
 		PlayableFlows: model.Knowledge.PlayableFlows, Hotspots: model.Knowledge.Hotspots,
@@ -683,26 +732,40 @@ func GenerateSite(model *Model, options Options) (GenerateResult, error) {
 	}
 	pages := 1
 	for _, document := range model.Documents {
-		if document.SourcePath == "index.md" || document.Type == "screen-index" {
+		directory := strings.Split(document.SourcePath, "/")[0]
+		typedCatalogIndex := strings.EqualFold(document.FileName, "index.md") && (directory == "use-cases" || directory == "flows")
+		if document.SourcePath == "index.md" || document.Type == "screen-index" || typedCatalogIndex {
 			continue
 		}
-		if err = writeFileEnsured(filepath.Join(output, filepath.FromSlash(document.OutputPath)), []byte(renderDocumentPage(model, document))); err != nil {
+		pageHTML := renderDocumentPage(model, document)
+		if document.Type == "use-case" {
+			pageHTML = renderUseCasePage(model, document)
+		}
+		if err = writeFileEnsured(filepath.Join(output, filepath.FromSlash(document.OutputPath)), []byte(pageHTML)); err != nil {
 			return GenerateResult{}, err
 		}
 		pages++
 	}
+	if len(model.Knowledge.UseCases)+len(model.Knowledge.Flows) > 0 {
+		processPages := map[string]string{
+			"processes/index.html": renderProcessCatalogPage(model, "processes/index.html", ""),
+			"use-cases/index.html": renderProcessCatalogPage(model, "use-cases/index.html", "use-case"),
+			"flows/index.html":     renderProcessCatalogPage(model, "flows/index.html", "flow"),
+		}
+		for target, pageHTML := range processPages {
+			if err = writeFileEnsured(filepath.Join(output, filepath.FromSlash(target)), []byte(pageHTML)); err != nil {
+				return GenerateResult{}, err
+			}
+			pages++
+		}
+	}
 	if len(model.Knowledge.Screens) > 0 {
 		generatedPages := map[string]string{
 			"screens/catalog.html": renderScreenCatalogPage(model, "screens/catalog.html"),
-			"flows/index.html":     renderFlowIndexPage(model, "flows/index.html"),
 			"traceability.html":    renderTraceabilityPage(model, "traceability.html"),
 		}
 		if model.ScreenMapEnabled {
 			generatedPages["screens/index.html"] = renderScreenMapPage(model, "screens/index.html")
-		}
-		for _, flow := range model.Knowledge.PlayableFlows {
-			target := "flows/" + flow.UseCaseID + ".html"
-			generatedPages[target] = renderPlayableFlowPage(model, flow, target)
 		}
 		for target, pageHTML := range generatedPages {
 			if err = writeFileEnsured(filepath.Join(output, filepath.FromSlash(target)), []byte(pageHTML)); err != nil {
@@ -717,6 +780,9 @@ func GenerateSite(model *Model, options Options) (GenerateResult, error) {
 	}
 	sort.SliceStable(directories, func(i, j int) bool { return naturalCompare(directories[i], directories[j]) < 0 })
 	for _, directory := range directories {
+		if directory == "use-cases" || directory == "flows" {
+			continue
+		}
 		if directoryHasSourceIndex(model, directory) {
 			continue
 		}

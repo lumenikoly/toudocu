@@ -29,7 +29,11 @@ func screenMapData(model *Model, current string) screenMapPayload {
 	}
 	flowURLs := map[string]string{}
 	for _, flow := range model.Knowledge.PlayableFlows {
-		flowURLs[flow.UseCaseID] = relativeURL(current, "flows/"+flow.UseCaseID+".html")
+		if useCase := findUseCase(model, flow.UseCaseID); useCase != nil {
+			if document := model.DocByPath[useCase.Document]; document != nil {
+				flowURLs[flow.UseCaseID] = relativeURL(current, document.OutputPath) + "#play"
+			}
+		}
 	}
 	screens := make([]KnowledgeScreen, len(model.Knowledge.Screens))
 	copy(screens, model.Knowledge.Screens)
@@ -92,7 +96,11 @@ func screenStatusOptions(model *Model) string {
 	return options.String()
 }
 
-func screenUseCaseOptions(model *Model) string {
+func screenUseCaseOptions(model *Model, selectedValues ...string) string {
+	selected := ""
+	if len(selectedValues) > 0 {
+		selected = selectedValues[0]
+	}
 	var options strings.Builder
 	for _, flow := range model.Knowledge.PlayableFlows {
 		title := flow.UseCaseID
@@ -102,7 +110,11 @@ func screenUseCaseOptions(model *Model) string {
 				break
 			}
 		}
-		options.WriteString(`<option value="` + escapeAttr(flow.UseCaseID) + `">` + escapeHTML(title) + `</option>`)
+		selectedAttribute := ""
+		if flow.UseCaseID == selected {
+			selectedAttribute = ` selected`
+		}
+		options.WriteString(`<option value="` + escapeAttr(flow.UseCaseID) + `"` + selectedAttribute + `>` + escapeHTML(title) + `</option>`)
 	}
 	return options.String()
 }
@@ -158,6 +170,43 @@ func blockingScreenMapIssues(model *Model) []Issue {
 	return result
 }
 
+func renderScreenMapWorkspace(model *Model, current, initialUseCase string, embedded bool) string {
+	var cards strings.Builder
+	for _, screen := range model.Knowledge.Screens {
+		cards.WriteString(screenCardHTML(current, screen))
+	}
+	workspaceClass := "screen-map-workspace"
+	if embedded {
+		workspaceClass += " is-embedded"
+	}
+	initialAttribute := ""
+	modeControls := `<div class="screen-map-modes" role="group" aria-label="Режим карты">` +
+		`<button type="button" class="toolbar-button is-active" data-map-mode="all" aria-pressed="true">Все</button>` +
+		`<button type="button" class="toolbar-button" data-map-mode="module" aria-pressed="false">Модуль</button>` +
+		`<button type="button" class="toolbar-button" data-map-mode="usecase" aria-pressed="false">Сценарий</button>` +
+		`<button type="button" class="toolbar-button" data-map-mode="unfinished" aria-pressed="false">Незавершённые</button>` +
+		`<button type="button" class="toolbar-button" data-map-mode="sitemap" aria-pressed="false">Sitemap</button></div>`
+	if initialUseCase != "" {
+		initialAttribute = ` data-map-initial-usecase="` + escapeAttr(initialUseCase) + `"`
+		modeControls = `<div class="screen-map-modes"><span class="screen-map-fixed-mode">Сценарий <code>` + escapeHTML(initialUseCase) + `</code></span></div>`
+	}
+	return `<section class="` + workspaceClass + `" data-screen-map` + initialAttribute + `>` +
+		`<div class="screen-map-toolbar">` + modeControls +
+		`<div class="screen-map-filters"><input type="search" data-map-search placeholder="Найти экран" aria-label="Найти экран">` +
+		`<select data-map-status aria-label="Статус"><option value="">Все статусы</option>` + screenStatusOptions(model) + `</select>` +
+		`<select data-map-module aria-label="Модуль" hidden><option value="">Выберите модуль</option>` + screenModuleOptions(model) + `</select>` +
+		`<select data-map-usecase aria-label="Сценарий" hidden><option value="">Выберите сценарий</option>` + screenUseCaseOptions(model, initialUseCase) + `</select></div>` +
+		`<div class="screen-map-zoom" role="group" aria-label="Масштаб"><button type="button" data-map-zoom-out aria-label="Уменьшить">−</button>` +
+		`<button type="button" data-map-fit>Вписать</button><button type="button" data-map-reset>Сбросить</button>` +
+		`<button type="button" data-map-zoom-in aria-label="Увеличить">+</button><button type="button" data-map-fullscreen>На весь экран</button></div></div>` +
+		`<div class="screen-map-shell"><div class="screen-map-stage" data-map-stage tabindex="0" aria-label="Интерактивная карта экранов">` +
+		`<div class="screen-map-viewport" data-map-viewport><div class="screen-map-groups" data-map-groups></div><svg class="screen-map-edges" data-map-edges aria-hidden="true"></svg>` +
+		`<div class="screen-map-nodes" data-map-nodes>` + cards.String() + `</div></div><p class="screen-map-empty" data-map-empty hidden>Нет экранов для выбранного режима.</p></div>` +
+		`<aside class="screen-inspector" data-map-inspector aria-live="polite"><div class="screen-inspector-empty"><strong>Выберите экран</strong><span>Здесь появятся состояния, связи и затронутые документы.</span></div></aside></div>` +
+		`<p class="screen-map-status" data-map-summary aria-live="polite"></p><script type="application/json" data-screen-map-data>` +
+		jsonScript(screenMapData(model, current)) + `</script></section>`
+}
+
 func renderScreenMapPage(model *Model, current string) string {
 	if issues := blockingScreenMapIssues(model); len(issues) > 0 {
 		var reasons strings.Builder
@@ -174,34 +223,11 @@ func renderScreenMapPage(model *Model, current string) string {
 			escapeAttr(relativeURL(current, "screens/catalog.html")) + `">Открыть каталог экранов →</a></p></section>`
 		return pageShell(model, current, "Карта экранов не построена", "Ошибки модели экранов", content, "")
 	}
-	var cards strings.Builder
-	for _, screen := range model.Knowledge.Screens {
-		cards.WriteString(screenCardHTML(current, screen))
-	}
 	content := breadcrumbs(model, current, "Карта экранов") +
 		`<header class="page-header screen-map-header"><div class="page-kicker"><span class="badge">Screen map</span><a class="badge" href="` +
 		escapeAttr(relativeURL(current, "screens/catalog.html")) + `">Каталог</a><a class="badge" href="` +
-		escapeAttr(relativeURL(current, "flows/index.html")) + `">Playable flows</a></div><h1>Карта экранов</h1><p class="page-lead">Экраны, состояния и переходы из Markdown-модели проекта.</p></header>` +
-		`<section class="screen-map-workspace" data-screen-map>` +
-		`<div class="screen-map-toolbar"><div class="screen-map-modes" role="group" aria-label="Режим карты">` +
-		`<button type="button" class="toolbar-button is-active" data-map-mode="all" aria-pressed="true">Все</button>` +
-		`<button type="button" class="toolbar-button" data-map-mode="module" aria-pressed="false">Модуль</button>` +
-		`<button type="button" class="toolbar-button" data-map-mode="usecase" aria-pressed="false">Сценарий</button>` +
-		`<button type="button" class="toolbar-button" data-map-mode="unfinished" aria-pressed="false">Незавершённые</button>` +
-		`<button type="button" class="toolbar-button" data-map-mode="sitemap" aria-pressed="false">Sitemap</button></div>` +
-		`<div class="screen-map-filters"><input type="search" data-map-search placeholder="Найти экран" aria-label="Найти экран">` +
-		`<select data-map-status aria-label="Статус"><option value="">Все статусы</option>` + screenStatusOptions(model) + `</select>` +
-		`<select data-map-module aria-label="Модуль" hidden><option value="">Выберите модуль</option>` + screenModuleOptions(model) + `</select>` +
-		`<select data-map-usecase aria-label="Сценарий" hidden><option value="">Выберите сценарий</option>` + screenUseCaseOptions(model) + `</select></div>` +
-		`<div class="screen-map-zoom" role="group" aria-label="Масштаб"><button type="button" data-map-zoom-out aria-label="Уменьшить">−</button>` +
-		`<button type="button" data-map-fit>Вписать</button><button type="button" data-map-reset>Сбросить</button>` +
-		`<button type="button" data-map-zoom-in aria-label="Увеличить">+</button><button type="button" data-map-fullscreen>На весь экран</button></div></div>` +
-		`<div class="screen-map-shell"><div class="screen-map-stage" data-map-stage tabindex="0" aria-label="Интерактивная карта экранов">` +
-		`<div class="screen-map-viewport" data-map-viewport><div class="screen-map-groups" data-map-groups></div><svg class="screen-map-edges" data-map-edges aria-hidden="true"></svg>` +
-		`<div class="screen-map-nodes" data-map-nodes>` + cards.String() + `</div></div><p class="screen-map-empty" data-map-empty hidden>Нет экранов для выбранного режима.</p></div>` +
-		`<aside class="screen-inspector" data-map-inspector aria-live="polite"><div class="screen-inspector-empty"><strong>Выберите экран</strong><span>Здесь появятся состояния, связи и затронутые документы.</span></div></aside></div>` +
-		`<p class="screen-map-status" data-map-summary aria-live="polite"></p><script type="application/json" data-screen-map-data>` +
-		jsonScript(screenMapData(model, current)) + `</script></section>`
+		escapeAttr(relativeURL(current, "processes/index.html")) + `">Процессы</a></div><h1>Карта экранов</h1><p class="page-lead">Экраны, состояния и переходы из Markdown-модели проекта.</p></header>` +
+		renderScreenMapWorkspace(model, current, "", false)
 	return pageShell(model, current, "Карта экранов", "Интерактивная карта экранов", content, "")
 }
 
@@ -337,34 +363,7 @@ func findUseCase(model *Model, id string) *KnowledgeUseCase {
 	return nil
 }
 
-func renderFlowIndexPage(model *Model, current string) string {
-	var rows strings.Builder
-	for _, flow := range model.Knowledge.PlayableFlows {
-		useCase := findUseCase(model, flow.UseCaseID)
-		title := flow.UseCaseID
-		if useCase != nil {
-			title += " · " + screenTitleForUseCase(*useCase)
-		}
-		status := `<span class="status-chip status-done">✓ Готов к запуску</span>`
-		if !flow.Valid {
-			status = `<span class="status-chip status-blocked">! Ошибки модели</span>`
-		}
-		rows.WriteString(`<article class="flow-list-row"><div><span class="flow-list-id">` + escapeHTML(flow.UseCaseID) +
-			`</span><h2>` + escapeHTML(title) + `</h2><p>` + escapeHTML(flow.StartScreenID) + ` → ` +
-			escapeHTML(strings.Join(flow.TerminalScreens, ", ")) + `</p></div><div>` + status + `<a class="primary-link" href="` +
-			escapeAttr(relativeURL(current, "flows/"+flow.UseCaseID+".html")) + `">Открыть flow →</a></div></article>`)
-	}
-	if rows.Len() == 0 {
-		rows.WriteString(`<p class="empty-state">Playable flows не описаны.</p>`)
-	}
-	content := breadcrumbs(model, current, "User flows") +
-		`<header class="page-header"><div class="page-kicker"><a class="badge" href="` + escapeAttr(relativeURL(current, screenMapTarget(model))) +
-		`">Экраны</a></div><h1>User flows</h1><p class="page-lead">Сценарии, которые можно пройти по задокументированным переходам.</p></header><section class="flow-list">` +
-		rows.String() + `</section>`
-	return pageShell(model, current, "User flows", "Проигрываемые пользовательские сценарии", content, "")
-}
-
-func renderPlayableFlowPage(model *Model, flow PlayableFlow, current string) string {
+func renderPlayableFlowComponent(model *Model, flow PlayableFlow, current string, embedded bool) string {
 	useCase := findUseCase(model, flow.UseCaseID)
 	title := flow.UseCaseID
 	if useCase != nil {
@@ -382,22 +381,23 @@ func renderPlayableFlowPage(model *Model, flow PlayableFlow, current string) str
 			}
 			issues.WriteString(`<li><code>` + escapeHTML(code) + `</code> — ` + escapeHTML(message) + `</li>`)
 		}
-		content := breadcrumbs(model, current, flow.UseCaseID) + `<header class="page-header"><h1>` + escapeHTML(title) +
-			`</h1><p class="page-lead">Сценарий нельзя запустить, пока модель содержит ошибки.</p></header><section class="dashboard-section"><h2>Проблемы</h2><ul>` +
+		return `<section class="playable-unavailable"><h2>Сценарий нельзя запустить</h2><p>Исправьте ошибки экранной модели.</p><ul>` +
 			issues.String() + `</ul><a href="` + escapeAttr(relativeURL(current, model.HealthOutputPath)) + `">Открыть диагностику →</a></section>`
-		return pageShell(model, current, title, "Ошибки playable flow", content, "")
 	}
 	payload := screenMapData(model, current)
 	useCaseLink := ""
+	mapLink := relativeURL(current, screenMapTarget(model)) + "#usecase=" + flow.UseCaseID
 	if useCase != nil {
 		if document := model.DocByPath[useCase.Document]; document != nil {
-			useCaseLink = `<a class="primary-button" href="` + escapeAttr(relativeURL(current, document.OutputPath)) + `">Открыть use case</a>`
+			useCaseTarget := relativeURL(current, document.OutputPath)
+			useCaseLink = `<a class="primary-button" href="` + escapeAttr(useCaseTarget+"#overview") + `">Открыть use case</a>`
+			if embedded {
+				mapLink = "#map"
+			}
 		}
 	}
-	mapLink := relativeURL(current, screenMapTarget(model)) + "#usecase=" + flow.UseCaseID
-	content := breadcrumbs(model, current, flow.UseCaseID) +
-		`<section class="playable-flow" data-playable-flow><header class="playable-header"><div><span class="page-kicker">Playable flow</span><h1>` +
-		escapeHTML(title) + `</h1><p>Шаг <strong data-flow-step>1</strong> · <span data-flow-history-label>Начало сценария</span></p></div>` +
+	return `<section class="playable-flow" data-playable-flow><header class="playable-header"><div><span class="page-kicker">Playable flow</span><h2>` +
+		escapeHTML(title) + `</h2><p>Шаг <strong data-flow-step>1</strong> · <span data-flow-history-label>Начало сценария</span></p></div>` +
 		`<a class="toolbar-button" href="` + escapeAttr(mapLink) + `">Показать экраны</a></header>` +
 		`<div class="playable-stage"><div class="playable-preview-wrap" data-flow-preview></div><div class="playable-copy"><div data-flow-alert></div>` +
 		`<p class="screen-eyebrow" data-flow-screen-id></p><h2 data-flow-screen-title></h2><p data-flow-state></p><div class="playable-actions" data-flow-actions></div>` +
@@ -410,7 +410,6 @@ func renderPlayableFlowPage(model *Model, flow PlayableFlow, current string) str
 		Model screenMapPayload `json:"model"`
 		Flow  PlayableFlow     `json:"flow"`
 	}{Model: payload, Flow: flow}) + `</script></section>`
-	return pageShell(model, current, title, "Playable flow", content, "")
 }
 
 func renderTraceabilityPage(model *Model, current string) string {

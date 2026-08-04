@@ -60,7 +60,8 @@ CLI-контракт v1 без legacy-слоя.
 
 `--screen-map` и `--no-screen-map` разрешены для `build` и `serve`. Карта
 генерируется по умолчанию при наличии `screens/SC-*.md`; `--no-screen-map`
-отключает только страницу карты, сохраняя каталог, playable flows и JSON.
+отключает только страницу общей карты, сохраняя каталог, страницы use cases с
+пошаговым режимом и JSON.
 
 ## Exit codes
 
@@ -80,9 +81,10 @@ CLI-контракт v1 без legacy-слоя.
 - project, current status и агрегированные stats;
 - документы, безопасно разрешённые links и backlinks;
 - optional `flowId` у work item, если задача ссылается на `FLOW-*`;
+- `knowledge.flows[]` и двусторонние связи `UC.flowIds ↔ FLOW.useCaseIds`;
 - экраны, состояния и переходы в top-level коллекциях `screens` и
   `transitions`;
-- вычисленные `playableFlows`, hotspots, справочник ошибок и traceability;
+- вычисленные экранные `playableFlows`, hotspots, справочник ошибок и traceability;
 - экранную статистику и `screenIds` у связанных сущностей;
 - roadmap с declared и effective completion;
 - риски, knowledge model и issues.

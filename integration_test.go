@@ -326,16 +326,63 @@ sequenceDiagram
 	if _, err := GenerateSite(model, Options{OutputDirectory: output}); err != nil {
 		t.Fatal(err)
 	}
-	flowHTML, err := os.ReadFile(filepath.Join(output, "flows", "login.html"))
+	flowHTML, err := os.ReadFile(filepath.Join(output, "flows", "FLOW-AUTH-LOGIN.html"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, part := range []string{
 		`data-mermaid-stage`, `data-mermaid-diagram`, `data-mermaid-zoom-out`,
 		`data-mermaid-fit`, `data-mermaid-zoom-in`, `data-mermaid-fullscreen`,
+		`UC-AUTH-01`, `../use-cases/UC-AUTH-01.html`,
 	} {
 		if !strings.Contains(string(flowHTML), part) {
 			t.Fatalf("flow Mermaid page missing %q: %s", part, flowHTML)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(output, "flows", "login.html")); !os.IsNotExist(err) {
+		t.Fatalf("source-filename URL must not be generated when a stable FLOW ID exists: %v", err)
+	}
+	processHTML, err := os.ReadFile(filepath.Join(output, "processes", "index.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, expected := range []string{"UC-AUTH-01", "FLOW-AUTH-LOGIN", "FLOW-SERVICES"} {
+		if !strings.Contains(string(processHTML), expected) {
+			t.Fatalf("aggregate processes catalog missing %q", expected)
+		}
+	}
+}
+
+func TestKnowledgeFlowsLinkMultipleUseCasesInBothDirections(t *testing.T) {
+	root := t.TempDir()
+	docs := filepath.Join(root, "docs")
+	writeTestFile(t, docs, "index.md", "# Проект\n")
+	for _, id := range []string{"UC-AUTH-01", "UC-AUTH-02"} {
+		writeTestFile(t, docs, "use-cases/"+id+".md", "# "+id+": Сценарий\n\n- Идентификатор: "+id+"\n- Статус: В работе\n")
+	}
+	writeTestFile(t, docs, "flows/FLOW-AUTH-LOGIN.md", `# FLOW-AUTH-LOGIN: Общий процесс
+
+- Идентификатор: FLOW-AUTH-LOGIN
+- Сценарий: UC-AUTH-01, UC-AUTH-02
+
+`+"```mermaid"+`
+flowchart TD
+    Start --> Finish
+`+"```"+`
+`)
+	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(model.Knowledge.Flows) != 1 {
+		t.Fatalf("flows=%#v", model.Knowledge.Flows)
+	}
+	if got := strings.Join(model.Knowledge.Flows[0].UseCaseIDs, ","); got != "UC-AUTH-01,UC-AUTH-02" {
+		t.Fatalf("flow use cases=%q", got)
+	}
+	for _, useCase := range model.Knowledge.UseCases {
+		if got := strings.Join(useCase.FlowIDs, ","); got != "FLOW-AUTH-LOGIN" {
+			t.Fatalf("%s flow IDs=%q", useCase.ID, got)
 		}
 	}
 }
@@ -379,6 +426,24 @@ sequenceDiagram
 		if !codes[code] {
 			t.Fatalf("missing %s in %#v", code, model.Issues)
 		}
+	}
+}
+
+func TestCanonicalOutputPathsRequireSafeStableIDs(t *testing.T) {
+	model := &Model{Documents: []*Document{
+		{Type: "use-case", Metadata: map[string]string{"id": "UC-AUTH-01"}, OutputPath: "use-cases/login.html"},
+		{Type: "flow", Metadata: map[string]string{"id": "FLOW-../ESCAPE"}, OutputPath: "flows/unsafe.html"},
+		{Type: "screen", Metadata: map[string]string{"id": "SC-AUTH/LOGIN"}, OutputPath: "screens/unsafe.html"},
+	}}
+	assignUniqueOutputPaths(model)
+	if got := model.Documents[0].OutputPath; got != "use-cases/UC-AUTH-01.html" {
+		t.Fatalf("canonical output=%q", got)
+	}
+	if got := model.Documents[1].OutputPath; got != "flows/unsafe.html" {
+		t.Fatalf("unsafe FLOW ID changed output path to %q", got)
+	}
+	if got := model.Documents[2].OutputPath; got != "screens/unsafe.html" {
+		t.Fatalf("unsafe screen ID changed output path to %q", got)
 	}
 }
 
@@ -439,14 +504,17 @@ func TestGenerateSite(t *testing.T) {
 	if result.Pages < 10 {
 		t.Fatalf("pages=%d", result.Pages)
 	}
-	for _, name := range []string{"index.html", "health.html", "report.json", "assets/style.css", "assets/app.js", "assets/search-index.js", "modules/auth.html", "modules/index.html", "use-cases/login.html", "use-cases/index.html"} {
+	for _, name := range []string{"index.html", "health.html", "report.json", "assets/style.css", "assets/app.js", "assets/search-index.js", "modules/auth.html", "modules/index.html", "processes/index.html", "use-cases/UC-AUTH-01.html", "use-cases/index.html", "flows/index.html"} {
 		if _, err := os.Stat(filepath.Join(output, filepath.FromSlash(name))); err != nil {
 			t.Fatalf("missing %s: %v", name, err)
 		}
 	}
+	if _, err := os.Stat(filepath.Join(output, "use-cases", "login.html")); !os.IsNotExist(err) {
+		t.Fatalf("source-filename URL must not be generated when a stable UC ID exists: %v", err)
+	}
 	htmlBytes, _ := os.ReadFile(filepath.Join(output, "modules/auth.html"))
 	html := string(htmlBytes)
-	for _, part := range []string{"Готовность документа", "../use-cases/login.html", `class="metadata-grid"`, "<dt>Статус</dt>", `class="document-toolbar task-toolbar"`, `role="group"`, `class="toolbar-button"`, `data-task-filter="open"`, `class="collapse-all-button"`, `data-collapse-label`} {
+	for _, part := range []string{"Готовность документа", "../use-cases/UC-AUTH-01.html", `class="metadata-grid"`, "<dt>Статус</dt>", `class="document-toolbar task-toolbar"`, `role="group"`, `class="toolbar-button"`, `data-task-filter="open"`, `class="collapse-all-button"`, `data-collapse-label`} {
 		if !strings.Contains(html, part) {
 			t.Fatalf("missing %s", part)
 		}
@@ -509,7 +577,7 @@ func TestGenerateMermaidSiteAssetsAndMarkup(t *testing.T) {
 			t.Fatalf("missing embedded Mermaid asset %s: %v", name, err)
 		}
 	}
-	htmlBytes, err := os.ReadFile(filepath.Join(output, "use-cases", "login.html"))
+	htmlBytes, err := os.ReadFile(filepath.Join(output, "use-cases", "UC-AUTH-01.html"))
 	if err != nil {
 		t.Fatal(err)
 	}

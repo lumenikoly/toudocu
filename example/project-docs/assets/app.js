@@ -748,6 +748,55 @@
     headings.forEach((heading) => observer.observe(heading));
   }
 
+  function initializeUseCaseTabs() {
+    $$('[data-usecase-tabs]').forEach((container) => {
+      const tabs = $$('[data-usecase-tab]', container);
+      const panels = $$('[data-usecase-panel]', container);
+      if (!tabs.length || !panels.length) return;
+      const ids = new Set(panels.map((panel) => panel.id));
+      container.classList.add('is-enhanced');
+
+      function activate(id, updateHistory = false) {
+        const targetID = ids.has(id) ? id : 'overview';
+        tabs.forEach((tab) => {
+          const active = tab.dataset.usecaseTab === targetID;
+          tab.classList.toggle('is-active', active);
+          tab.setAttribute('aria-selected', String(active));
+          tab.tabIndex = active ? 0 : -1;
+        });
+        panels.forEach((panel) => {
+          panel.hidden = panel.id !== targetID;
+        });
+        const activePanel = panels.find((panel) => panel.id === targetID);
+        activePanel?.dispatchEvent(new CustomEvent('docgent:panelshown', { bubbles: true }));
+        if (updateHistory && window.location.hash !== `#${targetID}`) {
+          window.history.pushState(null, '', `#${targetID}`);
+        }
+      }
+
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('click', (event) => {
+          event.preventDefault();
+          activate(tab.dataset.usecaseTab, true);
+        });
+        tab.addEventListener('keydown', (event) => {
+          let next = index;
+          if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+          else if (event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
+          else if (event.key === 'Home') next = 0;
+          else if (event.key === 'End') next = tabs.length - 1;
+          else return;
+          event.preventDefault();
+          tabs[next].focus();
+          activate(tabs[next].dataset.usecaseTab, true);
+        });
+      });
+      window.addEventListener('hashchange', () => activate(window.location.hash.slice(1)));
+      window.addEventListener('popstate', () => activate(window.location.hash.slice(1)));
+      activate(window.location.hash.slice(1));
+    });
+  }
+
   function initializePrint() {
     $('[data-print]')?.addEventListener('click', () => window.print());
   }
@@ -760,6 +809,7 @@
   initializeCollapsibleSections();
   initializeCodeCopy();
   initializeMermaid();
+  initializeUseCaseTabs();
   initializeTocTracking();
   initializePrint();
 })();

@@ -25,7 +25,7 @@ var folderLabels = map[string]string{
 	"use-cases": "Пользовательские сценарии", "modules": "Модули", "architecture": "Архитектура",
 	"contracts": "Контракты", "decisions": "Решения", "flows": "Процессы", "guides": "Руководства",
 	"work": "Рабочие задачи", "reference": "Справочник",
-	"screens": "Экраны",
+	"processes": "Процессы", "screens": "Экраны",
 }
 
 var rootOrder = map[string]int{
@@ -418,6 +418,22 @@ func validateGlobalStructure(model *Model) {
 func assignUniqueOutputPaths(model *Model) {
 	used := map[string]*Document{}
 	for _, document := range model.Documents {
+		if id := strings.TrimSpace(document.Metadata["id"]); safeStableID(id) {
+			switch document.Type {
+			case "use-case":
+				if strings.HasPrefix(id, "UC-") {
+					document.OutputPath = path.Join("use-cases", id+".html")
+				}
+			case "flow":
+				if strings.HasPrefix(id, "FLOW-") {
+					document.OutputPath = path.Join("flows", id+".html")
+				}
+			case "screen":
+				if strings.HasPrefix(id, "SC-") {
+					document.OutputPath = path.Join("screens", id+".html")
+				}
+			}
+		}
 		candidate := document.OutputPath
 		key := strings.ToLower(candidate)
 		if previous := used[key]; previous != nil {
@@ -434,6 +450,19 @@ func assignUniqueOutputPaths(model *Model) {
 		}
 		used[strings.ToLower(document.OutputPath)] = document
 	}
+}
+
+func safeStableID(id string) bool {
+	if id == "" || strings.HasPrefix(id, "-") || strings.HasSuffix(id, "-") {
+		return false
+	}
+	for _, value := range id {
+		if value == '-' || value >= 'A' && value <= 'Z' || value >= '0' && value <= '9' {
+			continue
+		}
+		return false
+	}
+	return true
 }
 
 // BuildDocumentationModel reads, validates and cross-links all Markdown documents.

@@ -133,6 +133,7 @@ type ReportProject struct {
 type ReportKnowledge struct {
 	Modules       []KnowledgeModule  `json:"modules"`
 	UseCases      []KnowledgeUseCase `json:"useCases"`
+	Flows         []KnowledgeFlow    `json:"flows"`
 	BusinessRules []BusinessRule     `json:"businessRules"`
 	WorkItems     []WorkItem         `json:"workItems"`
 }

@@ -2,6 +2,7 @@
 /dist/
 /build/
 /example/site/
+/example/project-docs/
 *.out
 *.test
 .DS_Store

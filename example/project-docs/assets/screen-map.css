@@ -1,5 +1,9 @@
 .screen-map-header { padding-bottom: 18px; }
 .screen-map-workspace { border-top: 1px solid var(--border); min-height: 720px; }
+.screen-map-workspace.is-embedded { min-height: 0; border-top: 0; }
+.screen-map-workspace.is-embedded .screen-map-shell { min-height: 580px; }
+.screen-map-workspace.is-embedded .screen-map-stage { min-height: 580px; }
+.screen-map-fixed-mode { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; color: var(--muted); font-size: 13px; }
 .screen-map-toolbar { display: flex; align-items: center; gap: 12px; padding: 12px 0; flex-wrap: wrap; }
 .screen-map-modes, .screen-map-filters, .screen-map-zoom { display: flex; align-items: center; gap: 6px; }
 .screen-map-filters { flex: 1; }

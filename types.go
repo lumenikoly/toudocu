@@ -205,10 +205,19 @@ type KnowledgeUseCase struct {
 	Document        string     `json:"document"`
 	RepositoryPaths []string   `json:"repositoryPaths"`
 	BusinessRuleIDs []string   `json:"businessRuleIds"`
+	FlowIDs         []string   `json:"flowIds"`
 	ScreenIDs       []string   `json:"screenIds"`
 	StartScreenID   string     `json:"startScreen,omitempty"`
 	TerminalScreens []string   `json:"terminalScreens"`
 	AllowCycle      bool       `json:"allowCycle"`
+}
+
+type KnowledgeFlow struct {
+	ID         string   `json:"id"`
+	Title      string   `json:"title"`
+	ModuleID   string   `json:"moduleId,omitempty"`
+	UseCaseIDs []string `json:"useCaseIds"`
+	Document   string   `json:"document"`
 }
 
 type ScreenState struct {
@@ -348,6 +357,7 @@ type VerificationCheck struct {
 type KnowledgeModel struct {
 	Modules       []KnowledgeModule  `json:"modules"`
 	UseCases      []KnowledgeUseCase `json:"useCases"`
+	Flows         []KnowledgeFlow    `json:"flows"`
 	Screens       []KnowledgeScreen  `json:"screens"`
 	Transitions   []ScreenTransition `json:"screenTransitions"`
 	BusinessRules []BusinessRule     `json:"businessRules"`

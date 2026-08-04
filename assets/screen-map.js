@@ -30,7 +30,8 @@
   const useCaseSelect = workspace.querySelector('[data-map-usecase]');
   const statusSelect = workspace.querySelector('[data-map-status]');
   const search = workspace.querySelector('[data-map-search]');
-  let mode = 'all';
+  const initialUseCase = workspace.dataset.mapInitialUsecase || '';
+  let mode = initialUseCase ? 'usecase' : 'all';
   let selected = '';
   let selectedTransition = '';
   let scale = 1;
@@ -533,9 +534,17 @@
     if (document.fullscreenElement) document.exitFullscreen?.();
     else stage.requestFullscreen?.();
   });
+  document.addEventListener('docgent:panelshown', (event) => {
+    if (event.target?.contains(workspace)) {
+      window.requestAnimationFrame(() => render({ fit: true }));
+    }
+  });
 
+  if (initialUseCase && useCaseSelect) {
+    useCaseSelect.value = initialUseCase;
+  }
   const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-  if (hash.get('usecase')) {
+  if (!initialUseCase && hash.get('usecase')) {
     mode = 'usecase';
     useCaseSelect.value = hash.get('usecase');
     useCaseSelect.hidden = false;

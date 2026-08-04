@@ -4,7 +4,7 @@
     "name": "Docgent",
     "version": "1.1.0-go"
   },
-  "generatedAt": "2026-07-29T14:36:41.449713652Z",
+  "generatedAt": "2026-07-29T16:56:18.468866775Z",
   "sourceDirectory": "docs",
   "staleDays": 90,
   "project": {
@@ -20,7 +20,7 @@
     "version": "0.1.0",
     "owner": "Команда проекта",
     "updated": "2026-07-29",
-    "summary": "Портал показывает документы всех основных типов, автономные Mermaid-диаграммы, карту экранов с пятью видами переходов, два playable flow, raster preview, fallback без изображения, hotspots и traceability рабочей задачи. Активные задачи, блокеры и следующий результат автоматически выводятся в HTML-представлении из work items и roadmap."
+    "summary": "Портал показывает документы всех основных типов, единый каталог UC- и FLOW- , автономные Mermaid-диаграммы, карту экранов с пятью видами переходов, два проигрываемых сценария, raster preview, fallback без изображения, hotspots и traceability рабочей задачи. Активные задачи, блокеры и следующий результат автоматически выводятся в HTML-представлении из work items и roadmap."
   },
   "currentStatus": {
     "activeWork": [
@@ -58,7 +58,7 @@
     }
   },
   "stats": {
-    "documents": 23,
+    "documents": 24,
     "totalTasks": 4,
     "completedTasks": 2,
     "remainingTasks": 2,
@@ -66,7 +66,7 @@
     "documentsComplete": 0,
     "documentsInProgress": 1,
     "documentsNotStarted": 3,
-    "documentsWithoutTasks": 19,
+    "documentsWithoutTasks": 20,
     "staleDocuments": 0,
     "documentsWithoutDescription": 2,
     "documentsWithoutStatus": 0,
@@ -113,7 +113,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-29T13:25:09.582045182Z",
+      "updatedAt": "2026-07-29T16:09:42.746744667Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -480,6 +480,68 @@
       "relatedDocuments": []
     },
     {
+      "id": "FLOW-CORE-ENTRY",
+      "sourcePath": "flows/FLOW-CORE-ENTRY.md",
+      "outputPath": "flows/FLOW-CORE-ENTRY.html",
+      "type": "flow",
+      "title": "FLOW-CORE-ENTRY: Маршрутизация с главной",
+      "description": "Переиспользуемый процесс показывает развилку между внутренним сценарием создания обращения и переходом во внешний центр поддержки. Связь с двумя UC- демонстрирует двустороннюю модель процессов.",
+      "metadata": {
+        "id": "FLOW-CORE-ENTRY",
+        "module": "MOD-CORE",
+        "updated": "2026-07-29",
+        "useCase": "UC-CORE-01, UC-CORE-02"
+      },
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-29T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../use-cases/core.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/core.md",
+          "href": "../use-cases/UC-CORE-01.html"
+        },
+        {
+          "destination": "../use-cases/support.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/support.md",
+          "href": "../use-cases/UC-CORE-02.html"
+        },
+        {
+          "destination": "../screens/SC-CORE-HOME.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "screens/SC-CORE-HOME.md",
+          "href": "../screens/SC-CORE-HOME.html"
+        }
+      ],
+      "backlinks": [],
+      "relatedDocuments": [
+        "use-cases/core.md",
+        "use-cases/support.md",
+        "screens/SC-CORE-HOME.md"
+      ]
+    },
+    {
       "id": "FLOW-CORE-REQUEST",
       "sourcePath": "flows/FLOW-CORE-REQUEST.md",
       "outputPath": "flows/FLOW-CORE-REQUEST.html",
@@ -515,7 +577,7 @@
           "blocked": false,
           "targetKind": "document",
           "target": "use-cases/core.md",
-          "href": "../use-cases/core.html"
+          "href": "../use-cases/UC-CORE-01.html"
         },
         {
           "destination": "../screens/SC-CORE-REQUEST.md",
@@ -606,7 +668,7 @@
           "blocked": false,
           "targetKind": "document",
           "target": "use-cases/core.md",
-          "href": "../use-cases/core.html"
+          "href": "../use-cases/UC-CORE-01.html"
         }
       ],
       "backlinks": [
@@ -654,7 +716,7 @@
           "blocked": false,
           "targetKind": "document",
           "target": "use-cases/support.md",
-          "href": "../use-cases/support.html"
+          "href": "../use-cases/UC-CORE-02.html"
         }
       ],
       "backlinks": [
@@ -759,7 +821,9 @@
       "warnings": 0,
       "errors": 0,
       "links": [],
-      "backlinks": [],
+      "backlinks": [
+        "flows/FLOW-CORE-ENTRY.md"
+      ],
       "relatedDocuments": []
     },
     {
@@ -804,7 +868,7 @@
           "blocked": false,
           "targetKind": "document",
           "target": "use-cases/core.md",
-          "href": "../use-cases/core.html"
+          "href": "../use-cases/UC-CORE-01.html"
         }
       ],
       "backlinks": [
@@ -889,7 +953,7 @@
     {
       "id": "UC-CORE-01",
       "sourcePath": "use-cases/core.md",
-      "outputPath": "use-cases/core.html",
+      "outputPath": "use-cases/UC-CORE-01.html",
       "type": "use-case",
       "title": "UC-CORE-01: Основной пользовательский сценарий",
       "description": "Пользователь получает основной результат проекта.",
@@ -948,6 +1012,7 @@
         }
       ],
       "backlinks": [
+        "flows/FLOW-CORE-ENTRY.md",
         "flows/FLOW-CORE-REQUEST.md",
         "modules/core.md",
         "screens/SC-CORE-REQUEST.md"
@@ -961,7 +1026,7 @@
     {
       "id": "UC-CORE-02",
       "sourcePath": "use-cases/support.md",
-      "outputPath": "use-cases/support.html",
+      "outputPath": "use-cases/UC-CORE-02.html",
       "type": "use-case",
       "title": "UC-CORE-02: Открыть центр поддержки",
       "description": "Пользователь переходит из Service Desk во внешний центр поддержки.",
@@ -1011,6 +1076,7 @@
         }
       ],
       "backlinks": [
+        "flows/FLOW-CORE-ENTRY.md",
         "modules/support.md"
       ],
       "relatedDocuments": [
@@ -1278,6 +1344,10 @@
         "businessRuleIds": [
           "BR-CORE-001"
         ],
+        "flowIds": [
+          "FLOW-CORE-ENTRY",
+          "FLOW-CORE-REQUEST"
+        ],
         "screenIds": [
           "SC-CORE-HELP",
           "SC-CORE-HOME",
@@ -1303,6 +1373,9 @@
         "document": "use-cases/support.md",
         "repositoryPaths": [],
         "businessRuleIds": [],
+        "flowIds": [
+          "FLOW-CORE-ENTRY"
+        ],
         "screenIds": [
           "SC-CORE-HOME",
           "SC-SUPPORT-PORTAL"
@@ -1312,6 +1385,27 @@
           "SC-SUPPORT-PORTAL"
         ],
         "allowCycle": false
+      }
+    ],
+    "flows": [
+      {
+        "id": "FLOW-CORE-ENTRY",
+        "title": "FLOW-CORE-ENTRY: Маршрутизация с главной",
+        "moduleId": "MOD-CORE",
+        "useCaseIds": [
+          "UC-CORE-01",
+          "UC-CORE-02"
+        ],
+        "document": "flows/FLOW-CORE-ENTRY.md"
+      },
+      {
+        "id": "FLOW-CORE-REQUEST",
+        "title": "FLOW-CORE-REQUEST: Создание запроса",
+        "moduleId": "MOD-CORE",
+        "useCaseIds": [
+          "UC-CORE-01"
+        ],
+        "document": "flows/FLOW-CORE-REQUEST.md"
       }
     ],
     "businessRules": [

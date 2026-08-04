@@ -120,6 +120,20 @@ func createScreenFixture(t *testing.T) (string, string) {
 	return root, docs
 }
 
+func navigationFolderHTML(t *testing.T, page, key string) string {
+	t.Helper()
+	marker := `data-nav-folder="` + key + `"`
+	start := strings.Index(page, marker)
+	if start < 0 {
+		t.Fatalf("navigation folder %q is missing", key)
+	}
+	end := strings.Index(page[start:], `</ul></li>`)
+	if end < 0 {
+		t.Fatalf("navigation folder %q is not closed", key)
+	}
+	return page[start : start+end+len(`</ul></li>`)]
+}
+
 func screenIssueCodes(model *Model) map[string]bool {
 	result := map[string]bool{}
 	for _, issue := range model.Issues {
@@ -337,13 +351,15 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 		t.Fatal(err)
 	}
 	for file, expected := range map[string]string{
-		"screens/index.html":      `data-screen-map`,
-		"screens/catalog.html":    `Каталог экранов`,
-		"flows/index.html":        `User flows`,
-		"flows/UC-AUTH-01.html":   `data-playable-flow`,
-		"traceability.html":       `Traceability Matrix`,
-		"assets/screen-map.js":    `computeVisible`,
-		"assets/playable-flow.js": `function activate`,
+		"screens/index.html":        `data-screen-map`,
+		"screens/catalog.html":      `Каталог экранов`,
+		"processes/index.html":      `Все процессы`,
+		"use-cases/index.html":      `Пользовательские сценарии`,
+		"use-cases/UC-AUTH-01.html": `data-playable-flow`,
+		"flows/index.html":          `Визуальные процессы`,
+		"traceability.html":         `Traceability Matrix`,
+		"assets/screen-map.js":      `computeVisible`,
+		"assets/playable-flow.js":   `function activate`,
 	} {
 		data, err := os.ReadFile(filepath.Join(output, filepath.FromSlash(file)))
 		if err != nil || !strings.Contains(string(data), expected) {
@@ -373,21 +389,71 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	if !strings.Contains(string(mapData), "3 вход.") || !strings.Contains(string(mapData), "3 исх.") {
 		t.Fatalf("screen cards must expose incoming and outgoing transition counts: %s", mapData)
 	}
-	flowData, err := os.ReadFile(filepath.Join(output, "flows", "UC-AUTH-01.html"))
+	flowData, err := os.ReadFile(filepath.Join(output, "use-cases", "UC-AUTH-01.html"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	flowPage := string(flowData)
-	for _, expected := range []string{"Открыть use case", "nav-subsection-label", "User flows", "Playable flows"} {
-		if !strings.Contains(flowPage, expected) {
-			t.Fatalf("playable flow page missing %q", expected)
+	useCasePage := string(flowData)
+	for _, expected := range []string{
+		`data-usecase-tabs`,
+		`href="#overview"`,
+		`href="#map"`,
+		`href="#play"`,
+		`href="#links"`,
+		`data-map-initial-usecase="UC-AUTH-01"`,
+		`data-playable-flow`,
+		`Открыть use case`,
+		`data-nav-folder="use-cases"`,
+		`data-nav-folder="processes"`,
+		`Все процессы`,
+		`Пользовательские сценарии`,
+		`Визуальные процессы`,
+		`Расположение в коде`,
+	} {
+		if !strings.Contains(useCasePage, expected) {
+			t.Fatalf("use case workspace missing %q", expected)
 		}
 	}
-	if strings.Count(flowPage, ">Playable flows<") != 1 {
-		t.Fatal("playable flows navigation must have one subsection inside Screens")
+	if strings.Contains(useCasePage, ">Playable flows<") || strings.Contains(useCasePage, ">User flows<") {
+		t.Fatal("playable and user-flow navigation must not be separate sections")
 	}
-	if !strings.Contains(flowPage, `data-nav-folder="screens"`) || !strings.Contains(flowPage, `nav-folder-link is-active`) {
-		t.Fatal("Screens navigation must remain active on a playable flow page")
+	useCaseNavigation := navigationFolderHTML(t, useCasePage, "use-cases")
+	processNavigation := navigationFolderHTML(t, useCasePage, "processes")
+	if !strings.Contains(useCaseNavigation, `nav-folder-link is-active`) {
+		t.Fatal("use case page must activate the top-level user-scenarios section")
+	}
+	if strings.Contains(processNavigation, `nav-folder-link is-active`) {
+		t.Fatal("use case page must not activate the aggregate processes section")
+	}
+	if strings.Contains(processNavigation, `UC-AUTH-01`) {
+		t.Fatal("individual use cases must not be duplicated inside the processes navigation tree")
+	}
+	if strings.Index(useCasePage, `data-nav-folder="use-cases"`) > strings.Index(useCasePage, `data-nav-folder="processes"`) {
+		t.Fatal("user scenarios must appear above processes in the primary navigation")
+	}
+	processData, err := os.ReadFile(filepath.Join(output, "processes", "index.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	processPage := string(processData)
+	if !strings.Contains(navigationFolderHTML(t, processPage, "processes"), `nav-folder-link is-active`) {
+		t.Fatal("aggregate catalog must activate the processes section")
+	}
+	if strings.Contains(navigationFolderHTML(t, processPage, "use-cases"), `nav-folder-link is-active`) {
+		t.Fatal("aggregate catalog must not activate the user-scenarios section")
+	}
+	if !strings.Contains(processPage, `UC-AUTH-01`) {
+		t.Fatal("aggregate processes catalog must retain user scenarios")
+	}
+	useCaseCatalogData, err := os.ReadFile(filepath.Join(output, "use-cases", "index.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(useCaseCatalogData), `../processes/index.html`) || !strings.Contains(string(useCaseCatalogData), `>Все процессы</a>`) {
+		t.Fatal("user-scenarios catalog must link to the aggregate processes catalog")
+	}
+	if _, err := os.Stat(filepath.Join(output, "flows", "UC-AUTH-01.html")); !os.IsNotExist(err) {
+		t.Fatalf("legacy duplicate playable page must not be generated: %v", err)
 	}
 	mapScript, err := os.ReadFile(filepath.Join(output, "assets", "screen-map.js"))
 	if err != nil {
@@ -417,7 +483,7 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, expected := range []string{".split('|').map(normalize).includes(value)", "resetButtons.forEach"} {
+	for _, expected := range []string{".split('|').map(normalize).includes(value)", "resetButtons.forEach", "initializeUseCaseTabs", "history.pushState"} {
 		if !strings.Contains(string(appScript), expected) {
 			t.Fatalf("collection filters missing %q", expected)
 		}
@@ -473,7 +539,7 @@ func TestNoScreenMapStillBuildsCatalogAndReport(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(output, "screens", "index.html")); !os.IsNotExist(err) {
 		t.Fatalf("screen map must not be generated: %v", err)
 	}
-	for _, name := range []string{"screens/catalog.html", "flows/UC-AUTH-01.html", "report.json"} {
+	for _, name := range []string{"screens/catalog.html", "processes/index.html", "use-cases/UC-AUTH-01.html", "report.json"} {
 		if _, err := os.Stat(filepath.Join(output, filepath.FromSlash(name))); err != nil {
 			t.Fatalf("%s must still be generated: %v", name, err)
 		}
