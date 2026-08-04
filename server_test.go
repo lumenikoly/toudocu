@@ -45,6 +45,9 @@ func TestServeArguments(t *testing.T) {
 	if defaults.Host != "127.0.0.1" || defaults.Port != 8080 {
 		t.Fatalf("defaults: %#v", defaults)
 	}
+	if defaults.Open {
+		t.Fatal("serve unexpectedly enables auto-open")
+	}
 
 	for _, args := range [][]string{
 		{"serve", "./docs", "--host="},
@@ -55,6 +58,13 @@ func TestServeArguments(t *testing.T) {
 	} {
 		if _, _, _, err := ParseArguments(args); err == nil {
 			t.Fatalf("expected arguments to fail: %#v", args)
+		}
+	}
+
+	unsupportedServeFlags := []string{"--edit", "--no-open"}
+	for _, flag := range unsupportedServeFlags {
+		if _, _, _, err := ParseArguments([]string{"serve", "./docs", flag}); err == nil {
+			t.Fatalf("unsupported serve flag was accepted: %s", flag)
 		}
 	}
 }

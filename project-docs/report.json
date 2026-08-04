@@ -4,7 +4,7 @@
     "name": "Docgent",
     "version": "1.1.0-go"
   },
-  "generatedAt": "2026-07-31T16:24:11.456035249Z",
+  "generatedAt": "2026-07-31T19:34:18.869374905Z",
   "sourceDirectory": "docs",
   "staleDays": 0,
   "project": {
@@ -37,17 +37,17 @@
     }
   },
   "stats": {
-    "documents": 46,
+    "documents": 48,
     "totalTasks": 10,
     "completedTasks": 9,
     "remainingTasks": 1,
     "taskProgress": 90,
-    "documentsComplete": 7,
+    "documentsComplete": 8,
     "documentsInProgress": 2,
     "documentsNotStarted": 0,
-    "documentsWithoutTasks": 37,
+    "documentsWithoutTasks": 38,
     "staleDocuments": 0,
-    "documentsWithoutDescription": 7,
+    "documentsWithoutDescription": 8,
     "documentsWithoutStatus": 0,
     "brokenLinks": 0,
     "warnings": 0,
@@ -447,7 +447,7 @@
       "outputPath": "architecture/failure-isolation.html",
       "type": "architecture",
       "title": "Изоляция ошибок документации и проверок",
-      "description": "Ошибки чтения и структуры превращаются в привязанные к документам diagnostics и не открывают путь к исполнению. Явно запущенные проверки задачи выполняются последовательно в отдельной границе процесса, а их сбои, timeout и ограниченный вывод фиксируются в отчёте. Сам Docgent не переписывает исходный Markdown, но разрешённые shell-команды имеют права текущего пользователя и могут менять репозиторий.",
+      "description": "Ошибки чтения и структуры превращаются в привязанные к документам diagnostics и не открывают путь к исполнению. Явно запущенные проверки задачи выполняются последовательно в отдельной границе процесса, а их сбои, timeout и ограниченный вывод фиксируются в отчёте. Только editor API режима serve меняет выбранный workspace-файл по CAS; разрешённые shell-команды имеют права текущего пользователя и могут менять весь репозиторий.",
       "metadata": {
         "architectureQuestion": "Как изолируются ошибки документации и запускаемых проверок?",
         "documentType": "Architecture"
@@ -464,7 +464,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T09:03:51.353861727Z",
+      "updatedAt": "2026-07-31T19:06:03.26357035Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -500,7 +500,7 @@
       "outputPath": "architecture/overview.html",
       "type": "architecture",
       "title": "Архитектура Docgent",
-      "description": "Docgent — локальный dependency-free Go CLI между исходным каталогом Markdown и двумя потребителями проверенной модели: автоматизацией через CLI/JSON и читателем автономного HTML-портала. Сеть, база данных и внешний runtime в границу системы не входят.",
+      "description": "Docgent — локальный dependency-free Go CLI между исходным каталогом документации и двумя потребителями проверенной модели: автоматизацией через CLI/JSON и читателем автономного HTML-портала. Опциональный serve добавляет локальный HTTP/editor runtime; база данных и внешний runtime в границу системы не входят.",
       "metadata": {
         "documentType": "Architecture Overview"
       },
@@ -516,7 +516,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T08:58:45.589039552Z",
+      "updatedAt": "2026-07-31T19:06:03.259935007Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -587,7 +587,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T08:58:45.589039552Z",
+      "updatedAt": "2026-07-31T19:06:03.261935023Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -641,6 +641,14 @@
           "href": "../flows/FLOW-DOCS-BUILD.html"
         },
         {
+          "destination": "../flows/FLOW-DOCS-SERVE.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-DOCS-SERVE.md",
+          "href": "../flows/FLOW-DOCS-SERVE.html"
+        },
+        {
           "destination": "../flows/FLOW-TASK-WORKFLOW.md",
           "broken": false,
           "blocked": false,
@@ -659,6 +667,7 @@
         "modules/site.md",
         "flows/FLOW-DOCS-CHECK.md",
         "flows/FLOW-DOCS-BUILD.md",
+        "flows/FLOW-DOCS-SERVE.md",
         "flows/FLOW-TASK-WORKFLOW.md"
       ]
     },
@@ -668,7 +677,7 @@
       "outputPath": "architecture/system-boundary.html",
       "type": "architecture",
       "title": "Системная граница Docgent",
-      "description": "Docgent ограничен одним локальным процессом, который читает документацию и репозиторий, строит проверенную модель и выдаёт diagnostics либо производные представления. Пользователь, агент, CI и браузер остаются взаимодействующими сторонами за этой границей.",
+      "description": "Docgent ограничен одним локальным процессом, который читает документацию и репозиторий, строит проверенную модель и выдаёт diagnostics либо производные представления. В serve тот же процесс принимает ограниченные editor-запросы и атомарно сохраняет выбранный workspace-файл. Пользователь, агент, CI и браузер остаются взаимодействующими сторонами за этой границей.",
       "metadata": {
         "architectureQuestion": "Где проходит системная граница Docgent и кто с ней взаимодействует?",
         "documentType": "Architecture"
@@ -685,7 +694,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T08:58:45.589039552Z",
+      "updatedAt": "2026-07-31T19:06:03.259935007Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -747,7 +756,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T08:58:45.589039552Z",
+      "updatedAt": "2026-07-31T19:06:03.26357035Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -823,6 +832,14 @@
           "targetKind": "document",
           "target": "guides/work-items.md",
           "href": "../guides/work-items.html"
+        },
+        {
+          "destination": "editor-http.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/editor-http.md",
+          "href": "editor-http.html"
         }
       ],
       "backlinks": [
@@ -843,8 +860,50 @@
         "use-cases/UC-TASK-03.md"
       ],
       "relatedDocuments": [
-        "guides/work-items.md"
+        "guides/work-items.md",
+        "contracts/editor-http.md"
       ]
+    },
+    {
+      "id": "",
+      "sourcePath": "contracts/editor-http.md",
+      "outputPath": "contracts/editor-http.html",
+      "type": "contract",
+      "title": "CONTRACT-EDITOR-HTTP: Локальный editor API",
+      "description": "Контракт определяет действующий same-origin API локального workspace. Все маршруты имеют префикс / docgent/api/editor , всегда возвращают Cache-Control: no-store и не выдают CORS-заголовки. JSON-ответы содержат schemaVersion: 1 .",
+      "metadata": {
+        "flow": "FLOW-DOCS-SERVE",
+        "module": "MOD-SITE",
+        "status": "Готово",
+        "type": "HTTP contract",
+        "useCase": "UC-DOCS-03"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Готово",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-07-31T19:30:21.746710468Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "contracts/cli.md",
+        "flows/FLOW-DOCS-SERVE.md",
+        "modules/site.md",
+        "reference/features.md",
+        "use-cases/serve-portal.md",
+        "work/TASK-SITE-002.md"
+      ],
+      "relatedDocuments": []
     },
     {
       "id": "ADR-001",
@@ -1098,7 +1157,7 @@
       "metadata": {
         "id": "FLOW-DOCS-SERVE",
         "module": "MOD-SITE",
-        "updated": "2026-07-30",
+        "updated": "2026-07-31",
         "useCase": "UC-DOCS-03"
       },
       "status": {
@@ -1113,7 +1172,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-31T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1157,9 +1216,18 @@
           "targetKind": "document",
           "target": "contracts/cli.md",
           "href": "../contracts/cli.html"
+        },
+        {
+          "destination": "../contracts/editor-http.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/editor-http.md",
+          "href": "../contracts/editor-http.html"
         }
       ],
       "backlinks": [
+        "architecture/runtime-components.md",
         "modules/cli.md",
         "modules/site.md",
         "use-cases/serve-portal.md"
@@ -1168,7 +1236,8 @@
         "use-cases/serve-portal.md",
         "flows/FLOW-DOCS-BUILD.md",
         "modules/site.md",
-        "contracts/cli.md"
+        "contracts/cli.md",
+        "contracts/editor-http.md"
       ]
     },
     {
@@ -1770,6 +1839,14 @@
       "errors": 0,
       "links": [
         {
+          "destination": "../contracts/editor-http.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/editor-http.md",
+          "href": "../contracts/editor-http.html"
+        },
+        {
           "destination": "../use-cases/build-portal.md",
           "broken": false,
           "blocked": false,
@@ -1820,6 +1897,7 @@
         "work/TASK-SITE-001.md"
       ],
       "relatedDocuments": [
+        "contracts/editor-http.md",
         "use-cases/build-portal.md",
         "use-cases/serve-portal.md",
         "use-cases/screen-map.md",
@@ -1972,7 +2050,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-30T20:37:43.660898001Z",
+      "updatedAt": "2026-07-31T19:06:34.727179962Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2002,7 +2080,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T16:21:58.100075453Z",
+      "updatedAt": "2026-07-31T19:06:34.725179947Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2022,6 +2100,14 @@
           "targetKind": "document",
           "target": "guides/quality-runbooks.md",
           "href": "../guides/quality-runbooks.html"
+        },
+        {
+          "destination": "../contracts/editor-http.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/editor-http.md",
+          "href": "../contracts/editor-http.html"
         },
         {
           "destination": "../guides/screens.md",
@@ -2047,6 +2133,7 @@
       "relatedDocuments": [
         "contracts/cli.md",
         "guides/quality-runbooks.md",
+        "contracts/editor-http.md",
         "guides/screens.md",
         "guides/work-items.md"
       ]
@@ -2382,14 +2469,14 @@
       "outputPath": "use-cases/UC-DOCS-03.html",
       "type": "use-case",
       "title": "UC-DOCS-03: Просматривать документацию на локальном сервере",
-      "description": "Разработчик просматривает портал через локальный HTTP-сервер и получает обновлённую сборку после изменения исходной документации.",
+      "description": "Разработчик просматривает и редактирует документацию через локальный HTTP-сервер и получает обновлённую модель и портал после сохранения или внешнего изменения.",
       "metadata": {
         "actor": "Разработчик",
         "id": "UC-DOCS-03",
         "module": "MOD-SITE",
         "priority": "Средний",
         "status": "Готово",
-        "updated": "2026-07-30"
+        "updated": "2026-07-31"
       },
       "status": {
         "kind": "done",
@@ -2403,7 +2490,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-31T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2415,6 +2502,14 @@
           "targetKind": "document",
           "target": "modules/site.md",
           "href": "../modules/site.html#br-site-003-dev-сервер-не-раскрывает-исходный-репозиторий"
+        },
+        {
+          "destination": "../modules/site.md#br-site-007-build-и-serve-имеют-разные-возможности",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/site.md",
+          "href": "../modules/site.html#br-site-007-build-и-serve-имеют-разные-возможности"
         },
         {
           "destination": "../flows/FLOW-DOCS-SERVE.md",
@@ -2447,6 +2542,14 @@
           "targetKind": "document",
           "target": "contracts/cli.md",
           "href": "../contracts/cli.html"
+        },
+        {
+          "destination": "../contracts/editor-http.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/editor-http.md",
+          "href": "../contracts/editor-http.html"
         }
       ],
       "backlinks": [
@@ -2458,7 +2561,8 @@
         "modules/site.md",
         "flows/FLOW-DOCS-SERVE.md",
         "modules/cli.md",
-        "contracts/cli.md"
+        "contracts/cli.md",
+        "contracts/editor-http.md"
       ]
     },
     {
@@ -3024,6 +3128,55 @@
         "modules/site.md",
         "reference/features.md"
       ]
+    },
+    {
+      "id": "",
+      "sourcePath": "work/TASK-SITE-002.md",
+      "outputPath": "work/TASK-SITE-002.html",
+      "type": "work",
+      "title": "TASK-SITE-002: Редактирование исходной документации в serve",
+      "description": "",
+      "metadata": {
+        "flow": "FLOW-DOCS-SERVE",
+        "module": "MOD-SITE",
+        "owner": "Команда Docgent",
+        "priority": "Высокий",
+        "standards": "STD-GO-001, STD-DOCS-001",
+        "status": "Выполнено",
+        "type": "Feature",
+        "updated": "2026-07-31",
+        "useCase": "UC-DOCS-03"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Выполнено",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 25,
+        "completed": 25,
+        "remaining": 0,
+        "percent": 100
+      },
+      "updatedAt": "2026-07-31T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../contracts/editor-http.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/editor-http.md",
+          "href": "../contracts/editor-http.html"
+        }
+      ],
+      "backlinks": [],
+      "relatedDocuments": [
+        "contracts/editor-http.md"
+      ]
     }
   ],
   "roadmap": [
@@ -3312,7 +3465,8 @@
           "BR-CLI-001",
           "BR-CLI-002",
           "BR-CLI-003",
-          "BR-CLI-004"
+          "BR-CLI-004",
+          "BR-CLI-005"
         ]
       },
       {
@@ -3380,7 +3534,9 @@
           "BR-SITE-003",
           "BR-SITE-004",
           "BR-SITE-005",
-          "BR-SITE-006"
+          "BR-SITE-006",
+          "BR-SITE-007",
+          "BR-SITE-008"
         ]
       }
     ],
@@ -3472,7 +3628,8 @@
         "document": "use-cases/serve-portal.md",
         "repositoryPaths": [],
         "businessRuleIds": [
-          "BR-SITE-003"
+          "BR-SITE-003",
+          "BR-SITE-007"
         ],
         "flowIds": [
           "FLOW-DOCS-SERVE"
@@ -3660,6 +3817,14 @@
         "line": 50
       },
       {
+        "id": "BR-CLI-005",
+        "title": "Browser и CLI используют один scaffold registry",
+        "moduleId": "MOD-CLI",
+        "document": "modules/cli.md",
+        "anchor": "br-cli-005-browser-и-cli-используют-один-scaffold-registry",
+        "line": 56
+      },
+      {
         "id": "BR-MD-001",
         "title": "Пользовательский HTML всегда экранируется",
         "moduleId": "MOD-MARKDOWN",
@@ -3689,7 +3854,7 @@
         "moduleId": "MOD-MODEL",
         "document": "modules/model.md",
         "anchor": "br-model-001-roadmap-является-единственным-источником-глобального-охвата",
-        "line": 30
+        "line": 32
       },
       {
         "id": "BR-MODEL-002",
@@ -3697,7 +3862,7 @@
         "moduleId": "MOD-MODEL",
         "document": "modules/model.md",
         "anchor": "br-model-002-ссылки-не-выходят-за-repository-root",
-        "line": 36
+        "line": 38
       },
       {
         "id": "BR-MODEL-003",
@@ -3705,7 +3870,7 @@
         "moduleId": "MOD-MODEL",
         "document": "modules/model.md",
         "anchor": "br-model-003-готовая-к-работе-задача-имеет-полный-проверяемый-контракт",
-        "line": 42
+        "line": 44
       },
       {
         "id": "BR-MODEL-004",
@@ -3713,7 +3878,7 @@
         "moduleId": "MOD-MODEL",
         "document": "modules/model.md",
         "anchor": "br-model-004-документы-экранов-являются-источником-графа",
-        "line": 47
+        "line": 49
       },
       {
         "id": "BR-MODEL-005",
@@ -3721,7 +3886,7 @@
         "moduleId": "MOD-MODEL",
         "document": "modules/model.md",
         "anchor": "br-model-005-overview-является-прямой-картой-архитектурных-вопросов",
-        "line": 53
+        "line": 55
       },
       {
         "id": "BR-SITE-001",
@@ -3729,7 +3894,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-001-очистка-output-не-затрагивает-защищённые-каталоги",
-        "line": 32
+        "line": 34
       },
       {
         "id": "BR-SITE-002",
@@ -3737,7 +3902,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-002-портал-работает-через-file-protocol",
-        "line": 37
+        "line": 39
       },
       {
         "id": "BR-SITE-003",
@@ -3745,7 +3910,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-003-dev-сервер-не-раскрывает-исходный-репозиторий",
-        "line": 42
+        "line": 44
       },
       {
         "id": "BR-SITE-004",
@@ -3753,7 +3918,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-004-mermaid-работает-автономно-и-в-строгом-режиме",
-        "line": 50
+        "line": 52
       },
       {
         "id": "BR-SITE-005",
@@ -3761,7 +3926,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-005-карта-экранов-работает-автономно",
-        "line": 57
+        "line": 59
       },
       {
         "id": "BR-SITE-006",
@@ -3769,7 +3934,23 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-006-темы-не-расширяют-доверенную-поверхность",
-        "line": 73
+        "line": 75
+      },
+      {
+        "id": "BR-SITE-007",
+        "title": "Build и serve имеют разные возможности",
+        "moduleId": "MOD-SITE",
+        "document": "modules/site.md",
+        "anchor": "br-site-007-build-и-serve-имеют-разные-возможности",
+        "line": 87
+      },
+      {
+        "id": "BR-SITE-008",
+        "title": "Запись защищена optimistic concurrency",
+        "moduleId": "MOD-SITE",
+        "document": "modules/site.md",
+        "anchor": "br-site-008-запись-защищена-optimistic-concurrency",
+        "line": 93
       }
     ],
     "workItems": [
@@ -5060,6 +5241,494 @@
           "modules/site.md",
           "reference/features.md"
         ]
+      },
+      {
+        "id": "TASK-SITE-002",
+        "title": "Редактирование исходной документации в serve",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Выполнено",
+          "recognized": true
+        },
+        "type": "Feature",
+        "archived": false,
+        "priority": "Высокий",
+        "updated": "2026-07-31",
+        "owner": "Команда Docgent",
+        "moduleId": "MOD-SITE",
+        "useCaseId": "UC-DOCS-03",
+        "flowId": "FLOW-DOCS-SERVE",
+        "screenIds": [],
+        "transitionIds": [],
+        "standardIds": [
+          "STD-GO-001",
+          "STD-DOCS-001"
+        ],
+        "runbookIds": [],
+        "dependsOn": [],
+        "document": "work/TASK-SITE-002.md",
+        "anchor": "task-site-002-редактирование-исходной-документации-в-serve",
+        "criteria": [
+          {
+            "line": 65,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-01 GenerateSite всегда создаёт автономный статический портал, а"
+          },
+          {
+            "line": 67,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-02 Workspace перечисляет только обычные .md, .yaml, .yml и"
+          },
+          {
+            "line": 71,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-03 API принимает только канонические относительные POSIX-пути и"
+          },
+          {
+            "line": 73,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-04 Чтение и запись используют SHA-256 digest; save сохраняет mode,"
+          },
+          {
+            "line": 78,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-05 Stale digest возвращает 409 staledigest, а подтверждённое"
+          },
+          {
+            "line": 81,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-06 Markdown diagnostics строятся по полной модели с in-memory overlay;"
+          },
+          {
+            "line": 84,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-07 Save/create синхронно обновляют модель, HTML, поиск и revision;"
+          },
+          {
+            "line": 86,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-08 Serve frontend опрашивает file revision через ETag раз в две"
+          },
+          {
+            "line": 88,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-09 Editor предоставляет дерево, path/dirty/save toolbar, Editor,"
+          },
+          {
+            "line": 90,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-10 На мобильном sidebar работает как drawer, а split становится одним"
+          },
+          {
+            "line": 92,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-11 Markdown preview использует существующий безопасный renderer;"
+          },
+          {
+            "line": 95,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-12 task init и семь scaffold-типов используют один упорядоченный"
+          },
+          {
+            "line": 98,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-13 Все editor JSON-ответы имеют schemaVersion: 1, no-store и единый"
+          },
+          {
+            "line": 101,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-14 Запись требует JSON content type, X-Docgent-Action и same-origin /"
+          },
+          {
+            "line": 106,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-15 Методы /files, /file, /preview, /validate, /create, ETag /"
+          },
+          {
+            "line": 109,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-16 Vendored CodeMirror IIFE bundle и лицензии/checksums встроены в Go;"
+          },
+          {
+            "line": 111,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-17 Документация фиксирует границу build = static read-only,"
+          }
+        ],
+        "verificationMatrix": [
+          {
+            "criterionId": "AC-01",
+            "criterion": "GenerateSite всегда создаёт автономный статический портал, а",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestStaticSiteExcludesEditor|TestServeSiteIncludesEditor'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-02",
+            "criterion": "Workspace перечисляет только обычные .md, .yaml, .yml и",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestEditorWorkspaceFiles|TestEditorWorkspaceExclusions'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-03",
+            "criterion": "API принимает только канонические относительные POSIX-пути и",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestEditorPathValidation'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-04",
+            "criterion": "Чтение и запись используют SHA-256 digest; save сохраняет mode,",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestEditorAtomicSave|TestEditorAtomicFailure'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-05",
+            "criterion": "Stale digest возвращает 409 staledigest, а подтверждённое",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestEditorStaleDigest'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-06",
+            "criterion": "Markdown diagnostics строятся по полной модели с in-memory overlay;",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestEditorDiagnostics'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-07",
+            "criterion": "Save/create синхронно обновляют модель, HTML, поиск и revision;",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestEditorRebuild|TestEditorWatcher'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-08",
+            "criterion": "Serve frontend опрашивает file revision через ETag раз в две",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestEditorPollingStateMachine|TestEditorAssetsContract'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-09",
+            "criterion": "Editor предоставляет дерево, path/dirty/save toolbar, Editor,",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestEditorKeyboardAndDirtyGuards|TestEditorAssetsContract'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-10",
+            "criterion": "На мобильном sidebar работает как drawer, а split становится одним",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestEditorResponsiveContract|TestEditorAssetsContract'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-11",
+            "criterion": "Markdown preview использует существующий безопасный renderer;",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestEditorPreviewAndRaw'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-12",
+            "criterion": "task init и семь scaffold-типов используют один упорядоченный",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestScaffoldRegistryParity|TestEditorCreate'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-13",
+            "criterion": "Все editor JSON-ответы имеют schemaVersion: 1, no-store и единый",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestEditorJSONContract|TestEditorLimits'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-14",
+            "criterion": "Запись требует JSON content type, X-Docgent-Action и same-origin /",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestEditorWriteGuards|TestEditorCannotExecuteCommands'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-15",
+            "criterion": "Методы /files, /file, /preview, /validate, /create, ETag /",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestEditorAPIContract'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-16",
+            "criterion": "Vendored CodeMirror IIFE bundle и лицензии/checksums встроены в Go;",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestEditorVendoredAssets'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-17",
+            "criterion": "Документация фиксирует границу build = static read-only,",
+            "completed": true,
+            "commands": [
+              "go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docgent check ./docs --strict --stale-days 0 \u0026\u0026 GOOS=windows GOARCH=amd64 go test -c -o /tmp/docgent-editor-windows.test . \u0026\u0026 GOOS=darwin GOARCH=amd64 go build -o /tmp/docgent-editor-darwin ./cmd/docgent \u0026\u0026 GOOS=linux GOARCH=amd64 go build -o /tmp/docgent-editor-linux ./cmd/docgent \u0026\u0026 test -s build/editor-qa/report.md \u0026\u0026 test -s build/editor-qa/semantic-review.txt"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          }
+        ],
+        "checks": [
+          {
+            "target": "AC-01",
+            "commands": [
+              "go test ./... -run 'TestStaticSiteExcludesEditor|TestServeSiteIncludesEditor'"
+            ],
+            "line": 128
+          },
+          {
+            "target": "AC-02",
+            "commands": [
+              "go test ./... -run 'TestEditorWorkspaceFiles|TestEditorWorkspaceExclusions'"
+            ],
+            "line": 129
+          },
+          {
+            "target": "AC-03",
+            "commands": [
+              "go test ./... -run 'TestEditorPathValidation'"
+            ],
+            "line": 130
+          },
+          {
+            "target": "AC-04",
+            "commands": [
+              "go test ./... -run 'TestEditorAtomicSave|TestEditorAtomicFailure'"
+            ],
+            "line": 131
+          },
+          {
+            "target": "AC-05",
+            "commands": [
+              "go test ./... -run 'TestEditorStaleDigest'"
+            ],
+            "line": 132
+          },
+          {
+            "target": "AC-06",
+            "commands": [
+              "go test ./... -run 'TestEditorDiagnostics'"
+            ],
+            "line": 133
+          },
+          {
+            "target": "AC-07",
+            "commands": [
+              "go test ./... -run 'TestEditorRebuild|TestEditorWatcher'"
+            ],
+            "line": 134
+          },
+          {
+            "target": "AC-08",
+            "commands": [
+              "go test ./... -run 'TestEditorPollingStateMachine|TestEditorAssetsContract'"
+            ],
+            "line": 135
+          },
+          {
+            "target": "AC-09",
+            "commands": [
+              "go test ./... -run 'TestEditorKeyboardAndDirtyGuards|TestEditorAssetsContract'"
+            ],
+            "line": 136
+          },
+          {
+            "target": "AC-10",
+            "commands": [
+              "go test ./... -run 'TestEditorResponsiveContract|TestEditorAssetsContract'"
+            ],
+            "line": 137
+          },
+          {
+            "target": "AC-11",
+            "commands": [
+              "go test ./... -run 'TestEditorPreviewAndRaw'"
+            ],
+            "line": 138
+          },
+          {
+            "target": "AC-12",
+            "commands": [
+              "go test ./... -run 'TestScaffoldRegistryParity|TestEditorCreate'"
+            ],
+            "line": 139
+          },
+          {
+            "target": "AC-13",
+            "commands": [
+              "go test ./... -run 'TestEditorJSONContract|TestEditorLimits'"
+            ],
+            "line": 140
+          },
+          {
+            "target": "AC-14",
+            "commands": [
+              "go test ./... -run 'TestEditorWriteGuards|TestEditorCannotExecuteCommands'"
+            ],
+            "line": 141
+          },
+          {
+            "target": "AC-15",
+            "commands": [
+              "go test ./... -run 'TestEditorAPIContract'"
+            ],
+            "line": 142
+          },
+          {
+            "target": "AC-16",
+            "commands": [
+              "go test ./... -run 'TestEditorVendoredAssets'"
+            ],
+            "line": 143
+          },
+          {
+            "target": "AC-17",
+            "commands": [
+              "go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docgent check ./docs --strict --stale-days 0 \u0026\u0026 GOOS=windows GOARCH=amd64 go test -c -o /tmp/docgent-editor-windows.test . \u0026\u0026 GOOS=darwin GOARCH=amd64 go build -o /tmp/docgent-editor-darwin ./cmd/docgent \u0026\u0026 GOOS=linux GOARCH=amd64 go build -o /tmp/docgent-editor-linux ./cmd/docgent \u0026\u0026 test -s build/editor-qa/report.md \u0026\u0026 test -s build/editor-qa/semantic-review.txt"
+            ],
+            "line": 144
+          },
+          {
+            "target": "ALL",
+            "commands": [
+              "go test ./..."
+            ],
+            "line": 145
+          },
+          {
+            "target": "DOCS",
+            "commands": [
+              "go run ./cmd/docgent check ./docs --repository-root ."
+            ],
+            "line": 146
+          },
+          {
+            "target": "QUALITY",
+            "commands": [
+              "go vet ./... \u0026\u0026 go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docgent check ./docs --strict --stale-days 0"
+            ],
+            "line": 147
+          }
+        ],
+        "repositoryPaths": [
+          "*_test.go",
+          "assets/",
+          "CHANGELOG.md",
+          "docs/architecture/failure-isolation.md",
+          "docs/architecture/overview.md",
+          "docs/architecture/runtime-components.md",
+          "docs/architecture/system-boundary.md",
+          "docs/architecture/trust-boundaries.md",
+          "docs/contracts/",
+          "docs/contracts/cli.md",
+          "docs/flows/FLOW-DOCS-SERVE.md",
+          "docs/modules/cli.md",
+          "docs/modules/model.md",
+          "docs/modules/site.md",
+          "docs/reference/configuration.md",
+          "docs/reference/features.md",
+          "docs/use-cases/serve-portal.md",
+          "docs_core.go",
+          "editor-bundle.mjs",
+          "embed.go",
+          "example/project-docs/",
+          "package-lock.json",
+          "package.json",
+          "process_site.go",
+          "project-docs/",
+          "README.md",
+          "scaffold.go",
+          "screen_site.go",
+          "screens.go",
+          "server.go",
+          "site.go",
+          "THIRD_PARTY_NOTICES.md"
+        ],
+        "result": "docgent serve предоставляет локальный live workspace, в котором пользователь безопасно редактирует и создаёт исходные документы, видит preview и diagnostics, а портал синхронно обновляет модель, HTML и поиск. docgent build остаётся автономным read-only порталом для file:// .",
+        "behaviorChange": "Было serve пересобирает статический портал при открытии HTML и по ручной кнопке, но не предоставляет доступ к исходным файлам и не замечает внешнее изменение до следующего просмотра или ручной пересборки. Станет serve всегда включает защищённый same-origin editor API, отдельный Operate UI, live rebuild после записи и watcher внешних изменений. Статическая генерация не получает editor markup, server-only scripts или API-ссылки.",
+        "before": "serve пересобирает статический портал при открытии HTML и по ручной кнопке, но не предоставляет доступ к исходным файлам и не замечает внешнее изменение до следующего просмотра или ручной пересборки.",
+        "after": "serve всегда включает защищённый same-origin editor API, отдельный Operate UI, live rebuild после записи и watcher внешних изменений. Статическая генерация не получает editor markup, server-only scripts или API-ссылки.",
+        "outOfScope": "изменение семантики --host , --port , --open или auto-open; параметры --no-open и --edit ; редактор или editor API в результате build ; TLS, отдельная аутентификация, CORS или удалённое совместное редактирование; запуск Git, shell, task verification или любых команд через editor API; общая schema validation произвольного YAML.",
+        "plan": "Разделить статическую и serve-генерацию портала. Реализовать безопасный workspace, diagnostics overlay и atomic CAS save. Реализовать editor HTTP API, live rebuild и watcher. Вынести общий реестр scaffold/task templates. Собрать и встроить CodeMirror, реализовать адаптивный editor UI. Добавить негативные, concurrency и end-to-end тесты. Обновить связанные источники истины и пересобрать порталы. Выполнить semantic, automated и browser verification.",
+        "documentationImpact": "Обновляются use case и flow режима serve, Site/CLI/Model contracts, runtime и trust boundaries, README, feature/configuration references и changelog. Добавляется отдельный editor HTTP contract; новая архитектурная страница не нужна, потому что новые вопросы принадлежат существующим источникам истины.",
+        "documentationPaths": []
       }
     ]
   },

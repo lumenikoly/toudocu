@@ -13,7 +13,7 @@ Docgent поставляется одним Go-бинарником без вн�
 | Проверка проекта | `docgent check ./docs` | diagnostics или `ProjectReport` |
 | Строгая проверка | `docgent check ./docs --strict` | warning также даёт exit code `1` |
 | Сборка портала | `docgent build ./docs` | автономный HTML и `report.json` |
-| Локальный просмотр | `docgent serve ./docs` | HTTP-сервер с пересборкой HTML |
+| Локальный workspace | `docgent serve ./docs` | view/edit, editor API, watcher и live rebuild |
 | Поиск документов | `docgent search "query" ./docs` | `SearchReport` по свежим Markdown |
 | Создание задачи | `docgent task init ./docs --area AREA --title TITLE --type TYPE` | новый Draft и `TaskInitReport` |
 | Создание сущности | `docgent scaffold module|use-case|flow|screen|decision ID ./docs --title TITLE` | атомарный scaffold и `ScaffoldReport` |
@@ -106,8 +106,6 @@ gate, а schema v1 сохраняет `documents[].type: "architecture"`.
   отдельными `☐`/`☑` для невыполненных и выполненных `TASK-*`/`BUG-*`;
 - глобальный полнотекстовый поиск с клавиатурным вызовом `/`;
 - оглавление и сворачиваемые разделы документа;
-- ручную пересборку модели и HTML из хедера после подтверждения endpoint
-  `serve`, с перезагрузкой текущей страницы после успеха;
 - копирование названия и repository-relative пути исходного Markdown-документа
   для передачи контекста агенту;
 - копирование блоков кода с fallback на выделение;
@@ -120,6 +118,24 @@ gate, а schema v1 сохраняет `documents[].type: "architecture"`.
 
 Все внутренние URL относительны. Портал не требует сервера, CDN, Node.js,
 браузерного расширения или сетевого доступа.
+
+## Live workspace serve
+
+`serve` добавляет к read-only portal отдельный Operate UI: дерево разрешённых
+исходников, path/dirty/save toolbar, CodeMirror, вкладки Editor/Preview/Split и
+positional diagnostics. Markdown preview использует существующий safe renderer;
+JSON получает syntax и hotspots diagnostics, а произвольный YAML — только
+доступные Docgent diagnostics без выдуманной общей schema.
+
+Save использует SHA-256 CAS и atomic replace. После save/create модель, HTML,
+search и diagnostics перестраиваются синхронно; watcher проверяет внешние
+изменения, а browser polling через ETag различает обычную страницу, clean editor
+и dirty conflict без потери local text. `Ctrl`/`Cmd`+`S`, leave guard,
+diagnostic navigation и mobile drawer входят в тот же UI.
+
+Browser create и CLI-команды `task init`/`scaffold` используют один ordered
+template registry. Editor API описан в
+[отдельном schema-v1 контракте](../contracts/editor-http.md).
 
 ## Процессы и пользовательские сценарии
 
@@ -243,19 +259,23 @@ Timeout завершает дерево процессов, а stdout и stderr 
 - repository links и task scope не могут выйти за `repository-root`;
 - `--clean` проверяет раскрытые пути и защищает input, его предков, системный
   корень и output-симлинки;
-- `serve` раздаёт только output, слушает loopback по умолчанию и не использует
-  кеширование;
+- обычные маршруты `serve` раздают только output, а editor API ограничен
+  canonical workspace paths внутри docs root; listener слушает loopback по
+  умолчанию и не использует кеширование;
 - ручная пересборка `serve` принимает только служебный `POST` с заголовком
   действия; статический портал через `file://` или другой HTTP-сервер кнопку не
   показывает;
 - ошибка отдельной Screen Map или проигрываемого сценария не лишает доступа к остальной
   документации;
-- обычные `check`, `build`, `serve` и `task context` никогда не выполняют
+- editor writes требуют JSON/action/same-origin guards, лимиты 3 MiB/2 MiB и не
+  получают CORS; при non-loopback listener прямые LAN-клиенты считаются
+  доверенными;
+- обычные `check`, `build`, `serve`, editor API и `task context` никогда не выполняют
   команды из Markdown.
 
 ## Ограничения
 
-Docgent не является CMS, визуальным редактором или средой выполнения продукта.
-Он не редактирует Markdown из браузера, не хранит серверную базу, не выполняет
-API-запросы пошагового viewer и не импортирует интерфейсы из Figma или
-frontend-кода.
+Docgent не является сетевой CMS, collaborative editor или средой выполнения
+продукта. Live workspace существует только внутри процесса `serve`, не хранит
+серверную базу, не выполняет API-запросы пошагового viewer и не импортирует
+интерфейсы из Figma или frontend-кода.

@@ -1,6 +1,7 @@
 package docgent
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -20,13 +21,24 @@ type documentationServer struct {
 	fileHandler http.Handler
 	stderr      io.Writer
 	mu          sync.Mutex
+	workspace   *editorWorkspace
+	model       *Model
+	result      GenerateResult
+	revision    string
+	overwrites  map[string]string
 }
 
 func newDocumentationServer(options Options, stderr io.Writer) (*documentationServer, *Model, GenerateResult, error) {
+	workspace, err := newEditorWorkspace(options)
+	if err != nil {
+		return nil, nil, GenerateResult{}, err
+	}
 	server := &documentationServer{
 		options:     options,
 		fileHandler: http.FileServer(http.Dir(options.OutputDirectory)),
 		stderr:      stderr,
+		workspace:   workspace,
+		overwrites:  map[string]string{},
 	}
 	model, result, err := server.rebuild()
 	if err != nil {
@@ -40,10 +52,18 @@ func (s *documentationServer) rebuild() (*Model, GenerateResult, error) {
 	if err != nil {
 		return nil, GenerateResult{}, err
 	}
-	result, err := GenerateSite(model, s.options)
+	_, revision, err := s.workspace.scan(model)
 	if err != nil {
 		return nil, GenerateResult{}, err
 	}
+	model.serveRevision = revision
+	result, err := generateServeSite(model, s.options)
+	if err != nil {
+		return nil, GenerateResult{}, err
+	}
+	s.model = model
+	s.result = result
+	s.revision = revision
 	return model, result, nil
 }
 
@@ -55,6 +75,14 @@ func (s *documentationServer) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	w.Header().Set("Cache-Control", "no-store")
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if strings.HasPrefix(r.URL.Path, editorAPIBase+"/") {
+		s.serveEditorAPI(w, r)
+		return
+	}
+	if r.URL.Path == editorUIPath || r.URL.Path == strings.TrimSuffix(editorUIPath, "/") {
+		s.serveEditorUI(w, r)
+		return
+	}
 
 	if r.URL.Path == rebuildEndpoint {
 		if r.Method != http.MethodPost {
@@ -92,6 +120,38 @@ func (s *documentationServer) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 	s.fileHandler.ServeHTTP(w, r)
+}
+
+func (s *documentationServer) watch(ctx context.Context) {
+	ticker := time.NewTicker(750 * time.Millisecond)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			s.mu.Lock()
+			_, candidate, err := s.workspace.scan(s.model)
+			changed := err == nil && candidate != s.revision
+			s.mu.Unlock()
+			if !changed {
+				continue
+			}
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(200 * time.Millisecond):
+			}
+			s.mu.Lock()
+			_, stable, stableErr := s.workspace.scan(s.model)
+			if stableErr == nil && stable == candidate && stable != s.revision {
+				if _, _, rebuildErr := s.rebuild(); rebuildErr != nil {
+					fmt.Fprintln(s.stderr, "Не удалось пересобрать документацию после внешнего изменения:", rebuildErr)
+				}
+			}
+			s.mu.Unlock()
+		}
+	}
 }
 
 func browserURL(host string, port int) string {
@@ -136,6 +196,9 @@ func serveDocumentation(options Options, stdout, stderr io.Writer) error {
 		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
+	watchContext, stopWatcher := context.WithCancel(context.Background())
+	defer stopWatcher()
+	go handler.watch(watchContext)
 	err = server.Serve(listener)
 	if err != nil && err != http.ErrServerClosed {
 		return err

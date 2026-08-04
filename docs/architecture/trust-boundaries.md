@@ -27,9 +27,24 @@ Markdown находятся в [CLI-контракте](../contracts/cli.md) и
 Символические ссылки не позволяют подменить границу очистки или записи, а
 generated output никогда не становится источником документации.
 
+В `serve` editor workspace дополнительно принимает только canonical relative
+POSIX path к обычному `.md`, `.yaml`, `.yml` или `.json` внутри docs root.
+Hidden/excluded/output, traversal, encoded остатки и любой обнаруженный
+symlink/reparse component блокируются. SHA-256 CAS и atomic replace защищают от
+случайной потери параллельного изменения. Намеренная privileged local race по
+замене каталога находится вне threat model доверенной рабочей копии.
+
+## HTTP-граница serve
+
+Editor write требует JSON content type, точный action header и same-origin
+browser context, не выдаёт CORS и ограничивает body/content. Эти guards защищают
+от cross-origin browser страницы, но не аутентифицируют прямой HTTP-клиент.
+Поэтому явный non-loopback listener включает доступных клиентов локальной сети
+в trust boundary; CLI сохраняет предупреждение об отсутствии TLS и авторизации.
+
 ## Граница исполнения
 
-Обычные `check`, `build`, `serve`, `search`, readiness и context не запускают
+Обычные `check`, `build`, `serve`, editor API, `search`, readiness и context не запускают
 команды из Markdown. Исполнение появляется только в `task verify --run` после
 task-local validation gate; правила разрешения описаны в
 [MOD-CLI](../modules/cli.md).

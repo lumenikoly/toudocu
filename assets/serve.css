@@ -1,0 +1,16 @@
+.server-rebuild-icon {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+.server-rebuild.is-rebuilding .server-rebuild-icon { animation: server-rebuild-spin 800ms linear infinite; }
+.server-rebuild.has-error { border-color: var(--danger); color: var(--danger); }
+.document-context-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+@keyframes server-rebuild-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .server-rebuild.is-rebuilding .server-rebuild-icon { animation: none; }
+}

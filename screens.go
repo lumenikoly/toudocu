@@ -753,7 +753,11 @@ func flowResult(document *Document) string {
 
 func parseHotspots(model *Model, transitionsByID map[string]ScreenTransition, screensByID map[string]*KnowledgeScreen) []Hotspot {
 	file := filepath.Join(model.RootDirectory, "screens", "hotspots.json")
-	data, err := os.ReadFile(file)
+	data, exists := model.sourceOverlay["screens/hotspots.json"]
+	var err error
+	if !exists {
+		data, err = os.ReadFile(file)
+	}
 	if os.IsNotExist(err) {
 		return []Hotspot{}
 	}

@@ -20,10 +20,16 @@ Runtime образует последовательный конвейер: CLI 
 | CLI | Разобрать команду, нормализовать пути и выбрать операцию | [MOD-CLI](../modules/cli.md) |
 | Markdown | Извлечь поддерживаемую структуру и безопасно отрендерить содержимое | [MOD-MARKDOWN](../modules/markdown.md) |
 | Project model | Классифицировать документы, разрешить связи и сформировать diagnostics | [MOD-MODEL](../modules/model.md) |
-| Site | Преобразовать проверенную модель в автономный портал и schema-v1 отчёт | [MOD-SITE](../modules/site.md) |
+| Site | Создать автономный read-only портал или serve-only editor workspace с live rebuild | [MOD-SITE](../modules/site.md) |
+
+Статический generator и serve-вариант разделены. Workspace перечисляет и
+атомарно записывает разрешённые файлы; editor API применяет HTTP guards;
+watcher замечает стабильный внешний fingerprint. Любая принятая запись заново
+проходит Project model и Site, поэтому browser не формирует параллельную модель.
 
 Screen graph и task workflow расширяют модель, но не обходят её validation
 gate. Конкретные последовательности операций остаются в
 [FLOW-DOCS-CHECK](../flows/FLOW-DOCS-CHECK.md),
 [FLOW-DOCS-BUILD](../flows/FLOW-DOCS-BUILD.md) и
+[FLOW-DOCS-SERVE](../flows/FLOW-DOCS-SERVE.md),
 [FLOW-TASK-WORKFLOW](../flows/FLOW-TASK-WORKFLOW.md).

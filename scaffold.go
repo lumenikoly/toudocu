@@ -19,7 +19,13 @@ var (
 )
 
 func validTaskInitType(value string) bool {
-	return containsString([]string{"Feature", "Bug", "Maintenance", "Documentation", "Research"}, value)
+	template, _ := scaffoldTemplate("task-init")
+	for _, field := range template.Fields {
+		if field.Name == "type" {
+			return containsString(field.Options, value)
+		}
+	}
+	return false
 }
 
 func validateScaffoldTitle(value string) error {
@@ -302,22 +308,65 @@ type scaffoldSpec struct {
 	directory string
 }
 
-var scaffoldSpecs = map[string]scaffoldSpec{
-	"module":   {prefix: "MOD-", directory: "modules"},
-	"use-case": {prefix: "UC-", directory: "use-cases"},
-	"flow":     {prefix: "FLOW-", directory: "flows"},
-	"screen":   {prefix: "SC-", directory: "screens"},
-	"decision": {prefix: "ADR-", directory: "decisions"},
-	"standard": {prefix: "STD-", directory: "quality"},
-	"runbook":  {prefix: "RB-", directory: "runbooks"},
+type editorTemplateField struct {
+	Name     string   `json:"name"`
+	Label    string   `json:"label"`
+	Type     string   `json:"type"`
+	Required bool     `json:"required"`
+	Options  []string `json:"options,omitempty"`
+}
+
+type editorTemplate struct {
+	Key       string                `json:"key"`
+	Label     string                `json:"label"`
+	Fields    []editorTemplateField `json:"fields"`
+	Languages []string              `json:"languages"`
+	spec      scaffoldSpec
+}
+
+var scaffoldRegistry = []editorTemplate{
+	{Key: "task-init", Label: "Рабочая задача", Languages: []string{"ru", "en"}, Fields: []editorTemplateField{
+		{Name: "area", Label: "Область", Type: "text", Required: true},
+		{Name: "title", Label: "Название", Type: "text", Required: true},
+		{Name: "type", Label: "Тип", Type: "select", Required: true, Options: []string{"Feature", "Bug", "Maintenance", "Documentation", "Research"}},
+	}},
+	{Key: "module", Label: "Модуль", Languages: []string{"ru", "en"}, Fields: entityTemplateFields(), spec: scaffoldSpec{prefix: "MOD-", directory: "modules"}},
+	{Key: "use-case", Label: "Пользовательский сценарий", Languages: []string{"ru", "en"}, Fields: entityTemplateFields(), spec: scaffoldSpec{prefix: "UC-", directory: "use-cases"}},
+	{Key: "flow", Label: "Процесс", Languages: []string{"ru", "en"}, Fields: entityTemplateFields(), spec: scaffoldSpec{prefix: "FLOW-", directory: "flows"}},
+	{Key: "screen", Label: "Экран", Languages: []string{"ru", "en"}, Fields: entityTemplateFields(), spec: scaffoldSpec{prefix: "SC-", directory: "screens"}},
+	{Key: "decision", Label: "Решение", Languages: []string{"ru", "en"}, Fields: entityTemplateFields(), spec: scaffoldSpec{prefix: "ADR-", directory: "decisions"}},
+	{Key: "standard", Label: "Стандарт", Languages: []string{"ru", "en"}, Fields: entityTemplateFields(), spec: scaffoldSpec{prefix: "STD-", directory: "quality"}},
+	{Key: "runbook", Label: "Runbook", Languages: []string{"ru", "en"}, Fields: entityTemplateFields(), spec: scaffoldSpec{prefix: "RB-", directory: "runbooks"}},
+}
+
+func entityTemplateFields() []editorTemplateField {
+	return []editorTemplateField{
+		{Name: "id", Label: "Идентификатор", Type: "text", Required: true},
+		{Name: "title", Label: "Название", Type: "text", Required: true},
+	}
+}
+
+func scaffoldTemplate(key string) (editorTemplate, bool) {
+	for _, template := range scaffoldRegistry {
+		if template.Key == key {
+			return template, true
+		}
+	}
+	return editorTemplate{}, false
+}
+
+func editorTemplates() []editorTemplate {
+	out := make([]editorTemplate, len(scaffoldRegistry))
+	copy(out, scaffoldRegistry)
+	return out
 }
 
 func validScaffoldID(kind, id string) bool {
-	spec, ok := scaffoldSpecs[kind]
-	if !ok || !strings.HasPrefix(id, spec.prefix) || !safeStableID(id) {
+	template, ok := scaffoldTemplate(kind)
+	if !ok || template.spec.prefix == "" || !strings.HasPrefix(id, template.spec.prefix) || !safeStableID(id) {
 		return false
 	}
-	return entityIDRE.MatchString(strings.TrimPrefix(id, spec.prefix))
+	return entityIDRE.MatchString(strings.TrimPrefix(id, template.spec.prefix))
 }
 
 func renderEntityScaffold(kind, id, title, language, date string) string {
@@ -361,8 +410,8 @@ func Scaffold(options Options) (ScaffoldReport, error) {
 	if info, err := os.Stat(options.InputDirectory); err != nil || !info.IsDir() {
 		return ScaffoldReport{}, fmt.Errorf("каталог документации не найден: %s", options.InputDirectory)
 	}
-	spec, ok := scaffoldSpecs[options.EntityKind]
-	if !ok || !validScaffoldID(options.EntityKind, options.EntityID) {
+	template, ok := scaffoldTemplate(options.EntityKind)
+	if !ok || template.spec.prefix == "" || !validScaffoldID(options.EntityKind, options.EntityID) {
 		return ScaffoldReport{}, fmt.Errorf("некорректный %s ID: %s", options.EntityKind, options.EntityID)
 	}
 	if err := validateScaffoldTitle(options.Title); err != nil {
@@ -374,7 +423,7 @@ func Scaffold(options Options) (ScaffoldReport, error) {
 	if options.Language != "en" && options.Language != "ru" {
 		return ScaffoldReport{}, fmt.Errorf("--lang должен быть en или ru")
 	}
-	relative := filepath.ToSlash(filepath.Join(spec.directory, options.EntityID+".md"))
+	relative := filepath.ToSlash(filepath.Join(template.spec.directory, options.EntityID+".md"))
 	target := filepath.Join(options.InputDirectory, filepath.FromSlash(relative))
 	if err := atomicCreateFile(target, renderEntityScaffold(options.EntityKind, options.EntityID, options.Title, options.Language, scaffoldDate(options.Now))); err != nil {
 		return ScaffoldReport{}, err
@@ -383,4 +432,54 @@ func Scaffold(options Options) (ScaffoldReport, error) {
 		SchemaVersion: 1, Kind: "scaffold", Generator: GeneratorInfo{Name: "Docgent", Version: Version},
 		EntityType: options.EntityKind, ID: options.EntityID, Title: options.Title, Language: options.Language, Path: relative,
 	}, nil
+}
+
+func createFromEditorTemplate(options Options, key, language string, fields map[string]string) (string, error) {
+	template, ok := scaffoldTemplate(key)
+	if !ok {
+		return "", fmt.Errorf("неизвестный шаблон: %s", key)
+	}
+	if language == "" {
+		language = "ru"
+	}
+	if !containsString(template.Languages, language) {
+		return "", fmt.Errorf("язык шаблона должен быть ru или en")
+	}
+	allowedFields := map[string]struct{}{}
+	for _, field := range template.Fields {
+		allowedFields[field.Name] = struct{}{}
+	}
+	for field := range fields {
+		if _, ok := allowedFields[field]; !ok {
+			return "", fmt.Errorf("неизвестное поле шаблона: %s", field)
+		}
+	}
+	for _, field := range template.Fields {
+		value := strings.TrimSpace(fields[field.Name])
+		if field.Required && value == "" {
+			return "", fmt.Errorf("поле %s обязательно", field.Name)
+		}
+		if field.Type == "select" && !containsString(field.Options, value) {
+			return "", fmt.Errorf("некорректное значение поля %s", field.Name)
+		}
+	}
+	options.Language = language
+	if key == "task-init" {
+		options.Area = strings.TrimSpace(fields["area"])
+		options.Title = strings.TrimSpace(fields["title"])
+		options.TaskType = strings.TrimSpace(fields["type"])
+		report, err := InitTask(options)
+		if err != nil {
+			return "", err
+		}
+		return report.Path, nil
+	}
+	options.EntityKind = key
+	options.EntityID = strings.TrimSpace(fields["id"])
+	options.Title = strings.TrimSpace(fields["title"])
+	report, err := Scaffold(options)
+	if err != nil {
+		return "", err
+	}
+	return report.Path, nil
 }

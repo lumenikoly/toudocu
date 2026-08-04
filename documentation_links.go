@@ -17,6 +17,8 @@ var reservedOutputAssets = map[string]struct{}{
 	"assets/screen-map.css": {}, "assets/screen-map.js": {},
 	"assets/playable-flow.css": {}, "assets/playable-flow.js": {},
 	"assets/mermaid.tiny.js": {}, "assets/mermaid.LICENSE.txt": {}, "report.json": {},
+	"assets/serve.css": {}, "assets/serve.js": {}, "assets/editor.css": {}, "assets/editor.js": {},
+	"assets/codemirror.js": {}, "assets/codemirror.LICENSE.txt": {}, "assets/codemirror.checksums.txt": {},
 }
 
 func splitLinkDestination(destination string) (pathPart, query, hash string) {

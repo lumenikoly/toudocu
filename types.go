@@ -533,6 +533,9 @@ type Model struct {
 	HealthOutputPath string
 	ReportOutputPath string
 	ScreenMapEnabled bool
+	sourceOverlay    map[string][]byte
+	serveMode        bool
+	serveRevision    string
 }
 
 type GenerateResult struct {

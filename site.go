@@ -3,6 +3,7 @@ package docgent
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -62,9 +63,16 @@ func renderDocumentContextButton(model *Model, document *Document) string {
 	if document == nil {
 		return ""
 	}
-	return `<button class="document-context-button" type="button" data-copy-document-context data-document-context-title="` +
+	copyButton := `<button class="document-context-button" type="button" data-copy-document-context data-document-context-title="` +
 		escapeAttr(document.Title) + `" data-document-context-path="` + escapeAttr(documentContextPath(model, document)) +
 		`"><span class="document-context-icon" aria-hidden="true">⧉</span><span data-copy-document-context-label aria-live="polite">Копировать контекст</span></button>`
+	if !model.serveMode {
+		return copyButton
+	}
+	encoded := url.QueryEscape(document.SourcePath)
+	return `<div class="document-context-actions">` + copyButton +
+		`<a class="document-context-button" href="/_docgent/editor/?path=` + escapeAttr(encoded) + `">Редактировать</a>` +
+		`<a class="document-context-button" href="/_docgent/api/editor/file?raw=1&amp;path=` + escapeAttr(encoded) + `" target="_blank" rel="noopener">Открыть исходник</a></div>`
 }
 
 func metricCard(label string, value any, detail string) string {
@@ -308,8 +316,13 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 	schemeLabel := colorSchemeLabel(config.ColorScheme)
 	themeSelect := `<label class="header-select site-theme-select"><span class="header-select-visual" aria-hidden="true"><span class="site-theme-indicator" data-site-theme-indicator>` + escapeHTML(themeIndicator) + `</span><span data-site-theme-label>` + escapeHTML(themeLabel) + `</span></span><select data-site-theme-select aria-label="Тема оформления">` + selectOptions(config.Theme, []selectOption{{"classic", "Классика"}, {"paper", "Бумага"}, {"terminal", "Терминал"}}) + `</select></label>`
 	schemeSelect := `<label class="header-select scheme-select"><span class="header-select-visual" aria-hidden="true"><span class="scheme-toggle-indicator"></span><span data-theme-label>` + escapeHTML(schemeLabel) + `</span></span><select data-color-scheme-select aria-label="Цветовая схема">` + selectOptions(config.ColorScheme, []selectOption{{"system", "Система"}, {"light", "Светлая"}, {"dark", "Тёмная"}}) + `</select></label>`
-	rebuildButton := `<button class="icon-button server-rebuild" type="button" data-server-rebuild aria-label="Пересобрать документацию" title="Пересобрать документацию" hidden><svg class="server-rebuild-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 5v6h-6"/></svg></button><span class="visually-hidden" data-server-rebuild-status aria-live="polite"></span>`
-	return `<!doctype html><html lang="ru" data-theme="` + escapeAttr(initialTheme) + `"` + attributes + `><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="` + escapeAttr(description) + `"><title>` + escapeHTML(fullTitle) + `</title><link rel="icon" href="` + escapeAttr(relativeURL(current, favicon)) + `">` + earlyTheme + `<link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/style.css">` + extraStyles + `<script src="` + escapeAttr(prefix) + `assets/search-index.js" defer></script>` + mermaidScript + `<script src="` + escapeAttr(prefix) + `assets/app.js" defer></script>` + extraScripts + `</head><body data-root-prefix="` + escapeAttr(prefix) + `" data-task-filter="all"><a class="skip-link" href="#main-content">Перейти к содержимому</a><header class="site-header"><div class="brand-area"><button class="icon-button sidebar-toggle" type="button" data-sidebar-toggle aria-label="Открыть навигацию">☰</button><a class="brand" href="` + escapeAttr(relativeURL(current, "index.html")) + `">` + brandMark + `<span class="brand-text">` + escapeHTML(model.Project.Title) + `</span></a></div><div class="global-search" role="search"><div class="search-input-wrap"><input type="search" data-global-search placeholder="Поиск по документации" aria-label="Поиск по документации"><span class="search-shortcut">/</span></div><div class="search-results" id="global-search-results" data-search-results role="listbox" hidden></div></div><div class="header-actions"><button class="icon-button" type="button" data-print aria-label="Печать">⎙</button>` + rebuildButton + themeSelect + schemeSelect + `</div></header><div class="site-layout"><aside class="sidebar">` + renderNavigation(model, current) + `</aside><div class="main-area"><main id="main-content" class="page-grid` + gridClass + `"><div class="page-content">` + content + `</div>` + tocHTML + `</main><footer class="site-footer">` + footer + `</footer></div></div></body></html>`
+	rebuildButton, serveAssets, serveRevision := "", "", ""
+	if model.serveMode {
+		rebuildButton = `<a class="icon-button" href="/_docgent/editor/" aria-label="Открыть редактор" title="Редактор документации">✎</a><button class="icon-button server-rebuild" type="button" data-server-rebuild aria-label="Пересобрать документацию" title="Пересобрать документацию"><svg class="server-rebuild-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 5v6h-6"/></svg></button><span class="visually-hidden" data-server-rebuild-status aria-live="polite"></span>`
+		serveAssets = `<link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/serve.css"><script src="` + escapeAttr(prefix) + `assets/serve.js" defer></script>`
+		serveRevision = `<meta name="docgent-revision" content="` + escapeAttr(model.serveRevision) + `">`
+	}
+	return `<!doctype html><html lang="ru" data-theme="` + escapeAttr(initialTheme) + `"` + attributes + `><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` + serveRevision + `<meta name="description" content="` + escapeAttr(description) + `"><title>` + escapeHTML(fullTitle) + `</title><link rel="icon" href="` + escapeAttr(relativeURL(current, favicon)) + `">` + earlyTheme + `<link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/style.css">` + extraStyles + serveAssets + `<script src="` + escapeAttr(prefix) + `assets/search-index.js" defer></script>` + mermaidScript + `<script src="` + escapeAttr(prefix) + `assets/app.js" defer></script>` + extraScripts + `</head><body data-root-prefix="` + escapeAttr(prefix) + `" data-task-filter="all"><a class="skip-link" href="#main-content">Перейти к содержимому</a><header class="site-header"><div class="brand-area"><button class="icon-button sidebar-toggle" type="button" data-sidebar-toggle aria-label="Открыть навигацию">☰</button><a class="brand" href="` + escapeAttr(relativeURL(current, "index.html")) + `">` + brandMark + `<span class="brand-text">` + escapeHTML(model.Project.Title) + `</span></a></div><div class="global-search" role="search"><div class="search-input-wrap"><input type="search" data-global-search placeholder="Поиск по документации" aria-label="Поиск по документации"><span class="search-shortcut">/</span></div><div class="search-results" id="global-search-results" data-search-results role="listbox" hidden></div></div><div class="header-actions"><button class="icon-button" type="button" data-print aria-label="Печать">⎙</button>` + rebuildButton + themeSelect + schemeSelect + `</div></header><div class="site-layout"><aside class="sidebar">` + renderNavigation(model, current) + `</aside><div class="main-area"><main id="main-content" class="page-grid` + gridClass + `"><div class="page-content">` + content + `</div>` + tocHTML + `</main><footer class="site-footer">` + footer + `</footer></div></div></body></html>`
 }
 
 type selectOption struct {
@@ -934,6 +947,16 @@ func ensureOutputSafety(inputDirectory, outputDirectory string) error {
 
 // GenerateSite writes a fully static, file:// compatible portal.
 func GenerateSite(model *Model, options Options) (GenerateResult, error) {
+	return generateSite(model, options, false)
+}
+
+func generateServeSite(model *Model, options Options) (GenerateResult, error) {
+	return generateSite(model, options, true)
+}
+
+func generateSite(model *Model, options Options, serve bool) (GenerateResult, error) {
+	model.serveMode = serve
+	defer func() { model.serveMode = false }()
 	model.ScreenMapEnabled = !options.NoScreenMap
 	output, err := filepath.Abs(options.OutputDirectory)
 	if err != nil {
@@ -952,9 +975,26 @@ func GenerateSite(model *Model, options Options) (GenerateResult, error) {
 	if err = mkdirp(output); err != nil {
 		return GenerateResult{}, err
 	}
+	serveOnlyAssets := []string{"serve.css", "serve.js", "editor.css", "editor.js", "codemirror.js", "codemirror.LICENSE.txt", "codemirror.checksums.txt"}
+	if !serve {
+		for _, asset := range serveOnlyAssets {
+			if removeErr := os.Remove(filepath.Join(output, "assets", asset)); removeErr != nil && !os.IsNotExist(removeErr) {
+				return GenerateResult{}, removeErr
+			}
+		}
+	}
 	for _, asset := range []string{"style.css", "app.js", "favicon.svg", "screen-map.css", "screen-map.js", "playable-flow.css", "playable-flow.js", "mermaid.tiny.js", "mermaid.LICENSE.txt"} {
 		if err = copyFSFile(EmbeddedFiles, "assets/"+asset, filepath.Join(output, "assets", asset)); err != nil {
 			return GenerateResult{}, err
+		}
+	}
+	serveAssetCount := 0
+	if serve {
+		for _, asset := range serveOnlyAssets {
+			if err = copyFSFile(EmbeddedFiles, "assets/"+asset, filepath.Join(output, "assets", asset)); err != nil {
+				return GenerateResult{}, err
+			}
+			serveAssetCount++
 		}
 	}
 	searchJSON, err := jsonForScript(model.SearchIndex)
@@ -1061,5 +1101,5 @@ func GenerateSite(model *Model, options Options) (GenerateResult, error) {
 	if err = writeFileEnsured(filepath.Join(output, model.ReportOutputPath), report); err != nil {
 		return GenerateResult{}, err
 	}
-	return GenerateResult{OutputDirectory: output, Pages: pages, Assets: len(model.Assets) + len(model.BrandingAssets) + 10}, nil
+	return GenerateResult{OutputDirectory: output, Pages: pages, Assets: len(model.Assets) + len(model.BrandingAssets) + 10 + serveAssetCount}, nil
 }

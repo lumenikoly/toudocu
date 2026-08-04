@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- `serve` получил live editor workspace с safe source tree, CodeMirror,
+  Markdown preview, diagnostics, typed create, SHA-256 CAS save, external-change
+  watcher и ETag polling; save/create синхронно обновляют модель, HTML и поиск.
+- `build` закреплён как автономный static read-only portal: editor markup,
+  editor API URL, CodeMirror и server-only rebuild code в него не попадают.
+- Добавлен schema-v1 editor HTTP contract со strict JSON, 3 MiB/2 MiB limits,
+  same-origin/action guards, canonical POSIX paths, symlink/output exclusions и
+  atomic platform-specific replace. API не запускает Git, shell или task verify.
+- `task init` и семь scaffold-команд используют один ordered registry, который
+  также формирует browser create; публичная CLI-семантика не изменилась.
 - Карта экранов получила obstacle-aware трассировку переходов и отдельный слой
   двухстрочных подписей, которые обходят карточки и остаются доступными с
   клавиатуры без изменения screen model или JSON schema.

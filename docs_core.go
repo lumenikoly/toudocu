@@ -233,8 +233,12 @@ func documentLess(a, b *Document) bool {
 	return naturalCompare(a.SourcePath, b.SourcePath) < 0
 }
 
-func createDocument(file scannedFile, root string, staleDays int, now time.Time, issues *[]Issue) *Document {
-	contentBytes, err := os.ReadFile(file.AbsolutePath)
+func createDocument(file scannedFile, root string, staleDays int, now time.Time, issues *[]Issue, overlay map[string][]byte) *Document {
+	contentBytes, exists := overlay[file.RelativePath]
+	var err error
+	if !exists {
+		contentBytes, err = os.ReadFile(file.AbsolutePath)
+	}
 	if err != nil {
 		*issues = append(*issues, newIssue("error", "file-read-failed", "Не удалось прочитать файл: "+err.Error(), file.RelativePath, 0))
 		return nil
@@ -529,6 +533,10 @@ func safeStableID(id string) bool {
 
 // BuildDocumentationModel reads, validates and cross-links all Markdown documents.
 func BuildDocumentationModel(options Options) (*Model, error) {
+	return buildDocumentationModel(options, nil)
+}
+
+func buildDocumentationModel(options Options, overlay map[string][]byte) (*Model, error) {
 	root, err := filepath.Abs(options.InputDirectory)
 	if err != nil {
 		return nil, err
@@ -570,13 +578,14 @@ func BuildDocumentationModel(options Options) (*Model, error) {
 		BrandingAssets: brandingAssets, SiteConfig: siteConfig,
 		Collections: map[string][]*Document{}, Knowledge: KnowledgeModel{},
 		HealthOutputPath: "health.html", ReportOutputPath: "report.json", ScreenMapEnabled: true,
+		sourceOverlay: overlay,
 	}
 	if model.RepositoryRef == "" {
 		model.RepositoryRef = "main"
 	}
 	files := scanMarkdownFiles(root, options.Excludes, &model.Issues)
 	for _, file := range files {
-		document := createDocument(file, root, staleDays, now, &model.Issues)
+		document := createDocument(file, root, staleDays, now, &model.Issues, overlay)
 		if document == nil {
 			continue
 		}

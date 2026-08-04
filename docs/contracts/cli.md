@@ -14,7 +14,7 @@ Docgent.
 |---|---|---|
 | `check` | отсутствуют | diagnostics или `ProjectReport` |
 | `build` | записывает output, при `--clean` безопасно очищает его | автономный портал и `report.json` |
-| `serve` | собирает output и запускает локальный HTTP-сервер | портал с автоматической и ручной пересборкой HTML |
+| `serve` | собирает output, запускает HTTP и по явному browser save изменяет workspace | editor API, watcher и live rebuild |
 | `search` | отсутствуют | `SearchReport` по свежим Markdown |
 | `task init` | атомарно создаёт новый `TASK-*` или `BUG-*` по типу | `TaskInitReport` |
 | `scaffold` | атомарно создаёт выбранную сущность | `ScaffoldReport` |
@@ -80,12 +80,17 @@ errors. `status.md`, `roadmap.md` и остальные типизированн
 `127.0.0.1` и `8080`. Для доступа из локальной сети требуется явный
 `--host 0.0.0.0`.
 
-Пока работает `serve`, запрос HTML автоматически пересобирает портал. Кнопка
-ручной пересборки в хедере появляется после проверки служебного endpoint,
-отправляет `POST` с anti-form заголовком, повторно строит модель и HTML и после
-успеха перезагружает текущую страницу. Это не авторизация и не проверка origin.
-Listener при этом не закрывается и сохраняет адрес. В статическом портале
-кнопка скрыта.
+Пока работает `serve`, HTML-запрос, save/create, watcher и ручная кнопка могут
+перестроить портал, не закрывая listener. Editor API и его JSON schema v1
+определены в [отдельном HTTP-контракте](editor-http.md). `build` всегда остаётся
+static read-only: editor markup, CodeMirror, API URL и server-only scripts в его
+результат не входят.
+
+Семантика `--host`, `--port` и `--open` не меняется; auto-open без `--open`
+отсутствует. Параметры `--no-open` и `--edit` не существуют и отклоняются как
+неизвестные. Редактор не зависит нормативно от адреса listener. При явном
+non-loopback listener доступные прямые HTTP-клиенты входят в trust boundary;
+same-origin guards не являются сетевой аутентификацией.
 
 `--report` и `--timeout` разрешены только для `task verify`.
 `task verify --run` разрешён только для статусов Ready, In Progress, Blocked и
@@ -109,7 +114,8 @@ Done; безопасный `--dry-run` также можно использов�
   завершились ошибкой; ошибка последующей пересборки возвращается клиенту как
   HTTP 500, не останавливая сервер; при ошибке ручной пересборки кнопка получает
   error-состояние, доступное сообщение объявляется через live region, а запрос
-  можно повторить.
+  можно повторить; editor API возвращает schema-v1 error envelope, а conflict —
+  `409 stale_digest` без потери текста.
 
 ## Architecture diagnostics
 

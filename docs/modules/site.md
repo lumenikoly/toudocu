@@ -19,13 +19,15 @@
 - каталоги процессов и use cases: `process_site.go`;
 - Screen Map, каталог и страницы экранов: `screen_site.go`;
 - локальная HTTP-раздача: `server.go`;
+- editor workspace, API и platform-specific atomic replace: `editor_*.go`;
 - встроенные ресурсы: `embed.go`, `assets/`;
 - конфигурация тем и безопасного брендинга: `site_config.go`.
 
 ## Границы
 
-Модуль не валидирует бизнес-сущности повторно и не редактирует Markdown. Он
-работает только с моделью, построенной модулем `MOD-MODEL`.
+Статическая генерация не валидирует бизнес-сущности повторно и не редактирует
+Markdown. Только явный режим `serve` предоставляет workspace-операции, после
+которых заново строит модель модулем `MOD-MODEL`.
 
 ## Бизнес-правила
 
@@ -41,11 +43,11 @@
 
 ### BR-SITE-003: Dev-сервер не раскрывает исходный репозиторий
 
-`serve` раздаёт только output-каталог, по умолчанию слушает loopback и отключает
-кеширование. Доступ через все сетевые интерфейсы включается только явным
-`--host 0.0.0.0`. Ручная пересборка из хедера использует только `POST` к
-служебному endpoint и требует заголовок действия, недоступный обычной
-cross-origin HTML-форме.
+Обычные маршруты `serve` раздают только output-каталог. Отдельный editor API
+разрешает обычные `.md`, `.yaml`, `.yml` и `.json` только внутри docs root,
+исключает hidden/excluded/output и symlink paths и не открывает остальной
+репозиторий. По умолчанию listener использует loopback; `--host 0.0.0.0`
+явно включает доступных клиентов локальной сети в trust boundary.
 
 ### BR-SITE-004: Mermaid работает автономно и в строгом режиме
 
@@ -82,6 +84,20 @@ fallback favicon и браузерные ресурсы встроены чер�
 `assets/branding/`. `build`, `check` и `serve` используют одну диагностику и
 остаются offline-first.
 
+### BR-SITE-007: Build и serve имеют разные возможности
+
+`GenerateSite` всегда создаёт автономный read-only результат для `file://` без
+editor markup, API URL, CodeMirror и server-only rebuild code. `serve` отдельно
+добавляет live workspace, editor/source actions, polling, API и watcher.
+
+### BR-SITE-008: Запись защищена optimistic concurrency
+
+Содержимое идентифицируется SHA-256 digest. Save проверяет digest до и после
+записи same-directory temp, сохраняет mode, синхронизирует данные и атомарно
+заменяет исходник. Конфликт не теряет local text и требует отдельного overwrite
+с актуальным digest и явным `confirmOverwrite`; при удалении исходника dirty
+buffer можно скачать. Diagnostics не блокируют сохранение.
+
 ## Инварианты
 
 - исходный `index.md` отображается dashboard, а не дублирующей страницей;
@@ -93,9 +109,10 @@ fallback favicon и браузерные ресурсы встроены чер�
   цвета;
 - каталоги, Screen Map, traceability и health page не выдают синтетический
   контекст документа;
-- после подтверждения служебного endpoint `serve` хедер позволяет вручную
-  пересобрать модель и HTML без остановки listener; через `file://` или другой
-  статический HTTP-сервер это действие скрыто;
+- в `serve` хедер позволяет открыть editor/source и вручную пересобрать модель
+  без остановки listener; через `file://` этих действий и assets нет;
+- save/create и стабильное внешнее изменение обновляют model, HTML, search,
+  diagnostics и workspace revision синхронно;
 - конфликт служебного output получает отдельный безопасный путь;
 - `ProjectReport` и HTML строятся из одной модели;
 - сгенерированные файлы не становятся источником истины.
@@ -105,6 +122,7 @@ fallback favicon и браузерные ресурсы встроены чер�
 - `GenerateSite`;
 - `BuildReport`;
 - CLI-команда `serve`;
+- [Editor HTTP schema v1](../contracts/editor-http.md);
 - `ProjectReport` schema v1;
 - HTML entrypoint `index.html` и машинный `report.json`.
 

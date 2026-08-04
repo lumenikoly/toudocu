@@ -43,6 +43,8 @@ release: test
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o $(DIST)/docgent-windows-amd64.exe $(CMD)
 	cp LICENSE THIRD_PARTY_NOTICES.md $(DIST)/
 	cp assets/mermaid.LICENSE.txt $(DIST)/MERMAID-LICENSE.txt
+	cp assets/codemirror.LICENSE.txt $(DIST)/CODEMIRROR-LICENSE.txt
+	cp assets/codemirror.checksums.txt $(DIST)/CODEMIRROR-CHECKSUMS.txt
 	cd $(DIST) && sha256sum * > checksums.txt
 
 clean:
