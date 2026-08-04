@@ -6,7 +6,7 @@
 - Модуль: MOD-MODEL
 - Сценарий: UC-DOCS-02
 - Владелец: Команда Docu-docu
-- Последнее обновление: 2026-07-26
+- Последнее обновление: 2026-08-04
 
 ## Результат
 
@@ -41,7 +41,7 @@
 
 - `AC-01` → `go run ./cmd/docu-docu check ./docs --strict --stale-days 0`
 - `AC-02` → `go test ./... -run 'TestKnowledgeModel|TestMinimalDocumentationCheckAndBuild'`
-- `AC-03` → `grep -q 'Проектная документация Docu-docu' README.md`
+- `AC-03` → `grep -Fq 'Исходная документация проекта' README.md && grep -Fq 'docs/index.md' README.md`
 - `ALL` → `go test ./...`
 - `DOCS` → `go run ./cmd/docu-docu check ./docs --strict --stale-days 0`
 

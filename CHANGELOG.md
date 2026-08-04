@@ -2,6 +2,10 @@
 
 ## 0.0.1
 
+- Самодокументация согласована с текущим состоянием репозитория: исправлены
+  onboarding и scaffold-примеры README, восстановлено описание Markdown subset,
+  roadmap включает сценарий Documentation Changes, а стабильный фасад `api.go`
+  получил отдельный Go API-контракт.
 - Первый стабильный релиз dependency-free Go CLI для проверки Markdown и
   построения автономного статического HTML-портала.
 - Команды `check`, `build`, `search`, `changes` и `task changes` обеспечивают

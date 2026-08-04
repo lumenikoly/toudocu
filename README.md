@@ -21,7 +21,7 @@
 
 ### 1. Установите CLI
 
-Скачайте готовый бинарник для своей платформы из раздела [Releases](https://github.com/your-org/docu-docu/releases) и добавьте его в `PATH`.
+Скачайте готовый бинарник для своей платформы из раздела [Releases](https://github.com/lumenikoly/docu-docu/releases) и добавьте его в `PATH`.
 
 Проверьте установку:
 
@@ -32,7 +32,7 @@ docu-docu --help
 Также можно собрать бинарник из исходников:
 
 ```bash
-git clone https://github.com/your-org/docu-docu.git
+git clone https://github.com/lumenikoly/docu-docu.git
 cd docu-docu
 make build
 ```
@@ -253,7 +253,7 @@ Docu-docu умеет создавать заготовки для новых д�
 Например:
 
 ```bash
-docu-docu scaffold module payments ./docs \
+docu-docu scaffold module MOD-PAYMENTS ./docs \
   --title "Payments"
 ```
 
@@ -291,6 +291,22 @@ Docu-docu подходит для описания:
 * планов и изменений проекта.
 
 Для диаграмм можно использовать Mermaid.
+
+---
+
+## Поддерживаемый Markdown
+
+Docu-docu намеренно поддерживает безопасное подмножество Markdown:
+
+* заголовки, абзацы, выделение и цитаты;
+* ссылки и безопасные локальные raster-изображения;
+* маркированные, нумерованные и task-списки;
+* таблицы, inline code и fenced code blocks;
+* Mermaid `flowchart`, `stateDiagram-v2` и `sequenceDiagram`.
+
+Произвольный HTML экранируется. Front matter, Mermaid directives и конструкции,
+зависящие от полного CommonMark, не поддерживаются. Подробные ограничения
+зафиксированы в [модуле безопасного Markdown](docs/modules/markdown.md).
 
 ---
 
@@ -364,7 +380,7 @@ $use-docu-docu translate
 | Запустить демонстрационный портал | `docu-docu serve ./example/docs`                                 | `make demo-serve`        |
 | Найти документ                    | `docu-docu search "запрос" ./docs`                               | —                        |
 | Посмотреть изменения              | `docu-docu changes ./docs`                                       | —                        |
-| Создать шаблон                    | `docu-docu scaffold module payments ./docs --title "Payments"`   | —                        |
+| Создать шаблон                    | `docu-docu scaffold module MOD-PAYMENTS ./docs --title "Payments"` | —                      |
 | Собрать бинарник                  | `go build -o docu-docu ./cmd/docu-docu`                          | `make build`             |
 | Запустить тесты                   | `go test ./...`                                                  | `make test`              |
 | Собрать релизные бинарники        | вручную                                                          | `make release`           |
@@ -373,6 +389,19 @@ $use-docu-docu translate
 Команды `make` предназначены для разработки самого Docu-docu из исходного репозитория.
 
 Пользователи готового бинарника запускают команды `docu-docu` напрямую.
+
+---
+
+## Публичный Go API
+
+Корневой пакет предоставляет типизированный фасад над моделью, рендерером,
+отчётами и отдельными операциями CLI. Текущий module path — локальный
+`docu-docu`; канонический удалённый Go module ещё не опубликован, поэтому
+внешним потребителям пока не следует фиксировать этот import path.
+
+Экспортируемые операции, побочные эффекты и правила совместимости описаны в
+[контракте Go API](docs/contracts/go-api.md). CLI остаётся основным
+пользовательским способом запуска готового бинарника.
 
 ---
 
@@ -451,6 +480,8 @@ docu-docu scaffold --help
 * [Возможности Docu-docu](docs/reference/features.md)
 * [Настройка](docs/reference/configuration.md)
 * [Команды CLI](docs/contracts/cli.md)
+* [Публичный Go API](docs/contracts/go-api.md)
+* [Исходная документация проекта](docs/index.md)
 * [Тестирование](docs/guides/testing.md)
 * [Участие в разработке](CONTRIBUTING.md)
 
