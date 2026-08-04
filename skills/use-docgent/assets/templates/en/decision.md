@@ -18,10 +18,4 @@
 
 ## Consequences
 
-### Positive
-
-- {{POSITIVE_CONSEQUENCE}}
-
-### Negative
-
-- {{NEGATIVE_CONSEQUENCE}}
+{{CONSEQUENCES}}

@@ -18,10 +18,4 @@
 
 ## Последствия
 
-### Положительные
-
-- {{POSITIVE_CONSEQUENCE}}
-
-### Отрицательные
-
-- {{NEGATIVE_CONSEQUENCE}}
+{{CONSEQUENCES}}

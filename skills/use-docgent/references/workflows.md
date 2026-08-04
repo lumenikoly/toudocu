@@ -19,6 +19,22 @@ Use `docgent` from `PATH`. In the Docgent source repository, substitute
 `go run ./cmd/docgent`. Docgent has no `init` command; create Markdown from the
 bundled templates.
 
+## Documentation gate
+
+For every documentation change, use this sequence:
+
+1. define the audience, purpose, and useful question;
+2. identify the source of truth and decide whether to update an existing file;
+3. draft only evidence-backed content;
+4. complete the author review from [semantic-gate.md](semantic-gate.md);
+5. obtain independent semantic review when the change is risk-bearing;
+6. run Docgent as the structural gate.
+
+An initial read-only `check` may be used during discovery. Its diagnostics are
+evidence about the declared structure, not instructions to invent content.
+Do not call a document complete until the required semantic gate and the final
+structural check both pass.
+
 ## Command matrix
 
 | Command | Mutates or executes | Use |
@@ -42,13 +58,14 @@ CI, or the user requires it.
 
 ## Diagnostic loop
 
-1. Run `check --format json`.
-2. Group issues by document and stable code.
-3. Fix every error at its source.
-4. Evaluate warnings as editorial guidance; fix only those supported by project
+1. Confirm that the semantic gate for the draft has passed.
+2. Run `check --format json`.
+3. Group issues by document and stable code.
+4. Fix every error at its source without adding unsupported semantics.
+5. Evaluate warnings as editorial guidance; fix only those supported by project
    evidence.
-5. Re-run an ordinary project-wide check.
-6. If strict validation is project policy, run it as an additional final gate.
+6. Re-run an ordinary project-wide check.
+7. If strict validation is project policy, run it as an additional final gate.
 
 Do not suppress an integrity error by removing a meaningful relationship. Do
 not suppress a warning by inventing status, dates, owners, sections, or
@@ -74,6 +91,10 @@ When adding related types, create targets before references: module and rules,
 then use case, then optional screen map or flow, then roadmap or work item.
 Replace every template placeholder before validation. A map or flow never
 replaces prose requirements or acceptance criteria.
+
+Do not let the template select the entities or topology. Whole-section
+placeholders such as `FLOW_DIAGRAM`, `SCREEN_ROWS`, and `TRANSITION_ROWS` must
+be replaced with content derived from product or repository evidence.
 
 ## Task workflow
 

@@ -26,6 +26,8 @@ apply typed contracts only when the project uses the corresponding capability.
      without permission.
 5. Read [references/workflows.md](references/workflows.md) before choosing CLI
    flags or working with `TASK-*`.
+6. Read [references/semantic-gate.md](references/semantic-gate.md) before
+   creating or changing any documentation.
 
 ## Inspect before writing
 
@@ -41,30 +43,37 @@ apply typed contracts only when the project uses the corresponding capability.
   review dates to silence a diagnostic.
 - Read [references/document-model.md](references/document-model.md) before
   creating a typed document or changing stable IDs and relationships.
+- Establish the document's audience, purpose, useful question, and sources of
+  truth before selecting a template or interpreting validation diagnostics.
 
 ## Create or update documentation
 
-1. For a new project, create a neutral `index.md` first. Add more documents only
+1. Apply the semantic gate. Prefer updating an existing source of truth and add
+   a document only when it communicates a distinct, evidence-backed purpose.
+2. For a new project, create a neutral `index.md` first. Add more documents only
    when they communicate known information.
-2. Use ordinary Markdown in untyped paths for free-form documentation. Use
+3. Use ordinary Markdown in untyped paths for free-form documentation. Use
    `modules/`, `use-cases/`, `flows/`, `screens/`, `decisions/`, `roadmap.md`,
    and `work/` only when the project benefits from their machine-readable
    semantics.
-3. Select the closest template from `assets/templates/ru/` or
+4. Select the closest template from `assets/templates/ru/` or
    `assets/templates/en/`. Templates are starting points, not a required
-   starter pack.
-4. Replace every `{{PLACEHOLDER}}`. Use `rg` when available, or an equivalent
+   starter pack. Remove unsupported optional sections instead of filling them
+   with plausible placeholders.
+5. Replace every `{{PLACEHOLDER}}`. Use `rg` when available, or an equivalent
    text search, to find unresolved placeholders.
-5. Keep statements observable and specific. Update related documents together
+6. Keep statements observable and specific. Update related documents together
    only when an explicit relationship exists.
-6. Keep global progress in `roadmap.md` if the project uses a roadmap. Do not
+7. Keep global progress in `roadmap.md` if the project uses a roadmap. Do not
    add requirement checklists to `status.md`.
-7. Preserve source Markdown as the source of truth. Never edit generated site
+8. Preserve source Markdown as the source of truth. Never edit generated site
    output as documentation.
-8. Treat Mermaid as visualization only. Keep requirements and acceptance
+9. Treat Mermaid as visualization only. Keep requirements and acceptance
    criteria in prose, and use only validated `flowchart`, `stateDiagram-v2`, or
    architectural `sequenceDiagram` blocks. For screen maps, edit the catalog
    and transition tables instead of the generated Mermaid source.
+10. Complete the author review and any risk-based independent review before
+    treating Docgent validation as the final structural gate.
 
 ## Interpret validation correctly
 
@@ -74,6 +83,8 @@ apply typed contracts only when the project uses the corresponding capability.
   change; otherwise report them without inventing content.
 - Do not add a module, use case, status, date, ID, or section solely to achieve
   zero warnings.
+- When a typed contract requires unsupported content, reconsider the document
+  type or request evidence instead of manufacturing a structurally valid model.
 - Use `--strict` only when repository instructions, CI, or the user explicitly
   requires warnings to fail validation.
 
@@ -97,7 +108,8 @@ apply typed contracts only when the project uses the corresponding capability.
 
 ## Validate and deliver
 
-1. Always finish with an ordinary project-wide check using discovered paths:
+1. After the semantic gate passes, finish with an ordinary project-wide check
+   using discovered paths:
 
    ```bash
    docgent check ./docs --repository-root .
@@ -108,5 +120,6 @@ apply typed contracts only when the project uses the corresponding capability.
 3. Build the portal only when requested or needed for verification. Discover the
    project's output convention; otherwise choose a dedicated disposable
    directory. Use `--clean` only after confirming the resolved output is safe.
-4. Report changed documentation, errors resolved, remaining warnings,
-   validation policy used, and any verification intentionally not run.
+4. Report the semantic-gate result and reviewer when required, changed
+   documentation, errors resolved, remaining warnings, validation policy used,
+   and any verification intentionally not run.

@@ -19,6 +19,10 @@ Validate only promises the documentation makes:
 Errors protect safety, identity, relationships, and executable contracts.
 Warnings describe editorial completeness, recognized statuses, and staleness.
 Do not turn a warning into invented content merely to make a strict check pass.
+Structural validation may define the serialization of an opted-in typed
+contract. It does not decide which entities the product contains, which
+relationships are meaningful, or whether the document should exist. Apply
+[semantic-gate.md](semantic-gate.md) before the final structural check.
 
 ## Paths and document types
 
@@ -83,29 +87,44 @@ when they add information; do not create empty or speculative prose. If the
 project does not need typed semantics, use the generic `document.md` template
 outside the reserved typed paths.
 
+Common schema-driven anti-patterns include:
+
+| Document | Reject when |
+|---|---|
+| Module | It mirrors a directory without a stable product or ownership boundary |
+| Use case | It restates functions or routes without observable actor behavior |
+| Flow | Its nodes are copied from code structure rather than one reusable scenario |
+| Screen map | Its catalog is derived from router entries instead of product navigation |
+| ADR | No durable decision or considered tradeoff can be evidenced |
+| Roadmap or status | Desired work is presented as current fact or global scope is inferred from local checklists |
+| Task | Scope, criteria, or commands are invented to complete the task schema |
+
 ## Flows and screen maps
 
 Use a `FLOW-*` document for the detailed behavior of one reusable scenario.
 Link it to an existing use case or architecture document. Mermaid node labels
 and edges are visualization only: Docgent does not derive relationships from
-them.
+them. Derive the diagram from the scenario; do not start from a generic
+start-to-finish graph and retrofit meaning.
 
 Use `screens/map.md` for the product-wide navigation graph. Its two tables are
-the machine-readable source of truth:
+the machine-readable source of truth for the declared graph, while product
+information architecture and user journeys determine which screens belong in
+it:
 
 ```md
 ## Screen catalog
 
 | ID | Screen | Module | Type | Role | Route | Status | Errors |
 |---|---|---|---|---|---|---|---|
-| SC-AREA-START | Start | MOD-AREA | page | entry | `/start` | Planned | — |
-| SC-AREA-RESULT | Result | MOD-AREA | page | terminal | `/result` | Planned | — |
+| SC-PUBLIC-HOME | Home | MOD-PUBLIC | page | entry | `/` | Planned | — |
+| SC-ACCOUNT-OVERVIEW | Account overview | MOD-ACCOUNT | page | terminal | `/account` | Planned | — |
 
 ## Transitions
 
 | From | Action | Condition | To | Type |
 |---|---|---|---|---|
-| SC-AREA-START | Continue | — | SC-AREA-RESULT | navigation |
+| SC-PUBLIC-HOME | Open account | Signed in | SC-ACCOUNT-OVERVIEW | navigation |
 ```
 
 Follow these constraints:
@@ -120,6 +139,12 @@ Follow these constraints:
 - do not use external URLs as transition targets in the v1 graph;
 - use `ERR-*` values for catalog filtering; Docgent does not resolve them
   against a separate error catalog.
+
+Use the router only to confirm routes for screens already justified by product
+navigation. Do not catalog technical redirects, wildcard or layout routes, or
+internal component states as screens. Every transition must represent a
+meaningful user action. Put the detailed behavior of one scenario in a
+`FLOW-*` document instead of duplicating it in the product-wide map.
 
 Do not add or edit a Mermaid fence in `screens/map.md`. Docgent generates the
 `flowchart LR` visualization from the catalog and transition tables.
@@ -138,6 +163,9 @@ Unknown screen IDs are errors. In templates, the whole-line placeholders
 `OPTIONAL_SCREENS_METADATA`, `OPTIONAL_FLOW_METADATA`,
 `OPTIONAL_ROUTE_METADATA`, and `OPTIONAL_COMPONENT_METADATA` mean: replace the
 placeholder with one complete metadata line, or delete the line.
+`FLOW_DIAGRAM`, `SCREEN_ROWS`, and `TRANSITION_ROWS` must be replaced with the
+complete evidence-backed Mermaid source or table rows; the templates do not
+provide a default topology.
 
 ## Work-item contract
 

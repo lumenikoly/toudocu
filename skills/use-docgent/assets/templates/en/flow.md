@@ -10,10 +10,7 @@
 ## Process
 
 ```mermaid
-flowchart TD
-    Start["{{START}}"]
-    Finish["{{FINISH}}"]
-    Start --> Finish
+{{FLOW_DIAGRAM}}
 ```
 
 ## Related documents

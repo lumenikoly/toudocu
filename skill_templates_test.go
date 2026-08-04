@@ -29,43 +29,39 @@ The user can continue from the start screen.
 
 			replacements := map[string]string{
 				"{{SCREEN_MAP_SUMMARY}}":          "Product navigation.",
-				"{{AREA}}":                        "CORE",
-				"{{START_SCREEN_TITLE}}":          "Start",
-				"{{RESULT_SCREEN_TITLE}}":         "Result",
+				"{{SCREEN_ROWS}}":                 "| SC-CORE-HOME | Home | MOD-CORE | page | entry | `/` | Запланировано | — |\n| SC-CORE-WORKSPACE | Workspace | MOD-CORE | page | terminal | `/workspace` | Запланировано | — |",
+				"{{TRANSITION_ROWS}}":             "| SC-CORE-HOME | Open workspace | — | SC-CORE-WORKSPACE | navigation |",
 				"{{MODULE_ID}}":                   "MOD-CORE",
-				"{{START_ROUTE}}":                 "/start",
-				"{{RESULT_ROUTE}}":                "/result",
 				"{{ACTION}}":                      "Continue",
 				"{{USE_CASE_ID}}":                 "UC-CORE-01",
 				"{{USE_CASE_TITLE}}":              "Continue",
 				"{{STATUS}}":                      "Запланировано",
 				"{{ACTOR}}":                       "User",
-				"{{OPTIONAL_SCREENS_METADATA}}":   "- Экраны: SC-CORE-START, SC-CORE-RESULT",
+				"{{OPTIONAL_SCREENS_METADATA}}":   "- Экраны: SC-CORE-HOME, SC-CORE-WORKSPACE",
 				"{{PRIORITY}}":                    "Средний",
 				"{{DATE}}":                        "2026-07-28",
-				"{{USE_CASE_SUMMARY}}":            "The user moves to the result screen.",
+				"{{USE_CASE_SUMMARY}}":            "The user opens the workspace from the home page.",
 				"{{INPUT}}":                       "A valid request.",
-				"{{PRECONDITION}}":                "The start screen is open.",
-				"{{MAIN_STEP}}":                   "The user continues.",
+				"{{PRECONDITION}}":                "The home page is open.",
+				"{{MAIN_STEP}}":                   "The user opens the workspace.",
 				"{{ERROR_SCENARIOS}}":             "No error scenario is defined.",
-				"{{POSTCONDITIONS}}":              "The result screen is open.",
+				"{{POSTCONDITIONS}}":              "The workspace is open.",
 				"{{BUSINESS_RULE_ID}}":            "BR-CORE-001",
 				"{{BUSINESS_RULE_REFERENCE}}":     "Continue is allowed.",
 				"{{MODULE_TITLE}}":                "Core",
 				"{{MODULE_FILE}}":                 "core.md",
 				"{{FLOW_ID}}":                     "FLOW-CORE-01",
 				"{{FLOW_TITLE}}":                  "Continue",
-				"{{FLOW_SUMMARY}}":                "Detailed continue flow.",
-				"{{START}}":                       "Start",
-				"{{FINISH}}":                      "Result",
+				"{{FLOW_SUMMARY}}":                "Detailed workspace navigation.",
+				"{{FLOW_DIAGRAM}}":                "flowchart TD\n    Home[\"Home\"] -->|Open workspace| Workspace[\"Workspace\"]",
 				"{{USE_CASE_LINK}}":               "../use-cases/core.md",
-				"{{SCREEN_ID}}":                   "SC-CORE-START",
-				"{{SCREEN_TITLE}}":                "Start",
+				"{{SCREEN_ID}}":                   "SC-CORE-HOME",
+				"{{SCREEN_TITLE}}":                "Home",
 				"{{SCREEN_STATUS}}":               "Запланировано",
-				"{{OPTIONAL_ROUTE_METADATA}}":     "- Маршрут: `/start`",
-				"{{OPTIONAL_COMPONENT_METADATA}}": "- Компонент: `web/start/`",
+				"{{OPTIONAL_ROUTE_METADATA}}":     "- Маршрут: `/`",
+				"{{OPTIONAL_COMPONENT_METADATA}}": "- Компонент: `web/home/`",
 				"{{YYYY-MM-DD}}":                  "2026-07-28",
-				"{{SCREEN_PURPOSE}}":              "Starts the scenario.",
+				"{{SCREEN_PURPOSE}}":              "Provides the product entry point.",
 				"{{STATES_AND_ERRORS}}":           "The screen has its default state.",
 				"{{TASK_ID}}":                     "TASK-CORE-001",
 				"{{TASK_TITLE}}":                  "Implement continue",
@@ -74,25 +70,26 @@ The user can continue from the start screen.
 				"{{RESULT}}":                      "The continue path works.",
 				"{{SCOPE_PATH}}":                  "docs",
 				"{{OUT_OF_SCOPE}}":                "Other scenarios.",
-				"{{ACCEPTANCE_CRITERION}}":        "Continue opens SC-CORE-RESULT.",
+				"{{ACCEPTANCE_CRITERION}}":        "Open workspace navigates to SC-CORE-WORKSPACE.",
 				"{{PLAN_STEP}}":                   "Implement the documented transition.",
 				"{{ACCEPTANCE_COMMAND}}":          "go test ./...",
 				"{{DOCUMENTATION_IMPACT}}":        "Update the screen map.",
 			}
 			if language == "en" {
+				replacements["{{SCREEN_ROWS}}"] = "| SC-CORE-HOME | Home | MOD-CORE | page | entry | `/` | Planned | — |\n| SC-CORE-WORKSPACE | Workspace | MOD-CORE | page | terminal | `/workspace` | Planned | — |"
 				replacements["{{STATUS}}"] = "Planned"
 				replacements["{{SCREEN_STATUS}}"] = "Planned"
 				replacements["{{PRIORITY}}"] = "Medium"
-				replacements["{{OPTIONAL_SCREENS_METADATA}}"] = "- Screens: SC-CORE-START, SC-CORE-RESULT"
-				replacements["{{OPTIONAL_ROUTE_METADATA}}"] = "- Route: `/start`"
-				replacements["{{OPTIONAL_COMPONENT_METADATA}}"] = "- Component: `web/start/`"
+				replacements["{{OPTIONAL_SCREENS_METADATA}}"] = "- Screens: SC-CORE-HOME, SC-CORE-WORKSPACE"
+				replacements["{{OPTIONAL_ROUTE_METADATA}}"] = "- Route: `/`"
+				replacements["{{OPTIONAL_COMPONENT_METADATA}}"] = "- Component: `web/home/`"
 				replacements["{{OPTIONAL_FLOW_METADATA}}"] = "- Flow: FLOW-CORE-01"
 			}
 
 			writeSkillTemplate(t, docs, language, "screen-map.md", "screens/map.md", replacements)
 			writeSkillTemplate(t, docs, language, "use-case.md", "use-cases/core.md", replacements)
 			writeSkillTemplate(t, docs, language, "flow.md", "flows/core.md", replacements)
-			writeSkillTemplate(t, docs, language, "screen.md", "screens/SC-CORE-START.md", replacements)
+			writeSkillTemplate(t, docs, language, "screen.md", "screens/SC-CORE-HOME.md", replacements)
 			writeSkillTemplate(t, docs, language, "work-ready-feature.md", "work/TASK-CORE-001.md", replacements)
 
 			model, err := BuildDocumentationModel(Options{
@@ -119,6 +116,42 @@ The user can continue from the start screen.
 				t.Fatalf("flow or screens missing from task context: %#v", context)
 			}
 		})
+	}
+}
+
+func TestUseDocgentTemplatesDoNotInventSemanticStructure(t *testing.T) {
+	for _, language := range []string{"ru", "en"} {
+		screenMap := readSkillTemplate(t, language, "screen-map.md")
+		for _, placeholder := range []string{"{{SCREEN_ROWS}}", "{{TRANSITION_ROWS}}"} {
+			if !strings.Contains(screenMap, placeholder) {
+				t.Errorf("%s/screen-map.md does not contain %s", language, placeholder)
+			}
+		}
+		for _, forbidden := range []string{"{{START_SCREEN_TITLE}}", "{{RESULT_SCREEN_TITLE}}", "SC-{{AREA}}-START", "SC-{{AREA}}-RESULT"} {
+			if strings.Contains(screenMap, forbidden) {
+				t.Errorf("%s/screen-map.md contains schema-driven example %s", language, forbidden)
+			}
+		}
+
+		flow := readSkillTemplate(t, language, "flow.md")
+		if !strings.Contains(flow, "{{FLOW_DIAGRAM}}") {
+			t.Errorf("%s/flow.md does not contain FLOW_DIAGRAM", language)
+		}
+		for _, forbidden := range []string{"{{START}}", "{{FINISH}}", "Start --> Finish"} {
+			if strings.Contains(flow, forbidden) {
+				t.Errorf("%s/flow.md contains default topology %s", language, forbidden)
+			}
+		}
+
+		decision := readSkillTemplate(t, language, "decision.md")
+		if !strings.Contains(decision, "{{CONSEQUENCES}}") {
+			t.Errorf("%s/decision.md does not contain CONSEQUENCES", language)
+		}
+		for _, forbidden := range []string{"{{POSITIVE_CONSEQUENCE}}", "{{NEGATIVE_CONSEQUENCE}}"} {
+			if strings.Contains(decision, forbidden) {
+				t.Errorf("%s/decision.md requires invented polarity %s", language, forbidden)
+			}
+		}
 	}
 }
 
