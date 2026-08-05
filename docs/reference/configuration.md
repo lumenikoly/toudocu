@@ -1,8 +1,12 @@
 # Справочник конфигурации
 
 CLI работает без конфигурационного файла. Необязательный
-`<repository-root>/.docu-docu/config.yml` настраивает портал и автоматически
-читается командами `build`, `check` и `serve`.
+`<repository-root>/.docu-docu/config.yml` целиком разбирается и валидируется при
+загрузке, включая configured branding assets. После общей валидации `build`,
+`check` и `serve` используют project/site configuration; `changes` и `task
+changes` — секцию `changes`; `task init` и `scaffold` — `project.locale`.
+Поэтому ошибка в общей структуре или site asset может остановить и операцию,
+которая непосредственно не использует эту настройку.
 
 ## Значения по умолчанию
 

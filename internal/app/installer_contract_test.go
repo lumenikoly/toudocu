@@ -49,7 +49,6 @@ func TestInstallerDocumentationContract(t *testing.T) {
 		"DOCU_DOCU_VERSION", "DOCU_DOCU_INSTALL_DIR", "DOCU_DOCU_NO_MODIFY_PATH",
 		"~/.local/bin/docu-docu", "%LOCALAPPDATA%\\Programs\\docu-docu\\docu-docu.exe",
 		"checksum", "один trust root", "curl | sh", "irm | iex",
-		"GitHub Release ещё не опубликован",
 	} {
 		if !strings.Contains(guide, expected) {
 			t.Errorf("installation guide missing %q", expected)
@@ -68,8 +67,15 @@ func TestInstallerDocumentationContract(t *testing.T) {
 			t.Errorf("%s does not describe both installers", name)
 		}
 	}
-	if !strings.Contains(status, "GitHub Release не создавались") {
-		t.Error("status does not preserve the unpublished-release boundary")
+	for _, expected := range []string{"Подготовка стабильного релиза 0.0.1", "готовится к стабильному релизу", "опубликовать стабильный релиз `0.0.1`"} {
+		if !strings.Contains(status, expected) {
+			t.Errorf("status does not describe release preparation: missing %q", expected)
+		}
+	}
+	for _, obsolete := range []string{"GitHub Release ещё не опубликован", "GitHub Release не создавались"} {
+		if strings.Contains(guide, obsolete) || strings.Contains(status, obsolete) {
+			t.Errorf("release documentation preserves obsolete unpublished-release warning %q", obsolete)
+		}
 	}
 	if !strings.Contains(systemBoundary, "Release installer") || !strings.Contains(systemBoundary, "остаётся снаружи") {
 		t.Error("system boundary does not keep bootstrap outside the Go runtime")

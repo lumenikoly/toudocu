@@ -48,8 +48,14 @@ func TestArchivedTasksAreFilteredFromDefaultPortalSurfaces(t *testing.T) {
 		t.Fatalf("unexpected work navigation: %s", navigation)
 	}
 	dashboard := renderDashboard(model)
-	if !strings.Contains(dashboard, "Active portal task") || strings.Contains(dashboard, "Archived portal task") {
-		t.Fatalf("unexpected dashboard archive visibility")
+	focusStart := strings.Index(dashboard, `class="dashboard-section dashboard-focus"`)
+	focusEnd := strings.Index(dashboard, `class="dashboard-section recommended-entries"`)
+	if focusStart < 0 || focusEnd <= focusStart {
+		t.Fatal("dashboard focus bounds are missing")
+	}
+	focus := dashboard[focusStart:focusEnd]
+	if strings.Contains(focus, "Active portal task") || strings.Contains(focus, "Archived portal task") || !strings.Contains(focus, "Активная работа") {
+		t.Fatalf("dashboard must summarize active work without listing task names")
 	}
 }
 
@@ -830,8 +836,8 @@ func TestGenerateSite(t *testing.T) {
 		t.Fatal("unsafe")
 	}
 	dashboardBytes, _ := os.ReadFile(filepath.Join(output, "index.html"))
-	if !strings.Contains(string(dashboardBytes), `data-filter-control="type"`) {
-		t.Fatal("dashboard must offer a type filter for its mixed document collection")
+	if strings.Contains(string(dashboardBytes), `data-filter-control="type"`) {
+		t.Fatal("dashboard must not duplicate the document catalog filters")
 	}
 	directoryBytes, _ := os.ReadFile(filepath.Join(output, "modules/index.html"))
 	directoryHTML := string(directoryBytes)
@@ -939,10 +945,24 @@ func TestPortalSimplifiedNavigationAndAccessibleHeadings(t *testing.T) {
 	if count := strings.Count(dashboard, `class="recommended-entry"`); count < 3 || count > 5 {
 		t.Fatalf("recommended entry count = %d", count)
 	}
-	for _, expected := range []string{"С чего начать", "Каталог документации", "Матрица трассируемости"} {
+	for _, expected := range []string{"Текущий фокус", "Следующий результат", "Активная работа", "Блокеры", "Открытые риски", "С чего начать", "Подробный обзор", "Матрица трассируемости"} {
 		if !strings.Contains(dashboard+renderTraceabilityPage(model, "traceability.html"), expected) {
 			t.Fatalf("portal missing %q", expected)
 		}
+	}
+	for _, forbidden := range []string{"Каталог документации", `data-filter-control="type"`, "Дорожная карта", "Вычисляемое состояние", "RISK-01: Тестовый риск"} {
+		if strings.Contains(dashboard, forbidden) {
+			t.Fatalf("dashboard still contains detailed surface %q", forbidden)
+		}
+	}
+	ordered := []string{"dashboard-about", "dashboard-focus", "recommended-entries", "dashboard-overview"}
+	position := -1
+	for _, marker := range ordered {
+		next := strings.Index(dashboard, marker)
+		if next <= position {
+			t.Fatalf("dashboard block %q is out of order", marker)
+		}
+		position = next
 	}
 	for _, forbidden := range []string{">⚑<", ">±<", ">⇥<", ">Traceability<"} {
 		if strings.Contains(renderNavigation(model, "index.html"), forbidden) {
@@ -973,6 +993,51 @@ func TestPortalSimplifiedNavigationAndAccessibleHeadings(t *testing.T) {
 		if !strings.Contains(string(app), expected) {
 			t.Fatalf("browser behavior missing %q", expected)
 		}
+	}
+}
+
+func TestDashboardFocusFallbacksAndAlwaysVisibleOverview(t *testing.T) {
+	_, docs, _ := createFixture(t)
+	model := buildFixture(t, docs)
+	html := renderDashboard(model)
+	for _, expected := range []string{
+		`class="focus-result-link" href="use-cases/UC-AUTH-01.html"`,
+		`class="focus-signal focus-signal-work" href="status.html"`,
+		`class="focus-signal focus-signal-blockers" href="status.html"`,
+		`class="focus-signal focus-signal-risks" href="risks.html"`,
+		"Нет блокеров",
+	} {
+		if !strings.Contains(html, expected) {
+			t.Fatalf("dashboard focus missing %q", expected)
+		}
+	}
+	if strings.Contains(html, "Add verification workflow") {
+		t.Fatal("dashboard focus must not list active task names")
+	}
+
+	model.CurrentStatus.NextResult = nil
+	model.Project.StatusDocument = nil
+	model.DocByPath["status.md"] = nil
+	model.DocByPath["risks.md"] = nil
+	model.Stats.OpenRisks = 0
+	model.Knowledge.WorkItems = append(model.Knowledge.WorkItems, WorkItem{})
+	html = renderDashboard(model)
+	for _, expected := range []string{
+		"Следующий результат не определён.",
+		`class="focus-signal focus-signal-work" href="work/index.html"`,
+		"Нет открытых рисков",
+	} {
+		if !strings.Contains(html, expected) {
+			t.Fatalf("dashboard fallback missing %q", expected)
+		}
+	}
+	if strings.Contains(html, `class="focus-signal focus-signal-risks" href=`) {
+		t.Fatal("dashboard must not link to a missing risks page")
+	}
+
+	if !strings.Contains(html, `<section class="dashboard-section dashboard-overview" data-dashboard-overview`) ||
+		strings.Contains(html, `<details class="dashboard-section dashboard-overview"`) {
+		t.Fatal("dashboard overview must remain permanently visible without a disclosure control")
 	}
 }
 
@@ -1450,7 +1515,7 @@ func TestRoadmapContractAndDeliverableRemainManual(t *testing.T) {
 	}
 }
 
-func TestComputedStatusAppearsOnDashboardAndStatusPage(t *testing.T) {
+func TestComputedStatusIsSummarizedOnDashboardAndDetailedOnStatusPage(t *testing.T) {
 	root, docs, output := createFixture(t)
 	commands := map[string]string{"AC-01": "pass", "AC-02": "pass", "ALL": "pass", "DOCS": "pass"}
 	task := taskVerifyFixture("Заблокировано", false, commands, "\n## Блокер\n\nОжидается решение ADR-014.\n")
@@ -1465,15 +1530,34 @@ func TestComputedStatusAppearsOnDashboardAndStatusPage(t *testing.T) {
 	if _, err := GenerateSite(model, Options{OutputDirectory: output, Clean: true}); err != nil {
 		t.Fatal(err)
 	}
-	for _, name := range []string{"index.html", "status.html"} {
-		data, err := os.ReadFile(filepath.Join(output, name))
-		if err != nil {
-			t.Fatal(err)
+	dashboardData, err := os.ReadFile(filepath.Join(output, "index.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	dashboard := string(dashboardData)
+	for _, part := range []string{"Текущий фокус", "Активная работа", "Блокеры", "UC-AUTH-01"} {
+		if !strings.Contains(dashboard, part) {
+			t.Fatalf("index.html missing %q", part)
 		}
-		for _, part := range []string{"Вычисляемое состояние", "TASK-AUTH-020", "Ожидается решение ADR-014", "UC-AUTH-01"} {
-			if !strings.Contains(string(data), part) {
-				t.Fatalf("%s missing %q", name, part)
-			}
+	}
+	focusStart := strings.Index(dashboard, `class="dashboard-section dashboard-focus"`)
+	focusEnd := strings.Index(dashboard, `class="dashboard-section recommended-entries"`)
+	if focusStart < 0 || focusEnd <= focusStart {
+		t.Fatal("dashboard focus bounds are missing")
+	}
+	focus := dashboard[focusStart:focusEnd]
+	for _, detail := range []string{"TASK-AUTH-020", "Ожидается решение ADR-014", "Вычисляемое состояние"} {
+		if strings.Contains(focus, detail) {
+			t.Fatalf("dashboard focus must not list detail %q", detail)
+		}
+	}
+	statusData, err := os.ReadFile(filepath.Join(output, "status.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, part := range []string{"Вычисляемое состояние", "TASK-AUTH-020", "Ожидается решение ADR-014", "UC-AUTH-01"} {
+		if !strings.Contains(string(statusData), part) {
+			t.Fatalf("status.html missing %q", part)
 		}
 	}
 }
@@ -1674,7 +1758,10 @@ func TestMinimalDocumentationCheckAndBuild(t *testing.T) {
 	if !strings.Contains(html, "Уникальное содержимое главной страницы.") {
 		t.Fatalf("index.md body is missing from dashboard: %s", html)
 	}
-	for _, absent := range []string{"Дорожная карта", "Вычисляемое состояние", "Открытые риски", "metric-label\">Модули"} {
+	if !strings.Contains(html, `<section class="dashboard-section dashboard-overview" data-dashboard-overview`) || strings.Contains(html, `<details class="dashboard-section dashboard-overview"`) {
+		t.Fatal("minimal dashboard overview must remain permanently visible")
+	}
+	for _, absent := range []string{"Текущий фокус", "Дорожная карта", "Вычисляемое состояние", "Открытые риски", "metric-label\">Модули", "Каталог документации"} {
 		if strings.Contains(html, absent) {
 			t.Fatalf("minimal dashboard contains optional block %q", absent)
 		}

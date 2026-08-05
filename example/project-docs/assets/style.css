@@ -431,6 +431,79 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .section-link { flex: none; color: var(--accent); text-decoration: none; font-size: 14px; font-weight: 700; }
 .section-link:hover { text-decoration: underline; }
 
+.dashboard-about { margin-bottom: 42px; }
+.dashboard-focus {
+  padding-block: 30px;
+  border-block: 1px solid var(--border);
+}
+.focus-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.75fr);
+  gap: clamp(28px, 5vw, 64px);
+  align-items: start;
+}
+.focus-result { min-width: 0; }
+.focus-eyebrow,
+.focus-signal-label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 760;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.focus-result-link {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: baseline;
+  margin-top: 10px;
+  color: var(--text);
+  text-decoration: none;
+}
+.focus-result-link strong {
+  font-size: clamp(20px, 2.5vw, 29px);
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+}
+.focus-result-link > :last-child { color: var(--accent); transition: transform 140ms ease; }
+.focus-result-link:hover strong { color: var(--accent-strong); text-decoration: underline; text-underline-offset: 4px; }
+.focus-result-link:hover > :last-child { transform: translateX(3px); }
+.focus-result-id { color: var(--accent-strong); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; font-weight: 750; }
+.focus-empty { margin: 10px 0 0; color: var(--muted); }
+.focus-signals { display: grid; }
+.focus-signal {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: baseline;
+  min-width: 0;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+}
+.focus-signal:first-child { padding-top: 0; }
+.focus-signal:last-child { padding-bottom: 0; border-bottom: 0; }
+.focus-signal strong { text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; }
+a.focus-signal:hover .focus-signal-label { color: var(--accent-strong); }
+
+.dashboard-overview {
+  border-block: 1px solid var(--border);
+}
+.dashboard-overview-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: center;
+  padding: 19px 0;
+  color: var(--text);
+}
+.dashboard-overview-heading > div:first-child { display: grid; gap: 3px; }
+.dashboard-overview-heading h2 { margin: 0; font-size: 18px; }
+.dashboard-overview-heading small { color: var(--muted); font-size: 12px; font-weight: 500; }
+.dashboard-overview-body { padding: 4px 0 20px; }
+.dashboard-overview .dashboard-page-actions { margin: 0 0 14px; }
+
 .recommended-entry-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); border-top: 1px solid var(--border); }
 .recommended-entry {
   display: grid;
@@ -668,6 +741,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .collapse-icon {
   position: absolute;
   inset: 0;
+  pointer-events: none;
   display: grid;
   place-items: center;
   font-size: 15px;
@@ -1425,6 +1499,7 @@ html[data-color-scheme="dark"] .scheme-toggle-indicator { background: var(--text
   .process-filterbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .process-filter-search { grid-column: 1 / -1; }
   .usecase-relations-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .focus-layout { grid-template-columns: 1fr; gap: 28px; }
 }
 
 @media (max-width: 620px) {
@@ -1444,6 +1519,12 @@ html[data-color-scheme="dark"] .scheme-toggle-indicator { background: var(--text
   .hero-summary.is-clampable:not(.is-expanded) p { -webkit-line-clamp: 5; }
   .hero.has-image { grid-template-columns: 1fr; }
   .hero-media { aspect-ratio: 16 / 9; }
+  .dashboard-about { margin-bottom: 32px; }
+  .dashboard-focus { padding-block: 24px; }
+  .focus-result-link { grid-template-columns: 1fr auto; }
+  .focus-result-id { grid-column: 1 / -1; }
+  .focus-signal { gap: 10px; }
+  .focus-signal strong { max-width: 55vw; }
   .metric-grid, .card-grid, .card-grid.three, .summary-panel, .link-list { grid-template-columns: 1fr; }
   .metadata-grid { grid-template-columns: 1fr; }
   .metadata-grid > div:last-child { grid-column: auto; }
@@ -1482,7 +1563,8 @@ html[data-color-scheme="dark"] .scheme-toggle-indicator { background: var(--text
   .screen-map-modes .toolbar-button,
   .mermaid-stage > .mermaid svg,
   .screen-map-stage .mermaid-diagram > .mermaid svg,
-  .screen-catalog-table tbody tr { transition: none; }
+  .screen-catalog-table tbody tr,
+  .focus-result-link > :last-child { transition: none; }
 }
 
 @media print {

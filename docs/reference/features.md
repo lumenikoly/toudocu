@@ -2,7 +2,8 @@
 
 Страница перечисляет реализованные возможности Docu-docu и указывает, где
 зафиксирован их подробный контракт. Источником истины остаются Markdown-файлы:
-портал и JSON не редактируют их и не хранят отдельную модель.
+JSON и результат `build` не хранят отдельную модель и не редактируют исходники;
+только `serve` добавляет явные операции записи в canonical workspace.
 
 ## CLI
 
@@ -19,12 +20,17 @@ Docu-docu поставляется одним Go-бинарником без в�
 | Строгая проверка | `docu-docu check ./docs --strict` | warning также даёт exit code `1` |
 | Сборка портала | `docu-docu build ./docs` | автономный HTML и `report.json` |
 | Локальный workspace | `docu-docu serve ./docs` | view/edit, editor API, watcher и live rebuild |
+| Просмотр изменений | `docu-docu changes ./docs` | text, Markdown или `ChangeSetReport` v1 |
+| Изменение одного файла | `docu-docu changes file PATH ./docs` | detail выбранного изменённого path |
 | Поиск документов | `docu-docu search "query" ./docs` | `SearchReport` по свежим Markdown |
 | Создание задачи | `docu-docu task init ./docs --area AREA --title TITLE --type TYPE` | новый Draft и `TaskInitReport` |
-| Создание сущности | `docu-docu scaffold module|use-case|flow|screen|decision ID ./docs --title TITLE` | атомарный scaffold и `ScaffoldReport` |
+| Создание сущности | `docu-docu scaffold module|use-case|flow|screen|decision|standard|runbook ID ./docs --title TITLE` | атомарный scaffold и `ScaffoldReport` |
 | Проверка готовности | `docu-docu task ready TASK-ID ./docs` | read-only `TaskReadyReport` |
 | Контекст задачи | `docu-docu task context TASK-ID ./docs` | read-only `TaskContextReport` |
 | Проверка задачи | `docu-docu task verify TASK-ID ./docs --dry-run|--run` | план или выполнение команд и `TaskVerifyReport` |
+| Изменения задачи | `docu-docu task changes TASK-ID ./docs` | task-scoped change report и impact diagnostics |
+| Архивирование задачи | `docu-docu task archive TASK-ID ./docs` | перемещение терминальной задачи в годовой архив |
+| Восстановление задачи | `docu-docu task restore TASK-ID ./docs` | возврат задачи из годового архива |
 | Версия | `docu-docu version` | версия генератора |
 
 Сборка требует явного `docu-docu build ./docs`; путь без команды отклоняется.
@@ -32,6 +38,10 @@ Docu-docu поставляется одним Go-бинарником без в�
 `docs/index.md` и `docs/architecture/overview.md`; `task init` создаёт только
 work item. Параметры и exit codes
 определены в [CLI-контракте](../contracts/cli.md).
+
+Команды `changes` поддерживают фильтры `--status`, `--module`, `--type` и
+`--permanent-only`. Последний оставляет только постоянную документацию и
+исключает work artifacts, contracts и assets.
 
 ## Публичный Go API
 
@@ -77,7 +87,13 @@ Refresh обновляет только evidence-backed источники, не
 После semantic и structural gates пересобираются только tracked или явно
 предписанные проектом portals.
 
+Полные пользовательские последовательности `init`, `refresh`, `refresh diff` и
+`translate` описаны в [руководстве по agent-workflows](../guides/agent-workflows.md).
+
 ## Документная модель
+
+Единая таблица назначения, границ и правил выбора находится в
+[справочнике видов документов](document-types.md).
 
 Минимальная документация содержит `index.md` и карту
 `architecture/overview.md` с типом `Architecture Overview`. Каждый другой
@@ -139,7 +155,11 @@ gate, а schema v1 сохраняет `documents[].type: "architecture"`.
 - отдельную страницу «Журнал изменений проекта» из корневого `CHANGELOG.md`,
   если это обычный читаемый файл; она участвует в portal search, но не входит в
   `report.json`, task context, semantic model или editor workspace;
-- 3–5 рекомендуемых точек входа и единый фильтруемый полный каталог;
+- спокойную главную сводку: сведения о проекте, следующий результат, числа
+  активных задач, блокеров и открытых рисков и до пяти рекомендуемых точек
+  входа; подробные списки доступны через поиск, навигацию и каталоги разделов;
+- содержательную часть `index.md` без повторения H1 и структурных metadata в
+  постоянно видимом подробном обзоре, включая печатную версию;
 - оглавление и сворачиваемые разделы документа с чистыми accessible names;
 - копирование названия и repository-relative пути исходного Markdown-документа
   для передачи контекста агенту;

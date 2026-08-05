@@ -17,7 +17,11 @@
 | `GET` | `/_docu-docu/api/changes/render?side=before|after&path=...` | sanitized HTML |
 | `GET` | `/_docu-docu/api/changes/screen-map` | screen/transition overlay v1 |
 
-Summary принимает `base`, `target`, `type`, `status`, `module` и `task`.
+Summary принимает `base`, `branchBase`, `target`, `type`, `status`, `module` и
+`task`. `branchBase` выбирает итоговую базу как `merge-base(branchBase, HEAD)`.
+Если HTTP-клиент также передал `base`, сервер сначала проверяет эту revision, а
+затем заменяет её вычисленным merge base; поэтому обе ссылки должны быть
+валидны. CLI запрещает сочетать эти два параметра.
 Неверная revision возвращает 400; отсутствие Git — 503. Error envelope содержит
 `schemaVersion: 1` и `diagnostics[]`.
 

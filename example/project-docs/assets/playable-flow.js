@@ -1,8 +1,12 @@
-(() => {
+window.DocuDocuInitializePlayableFlow = (scope, signal) => {
   'use strict';
 
-  const root = document.querySelector('[data-playable-flow]');
+  scope = scope || document;
+
+  const root = scope.querySelector('[data-playable-flow]');
   if (!root) return;
+  if (root.dataset.pageInitialized === 'true') return;
+  root.dataset.pageInitialized = 'true';
   const payload = JSON.parse(root.querySelector('[data-playable-data]')?.textContent || '{}');
   const model = payload.model || {};
   const flow = payload.flow || {};
@@ -141,4 +145,4 @@
   root.querySelectorAll('[data-flow-reset]').forEach((button) => button.addEventListener('click', reset));
   showHotspots?.addEventListener('change', render);
   render();
-})();
+};

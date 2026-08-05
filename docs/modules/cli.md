@@ -19,7 +19,8 @@
 - CLI и локальный HTTP-сервер: `internal/app/cli.go`, `internal/app/server.go`;
 - read-only контекст и readiness: `internal/app/task_context.go`, `internal/app/task_ready.go`;
 - search и каркасы: `internal/app/search.go`, `internal/app/scaffold.go`;
-- выполнение verify и управление процессами: `internal/app/task_verify.go`, `internal/app/command_process_*.go`.
+- выполнение verify и управление процессами: `internal/app/task_verify.go`, `internal/app/command_process_*.go`;
+- архивирование и восстановление work items: `internal/app/task_archive.go`.
 
 ## Границы
 
@@ -66,6 +67,12 @@ editor-запись отклоняются с `TRANSLATION_ROOT_READ_ONLY`. Work
 остаются читательским зеркалом, а агент и CI используют только canonical docs
 root.
 
+### BR-CLI-007: Архивирование не изменяет контракт задачи
+
+`task archive` и `task restore` перемещают один допустимый work item без
+перезаписи и не изменяют его Markdown или статус. Операция блокируется, если
+перемещение разорвёт разрешение прямой Markdown-ссылки.
+
 ## Инварианты
 
 - JSON-режим не смешивает отчёт с потоковым текстовым выводом;
@@ -94,6 +101,7 @@ root.
 - [UC-TASK-01: Контекст рабочей задачи](../use-cases/task-workflow.md)
 - [UC-TASK-02: Проверка рабочей задачи](../use-cases/task-verify.md)
 - [UC-TASK-03: Подготовка рабочей задачи](../use-cases/UC-TASK-03.md)
+- [UC-TASK-04: Архивирование и восстановление задачи](../use-cases/UC-TASK-04.md)
 - [UC-DOCS-02: Проверка документации](../use-cases/check-documentation.md)
 - [UC-DOCS-03: Локальный сервер](../use-cases/serve-portal.md)
 

@@ -5,13 +5,13 @@
 - Модуль: MOD-CLI
 - Стандарты: STD-GO-001, STD-DOCS-001
 - Владелец: Команда Docu-docu
-- Последнее обновление: 2026-08-04
+- Последнее обновление: 2026-08-05
 
 ## Результат
 
 Release bundle и workflow `0.0.1` готовы к публикации POSIX- и
-PowerShell-bootstrap: после публикации владельцем пользователь одной
-командой устанавливает или обновляет Docu-docu, а bootstrap сам
+PowerShell-bootstrap: пользователь одной командой устанавливает или обновляет
+Docu-docu, а bootstrap сам
 выбирает поддерживаемый OS/architecture artifact и проверяет SHA-256
 до замены файла.
 
@@ -37,8 +37,7 @@ curl -fsSL https://github.com/lumenikoly/docu-docu/releases/latest/download/inst
 irm https://github.com/lumenikoly/docu-docu/releases/latest/download/install.ps1 | iex
 ```
 
-Оба `install.*` публикуются как assets ещё не опубликованного
-релиза `0.0.1`.
+Оба `install.*` входят в release assets версии `0.0.1`.
 
 Если standard user dir ещё не в `PATH`, POSIX installer один раз
 добавляет managed entry в `.zshrc` для zsh, `.bashrc` для bash, fish
@@ -80,8 +79,8 @@ irm https://github.com/lumenikoly/docu-docu/releases/latest/download/install.ps1
   `checksums.txt` покрывает их вместе с бинарниками и notices.
 - [x] `AC-05` README и каноническая документация описывают
   команды, матрицу, update/version override, `PATH`, проверку
-  SHA-256, границу сети только для bootstrap и то, что до
-  публикации `0.0.1` владельцем one-liner ещё недоступен.
+  SHA-256, границу сети только для bootstrap и стандартные команды
+  установки из stable GitHub Release.
 - [x] `AC-06` Повторный запуск, upgrade, downgrade и добавление
   стандартного user install dir в shell/user `PATH` идемпотентны;
   нестандартный каталог не меняет profile и получает подсказку.

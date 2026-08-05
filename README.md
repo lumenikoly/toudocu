@@ -499,6 +499,8 @@ Detailed documentation:
 * [Docu-docu features](docs/reference/features.md)
 * [Configuration](docs/reference/configuration.md)
 * [CLI commands](docs/contracts/cli.md)
+* [Agent workflows](docs/guides/agent-workflows.md)
+* [Work items](docs/guides/work-items.md)
 * [Public Go API](docs/contracts/go-api.md)
 * [Project source documentation](docs/index.md)
 * [Testing](docs/guides/testing.md)

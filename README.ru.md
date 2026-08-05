@@ -499,6 +499,8 @@ docu-docu scaffold --help
 * [Возможности Docu-docu](docs/reference/features.md)
 * [Настройка](docs/reference/configuration.md)
 * [Команды CLI](docs/contracts/cli.md)
+* [Agent-workflows](docs/guides/agent-workflows.md)
+* [Рабочие задачи](docs/guides/work-items.md)
 * [Публичный Go API](docs/contracts/go-api.md)
 * [Исходная документация проекта](docs/index.md)
 * [Тестирование](docs/guides/testing.md)

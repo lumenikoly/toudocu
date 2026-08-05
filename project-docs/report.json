@@ -4,22 +4,22 @@
     "name": "Docu-docu",
     "version": "0.0.1"
   },
-  "generatedAt": "2026-08-05T12:07:21.760170828Z",
+  "generatedAt": "2026-08-05T14:39:15.776270424Z",
   "sourceDirectory": "docs",
   "staleDays": 90,
   "project": {
     "title": "Docu-docu",
     "description": "Docu-docu — dependency-free CLI на Go с публичным Go-фасадом для проверяемой проектной документации в структурированном Markdown и автономного HTML-портала, работающего через file:// .",
     "status": {
-      "kind": "done",
-      "symbol": "✓",
-      "label": "Готово",
+      "kind": "in-progress",
+      "symbol": "◐",
+      "label": "В работе",
       "recognized": true
     },
-    "stage": "Локально подготовлен стабильный релиз 0.0.1",
+    "stage": "Подготовка стабильного релиза 0.0.1",
     "version": "0.0.1",
     "owner": "Команда Docu-docu",
-    "updated": "2026-08-04",
+    "updated": "2026-08-05",
     "summary": "CLI проверяет, собирает и локально раздаёт документацию, формирует типизированные JSON-отчёты, выдаёт контекст выбранной задачи и выполняет её проверки только по явной команде. Корневой Go-пакет предоставляет стабильный фасад модели, рендеринга и отчётов для локального встраивания; канонический удалённый module path пока не опубликован. Встроенная Mermaid Tiny отображает связанные процессы без CDN или Node.js. Безопасность путей, HTML, диаграмм, HTTP-раздачи и process timeout проверяется негативными тестами. Модель процессов формирует раздельные каталоги UC- и FLOW- , стабильные URL по ID и рабочее пространство use case с описанием, картой, проигрыванием и связями. Экранная модель формирует основной каталог, отдельную общую карту с SVG-связями, sitemap, hotspots и traceability. Всё работает через file:// , поддерживает клавиатуру, touch, состояния, ошибки и fallback без preview. Активные задачи, блокеры и следующий результат вычисляются из work items и roadmap и отображаются в HTML автоматически."
   },
   "currentStatus": {
@@ -33,19 +33,19 @@
       "effectiveCompleted": false,
       "completionSource": "roadmap-checkbox",
       "document": "roadmap.md",
-      "line": 28
+      "line": 31
     }
   },
   "stats": {
-    "documents": 62,
-    "totalTasks": 12,
-    "completedTasks": 11,
+    "documents": 65,
+    "totalTasks": 15,
+    "completedTasks": 14,
     "remainingTasks": 1,
-    "taskProgress": 92,
+    "taskProgress": 93,
     "documentsComplete": 12,
     "documentsInProgress": 2,
     "documentsNotStarted": 0,
-    "documentsWithoutTasks": 48,
+    "documentsWithoutTasks": 51,
     "staleDocuments": 0,
     "documentsWithoutDescription": 12,
     "documentsWithoutStatus": 0,
@@ -56,9 +56,9 @@
     "moduleStatuses": {
       "done": 5
     },
-    "useCases": 8,
+    "useCases": 9,
     "useCaseStatuses": {
-      "done": 8
+      "done": 9
     },
     "screens": 0,
     "screensDone": 0,
@@ -100,7 +100,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-04T17:55:47.551125692Z",
+      "updatedAt": "2026-08-05T13:22:12.765478409Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -114,18 +114,18 @@
       "outputPath": "status.html",
       "type": "status",
       "title": "Текущее состояние",
-      "description": "Релиз 0.0.1 локально подготовлен вместе с проверяемыми POSIX- и PowerShell-installers. Git-тег и GitHub Release не создавались, поэтому one-liner станет рабочим только после публикации владельцем.",
+      "description": "Версия 0.0.1 готовится к стабильному релизу вместе с проверяемыми POSIX- и PowerShell-installers, release workflow, checksums и документацией установки.",
       "metadata": {
         "owner": "Команда Docu-docu",
-        "stage": "Локально подготовлен стабильный релиз 0.0.1",
-        "status": "Готово",
-        "updated": "2026-08-04",
+        "stage": "Подготовка стабильного релиза 0.0.1",
+        "status": "В работе",
+        "updated": "2026-08-05",
         "version": "0.0.1"
       },
       "status": {
-        "kind": "done",
-        "symbol": "✓",
-        "label": "Готово",
+        "kind": "in-progress",
+        "symbol": "◐",
+        "label": "В работе",
         "recognized": true
       },
       "taskStats": {
@@ -134,7 +134,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-04T00:00:00Z",
+      "updatedAt": "2026-08-05T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -157,12 +157,12 @@
         "recognized": true
       },
       "taskStats": {
-        "total": 12,
-        "completed": 11,
+        "total": 15,
+        "completed": 14,
         "remaining": 1,
-        "percent": 92
+        "percent": 93
       },
-      "updatedAt": "2026-08-04T17:52:58.789622342Z",
+      "updatedAt": "2026-08-05T13:22:12.767478434Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -801,12 +801,14 @@
         "guides/work-items.md",
         "modules/cli.md",
         "modules/model.md",
+        "reference/document-types.md",
         "reference/features.md",
         "use-cases/build-portal.md",
         "use-cases/serve-portal.md",
         "use-cases/task-verify.md",
         "use-cases/task-workflow.md",
-        "use-cases/UC-TASK-03.md"
+        "use-cases/UC-TASK-03.md",
+        "use-cases/UC-TASK-04.md"
       ],
       "relatedDocuments": [
         "contracts/go-api.md",
@@ -1470,6 +1472,37 @@
     },
     {
       "id": "",
+      "sourcePath": "guides/agent-workflows.md",
+      "outputPath": "guides/agent-workflows.html",
+      "type": "guide",
+      "sectionType": "guides",
+      "title": "Agent-workflows Docu-docu",
+      "description": "Устанавливаемый skill добавляет четыре явных workflow для создания и актуализации исходной документации. Они изменяют Markdown по подтверждённым repository evidence и не являются командами Go CLI.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-05T13:23:24.595360094Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "reference/features.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
       "sourcePath": "guides/documentation-changes.md",
       "outputPath": "guides/documentation-changes.html",
       "type": "guide",
@@ -1489,7 +1522,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-04T19:29:54.228409592Z",
+      "updatedAt": "2026-08-05T13:22:42.405002817Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1549,7 +1582,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-04T20:10:12.841646256Z",
+      "updatedAt": "2026-08-05T13:22:12.764478396Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1615,6 +1648,7 @@
       "errors": 0,
       "links": [],
       "backlinks": [
+        "reference/document-types.md",
         "reference/features.md"
       ],
       "relatedDocuments": []
@@ -1722,9 +1756,11 @@
         "contracts/cli.md",
         "flows/FLOW-TASK-WORKFLOW.md",
         "modules/model.md",
+        "reference/document-types.md",
         "reference/features.md",
         "use-cases/task-verify.md",
-        "use-cases/task-workflow.md"
+        "use-cases/task-workflow.md",
+        "use-cases/UC-TASK-04.md"
       ],
       "relatedDocuments": [
         "contracts/cli.md"
@@ -1794,6 +1830,14 @@
           "href": "../use-cases/UC-TASK-03.html"
         },
         {
+          "destination": "../use-cases/UC-TASK-04.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/UC-TASK-04.md",
+          "href": "../use-cases/UC-TASK-04.html"
+        },
+        {
           "destination": "../use-cases/check-documentation.md",
           "broken": false,
           "blocked": false,
@@ -1843,13 +1887,15 @@
         "use-cases/serve-portal.md",
         "use-cases/task-verify.md",
         "use-cases/task-workflow.md",
-        "use-cases/UC-TASK-03.md"
+        "use-cases/UC-TASK-03.md",
+        "use-cases/UC-TASK-04.md"
       ],
       "relatedDocuments": [
         "contracts/cli.md",
         "use-cases/task-workflow.md",
         "use-cases/task-verify.md",
         "use-cases/UC-TASK-03.md",
+        "use-cases/UC-TASK-04.md",
         "use-cases/check-documentation.md",
         "use-cases/serve-portal.md",
         "flows/FLOW-DOCS-CHECK.md",
@@ -2353,7 +2399,7 @@
       "type": "reference",
       "sectionType": "reference",
       "title": "Справочник конфигурации",
-      "description": "CLI работает без конфигурационного файла. Необязательный \u003crepository-root\u003e/.docu-docu/config.yml настраивает портал и автоматически читается командами build , check и serve .",
+      "description": "CLI работает без конфигурационного файла. Необязательный \u003crepository-root\u003e/.docu-docu/config.yml целиком разбирается и валидируется при загрузке, включая configured branding assets. После общей валидации build , check и serve используют project/site configuration; changes и task changes — секцию changes ; task init и scaffold — project.locale . Поэтому ошибка в общей структуре или site asset может остановить и операцию, которая непосредственно не использует эту настройку.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -2367,7 +2413,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T08:52:05.055793683Z",
+      "updatedAt": "2026-08-05T13:28:55.220137027Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2377,12 +2423,12 @@
     },
     {
       "id": "",
-      "sourcePath": "reference/features.md",
-      "outputPath": "reference/features.html",
+      "sourcePath": "reference/document-types.md",
+      "outputPath": "reference/document-types.html",
       "type": "reference",
       "sectionType": "reference",
-      "title": "Каталог возможностей",
-      "description": "Страница перечисляет реализованные возможности Docu-docu и указывает, где зафиксирован их подробный контракт. Источником истины остаются Markdown-файлы: портал и JSON не редактируют их и не хранят отдельную модель.",
+      "title": "Виды документов Docu-docu",
+      "description": "Справочник помогает выбрать документ по его назначению. Docu-docu классифицирует документ по расположению файла. Смысловой выбор начинается с вопроса, на который должен ответить источник; стабильный ID требуется только отдельным видам машиночитаемых сущностей.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -2396,7 +2442,195 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T09:19:30.029984526Z",
+      "updatedAt": "2026-08-05T14:37:27.959141824Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "#обзор-и-состояние-проекта",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/document-types.md",
+          "href": "#обзор-и-состояние-проекта"
+        },
+        {
+          "destination": "#обзор-и-состояние-проекта",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/document-types.md",
+          "href": "#обзор-и-состояние-проекта"
+        },
+        {
+          "destination": "#обзор-и-состояние-проекта",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/document-types.md",
+          "href": "#обзор-и-состояние-проекта"
+        },
+        {
+          "destination": "#продукт-и-архитектура",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/document-types.md",
+          "href": "#продукт-и-архитектура"
+        },
+        {
+          "destination": "#продукт-и-архитектура",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/document-types.md",
+          "href": "#продукт-и-архитектура"
+        },
+        {
+          "destination": "#продукт-и-архитектура",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/document-types.md",
+          "href": "#продукт-и-архитектура"
+        },
+        {
+          "destination": "#продукт-и-архитектура",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/document-types.md",
+          "href": "#продукт-и-архитектура"
+        },
+        {
+          "destination": "#продукт-и-архитектура",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/document-types.md",
+          "href": "#продукт-и-архитектура"
+        },
+        {
+          "destination": "#продукт-и-архитектура",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/document-types.md",
+          "href": "#продукт-и-архитектура"
+        },
+        {
+          "destination": "#правила-процедуры-и-пояснения",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/document-types.md",
+          "href": "#правила-процедуры-и-пояснения"
+        },
+        {
+          "destination": "#правила-процедуры-и-пояснения",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/document-types.md",
+          "href": "#правила-процедуры-и-пояснения"
+        },
+        {
+          "destination": "#правила-процедуры-и-пояснения",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/document-types.md",
+          "href": "#правила-процедуры-и-пояснения"
+        },
+        {
+          "destination": "#правила-процедуры-и-пояснения",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/document-types.md",
+          "href": "#правила-процедуры-и-пояснения"
+        },
+        {
+          "destination": "#правила-процедуры-и-пояснения",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/document-types.md",
+          "href": "#правила-процедуры-и-пояснения"
+        },
+        {
+          "destination": "#рабочие-и-свободные-документы",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/document-types.md",
+          "href": "#рабочие-и-свободные-документы"
+        },
+        {
+          "destination": "#обзор-и-состояние-проекта",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/document-types.md",
+          "href": "#обзор-и-состояние-проекта"
+        },
+        {
+          "destination": "../guides/quality-runbooks.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/quality-runbooks.md",
+          "href": "../guides/quality-runbooks.html"
+        },
+        {
+          "destination": "../contracts/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "../contracts/cli.html"
+        },
+        {
+          "destination": "../guides/work-items.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/work-items.md",
+          "href": "../guides/work-items.html"
+        }
+      ],
+      "backlinks": [
+        "reference/features.md"
+      ],
+      "relatedDocuments": [
+        "guides/quality-runbooks.md",
+        "contracts/cli.md",
+        "guides/work-items.md"
+      ]
+    },
+    {
+      "id": "",
+      "sourcePath": "reference/features.md",
+      "outputPath": "reference/features.html",
+      "type": "reference",
+      "sectionType": "reference",
+      "title": "Каталог возможностей",
+      "description": "Страница перечисляет реализованные возможности Docu-docu и указывает, где зафиксирован их подробный контракт. Источником истины остаются Markdown-файлы: JSON и результат build не хранят отдельную модель и не редактируют исходники; только serve добавляет явные операции записи в canonical workspace.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-05T14:34:23.464707337Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2416,6 +2650,22 @@
           "targetKind": "document",
           "target": "contracts/go-api.md",
           "href": "../contracts/go-api.html"
+        },
+        {
+          "destination": "../guides/agent-workflows.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/agent-workflows.md",
+          "href": "../guides/agent-workflows.html"
+        },
+        {
+          "destination": "document-types.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/document-types.md",
+          "href": "document-types.html"
         },
         {
           "destination": "../guides/quality-runbooks.md",
@@ -2456,6 +2706,8 @@
       "relatedDocuments": [
         "contracts/cli.md",
         "contracts/go-api.md",
+        "guides/agent-workflows.md",
+        "reference/document-types.md",
         "guides/quality-runbooks.md",
         "contracts/editor-http.md",
         "guides/screens.md",
@@ -3285,6 +3537,89 @@
       ]
     },
     {
+      "id": "UC-TASK-04",
+      "sourcePath": "use-cases/UC-TASK-04.md",
+      "outputPath": "use-cases/UC-TASK-04.html",
+      "type": "use-case",
+      "sectionType": "use-cases",
+      "title": "UC-TASK-04: Архивировать или восстановить рабочую задачу",
+      "description": "Исполнитель убирает завершённую или отменённую задачу из активного списка в годовой архив либо возвращает архивный work item в активный каталог без изменения его контракта.",
+      "metadata": {
+        "actor": "Исполнитель — разработчик или программный агент",
+        "id": "UC-TASK-04",
+        "module": "MOD-CLI",
+        "priority": "Средний",
+        "status": "Готово",
+        "updated": "2026-08-05"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Готово",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-05T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../modules/cli.md#br-cli-006-translation-root-не-является-рабочим-контекстом",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/cli.md",
+          "href": "../modules/cli.html#br-cli-006-translation-root-не-является-рабочим-контекстом"
+        },
+        {
+          "destination": "../modules/cli.md#br-cli-007-архивирование-не-изменяет-контракт-задачи",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/cli.md",
+          "href": "../modules/cli.html#br-cli-007-архивирование-не-изменяет-контракт-задачи"
+        },
+        {
+          "destination": "../modules/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/cli.md",
+          "href": "../modules/cli.html"
+        },
+        {
+          "destination": "../contracts/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "../contracts/cli.html"
+        },
+        {
+          "destination": "../guides/work-items.md#архив",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/work-items.md",
+          "href": "../guides/work-items.html#архив"
+        }
+      ],
+      "backlinks": [
+        "modules/cli.md"
+      ],
+      "relatedDocuments": [
+        "modules/cli.md",
+        "contracts/cli.md",
+        "guides/work-items.md"
+      ]
+    },
+    {
       "id": "",
       "sourcePath": "work/TASK-ARCH-001.md",
       "outputPath": "work/TASK-ARCH-001.html",
@@ -3636,7 +3971,7 @@
         "standards": "STD-GO-001, STD-DOCS-001",
         "status": "Выполнено",
         "type": "Maintenance",
-        "updated": "2026-08-04"
+        "updated": "2026-08-05"
       },
       "status": {
         "kind": "done",
@@ -3650,7 +3985,7 @@
         "remaining": 0,
         "percent": 100
       },
-      "updatedAt": "2026-08-04T00:00:00Z",
+      "updatedAt": "2026-08-05T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -3777,8 +4112,8 @@
       },
       "plannedDate": "",
       "taskStats": {
-        "total": 11,
-        "completed": 11,
+        "total": 14,
+        "completed": 14,
         "remaining": 0,
         "percent": 100
       },
@@ -3920,6 +4255,23 @@
           "line": 18
         },
         {
+          "id": "UC-TASK-04",
+          "text": "UC-TASK-04 Исполнитель архивирует или восстанавливает рабочую задачу.",
+          "kind": "use-case",
+          "declaredCompleted": true,
+          "effectiveCompleted": true,
+          "completionSource": "use-case-status",
+          "targetDocument": "use-cases/UC-TASK-04.md",
+          "targetStatus": {
+            "kind": "done",
+            "symbol": "✓",
+            "label": "Готово",
+            "recognized": true
+          },
+          "document": "roadmap.md",
+          "line": 19
+        },
+        {
           "id": "CON-CLI-V1",
           "text": "CON-CLI-V1 Зафиксирован публичный CLI-контракт и versioned JSON schemas.",
           "kind": "contract",
@@ -3934,7 +4286,7 @@
             "recognized": true
           },
           "document": "roadmap.md",
-          "line": 19
+          "line": 20
         },
         {
           "id": "CON-GO-API-V1",
@@ -3951,7 +4303,27 @@
             "recognized": true
           },
           "document": "roadmap.md",
-          "line": 20
+          "line": 21
+        },
+        {
+          "id": "DLV-INSTALL-01",
+          "text": "DLV-INSTALL-01 Подготовлены проверяемые install/update workflows для release assets.",
+          "kind": "deliverable",
+          "declaredCompleted": true,
+          "effectiveCompleted": true,
+          "completionSource": "roadmap-checkbox",
+          "document": "roadmap.md",
+          "line": 22
+        },
+        {
+          "id": "DLV-SKILL-WORKFLOWS-01",
+          "text": "DLV-SKILL-WORKFLOWS-01 Описаны agent-workflows init, refresh и translate.",
+          "kind": "deliverable",
+          "declaredCompleted": true,
+          "effectiveCompleted": true,
+          "completionSource": "roadmap-checkbox",
+          "document": "roadmap.md",
+          "line": 23
         },
         {
           "id": "DLV-SELF-DOCS-01",
@@ -3961,7 +4333,7 @@
           "effectiveCompleted": true,
           "completionSource": "roadmap-checkbox",
           "document": "roadmap.md",
-          "line": 21
+          "line": 24
         }
       ],
       "document": "roadmap.md",
@@ -3991,7 +4363,7 @@
           "effectiveCompleted": false,
           "completionSource": "roadmap-checkbox",
           "document": "roadmap.md",
-          "line": 28
+          "line": 31
         }
       ],
       "document": "roadmap.md",
@@ -4079,7 +4451,8 @@
         "useCaseIds": [
           "UC-TASK-01",
           "UC-TASK-02",
-          "UC-TASK-03"
+          "UC-TASK-03",
+          "UC-TASK-04"
         ],
         "screenIds": [],
         "businessRuleIds": [
@@ -4088,7 +4461,8 @@
           "BR-CLI-003",
           "BR-CLI-004",
           "BR-CLI-005",
-          "BR-CLI-006"
+          "BR-CLI-006",
+          "BR-CLI-007"
         ]
       },
       {
@@ -4378,6 +4752,27 @@
         "screenIds": [],
         "terminalScreens": [],
         "allowCycle": false
+      },
+      {
+        "id": "UC-TASK-04",
+        "title": "UC-TASK-04: Архивировать или восстановить рабочую задачу",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Готово",
+          "recognized": true
+        },
+        "moduleId": "MOD-CLI",
+        "document": "use-cases/UC-TASK-04.md",
+        "repositoryPaths": [],
+        "businessRuleIds": [
+          "BR-CLI-006",
+          "BR-CLI-007"
+        ],
+        "flowIds": [],
+        "screenIds": [],
+        "terminalScreens": [],
+        "allowCycle": false
       }
     ],
     "flows": [
@@ -4471,7 +4866,7 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-001-контекст-задачи-не-исполняет-команды",
-        "line": 33
+        "line": 34
       },
       {
         "id": "BR-CLI-002",
@@ -4479,7 +4874,7 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-002-проверки-запускаются-только-явно",
-        "line": 38
+        "line": 39
       },
       {
         "id": "BR-CLI-003",
@@ -4487,7 +4882,7 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-003-timeout-завершает-дерево-процессов",
-        "line": 43
+        "line": 44
       },
       {
         "id": "BR-CLI-004",
@@ -4495,7 +4890,7 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-004-docu-docu-не-интерпретирует-пользовательский-запрос",
-        "line": 48
+        "line": 49
       },
       {
         "id": "BR-CLI-005",
@@ -4503,7 +4898,7 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-005-browser-и-cli-используют-один-scaffold-registry",
-        "line": 54
+        "line": 55
       },
       {
         "id": "BR-CLI-006",
@@ -4511,7 +4906,15 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-006-translation-root-не-является-рабочим-контекстом",
-        "line": 60
+        "line": 61
+      },
+      {
+        "id": "BR-CLI-007",
+        "title": "Архивирование не изменяет контракт задачи",
+        "moduleId": "MOD-CLI",
+        "document": "modules/cli.md",
+        "anchor": "br-cli-007-архивирование-не-изменяет-контракт-задачи",
+        "line": 70
       },
       {
         "id": "BR-MD-001",
@@ -6625,7 +7028,7 @@
         },
         "type": "Maintenance",
         "archived": false,
-        "updated": "2026-08-04",
+        "updated": "2026-08-05",
         "owner": "Команда Docu-docu",
         "moduleId": "MOD-CLI",
         "screenIds": [],
@@ -6640,37 +7043,37 @@
         "anchor": "task-release-002-добавить-установку-и-обновление-из-github-release",
         "criteria": [
           {
-            "line": 68,
+            "line": 67,
             "indent": 0,
             "completed": true,
             "text": "AC-01 Installer однозначно выбирает пять существующих"
           },
           {
-            "line": 71,
+            "line": 70,
             "indent": 0,
             "completed": true,
             "text": "AC-02 По умолчанию выбирается latest stable release;"
           },
           {
-            "line": 75,
+            "line": 74,
             "indent": 0,
             "completed": true,
             "text": "AC-03 Бинарник заменяется только после точной проверки"
           },
           {
-            "line": 79,
+            "line": 78,
             "indent": 0,
             "completed": true,
             "text": "AC-04 Release bundle содержит оба installer-скрипта, а"
           },
           {
-            "line": 81,
+            "line": 80,
             "indent": 0,
             "completed": true,
             "text": "AC-05 README и каноническая документация описывают"
           },
           {
-            "line": 85,
+            "line": 84,
             "indent": 0,
             "completed": true,
             "text": "AC-06 Повторный запуск, upgrade, downgrade и добавление"
@@ -6744,63 +7147,63 @@
             "commands": [
               "go test ./internal/app -run TestInstallerPlatformContract"
             ],
-            "line": 99
+            "line": 98
           },
           {
             "target": "AC-02",
             "commands": [
               "go test ./internal/app -run TestInstallerSelectionAndPathContract"
             ],
-            "line": 100
+            "line": 99
           },
           {
             "target": "AC-03",
             "commands": [
               "go test ./internal/app -run TestInstallerIntegrityAndReplacement"
             ],
-            "line": 101
+            "line": 100
           },
           {
             "target": "AC-04",
             "commands": [
               "make release \u0026\u0026 cd dist \u0026\u0026 sha256sum -c checksums.txt \u0026\u0026 test \"$(wc -l \u003c checksums.txt)\" -eq 10 \u0026\u0026 for file in docu-docu-linux-amd64 docu-docu-linux-arm64 docu-docu-darwin-amd64 docu-docu-darwin-arm64 docu-docu-windows-amd64.exe install.sh install.ps1 LICENSE THIRD_PARTY_NOTICES.md CODEMIRROR-CHECKSUMS.txt; do awk -v file=\"$file\" '$2 == file { found=1 } END { exit !found }' checksums.txt || exit 1; done"
             ],
-            "line": 102
+            "line": 101
           },
           {
             "target": "AC-05",
             "commands": [
               "go test ./internal/app -run TestInstallerDocumentationContract \u0026\u0026 go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
             ],
-            "line": 103
+            "line": 102
           },
           {
             "target": "AC-06",
             "commands": [
               "go test ./internal/app -run TestInstallerRepeatUpgradeDowngradeAndPath"
             ],
-            "line": 104
+            "line": 103
           },
           {
             "target": "ALL",
             "commands": [
               "go test ./..."
             ],
-            "line": 105
+            "line": 104
           },
           {
             "target": "DOCS",
             "commands": [
               "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
             ],
-            "line": 106
+            "line": 105
           },
           {
             "target": "QUALITY",
             "commands": [
               "make check"
             ],
-            "line": 107
+            "line": 106
           }
         ],
         "repositoryPaths": [
@@ -6811,10 +7214,10 @@
           "Makefile",
           "README.md"
         ],
-        "result": "Release bundle и workflow 0.0.1 готовы к публикации POSIX- и PowerShell-bootstrap: после публикации владельцем пользователь одной командой устанавливает или обновляет Docu-docu, а bootstrap сам выбирает поддерживаемый OS/architecture artifact и проверяет SHA-256 до замены файла.",
-        "behaviorChange": "Было Пользователь вручную выбирает бинарник в GitHub Releases, проверяет его и добавляет в PATH . Станет POSIX- и PowerShell-команды скачивают подходящий artifact и checksums.txt , проверяют целостность и без sudo атомарно устанавливают его в /.local/bin/docu-docu или %LOCALAPPDATA%\\Programs\\docu-docu\\docu-docu.exe . Канонические команды: Оба install. публикуются как assets ещё не опубликованного релиза 0.0.1 . Если standard user dir ещё не в PATH , POSIX installer один раз добавляет managed entry в .zshrc для zsh, .bashrc для bash, fish conf.d , а для остальных POSIX shells — в .profile . PowerShell installer один раз добавляет стандартный каталог в user PATH . Текущий parent shell не изменяется: installer печатает точную source /fish-команду, для .profile просит login/re-login, а для Windows — открыть новый terminal.",
+        "result": "Release bundle и workflow 0.0.1 готовы к публикации POSIX- и PowerShell-bootstrap: пользователь одной командой устанавливает или обновляет Docu-docu, а bootstrap сам выбирает поддерживаемый OS/architecture artifact и проверяет SHA-256 до замены файла.",
+        "behaviorChange": "Было Пользователь вручную выбирает бинарник в GitHub Releases, проверяет его и добавляет в PATH . Станет POSIX- и PowerShell-команды скачивают подходящий artifact и checksums.txt , проверяют целостность и без sudo атомарно устанавливают его в /.local/bin/docu-docu или %LOCALAPPDATA%\\Programs\\docu-docu\\docu-docu.exe . Канонические команды: Оба install. входят в release assets версии 0.0.1 . Если standard user dir ещё не в PATH , POSIX installer один раз добавляет managed entry в .zshrc для zsh, .bashrc для bash, fish conf.d , а для остальных POSIX shells — в .profile . PowerShell installer один раз добавляет стандартный каталог в user PATH . Текущий parent shell не изменяется: installer печатает точную source /fish-команду, для .profile просит login/re-login, а для Windows — открыть новый terminal.",
         "before": "Пользователь вручную выбирает бинарник в GitHub Releases, проверяет его и добавляет в PATH .",
-        "after": "POSIX- и PowerShell-команды скачивают подходящий artifact и checksums.txt , проверяют целостность и без sudo атомарно устанавливают его в /.local/bin/docu-docu или %LOCALAPPDATA%\\Programs\\docu-docu\\docu-docu.exe . Канонические команды: Оба install. публикуются как assets ещё не опубликованного релиза 0.0.1 . Если standard user dir ещё не в PATH , POSIX installer один раз добавляет managed entry в .zshrc для zsh, .bashrc для bash, fish conf.d , а для остальных POSIX shells — в .profile . PowerShell installer один раз добавляет стандартный каталог в user PATH . Текущий parent shell не изменяется: installer печатает точную source /fish-команду, для .profile просит login/re-login, а для Windows — открыть новый terminal.",
+        "after": "POSIX- и PowerShell-команды скачивают подходящий artifact и checksums.txt , проверяют целостность и без sudo атомарно устанавливают его в /.local/bin/docu-docu или %LOCALAPPDATA%\\Programs\\docu-docu\\docu-docu.exe . Канонические команды: Оба install. входят в release assets версии 0.0.1 . Если standard user dir ещё не в PATH , POSIX installer один раз добавляет managed entry в .zshrc для zsh, .bashrc для bash, fish conf.d , а для остальных POSIX shells — в .profile . PowerShell installer один раз добавляет стандартный каталог в user PATH . Текущий parent shell не изменяется: installer печатает точную source /fish-команду, для .profile просит login/re-login, а для Windows — открыть новый terminal.",
         "outOfScope": "публикация Git-тега или GitHub Release; фоновое самообновление или новая команда Go CLI; system-wide установка через sudo и package managers; Windows ARM64 и другие новые release targets; подпись или notarization релизных бинарников.",
         "plan": "Реализовать одинаковый installer contract для POSIX и PowerShell. Включить скрипты в release bundle и checksum generation. Добавить platform, integrity, replacement и release contract tests. Обновить источные документы и release notes. Пройти semantic gate, полную проверку и пересобрать портал.",
         "documentationImpact": "Добавляется guide установки; обновляются README, CHANGELOG.md , текущее состояние, system/trust boundary и отслеживаемый портал.",

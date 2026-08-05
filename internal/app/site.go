@@ -721,39 +721,75 @@ func renderRecommendedEntries(model *Model) string {
 	for _, item := range entries {
 		cards.WriteString(`<a class="recommended-entry" href="` + escapeAttr(item.href) + `"><strong>` + escapeHTML(item.title) + `</strong><span>` + escapeHTML(item.description) + `</span></a>`)
 	}
-	return `<section class="dashboard-section recommended-entries"><div class="section-heading"><div><h2>С чего начать</h2><p>Рекомендуемые точки входа; полный список находится в каталоге ниже.</p></div></div><div class="recommended-entry-grid">` + cards.String() + `</div></section>`
+	return `<section class="dashboard-section recommended-entries"><div class="section-heading"><div><h2>С чего начать</h2><p>До пяти рекомендуемых точек входа в документацию проекта.</p></div></div><div class="recommended-entry-grid">` + cards.String() + `</div></section>`
+}
+
+func renderDashboardFocus(model *Model) string {
+	roadmap := model.DocByPath["roadmap.md"]
+	risksDocument := model.DocByPath["risks.md"]
+	if roadmap == nil && len(model.Knowledge.WorkItems) == 0 && risksDocument == nil {
+		return ""
+	}
+
+	nextResult := `<p class="focus-empty">Следующий результат не определён.</p>`
+	if next := model.CurrentStatus.NextResult; next != nil {
+		target := next.TargetDocument
+		if target == "" {
+			target = next.Document
+		}
+		href := "#"
+		if document := model.DocByPath[target]; document != nil {
+			href = relativeURL("index.html", document.OutputPath)
+		}
+		text := strings.TrimSpace(strings.TrimLeft(strings.TrimPrefix(next.Text, next.ID), " :—-"))
+		if text == "" {
+			text = next.ID
+		}
+		nextResult = `<a class="focus-result-link" href="` + escapeAttr(href) + `"><span class="focus-result-id">` + escapeHTML(next.ID) + `</span><strong>` + escapeHTML(text) + `</strong><span aria-hidden="true">→</span></a>`
+	}
+
+	workTarget := ""
+	if model.Project.StatusDocument != nil {
+		workTarget = model.Project.StatusDocument.OutputPath
+	} else if len(model.Knowledge.WorkItems) > 0 {
+		workTarget = "work/index.html"
+	}
+	workHref := ""
+	if workTarget != "" {
+		workHref = relativeURL("index.html", workTarget)
+	}
+	riskHref := ""
+	if risksDocument != nil {
+		riskHref = relativeURL("index.html", risksDocument.OutputPath)
+	}
+	activeCount := len(model.CurrentStatus.ActiveWork)
+	blockerCount := len(model.CurrentStatus.Blockers)
+	openRiskCount := model.Stats.OpenRisks
+
+	signal := func(className, href, label, emptyLabel string, count int) string {
+		state := fmt.Sprintf("%d", count)
+		if count == 0 {
+			state = emptyLabel
+		}
+		content := `<span class="focus-signal-label">` + escapeHTML(label) + `</span><strong>` + escapeHTML(state) + `</strong>`
+		if href == "" {
+			return `<div class="focus-signal ` + className + `">` + content + `</div>`
+		}
+		return `<a class="focus-signal ` + className + `" href="` + escapeAttr(href) + `">` + content + `</a>`
+	}
+
+	return `<section class="dashboard-section dashboard-focus" aria-labelledby="dashboard-focus-title"><div class="section-heading"><div><h2 id="dashboard-focus-title">Текущий фокус</h2><p>Ближайший результат и сигналы, требующие внимания.</p></div></div><div class="focus-layout"><div class="focus-result"><span class="focus-eyebrow">Следующий результат</span>` + nextResult + `</div><div class="focus-signals" aria-label="Сводка текущего состояния">` +
+		signal("focus-signal-work", workHref, "Активная работа", "Нет активных задач", activeCount) +
+		signal("focus-signal-blockers", workHref, "Блокеры", "Нет блокеров", blockerCount) +
+		signal("focus-signal-risks", riskHref, "Открытые риски", "Нет открытых рисков", openRiskCount) +
+		`</div></div></section>`
 }
 
 func renderDashboard(model *Model) string {
-	stats := model.Stats
-	var docs strings.Builder
-	for _, document := range model.Documents {
-		if document.SourcePath == "index.md" {
-			continue
-		}
-		if archived, _, _ := taskArchivePathInfo(document.SourcePath); archived {
-			continue
-		}
-		docs.WriteString(docCard("index.html", document))
-	}
-	var stages strings.Builder
-	for _, stage := range model.RoadmapStages {
-		href := relativeURL("index.html", stage.Document.OutputPath) + "#" + stage.Anchor
-		stages.WriteString(`<article class="timeline-card"><div>` + renderStatusChip(stage.Status) + `</div><h3><a href="` + escapeAttr(href) + `">` + escapeHTML(stage.Title) + `</a></h3>` + renderProgress(stage.TaskStats, "Этап") + `<p>` + escapeHTML(truncate(stage.Text, 160)) + `</p></article>`)
-	}
-	var risks strings.Builder
-	for _, risk := range model.Risks {
-		href := relativeURL("index.html", risk.Document.OutputPath) + "#" + risk.Anchor
-		risks.WriteString(`<article class="risk-card"><div>` + renderStatusChip(risk.Status) + `</div><h3><a href="` + escapeAttr(href) + `">` + escapeHTML(risk.ID+": "+risk.Title) + `</a></h3><p>Вероятность: ` + escapeHTML(risk.Probability) + ` · Влияние: ` + escapeHTML(risk.Impact) + `</p>` + renderProgress(risk.TaskStats, "Снижение риска") + `</article>`)
-	}
 	status := ""
 	if model.Project.OverviewDocument != nil && model.Project.OverviewDocument.Metadata["status"] != "" ||
 		model.Project.StatusDocument != nil && model.Project.StatusDocument.Metadata["status"] != "" {
 		status = `<div class="page-kicker">` + renderStatusChip(model.Project.Status) + `</div>`
-	}
-	summary := ""
-	if model.Project.Summary != "" {
-		summary = `<div class="hero-summary" data-hero-summary><p>` + escapeHTML(model.Project.Summary) + `</p><button type="button" data-hero-summary-toggle hidden aria-expanded="false">Показать полностью</button></div>`
 	}
 	meta := ""
 	if values := nonEmpty([]string{model.Project.Stage, model.Project.Version, model.Project.Owner, model.Project.Updated}); len(values) > 0 {
@@ -763,40 +799,10 @@ func renderDashboard(model *Model) string {
 	if document := model.Project.OverviewDocument; document != nil {
 		body := renderDocumentMarkdown(document, linkResolverFor(model, document), nil)
 		if body != "" {
-			overview = `<article class="doc-content dashboard-overview">` + body + `</article>`
+			overview = `<section class="dashboard-section dashboard-overview" data-dashboard-overview aria-labelledby="dashboard-overview-title"><div class="dashboard-overview-heading"><div><h2 id="dashboard-overview-title">Подробный обзор</h2><small>Полное содержание index.md</small></div></div><div class="dashboard-overview-body"><div class="page-actions dashboard-page-actions">` + renderDocumentContextButton(model, document) + `</div><article class="doc-content">` + body + `</article></div></section>`
 		}
 	}
-	var metrics strings.Builder
-	if stats.TotalTasks > 0 {
-		metrics.WriteString(metricCard("Прогресс", fmt.Sprintf("%d%%", percentOrZero(stats.TaskProgress)), fmt.Sprintf("%d из %d задач roadmap", stats.CompletedTasks, stats.TotalTasks)))
-	}
-	metrics.WriteString(metricCard("Документы", stats.Documents, fmt.Sprintf("%d замечаний", stats.Warnings+stats.Errors)))
-	if stats.Modules > 0 || stats.UseCases > 0 {
-		metrics.WriteString(metricCard("Модули", stats.Modules, fmt.Sprintf("%d сценариев", stats.UseCases)))
-	}
-	if stats.Risks > 0 {
-		metrics.WriteString(metricCard("Риски", stats.OpenRisks, fmt.Sprintf("%d всего", stats.Risks)))
-	}
-	if stats.OpenBugs > 0 || stats.CriticalBugs > 0 || stats.HighSeverityBugs > 0 {
-		metrics.WriteString(metricCard("Открытые баги", stats.OpenBugs, fmt.Sprintf("критических: %d · высокой серьёзности: %d · регрессий: %d · без воспроизведения: %d · заблокированных: %d", stats.CriticalBugs, stats.HighSeverityBugs, stats.RegressionBugs, stats.UnreproducedBugs, stats.BlockedBugs)))
-	}
-	roadmap := ""
-	if stages.Len() > 0 {
-		roadmap = `<section class="dashboard-section"><div class="section-heading"><div><h2>Дорожная карта</h2><p>Roadmap определяет охват; состояние UC-элементов вычисляется из связанных сценариев.</p></div></div><div class="timeline-grid">` + stages.String() + `</div></section>`
-	}
-	computedStatus := ""
-	if len(model.Knowledge.WorkItems) > 0 || stats.TotalTasks > 0 {
-		computedStatus = renderComputedStatus(model, "index.html")
-	}
-	riskSection := ""
-	if risks.Len() > 0 {
-		riskSection = `<section class="dashboard-section"><div class="section-heading"><div><h2>Открытые риски</h2></div></div><div class="card-grid">` + risks.String() + `</div></section>`
-	}
-	documentList := `<p class="empty-state">Дополнительных документов нет.</p>`
-	if docs.Len() > 0 {
-		documentList = `<div data-filter-scope>` + filterControls(true, true) + `<div class="collection-summary">Показано: <strong data-filter-count></strong></div><div class="card-grid">` + docs.String() + `</div><div class="empty-state" data-filter-empty hidden>Ничего не найдено.</div></div>`
-	}
-	hero := `<header class="page-header"><h1>` + escapeHTML(model.Project.Title) + `</h1><p class="page-lead">` + escapeHTML(model.Project.Description) + `</p></header>`
+	hero := `<header class="page-header dashboard-about">` + status + `<h1>` + escapeHTML(model.Project.Title) + `</h1><p class="page-lead">` + escapeHTML(model.Project.Description) + `</p>` + meta + `</header>`
 	if model.SiteConfig.Hero.Enabled {
 		heroLogo := ""
 		if logo := brandingOutput(model, "logo"); logo != "" {
@@ -808,13 +814,9 @@ func renderDashboard(model *Model) string {
 			heroClass += " has-image"
 			heroImage = `<div class="hero-media"><img src="` + escapeAttr(image) + `" alt=""></div>`
 		}
-		hero = `<header class="` + heroClass + `"><div class="hero-copy">` + heroLogo + status + `<h1>` + escapeHTML(model.Project.Title) + `</h1><p class="hero-description">` + escapeHTML(model.Project.Description) + `</p>` + summary + meta + `</div>` + heroImage + `</header>`
+		hero = `<header class="` + heroClass + ` dashboard-about"><div class="hero-copy">` + heroLogo + status + `<h1>` + escapeHTML(model.Project.Title) + `</h1><p class="hero-description">` + escapeHTML(model.Project.Description) + `</p>` + meta + `</div>` + heroImage + `</header>`
 	}
-	contextAction := ""
-	if document := model.Project.OverviewDocument; document != nil {
-		contextAction = `<div class="page-actions dashboard-page-actions">` + renderDocumentContextButton(model, document) + `</div>`
-	}
-	content := hero + contextAction + overview + renderRecommendedEntries(model) + `<section class="metric-grid">` + metrics.String() + `</section>` + roadmap + computedStatus + riskSection + `<section class="dashboard-section"><div class="section-heading"><div><h2>Каталог документации</h2><p>Единый полный список с поиском, фильтрами и статусами.</p></div><a class="section-link" href="` + escapeAttr(model.HealthOutputPath) + `">Качество →</a></div>` + documentList + `</section>`
+	content := hero + renderDashboardFocus(model) + renderRecommendedEntries(model) + overview
 	return pageShell(model, "index.html", model.Project.Title, model.Project.Description, content, "")
 }
 

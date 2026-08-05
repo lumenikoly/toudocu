@@ -48,7 +48,7 @@ docu-docu task context TASK-ID [docs-dir] [--format text|json]
 docu-docu task verify TASK-ID [docs-dir] (--dry-run|--run) [--target TARGET] [--report FILE] [--timeout DURATION] [--format text|json]
 docu-docu task archive TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]
 docu-docu task restore TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]
-docu-docu changes [docs-dir] [--base REV|--branch-base REF] [--target working-tree|index|HEAD|REV] [--format text|json|markdown]
+docu-docu changes [docs-dir] [--base REV|--branch-base REF] [--target working-tree|index|HEAD|REV] [--status STATUS] [--module ID] [--type TYPE] [--permanent-only] [--format text|json|markdown] [-o FILE]
 docu-docu changes file PATH [docs-dir] [параметры changes]
 docu-docu task changes TASK-ID [docs-dir] [параметры changes]
 ```
@@ -128,6 +128,12 @@ revision, `3` — Git/repository недоступен, `4` — внутренн�
 генерируется по умолчанию при наличии `screens/SC-*.md`; `--no-screen-map`
 отключает только страницу общей карты, сохраняя каталог, страницы use cases с
 пошаговым режимом и JSON.
+
+`--status` сравнивает точный Git-status изменения, `--type` — тип найденной
+сущности, `--module` ищет ID или значение модуля в path, сущностях и semantic
+summary. `--permanent-only` оставляет classification
+`permanent-documentation`. Фильтры применяются после построения change set и
+пересчитывают summary и digest от отфильтрованного отчёта.
 
 ## Exit codes
 

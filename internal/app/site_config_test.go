@@ -353,7 +353,7 @@ func TestHeroCanBeDisabled(t *testing.T) {
 	writeSiteConfig(t, root, "site:\n  hero:\n    enabled: false\n")
 	model := buildConfigFixture(t, root, docs, "")
 	html := renderDashboard(model)
-	if strings.Contains(html, `class="hero`) || !strings.Contains(html, `class="page-header"`) {
+	if strings.Contains(html, `class="hero dashboard-about"`) || strings.Contains(html, `class="hero has-image dashboard-about"`) || !strings.Contains(html, `class="page-header dashboard-about"`) {
 		t.Fatalf("disabled hero rendered incorrectly")
 	}
 }

@@ -8,7 +8,24 @@
     .replace(/ё/g, 'е')
     .replace(/[^\p{L}\p{N}]+/gu, ' ')
     .trim();
-  const rootPrefix = document.body.dataset.rootPrefix || '';
+  const rootPrefix = () => document.body.dataset.rootPrefix || '';
+  const scriptLoads = new Map();
+
+  function loadScript(name) {
+    if (scriptLoads.has(name)) return scriptLoads.get(name);
+    const promise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = `${rootPrefix()}assets/${name}`;
+      script.onload = resolve;
+      script.onerror = () => reject(new Error(`Не удалось загрузить ${name}`));
+      document.head.append(script);
+    }).catch((error) => {
+      scriptLoads.delete(name);
+      throw error;
+    });
+    scriptLoads.set(name, promise);
+    return promise;
+  }
 
   function initializeTheme() {
     const select = $('[data-color-scheme-select]');
@@ -110,7 +127,7 @@
     };
   }
 
-  function initializeSidebar() {
+  function initializeSidebar(signal) {
     const toggle = $('[data-sidebar-toggle]');
     let folderState = {};
     try {
@@ -138,33 +155,41 @@
       folderToggle?.addEventListener('click', (event) => {
         event.stopPropagation();
         setCollapsed(!folder.classList.contains('is-collapsed'));
-      });
+      }, { signal });
     });
     toggle?.addEventListener('click', (event) => {
       event.stopPropagation();
       const open = document.body.classList.toggle('sidebar-open');
       toggle.setAttribute('aria-expanded', String(open));
-    });
+    }, { signal });
     document.addEventListener('click', (event) => {
       if (!document.body.classList.contains('sidebar-open')) return;
       if (event.target.closest('.sidebar') || event.target.closest('[data-sidebar-toggle]')) return;
       document.body.classList.remove('sidebar-open');
       toggle?.setAttribute('aria-expanded', 'false');
-    });
+    }, { signal });
     $$('.sidebar a').forEach((link) => link.addEventListener('click', () => {
       document.body.classList.remove('sidebar-open');
       toggle?.setAttribute('aria-expanded', 'false');
-    }));
+    }, { signal }));
     $('.nav-link.is-active, .nav-folder-link.is-active')?.scrollIntoView({ block: 'center' });
   }
 
   function initializeGlobalSearch() {
     const input = $('[data-global-search]');
     const results = $('[data-search-results]');
-    const index = Array.isArray(window.PROJECT_DOCS_SEARCH_INDEX) ? window.PROJECT_DOCS_SEARCH_INDEX : [];
     if (!input || !results) return;
     let selected = -1;
     let currentItems = [];
+    let index = Array.isArray(window.PROJECT_DOCS_SEARCH_INDEX) ? window.PROJECT_DOCS_SEARCH_INDEX : [];
+
+    async function ensureIndex() {
+      if (!Array.isArray(window.PROJECT_DOCS_SEARCH_INDEX)) {
+        await loadScript('search-index.js');
+      }
+      index = Array.isArray(window.PROJECT_DOCS_SEARCH_INDEX) ? window.PROJECT_DOCS_SEARCH_INDEX : [];
+      return index;
+    }
 
     function score(item, query, terms) {
       const title = normalize(item.title);
@@ -225,7 +250,7 @@
         currentItems.forEach((item, itemIndex) => {
           const link = document.createElement('a');
           link.className = 'search-result';
-          link.href = `${rootPrefix}${item.url}`;
+          link.href = `${rootPrefix()}${item.url}`;
           link.setAttribute('role', 'option');
           link.setAttribute('aria-selected', 'false');
           link.dataset.searchIndex = String(itemIndex);
@@ -244,8 +269,8 @@
       input.setAttribute('aria-expanded', 'true');
     }
 
-    input.addEventListener('input', render);
-    input.addEventListener('focus', () => { if (input.value.trim()) render(); });
+    input.addEventListener('input', async () => { await ensureIndex(); render(); });
+    input.addEventListener('focus', async () => { await ensureIndex(); if (input.value.trim()) render(); });
     input.addEventListener('keydown', (event) => {
       if (event.key === 'ArrowDown') {
         event.preventDefault();
@@ -479,7 +504,7 @@
     });
   }
 
-  function initializeDiagramViewport({ stage, target, zoomIn, zoomOut, fitButton, fullscreenButton }) {
+  function initializeDiagramViewport({ stage, target, zoomIn, zoomOut, fitButton, fullscreenButton, signal }) {
     if (!stage || !target) return null;
     let view = { scale: 1, x: 0, y: 0 };
     let dragging = null;
@@ -536,13 +561,13 @@
       nativeFullscreen = expanded;
       updateFullscreenButton();
       fit();
-    });
+    }, { signal });
     document.addEventListener('keydown', (event) => {
       if (event.key !== 'Escape' || !stage.classList.contains('is-fullscreen-fallback')) return;
       stage.classList.remove('is-fullscreen-fallback');
       updateFullscreenButton();
       fit();
-    });
+    }, { signal });
     stage.addEventListener('wheel', (event) => {
       if (!event.target.closest('svg')) return;
       event.preventDefault();
@@ -572,7 +597,7 @@
     return { fit };
   }
 
-  function initializeMermaid() {
+  function initializeMermaid(signal) {
     const containers = $$('[data-mermaid-container]').filter((container) => $('[data-mermaid-diagram]', container) && !container.matches('[data-screen-map-diagram]'));
     if (!containers.length) return;
     const viewports = new Map();
@@ -584,6 +609,7 @@
         zoomOut: $('[data-mermaid-zoom-out]', container),
         fitButton: $('[data-mermaid-fit]', container),
         fullscreenButton: $('[data-mermaid-fullscreen]', container),
+        signal,
       });
       if (viewport) viewports.set(container, viewport);
     });
@@ -597,6 +623,7 @@
     };
 
     let renderQueue = Promise.resolve();
+    let started = false;
     const renderAll = async () => {
       if (!window.mermaid) {
         containers.forEach(showError);
@@ -628,13 +655,32 @@
       }
     };
     const scheduleRender = () => {
-      renderQueue = renderQueue.then(renderAll, renderAll);
+      started = true;
+      const render = async () => {
+        try {
+          if (!window.mermaid) await loadScript('mermaid.tiny.js');
+          await renderAll();
+        } catch {
+          containers.forEach(showError);
+        }
+      };
+      renderQueue = renderQueue.then(render, render);
     };
-    document.addEventListener('docu-docu:themechange', scheduleRender);
-    scheduleRender();
+    document.addEventListener('docu-docu:themechange', () => { if (started) scheduleRender(); }, { signal });
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer.disconnect();
+        scheduleRender();
+      }, { rootMargin: '320px 0px' });
+      containers.forEach((container) => observer.observe(container));
+      signal.addEventListener('abort', () => observer.disconnect(), { once: true });
+    } else {
+      window.setTimeout(scheduleRender, 0);
+    }
   }
 
-  function initializeScreenMap() {
+  function initializeScreenMap(signal) {
     const workspace = $('[data-screen-map]');
     if (!workspace) return;
     const dataElement = $('[data-screen-map-data]', workspace);
@@ -672,6 +718,7 @@
       zoomOut: $('[data-screen-zoom-out]', workspace),
       fitButton: $('[data-screen-fit]', workspace),
       fullscreenButton: $('[data-screen-fullscreen]', workspace),
+      signal,
     });
 
     const mermaidText = (value) => String(value || '')
@@ -855,11 +902,11 @@
       selected = hashRow.dataset.screenRow;
       hashRow.classList.add('is-selected');
     }
-    document.addEventListener('docu-docu:themechange', scheduleRender);
+    document.addEventListener('docu-docu:themechange', scheduleRender, { signal });
     scheduleRender();
   }
 
-  function initializeTocTracking() {
+  function initializeTocTracking(signal) {
     const links = $$('.page-toc a[href^="#"]');
     if (!links.length || !('IntersectionObserver' in window)) return;
     const byId = new Map(links.map((link) => [decodeURIComponent(link.hash.slice(1)), link]));
@@ -870,9 +917,10 @@
       links.forEach((link) => link.classList.toggle('is-active', link === byId.get(visible.target.id)));
     }, { rootMargin: '-80px 0px -70% 0px', threshold: 0 });
     headings.forEach((heading) => observer.observe(heading));
+    signal.addEventListener('abort', () => observer.disconnect(), { once: true });
   }
 
-  function initializeUseCaseTabs() {
+  function initializeUseCaseTabs(signal) {
     $$('[data-usecase-tabs]').forEach((container) => {
       const tabs = $$('[data-usecase-tab]', container);
       const panels = $$('[data-usecase-panel]', container);
@@ -915,8 +963,8 @@
           activate(tabs[next].dataset.usecaseTab, true);
         });
       });
-      window.addEventListener('hashchange', () => activate(window.location.hash.slice(1)));
-      window.addEventListener('popstate', () => activate(window.location.hash.slice(1)));
+      window.addEventListener('hashchange', () => activate(window.location.hash.slice(1)), { signal });
+      window.addEventListener('popstate', () => activate(window.location.hash.slice(1)), { signal });
       activate(window.location.hash.slice(1));
     });
   }
@@ -925,18 +973,37 @@
     $('[data-print]')?.addEventListener('click', () => window.print());
   }
 
+  async function initializePage(signal) {
+    initializeHeroSummary();
+    initializeSidebar(signal);
+    initializeCollectionFilters();
+    initializeTaskFilters();
+    initializeCollapsibleSections();
+    initializeDocumentContextCopy();
+    initializeCodeCopy();
+    initializeMermaid(signal);
+    initializeScreenMap(signal);
+    initializeUseCaseTabs(signal);
+    initializeTocTracking(signal);
+    if ($('[data-screen-map]')) {
+      await loadScript('screen-map.js').catch(() => {});
+      if (!signal.aborted) window.DocuDocuInitializeScreenMap?.(document, signal);
+    }
+    if ($('[data-playable-flow]')) {
+      await loadScript('playable-flow.js').catch(() => {});
+      if (!signal.aborted) window.DocuDocuInitializePlayableFlow?.(document, signal);
+    }
+  }
+
+  let pageController = new AbortController();
   initializeTheme();
   initializeSiteTheme();
-  initializeHeroSummary();
-  initializeSidebar();
   initializeGlobalSearch();
-  initializeCollectionFilters();
-  initializeTaskFilters();
-  initializeCollapsibleSections();
-  initializeDocumentContextCopy();
-  initializeCodeCopy();
-  initializeMermaid();
-  initializeUseCaseTabs();
-  initializeTocTracking();
   initializePrint();
+  initializePage(pageController.signal);
+  document.addEventListener('docu-docu:pagechange', () => {
+    pageController.abort();
+    pageController = new AbortController();
+    initializePage(pageController.signal);
+  });
 })();
