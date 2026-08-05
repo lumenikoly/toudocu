@@ -4,7 +4,7 @@
     "name": "Docu-docu",
     "version": "0.0.1"
   },
-  "generatedAt": "2026-08-05T15:28:17.2848019Z",
+  "generatedAt": "2026-08-05T18:57:28.137640418Z",
   "sourceDirectory": "docs",
   "staleDays": 90,
   "project": {
@@ -33,21 +33,21 @@
       "effectiveCompleted": false,
       "completionSource": "roadmap-checkbox",
       "document": "roadmap.md",
-      "line": 31
+      "line": 30
     }
   },
   "stats": {
-    "documents": 72,
-    "totalTasks": 15,
-    "completedTasks": 14,
+    "documents": 74,
+    "totalTasks": 14,
+    "completedTasks": 13,
     "remainingTasks": 1,
     "taskProgress": 93,
-    "documentsComplete": 12,
+    "documentsComplete": 13,
     "documentsInProgress": 2,
     "documentsNotStarted": 0,
-    "documentsWithoutTasks": 58,
+    "documentsWithoutTasks": 59,
     "staleDocuments": 0,
-    "documentsWithoutDescription": 12,
+    "documentsWithoutDescription": 13,
     "documentsWithoutStatus": 0,
     "brokenLinks": 0,
     "warnings": 0,
@@ -60,14 +60,14 @@
     "useCaseStatuses": {
       "done": 9
     },
-    "screens": 6,
-    "screensDone": 6,
+    "screens": 7,
+    "screensDone": 7,
     "screensInProgress": 0,
     "screensPlanned": 0,
     "screensUnreachable": 0,
     "risks": 3,
     "openRisks": 2,
-    "decisions": 3,
+    "decisions": 4,
     "openBugs": 0,
     "criticalBugs": 0,
     "highSeverityBugs": 0,
@@ -157,12 +157,12 @@
         "recognized": true
       },
       "taskStats": {
-        "total": 15,
-        "completed": 14,
+        "total": 14,
+        "completed": 13,
         "remaining": 1,
         "percent": 93
       },
-      "updatedAt": "2026-08-05T13:22:12.767478434Z",
+      "updatedAt": "2026-08-05T18:21:17.722521957Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -285,6 +285,7 @@
       "links": [],
       "backlinks": [
         "architecture/overview.md",
+        "contracts/changes-http.md",
         "flows/FLOW-DOCS-CHANGES.md",
         "guides/documentation-changes.md"
       ],
@@ -351,7 +352,7 @@
       "type": "architecture",
       "sectionType": "architecture",
       "title": "Архитектура",
-      "description": "Docu-docu — локальный dependency-free Go runtime между исходным каталогом документации и потребителями проверенной модели: Go-кодом через публичный фасад, автоматизацией через CLI/JSON и читателем автономного HTML-портала. Опциональный serve добавляет локальный HTTP/editor runtime; база данных и внешний runtime в границу системы не входят.",
+      "description": "Docu-docu — локальный dependency-free Go runtime между исходным каталогом документации и потребителями проверенной модели: Go-кодом через публичный фасад, автоматизацией через CLI/JSON и читателем автономного HTML-портала. Опциональный serve добавляет локальный HTTP/editor runtime и offline каталог OpenAPI; база данных, CDN и внешний runtime в границу системы не входят.",
       "metadata": {
         "documentType": "Architecture Overview"
       },
@@ -367,7 +368,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-04T17:55:47.5539959Z",
+      "updatedAt": "2026-08-05T17:45:16.808083952Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -429,7 +430,7 @@
       "type": "architecture",
       "sectionType": "architecture",
       "title": "Разделение ответственности runtime-компонентов",
-      "description": "Runtime образует последовательный конвейер: CLI либо прямой вызов Go API задаёт операцию, Markdown-слой извлекает безопасное представление, модель проверяет структуру и связи, а выбранный потребитель возвращает отчёт, строит портал или выполняет отдельно разрешённый task workflow.",
+      "description": "Runtime образует последовательный конвейер: CLI либо прямой вызов Go API задаёт операцию, document/OpenAPI слой извлекает безопасное представление, модель проверяет структуру и связи, а выбранный потребитель возвращает отчёт, строит портал или выполняет отдельно разрешённый task workflow.",
       "metadata": {
         "architectureQuestion": "Как runtime-компоненты делят ответственность?",
         "documentType": "Architecture"
@@ -446,7 +447,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-04T17:53:30.343702237Z",
+      "updatedAt": "2026-08-05T18:21:17.721521948Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -460,12 +461,12 @@
           "href": "../modules/cli.html"
         },
         {
-          "destination": "../contracts/go-api.md",
+          "destination": "../reference/features.md#публичный-go-api",
           "broken": false,
           "blocked": false,
           "targetKind": "document",
-          "target": "contracts/go-api.md",
-          "href": "../contracts/go-api.html"
+          "target": "reference/features.md",
+          "href": "../reference/features.html#публичный-go-api"
         },
         {
           "destination": "../modules/markdown.md",
@@ -529,7 +530,7 @@
       ],
       "relatedDocuments": [
         "modules/cli.md",
-        "contracts/go-api.md",
+        "reference/features.md",
         "modules/markdown.md",
         "modules/model.md",
         "modules/site.md",
@@ -546,7 +547,7 @@
       "type": "architecture",
       "sectionType": "architecture",
       "title": "Системная граница Docu-docu",
-      "description": "Docu-docu ограничен одним локальным процессом, который читает документацию и репозиторий, строит проверенную модель и выдаёт diagnostics либо производные представления. Встраивающий Go-код вызывает тот же фасад модели и операций без отдельного процесса. В serve процесс принимает ограниченные editor-запросы и атомарно сохраняет выбранный workspace-файл. Пользователь, библиотечный потребитель, агент, CI и браузер остаются взаимодействующими сторонами за этой границей. Release installer также остаётся снаружи: это отдельный bootstrap, который использует сеть только до запуска Go runtime.",
+      "description": "Docu-docu ограничен одним локальным процессом, который читает документацию и репозиторий, строит проверенную модель и выдаёт diagnostics либо производные представления. Встраивающий Go-код вызывает тот же фасад модели и операций без отдельного процесса. В serve процесс принимает ограниченные editor/changes запросы, отдаёт offline OpenAPI UI и атомарно сохраняет выбранный workspace-файл. Пользователь, библиотечный потребитель, агент, CI и браузер остаются взаимодействующими сторонами за этой границей. Release installer также остаётся снаружи: это отдельный bootstrap, который использует сеть только до запуска Go runtime.",
       "metadata": {
         "architectureQuestion": "Где проходит системная граница Docu-docu и кто с ней взаимодействует?",
         "documentType": "Architecture"
@@ -563,7 +564,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-04T20:01:02.557990969Z",
+      "updatedAt": "2026-08-05T18:21:17.722521957Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -577,12 +578,12 @@
           "href": "../contracts/cli.html"
         },
         {
-          "destination": "../contracts/go-api.md",
+          "destination": "../reference/features.md#публичный-go-api",
           "broken": false,
           "blocked": false,
           "targetKind": "document",
-          "target": "contracts/go-api.md",
-          "href": "../contracts/go-api.html"
+          "target": "reference/features.md",
+          "href": "../reference/features.html#публичный-go-api"
         },
         {
           "destination": "../decisions/001-dependency-free.md",
@@ -614,7 +615,7 @@
       ],
       "relatedDocuments": [
         "contracts/cli.md",
-        "contracts/go-api.md",
+        "reference/features.md",
         "decisions/001-dependency-free.md",
         "decisions/ADR-002.md",
         "guides/installation.md"
@@ -644,7 +645,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-04T20:10:12.84064625Z",
+      "updatedAt": "2026-08-05T17:45:16.812083972Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -675,7 +676,8 @@
         }
       ],
       "backlinks": [
-        "architecture/overview.md"
+        "architecture/overview.md",
+        "contracts/editor-http.md"
       ],
       "relatedDocuments": [
         "contracts/cli.md",
@@ -689,13 +691,13 @@
       "outputPath": "contracts/changes-http.html",
       "type": "contract",
       "sectionType": "contracts",
-      "title": "HTTP-контракт Documentation Changes v1",
-      "description": "Все endpoints read-only, используют Cache-Control: no-store , принимают только локальные Git revisions и ограничивают доступ documentation roots.",
+      "title": "Changes HTTP API: поведение и границы",
+      "description": "OpenAPI 3.1.0 содержит маршруты, параметры, коды ответа и схемы данных. В canonical serve на этой странице также появляется кнопка для открытия спецификации в Swagger UI.",
       "metadata": {
         "id": "CON-CHANGES-HTTP-V1",
         "owner": "Команда Docu-docu",
         "status": "Готово",
-        "updated": "2026-07-31"
+        "updated": "2026-08-05"
       },
       "status": {
         "kind": "done",
@@ -709,16 +711,63 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T00:00:00Z",
+      "updatedAt": "2026-08-05T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
-      "links": [],
+      "links": [
+        {
+          "destination": "changes.openapi.yaml",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "asset",
+          "target": "contracts/changes.openapi.yaml",
+          "href": "changes.openapi.yaml"
+        },
+        {
+          "destination": "../decisions/ADR-004.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "decisions/ADR-004.md",
+          "href": "../decisions/ADR-004.html"
+        },
+        {
+          "destination": "../modules/MOD-CHANGES.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/MOD-CHANGES.md",
+          "href": "../modules/MOD-CHANGES.html"
+        },
+        {
+          "destination": "../architecture/documentation-changes.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "architecture/documentation-changes.md",
+          "href": "../architecture/documentation-changes.html"
+        },
+        {
+          "destination": "../reference/changes-report.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/changes-report.md",
+          "href": "../reference/changes-report.html"
+        }
+      ],
       "backlinks": [
         "guides/documentation-changes.md",
+        "modules/site.md",
         "reference/api.md"
       ],
-      "relatedDocuments": []
+      "relatedDocuments": [
+        "decisions/ADR-004.md",
+        "modules/MOD-CHANGES.md",
+        "architecture/documentation-changes.md",
+        "reference/changes-report.md"
+      ]
     },
     {
       "id": "CON-CLI-V1",
@@ -726,8 +775,8 @@
       "outputPath": "contracts/cli.html",
       "type": "contract",
       "sectionType": "contracts",
-      "title": "CLI-контракт Docu-docu v1",
-      "description": "Контракт фиксирует публичные команды, exit codes и машинные JSON-форматы Docu-docu.",
+      "title": "CLI Docu-docu v1",
+      "description": "Документ фиксирует команды, побочные эффекты, exit codes и версионируемые JSON-результаты CLI. Конкретный синтаксис флагов показывает docu-docu COMMAND --help .",
       "metadata": {
         "id": "CON-CLI-V1",
         "owner": "Команда Docu-docu",
@@ -752,28 +801,12 @@
       "errors": 0,
       "links": [
         {
-          "destination": "go-api.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "contracts/go-api.md",
-          "href": "go-api.html"
-        },
-        {
           "destination": "../guides/work-items.md",
           "broken": false,
           "blocked": false,
           "targetKind": "document",
           "target": "guides/work-items.md",
           "href": "../guides/work-items.html"
-        },
-        {
-          "destination": "editor-http.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "contracts/editor-http.md",
-          "href": "editor-http.html"
         },
         {
           "destination": "../guides/documentation-changes.md",
@@ -784,18 +817,25 @@
           "href": "../guides/documentation-changes.html"
         },
         {
-          "destination": "../reference/changes-report.md",
+          "destination": "../reference/document-types.md",
           "broken": false,
           "blocked": false,
           "targetKind": "document",
-          "target": "reference/changes-report.md",
-          "href": "../reference/changes-report.html"
+          "target": "reference/document-types.md",
+          "href": "../reference/document-types.html"
+        },
+        {
+          "destination": "../reference/configuration.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/configuration.md",
+          "href": "../reference/configuration.html"
         }
       ],
       "backlinks": [
         "architecture/system-boundary.md",
         "architecture/trust-boundaries.md",
-        "contracts/go-api.md",
         "flows/FLOW-DOCS-BUILD.md",
         "flows/FLOW-DOCS-SERVE.md",
         "flows/FLOW-TASK-WORKFLOW.md",
@@ -813,66 +853,22 @@
         "use-cases/UC-TASK-04.md"
       ],
       "relatedDocuments": [
-        "contracts/go-api.md",
         "guides/work-items.md",
-        "contracts/editor-http.md",
         "guides/documentation-changes.md",
-        "reference/changes-report.md"
+        "reference/document-types.md",
+        "reference/configuration.md"
       ]
     },
     {
-      "id": "",
+      "id": "CON-EDITOR-HTTP-V1",
       "sourcePath": "contracts/editor-http.md",
       "outputPath": "contracts/editor-http.html",
       "type": "contract",
       "sectionType": "contracts",
-      "title": "CONTRACT-EDITOR-HTTP: Локальный editor API",
-      "description": "Контракт определяет действующий same-origin API локального workspace. Все маршруты имеют префикс / docu-docu/api/editor , всегда возвращают Cache-Control: no-store и не выдают CORS-заголовки. JSON-ответы содержат schemaVersion: 1 .",
+      "title": "Editor HTTP API: поведение и границы",
+      "description": "OpenAPI 3.1.0 содержит маршруты, параметры, коды ответа и схемы данных. В canonical serve на этой странице также появляется кнопка для открытия спецификации в Swagger UI.",
       "metadata": {
-        "flow": "FLOW-DOCS-SERVE",
-        "module": "MOD-SITE",
-        "status": "Готово",
-        "type": "HTTP contract",
-        "useCase": "UC-DOCS-03"
-      },
-      "status": {
-        "kind": "done",
-        "symbol": "✓",
-        "label": "Готово",
-        "recognized": true
-      },
-      "taskStats": {
-        "total": 0,
-        "completed": 0,
-        "remaining": 0,
-        "percent": null
-      },
-      "updatedAt": "2026-08-05T14:53:24.406878417Z",
-      "stale": false,
-      "warnings": 0,
-      "errors": 0,
-      "links": [],
-      "backlinks": [
-        "contracts/cli.md",
-        "flows/FLOW-DOCS-SERVE.md",
-        "modules/site.md",
-        "reference/api.md",
-        "reference/features.md",
-        "use-cases/serve-portal.md",
-        "work/TASK-SITE-002.md"
-      ],
-      "relatedDocuments": []
-    },
-    {
-      "id": "CON-GO-API-V1",
-      "sourcePath": "contracts/go-api.md",
-      "outputPath": "contracts/go-api.html",
-      "type": "contract",
-      "sectionType": "contracts",
-      "title": "Go API-контракт Docu-docu v1",
-      "description": "Контракт описывает экспортируемый фасад корневого Go-пакета. Он нужен разработчикам, которые встраивают модель, рендеринг или отчёты Docu-docu без запуска отдельного процесса.",
-      "metadata": {
-        "id": "CON-GO-API-V1",
+        "id": "CON-EDITOR-HTTP-V1",
         "owner": "Команда Docu-docu",
         "status": "Готово",
         "updated": "2026-08-05"
@@ -895,32 +891,59 @@
       "errors": 0,
       "links": [
         {
-          "destination": "cli.md",
+          "destination": "editor.openapi.yaml",
           "broken": false,
           "blocked": false,
-          "targetKind": "document",
-          "target": "contracts/cli.md",
-          "href": "cli.html"
+          "targetKind": "asset",
+          "target": "contracts/editor.openapi.yaml",
+          "href": "editor.openapi.yaml"
         },
         {
-          "destination": "cli.md",
+          "destination": "../decisions/ADR-004.md",
           "broken": false,
           "blocked": false,
           "targetKind": "document",
-          "target": "contracts/cli.md",
-          "href": "cli.html"
+          "target": "decisions/ADR-004.md",
+          "href": "../decisions/ADR-004.html"
+        },
+        {
+          "destination": "../modules/site.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/site.md",
+          "href": "../modules/site.html"
+        },
+        {
+          "destination": "../use-cases/serve-portal.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/serve-portal.md",
+          "href": "../use-cases/UC-DOCS-03.html"
+        },
+        {
+          "destination": "../architecture/trust-boundaries.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "architecture/trust-boundaries.md",
+          "href": "../architecture/trust-boundaries.html"
         }
       ],
       "backlinks": [
-        "architecture/runtime-components.md",
-        "architecture/system-boundary.md",
-        "contracts/cli.md",
-        "modules/model.md",
+        "flows/FLOW-DOCS-SERVE.md",
+        "modules/site.md",
         "reference/api.md",
-        "reference/features.md"
+        "reference/features.md",
+        "use-cases/serve-portal.md",
+        "work/TASK-SITE-002.md"
       ],
       "relatedDocuments": [
-        "contracts/cli.md"
+        "decisions/ADR-004.md",
+        "modules/site.md",
+        "use-cases/serve-portal.md",
+        "architecture/trust-boundaries.md"
       ]
     },
     {
@@ -1043,6 +1066,44 @@
       "links": [],
       "backlinks": [
         "decisions/001-dependency-free.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "ADR-004",
+      "sourcePath": "decisions/ADR-004.md",
+      "outputPath": "decisions/ADR-004.html",
+      "type": "decision",
+      "sectionType": "decisions",
+      "title": "ADR-004: Гибридный source of truth для HTTP API",
+      "description": "Wire-level контракт HTTP API хранится в OpenAPI 3.1.0, а поведение и trust boundaries — в Markdown-компаньоне.",
+      "metadata": {
+        "author": "Команда Docu-docu",
+        "date": "2026-08-05",
+        "id": "ADR-004",
+        "status": "Принято",
+        "updated": "2026-08-05"
+      },
+      "status": {
+        "kind": "accepted",
+        "symbol": "✓",
+        "label": "Принято",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-05T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "contracts/changes-http.md",
+        "contracts/editor-http.md"
       ],
       "relatedDocuments": []
     },
@@ -1293,7 +1354,7 @@
       "metadata": {
         "id": "FLOW-DOCS-SERVE",
         "module": "MOD-SITE",
-        "updated": "2026-08-04",
+        "updated": "2026-08-05",
         "useCase": "UC-DOCS-03"
       },
       "status": {
@@ -1308,7 +1369,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-04T00:00:00Z",
+      "updatedAt": "2026-08-05T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1977,7 +2038,7 @@
         "id": "MOD-CHANGES",
         "owner": "Команда Docu-docu",
         "status": "Готово",
-        "updated": "2026-08-03"
+        "updated": "2026-08-05"
       },
       "status": {
         "kind": "done",
@@ -1991,11 +2052,19 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T00:00:00Z",
+      "updatedAt": "2026-08-05T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
       "links": [
+        {
+          "destination": "../contracts/changes.openapi.yaml",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "asset",
+          "target": "contracts/changes.openapi.yaml",
+          "href": "../contracts/changes.openapi.yaml"
+        },
         {
           "destination": "../use-cases/UC-DOCS-05.md",
           "broken": false,
@@ -2006,6 +2075,7 @@
         }
       ],
       "backlinks": [
+        "contracts/changes-http.md",
         "flows/FLOW-DOCS-CHANGES.md",
         "use-cases/UC-DOCS-05.md"
       ],
@@ -2025,7 +2095,7 @@
         "id": "MOD-MODEL",
         "owner": "Команда Docu-docu",
         "status": "Готово",
-        "updated": "2026-08-04"
+        "updated": "2026-08-05"
       },
       "status": {
         "kind": "done",
@@ -2039,19 +2109,11 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-04T00:00:00Z",
+      "updatedAt": "2026-08-05T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
       "links": [
-        {
-          "destination": "../contracts/go-api.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "contracts/go-api.md",
-          "href": "../contracts/go-api.html"
-        },
         {
           "destination": "../contracts/cli.md",
           "broken": false,
@@ -2128,7 +2190,6 @@
         "use-cases/UC-TASK-03.md"
       ],
       "relatedDocuments": [
-        "contracts/go-api.md",
         "contracts/cli.md",
         "guides/work-items.md",
         "quality/index.md",
@@ -2171,12 +2232,36 @@
       "errors": 0,
       "links": [
         {
+          "destination": "../contracts/editor.openapi.yaml",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "asset",
+          "target": "contracts/editor.openapi.yaml",
+          "href": "../contracts/editor.openapi.yaml"
+        },
+        {
+          "destination": "../contracts/changes.openapi.yaml",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "asset",
+          "target": "contracts/changes.openapi.yaml",
+          "href": "../contracts/changes.openapi.yaml"
+        },
+        {
           "destination": "../contracts/editor-http.md",
           "broken": false,
           "blocked": false,
           "targetKind": "document",
           "target": "contracts/editor-http.md",
           "href": "../contracts/editor-http.html"
+        },
+        {
+          "destination": "../contracts/changes-http.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/changes-http.md",
+          "href": "../contracts/changes-http.html"
         },
         {
           "destination": "../use-cases/build-portal.md",
@@ -2221,6 +2306,7 @@
       ],
       "backlinks": [
         "architecture/runtime-components.md",
+        "contracts/editor-http.md",
         "flows/FLOW-DOCS-BUILD.md",
         "flows/FLOW-DOCS-SERVE.md",
         "use-cases/build-portal.md",
@@ -2230,6 +2316,7 @@
       ],
       "relatedDocuments": [
         "contracts/editor-http.md",
+        "contracts/changes-http.md",
         "use-cases/build-portal.md",
         "use-cases/serve-portal.md",
         "use-cases/screen-map.md",
@@ -2297,13 +2384,13 @@
       "type": "standard",
       "sectionType": "quality",
       "title": "STD-DOCS-001: Проверяемая документация",
-      "description": "Стандарт удерживает Markdown источником истины и отделяет подтверждённые глобальные правила от локальных или сгенерированных представлений.",
+      "description": "Стандарт отделяет подтверждённые исходники от локальных или сгенерированных представлений. Markdown остаётся источником документной модели; явно распознанный OpenAPI может владеть только HTTP wire contract.",
       "metadata": {
         "id": "STD-DOCS-001",
         "owner": "Команда Docu-docu",
         "scope": "Исходная документация, шаблоны skill и отслеживаемые порталы",
         "status": "Действует",
-        "updated": "2026-07-31"
+        "updated": "2026-08-05"
       },
       "status": {
         "kind": "in-progress",
@@ -2317,7 +2404,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T00:00:00Z",
+      "updatedAt": "2026-08-05T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2371,7 +2458,7 @@
       "type": "reference",
       "sectionType": "reference",
       "title": "Карта API и программных интерфейсов",
-      "description": "Страница помогает разработчику или интегратору выбрать действующий интерфейс Docu-docu и перейти к его полному контракту. Это навигационный обзор, а не OpenAPI-схема: форматы, endpoints и правила совместимости остаются в связанных контрактах.",
+      "description": "Страница помогает разработчику или интегратору выбрать действующий интерфейс Docu-docu. Wire-level Editor и Changes contracts определены OpenAPI 3.1.0; Markdown-ссылки ведут к behavioral companions.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -2385,7 +2472,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T15:00:34.78779657Z",
+      "updatedAt": "2026-08-05T18:22:18.313059502Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2399,20 +2486,28 @@
           "href": "../contracts/cli.html"
         },
         {
-          "destination": "../contracts/go-api.md",
+          "destination": "features.md#публичный-go-api",
           "broken": false,
           "blocked": false,
           "targetKind": "document",
-          "target": "contracts/go-api.md",
-          "href": "../contracts/go-api.html"
+          "target": "reference/features.md",
+          "href": "features.html#публичный-go-api"
         },
         {
-          "destination": "../contracts/cli.md#projectreport-schema-v1",
+          "destination": "../contracts/cli.md#результаты-json",
           "broken": false,
           "blocked": false,
           "targetKind": "document",
           "target": "contracts/cli.md",
-          "href": "../contracts/cli.html#projectreport-schema-v1"
+          "href": "../contracts/cli.html#результаты-json"
+        },
+        {
+          "destination": "../contracts/editor.openapi.yaml",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "asset",
+          "target": "contracts/editor.openapi.yaml",
+          "href": "../contracts/editor.openapi.yaml"
         },
         {
           "destination": "../contracts/editor-http.md",
@@ -2423,6 +2518,14 @@
           "href": "../contracts/editor-http.html"
         },
         {
+          "destination": "../contracts/changes.openapi.yaml",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "asset",
+          "target": "contracts/changes.openapi.yaml",
+          "href": "../contracts/changes.openapi.yaml"
+        },
+        {
           "destination": "../contracts/changes-http.md",
           "broken": false,
           "blocked": false,
@@ -2431,12 +2534,28 @@
           "href": "../contracts/changes-http.html"
         },
         {
-          "destination": "../contracts/editor-http.md#ручная-пересборка-портала",
+          "destination": "../screens/SC-SITE-API-DOCS.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "screens/SC-SITE-API-DOCS.md",
+          "href": "../screens/SC-SITE-API-DOCS.html"
+        },
+        {
+          "destination": "../contracts/editor.openapi.yaml",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "asset",
+          "target": "contracts/editor.openapi.yaml",
+          "href": "../contracts/editor.openapi.yaml"
+        },
+        {
+          "destination": "../contracts/editor-http.md",
           "broken": false,
           "blocked": false,
           "targetKind": "document",
           "target": "contracts/editor-http.md",
-          "href": "../contracts/editor-http.html#ручная-пересборка-портала"
+          "href": "../contracts/editor-http.html"
         }
       ],
       "backlinks": [
@@ -2444,9 +2563,10 @@
       ],
       "relatedDocuments": [
         "contracts/cli.md",
-        "contracts/go-api.md",
+        "reference/features.md",
         "contracts/editor-http.md",
-        "contracts/changes-http.md"
+        "contracts/changes-http.md",
+        "screens/SC-SITE-API-DOCS.md"
       ]
     },
     {
@@ -2476,7 +2596,7 @@
       "errors": 0,
       "links": [],
       "backlinks": [
-        "contracts/cli.md",
+        "contracts/changes-http.md",
         "guides/documentation-changes.md"
       ],
       "relatedDocuments": []
@@ -2502,12 +2622,14 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T13:28:55.220137027Z",
+      "updatedAt": "2026-08-05T17:45:33.069165595Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
       "links": [],
-      "backlinks": [],
+      "backlinks": [
+        "contracts/cli.md"
+      ],
       "relatedDocuments": []
     },
     {
@@ -2690,6 +2812,7 @@
         }
       ],
       "backlinks": [
+        "contracts/cli.md",
         "reference/features.md"
       ],
       "relatedDocuments": [
@@ -2719,7 +2842,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T14:53:24.406878417Z",
+      "updatedAt": "2026-08-05T18:26:24.813127808Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2749,14 +2872,6 @@
           "href": "../contracts/cli.html"
         },
         {
-          "destination": "../contracts/go-api.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "contracts/go-api.md",
-          "href": "../contracts/go-api.html"
-        },
-        {
           "destination": "../guides/agent-workflows.md",
           "broken": false,
           "blocked": false,
@@ -2779,6 +2894,14 @@
           "targetKind": "document",
           "target": "guides/quality-runbooks.md",
           "href": "../guides/quality-runbooks.html"
+        },
+        {
+          "destination": "../contracts/editor.openapi.yaml",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "asset",
+          "target": "contracts/editor.openapi.yaml",
+          "href": "../contracts/editor.openapi.yaml"
         },
         {
           "destination": "../contracts/editor-http.md",
@@ -2814,12 +2937,14 @@
         }
       ],
       "backlinks": [
+        "architecture/runtime-components.md",
+        "architecture/system-boundary.md",
+        "reference/api.md",
         "work/TASK-SITE-001.md"
       ],
       "relatedDocuments": [
         "reference/api.md",
         "contracts/cli.md",
-        "contracts/go-api.md",
         "guides/agent-workflows.md",
         "reference/document-types.md",
         "guides/quality-runbooks.md",
@@ -2862,6 +2987,44 @@
       "errors": 0,
       "links": [],
       "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "SC-SITE-API-DOCS",
+      "sourcePath": "screens/SC-SITE-API-DOCS.md",
+      "outputPath": "screens/SC-SITE-API-DOCS.html",
+      "type": "screen",
+      "sectionType": "screens",
+      "title": "SC-SITE-API-DOCS: HTTP API",
+      "description": "Serve-only каталог wire-level контрактов Editor и Changes API. Пользователь выбирает OpenAPI source, раскрывает operations и может выполнить только безопасные GET / HEAD запросы к canonical local server.",
+      "metadata": {
+        "id": "SC-SITE-API-DOCS",
+        "module": "MOD-SITE",
+        "route": "/_docu-docu/api-docs/",
+        "status": "Реализован",
+        "type": "Экран",
+        "updated": "2026-08-05"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Реализован",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-05T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "reference/api.md"
+      ],
       "relatedDocuments": []
     },
     {
@@ -2941,7 +3104,7 @@
       "type": "screen",
       "sectionType": "screens",
       "title": "SC-SITE-HOME: Главная портала",
-      "description": "Главная точка входа в собранную документацию: показывает состояние проекта и ведёт к документам, локальному редактору и просмотру изменений.",
+      "description": "Главная точка входа в собранную документацию: показывает состояние проекта и ведёт к документам, локальному редактору, просмотру изменений и HTTP API.",
       "metadata": {
         "id": "SC-SITE-HOME",
         "module": "MOD-SITE",
@@ -3386,10 +3549,10 @@
         "id": "UC-DOCS-03",
         "module": "MOD-SITE",
         "priority": "Средний",
-        "screens": "SC-SITE-HOME, SC-SITE-EDITOR, SC-SITE-DOCUMENT",
+        "screens": "SC-SITE-HOME, SC-SITE-EDITOR, SC-SITE-DOCUMENT, SC-SITE-API-DOCS",
         "startScreen": "SC-SITE-HOME",
         "status": "Готово",
-        "terminalScreens": "SC-SITE-DOCUMENT",
+        "terminalScreens": "SC-SITE-DOCUMENT, SC-SITE-API-DOCS",
         "updated": "2026-08-05"
       },
       "status": {
@@ -3472,9 +3635,26 @@
           "targetKind": "document",
           "target": "contracts/editor-http.md",
           "href": "../contracts/editor-http.html"
+        },
+        {
+          "destination": "../contracts/editor.openapi.yaml",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "asset",
+          "target": "contracts/editor.openapi.yaml",
+          "href": "../contracts/editor.openapi.yaml"
+        },
+        {
+          "destination": "../contracts/changes.openapi.yaml",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "asset",
+          "target": "contracts/changes.openapi.yaml",
+          "href": "../contracts/changes.openapi.yaml"
         }
       ],
       "backlinks": [
+        "contracts/editor-http.md",
         "flows/FLOW-DOCS-SERVE.md",
         "modules/cli.md",
         "modules/site.md"
@@ -3955,6 +4135,46 @@
         "contracts/cli.md",
         "guides/work-items.md"
       ]
+    },
+    {
+      "id": "",
+      "sourcePath": "work/TASK-API-001.md",
+      "outputPath": "work/TASK-API-001.html",
+      "type": "work",
+      "sectionType": "work",
+      "title": "TASK-API-001: OpenAPI-контракты и offline Swagger UI",
+      "description": "",
+      "metadata": {
+        "module": "MOD-SITE",
+        "owner": "Команда Docu-docu",
+        "priority": "Высокий",
+        "screens": "SC-SITE-HOME, SC-SITE-API-DOCS",
+        "standards": "STD-GO-001, STD-DOCS-001",
+        "status": "Выполнено",
+        "transitions": "TR-SITE-006",
+        "type": "Feature",
+        "updated": "2026-08-05",
+        "useCase": "UC-DOCS-03"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Выполнено",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 14,
+        "completed": 14,
+        "remaining": 0,
+        "percent": 100
+      },
+      "updatedAt": "2026-08-05T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
     },
     {
       "id": "",
@@ -4452,8 +4672,8 @@
       },
       "plannedDate": "",
       "taskStats": {
-        "total": 14,
-        "completed": 14,
+        "total": 13,
+        "completed": 13,
         "remaining": 0,
         "percent": 100
       },
@@ -4629,23 +4849,6 @@
           "line": 20
         },
         {
-          "id": "CON-GO-API-V1",
-          "text": "CON-GO-API-V1 Зафиксирован публичный Go API-контракт.",
-          "kind": "contract",
-          "declaredCompleted": true,
-          "effectiveCompleted": true,
-          "completionSource": "roadmap-checkbox",
-          "targetDocument": "contracts/go-api.md",
-          "targetStatus": {
-            "kind": "done",
-            "symbol": "✓",
-            "label": "Готово",
-            "recognized": true
-          },
-          "document": "roadmap.md",
-          "line": 21
-        },
-        {
           "id": "DLV-INSTALL-01",
           "text": "DLV-INSTALL-01 Подготовлены проверяемые install/update workflows для release assets.",
           "kind": "deliverable",
@@ -4653,7 +4856,7 @@
           "effectiveCompleted": true,
           "completionSource": "roadmap-checkbox",
           "document": "roadmap.md",
-          "line": 22
+          "line": 21
         },
         {
           "id": "DLV-SKILL-WORKFLOWS-01",
@@ -4663,7 +4866,7 @@
           "effectiveCompleted": true,
           "completionSource": "roadmap-checkbox",
           "document": "roadmap.md",
-          "line": 23
+          "line": 22
         },
         {
           "id": "DLV-SELF-DOCS-01",
@@ -4673,7 +4876,7 @@
           "effectiveCompleted": true,
           "completionSource": "roadmap-checkbox",
           "document": "roadmap.md",
-          "line": 24
+          "line": 23
         }
       ],
       "document": "roadmap.md",
@@ -4703,7 +4906,7 @@
           "effectiveCompleted": false,
           "completionSource": "roadmap-checkbox",
           "document": "roadmap.md",
-          "line": 31
+          "line": 30
         }
       ],
       "document": "roadmap.md",
@@ -4868,7 +5071,8 @@
           "BR-MODEL-002",
           "BR-MODEL-003",
           "BR-MODEL-004",
-          "BR-MODEL-005"
+          "BR-MODEL-005",
+          "BR-MODEL-006"
         ]
       },
       {
@@ -4888,6 +5092,7 @@
           "UC-DOCS-04"
         ],
         "screenIds": [
+          "SC-SITE-API-DOCS",
           "SC-SITE-DOCUMENT",
           "SC-SITE-EDITOR",
           "SC-SITE-HOME",
@@ -4904,7 +5109,8 @@
           "BR-SITE-007",
           "BR-SITE-008",
           "BR-SITE-009",
-          "BR-SITE-010"
+          "BR-SITE-010",
+          "BR-SITE-011"
         ]
       }
     ],
@@ -5010,13 +5216,15 @@
           "FLOW-DOCS-SERVE"
         ],
         "screenIds": [
+          "SC-SITE-API-DOCS",
           "SC-SITE-DOCUMENT",
           "SC-SITE-EDITOR",
           "SC-SITE-HOME"
         ],
         "startScreen": "SC-SITE-HOME",
         "terminalScreens": [
-          "SC-SITE-DOCUMENT"
+          "SC-SITE-DOCUMENT",
+          "SC-SITE-API-DOCS"
         ],
         "allowCycle": true
       },
@@ -5203,8 +5411,8 @@
         },
         "owner": "Команда Docu-docu",
         "scope": "Исходная документация, шаблоны skill и отслеживаемые порталы",
-        "updated": "2026-07-31",
-        "rules": "Глобальный охват определяет roadmap.md ; состояние явно связанного UC- берётся из use case. Остальные локальные чек-листы не агрегируются. Сгенерированные build/ , dist/ , example/site/ , project-docs/ и example/project-docs/ не редактируются как источник истины. Отслеживаемые порталы пересобираются из Markdown после semantic review и структурной проверки. Типизированный документ создаётся только для подтверждённой семантики; неизвестные владелец, дата, статус или процедура не изобретаются ради отсутствия предупреждения. Явно связанные стандарты и runbook читаются вместе с task context; область других применимых стандартов проверяется автором без glob-эвристик CLI. docs/runbooks/ создаётся только при наличии реальной эксплуатационной процедуры. docs/architecture/overview.md является обязательной картой; каждый другой Markdown-файл в architecture/ отвечает на один явный архитектурный вопрос и добавляется прямой ссылкой из overview. Подробности FLOW, CONTRACT, REFERENCE, RUNBOOK, ADR и MODULE остаются в соответствующих источниках истины, а semantic gate проверяет архитектурную форму и смысл по ARCH001 – ARCH013 . $docu-docu refresh и $docu-docu refresh diff обновляют исходную документацию только по текущим repository evidence; даты меняются вместе с содержанием или связями, а Last verified требует фактической проверки runbook. Корневой CHANGELOG.md , если он существует, является единственным специальным источником релизных изменений. Его нельзя дублировать в docs/changelog.md : такой файл остаётся обычным Markdown-документом. Не создавайте корневой журнал только ради portal-вкладки.",
+        "updated": "2026-08-05",
+        "rules": "Глобальный охват определяет roadmap.md ; состояние явно связанного UC- берётся из use case. Остальные локальные чек-листы не агрегируются. Сгенерированные build/ , dist/ , example/site/ , project-docs/ и example/project-docs/ не редактируются как источник истины. Отслеживаемые порталы пересобираются из Markdown после semantic review и структурной проверки. Типизированный документ создаётся только для подтверждённой семантики; неизвестные владелец, дата, статус или процедура не изобретаются ради отсутствия предупреждения. Явно связанные стандарты и runbook читаются вместе с task context; область других применимых стандартов проверяется автором без glob-эвристик CLI. docs/runbooks/ создаётся только при наличии реальной эксплуатационной процедуры. docs/architecture/overview.md является обязательной картой; каждый другой Markdown-файл в architecture/ отвечает на один явный архитектурный вопрос и добавляется прямой ссылкой из overview. Подробности FLOW, CONTRACT, REFERENCE, RUNBOOK, ADR и MODULE остаются в соответствующих источниках истины, а semantic gate проверяет архитектурную форму и смысл по ARCH001 – ARCH013 . $docu-docu refresh и $docu-docu refresh diff обновляют исходную документацию только по текущим repository evidence; даты меняются вместе с содержанием или связями, а Last verified требует фактической проверки runbook. Корневой CHANGELOG.md , если он существует, является единственным специальным источником релизных изменений. Его нельзя дублировать в docs/changelog.md : такой файл остаётся обычным Markdown-документом. Не создавайте корневой журнал только ради portal-вкладки. contracts/ / .openapi.{yaml,yml,json} владеет HTTP paths, methods, parameters, headers, statuses, media types, examples и JSON schemas. Markdown-компаньон не повторяет их и фиксирует поведение, security, filesystem и trust-boundary invariants. External $ref не загружаются.",
         "automaticChecks": "go run ./cmd/docu-docu check ./docs --strict --stale-days 0 ; тесты целостности шаблонов и публичного JSON schema; тесты ссылок, стабильных ID, task context и портальной навигации. Команды запускаются из work item или доверенного CI workflow, а не напрямую из этого стандарта.",
         "document": "quality/STD-DOCS-001.md"
       },
@@ -5313,7 +5521,7 @@
         "moduleId": "MOD-CHANGES",
         "document": "modules/MOD-CHANGES.md",
         "anchor": "br-changes-001-git-является-единственным-источником-версий",
-        "line": 30
+        "line": 35
       },
       {
         "id": "BR-CHANGES-002",
@@ -5321,7 +5529,7 @@
         "moduleId": "MOD-CHANGES",
         "document": "modules/MOD-CHANGES.md",
         "anchor": "br-changes-002-исходный-diff-имеет-приоритет",
-        "line": 36
+        "line": 41
       },
       {
         "id": "BR-CHANGES-003",
@@ -5329,7 +5537,7 @@
         "moduleId": "MOD-CHANGES",
         "document": "modules/MOD-CHANGES.md",
         "anchor": "br-changes-003-диапазон-всегда-явный",
-        "line": 41
+        "line": 46
       },
       {
         "id": "BR-CHANGES-004",
@@ -5337,7 +5545,7 @@
         "moduleId": "MOD-CHANGES",
         "document": "modules/MOD-CHANGES.md",
         "anchor": "br-changes-004-анализ-ограничен-документационными-roots",
-        "line": 46
+        "line": 51
       },
       {
         "id": "BR-MODEL-001",
@@ -5380,12 +5588,20 @@
         "line": 55
       },
       {
+        "id": "BR-MODEL-006",
+        "title": "OpenAPI contracts проверяются как отдельный source type",
+        "moduleId": "MOD-MODEL",
+        "document": "modules/model.md",
+        "anchor": "br-model-006-openapi-contracts-проверяются-как-отдельный-source-type",
+        "line": 62
+      },
+      {
         "id": "BR-SITE-001",
         "title": "Очистка output не затрагивает защищённые каталоги",
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-001-очистка-output-не-затрагивает-защищённые-каталоги",
-        "line": 34
+        "line": 35
       },
       {
         "id": "BR-SITE-002",
@@ -5393,7 +5609,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-002-портал-работает-через-file-protocol",
-        "line": 39
+        "line": 40
       },
       {
         "id": "BR-SITE-003",
@@ -5401,7 +5617,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-003-dev-сервер-не-раскрывает-исходный-репозиторий",
-        "line": 44
+        "line": 45
       },
       {
         "id": "BR-SITE-004",
@@ -5409,7 +5625,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-004-mermaid-работает-автономно-и-в-строгом-режиме",
-        "line": 52
+        "line": 53
       },
       {
         "id": "BR-SITE-005",
@@ -5417,7 +5633,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-005-карта-экранов-работает-автономно",
-        "line": 59
+        "line": 60
       },
       {
         "id": "BR-SITE-006",
@@ -5425,7 +5641,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-006-темы-не-расширяют-доверенную-поверхность",
-        "line": 78
+        "line": 79
       },
       {
         "id": "BR-SITE-007",
@@ -5433,7 +5649,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-007-build-и-serve-имеют-разные-возможности",
-        "line": 90
+        "line": 91
       },
       {
         "id": "BR-SITE-008",
@@ -5441,7 +5657,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-008-запись-защищена-optimistic-concurrency",
-        "line": 96
+        "line": 99
       },
       {
         "id": "BR-SITE-009",
@@ -5449,7 +5665,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-009-locale-portals-изолированы-от-canonical-workspace",
-        "line": 104
+        "line": 107
       },
       {
         "id": "BR-SITE-010",
@@ -5457,10 +5673,299 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-010-мягкая-навигация-ограничена-canonical-serve-portal",
-        "line": 116
+        "line": 119
+      },
+      {
+        "id": "BR-SITE-011",
+        "title": "API docs остаётся offline и read-mostly",
+        "moduleId": "MOD-SITE",
+        "document": "modules/site.md",
+        "anchor": "br-site-011-api-docs-остаётся-offline-и-read-mostly",
+        "line": 134
       }
     ],
     "workItems": [
+      {
+        "id": "TASK-API-001",
+        "title": "OpenAPI-контракты и offline Swagger UI",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Выполнено",
+          "recognized": true
+        },
+        "type": "Feature",
+        "archived": false,
+        "priority": "Высокий",
+        "updated": "2026-08-05",
+        "owner": "Команда Docu-docu",
+        "moduleId": "MOD-SITE",
+        "useCaseId": "UC-DOCS-03",
+        "screenIds": [
+          "SC-SITE-HOME",
+          "SC-SITE-API-DOCS"
+        ],
+        "transitionIds": [
+          "TR-SITE-006"
+        ],
+        "standardIds": [
+          "STD-GO-001",
+          "STD-DOCS-001"
+        ],
+        "runbookIds": [],
+        "dependsOn": [],
+        "document": "work/TASK-API-001.md",
+        "anchor": "task-api-001-openapi-контракты-и-offline-swagger-ui",
+        "criteria": [
+          {
+            "line": 53,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-01 Два OpenAPI 3.1.0 файла полностью описывают действующие Editor и Changes operations, параметры, статусы, media types, examples и schema v1 components."
+          },
+          {
+            "line": 54,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-02 check и editor diagnostics распознают contracts//.openapi.{yaml,yml,json} и выдают устойчивые positional diagnostics для syntax/root/operation/operationId/path-parameter/internal-ref ошибок без network resolution."
+          },
+          {
+            "line": 55,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-03 Декларативные route registries двусторонне соответствуют OpenAPI paths и methods."
+          },
+          {
+            "line": 56,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-04 Changes разрешает HEAD только summary и возвращает schema-v1 diagnostic envelope для всех API errors; успешные content/render media types сохраняются."
+          },
+          {
+            "line": 57,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-05 Canonical serve предоставляет GET|HEAD /docu-docu/api-docs/, selector двух specs, same-origin assets, CSP/no-store/nosniff и Try it out только для GET/HEAD."
+          },
+          {
+            "line": 58,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-06 Swagger UI 5.32.12, license и checksums vendored; runtime/CI и external network dependencies отсутствуют."
+          },
+          {
+            "line": 59,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-07 Static build копирует OpenAPI specs, но не Swagger UI assets/navigation; translation portals и direct translation serve не содержат UI."
+          },
+          {
+            "line": 60,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-08 Markdown-компаньоны и связанные ADR/standard/module/use-case/flow/screen/architecture/reference/README/changelog источники согласованы без изменения translation roots."
+          },
+          {
+            "line": 61,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-09 Unit, contract, regression, portal, race, strict documentation и repository checks проходят; browser QA подтверждает selector и safe GET."
+          }
+        ],
+        "verificationMatrix": [
+          {
+            "criterionId": "AC-01",
+            "criterion": "Два OpenAPI 3.1.0 файла полностью описывают действующие Editor и Changes operations, параметры, статусы, media types, examples и schema v1 components.",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestOpenAPIContracts'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-02",
+            "criterion": "check и editor diagnostics распознают contracts//.openapi.{yaml,yml,json} и выдают устойчивые positional diagnostics для syntax/root/operation/operationId/path-parameter/internal-ref ошибок без network resolution.",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestOpenAPIValidation|TestEditorOpenAPIDiagnostics'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-03",
+            "criterion": "Декларативные route registries двусторонне соответствуют OpenAPI paths и methods.",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestOpenAPIContractParity'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-04",
+            "criterion": "Changes разрешает HEAD только summary и возвращает schema-v1 diagnostic envelope для всех API errors; успешные content/render media types сохраняются.",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestChangesHTTPContract'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-05",
+            "criterion": "Canonical serve предоставляет GET|HEAD /docu-docu/api-docs/, selector двух specs, same-origin assets, CSP/no-store/nosniff и Try it out только для GET/HEAD.",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestAPIDocsUI'"
+            ],
+            "transitions": [
+              "TR-SITE-006"
+            ],
+            "verificationReferences": [
+              "TestAPIDocsUI"
+            ]
+          },
+          {
+            "criterionId": "AC-06",
+            "criterion": "Swagger UI 5.32.12, license и checksums vendored; runtime/CI и external network dependencies отсутствуют.",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestSwaggerUIVendoredAssets'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-07",
+            "criterion": "Static build копирует OpenAPI specs, но не Swagger UI assets/navigation; translation portals и direct translation serve не содержат UI.",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestStaticSiteExcludesAPIDocs|TestTranslationServeExcludesAPIDocs'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-08",
+            "criterion": "Markdown-компаньоны и связанные ADR/standard/module/use-case/flow/screen/architecture/reference/README/changelog источники согласованы без изменения translation roots.",
+            "completed": true,
+            "commands": [
+              "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-09",
+            "criterion": "Unit, contract, regression, portal, race, strict documentation и repository checks проходят; browser QA подтверждает selector и safe GET.",
+            "completed": true,
+            "commands": [
+              "go vet ./... \u0026\u0026 go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 make check"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          }
+        ],
+        "checks": [
+          {
+            "target": "AC-01",
+            "commands": [
+              "go test ./... -run 'TestOpenAPIContracts'"
+            ],
+            "line": 74
+          },
+          {
+            "target": "AC-02",
+            "commands": [
+              "go test ./... -run 'TestOpenAPIValidation|TestEditorOpenAPIDiagnostics'"
+            ],
+            "line": 75
+          },
+          {
+            "target": "AC-03",
+            "commands": [
+              "go test ./... -run 'TestOpenAPIContractParity'"
+            ],
+            "line": 76
+          },
+          {
+            "target": "AC-04",
+            "commands": [
+              "go test ./... -run 'TestChangesHTTPContract'"
+            ],
+            "line": 77
+          },
+          {
+            "target": "AC-05",
+            "commands": [
+              "go test ./... -run 'TestAPIDocsUI'"
+            ],
+            "line": 78
+          },
+          {
+            "target": "AC-06",
+            "commands": [
+              "go test ./... -run 'TestSwaggerUIVendoredAssets'"
+            ],
+            "line": 79
+          },
+          {
+            "target": "AC-07",
+            "commands": [
+              "go test ./... -run 'TestStaticSiteExcludesAPIDocs|TestTranslationServeExcludesAPIDocs'"
+            ],
+            "line": 80
+          },
+          {
+            "target": "AC-08",
+            "commands": [
+              "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
+            ],
+            "line": 81
+          },
+          {
+            "target": "AC-09",
+            "commands": [
+              "go vet ./... \u0026\u0026 go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 make check"
+            ],
+            "line": 82
+          },
+          {
+            "target": "ALL",
+            "commands": [
+              "go test ./..."
+            ],
+            "line": 83
+          },
+          {
+            "target": "DOCS",
+            "commands": [
+              "go run ./cmd/docu-docu check ./docs --repository-root ."
+            ],
+            "line": 84
+          },
+          {
+            "target": "QUALITY",
+            "commands": [
+              "go vet ./... \u0026\u0026 go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docu-docu check ./docs --strict --stale-days 0 \u0026\u0026 make check"
+            ],
+            "line": 85
+          }
+        ],
+        "repositoryPaths": [
+          "internal/app/"
+        ],
+        "result": "Два OpenAPI 3.1.0 контракта являются источниками истины для wire-level Editor и Changes API, а canonical serve предоставляет их через полностью offline Swagger UI без изменения публичной schema v1 отчётов.",
+        "behaviorChange": "Было Wire-контракты дублируются в Markdown, OpenAPI-файлы не проверяются как отдельный тип источника, а локальный портал не предоставляет интерактивный каталог API. Станет check и editor diagnostics проверяют OpenAPI, route registries двусторонне соответствуют operations, Changes API имеет единый JSON error envelope и ограничивает HEAD summary-маршрутом, а canonical serve показывает оба контракта в vendored Swagger UI. Static и translation portals UI не получают.",
+        "before": "Wire-контракты дублируются в Markdown, OpenAPI-файлы не проверяются как отдельный тип источника, а локальный портал не предоставляет интерактивный каталог API.",
+        "after": "check и editor diagnostics проверяют OpenAPI, route registries двусторонне соответствуют operations, Changes API имеет единый JSON error envelope и ограничивает HEAD summary-маршрутом, а canonical serve показывает оба контракта в vendored Swagger UI. Static и translation portals UI не получают.",
+        "outOfScope": "новые CLI flags, Go exports или schemaVersion публичных JSON reports; TLS, authentication, CORS или внешняя загрузка $ref ; Swagger UI в static build, locale mounts или при прямом serve translation root; изменение успешных Editor payloads и media types raw/rendered Changes content; изменение translation roots и generated example portals.",
+        "plan": "Добавить и валидировать OpenAPI sources. Ввести route registries и нормализовать Changes errors/methods. Встроить offline Swagger UI и изолировать static/translation portals. Обновить source documentation и пройти semantic gates. Выполнить automated и browser verification.",
+        "documentationImpact": "Добавляются два OpenAPI contracts, ADR, screen и этот work item. Обновляются Markdown HTTP companions, STD-DOCS-001 , API/CLI references, Site/Changes modules, architecture answers, UC-DOCS-03 , FLOW-DOCS-SERVE , README и CHANGELOG. Translation roots и generated portals не изменяются.",
+        "documentationPaths": []
+      },
       {
         "id": "TASK-ARCH-001",
         "title": "Внедрить вопросно-ориентированную архитектурную документацию",
@@ -8291,6 +8796,33 @@
       "document": "screens/SC-CHANGES-WORKSPACE.md"
     },
     {
+      "id": "SC-SITE-API-DOCS",
+      "title": "HTTP API",
+      "description": "Serve-only каталог wire-level контрактов Editor и Changes API. Пользователь выбирает OpenAPI source, раскрывает operations и может выполнить только безопасные GET / HEAD запросы к canonical local server.",
+      "module": "MOD-SITE",
+      "type": "screen",
+      "status": "implemented",
+      "route": "/_docu-docu/api-docs/",
+      "updated": "2026-08-05",
+      "states": [
+        {
+          "id": "DEFAULT"
+        }
+      ],
+      "incomingTransitions": [
+        "TR-SITE-006"
+      ],
+      "outgoingTransitions": [],
+      "useCases": [
+        "UC-DOCS-03"
+      ],
+      "workItems": [
+        "TASK-API-001"
+      ],
+      "contracts": [],
+      "document": "screens/SC-SITE-API-DOCS.md"
+    },
+    {
       "id": "SC-SITE-DOCUMENT",
       "title": "Страница документа",
       "description": "Каноническое представление выбранного Markdown-документа в портале. Конкретный URL определяется самим документом и generated output, поэтому общий шаблон маршрута здесь намеренно не фиксируется.",
@@ -8343,7 +8875,7 @@
     {
       "id": "SC-SITE-HOME",
       "title": "Главная портала",
-      "description": "Главная точка входа в собранную документацию: показывает состояние проекта и ведёт к документам, локальному редактору и просмотру изменений.",
+      "description": "Главная точка входа в собранную документацию: показывает состояние проекта и ведёт к документам, локальному редактору, просмотру изменений и HTTP API.",
       "module": "MOD-SITE",
       "type": "page",
       "status": "implemented",
@@ -8360,13 +8892,16 @@
       "outgoingTransitions": [
         "TR-SITE-001",
         "TR-SITE-002",
-        "TR-SITE-005"
+        "TR-SITE-005",
+        "TR-SITE-006"
       ],
       "useCases": [
         "UC-DOCS-03",
         "UC-DOCS-05"
       ],
-      "workItems": [],
+      "workItems": [
+        "TASK-API-001"
+      ],
       "contracts": [],
       "document": "screens/SC-SITE-HOME.md"
     },
@@ -8466,6 +9001,17 @@
       "line": 19
     },
     {
+      "id": "TR-SITE-006",
+      "useCase": "UC-DOCS-03",
+      "source": "SC-SITE-HOME",
+      "target": "SC-SITE-API-DOCS",
+      "action": "Открыть HTTP API",
+      "condition": "Canonical портал запущен через serve",
+      "type": "navigation",
+      "document": "screens/SC-SITE-HOME.md",
+      "line": 20
+    },
+    {
       "id": "TR-SITE-004",
       "useCase": "UC-DOCS-04",
       "source": "SC-SITE-USE-CASE",
@@ -8499,19 +9045,22 @@
       "useCase": "UC-DOCS-03",
       "startScreen": "SC-SITE-HOME",
       "reachableScreens": [
+        "SC-SITE-API-DOCS",
         "SC-SITE-DOCUMENT",
         "SC-SITE-EDITOR",
         "SC-SITE-HOME"
       ],
       "terminalScreens": [
-        "SC-SITE-DOCUMENT"
+        "SC-SITE-DOCUMENT",
+        "SC-SITE-API-DOCS"
       ],
       "transitions": [
         "TR-SITE-003",
         "TR-SITE-001",
-        "TR-SITE-002"
+        "TR-SITE-002",
+        "TR-SITE-006"
       ],
-      "result": "Пока команда работает, обычные маршруты раздают output, а отдельный editor API читает и изменяет только разрешённый workspace внутри docs root. Остальные файлы репозитория недоступны. После остановки процесса API исчезает и порт освобождён. Locale mount / docu-docu/locales/\u003clocale\u003e/ является read-only: он не содержит editor, changes, workspace или canonical API.",
+      "result": "Пока команда работает, обычные маршруты раздают output, а отдельный editor API читает и изменяет только разрешённый workspace внутри docs root. Остальные файлы репозитория недоступны. После остановки процесса API исчезает и порт освобождён. Locale mount / docu-docu/locales/\u003clocale\u003e/ является read-only: он не содержит editor, changes, workspace, API docs или canonical API.",
       "valid": true,
       "issueCodes": []
     },
@@ -8536,6 +9085,14 @@
   "hotspots": [],
   "errorDefinitions": [],
   "traceability": [
+    {
+      "useCase": "UC-DOCS-03",
+      "screen": "SC-SITE-HOME",
+      "transition": "TR-SITE-006",
+      "task": "TASK-API-001",
+      "criterion": "AC-05",
+      "verification": "TestAPIDocsUI"
+    },
     {
       "useCase": "UC-DOCS-05",
       "screen": "SC-SITE-HOME",

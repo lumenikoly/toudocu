@@ -310,8 +310,8 @@ func (w *editorWorkspace) read(filePath string, model *Model, diagnostics bool) 
 func issueDiagnostics(issues []Issue) []editorDiagnostic {
 	out := make([]editorDiagnostic, 0, len(issues))
 	for _, issue := range issues {
-		column := 0
-		if issue.Line > 0 {
+		column := issue.Column
+		if issue.Line > 0 && column == 0 {
 			column = 1
 		}
 		out = append(out, editorDiagnostic{Severity: issue.Severity, Code: issue.Code, Message: issue.Message, Path: issue.DocumentPath, Line: issue.Line, Column: column})
@@ -356,9 +356,15 @@ func jsonSyntaxDiagnostic(filePath string, content []byte) []editorDiagnostic {
 func (w *editorWorkspace) diagnostics(filePath string, content []byte) ([]editorDiagnostic, error) {
 	language, _ := editorLanguage(filePath)
 	if language == "yaml" {
+		if isOpenAPIContractPath(filePath) {
+			return issueDiagnostics(validateOpenAPIContract(filePath, content)), nil
+		}
 		return []editorDiagnostic{}, nil
 	}
 	if language == "json" {
+		if isOpenAPIContractPath(filePath) {
+			return issueDiagnostics(validateOpenAPIContract(filePath, content)), nil
+		}
 		syntax := jsonSyntaxDiagnostic(filePath, content)
 		if len(syntax) > 0 || filePath != "screens/hotspots.json" {
 			return syntax, nil

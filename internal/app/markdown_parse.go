@@ -113,13 +113,21 @@ type metadataExtraction struct {
 
 func normalizeFieldName(name string) string { return fieldAliases[canonicalText(name)] }
 
+func stripMetadataValue(value string) string {
+	trimmed := strings.TrimSpace(value)
+	if len(trimmed) >= 2 && strings.HasPrefix(trimmed, "`") && strings.HasSuffix(trimmed, "`") {
+		return strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(trimmed, "`"), "`"))
+	}
+	return stripInlineMarkdown(value)
+}
+
 func parseMetadataLine(line string) (parsedMetadataLine, bool) {
 	match := metadataLineRE.FindStringSubmatch(line)
 	if match == nil {
 		return parsedMetadataLine{}, false
 	}
 	rawKey := stripInlineMarkdown(match[1])
-	value := stripInlineMarkdown(match[2])
+	value := stripMetadataValue(match[2])
 	if rawKey == "" || value == "" {
 		return parsedMetadataLine{}, false
 	}

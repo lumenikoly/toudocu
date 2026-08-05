@@ -3,7 +3,7 @@
 - Идентификатор: FLOW-DOCS-SERVE
 - Сценарий: UC-DOCS-03
 - Модуль: MOD-SITE
-- Последнее обновление: 2026-08-04
+- Последнее обновление: 2026-08-05
 
 Схема визуализирует жизненный цикл команды `serve`. Сетевые ограничения,
 ошибочные сценарии и постусловия определяет
@@ -22,7 +22,10 @@ flowchart TD
     Request --> Locale{"Locale route?"}
     Locale -->|Да| LocaleSnapshot["Отдать read-only locale snapshot"]
     LocaleSnapshot --> Request
-    Locale -->|Нет| Editor{"Editor save или create?"}
+    Locale -->|Нет| APIDocs{"API docs?"}
+    APIDocs -->|Да| Swagger["Отдать vendored Swagger UI и same-origin specs"]
+    Swagger --> Request
+    APIDocs -->|Нет| Editor{"Editor save или create?"}
     Editor -->|Да| Guard["Проверить origin, action, path и limits; для save — digest"]
     Guard --> Accepted{"Запись допустима?"}
     Accepted -->|Нет| APIError["Вернуть JSON error без изменения файла"]
@@ -72,6 +75,8 @@ flowchart TD
   мягкими переходами.
 - Editor, CodeMirror, API, polling и ручная пересборка существуют только в
   `serve`; статический портал через `file://` не содержит их markup или assets.
+- API docs существует только в canonical `serve`, не загружает CDN и разрешает
+  Try it out только для `GET`/`HEAD`; static и locale portals его не содержат.
 - Ошибка пересборки не останавливает уже запущенный сервер.
 
 ## Связанные документы

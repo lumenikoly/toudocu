@@ -223,7 +223,9 @@ Local mode provides:
 * file watching;
 * automatic rebuilds;
 * validation previews;
-* Git change browsing.
+* Git change browsing;
+* offline OpenAPI documentation at `/_docu-docu/api-docs/` with safe
+  `GET`/`HEAD` Try it out.
 
 By default, the server listens on:
 
@@ -232,6 +234,9 @@ By default, the server listens on:
 ```
 
 The local server does not provide TLS or built-in authentication. Do not expose it to an external network without additional protection.
+
+The API documentation uses vendored Swagger UI 5.32.12 and same-origin specs;
+it never loads a CDN. Static builds copy the OpenAPI files but omit the UI.
 
 ---
 
@@ -418,9 +423,10 @@ individual CLI operations. The current module path is the local
 `docu-docu`; a canonical remote Go module has not been published yet, so
 external consumers should not depend on this import path.
 
-Exported operations, side effects, and compatibility rules are described in the
-[Go API contract](docs/contracts/go-api.md). The CLI remains the primary
-user-facing way to run the released binary.
+The exported declarations and package documentation in `api.go` define the
+current facade. The CLI remains the primary user-facing way to run the released
+binary; no external module compatibility promise is made before a canonical
+module path is published.
 
 ---
 
@@ -501,7 +507,6 @@ Detailed documentation:
 * [CLI commands](docs/contracts/cli.md)
 * [Agent workflows](docs/guides/agent-workflows.md)
 * [Work items](docs/guides/work-items.md)
-* [Public Go API](docs/contracts/go-api.md)
 * [Project source documentation](docs/index.md)
 * [Testing](docs/guides/testing.md)
 * [Contributing](CONTRIBUTING.md)

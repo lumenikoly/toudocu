@@ -373,7 +373,7 @@ func (s *documentationServer) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		s.serveLocale(w, r)
 		return
 	}
-	if s.translationReadOnly && (strings.HasPrefix(r.URL.Path, editorAPIBase+"/") || r.URL.Path == editorUIPath || r.URL.Path == strings.TrimSuffix(editorUIPath, "/") || r.URL.Path == rebuildEndpoint) {
+	if s.translationReadOnly && (strings.HasPrefix(r.URL.Path, editorAPIBase+"/") || r.URL.Path == editorUIPath || r.URL.Path == strings.TrimSuffix(editorUIPath, "/") || r.URL.Path == apiDocsUIPath || r.URL.Path == strings.TrimSuffix(apiDocsUIPath, "/") || r.URL.Path == rebuildEndpoint) {
 		http.NotFound(w, r)
 		return
 	}
@@ -393,27 +393,37 @@ func (s *documentationServer) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		s.serveEditorUI(w, r)
 		return
 	}
-	if r.URL.Path == rebuildEndpoint {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
-			return
-		}
-		if r.Header.Get("X-Docu-docu-Action") != "rebuild" {
-			http.Error(w, "Запрос на пересборку отклонён", http.StatusForbidden)
-			return
-		}
-		model, result, err := s.rebuild()
-		if err != nil {
-			fmt.Fprintln(s.stderr, "Не удалось пересобрать документацию:", err)
-			http.Error(w, "Не удалось пересобрать документацию: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(map[string]int{"documents": model.Stats.Documents, "errors": model.Stats.Errors, "pages": result.Pages, "warnings": model.Stats.Warnings})
+	if r.URL.Path == apiDocsUIPath || r.URL.Path == strings.TrimSuffix(apiDocsUIPath, "/") {
+		s.serveAPIDocsUI(w, r)
 		return
 	}
+	for _, route := range editorServiceRouteRegistry {
+		if r.URL.Path == route.Path {
+			route.Handler(s, w, r)
+			return
+		}
+	}
 	s.serveSnapshot(w, r, s.portals[canonicalPortalKey()])
+}
+
+func (s *documentationServer) serveRebuild(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.Header().Set("Allow", http.MethodPost)
+		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
+		return
+	}
+	if r.Header.Get("X-Docu-docu-Action") != "rebuild" {
+		http.Error(w, "Запрос на пересборку отклонён", http.StatusForbidden)
+		return
+	}
+	model, result, err := s.rebuild()
+	if err != nil {
+		fmt.Fprintln(s.stderr, "Не удалось пересобрать документацию:", err)
+		http.Error(w, "Не удалось пересобрать документацию: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	_ = json.NewEncoder(w).Encode(map[string]int{"documents": model.Stats.Documents, "errors": model.Stats.Errors, "pages": result.Pages, "warnings": model.Stats.Warnings})
 }
 
 func (s *documentationServer) serveLocale(w http.ResponseWriter, r *http.Request) {

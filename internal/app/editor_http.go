@@ -17,6 +17,24 @@ const (
 	editorBodyLimit = 3 << 20
 )
 
+type apiRoute struct {
+	Path    string
+	Methods []string
+	Handler func(*documentationServer, http.ResponseWriter, *http.Request)
+}
+
+var editorRouteRegistry = []apiRoute{
+	{Path: editorAPIBase + "/files", Methods: []string{http.MethodGet}, Handler: (*documentationServer).serveEditorFiles},
+	{Path: editorAPIBase + "/file", Methods: []string{http.MethodGet, http.MethodPut}, Handler: (*documentationServer).serveEditorFile},
+	{Path: editorAPIBase + "/preview", Methods: []string{http.MethodPost}, Handler: (*documentationServer).serveEditorPreview},
+	{Path: editorAPIBase + "/validate", Methods: []string{http.MethodPost}, Handler: (*documentationServer).serveEditorValidate},
+	{Path: editorAPIBase + "/create", Methods: []string{http.MethodPost}, Handler: (*documentationServer).serveEditorCreate},
+}
+
+var editorServiceRouteRegistry = []apiRoute{
+	{Path: rebuildEndpoint, Methods: []string{http.MethodPost}, Handler: (*documentationServer).serveRebuild},
+}
+
 type editorErrorEnvelope struct {
 	SchemaVersion int               `json:"schemaVersion"`
 	Error         editorErrorDetail `json:"error"`
@@ -137,20 +155,16 @@ func editorStatusForError(err error) (int, string) {
 }
 
 func (s *documentationServer) serveEditorAPI(w http.ResponseWriter, r *http.Request) {
-	switch strings.TrimPrefix(r.URL.Path, editorAPIBase) {
-	case "/files":
-		s.serveEditorFiles(w, r)
-	case "/file":
-		s.serveEditorFile(w, r)
-	case "/preview":
-		s.serveEditorPreview(w, r)
-	case "/validate":
-		s.serveEditorValidate(w, r)
-	case "/create":
-		s.serveEditorCreate(w, r)
-	default:
-		writeEditorError(w, http.StatusNotFound, "route_not_found", "Editor API route не найден", nil)
+	for _, route := range editorRouteRegistry {
+		if r.URL.Path == route.Path {
+			if !allowEditorMethods(w, r, route.Methods...) {
+				return
+			}
+			route.Handler(s, w, r)
+			return
+		}
 	}
+	writeEditorError(w, http.StatusNotFound, "route_not_found", "Editor API route не найден", nil)
 }
 
 func (s *documentationServer) serveEditorFiles(w http.ResponseWriter, r *http.Request) {
@@ -197,6 +211,7 @@ func (s *documentationServer) serveEditorFile(w http.ResponseWriter, r *http.Req
 		return
 	}
 	if r.Method == http.MethodGet {
+		w.Header().Set("X-Content-Type-Options", "nosniff")
 		filePath := r.URL.Query().Get("path")
 		item, err := s.workspace.read(filePath, s.model, r.URL.Query().Get("raw") != "1")
 		if err != nil {
@@ -206,7 +221,6 @@ func (s *documentationServer) serveEditorFile(w http.ResponseWriter, r *http.Req
 		}
 		if r.URL.Query().Get("raw") == "1" {
 			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-			w.Header().Set("X-Content-Type-Options", "nosniff")
 			_, _ = io.WriteString(w, item.Content)
 			return
 		}

@@ -54,9 +54,10 @@ workflow и Git-backed changes. Прямые вызовы возвращают �
 обязательной сериализации или запуска отдельного процесса.
 
 Канонический удалённый module path пока не опубликован. Текущий import path
-предназначен для исходного модуля или явного локального `replace`; операции,
-побочные эффекты и совместимость перечислены в
-[Go API-контракте](../contracts/go-api.md).
+предназначен для исходного модуля или явного локального `replace`. Фактическую
+публичную поверхность определяют объявления и package documentation в
+корневом `api.go`; до публикации модуля отдельные гарантии совместимости для
+внешних потребителей не заявлены.
 
 ## Skill workflows актуализации
 
@@ -183,7 +184,10 @@ gate, а schema v1 сохраняет `documents[].type: "architecture"`.
 исходников, path/dirty/save toolbar, CodeMirror, вкладки Editor/Preview/Split и
 positional diagnostics. Markdown preview использует существующий safe renderer;
 JSON получает syntax и hotspots diagnostics, а произвольный YAML — только
-доступные Docu-docu diagnostics без выдуманной общей schema.
+доступные Docu-docu diagnostics без выдуманной общей schema. Исключение —
+`contracts/**/*.openapi.{yaml,yml,json}`: эти файлы получают OpenAPI 3.0/3.1
+root, operation, operationId, path-parameter и internal `$ref` validation с
+line/column; external references не загружаются.
 
 Save использует SHA-256 CAS и atomic replace. После save/create модель, HTML,
 search и diagnostics перестраиваются синхронно; watcher проверяет внешние
@@ -191,9 +195,14 @@ search и diagnostics перестраиваются синхронно; watcher
 и dirty conflict без потери local text. `Ctrl`/`Cmd`+`S`, leave guard,
 diagnostic navigation и mobile drawer входят в тот же UI.
 
-Browser create и CLI-команды `task init`/`scaffold` используют один ordered
-template registry. Editor API описан в
-[отдельном schema-v1 контракте](../contracts/editor-http.md).
+Создание документа в браузере и команды `task init`/`scaffold` используют один
+реестр шаблонов. Wire-контракт Editor API находится в
+[OpenAPI](../contracts/editor.openapi.yaml), а гарантии записи и границы
+workspace — в [поведенческом описании](../contracts/editor-http.md).
+
+Canonical `serve` также публикует `/_docu-docu/api-docs/`: vendored Swagger UI
+5.32.12 переключает Editor/Changes specs, не использует CDN и разрешает Try it
+out только для `GET`/`HEAD`. Static и translation portals UI не получают.
 
 ## Процессы и пользовательские сценарии
 

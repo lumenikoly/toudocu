@@ -57,6 +57,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+## Swagger UI
+
+- Package: `swagger-ui-dist`
+- Version: `5.32.12`
+- Source: <https://github.com/swagger-api/swagger-ui>
+- License: Apache-2.0
+
+The canonical serve-only API documentation embeds `swagger-ui.css`,
+`swagger-ui-bundle.js` and `swagger-ui-standalone-preset.js`. The upstream
+license and generated bundle notices are embedded beside them as
+`assets/swagger-ui*.LICENSE.txt`; `assets/swagger-ui.checksums.txt` records
+their SHA-256 digests. Node.js is used only to refresh these vendored files and
+is not a Go or end-user runtime dependency.
+
 ## Mermaid Tiny and bundled dependencies
 
 - Package: `@mermaid-js/tiny`

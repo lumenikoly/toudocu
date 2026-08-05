@@ -44,8 +44,12 @@ browser context, не выдаёт CORS и ограничивает body/content
 в trust boundary; CLI сохраняет предупреждение об отсутствии TLS и авторизации.
 Locale routes ограничены `/_docu-docu/locales/<locale>/` и отдают только
 сгенерированные read-only snapshots. Они не перенаправляют к editor, changes,
-workspace или canonical API; target URLs вычисляет сервер из разрешённых
+workspace, API docs или canonical API; target URLs вычисляет сервер из разрешённых
 profiles и mounts.
+
+Canonical API docs загружает только embedded Swagger UI и same-origin
+проверенные specs. CSP запрещает внешние script/style/connect targets, а
+browser Try it out ограничен `GET`/`HEAD`; UI не ослабляет guards самих APIs.
 
 ## Граница исполнения
 

@@ -50,8 +50,9 @@ release: check
 	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags="-s -w" -o $(DIST)/docu-docu-darwin-arm64 $(CMD)
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o $(DIST)/docu-docu-windows-amd64.exe $(CMD)
 	cp LICENSE $(DIST)/
-	{ cat THIRD_PARTY_NOTICES.md; printf '\n\n# Embedded browser asset notices\n'; cat internal/app/assets/mermaid.LICENSE.txt; printf '\n\n'; cat internal/app/assets/codemirror.LICENSE.txt; } > $(DIST)/THIRD_PARTY_NOTICES.md
+	{ cat THIRD_PARTY_NOTICES.md; printf '\n\n# Embedded browser asset notices\n'; cat internal/app/assets/mermaid.LICENSE.txt; printf '\n\n'; cat internal/app/assets/codemirror.LICENSE.txt; printf '\n\n'; cat internal/app/assets/swagger-ui.LICENSE.txt; printf '\n\n'; cat internal/app/assets/swagger-ui-bundle.LICENSE.txt; printf '\n\n'; cat internal/app/assets/swagger-ui-standalone-preset.LICENSE.txt; } > $(DIST)/THIRD_PARTY_NOTICES.md
 	cp internal/app/assets/codemirror.checksums.txt $(DIST)/CODEMIRROR-CHECKSUMS.txt
+	cp internal/app/assets/swagger-ui.checksums.txt $(DIST)/SWAGGER-UI-CHECKSUMS.txt
 	cp scripts/install.sh scripts/install.ps1 $(DIST)/
 	cd $(DIST) && sha256sum * > checksums.txt
 

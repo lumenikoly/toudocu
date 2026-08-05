@@ -1,46 +1,54 @@
-# HTTP-контракт Documentation Changes v1
+# Changes HTTP API: поведение и границы
 
 - Идентификатор: CON-CHANGES-HTTP-V1
 - Статус: Готово
 - Владелец: Команда Docu-docu
-- Последнее обновление: 2026-07-31
+- Последнее обновление: 2026-08-05
 
-Все endpoints read-only, используют `Cache-Control: no-store`, принимают только
-локальные Git revisions и ограничивают доступ documentation roots.
+[OpenAPI 3.1.0](changes.openapi.yaml) содержит маршруты, параметры, коды ответа
+и схемы данных. В canonical `serve` на этой странице также появляется кнопка
+для открытия спецификации в Swagger UI.
 
-| Метод | Endpoint | Ответ |
-|---|---|---|
-| `GET/HEAD` | `/_docu-docu/api/changes` | `ChangeSetReport`, ETag = digest |
-| `GET` | `/_docu-docu/api/changes/file?path=...` | один `DocumentationChange` |
-| `GET` | `/_docu-docu/api/changes/task?task=TASK-*` | `TaskImpactReport` |
-| `GET` | `/_docu-docu/api/changes/content?side=before|after&path=...` | Git content |
-| `GET` | `/_docu-docu/api/changes/render?side=before|after&path=...` | sanitized HTML |
-| `GET` | `/_docu-docu/api/changes/screen-map` | screen/transition overlay v1 |
+Этот документ отвечает на другой вопрос: откуда API берёт изменения и какие
+ограничения сохраняет при чтении Git и файлов.
 
-Summary принимает `base`, `branchBase`, `target`, `type`, `status`, `module` и
-`task`. `branchBase` выбирает итоговую базу как `merge-base(branchBase, HEAD)`.
-Если HTTP-клиент также передал `base`, сервер сначала проверяет эту revision, а
-затем заменяет её вычисленным merge base; поэтому обе ссылки должны быть
-валидны. CLI запрещает сочетать эти два параметра.
-Неверная revision возвращает 400; отсутствие Git — 503. Error envelope содержит
-`schemaVersion: 1` и `diagnostics[]`.
+## Доступность
 
-`path` — canonical repository-relative POSIX path элемента change set.
-Абсолютный путь, backslash, `..`, файл вне documentation roots и `.git` не
-разрешаются. Ответы content ограничены по размеру, используют `nosniff` и CSP
-`default-src 'none'`; SVG не получает разрешений на script, style или network.
-Renderer использует существующую sanitization policy.
+API работает только в режиме `serve` и ничего не записывает. При прямом запуске
+translation root он читает выбранный root; locale-разделы canonical portal
+отдельного API не получают.
 
-Summary и file detail кэшируются по comparison, workspace revision, `HEAD`,
-porcelain-v2 status и resolved пользовательским refs. Изменение working tree,
-index или HEAD создаёт новый cache key. UI опрашивает HEAD summary с ETag.
-Изменившийся digest сохраняет открытый path и URL-фильтры и загружает новый
-change set.
+## Сравнение версий
 
-`file`, `content` и `render` выполняют path-scoped analysis: source patches и
-specialized model строятся только для запрошенного файла. Summary не переносит
-полный patch; UI загружает его лениво при открытии detail.
+API сравнивает локальные commits, index и working tree без `fetch`, `checkout`
+и изменения Git-состояния. Параметр `branchBase` вычисляет merge base с `HEAD`.
+Если вместе с ним указан `base`, обе ссылки должны разрешаться локально.
 
-Для OpenAPI `semanticChanges[].field` адресует operation, parameter, response
-header, security scheme или schema property. `compatibility` принимает
-`breaking`, `potentially-breaking`, `non-breaking` или `informational`.
+ETag вычисляется из отфильтрованного набора изменений. Кэш учитывает comparison,
+текущую revision документации, `HEAD`, Git status и разрешённые revisions,
+поэтому изменение index или working tree не возвращает устаревший отчёт.
+
+Summary не содержит полный patch. Детальный отчёт, исходное содержимое и
+HTML-представление строятся только для запрошенного файла.
+
+## Безопасность чтения
+
+Путь должен быть относительным POSIX-путём внутри разрешённого documentation
+root. Абсолютные пути, `..`, обратная косая черта, `.git`, symlink-выход и путь
+за пределами root отклоняются.
+
+Исходное содержимое возвращается с определённым сервером media type,
+`X-Content-Type-Options: nosniff` и запретительной CSP. Markdown перед выдачей
+как `text/html` проходит безопасный renderer. SVG не получает права выполнять
+скрипты, загружать сеть или применять встроенные стили.
+
+Ошибка анализа отдельного представления — semantic diff, Mermaid, OpenAPI,
+экрана или asset — остаётся локальной диагностикой и не скрывает доступный
+исходный diff.
+
+## Связанные документы
+
+- [Почему wire-контракт отделён от поведения](../decisions/ADR-004.md)
+- [Модуль Documentation Changes](../modules/MOD-CHANGES.md)
+- [Как устроено сравнение документации](../architecture/documentation-changes.md)
+- [Поля ChangeSetReport](../reference/changes-report.md)

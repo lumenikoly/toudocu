@@ -154,6 +154,10 @@ listener и не получает отдельного CLI-флага.
 не существуют. Через `file://` или другой статический HTTP-сервер editor markup,
 API URL, CodeMirror и server-only scripts отсутствуют.
 
+Canonical `serve` без отдельной настройки публикует найденные OpenAPI contracts
+через `/_docu-docu/api-docs/`. Static build копирует specs, но не Swagger UI;
+translation mounts и direct translation serve не публикуют ни UI, ни ссылку.
+
 Workspace включает обычные `.md`, `.yaml`, `.yml` и `.json` внутри docs root и
 исключает hidden, configured excludes, output subtree и symlink paths. JSON body
 ограничен 3 MiB, content — 2 MiB. При `--host 0.0.0.0` same-origin browser

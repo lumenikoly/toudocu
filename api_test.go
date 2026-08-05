@@ -2,7 +2,6 @@ package docudocu_test
 
 import (
 	"os"
-	"regexp"
 	"strings"
 	"testing"
 
@@ -19,24 +18,6 @@ func TestPublicAPIFacadeDelegatesToInternalImplementation(t *testing.T) {
 	parsed := docudocu.AnalyzeMarkdown("# Title\n\nBody.\n")
 	if parsed.Title != "Title" {
 		t.Fatalf("AnalyzeMarkdown() title = %q, want Title", parsed.Title)
-	}
-}
-
-func TestPublicAPIFacadeIsDocumented(t *testing.T) {
-	api, err := os.ReadFile("api.go")
-	if err != nil {
-		t.Fatal(err)
-	}
-	contract, err := os.ReadFile("docs/contracts/go-api.md")
-	if err != nil {
-		t.Fatal(err)
-	}
-	exportedFunction := regexp.MustCompile(`(?m)^func ([A-Z][A-Za-z0-9]*)\(`)
-	for _, match := range exportedFunction.FindAllStringSubmatch(string(api), -1) {
-		name := match[1]
-		if !strings.Contains(string(contract), "`"+name+"`") {
-			t.Errorf("public function %s is missing from Go API contract", name)
-		}
 	}
 }
 
@@ -58,7 +39,7 @@ func TestRootDocumentationMatchesPublishedState(t *testing.T) {
 	for _, expected := range []string{
 		"## Supported Markdown",
 		"scaffold module MOD-PAYMENTS",
-		"[Public Go API](docs/contracts/go-api.md)",
+		"## Public Go API",
 		"[Project source documentation](docs/index.md)",
 	} {
 		if !strings.Contains(text, expected) {
@@ -67,7 +48,7 @@ func TestRootDocumentationMatchesPublishedState(t *testing.T) {
 	}
 	for _, expected := range []string{
 		"## Поддерживаемый Markdown",
-		"[Публичный Go API](docs/contracts/go-api.md)",
+		"## Публичный Go API",
 		"[Исходная документация проекта](docs/index.md)",
 	} {
 		if !strings.Contains(string(russian), expected) {

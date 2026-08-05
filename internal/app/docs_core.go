@@ -689,6 +689,9 @@ func buildDocumentationModel(options Options, overlay map[string][]byte) (*Model
 		}
 		files = filtered
 	}
+	var openAPIIssues []Issue
+	model.openAPIContracts, openAPIIssues = discoverOpenAPIContracts(root, options.Excludes, overlay)
+	model.Issues = append(model.Issues, openAPIIssues...)
 	for _, file := range files {
 		document := createDocument(file, root, staleDays, now, &model.Issues, overlay)
 		if document == nil {

@@ -76,6 +76,25 @@ func renderDocumentContextButton(model *Model, document *Document) string {
 		`<a class="document-context-button" href="/_docu-docu/api/editor/file?raw=1&amp;path=` + escapeAttr(encoded) + `" target="_blank" rel="noopener">Открыть исходник</a></div>`
 }
 
+func renderOpenAPIContractButton(model *Model, document *Document) string {
+	if !model.serveMode || document == nil {
+		return ""
+	}
+	for _, link := range document.Links {
+		destination, _, _ := splitLinkDestination(link.Destination)
+		if destination == "" || isExternalDestination(destination) {
+			continue
+		}
+		candidate := path.Clean(path.Join(path.Dir(document.SourcePath), destination))
+		for _, contract := range model.openAPIContracts {
+			if candidate == contract.Path {
+				return `<a class="document-context-button" href="` + apiDocsUIPath + `?spec=` + escapeAttr(url.QueryEscape(contract.Path)) + `">Открыть в Swagger UI</a>`
+			}
+		}
+	}
+	return ""
+}
+
 func metricCard(label string, value any, detail string) string {
 	out := fmt.Sprintf(`<div class="metric-card"><div class="metric-label">%s</div><div class="metric-value">%s</div>`, escapeHTML(label), escapeHTML(value))
 	if detail != "" {
@@ -266,6 +285,9 @@ func renderNavigation(model *Model, current string) string {
 	fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span>Качество документации</span></a></li>`, active, escapeAttr(relativeURL(current, model.HealthOutputPath)))
 	if model.serveMode {
 		fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link" href="/changes/"><span>Изменения</span></a></li>`)
+		if len(model.openAPIContracts) > 0 {
+			fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link" href="/_docu-docu/api-docs/"><span>HTTP API</span></a></li>`)
+		}
 	}
 	if len(model.Knowledge.Screens) > 0 {
 		active = ""
@@ -530,7 +552,7 @@ func renderDocumentPage(model *Model, document *Document) string {
 	if strings.TrimSpace(document.Metadata["status"]) != "" {
 		statusChip = renderStatusChip(displayStatus)
 	}
-	content := breadcrumbs(model, document.OutputPath, document.Title) + `<header class="page-header"><div class="page-kicker">` + statusChip + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + issues + `</div><h1>` + escapeHTML(document.Title) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` + renderMetadata(document) + renderProgress(document.TaskStats, "Готовность документа") + controls + `<div class="page-actions">` + renderDocumentContextButton(model, document) + `<button class="collapse-all-button" type="button" data-collapse-all data-collapse-state="expanded" aria-expanded="true"><span class="collapse-all-icon" aria-hidden="true"><span class="collapse-icon collapse-icon-up">↑</span><span class="collapse-icon collapse-icon-down">↓</span></span><span data-collapse-label>Свернуть разделы</span></button></div></header>` + computedStatus + `<article class="doc-content">` + body + `</article>` + screenConnections + renderRelated(model, document)
+	content := breadcrumbs(model, document.OutputPath, document.Title) + `<header class="page-header"><div class="page-kicker">` + statusChip + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + issues + `</div><h1>` + escapeHTML(document.Title) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` + renderMetadata(document) + renderProgress(document.TaskStats, "Готовность документа") + controls + `<div class="page-actions">` + renderDocumentContextButton(model, document) + renderOpenAPIContractButton(model, document) + `<button class="collapse-all-button" type="button" data-collapse-all data-collapse-state="expanded" aria-expanded="true"><span class="collapse-all-icon" aria-hidden="true"><span class="collapse-icon collapse-icon-up">↑</span><span class="collapse-icon collapse-icon-down">↓</span></span><span data-collapse-label>Свернуть разделы</span></button></div></header>` + computedStatus + `<article class="doc-content">` + body + `</article>` + screenConnections + renderRelated(model, document)
 	content += flowConnections
 	return pageShell(model, document.OutputPath, document.Title, document.Description, content, renderTOC(document))
 }
@@ -1073,7 +1095,7 @@ func generateSite(model *Model, options Options, serve bool) (GenerateResult, er
 	if err = mkdirp(output); err != nil {
 		return GenerateResult{}, err
 	}
-	serveOnlyAssets := []string{"serve.css", "serve.js", "serve-navigation.js", "editor.css", "editor.js", "changes.css", "changes.js", "codemirror.js", "codemirror.LICENSE.txt", "codemirror.checksums.txt"}
+	serveOnlyAssets := []string{"serve.css", "serve.js", "serve-navigation.js", "editor.css", "editor.js", "changes.css", "changes.js", "codemirror.js", "codemirror.LICENSE.txt", "codemirror.checksums.txt", "api-docs.js", "swagger-ui.css", "swagger-ui-bundle.js", "swagger-ui-standalone-preset.js", "swagger-ui.LICENSE.txt", "swagger-ui-bundle.LICENSE.txt", "swagger-ui-standalone-preset.LICENSE.txt", "swagger-ui.checksums.txt"}
 	if !serve {
 		for _, asset := range serveOnlyAssets {
 			if removeErr := os.Remove(filepath.Join(output, "assets", asset)); removeErr != nil && !os.IsNotExist(removeErr) {
@@ -1113,6 +1135,11 @@ func generateSite(model *Model, options Options, serve bool) (GenerateResult, er
 	}
 	for outputPath, sourcePath := range model.BrandingAssets {
 		if err = copyFileEnsured(sourcePath, filepath.Join(output, filepath.FromSlash(outputPath))); err != nil {
+			return GenerateResult{}, err
+		}
+	}
+	for _, contract := range model.openAPIContracts {
+		if err = copyFileEnsured(filepath.Join(model.RootDirectory, filepath.FromSlash(contract.Path)), filepath.Join(output, filepath.FromSlash(contract.Path))); err != nil {
 			return GenerateResult{}, err
 		}
 	}

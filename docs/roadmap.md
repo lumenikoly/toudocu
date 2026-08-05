@@ -18,7 +18,6 @@ Roadmap определяет продуктовый охват Docu-docu; сос
 - [x] `UC-TASK-03` Исполнитель подготавливает новую рабочую задачу.
 - [x] `UC-TASK-04` Исполнитель архивирует или восстанавливает рабочую задачу.
 - [x] `CON-CLI-V1` Зафиксирован публичный CLI-контракт и versioned JSON schemas.
-- [x] `CON-GO-API-V1` Зафиксирован публичный Go API-контракт.
 - [x] `DLV-INSTALL-01` Подготовлены проверяемые install/update workflows для release assets.
 - [x] `DLV-SKILL-WORKFLOWS-01` Описаны agent-workflows init, refresh и translate.
 - [x] `DLV-SELF-DOCS-01` Репозиторий содержит собственную проверяемую документацию.

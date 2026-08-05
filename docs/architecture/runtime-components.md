@@ -4,9 +4,9 @@
 - Архитектурный вопрос: Как runtime-компоненты делят ответственность?
 
 Runtime образует последовательный конвейер: CLI либо прямой вызов Go API задаёт
-операцию, Markdown-слой извлекает безопасное представление, модель проверяет
-структуру и связи, а выбранный потребитель возвращает отчёт, строит портал или
-выполняет отдельно разрешённый task workflow.
+операцию, document/OpenAPI слой извлекает безопасное представление, модель
+проверяет структуру и связи, а выбранный потребитель возвращает отчёт, строит
+портал или выполняет отдельно разрешённый task workflow.
 
 ## Область
 
@@ -25,10 +25,10 @@ URL state при invalidation. Компоненты активны для `chang
 | Граница | Ответственность | Источник подробностей |
 |---|---|---|
 | CLI | Разобрать команду, нормализовать пути и выбрать операцию | [MOD-CLI](../modules/cli.md) |
-| Go API | Предоставить стабильный типизированный фасад без доступа к `internal/app` | [CON-GO-API-V1](../contracts/go-api.md) |
+| Go API | Предоставить типизированный фасад без доступа к `internal/app` | [Обзор публичного Go API](../reference/features.md#публичный-go-api) |
 | Markdown | Извлечь поддерживаемую структуру и безопасно отрендерить содержимое | [MOD-MARKDOWN](../modules/markdown.md) |
-| Project model | Классифицировать документы, разрешить связи и сформировать diagnostics | [MOD-MODEL](../modules/model.md) |
-| Site | Создать автономный read-only портал или serve-only editor workspace с live rebuild | [MOD-SITE](../modules/site.md) |
+| Project model | Классифицировать документы, проверить OpenAPI, разрешить связи и сформировать diagnostics | [MOD-MODEL](../modules/model.md) |
+| Site | Создать автономный read-only портал или canonical serve workspace с editor, changes и offline API docs | [MOD-SITE](../modules/site.md) |
 
 Статический generator и serve-вариант разделены. Serve хранит отдельные
 runtime snapshots canonical и configured translation roots: HTTP читает только
@@ -36,6 +36,8 @@ runtime snapshots canonical и configured translation roots: HTTP читает �
 Workspace перечисляет и атомарно записывает разрешённые canonical файлы;
 editor API применяет HTTP guards. Любая принятая запись заново
 проходит Project model и Site, поэтому browser не формирует параллельную модель.
+Декларативные Editor/Changes route registries проверяются против OpenAPI
+operations; Swagger UI читает те же specs как same-origin assets.
 
 Screen graph и task workflow расширяют модель, но не обходят её validation
 gate. Конкретные последовательности операций остаются в

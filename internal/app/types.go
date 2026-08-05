@@ -139,6 +139,7 @@ type Issue struct {
 	Message      string `json:"message"`
 	DocumentPath string `json:"documentPath,omitempty"`
 	Line         int    `json:"line,omitempty"`
+	Column       int    `json:"column,omitempty"`
 }
 
 type Document struct {
@@ -562,6 +563,7 @@ type Model struct {
 	serveRevision     string
 	languageTargets   map[string][]LanguageTarget
 	translationLocale string
+	openAPIContracts  []OpenAPIContract
 }
 
 type GenerateResult struct {

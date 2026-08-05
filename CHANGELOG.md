@@ -2,13 +2,18 @@
 
 ## 0.0.1
 
+- Editor и Changes HTTP API получили OpenAPI 3.1.0 sources of truth,
+  declarative route parity и единый positional check; canonical `serve`
+  показывает оба контракта через offline Swagger UI 5.32.12, а static и
+  translation portals UI не получают.
+- Changes API разрешает `HEAD` только для summary и возвращает schema-v1
+  diagnostics envelope для всех API-ошибок без изменения успешных media types.
 - Translation roots поддерживают полный файловый паритет с canonical docs,
   включая work items, notes и ideas, но остаются read-only: task workflow,
   scaffold и editor-запись отклоняются до использования переводного контекста.
 - Самодокументация согласована с текущим состоянием репозитория: исправлены
   onboarding и scaffold-примеры README, восстановлено описание Markdown subset,
-  roadmap включает сценарий Documentation Changes, а стабильный фасад `api.go`
-  получил отдельный Go API-контракт.
+  а roadmap включает сценарий Documentation Changes.
 - Первый стабильный релиз dependency-free Go CLI для проверки Markdown и
   построения автономного статического HTML-портала.
 - Команды `check`, `build`, `search`, `changes` и `task changes` обеспечивают

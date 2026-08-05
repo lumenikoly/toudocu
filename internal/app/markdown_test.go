@@ -38,6 +38,13 @@ func TestAnalyzeMarkdown(t *testing.T) {
 	}
 }
 
+func TestMetadataInlineCodePreservesRouteUnderscores(t *testing.T) {
+	doc := AnalyzeMarkdown("# SC-SITE-API-DOCS: API\n\n- Маршрут: `/_docu-docu/api-docs/`\n")
+	if got := doc.Metadata["route"]; got != "/_docu-docu/api-docs/" {
+		t.Fatalf("route = %q", got)
+	}
+}
+
 func TestRenderMarkdownSafety(t *testing.T) {
 	doc := AnalyzeMarkdown("# Безопасность\n\n<script>alert(1)</script>\n\n[опасно](javascript:alert(1))")
 	html := RenderMarkdown(doc, RenderContext{ResolveLink: func(destination string, image bool, title string) LinkResolution {

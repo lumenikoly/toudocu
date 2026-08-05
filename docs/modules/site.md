@@ -18,7 +18,8 @@
 - оболочка HTML и отчёт: `internal/app/site.go`, `internal/app/report_types.go`;
 - каталоги процессов и use cases: `internal/app/process_site.go`;
 - Screen Map, каталог и страницы экранов: `internal/app/screen_site.go`;
-- локальная HTTP-раздача: `internal/app/server.go`;
+- локальная HTTP-раздача и offline API docs: `internal/app/server.go`,
+  `internal/app/api_docs.go`;
 - editor workspace, API и platform-specific atomic replace: `internal/app/editor_*.go`;
 - встроенные ресурсы: `internal/app/embed.go`, `internal/app/assets/`;
 - конфигурация тем и безопасного брендинга: `internal/app/site_config.go`.
@@ -90,8 +91,10 @@ fallback favicon и браузерные ресурсы встроены чер�
 ### BR-SITE-007: Build и serve имеют разные возможности
 
 `GenerateSite` всегда создаёт автономный read-only результат для `file://` без
-editor markup, API URL, CodeMirror и server-only rebuild code. `serve` отдельно
-добавляет live workspace, editor/source actions, polling, API и watcher.
+editor markup, API UI, Swagger UI, CodeMirror и server-only rebuild code. Он
+копирует найденные OpenAPI specs как обычные portal assets. `serve` отдельно
+добавляет live workspace, editor/source actions, polling, API, watcher и
+vendored Swagger UI для canonical contracts.
 
 ### BR-SITE-008: Запись защищена optimistic concurrency
 
@@ -127,6 +130,13 @@ locale, external и специальные переходы всегда ост�
 Поисковый индекс загружается только при первом обращении к поиску и сохраняется
 в памяти между мягкими переходами. Mermaid bundle загружается при приближении
 первой диаграммы и повторно используется до полной загрузки страницы.
+
+### BR-SITE-011: API docs остаётся offline и read-mostly
+
+`/_docu-docu/api-docs/` существует только у canonical `serve`, использует
+same-origin specs и закреплённый Swagger UI 5.32.12 без CDN. CSP запрещает
+external network, а Try it out доступен только для `GET`/`HEAD`. Locale mounts,
+direct translation serve и static build не содержат UI, assets или navigation.
 
 ## Инварианты
 
@@ -180,7 +190,8 @@ locale, external и специальные переходы всегда ост�
 - `GenerateSite`;
 - `BuildReport`;
 - CLI-команда `serve`;
-- [Editor HTTP schema v1](../contracts/editor-http.md);
+- [Editor OpenAPI](../contracts/editor.openapi.yaml) и [Changes OpenAPI](../contracts/changes.openapi.yaml);
+- [поведение Editor API](../contracts/editor-http.md) и [Changes API](../contracts/changes-http.md);
 - `ProjectReport` schema v1;
 - HTML entrypoint `index.html` и машинный `report.json`.
 
