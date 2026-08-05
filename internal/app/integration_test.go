@@ -822,6 +822,10 @@ func TestGenerateSite(t *testing.T) {
 			t.Fatalf("missing %s", part)
 		}
 	}
+	collapseAllMarkup := `<span class="collapse-all-icon" aria-hidden="true"><span class="collapse-icon collapse-icon-up">↑</span><span class="collapse-icon collapse-icon-down">↓</span></span><span data-collapse-label>Свернуть разделы</span>`
+	if !strings.Contains(html, collapseAllMarkup) {
+		t.Fatal("collapse-all icons must remain inside their positioning container")
+	}
 	if strings.Contains(html, "<script>alert") {
 		t.Fatal("unsafe")
 	}

@@ -668,6 +668,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .collapse-icon {
   position: absolute;
   inset: 0;
+  pointer-events: none;
   display: grid;
   place-items: center;
   font-size: 15px;
