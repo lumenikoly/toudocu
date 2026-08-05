@@ -1,27 +1,29 @@
 # Docu-docu
 
-**Инструмент для проверяемой Markdown-документации и автономных HTML-порталов.**
+**English** | [Русский](README.ru.md)
 
-**Docu-docu** помогает поддерживать документацию вместе с кодом, находить несоответствия и собирать удобные статические порталы для чтения.
+**A tool for verifiable Markdown documentation and standalone HTML portals.**
 
-### Главные возможности
+**Docu-docu** helps keep documentation aligned with the codebase, find inconsistencies, and build clean static portals for reading.
 
-* **Готовый CLI на Go** — быстрый бинарник без Node.js и дополнительных зависимостей.
-* **Skills для AI-агентов** — помогают анализировать репозиторий, создавать документацию и обновлять её после изменений.
-* **Проверка документации** — структура, ссылки и связи проверяются локально и в CI.
-* **Автономный портал** — статический сайт открывается с диска и не требует запущенного сервера.
-* **Локальный режим** — редактор, автоматическая пересборка и просмотр Git-изменений.
-* **Минимум инфраструктуры** — без базы данных, npm, CDN и отдельного runtime.
+### Key features
 
-Вся документация хранится в репозитории как обычные Markdown-файлы.
+* **Ready-to-use Go CLI** — a fast binary with no Node.js or additional dependencies.
+* **Skills for AI agents** — help analyze repositories, create documentation, and update it after changes.
+* **Documentation validation** — structure, links, and relationships can be checked locally and in CI.
+* **Standalone portal** — the static website opens directly from disk and does not require a running server.
+* **Local mode** — an editor, automatic rebuilds, and Git change browsing.
+* **Minimal infrastructure** — no database, npm, CDN, or separate runtime.
+
+All documentation is stored in the repository as regular Markdown files.
 
 ---
 
-## Быстрый старт
+## Quick start
 
-### 1. Установите CLI
+### 1. Install the CLI
 
-Linux и macOS:
+Linux and macOS:
 
 ```bash
 curl -fsSL https://github.com/lumenikoly/docu-docu/releases/latest/download/install.sh | sh
@@ -33,17 +35,17 @@ Windows PowerShell:
 irm https://github.com/lumenikoly/docu-docu/releases/latest/download/install.ps1 | iex
 ```
 
-Installer сам выбирает платформу, проверяет SHA-256 и ставит бинарник
-в каталог текущего пользователя. Повторный запуск этой же команды
-обновляет Docu-docu.
+The installer selects the platform, verifies SHA-256, and installs the binary
+in the current user's directory. Running the same command again updates
+Docu-docu.
 
-Проверьте установку:
+Verify the installation:
 
 ```bash
 docu-docu --help
 ```
 
-Также можно собрать бинарник из исходников:
+You can also build the binary from source:
 
 ```bash
 git clone https://github.com/lumenikoly/docu-docu.git
@@ -51,60 +53,60 @@ cd docu-docu
 make build
 ```
 
-После сборки бинарник появится в корне репозитория:
+After the build, the binary will be available in the repository root:
 
 ```bash
 ./docu-docu --help
 ```
 
-Матрица платформ, закрепление версии, каталоги и границы проверки
-описаны в [руководстве по установке](docs/guides/installation.md).
+For the platform matrix, version pinning, directories, and verification scope,
+see the [installation guide](docs/guides/installation.md).
 
-### 2. Подключите skill
+### 2. Install the skill
 
-Skill устанавливается отдельно в поддерживаемый AI-инструмент.
+The skill is installed separately in a supported AI tool.
 
-После установки он будет доступен как:
+After installation, it will be available as:
 
 ```text
 $docu-docu
 ```
 
-Skill использует установленный CLI для проверки и сборки документации, а сам отвечает за анализ репозитория и обновление Markdown-файлов.
+The skill uses the installed CLI to validate and build documentation, while the skill itself is responsible for analyzing the repository and updating Markdown files.
 
-CLI можно использовать и без skill.
+The CLI can also be used without the skill.
 
-### 3. Создайте документацию проекта
+### 3. Create project documentation
 
-Запустите skill из корня своего репозитория:
+Run the skill from the root of your repository:
 
 ```text
 $docu-docu init
 ```
 
-Skill изучит проект и создаст начальную структуру документации.
+The skill will analyze the project and create the initial documentation structure.
 
-### 4. Проверьте документацию
+### 4. Validate the documentation
 
 ```bash
 docu-docu check ./docs
 ```
 
-### 5. Запустите локальный портал
+### 5. Start the local portal
 
 ```bash
 docu-docu serve ./docs
 ```
 
-По умолчанию портал будет доступен по адресу:
+By default, the portal will be available at:
 
 ```text
 http://127.0.0.1:8080
 ```
 
-Локальный режим включает редактор, отслеживание файлов и автоматическую пересборку.
+Local mode includes an editor, file watching, and automatic rebuilds.
 
-### 6. Соберите автономную версию
+### 6. Build a standalone version
 
 ```bash
 docu-docu build ./docs \
@@ -112,7 +114,7 @@ docu-docu build ./docs \
   --clean
 ```
 
-Готовый портал можно открыть прямо с диска:
+The generated portal can be opened directly from disk:
 
 ```text
 site/index.html
@@ -122,71 +124,71 @@ site/index.html
 
 ## Skills
 
-Skills позволяют работать с документацией через обычные запросы к AI-агенту.
+Skills let you work with documentation through regular requests to an AI agent.
 
-Они анализируют репозиторий, находят связанные документы и используют Docu-docu для проверки результата.
+They analyze the repository, locate related documents, and use Docu-docu to validate the result.
 
-### Создать документацию
+### Create documentation
 
 ```text
 $docu-docu init
 ```
 
-Skill изучает репозиторий и создаёт начальную структуру документации.
+The skill analyzes the repository and creates the initial documentation structure.
 
-Он подходит как для нового проекта, так и для существующего репозитория без оформленной документации.
+It works both for new projects and existing repositories without established documentation.
 
-### Сверить документацию с проектом
+### Review documentation against the project
 
 ```text
 $docu-docu refresh
 ```
 
-Skill проверяет документацию по текущему состоянию репозитория и обновляет затронутые разделы.
+The skill checks the documentation against the current repository state and updates affected sections.
 
-Это полезно после крупных изменений, рефакторинга или добавления новых компонентов.
+This is useful after major changes, refactoring, or the introduction of new components.
 
-### Проверить текущие изменения
+### Review current changes
 
 ```text
 $docu-docu refresh diff
 ```
 
-Skill начинает с текущих Git-изменений и проверяет связанную с ними документацию.
+The skill starts with the current Git changes and reviews the related documentation.
 
-Этот режим удобно использовать перед коммитом или pull request.
+This mode is useful before a commit or pull request.
 
-### Обновить перевод
+### Update a translation
 
 ```text
 $docu-docu translate
 ```
 
-Skill обновляет отдельную языковую версию документации, сохраняя основной каталог источником истины.
+The skill updates a separate language version while keeping the main documentation as the source of truth.
 
 ---
 
-## Проверка документации
+## Documentation validation
 
 ```bash
 docu-docu check ./docs
 ```
 
-Docu-docu проверяет:
+Docu-docu validates:
 
-* структуру каталогов и документов;
-* внутренние и внешние ссылки;
-* обязательные разделы;
-* связи между документами;
-* диаграммы;
-* стандарты и рабочие инструкции;
-* целостность общей модели проекта.
+* directory and document structure;
+* internal and external links;
+* required sections;
+* relationships between documents;
+* diagrams;
+* standards and operational instructions;
+* integrity of the overall project model.
 
-Проверку можно запускать локально или добавлять в CI.
+Validation can be run locally or added to CI.
 
 ---
 
-## Автономный HTML-портал
+## Standalone HTML portal
 
 ```bash
 docu-docu build ./docs \
@@ -194,64 +196,64 @@ docu-docu build ./docs \
   --clean
 ```
 
-Готовый портал:
+The generated portal:
 
-* открывается через `file://`;
-* не требует запущенного сервера;
-* не использует базу данных;
-* не загружает ресурсы из CDN;
-* не требует Node.js или npm;
-* подходит для CI-артефактов и статического хостинга.
+* opens through `file://`;
+* does not require a running server;
+* does not use a database;
+* does not load resources from a CDN;
+* does not require Node.js or npm;
+* works well as a CI artifact or on static hosting.
 
-Портал остаётся доступным только для чтения.
+The portal is read-only.
 
 ---
 
-## Локальный портал и редактор
+## Local portal and editor
 
 ```bash
 docu-docu serve ./docs
 ```
 
-Локальный режим предоставляет:
+Local mode provides:
 
-* навигацию по документации;
-* встроенный редактор;
-* поиск;
-* отслеживание изменений;
-* автоматическую пересборку;
-* предварительный просмотр ошибок;
-* просмотр изменений через Git.
+* documentation navigation;
+* a built-in editor;
+* search;
+* file watching;
+* automatic rebuilds;
+* validation previews;
+* Git change browsing.
 
-По умолчанию сервер слушает:
+By default, the server listens on:
 
 ```text
 127.0.0.1:8080
 ```
 
-У локального сервера нет TLS и встроенной авторизации. Не открывайте его во внешнюю сеть без дополнительной защиты.
+The local server does not provide TLS or built-in authentication. Do not expose it to an external network without additional protection.
 
 ---
 
-## Поиск
+## Search
 
 ```bash
 docu-docu search "authentication" ./docs
 ```
 
-Поиск работает по исходным Markdown-файлам и помогает быстро найти существующее описание перед созданием нового документа.
+Search works directly with the source Markdown files and helps you quickly find existing documentation before creating a new document.
 
 ---
 
-## Просмотр изменений
+## Change browsing
 
 ```bash
 docu-docu changes ./docs
 ```
 
-Docu-docu использует Git, чтобы показать изменения документации между ветками, коммитами и текущим рабочим состоянием.
+Docu-docu uses Git to show documentation changes between branches, commits, and the current working state.
 
-Пример сравнения с основной веткой:
+For example, compare the documentation with the main branch:
 
 ```bash
 docu-docu changes ./docs \
@@ -259,28 +261,28 @@ docu-docu changes ./docs \
   --target working-tree
 ```
 
-Docu-docu не выполняет `commit`, `checkout`, `add` или `fetch` и не изменяет состояние репозитория.
+Docu-docu does not run `commit`, `checkout`, `add`, or `fetch`, and it does not modify repository state.
 
 ---
 
-## Шаблоны документов
+## Document scaffolds
 
-Docu-docu умеет создавать заготовки для новых документов.
+Docu-docu can create scaffolds for new documents.
 
-Например:
+For example:
 
 ```bash
 docu-docu scaffold module MOD-PAYMENTS ./docs \
   --title "Payments"
 ```
 
-Шаблон задаёт структуру документа, но не придумывает сведения о проекте.
+A scaffold provides the document structure without inventing information about the project.
 
 ---
 
-## Структура документации
+## Documentation structure
 
-Минимальный проект состоит из двух файлов:
+A minimal project contains two files:
 
 ```text
 docs/
@@ -289,53 +291,53 @@ docs/
     └── overview.md
 ```
 
-`index.md` знакомит читателя с проектом.
+`index.md` introduces the project.
 
-`architecture/overview.md` кратко описывает устройство системы и содержит ссылки на более подробные документы.
+`architecture/overview.md` briefly describes the system and links to more detailed documents.
 
-Остальные разделы можно добавлять по мере роста проекта.
+Additional sections can be introduced as the project grows.
 
-Docu-docu подходит для описания:
+Docu-docu can be used to document:
 
-* архитектуры;
-* компонентов;
-* пользовательских сценариев;
-* процессов;
-* интерфейсов;
-* требований;
-* стандартов разработки;
-* эксплуатационных инструкций;
-* планов и изменений проекта.
+* architecture;
+* components;
+* user scenarios;
+* processes;
+* interfaces;
+* requirements;
+* development standards;
+* operational instructions;
+* project plans and changes.
 
-Для диаграмм можно использовать Mermaid.
-
----
-
-## Поддерживаемый Markdown
-
-Docu-docu намеренно поддерживает безопасное подмножество Markdown:
-
-* заголовки, абзацы, выделение и цитаты;
-* ссылки и безопасные локальные raster-изображения;
-* маркированные, нумерованные и task-списки;
-* таблицы, inline code и fenced code blocks;
-* Mermaid `flowchart`, `stateDiagram-v2` и `sequenceDiagram`.
-
-Произвольный HTML экранируется. Front matter, Mermaid directives и конструкции,
-зависящие от полного CommonMark, не поддерживаются. Подробные ограничения
-зафиксированы в [модуле безопасного Markdown](docs/modules/markdown.md).
+Mermaid can be used for diagrams.
 
 ---
 
-## Настройка портала
+## Supported Markdown
 
-Необязательный файл `.docu-docu/config.yml` позволяет настроить внешний вид и поведение портала.
+Docu-docu intentionally supports a safe subset of Markdown:
 
-Пример:
+* headings, paragraphs, emphasis, and blockquotes;
+* links and safe local raster images;
+* unordered, ordered, and task lists;
+* tables, inline code, and fenced code blocks;
+* Mermaid `flowchart`, `stateDiagram-v2`, and `sequenceDiagram`.
+
+Arbitrary HTML is escaped. Front matter, Mermaid directives, and syntax that
+depends on full CommonMark support are not supported. Detailed limitations are
+documented in the [safe Markdown module](docs/modules/markdown.md).
+
+---
+
+## Portal configuration
+
+The optional `.docu-docu/config.yml` file configures the appearance and behavior of the portal.
+
+Example:
 
 ```yaml
 project:
-  locale: ru
+  locale: en
 
 site:
   title: My Project
@@ -346,18 +348,18 @@ site:
   accent: indigo
 ```
 
-Можно настроить:
+You can configure:
 
-* название проекта;
-* логотип и favicon;
-* обложку главной страницы;
-* светлую или тёмную схему;
-* цветовой акцент;
-* ширину контента;
-* плотность интерфейса;
-* текст в нижней части страницы.
+* the project title;
+* logo and favicon;
+* the homepage hero image;
+* light or dark color scheme;
+* accent color;
+* content width;
+* interface density;
+* footer text.
 
-Доступны темы:
+Available themes:
 
 ```text
 classic
@@ -367,112 +369,112 @@ terminal
 
 ---
 
-## Переводы
+## Translations
 
-Основной язык проекта задаётся в `.docu-docu/config.yml`:
+The main project language is configured in `.docu-docu/config.yml`:
 
 ```yaml
 project:
-  locale: ru
+  locale: en
 ```
 
-Для обновления отдельной языковой версии используйте:
+To update a separate language version, use:
 
 ```text
 $docu-docu translate
 ```
 
-Основная документация остаётся источником истины, а переводы хранятся отдельно.
+The main documentation remains the source of truth, while translations are stored separately.
 
 ---
 
-## Основные команды
+## Main commands
 
-| Задача                            | CLI                                                              | Из репозитория Docu-docu |
-| --------------------------------- | ---------------------------------------------------------------- | ------------------------ |
-| Проверить документацию            | `docu-docu check ./docs`                                         | `make check`             |
-| Собрать портал                    | `docu-docu build ./docs --output ./site --clean`                 | `make docs`              |
-| Запустить локальный портал        | `docu-docu serve ./docs`                                         | `make docs-serve`        |
-| Собрать демонстрационный портал   | `docu-docu build ./example/docs --output ./example/site --clean` | `make demo`              |
-| Запустить демонстрационный портал | `docu-docu serve ./example/docs`                                 | `make demo-serve`        |
-| Найти документ                    | `docu-docu search "запрос" ./docs`                               | —                        |
-| Посмотреть изменения              | `docu-docu changes ./docs`                                       | —                        |
-| Создать шаблон                    | `docu-docu scaffold module MOD-PAYMENTS ./docs --title "Payments"` | —                      |
-| Собрать бинарник                  | `go build -o docu-docu ./cmd/docu-docu`                          | `make build`             |
-| Запустить тесты                   | `go test ./...`                                                  | `make test`              |
-| Собрать релизные бинарники        | вручную                                                          | `make release`           |
-| Удалить артефакты                 | вручную                                                          | `make clean`             |
+| Task                       | CLI                                                                | From the Docu-docu repository |
+| -------------------------- | ------------------------------------------------------------------ | ----------------------------- |
+| Validate documentation     | `docu-docu check ./docs`                                           | `make check`                  |
+| Build the portal           | `docu-docu build ./docs --output ./site --clean`                   | `make docs`                   |
+| Start the local portal     | `docu-docu serve ./docs`                                           | `make docs-serve`             |
+| Build the demo portal      | `docu-docu build ./example/docs --output ./example/site --clean`   | `make demo`                   |
+| Start the demo portal      | `docu-docu serve ./example/docs`                                   | `make demo-serve`             |
+| Find a document            | `docu-docu search "query" ./docs`                                  | —                             |
+| Browse changes             | `docu-docu changes ./docs`                                         | —                             |
+| Create a scaffold          | `docu-docu scaffold module MOD-PAYMENTS ./docs --title "Payments"` | —                             |
+| Build the binary           | `go build -o docu-docu ./cmd/docu-docu`                            | `make build`                  |
+| Run tests                  | `go test ./...`                                                    | `make test`                   |
+| Build release binaries     | manually                                                           | `make release`                |
+| Remove generated artifacts | manually                                                           | `make clean`                  |
 
-Команды `make` предназначены для разработки самого Docu-docu из исходного репозитория.
+The `make` commands are intended for developing Docu-docu from its source repository.
 
-Пользователи готового бинарника запускают команды `docu-docu` напрямую.
-
----
-
-## Публичный Go API
-
-Корневой пакет предоставляет типизированный фасад над моделью, рендерером,
-отчётами и отдельными операциями CLI. Текущий module path — локальный
-`docu-docu`; канонический удалённый Go module ещё не опубликован, поэтому
-внешним потребителям пока не следует фиксировать этот import path.
-
-Экспортируемые операции, побочные эффекты и правила совместимости описаны в
-[контракте Go API](docs/contracts/go-api.md). CLI остаётся основным
-пользовательским способом запуска готового бинарника.
+Users of a released binary should run `docu-docu` commands directly.
 
 ---
 
-## Разработка
+## Public Go API
 
-Отформатировать Go-код:
+The root package provides a typed facade over the model, renderer, reports, and
+individual CLI operations. The current module path is the local
+`docu-docu`; a canonical remote Go module has not been published yet, so
+external consumers should not depend on this import path.
+
+Exported operations, side effects, and compatibility rules are described in the
+[Go API contract](docs/contracts/go-api.md). The CLI remains the primary
+user-facing way to run the released binary.
+
+---
+
+## Development
+
+Format the Go code:
 
 ```bash
 make fmt
 ```
 
-Проверить форматирование:
+Check formatting:
 
 ```bash
 make fmt-check
 ```
 
-Запустить статический анализ:
+Run static analysis:
 
 ```bash
 make vet
 ```
 
-Запустить тесты:
+Run tests:
 
 ```bash
 make test
 ```
 
-Выполнить полный цикл проверки:
+Run the complete validation cycle:
 
 ```bash
 make check
 ```
 
-Собрать портал проекта:
+Build the project portal:
 
 ```bash
 make docs
 ```
 
-Запустить портал проекта:
+Start the project portal:
 
 ```bash
 make docs-serve
 ```
 
-Собрать релизные бинарники:
+Build release binaries:
 
 ```bash
 make release
 ```
 
-Удалить созданные артефакты:
+Remove generated artifacts:
 
 ```bash
 make clean
@@ -480,7 +482,7 @@ make clean
 
 ---
 
-## Справка
+## Help
 
 ```bash
 docu-docu --help
@@ -492,20 +494,20 @@ docu-docu changes --help
 docu-docu scaffold --help
 ```
 
-Подробная документация:
+Detailed documentation:
 
-* [Возможности Docu-docu](docs/reference/features.md)
-* [Настройка](docs/reference/configuration.md)
-* [Команды CLI](docs/contracts/cli.md)
-* [Публичный Go API](docs/contracts/go-api.md)
-* [Исходная документация проекта](docs/index.md)
-* [Тестирование](docs/guides/testing.md)
-* [Участие в разработке](CONTRIBUTING.md)
+* [Docu-docu features](docs/reference/features.md)
+* [Configuration](docs/reference/configuration.md)
+* [CLI commands](docs/contracts/cli.md)
+* [Public Go API](docs/contracts/go-api.md)
+* [Project source documentation](docs/index.md)
+* [Testing](docs/guides/testing.md)
+* [Contributing](CONTRIBUTING.md)
 
 ---
 
-## Лицензия
+## License
 
-Условия распространения находятся в [LICENSE](LICENSE).
+Distribution terms are available in [LICENSE](LICENSE).
 
-Лицензии встроенных сторонних компонентов перечислены в [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Licenses for embedded third-party components are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
