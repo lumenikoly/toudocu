@@ -1002,6 +1002,7 @@ func TestDashboardFocusFallbacksAndAlwaysVisibleOverview(t *testing.T) {
 	html := renderDashboard(model)
 	for _, expected := range []string{
 		`class="focus-result-link" href="use-cases/UC-AUTH-01.html"`,
+		`class="recommended-entry" href="architecture/overview.html"`,
 		`class="focus-signal focus-signal-work" href="status.html"`,
 		`class="focus-signal focus-signal-blockers" href="status.html"`,
 		`class="focus-signal focus-signal-risks" href="risks.html"`,

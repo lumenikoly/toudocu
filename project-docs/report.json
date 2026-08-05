@@ -4,7 +4,7 @@
     "name": "Docu-docu",
     "version": "0.0.1"
   },
-  "generatedAt": "2026-08-05T14:39:15.776270424Z",
+  "generatedAt": "2026-08-05T15:28:17.2848019Z",
   "sourceDirectory": "docs",
   "staleDays": 90,
   "project": {
@@ -37,7 +37,7 @@
     }
   },
   "stats": {
-    "documents": 65,
+    "documents": 72,
     "totalTasks": 15,
     "completedTasks": 14,
     "remainingTasks": 1,
@@ -45,7 +45,7 @@
     "documentsComplete": 12,
     "documentsInProgress": 2,
     "documentsNotStarted": 0,
-    "documentsWithoutTasks": 51,
+    "documentsWithoutTasks": 58,
     "staleDocuments": 0,
     "documentsWithoutDescription": 12,
     "documentsWithoutStatus": 0,
@@ -60,8 +60,8 @@
     "useCaseStatuses": {
       "done": 9
     },
-    "screens": 0,
-    "screensDone": 0,
+    "screens": 6,
+    "screensDone": 6,
     "screensInProgress": 0,
     "screensPlanned": 0,
     "screensUnreachable": 0,
@@ -715,7 +715,8 @@
       "errors": 0,
       "links": [],
       "backlinks": [
-        "guides/documentation-changes.md"
+        "guides/documentation-changes.md",
+        "reference/api.md"
       ],
       "relatedDocuments": []
     },
@@ -801,6 +802,7 @@
         "guides/work-items.md",
         "modules/cli.md",
         "modules/model.md",
+        "reference/api.md",
         "reference/document-types.md",
         "reference/features.md",
         "use-cases/build-portal.md",
@@ -845,7 +847,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T08:15:03.403508286Z",
+      "updatedAt": "2026-08-05T14:53:24.406878417Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -854,6 +856,7 @@
         "contracts/cli.md",
         "flows/FLOW-DOCS-SERVE.md",
         "modules/site.md",
+        "reference/api.md",
         "reference/features.md",
         "use-cases/serve-portal.md",
         "work/TASK-SITE-002.md"
@@ -913,6 +916,7 @@
         "architecture/system-boundary.md",
         "contracts/cli.md",
         "modules/model.md",
+        "reference/api.md",
         "reference/features.md"
       ],
       "relatedDocuments": [
@@ -2362,6 +2366,91 @@
     },
     {
       "id": "",
+      "sourcePath": "reference/api.md",
+      "outputPath": "reference/api.html",
+      "type": "reference",
+      "sectionType": "reference",
+      "title": "Карта API и программных интерфейсов",
+      "description": "Страница помогает разработчику или интегратору выбрать действующий интерфейс Docu-docu и перейти к его полному контракту. Это навигационный обзор, а не OpenAPI-схема: форматы, endpoints и правила совместимости остаются в связанных контрактах.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-05T15:00:34.78779657Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../contracts/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "../contracts/cli.html"
+        },
+        {
+          "destination": "../contracts/go-api.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/go-api.md",
+          "href": "../contracts/go-api.html"
+        },
+        {
+          "destination": "../contracts/cli.md#projectreport-schema-v1",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "../contracts/cli.html#projectreport-schema-v1"
+        },
+        {
+          "destination": "../contracts/editor-http.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/editor-http.md",
+          "href": "../contracts/editor-http.html"
+        },
+        {
+          "destination": "../contracts/changes-http.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/changes-http.md",
+          "href": "../contracts/changes-http.html"
+        },
+        {
+          "destination": "../contracts/editor-http.md#ручная-пересборка-портала",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/editor-http.md",
+          "href": "../contracts/editor-http.html#ручная-пересборка-портала"
+        }
+      ],
+      "backlinks": [
+        "reference/features.md"
+      ],
+      "relatedDocuments": [
+        "contracts/cli.md",
+        "contracts/go-api.md",
+        "contracts/editor-http.md",
+        "contracts/changes-http.md"
+      ]
+    },
+    {
+      "id": "",
       "sourcePath": "reference/changes-report.md",
       "outputPath": "reference/changes-report.html",
       "type": "reference",
@@ -2630,11 +2719,27 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T14:34:23.464707337Z",
+      "updatedAt": "2026-08-05T14:53:24.406878417Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
       "links": [
+        {
+          "destination": "api.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "reference/api.md",
+          "href": "api.html"
+        },
+        {
+          "destination": "../screens/",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "directory",
+          "target": "screens/index.html",
+          "href": "../screens/index.html"
+        },
         {
           "destination": "../contracts/cli.md",
           "broken": false,
@@ -2684,6 +2789,14 @@
           "href": "../contracts/editor-http.html"
         },
         {
+          "destination": "../screens/",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "directory",
+          "target": "screens/index.html",
+          "href": "../screens/index.html"
+        },
+        {
           "destination": "../guides/screens.md",
           "broken": false,
           "blocked": false,
@@ -2704,6 +2817,7 @@
         "work/TASK-SITE-001.md"
       ],
       "relatedDocuments": [
+        "reference/api.md",
         "contracts/cli.md",
         "contracts/go-api.md",
         "guides/agent-workflows.md",
@@ -2713,6 +2827,219 @@
         "guides/screens.md",
         "guides/work-items.md"
       ]
+    },
+    {
+      "id": "SC-CHANGES-WORKSPACE",
+      "sourcePath": "screens/SC-CHANGES-WORKSPACE.md",
+      "outputPath": "screens/SC-CHANGES-WORKSPACE.html",
+      "type": "screen",
+      "sectionType": "screens",
+      "title": "SC-CHANGES-WORKSPACE: Просмотр изменений",
+      "description": "Read-only workspace сравнения выбранных Git-состояний документации: сводка, исходный, rendered и semantic diff, экранная overlay-карта и task impact.",
+      "metadata": {
+        "id": "SC-CHANGES-WORKSPACE",
+        "module": "MOD-CHANGES",
+        "route": "/changes/",
+        "status": "Реализован",
+        "type": "Экран",
+        "updated": "2026-08-05"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Реализован",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-05T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "SC-SITE-DOCUMENT",
+      "sourcePath": "screens/SC-SITE-DOCUMENT.md",
+      "outputPath": "screens/SC-SITE-DOCUMENT.html",
+      "type": "screen",
+      "sectionType": "screens",
+      "title": "SC-SITE-DOCUMENT: Страница документа",
+      "description": "Каноническое представление выбранного Markdown-документа в портале. Конкретный URL определяется самим документом и generated output, поэтому общий шаблон маршрута здесь намеренно не фиксируется.",
+      "metadata": {
+        "id": "SC-SITE-DOCUMENT",
+        "module": "MOD-SITE",
+        "status": "Реализован",
+        "type": "Страница",
+        "updated": "2026-08-05"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Реализован",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-05T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "SC-SITE-EDITOR",
+      "sourcePath": "screens/SC-SITE-EDITOR.md",
+      "outputPath": "screens/SC-SITE-EDITOR.html",
+      "type": "screen",
+      "sectionType": "screens",
+      "title": "SC-SITE-EDITOR: Редактор",
+      "description": "Workspace исходной документации в режиме serve : выбор файла, preview, diagnostics, создание и защищённое сохранение.",
+      "metadata": {
+        "id": "SC-SITE-EDITOR",
+        "module": "MOD-SITE",
+        "status": "Реализован",
+        "type": "Экран",
+        "updated": "2026-08-05"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Реализован",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-05T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "SC-SITE-HOME",
+      "sourcePath": "screens/SC-SITE-HOME.md",
+      "outputPath": "screens/SC-SITE-HOME.html",
+      "type": "screen",
+      "sectionType": "screens",
+      "title": "SC-SITE-HOME: Главная портала",
+      "description": "Главная точка входа в собранную документацию: показывает состояние проекта и ведёт к документам, локальному редактору и просмотру изменений.",
+      "metadata": {
+        "id": "SC-SITE-HOME",
+        "module": "MOD-SITE",
+        "route": "/",
+        "status": "Реализован",
+        "type": "Страница",
+        "updated": "2026-08-05"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Реализован",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-05T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "SC-SITE-SCREEN-MAP",
+      "sourcePath": "screens/SC-SITE-SCREEN-MAP.md",
+      "outputPath": "screens/SC-SITE-SCREEN-MAP.html",
+      "type": "screen",
+      "sectionType": "screens",
+      "title": "SC-SITE-SCREEN-MAP: Общая карта экранов",
+      "description": "Интерактивное представление устойчивых экранов и пользовательских переходов, построенное из screens/SC- .md . Карта не является каталогом всех generated routes.",
+      "metadata": {
+        "id": "SC-SITE-SCREEN-MAP",
+        "module": "MOD-SITE",
+        "route": "/screens/index.html",
+        "status": "Реализован",
+        "type": "Страница",
+        "updated": "2026-08-05"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Реализован",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-05T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "SC-SITE-USE-CASE",
+      "sourcePath": "screens/SC-SITE-USE-CASE.md",
+      "outputPath": "screens/SC-SITE-USE-CASE.html",
+      "type": "screen",
+      "sectionType": "screens",
+      "title": "SC-SITE-USE-CASE: Workspace пользовательского сценария",
+      "description": "Единая страница выбранного UC- с описанием, картой, проигрыванием и связями. URL зависит от generated use case и не объявляется отдельным route pattern.",
+      "metadata": {
+        "id": "SC-SITE-USE-CASE",
+        "module": "MOD-SITE",
+        "status": "Реализован",
+        "type": "Страница",
+        "updated": "2026-08-05"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Реализован",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-05T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
     },
     {
       "id": "UC-DOCS-01",
@@ -2972,8 +3299,11 @@
         "id": "UC-DOCS-04",
         "module": "MOD-SITE",
         "priority": "Высокий",
+        "screens": "SC-SITE-USE-CASE, SC-SITE-SCREEN-MAP",
+        "startScreen": "SC-SITE-USE-CASE",
         "status": "Готово",
-        "updated": "2026-07-29"
+        "terminalScreens": "SC-SITE-SCREEN-MAP",
+        "updated": "2026-08-05"
       },
       "status": {
         "kind": "done",
@@ -2987,7 +3317,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-29T00:00:00Z",
+      "updatedAt": "2026-08-05T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -3052,11 +3382,15 @@
       "description": "Разработчик просматривает и редактирует документацию через локальный HTTP-сервер и получает обновлённую модель и портал после сохранения или внешнего изменения.",
       "metadata": {
         "actor": "Разработчик",
+        "allowCycle": "Да",
         "id": "UC-DOCS-03",
         "module": "MOD-SITE",
         "priority": "Средний",
+        "screens": "SC-SITE-HOME, SC-SITE-EDITOR, SC-SITE-DOCUMENT",
+        "startScreen": "SC-SITE-HOME",
         "status": "Готово",
-        "updated": "2026-08-04"
+        "terminalScreens": "SC-SITE-DOCUMENT",
+        "updated": "2026-08-05"
       },
       "status": {
         "kind": "done",
@@ -3070,7 +3404,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-04T00:00:00Z",
+      "updatedAt": "2026-08-05T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -3372,8 +3706,11 @@
         "id": "UC-DOCS-05",
         "module": "MOD-CHANGES",
         "priority": "Высокий",
+        "screens": "SC-SITE-HOME, SC-CHANGES-WORKSPACE",
+        "startScreen": "SC-SITE-HOME",
         "status": "Готово",
-        "updated": "2026-08-03"
+        "terminalScreens": "SC-CHANGES-WORKSPACE",
+        "updated": "2026-08-05"
       },
       "status": {
         "kind": "done",
@@ -3387,7 +3724,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T00:00:00Z",
+      "updatedAt": "2026-08-05T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -3672,8 +4009,9 @@
         "priority": "Высокий",
         "standards": "STD-GO-001, STD-DOCS-001",
         "status": "Выполнено",
+        "transitions": "TR-SITE-005",
         "type": "Feature",
-        "updated": "2026-08-01",
+        "updated": "2026-08-05",
         "useCase": "UC-DOCS-05"
       },
       "status": {
@@ -3688,7 +4026,7 @@
         "remaining": 0,
         "percent": 100
       },
-      "updatedAt": "2026-08-01T00:00:00Z",
+      "updatedAt": "2026-08-05T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -3897,8 +4235,9 @@
         "priority": "Высокий",
         "standards": "STD-GO-001, STD-DOCS-001",
         "status": "Выполнено",
+        "transitions": "TR-SITE-004",
         "type": "Maintenance",
-        "updated": "2026-08-03"
+        "updated": "2026-08-05"
       },
       "status": {
         "kind": "done",
@@ -3912,7 +4251,7 @@
         "remaining": 0,
         "percent": 100
       },
-      "updatedAt": "2026-08-03T00:00:00Z",
+      "updatedAt": "2026-08-05T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -4065,8 +4404,9 @@
         "priority": "Высокий",
         "standards": "STD-GO-001, STD-DOCS-001",
         "status": "Выполнено",
+        "transitions": "TR-SITE-001, TR-SITE-002, TR-SITE-003",
         "type": "Feature",
-        "updated": "2026-07-31",
+        "updated": "2026-08-05",
         "useCase": "UC-DOCS-03"
       },
       "status": {
@@ -4081,7 +4421,7 @@
         "remaining": 0,
         "percent": 100
       },
-      "updatedAt": "2026-07-31T00:00:00Z",
+      "updatedAt": "2026-08-05T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -4498,7 +4838,9 @@
         "useCaseIds": [
           "UC-DOCS-05"
         ],
-        "screenIds": [],
+        "screenIds": [
+          "SC-CHANGES-WORKSPACE"
+        ],
         "businessRuleIds": [
           "BR-CHANGES-001",
           "BR-CHANGES-002",
@@ -4545,7 +4887,13 @@
           "UC-DOCS-03",
           "UC-DOCS-04"
         ],
-        "screenIds": [],
+        "screenIds": [
+          "SC-SITE-DOCUMENT",
+          "SC-SITE-EDITOR",
+          "SC-SITE-HOME",
+          "SC-SITE-SCREEN-MAP",
+          "SC-SITE-USE-CASE"
+        ],
         "businessRuleIds": [
           "BR-SITE-001",
           "BR-SITE-002",
@@ -4631,8 +4979,14 @@
           "BR-SITE-005"
         ],
         "flowIds": [],
-        "screenIds": [],
-        "terminalScreens": [],
+        "screenIds": [
+          "SC-SITE-SCREEN-MAP",
+          "SC-SITE-USE-CASE"
+        ],
+        "startScreen": "SC-SITE-USE-CASE",
+        "terminalScreens": [
+          "SC-SITE-SCREEN-MAP"
+        ],
         "allowCycle": false
       },
       {
@@ -4655,9 +5009,16 @@
         "flowIds": [
           "FLOW-DOCS-SERVE"
         ],
-        "screenIds": [],
-        "terminalScreens": [],
-        "allowCycle": false
+        "screenIds": [
+          "SC-SITE-DOCUMENT",
+          "SC-SITE-EDITOR",
+          "SC-SITE-HOME"
+        ],
+        "startScreen": "SC-SITE-HOME",
+        "terminalScreens": [
+          "SC-SITE-DOCUMENT"
+        ],
+        "allowCycle": true
       },
       {
         "id": "UC-TASK-02",
@@ -4726,8 +5087,14 @@
         "flowIds": [
           "FLOW-DOCS-CHANGES"
         ],
-        "screenIds": [],
-        "terminalScreens": [],
+        "screenIds": [
+          "SC-CHANGES-WORKSPACE",
+          "SC-SITE-HOME"
+        ],
+        "startScreen": "SC-SITE-HOME",
+        "terminalScreens": [
+          "SC-CHANGES-WORKSPACE"
+        ],
         "allowCycle": false
       },
       {
@@ -5322,13 +5689,15 @@
         "type": "Feature",
         "archived": false,
         "priority": "Высокий",
-        "updated": "2026-08-01",
+        "updated": "2026-08-05",
         "owner": "Команда Docu-docu",
         "moduleId": "MOD-CHANGES",
         "useCaseId": "UC-DOCS-05",
         "flowId": "FLOW-DOCS-CHANGES",
         "screenIds": [],
-        "transitionIds": [],
+        "transitionIds": [
+          "TR-SITE-005"
+        ],
         "standardIds": [
           "STD-GO-001",
           "STD-DOCS-001"
@@ -5339,73 +5708,73 @@
         "anchor": "task-changes-001-просмотр-изменений-документации",
         "criteria": [
           {
-            "line": 53,
+            "line": 54,
             "indent": 0,
             "completed": true,
             "text": "AC-01 Git adapter поддерживает commit, index и working-tree snapshots,"
           },
           {
-            "line": 56,
+            "line": 57,
             "indent": 0,
             "completed": true,
             "text": "AC-02 ChangeSetReport schema v1 содержит явный resolved comparison,"
           },
           {
-            "line": 58,
+            "line": 59,
             "indent": 0,
             "completed": true,
             "text": "AC-03 Unified diff точно получен от Git, side-by-side выводится из hunks,"
           },
           {
-            "line": 60,
+            "line": 61,
             "indent": 0,
             "completed": true,
             "text": "AC-04 Deterministic semantic diff поддерживает UC, FLOW, SC/TR, MOD,"
           },
           {
-            "line": 62,
+            "line": 63,
             "indent": 0,
             "completed": true,
             "text": "AC-05 OpenAPI YAML/JSON diff сравнивает operations, requests, responses,"
           },
           {
-            "line": 64,
+            "line": 65,
             "indent": 0,
             "completed": true,
             "text": "AC-06 Rendered Markdown, Mermaid, Screen Map и image assets доступны до"
           },
           {
-            "line": 66,
+            "line": 67,
             "indent": 0,
             "completed": true,
             "text": "AC-07 Task impact отделяет task contract от permanent documentation и"
           },
           {
-            "line": 68,
+            "line": 69,
             "indent": 0,
             "completed": true,
             "text": "AC-08 CLI поддерживает summary, file и task reports, filters,"
           },
           {
-            "line": 70,
+            "line": 71,
             "indent": 0,
             "completed": true,
             "text": "AC-09 Read-only HTTP API проверяет revisions/paths/limits, поддерживает"
           },
           {
-            "line": 72,
+            "line": 73,
             "indent": 0,
             "completed": true,
             "text": "AC-10 Changes UI поддерживает comparison selector, filters/search,"
           },
           {
-            "line": 74,
+            "line": 75,
             "indent": 0,
             "completed": true,
             "text": "AC-11 serve сохраняет filters/open file при invalidation, а отсутствие"
           },
           {
-            "line": 76,
+            "line": 77,
             "indent": 0,
             "completed": true,
             "text": "AC-12 Static build, существующий check, ProjectReport schema v1 и"
@@ -5509,8 +5878,12 @@
             "commands": [
               "go test ./... -run 'TestChangesAssetsContract'"
             ],
-            "transitions": [],
-            "verificationReferences": []
+            "transitions": [
+              "TR-SITE-005"
+            ],
+            "verificationReferences": [
+              "TestServeSiteIncludesEditor"
+            ]
           },
           {
             "criterionId": "AC-11",
@@ -5539,105 +5912,105 @@
             "commands": [
               "go test ./... -run 'TestGitChange|TestChangeComparison'"
             ],
-            "line": 90
+            "line": 92
           },
           {
             "target": "AC-02",
             "commands": [
               "go test ./... -run 'TestChangeSetReport|TestChangeSetDigest'"
             ],
-            "line": 91
+            "line": 93
           },
           {
             "target": "AC-03",
             "commands": [
               "go test ./... -run 'TestSourceDiff|TestSideBySideDiff|TestLargeChange'"
             ],
-            "line": 92
+            "line": 94
           },
           {
             "target": "AC-04",
             "commands": [
               "go test ./... -run 'TestSemanticDiff'"
             ],
-            "line": 93
+            "line": 95
           },
           {
             "target": "AC-05",
             "commands": [
               "go test ./... -run 'TestOpenAPIDiff'"
             ],
-            "line": 94
+            "line": 96
           },
           {
             "target": "AC-06",
             "commands": [
               "go test ./... -run 'TestRenderedChange|TestMermaidChange|TestAssetChange|TestScreenMapChange'"
             ],
-            "line": 95
+            "line": 97
           },
           {
             "target": "AC-07",
             "commands": [
               "go test ./... -run 'TestTaskImpact'"
             ],
-            "line": 96
+            "line": 98
           },
           {
             "target": "AC-08",
             "commands": [
               "go test ./... -run 'TestChangesCLI'"
             ],
-            "line": 97
+            "line": 99
           },
           {
             "target": "AC-09",
             "commands": [
               "go test ./... -run 'TestChangesHTTP'"
             ],
-            "line": 98
+            "line": 100
           },
           {
             "target": "AC-10",
             "commands": [
               "go test ./... -run 'TestChangesAssetsContract'"
             ],
-            "line": 99
+            "line": 101
           },
           {
             "target": "AC-11",
             "commands": [
               "go test ./... -run 'TestChangesInvalidation|TestChangesWithoutGit'"
             ],
-            "line": 100
+            "line": 102
           },
           {
             "target": "AC-12",
             "commands": [
               "go test ./... -run 'TestStaticSiteExcludesChanges|TestProjectReport'"
             ],
-            "line": 101
+            "line": 103
           },
           {
             "target": "ALL",
             "commands": [
               "go test ./..."
             ],
-            "line": 102
+            "line": 104
           },
           {
             "target": "DOCS",
             "commands": [
               "go run ./cmd/docu-docu check ./docs --repository-root ."
             ],
-            "line": 103
+            "line": 105
           },
           {
             "target": "QUALITY",
             "commands": [
               "go vet ./... \u0026\u0026 go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docu-docu check ./docs --strict --stale-days 0"
             ],
-            "line": 104
+            "line": 106
           }
         ],
         "repositoryPaths": [
@@ -6620,11 +6993,13 @@
         "type": "Maintenance",
         "archived": false,
         "priority": "Высокий",
-        "updated": "2026-08-03",
+        "updated": "2026-08-05",
         "owner": "Команда Docu-docu",
         "moduleId": "MOD-MODEL",
         "screenIds": [],
-        "transitionIds": [],
+        "transitionIds": [
+          "TR-SITE-004"
+        ],
         "standardIds": [
           "STD-GO-001",
           "STD-DOCS-001"
@@ -6635,43 +7010,43 @@
         "anchor": "task-model-001-стабилизировать-встроенные-разделы-и-маршрут-flow",
         "criteria": [
           {
-            "line": 45,
+            "line": 46,
             "indent": 0,
             "completed": true,
             "text": "AC-01 Двенадцать SectionType имеют стабильный порядок и derived lookup."
           },
           {
-            "line": 46,
+            "line": 47,
             "indent": 0,
             "completed": true,
             "text": "AC-02 Config принимает project-only locale и полный sections map."
           },
           {
-            "line": 47,
+            "line": 48,
             "indent": 0,
             "completed": true,
             "text": "AC-03 Некорректные locale отклоняются, а неизвестные корректные locale допустимы."
           },
           {
-            "line": 48,
+            "line": 49,
             "indent": 0,
             "completed": true,
             "text": "AC-04 Навигация, routes, HTML lang и report используют SectionType."
           },
           {
-            "line": 49,
+            "line": 50,
             "indent": 0,
             "completed": true,
             "text": "AC-05 Полный Go и строгий documentation verification проходят."
           },
           {
-            "line": 50,
+            "line": 51,
             "indent": 0,
             "completed": true,
             "text": "AC-06 Каталог FLOW существует только как processes/index.html, его"
           },
           {
-            "line": 53,
+            "line": 54,
             "indent": 0,
             "completed": true,
             "text": "AC-07 Демо-проект задаёт полные локализованные project.locale и"
@@ -6735,8 +7110,12 @@
             "commands": [
               "go test ./... -run TestScreenPortalAndReportV1"
             ],
-            "transitions": [],
-            "verificationReferences": []
+            "transitions": [
+              "TR-SITE-004"
+            ],
+            "verificationReferences": [
+              "TestScreenPortalAndReportV1"
+            ]
           },
           {
             "criterionId": "AC-07",
@@ -6755,70 +7134,70 @@
             "commands": [
               "go test ./... -run TestBuiltinSectionsStableOrderAndLookups"
             ],
-            "line": 58
+            "line": 60
           },
           {
             "target": "AC-02",
             "commands": [
               "go test ./... -run TestProjectLocaleConfiguration"
             ],
-            "line": 59
+            "line": 61
           },
           {
             "target": "AC-03",
             "commands": [
               "go test ./... -run TestProjectLocaleConfiguration"
             ],
-            "line": 60
+            "line": 62
           },
           {
             "target": "AC-04",
             "commands": [
               "go test ./... -run TestMissingProjectConfigurationUsesEnglishAndWarning"
             ],
-            "line": 61
+            "line": 63
           },
           {
             "target": "AC-05",
             "commands": [
               "go vet ./... \u0026\u0026 go test ./... \u0026\u0026 go test -race ./..."
             ],
-            "line": 62
+            "line": 64
           },
           {
             "target": "AC-06",
             "commands": [
               "go test ./... -run TestScreenPortalAndReportV1"
             ],
-            "line": 63
+            "line": 65
           },
           {
             "target": "AC-07",
             "commands": [
               "go run ./cmd/docu-docu check ./example/docs --repository-root ./example --strict --stale-days 0"
             ],
-            "line": 64
+            "line": 66
           },
           {
             "target": "ALL",
             "commands": [
               "go vet ./... \u0026\u0026 go test ./... \u0026\u0026 go test -race ./..."
             ],
-            "line": 65
+            "line": 67
           },
           {
             "target": "DOCS",
             "commands": [
               "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0 \u0026\u0026 go run ./cmd/docu-docu check ./example/docs --repository-root ./example --strict --stale-days 0"
             ],
-            "line": 66
+            "line": 68
           },
           {
             "target": "QUALITY",
             "commands": [
               "go test ./..."
             ],
-            "line": 67
+            "line": 69
           }
         ],
         "repositoryPaths": [
@@ -7391,13 +7770,17 @@
         "type": "Feature",
         "archived": false,
         "priority": "Высокий",
-        "updated": "2026-07-31",
+        "updated": "2026-08-05",
         "owner": "Команда Docu-docu",
         "moduleId": "MOD-SITE",
         "useCaseId": "UC-DOCS-03",
         "flowId": "FLOW-DOCS-SERVE",
         "screenIds": [],
-        "transitionIds": [],
+        "transitionIds": [
+          "TR-SITE-001",
+          "TR-SITE-002",
+          "TR-SITE-003"
+        ],
         "standardIds": [
           "STD-GO-001",
           "STD-DOCS-001"
@@ -7408,103 +7791,103 @@
         "anchor": "task-site-002-редактирование-исходной-документации-в-serve",
         "criteria": [
           {
-            "line": 65,
+            "line": 66,
             "indent": 0,
             "completed": true,
             "text": "AC-01 GenerateSite всегда создаёт автономный статический портал, а"
           },
           {
-            "line": 67,
+            "line": 68,
             "indent": 0,
             "completed": true,
             "text": "AC-02 Workspace перечисляет только обычные .md, .yaml, .yml и"
           },
           {
-            "line": 71,
+            "line": 72,
             "indent": 0,
             "completed": true,
             "text": "AC-03 API принимает только канонические относительные POSIX-пути и"
           },
           {
-            "line": 73,
+            "line": 74,
             "indent": 0,
             "completed": true,
             "text": "AC-04 Чтение и запись используют SHA-256 digest; save сохраняет mode,"
           },
           {
-            "line": 78,
+            "line": 79,
             "indent": 0,
             "completed": true,
             "text": "AC-05 Stale digest возвращает 409 staledigest, а подтверждённое"
           },
           {
-            "line": 81,
+            "line": 82,
             "indent": 0,
             "completed": true,
             "text": "AC-06 Markdown diagnostics строятся по полной модели с in-memory overlay;"
           },
           {
-            "line": 84,
+            "line": 85,
             "indent": 0,
             "completed": true,
             "text": "AC-07 Save/create синхронно обновляют модель, HTML, поиск и revision;"
           },
           {
-            "line": 86,
+            "line": 87,
             "indent": 0,
             "completed": true,
             "text": "AC-08 Serve frontend опрашивает file revision через ETag раз в две"
           },
           {
-            "line": 88,
+            "line": 89,
             "indent": 0,
             "completed": true,
             "text": "AC-09 Editor предоставляет дерево, path/dirty/save toolbar, Editor,"
           },
           {
-            "line": 90,
+            "line": 91,
             "indent": 0,
             "completed": true,
             "text": "AC-10 На мобильном sidebar работает как drawer, а split становится одним"
           },
           {
-            "line": 92,
+            "line": 93,
             "indent": 0,
             "completed": true,
             "text": "AC-11 Markdown preview использует существующий безопасный renderer;"
           },
           {
-            "line": 95,
+            "line": 96,
             "indent": 0,
             "completed": true,
             "text": "AC-12 task init и семь scaffold-типов используют один упорядоченный"
           },
           {
-            "line": 98,
+            "line": 99,
             "indent": 0,
             "completed": true,
             "text": "AC-13 Все editor JSON-ответы имеют schemaVersion: 1, no-store и единый"
           },
           {
-            "line": 101,
+            "line": 102,
             "indent": 0,
             "completed": true,
             "text": "AC-14 Запись требует JSON content type, X-Docu-docu-Action и same-origin /"
           },
           {
-            "line": 106,
+            "line": 107,
             "indent": 0,
             "completed": true,
             "text": "AC-15 Методы /files, /file, /preview, /validate, /create, ETag /"
           },
           {
-            "line": 109,
+            "line": 110,
             "indent": 0,
             "completed": true,
             "text": "AC-16 Vendored CodeMirror IIFE bundle и лицензии/checksums встроены в Go;"
           },
           {
-            "line": 111,
+            "line": 112,
             "indent": 0,
             "completed": true,
             "text": "AC-17 Документация фиксирует границу build = static read-only,"
@@ -7518,8 +7901,12 @@
             "commands": [
               "go test ./... -run 'TestStaticSiteExcludesEditor|TestServeSiteIncludesEditor'"
             ],
-            "transitions": [],
-            "verificationReferences": []
+            "transitions": [
+              "TR-SITE-001"
+            ],
+            "verificationReferences": [
+              "TestDashboardFocusFallbacksAndAlwaysVisibleOverview"
+            ]
           },
           {
             "criterionId": "AC-02",
@@ -7598,8 +7985,12 @@
             "commands": [
               "go test ./... -run 'TestEditorKeyboardAndDirtyGuards|TestEditorAssetsContract'"
             ],
-            "transitions": [],
-            "verificationReferences": []
+            "transitions": [
+              "TR-SITE-002"
+            ],
+            "verificationReferences": [
+              "TestServeSiteIncludesEditor"
+            ]
           },
           {
             "criterionId": "AC-10",
@@ -7678,8 +8069,12 @@
             "commands": [
               "go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docu-docu check ./docs --strict --stale-days 0 \u0026\u0026 GOOS=windows GOARCH=amd64 go test -c -o /tmp/docu-docu-editor-windows.test . \u0026\u0026 GOOS=darwin GOARCH=amd64 go build -o /tmp/docu-docu-editor-darwin ./cmd/docu-docu \u0026\u0026 GOOS=linux GOARCH=amd64 go build -o /tmp/docu-docu-editor-linux ./cmd/docu-docu \u0026\u0026 test -s build/editor-qa/report.md \u0026\u0026 test -s build/editor-qa/semantic-review.txt"
             ],
-            "transitions": [],
-            "verificationReferences": []
+            "transitions": [
+              "TR-SITE-003"
+            ],
+            "verificationReferences": [
+              "TestServeSiteIncludesEditor"
+            ]
           }
         ],
         "checks": [
@@ -7688,140 +8083,140 @@
             "commands": [
               "go test ./... -run 'TestStaticSiteExcludesEditor|TestServeSiteIncludesEditor'"
             ],
-            "line": 128
+            "line": 132
           },
           {
             "target": "AC-02",
             "commands": [
               "go test ./... -run 'TestEditorWorkspaceFiles|TestEditorWorkspaceExclusions'"
             ],
-            "line": 129
+            "line": 133
           },
           {
             "target": "AC-03",
             "commands": [
               "go test ./... -run 'TestEditorPathValidation'"
             ],
-            "line": 130
+            "line": 134
           },
           {
             "target": "AC-04",
             "commands": [
               "go test ./... -run 'TestEditorAtomicSave|TestEditorAtomicFailure'"
             ],
-            "line": 131
+            "line": 135
           },
           {
             "target": "AC-05",
             "commands": [
               "go test ./... -run 'TestEditorStaleDigest'"
             ],
-            "line": 132
+            "line": 136
           },
           {
             "target": "AC-06",
             "commands": [
               "go test ./... -run 'TestEditorDiagnostics'"
             ],
-            "line": 133
+            "line": 137
           },
           {
             "target": "AC-07",
             "commands": [
               "go test ./... -run 'TestEditorRebuild|TestEditorWatcher'"
             ],
-            "line": 134
+            "line": 138
           },
           {
             "target": "AC-08",
             "commands": [
               "go test ./... -run 'TestEditorPollingStateMachine|TestEditorAssetsContract'"
             ],
-            "line": 135
+            "line": 139
           },
           {
             "target": "AC-09",
             "commands": [
               "go test ./... -run 'TestEditorKeyboardAndDirtyGuards|TestEditorAssetsContract'"
             ],
-            "line": 136
+            "line": 140
           },
           {
             "target": "AC-10",
             "commands": [
               "go test ./... -run 'TestEditorResponsiveContract|TestEditorAssetsContract'"
             ],
-            "line": 137
+            "line": 141
           },
           {
             "target": "AC-11",
             "commands": [
               "go test ./... -run 'TestEditorPreviewAndRaw'"
             ],
-            "line": 138
+            "line": 142
           },
           {
             "target": "AC-12",
             "commands": [
               "go test ./... -run 'TestScaffoldRegistryParity|TestEditorCreate'"
             ],
-            "line": 139
+            "line": 143
           },
           {
             "target": "AC-13",
             "commands": [
               "go test ./... -run 'TestEditorJSONContract|TestEditorLimits'"
             ],
-            "line": 140
+            "line": 144
           },
           {
             "target": "AC-14",
             "commands": [
               "go test ./... -run 'TestEditorWriteGuards|TestEditorCannotExecuteCommands'"
             ],
-            "line": 141
+            "line": 145
           },
           {
             "target": "AC-15",
             "commands": [
               "go test ./... -run 'TestEditorAPIContract'"
             ],
-            "line": 142
+            "line": 146
           },
           {
             "target": "AC-16",
             "commands": [
               "go test ./... -run 'TestEditorVendoredAssets'"
             ],
-            "line": 143
+            "line": 147
           },
           {
             "target": "AC-17",
             "commands": [
               "go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docu-docu check ./docs --strict --stale-days 0 \u0026\u0026 GOOS=windows GOARCH=amd64 go test -c -o /tmp/docu-docu-editor-windows.test . \u0026\u0026 GOOS=darwin GOARCH=amd64 go build -o /tmp/docu-docu-editor-darwin ./cmd/docu-docu \u0026\u0026 GOOS=linux GOARCH=amd64 go build -o /tmp/docu-docu-editor-linux ./cmd/docu-docu \u0026\u0026 test -s build/editor-qa/report.md \u0026\u0026 test -s build/editor-qa/semantic-review.txt"
             ],
-            "line": 144
+            "line": 148
           },
           {
             "target": "ALL",
             "commands": [
               "go test ./..."
             ],
-            "line": 145
+            "line": 149
           },
           {
             "target": "DOCS",
             "commands": [
               "go run ./cmd/docu-docu check ./docs --repository-root ."
             ],
-            "line": 146
+            "line": 150
           },
           {
             "target": "QUALITY",
             "commands": [
               "go vet ./... \u0026\u0026 go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docu-docu check ./docs --strict --stale-days 0"
             ],
-            "line": 147
+            "line": 151
           }
         ],
         "repositoryPaths": [
@@ -7869,11 +8264,318 @@
       }
     ]
   },
-  "screens": [],
-  "transitions": [],
-  "playableFlows": [],
+  "screens": [
+    {
+      "id": "SC-CHANGES-WORKSPACE",
+      "title": "Просмотр изменений",
+      "description": "Read-only workspace сравнения выбранных Git-состояний документации: сводка, исходный, rendered и semantic diff, экранная overlay-карта и task impact.",
+      "module": "MOD-CHANGES",
+      "type": "screen",
+      "status": "implemented",
+      "route": "/changes/",
+      "updated": "2026-08-05",
+      "states": [
+        {
+          "id": "DEFAULT"
+        }
+      ],
+      "incomingTransitions": [
+        "TR-SITE-005"
+      ],
+      "outgoingTransitions": [],
+      "useCases": [
+        "UC-DOCS-05"
+      ],
+      "workItems": [],
+      "contracts": [],
+      "document": "screens/SC-CHANGES-WORKSPACE.md"
+    },
+    {
+      "id": "SC-SITE-DOCUMENT",
+      "title": "Страница документа",
+      "description": "Каноническое представление выбранного Markdown-документа в портале. Конкретный URL определяется самим документом и generated output, поэтому общий шаблон маршрута здесь намеренно не фиксируется.",
+      "module": "MOD-SITE",
+      "type": "page",
+      "status": "implemented",
+      "updated": "2026-08-05",
+      "states": [
+        {
+          "id": "DEFAULT"
+        }
+      ],
+      "incomingTransitions": [
+        "TR-SITE-001"
+      ],
+      "outgoingTransitions": [],
+      "useCases": [
+        "UC-DOCS-03"
+      ],
+      "workItems": [],
+      "contracts": [],
+      "document": "screens/SC-SITE-DOCUMENT.md"
+    },
+    {
+      "id": "SC-SITE-EDITOR",
+      "title": "Редактор",
+      "description": "Workspace исходной документации в режиме serve : выбор файла, preview, diagnostics, создание и защищённое сохранение.",
+      "module": "MOD-SITE",
+      "type": "screen",
+      "status": "implemented",
+      "updated": "2026-08-05",
+      "states": [
+        {
+          "id": "DEFAULT"
+        }
+      ],
+      "incomingTransitions": [
+        "TR-SITE-002"
+      ],
+      "outgoingTransitions": [
+        "TR-SITE-003"
+      ],
+      "useCases": [
+        "UC-DOCS-03"
+      ],
+      "workItems": [],
+      "contracts": [],
+      "document": "screens/SC-SITE-EDITOR.md"
+    },
+    {
+      "id": "SC-SITE-HOME",
+      "title": "Главная портала",
+      "description": "Главная точка входа в собранную документацию: показывает состояние проекта и ведёт к документам, локальному редактору и просмотру изменений.",
+      "module": "MOD-SITE",
+      "type": "page",
+      "status": "implemented",
+      "route": "/",
+      "updated": "2026-08-05",
+      "states": [
+        {
+          "id": "DEFAULT"
+        }
+      ],
+      "incomingTransitions": [
+        "TR-SITE-003"
+      ],
+      "outgoingTransitions": [
+        "TR-SITE-001",
+        "TR-SITE-002",
+        "TR-SITE-005"
+      ],
+      "useCases": [
+        "UC-DOCS-03",
+        "UC-DOCS-05"
+      ],
+      "workItems": [],
+      "contracts": [],
+      "document": "screens/SC-SITE-HOME.md"
+    },
+    {
+      "id": "SC-SITE-SCREEN-MAP",
+      "title": "Общая карта экранов",
+      "description": "Интерактивное представление устойчивых экранов и пользовательских переходов, построенное из screens/SC- .md . Карта не является каталогом всех generated routes.",
+      "module": "MOD-SITE",
+      "type": "page",
+      "status": "implemented",
+      "route": "/screens/index.html",
+      "updated": "2026-08-05",
+      "states": [
+        {
+          "id": "DEFAULT"
+        }
+      ],
+      "incomingTransitions": [
+        "TR-SITE-004"
+      ],
+      "outgoingTransitions": [],
+      "useCases": [
+        "UC-DOCS-04"
+      ],
+      "workItems": [],
+      "contracts": [],
+      "document": "screens/SC-SITE-SCREEN-MAP.md"
+    },
+    {
+      "id": "SC-SITE-USE-CASE",
+      "title": "Workspace пользовательского сценария",
+      "description": "Единая страница выбранного UC- с описанием, картой, проигрыванием и связями. URL зависит от generated use case и не объявляется отдельным route pattern.",
+      "module": "MOD-SITE",
+      "type": "page",
+      "status": "implemented",
+      "updated": "2026-08-05",
+      "states": [
+        {
+          "id": "DEFAULT"
+        }
+      ],
+      "incomingTransitions": [],
+      "outgoingTransitions": [
+        "TR-SITE-004"
+      ],
+      "useCases": [
+        "UC-DOCS-04"
+      ],
+      "workItems": [],
+      "contracts": [],
+      "document": "screens/SC-SITE-USE-CASE.md"
+    }
+  ],
+  "transitions": [
+    {
+      "id": "TR-SITE-003",
+      "useCase": "UC-DOCS-03",
+      "source": "SC-SITE-EDITOR",
+      "target": "SC-SITE-HOME",
+      "action": "Вернуться в портал",
+      "condition": "Всегда",
+      "type": "return",
+      "document": "screens/SC-SITE-EDITOR.md",
+      "line": 18
+    },
+    {
+      "id": "TR-SITE-001",
+      "useCase": "UC-DOCS-03",
+      "source": "SC-SITE-HOME",
+      "target": "SC-SITE-DOCUMENT",
+      "action": "Открыть документ",
+      "condition": "Документ выбран",
+      "type": "navigation",
+      "document": "screens/SC-SITE-HOME.md",
+      "line": 17
+    },
+    {
+      "id": "TR-SITE-002",
+      "useCase": "UC-DOCS-03",
+      "source": "SC-SITE-HOME",
+      "target": "SC-SITE-EDITOR",
+      "action": "Открыть редактор",
+      "condition": "Портал запущен через serve",
+      "type": "navigation",
+      "document": "screens/SC-SITE-HOME.md",
+      "line": 18
+    },
+    {
+      "id": "TR-SITE-005",
+      "useCase": "UC-DOCS-05",
+      "source": "SC-SITE-HOME",
+      "target": "SC-CHANGES-WORKSPACE",
+      "action": "Открыть изменения",
+      "condition": "Портал запущен через serve",
+      "type": "navigation",
+      "document": "screens/SC-SITE-HOME.md",
+      "line": 19
+    },
+    {
+      "id": "TR-SITE-004",
+      "useCase": "UC-DOCS-04",
+      "source": "SC-SITE-USE-CASE",
+      "target": "SC-SITE-SCREEN-MAP",
+      "action": "Показать общую карту",
+      "condition": "Всегда",
+      "type": "navigation",
+      "document": "screens/SC-SITE-USE-CASE.md",
+      "line": 16
+    }
+  ],
+  "playableFlows": [
+    {
+      "useCase": "UC-DOCS-04",
+      "startScreen": "SC-SITE-USE-CASE",
+      "reachableScreens": [
+        "SC-SITE-SCREEN-MAP",
+        "SC-SITE-USE-CASE"
+      ],
+      "terminalScreens": [
+        "SC-SITE-SCREEN-MAP"
+      ],
+      "transitions": [
+        "TR-SITE-004"
+      ],
+      "result": "HTML и ProjectReport schema v1 содержат согласованные screens, transitions, проигрываемые сценарии и traceability. Исходный Markdown не изменяется.",
+      "valid": true,
+      "issueCodes": []
+    },
+    {
+      "useCase": "UC-DOCS-03",
+      "startScreen": "SC-SITE-HOME",
+      "reachableScreens": [
+        "SC-SITE-DOCUMENT",
+        "SC-SITE-EDITOR",
+        "SC-SITE-HOME"
+      ],
+      "terminalScreens": [
+        "SC-SITE-DOCUMENT"
+      ],
+      "transitions": [
+        "TR-SITE-003",
+        "TR-SITE-001",
+        "TR-SITE-002"
+      ],
+      "result": "Пока команда работает, обычные маршруты раздают output, а отдельный editor API читает и изменяет только разрешённый workspace внутри docs root. Остальные файлы репозитория недоступны. После остановки процесса API исчезает и порт освобождён. Locale mount / docu-docu/locales/\u003clocale\u003e/ является read-only: он не содержит editor, changes, workspace или canonical API.",
+      "valid": true,
+      "issueCodes": []
+    },
+    {
+      "useCase": "UC-DOCS-05",
+      "startScreen": "SC-SITE-HOME",
+      "reachableScreens": [
+        "SC-CHANGES-WORKSPACE",
+        "SC-SITE-HOME"
+      ],
+      "terminalScreens": [
+        "SC-CHANGES-WORKSPACE"
+      ],
+      "transitions": [
+        "TR-SITE-005"
+      ],
+      "result": "Git repository не изменён; человек и CI получают один и тот же versioned change report; предупреждения task impact остаются наблюдением, а не автоматическим решением.",
+      "valid": true,
+      "issueCodes": []
+    }
+  ],
   "hotspots": [],
   "errorDefinitions": [],
-  "traceability": [],
+  "traceability": [
+    {
+      "useCase": "UC-DOCS-05",
+      "screen": "SC-SITE-HOME",
+      "transition": "TR-SITE-005",
+      "task": "TASK-CHANGES-001",
+      "criterion": "AC-10",
+      "verification": "TestServeSiteIncludesEditor"
+    },
+    {
+      "useCase": "UC-DOCS-04",
+      "screen": "SC-SITE-USE-CASE",
+      "transition": "TR-SITE-004",
+      "task": "TASK-MODEL-001",
+      "criterion": "AC-06",
+      "verification": "TestScreenPortalAndReportV1"
+    },
+    {
+      "useCase": "UC-DOCS-03",
+      "screen": "SC-SITE-HOME",
+      "transition": "TR-SITE-001",
+      "task": "TASK-SITE-002",
+      "criterion": "AC-01",
+      "verification": "TestDashboardFocusFallbacksAndAlwaysVisibleOverview"
+    },
+    {
+      "useCase": "UC-DOCS-03",
+      "screen": "SC-SITE-HOME",
+      "transition": "TR-SITE-002",
+      "task": "TASK-SITE-002",
+      "criterion": "AC-09",
+      "verification": "TestServeSiteIncludesEditor"
+    },
+    {
+      "useCase": "UC-DOCS-03",
+      "screen": "SC-SITE-EDITOR",
+      "transition": "TR-SITE-003",
+      "task": "TASK-SITE-002",
+      "criterion": "AC-17",
+      "verification": "TestServeSiteIncludesEditor"
+    }
+  ],
   "issues": []
 }

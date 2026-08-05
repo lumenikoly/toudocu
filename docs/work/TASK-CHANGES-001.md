@@ -6,9 +6,10 @@
 - Модуль: MOD-CHANGES
 - Сценарий: UC-DOCS-05
 - Процесс: FLOW-DOCS-CHANGES
+- Переходы: TR-SITE-005
 - Стандарты: STD-GO-001, STD-DOCS-001
 - Владелец: Команда Docu-docu
-- Последнее обновление: 2026-08-01
+- Последнее обновление: 2026-08-05
 
 ## Результат
 
@@ -87,6 +88,7 @@
 
 ## Проверка
 
+- `AC-10` → `TR-SITE-005` → `TestServeSiteIncludesEditor`
 - `AC-01` → `go test ./... -run 'TestGitChange|TestChangeComparison'`
 - `AC-02` → `go test ./... -run 'TestChangeSetReport|TestChangeSetDigest'`
 - `AC-03` → `go test ./... -run 'TestSourceDiff|TestSideBySideDiff|TestLargeChange'`

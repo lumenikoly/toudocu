@@ -117,7 +117,7 @@ func TestServeSiteIncludesEditor(t *testing.T) {
 		t.Fatalf("serve page and polling endpoint use different revisions: meta=%s etag=%s body=%s", server.revision, files.Header().Get("ETag"), files.Body.String())
 	}
 	response := performEditorRequest(server, editorRequest(http.MethodGet, editorUIPath, "", nil))
-	if response.Code != http.StatusOK || !strings.Contains(response.Body.String(), "data-editor-host") {
+	if response.Code != http.StatusOK || !strings.Contains(response.Body.String(), "data-editor-host") || !strings.Contains(response.Body.String(), `class="editor-brand" href="/"`) {
 		t.Fatalf("editor UI: status=%d body=%s", response.Code, response.Body.String())
 	}
 	changes := performEditorRequest(server, editorRequest(http.MethodGet, changesUIPath, "", nil))

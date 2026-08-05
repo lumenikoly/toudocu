@@ -18,6 +18,9 @@
 configured translation root портал собирается без editor UI и editor API;
 исходники перевода изменяются только явным workflow `$docu-docu translate`.
 
+Отдельный endpoint ручной пересборки не входит в JSON schema editor API, но
+документируется здесь как часть того же canonical `serve` workspace.
+
 ## Общие правила
 
 - Максимальный JSON request body — 3 MiB, поле `content` — 2 MiB.
@@ -143,6 +146,30 @@ ordered `fields` и `languages`; field содержит `name`, `label`, `type` 
 атомарный `O_EXCL`; успех `201` возвращает
 `{schemaVersion, revision, file, rebuild}` с content и diagnostics созданного
 файла. Конфликт пути возвращает `409 file_exists`.
+
+## Ручная пересборка портала
+
+`POST /__docu-docu/rebuild` доступен только canonical portal в режиме `serve`
+и требует точный заголовок `X-Docu-docu-Action: rebuild`. Запрос заново читает
+documentation root и пересобирает модель, HTML и поиск в output-каталоге, но не
+записывает Markdown.
+
+Успешный ответ имеет `Content-Type: application/json; charset=utf-8` и форму:
+
+```json
+{"documents":65,"errors":0,"pages":86,"warnings":0}
+```
+
+Это служебный response shape, а не envelope editor API: поля `schemaVersion` и
+`revision` в нём отсутствуют. Ошибки возвращаются как `text/plain`:
+
+- `405` и `Allow: POST`, если выбран другой HTTP-метод;
+- `403`, если action header отсутствует или не равен `rebuild`;
+- `500`, если пересборка не завершилась.
+
+Все ответы имеют `Cache-Control: no-store`. В translation portal endpoint
+недоступен; статический `build` также не содержит кнопку или server-only код
+пересборки.
 
 ## Path contract
 

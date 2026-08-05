@@ -4,9 +4,9 @@
     "name": "Docu-docu",
     "version": "0.0.1"
   },
-  "generatedAt": "2026-08-05T12:57:12.305828985Z",
+  "generatedAt": "2026-08-05T14:42:29.139754913Z",
   "sourceDirectory": "docs",
-  "staleDays": 0,
+  "staleDays": 90,
   "project": {
     "title": "Service Desk Showcase",
     "description": "Демонстрационный проект показывает возможности Docu-docu на документации небольшого сервиса обращений: от модели требований и задач до интерактивной карты экранов и проигрываемых сценариев.",

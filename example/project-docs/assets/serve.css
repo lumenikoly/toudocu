@@ -1,0 +1,33 @@
+.server-rebuild-icon {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+.server-rebuild.is-rebuilding .server-rebuild-icon { animation: server-rebuild-spin 800ms linear infinite; }
+.server-rebuild.has-error { border-color: var(--danger); color: var(--danger); }
+.server-rebuild.has-success { border-color: var(--success); color: var(--success); }
+.document-context-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.task-page-tabs { display: flex; gap: 4px; margin: 0 0 18px; border-bottom: 1px solid var(--border); }
+.task-page-tabs a, .task-page-tabs span { padding: 9px 12px; color: var(--muted); text-decoration: none; }
+.task-page-tabs span[aria-current="page"] { border-bottom: 2px solid var(--accent); color: var(--text); font-weight: 700; }
+.task-page-tabs a:hover { color: var(--accent); }
+@keyframes server-rebuild-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .server-rebuild.is-rebuilding .server-rebuild-icon { animation: none; }
+}
+.is-soft-navigating::before {
+  content: "";
+  position: fixed;
+  z-index: 10000;
+  inset: 0 0 auto;
+  height: 2px;
+  background: var(--accent);
+}
+
+.is-soft-navigating .site-layout {
+  cursor: progress;
+}

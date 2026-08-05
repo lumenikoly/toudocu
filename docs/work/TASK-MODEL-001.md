@@ -4,9 +4,10 @@
 - Тип: Maintenance
 - Приоритет: Высокий
 - Модуль: MOD-MODEL
+- Переходы: TR-SITE-004
 - Стандарты: STD-GO-001, STD-DOCS-001
 - Владелец: Команда Docu-docu
-- Последнее обновление: 2026-08-03
+- Последнее обновление: 2026-08-05
 
 ## Результат
 
@@ -55,6 +56,7 @@ directory и маршрутом отдельных документов, а ег
 
 ## Проверка
 
+- `AC-06` → `TR-SITE-004` → `TestScreenPortalAndReportV1`
 - `AC-01` → `go test ./... -run TestBuiltinSectionsStableOrderAndLookups`
 - `AC-02` → `go test ./... -run TestProjectLocaleConfiguration`
 - `AC-03` → `go test ./... -run TestProjectLocaleConfiguration`

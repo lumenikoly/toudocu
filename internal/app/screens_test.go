@@ -555,6 +555,7 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	}
 	useCaseNavigation := navigationFolderHTML(t, useCasePage, "use-cases")
 	processNavigation := navigationFolderHTML(t, useCasePage, "processes")
+	useCaseScreensNavigation := navigationFolderHTML(t, useCasePage, "screens")
 	if !strings.Contains(useCaseNavigation, `nav-folder-link is-active`) {
 		t.Fatal("use case page must activate the top-level user-scenarios section")
 	}
@@ -563,6 +564,9 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	}
 	if strings.Contains(processNavigation, `UC-AUTH-01`) {
 		t.Fatal("individual use cases must not be duplicated inside the processes navigation tree")
+	}
+	if !strings.Contains(useCaseScreensNavigation, `href="../screens/index.html"`) {
+		t.Fatal("use case workspace must link to the shared screen map")
 	}
 	for _, unexpected := range []string{`processes-flow`, `Все процессы`, `Визуальные процессы`, `../flows/index.html`} {
 		if strings.Contains(processNavigation, unexpected) {
@@ -648,6 +652,11 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	for _, expected := range []string{".split('|').map(normalize).includes(value)", "resetButtons.forEach", "initializeUseCaseTabs", "history.pushState"} {
 		if !strings.Contains(string(appScript), expected) {
 			t.Fatalf("collection filters missing %q", expected)
+		}
+	}
+	for _, removed := range []string{"function initializeScreenMap", "data-screen-map-diagram", "data-screen-map-stage", "data-screen-mode", "data-screen-select"} {
+		if strings.Contains(string(appScript), removed) {
+			t.Fatalf("app.js retains legacy screen-map initializer contract %q", removed)
 		}
 	}
 	styleData, err := os.ReadFile(filepath.Join(output, "assets", "style.css"))

@@ -6,9 +6,10 @@
 - Модуль: MOD-SITE
 - Сценарий: UC-DOCS-03
 - Процесс: FLOW-DOCS-SERVE
+- Переходы: TR-SITE-001, TR-SITE-002, TR-SITE-003
 - Стандарты: STD-GO-001, STD-DOCS-001
 - Владелец: Команда Docu-docu
-- Последнее обновление: 2026-07-31
+- Последнее обновление: 2026-08-05
 
 ## Результат
 
@@ -125,6 +126,9 @@ live rebuild после записи и watcher внешних изменени�
 
 ## Проверка
 
+- `AC-01` → `TR-SITE-001` → `TestDashboardFocusFallbacksAndAlwaysVisibleOverview`
+- `AC-09` → `TR-SITE-002` → `TestServeSiteIncludesEditor`
+- `AC-17` → `TR-SITE-003` → `TestServeSiteIncludesEditor`
 - `AC-01` → `go test ./... -run 'TestStaticSiteExcludesEditor|TestServeSiteIncludesEditor'`
 - `AC-02` → `go test ./... -run 'TestEditorWorkspaceFiles|TestEditorWorkspaceExclusions'`
 - `AC-03` → `go test ./... -run 'TestEditorPathValidation'`
