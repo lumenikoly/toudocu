@@ -10,6 +10,11 @@
     count: $('[data-result-count]'), detail: $('[data-detail]'), toast: $('[data-changes-toast]'),
   };
 
+  document.addEventListener('docu-docu:themechange', async (event) => {
+    state.merge?.setTheme?.(event.detail.theme);
+    if (state.selected && (state.tab === 'mermaid' || state.tab === 'rendered')) await renderDetail();
+  });
+
   function addToolbarControl(label, name, options, input = false) {
     const wrapper = document.createElement('label'); const caption = document.createElement('span'); caption.textContent = label;
     const control = document.createElement(input ? 'input' : 'select'); control.dataset[name] = '';

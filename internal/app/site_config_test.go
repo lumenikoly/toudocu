@@ -327,11 +327,14 @@ func TestGenerateSiteBrandingAndThemeContract(t *testing.T) {
 		`data-site-theme="terminal"`, `data-color-scheme="system"`, `data-accent="rose"`,
 		`data-density="compact"`, `data-content-width="narrow"`,
 		`assets/branding/logo.svg`, `assets/branding/favicon.svg`, `assets/branding/hero.webp`,
-		`data-color-scheme-select`, `data-site-theme-select`, `docu-docu-site-theme`, `&lt;strong&gt;Escaped&lt;/strong&gt;`,
+		`assets/appearance.js`, `data-color-scheme-select`, `data-site-theme-select`, `docu-docu-site-theme`, `&lt;strong&gt;Escaped&lt;/strong&gt;`,
 	} {
 		if !strings.Contains(html, part) {
 			t.Fatalf("missing %q", part)
 		}
+	}
+	if strings.Count(html, `data-theme="`) != 1 {
+		t.Fatalf("portal must render one data-theme attribute, got %d", strings.Count(html, `data-theme="`))
 	}
 	if strings.Contains(html, "<strong>Escaped</strong>") {
 		t.Fatal("footer HTML was not escaped")

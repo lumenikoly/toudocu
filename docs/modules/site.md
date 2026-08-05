@@ -21,6 +21,7 @@
 - локальная HTTP-раздача и offline API docs: `internal/app/server.go`,
   `internal/app/api_docs.go`;
 - editor workspace, API и platform-specific atomic replace: `internal/app/editor_*.go`;
+- общая оболочка Editor и Changes: `internal/app/workspace_shell.go`;
 - встроенные ресурсы: `internal/app/embed.go`, `internal/app/assets/`;
 - конфигурация тем и безопасного брендинга: `internal/app/site_config.go`.
 
@@ -138,6 +139,20 @@ same-origin specs и закреплённый Swagger UI 5.32.12 без CDN. CSP
 external network, а Try it out доступен только для `GET`/`HEAD`. Locale mounts,
 direct translation serve и static build не содержат UI, assets или navigation.
 
+### BR-SITE-012: Рабочие поверхности используют единое оформление
+
+Canonical portal режима `serve`, Editor и Changes используют одинаковые
+ключи `localStorage` для `classic`/`paper`/`terminal` и
+`system`/`light`/`dark`. Встроенный `appearance.js` применяет сохранённые
+theme, scheme, accent, density и content width до основной инициализации и
+публикует `docu-docu:themechange` при последующих изменениях.
+
+Editor и Changes получают общий header с project branding, навигацией
+«Портал / Редактор / Изменения», активным `aria-current` и селекторами темы.
+Их рабочие действия остаются в отдельной контекстной панели. CodeMirror
+переключает theme compartment без пересоздания editor state, а активный
+Mermaid diff перерисовывается без сброса отчёта, фильтров и URL state.
+
 ## Инварианты
 
 - исходный `index.md` отображается dashboard, а не дублирующей страницей:
@@ -166,10 +181,12 @@ direct translation serve и static build не содержат UI, assets или
   версия сохраняет её целиком;
 - каталоги, Screen Map, traceability и health page не выдают синтетический
   контекст документа;
-- в `serve` отдельная workspace-панель позволяет открыть editor и вручную
-  пересобрать модель, HTML и поиск без остановки listener; она показывает
-  область, progress, результат или ошибку с повтором; через `file://` этих
-  действий и assets нет;
+- в canonical `serve` общий surface navigation открывает portal, Editor и
+  Changes полной навигацией, а rebuild остаётся отдельным портальным действием;
+  через `file://` специальных маршрутов, действий и serve-only assets нет;
+- compact navigation сохраняет доступные названия у 40×40 control surfaces;
+  контекстные панели складываются без горизонтального overflow страницы, а
+  локальная прокрутка остаётся у дерева, метрик и diff;
 - save/create и стабильное внешнее изменение обновляют model, HTML, search,
   diagnostics и workspace revision синхронно;
 - обычный HTTP request не запускает rebuild; watcher публикует snapshot только

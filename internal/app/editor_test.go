@@ -117,11 +117,11 @@ func TestServeSiteIncludesEditor(t *testing.T) {
 		t.Fatalf("serve page and polling endpoint use different revisions: meta=%s etag=%s body=%s", server.revision, files.Header().Get("ETag"), files.Body.String())
 	}
 	response := performEditorRequest(server, editorRequest(http.MethodGet, editorUIPath, "", nil))
-	if response.Code != http.StatusOK || !strings.Contains(response.Body.String(), "data-editor-host") || !strings.Contains(response.Body.String(), `class="editor-brand" href="/"`) {
+	if response.Code != http.StatusOK || !strings.Contains(response.Body.String(), "data-editor-host") || !strings.Contains(response.Body.String(), `class="workspace-brand brand" href="/"`) || !strings.Contains(response.Body.String(), `href="/_docu-docu/editor/" aria-label="Открыть редактор" aria-current="page"`) || !strings.Contains(response.Body.String(), `data-site-theme-select`) {
 		t.Fatalf("editor UI: status=%d body=%s", response.Code, response.Body.String())
 	}
 	changes := performEditorRequest(server, editorRequest(http.MethodGet, changesUIPath, "", nil))
-	if changes.Code != http.StatusOK || !strings.Contains(changes.Body.String(), "data-file-list") {
+	if changes.Code != http.StatusOK || !strings.Contains(changes.Body.String(), "data-file-list") || !strings.Contains(changes.Body.String(), `href="/changes/" aria-label="Открыть изменения" aria-current="page"`) || !strings.Contains(changes.Body.String(), `data-color-scheme-select`) {
 		t.Fatalf("changes UI: status=%d body=%s", changes.Code, changes.Body.String())
 	}
 }
@@ -375,6 +375,43 @@ func TestEditorKeyboardAndDirtyGuards(t *testing.T) {
 func TestEditorResponsiveContract(t *testing.T) {
 	for _, expected := range []string{"@media (max-width: 900px)", "@media (max-width: 720px)", ".editor-tree.is-open", "data-stage=\"split\""} {
 		assertEditorAssetContains(t, "editor.css", expected)
+	}
+}
+
+func TestSharedAppearanceAndDynamicEditorTheme(t *testing.T) {
+	for _, expected := range []string{"docu-docu:themechange", "docu-docu-site-theme", "docu-docu-color-scheme", "docu-docu-content-width"} {
+		assertEditorAssetContains(t, "appearance.js", expected)
+	}
+	for _, expected := range []string{"setTheme", "themeCompartment.reconfigure", "new Compartment"} {
+		data, err := os.ReadFile(filepath.Join("..", "..", "editor-bundle.mjs"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(string(data), expected) {
+			t.Fatalf("editor-bundle.mjs missing %q", expected)
+		}
+	}
+}
+
+func TestWorkspaceShellUsesProjectBranding(t *testing.T) {
+	model := &Model{
+		Project:        ProjectInfo{Title: "Branded docs"},
+		SiteConfig:     defaultSiteConfig(),
+		BrandingAssets: map[string]string{"assets/branding/logo.svg": "", "assets/branding/favicon.png": ""},
+	}
+	server := &documentationServer{model: model}
+	for name, handler := range map[string]func(http.ResponseWriter, *http.Request){
+		"editor":  server.serveEditorUI,
+		"changes": server.serveChangesUI,
+	} {
+		response := httptest.NewRecorder()
+		handler(response, httptest.NewRequest(http.MethodGet, "/", nil))
+		body := response.Body.String()
+		for _, expected := range []string{`src="/assets/branding/logo.svg"`, `href="/assets/branding/favicon.png"`, `data-site-theme="classic"`, `data-color-scheme="system"`} {
+			if !strings.Contains(body, expected) {
+				t.Fatalf("%s workspace missing %q", name, expected)
+			}
+		}
 	}
 }
 func TestEditorAssetsContract(t *testing.T) {

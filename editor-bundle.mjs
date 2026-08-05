@@ -1,5 +1,5 @@
 import { basicSetup, EditorView } from 'codemirror';
-import { EditorState } from '@codemirror/state';
+import { Compartment, EditorState } from '@codemirror/state';
 import { markdown } from '@codemirror/lang-markdown';
 import { json } from '@codemirror/lang-json';
 import { yaml } from '@codemirror/lang-yaml';
@@ -18,21 +18,43 @@ function position(view, line, column) {
   return Math.min(record.to, record.from + Math.max(0, (Number(column) || 1) - 1));
 }
 
+function appearanceTheme(theme) {
+  return EditorView.theme({
+    '&': { color: 'var(--text)', backgroundColor: 'var(--surface)' },
+    '.cm-content': { caretColor: 'var(--accent)' },
+    '.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--accent)' },
+    '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': { backgroundColor: 'var(--accent-soft)' },
+    '.cm-gutters': { color: 'var(--muted)', backgroundColor: 'var(--surface-soft)', borderRightColor: 'var(--border)' },
+    '.cm-activeLine, .cm-activeLineGutter': { backgroundColor: 'color-mix(in srgb, var(--accent) 7%, transparent)' },
+  }, { dark: theme === 'dark' });
+}
+
+const currentTheme = () => document.documentElement.dataset.theme || 'light';
+
 window.DocuDocuCodeMirror = {
 	createMerge({ parent, before, after, language }) {
+		const themeA = new Compartment();
+		const themeB = new Compartment();
 		const readOnly = [basicSetup, languageExtension(language), EditorView.lineWrapping, EditorState.readOnly.of(true), EditorView.editable.of(false)];
 		const view = new MergeView({
 			parent,
-			a: { doc: before, extensions: readOnly },
-			b: { doc: after, extensions: readOnly },
+			a: { doc: before, extensions: [readOnly, themeA.of(appearanceTheme(currentTheme()))] },
+			b: { doc: after, extensions: [readOnly, themeB.of(appearanceTheme(currentTheme()))] },
 			collapseUnchanged: { margin: 3, minSize: 6 },
 			highlightChanges: true,
 			gutter: true,
 		});
-		return { destroy: () => view.destroy() };
+		return {
+			destroy: () => view.destroy(),
+			setTheme(theme) {
+				view.a.dispatch({ effects: themeA.reconfigure(appearanceTheme(theme)) });
+				view.b.dispatch({ effects: themeB.reconfigure(appearanceTheme(theme)) });
+			},
+		};
 	},
   create({ parent, doc, language, onChange }) {
     let applying = false;
+    const themeCompartment = new Compartment();
     const view = new EditorView({
       parent,
       state: EditorState.create({
@@ -41,6 +63,7 @@ window.DocuDocuCodeMirror = {
           basicSetup,
           languageExtension(language),
           EditorView.lineWrapping,
+          themeCompartment.of(appearanceTheme(currentTheme())),
           EditorView.updateListener.of((update) => {
             if (update.docChanged && !applying) onChange();
           }),
@@ -56,6 +79,7 @@ window.DocuDocuCodeMirror = {
       },
       focus: () => view.focus(),
       destroy: () => view.destroy(),
+      setTheme(theme) { view.dispatch({ effects: themeCompartment.reconfigure(appearanceTheme(theme)) }); },
       gotoLine(line, column) {
         const anchor = position(view, line, column);
         view.dispatch({ selection: { anchor }, scrollIntoView: true });

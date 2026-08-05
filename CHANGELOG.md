@@ -2,6 +2,10 @@
 
 ## 0.0.1
 
+- Portal, Editor и Changes получили единый compact workspace shell, project
+  branding, навигацию и синхронные темы; CodeMirror меняет оформление без
+  потери editor state, а responsive layout сохраняет локальную прокрутку
+  рабочих областей без горизонтального overflow страницы.
 - Editor и Changes HTTP API получили OpenAPI 3.1.0 sources of truth,
   declarative route parity и единый positional check; canonical `serve`
   показывает оба контракта через offline Swagger UI 5.32.12, а static и

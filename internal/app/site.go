@@ -336,13 +336,9 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 	if custom := brandingOutput(model, "favicon"); custom != "" {
 		favicon = custom
 	}
-	initialTheme := config.ColorScheme
-	if initialTheme == "system" {
-		initialTheme = "light"
-	}
-	earlyTheme := `<script>(function(){var m="` + escapeAttr(config.ColorScheme) + `",t="` + escapeAttr(config.Theme) + `";try{var s=localStorage.getItem("docu-docu-color-scheme"),u=localStorage.getItem("docu-docu-site-theme");if(s==="system"||s==="light"||s==="dark")m=s;if(u==="classic"||u==="paper"||u==="terminal")t=u}catch(e){}var d=m==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):m;document.documentElement.dataset.colorScheme=m;document.documentElement.dataset.theme=d;document.documentElement.dataset.siteTheme=t}())</script>`
-	attributes := ` data-site-theme="` + escapeAttr(config.Theme) + `" data-color-scheme="` + escapeAttr(config.ColorScheme) + `" data-accent="` + escapeAttr(config.Accent) + `" data-density="` + escapeAttr(config.Density) + `" data-content-width="` + escapeAttr(config.ContentWidth) + `"`
-	brandMark := `<span class="brand-mark" aria-hidden="true">DG</span>`
+	earlyTheme := `<script src="` + escapeAttr(prefix) + `assets/appearance.js" data-default-site-theme="` + escapeAttr(config.Theme) + `" data-default-color-scheme="` + escapeAttr(config.ColorScheme) + `" data-default-accent="` + escapeAttr(config.Accent) + `" data-default-density="` + escapeAttr(config.Density) + `" data-default-content-width="` + escapeAttr(config.ContentWidth) + `" data-storage-site-theme="docu-docu-site-theme" data-storage-color-scheme="docu-docu-color-scheme"></script>`
+	attributes := appearanceAttributes(config)
+	brandMark := `<span class="brand-mark" aria-hidden="true">DD</span>`
 	if logo := brandingOutput(model, "logo"); logo != "" {
 		brandMark = `<img class="brand-logo" src="` + escapeAttr(relativeURL(current, logo)) + `" alt="">`
 	}
@@ -357,7 +353,7 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 	languageSelect := renderLanguageSelect(model.languageTargets[current])
 	serveControls, serveAssets, serveRevision := "", "", ""
 	if model.serveMode {
-		serveControls = `<a class="icon-button" href="/_docu-docu/editor/" aria-label="Открыть редактор" title="Редактор документации">✎</a><button class="icon-button server-rebuild" type="button" data-server-rebuild aria-label="Пересобрать документацию" title="Пересобрать документацию"><svg class="server-rebuild-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 5v6h-6"/></svg></button><span class="visually-hidden" data-server-rebuild-status role="status" aria-live="polite"></span>`
+		serveControls = workspaceNavigation(workspacePortal) + `<button class="icon-button server-rebuild" type="button" data-server-rebuild aria-label="Пересобрать документацию" title="Пересобрать документацию"><svg class="server-rebuild-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 5v6h-6"/></svg></button><span class="visually-hidden" data-server-rebuild-status role="status" aria-live="polite"></span>`
 		serveAssets = `<link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/serve.css"><script src="` + escapeAttr(prefix) + `assets/serve.js" defer></script><script src="` + escapeAttr(prefix) + `assets/serve-navigation.js" defer data-docu-docu-serve-navigation></script>`
 		serveRevision = `<meta name="docu-docu-revision" content="` + escapeAttr(model.serveRevision) + `">`
 	}
@@ -365,7 +361,7 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 	if locale == "" {
 		locale = "en"
 	}
-	return `<!doctype html><html lang="` + escapeAttr(locale) + `" data-theme="` + escapeAttr(initialTheme) + `"` + attributes + `><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` + serveRevision + `<meta name="description" content="` + escapeAttr(description) + `"><title>` + escapeHTML(fullTitle) + `</title><link rel="icon" href="` + escapeAttr(relativeURL(current, favicon)) + `">` + earlyTheme + `<link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/style.css">` + extraStyles + serveAssets + `<script src="` + escapeAttr(prefix) + `assets/app.js" defer></script></head><body data-root-prefix="` + escapeAttr(prefix) + `" data-task-filter="all"><a class="skip-link" href="#main-content">Перейти к содержимому</a><header class="site-header"><div class="brand-area"><button class="icon-button sidebar-toggle" type="button" data-sidebar-toggle aria-label="Открыть навигацию">☰</button><a class="brand" href="` + escapeAttr(relativeURL(current, "index.html")) + `">` + brandMark + `<span class="brand-text">` + escapeHTML(model.Project.Title) + `</span></a></div><div class="global-search" role="search"><div class="search-input-wrap"><input type="search" data-global-search placeholder="Поиск по документации" aria-label="Поиск по документации"><span class="search-shortcut">/</span></div><div class="search-results" id="global-search-results" data-search-results role="listbox" hidden></div></div><div class="header-actions"><button class="icon-button" type="button" data-print aria-label="Печать">⎙</button>` + serveControls + languageSelect + themeSelect + schemeSelect + `</div></header><div class="site-layout"><aside class="sidebar">` + renderNavigation(model, current) + `</aside><div class="main-area"><main id="main-content" class="page-grid` + gridClass + `"><div class="page-content">` + content + `</div>` + tocHTML + `</main><footer class="site-footer">` + footer + `</footer></div></div></body></html>`
+	return `<!doctype html><html lang="` + escapeAttr(locale) + `"` + attributes + `><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` + serveRevision + `<meta name="description" content="` + escapeAttr(description) + `"><title>` + escapeHTML(fullTitle) + `</title><link rel="icon" href="` + escapeAttr(relativeURL(current, favicon)) + `">` + earlyTheme + `<link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/style.css">` + extraStyles + serveAssets + `<script src="` + escapeAttr(prefix) + `assets/app.js" defer></script></head><body data-root-prefix="` + escapeAttr(prefix) + `" data-task-filter="all"><a class="skip-link" href="#main-content">Перейти к содержимому</a><header class="site-header"><div class="brand-area"><button class="icon-button sidebar-toggle" type="button" data-sidebar-toggle aria-label="Открыть навигацию">☰</button><a class="brand" href="` + escapeAttr(relativeURL(current, "index.html")) + `">` + brandMark + `<span class="brand-text">` + escapeHTML(model.Project.Title) + `</span></a></div><div class="global-search" role="search"><div class="search-input-wrap"><input type="search" data-global-search placeholder="Поиск по документации" aria-label="Поиск по документации"><span class="search-shortcut">/</span></div><div class="search-results" id="global-search-results" data-search-results role="listbox" hidden></div></div><div class="header-actions"><button class="icon-button" type="button" data-print aria-label="Печать">⎙</button>` + serveControls + languageSelect + themeSelect + schemeSelect + `</div></header><div class="site-layout"><aside class="sidebar">` + renderNavigation(model, current) + `</aside><div class="main-area"><main id="main-content" class="page-grid` + gridClass + `"><div class="page-content">` + content + `</div>` + tocHTML + `</main><footer class="site-footer">` + footer + `</footer></div></div></body></html>`
 }
 
 func renderLanguageSelect(targets []LanguageTarget) string {
@@ -1103,7 +1099,7 @@ func generateSite(model *Model, options Options, serve bool) (GenerateResult, er
 			}
 		}
 	}
-	for _, asset := range []string{"style.css", "app.js", "favicon.svg", "screen-map.css", "screen-map.js", "playable-flow.css", "playable-flow.js", "mermaid.tiny.js", "mermaid.LICENSE.txt"} {
+	for _, asset := range []string{"style.css", "appearance.js", "app.js", "favicon.svg", "screen-map.css", "screen-map.js", "playable-flow.css", "playable-flow.js", "mermaid.tiny.js", "mermaid.LICENSE.txt"} {
 		if err = copyFSFile(EmbeddedFiles, "assets/"+asset, filepath.Join(output, "assets", asset)); err != nil {
 			return GenerateResult{}, err
 		}

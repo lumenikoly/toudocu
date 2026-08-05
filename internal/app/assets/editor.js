@@ -83,6 +83,10 @@
     }
   }
 
+  document.addEventListener('docu-docu:themechange', (event) => {
+    state.editor?.setTheme?.(event.detail.theme);
+  });
+
   function renderTree() {
     const query = elements.filter.value.trim().toLocaleLowerCase('ru');
     const filtered = state.files.filter((file) => `${file.path} ${file.title || ''}`.toLocaleLowerCase('ru').includes(query));

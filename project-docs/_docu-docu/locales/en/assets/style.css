@@ -133,6 +133,18 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 
 .header-actions { display: flex; align-items: center; gap: 8px; }
+.workspace-body { min-width: 0; overflow-x: hidden; }
+.workspace-header { position: sticky; top: 0; z-index: 60; min-height: 64px; display: grid; grid-template-columns: minmax(180px, 1fr) auto minmax(180px, 1fr); align-items: center; gap: 18px; padding: 8px 20px; border-bottom: 1px solid var(--border); background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(14px); }
+.workspace-brand { justify-self: start; }
+.workspace-nav { display: flex; align-items: center; gap: 3px; }
+.workspace-nav-link { min-height: 40px; display: inline-flex; align-items: center; gap: 7px; padding: 7px 11px; border-radius: 9px; color: var(--muted); font-size: 13px; font-weight: 680; line-height: 1; text-decoration: none; transition: color 140ms ease, background-color 140ms ease, transform 100ms ease; }
+.workspace-nav-link:hover { background: var(--surface-soft); color: var(--text); }
+.workspace-nav-link[aria-current="page"] { background: var(--accent-soft); color: var(--accent-strong); }
+.workspace-nav-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.workspace-nav-link:active { transform: scale(.96); }
+.workspace-appearance { justify-self: end; display: flex; align-items: center; gap: 8px; }
+.workspace-context { position: sticky; top: 64px; z-index: 40; min-width: 0; min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 8px 20px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.workspace-context button:active, .workspace-context a:active, .icon-button:active { transform: scale(.96); }
 .icon-button {
   width: 38px;
   height: 38px;
@@ -145,6 +157,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   cursor: pointer;
 }
 .icon-button:hover { border-color: var(--border-strong); background: var(--surface-soft); }
+.icon-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .icon-button:disabled { cursor: wait; opacity: 0.68; }
 .sidebar-toggle { display: none; }
 .visually-hidden {
@@ -1580,4 +1593,35 @@ html[data-color-scheme="dark"] .scheme-toggle-indicator { background: var(--text
   .mermaid-diagram { break-inside: avoid; }
   a { color: inherit !important; text-decoration: none !important; }
   a[href]::after { content: "" !important; }
+}
+
+html[data-site-theme="paper"] .workspace-header,
+html[data-site-theme="paper"] .workspace-context { background: var(--surface); }
+html[data-site-theme="terminal"] .workspace-header,
+html[data-site-theme="terminal"] .workspace-context { background: var(--surface); font-family: var(--font-interface); }
+
+@media (max-width: 1400px) {
+  .site-header .workspace-nav-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+  .site-header .workspace-nav-link { width: 40px; height: 40px; justify-content: center; padding: 0; font-size: 16px; }
+}
+
+@media (max-width: 1180px) {
+  .workspace-header { grid-template-columns: auto 1fr auto; gap: 8px; padding-inline: 12px; }
+  .workspace-header .brand-text { display: none; }
+  .workspace-nav { justify-self: center; }
+  .workspace-nav-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+  .workspace-nav-link { width: 40px; height: 40px; justify-content: center; padding: 0; font-size: 16px; }
+}
+
+@media (max-width: 620px) {
+  .workspace-header { min-height: 56px; grid-template-columns: auto 1fr; }
+  .workspace-brand { grid-column: 1; }
+  .workspace-nav { grid-column: 2; justify-self: end; }
+  .workspace-appearance { grid-column: 1 / -1; justify-self: stretch; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .workspace-appearance .header-select { width: 100%; }
+  .workspace-context { position: relative; top: auto; padding: 10px 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-nav-link { transition: none; }
 }

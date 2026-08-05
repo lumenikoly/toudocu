@@ -27,64 +27,6 @@
     return promise;
   }
 
-  function initializeTheme() {
-    const select = $('[data-color-scheme-select]');
-    const media = window.matchMedia('(prefers-color-scheme: dark)');
-    let mode = document.documentElement.dataset.colorScheme || 'system';
-
-    const apply = (announce = true) => {
-      const resolved = mode === 'system' ? (media.matches ? 'dark' : 'light') : mode;
-      document.documentElement.dataset.colorScheme = mode;
-      document.documentElement.dataset.theme = resolved;
-      const labels = { system: 'Система', light: 'Светлая', dark: 'Тёмная' };
-      const label = $('[data-theme-label]', select?.closest('.header-select'));
-      if (label) label.textContent = labels[mode];
-      if (select) select.value = mode;
-      if (announce) {
-        document.dispatchEvent(new CustomEvent('docu-docu:themechange', { detail: { mode, theme: resolved } }));
-      }
-    };
-    apply(false);
-
-    select?.addEventListener('change', () => {
-      mode = select.value;
-      try { localStorage.setItem('docu-docu-color-scheme', mode); } catch { /* file:// privacy mode */ }
-      apply();
-    });
-    media.addEventListener?.('change', () => {
-      if (mode === 'system') apply();
-    });
-  }
-
-  function initializeSiteTheme() {
-    const select = $('[data-site-theme-select]');
-    const labels = { classic: 'Классика', paper: 'Бумага', terminal: 'Терминал' };
-    const indicators = { classic: 'C', paper: 'P', terminal: 'T' };
-    let theme = document.documentElement.dataset.siteTheme || 'classic';
-
-    const apply = (announce = true) => {
-      document.documentElement.dataset.siteTheme = theme;
-      const wrapper = select?.closest('.header-select');
-      const label = $('[data-site-theme-label]', wrapper);
-      const indicator = $('[data-site-theme-indicator]', wrapper);
-      if (label) label.textContent = labels[theme];
-      if (indicator) indicator.textContent = indicators[theme];
-      if (select) select.value = theme;
-      if (announce) {
-        document.dispatchEvent(new CustomEvent('docu-docu:themechange', {
-          detail: { siteTheme: theme, theme: document.documentElement.dataset.theme },
-        }));
-      }
-    };
-    apply(false);
-
-    select?.addEventListener('change', () => {
-      theme = select.value;
-      try { localStorage.setItem('docu-docu-site-theme', theme); } catch { /* file:// privacy mode */ }
-      apply();
-    });
-  }
-
   function initializeHeroSummary() {
     $$('[data-hero-summary]').forEach((summary) => {
       const text = $('p', summary);
@@ -769,8 +711,6 @@
   }
 
   let pageController = new AbortController();
-  initializeTheme();
-  initializeSiteTheme();
   initializeGlobalSearch();
   initializePrint();
   initializePage(pageController.signal);

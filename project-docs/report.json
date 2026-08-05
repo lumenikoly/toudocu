@@ -4,7 +4,7 @@
     "name": "Docu-docu",
     "version": "0.0.1"
   },
-  "generatedAt": "2026-08-05T18:57:28.137640418Z",
+  "generatedAt": "2026-08-05T19:56:07.842729387Z",
   "sourceDirectory": "docs",
   "staleDays": 90,
   "project": {
@@ -5110,7 +5110,8 @@
           "BR-SITE-008",
           "BR-SITE-009",
           "BR-SITE-010",
-          "BR-SITE-011"
+          "BR-SITE-011",
+          "BR-SITE-012"
         ]
       }
     ],
@@ -5601,7 +5602,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-001-очистка-output-не-затрагивает-защищённые-каталоги",
-        "line": 35
+        "line": 36
       },
       {
         "id": "BR-SITE-002",
@@ -5609,7 +5610,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-002-портал-работает-через-file-protocol",
-        "line": 40
+        "line": 41
       },
       {
         "id": "BR-SITE-003",
@@ -5617,7 +5618,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-003-dev-сервер-не-раскрывает-исходный-репозиторий",
-        "line": 45
+        "line": 46
       },
       {
         "id": "BR-SITE-004",
@@ -5625,7 +5626,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-004-mermaid-работает-автономно-и-в-строгом-режиме",
-        "line": 53
+        "line": 54
       },
       {
         "id": "BR-SITE-005",
@@ -5633,7 +5634,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-005-карта-экранов-работает-автономно",
-        "line": 60
+        "line": 61
       },
       {
         "id": "BR-SITE-006",
@@ -5641,7 +5642,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-006-темы-не-расширяют-доверенную-поверхность",
-        "line": 79
+        "line": 80
       },
       {
         "id": "BR-SITE-007",
@@ -5649,7 +5650,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-007-build-и-serve-имеют-разные-возможности",
-        "line": 91
+        "line": 92
       },
       {
         "id": "BR-SITE-008",
@@ -5657,7 +5658,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-008-запись-защищена-optimistic-concurrency",
-        "line": 99
+        "line": 100
       },
       {
         "id": "BR-SITE-009",
@@ -5665,7 +5666,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-009-locale-portals-изолированы-от-canonical-workspace",
-        "line": 107
+        "line": 108
       },
       {
         "id": "BR-SITE-010",
@@ -5673,7 +5674,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-010-мягкая-навигация-ограничена-canonical-serve-portal",
-        "line": 119
+        "line": 120
       },
       {
         "id": "BR-SITE-011",
@@ -5681,7 +5682,15 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-011-api-docs-остаётся-offline-и-read-mostly",
-        "line": 134
+        "line": 135
+      },
+      {
+        "id": "BR-SITE-012",
+        "title": "Рабочие поверхности используют единое оформление",
+        "moduleId": "MOD-SITE",
+        "document": "modules/site.md",
+        "anchor": "br-site-012-рабочие-поверхности-используют-единое-оформление",
+        "line": 142
       }
     ],
     "workItems": [
@@ -8965,7 +8974,7 @@
       "condition": "Всегда",
       "type": "return",
       "document": "screens/SC-SITE-EDITOR.md",
-      "line": 18
+      "line": 30
     },
     {
       "id": "TR-SITE-001",

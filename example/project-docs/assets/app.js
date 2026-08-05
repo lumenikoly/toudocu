@@ -27,64 +27,6 @@
     return promise;
   }
 
-  function initializeTheme() {
-    const select = $('[data-color-scheme-select]');
-    const media = window.matchMedia('(prefers-color-scheme: dark)');
-    let mode = document.documentElement.dataset.colorScheme || 'system';
-
-    const apply = (announce = true) => {
-      const resolved = mode === 'system' ? (media.matches ? 'dark' : 'light') : mode;
-      document.documentElement.dataset.colorScheme = mode;
-      document.documentElement.dataset.theme = resolved;
-      const labels = { system: 'Система', light: 'Светлая', dark: 'Тёмная' };
-      const label = $('[data-theme-label]', select?.closest('.header-select'));
-      if (label) label.textContent = labels[mode];
-      if (select) select.value = mode;
-      if (announce) {
-        document.dispatchEvent(new CustomEvent('docu-docu:themechange', { detail: { mode, theme: resolved } }));
-      }
-    };
-    apply(false);
-
-    select?.addEventListener('change', () => {
-      mode = select.value;
-      try { localStorage.setItem('docu-docu-color-scheme', mode); } catch { /* file:// privacy mode */ }
-      apply();
-    });
-    media.addEventListener?.('change', () => {
-      if (mode === 'system') apply();
-    });
-  }
-
-  function initializeSiteTheme() {
-    const select = $('[data-site-theme-select]');
-    const labels = { classic: 'Классика', paper: 'Бумага', terminal: 'Терминал' };
-    const indicators = { classic: 'C', paper: 'P', terminal: 'T' };
-    let theme = document.documentElement.dataset.siteTheme || 'classic';
-
-    const apply = (announce = true) => {
-      document.documentElement.dataset.siteTheme = theme;
-      const wrapper = select?.closest('.header-select');
-      const label = $('[data-site-theme-label]', wrapper);
-      const indicator = $('[data-site-theme-indicator]', wrapper);
-      if (label) label.textContent = labels[theme];
-      if (indicator) indicator.textContent = indicators[theme];
-      if (select) select.value = theme;
-      if (announce) {
-        document.dispatchEvent(new CustomEvent('docu-docu:themechange', {
-          detail: { siteTheme: theme, theme: document.documentElement.dataset.theme },
-        }));
-      }
-    };
-    apply(false);
-
-    select?.addEventListener('change', () => {
-      theme = select.value;
-      try { localStorage.setItem('docu-docu-site-theme', theme); } catch { /* file:// privacy mode */ }
-      apply();
-    });
-  }
-
   function initializeHeroSummary() {
     $$('[data-hero-summary]').forEach((summary) => {
       const text = $('p', summary);
@@ -598,7 +540,7 @@
   }
 
   function initializeMermaid(signal) {
-    const containers = $$('[data-mermaid-container]').filter((container) => $('[data-mermaid-diagram]', container) && !container.matches('[data-screen-map-diagram]'));
+    const containers = $$('[data-mermaid-container]').filter((container) => $('[data-mermaid-diagram]', container));
     if (!containers.length) return;
     const viewports = new Map();
     containers.forEach((container) => {
@@ -680,232 +622,6 @@
     }
   }
 
-  function initializeScreenMap(signal) {
-    const workspace = $('[data-screen-map]');
-    if (!workspace) return;
-    const dataElement = $('[data-screen-map-data]', workspace);
-    const diagram = $('[data-screen-map-diagram]', workspace);
-    const target = $('[data-mermaid-diagram]', diagram);
-    const sourceCode = $('.mermaid-source code', diagram);
-    const error = $('[data-mermaid-error]', diagram);
-    const stage = $('[data-screen-map-stage]', workspace);
-    const message = $('[data-screen-map-message]', workspace);
-    const moduleControl = $('[data-screen-module-control]', workspace);
-    const moduleSelect = $('[data-screen-module]', workspace);
-    const pathControls = $('[data-screen-path-controls]', workspace);
-    const pathFrom = $('[data-screen-path-from]', workspace);
-    const pathTo = $('[data-screen-path-to]', workspace);
-    if (!dataElement || !diagram || !target || !stage) return;
-
-    let data;
-    try {
-      data = JSON.parse(dataElement.textContent || '{}');
-    } catch {
-      if (error) error.hidden = false;
-      return;
-    }
-    const screens = Array.isArray(data.screens) ? data.screens : [];
-    const transitions = Array.isArray(data.transitions) ? data.transitions : [];
-    const modules = data.modules && typeof data.modules === 'object' ? data.modules : {};
-    const nodeIds = new Map(screens.map((screen, index) => [screen.id, `n${index}`]));
-    let mode = 'all';
-    let selected = '';
-    let renderQueue = Promise.resolve();
-    const viewport = initializeDiagramViewport({
-      stage,
-      target,
-      zoomIn: $('[data-screen-zoom-in]', workspace),
-      zoomOut: $('[data-screen-zoom-out]', workspace),
-      fitButton: $('[data-screen-fit]', workspace),
-      fullscreenButton: $('[data-screen-fullscreen]', workspace),
-      signal,
-    });
-
-    const mermaidText = (value) => String(value || '')
-      .replace(/\\/g, '\\\\')
-      .replace(/"/g, '\\"')
-      .replace(/[\r\n]+/g, ' ')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-
-    function reachable(start, reverse = false) {
-      const adjacency = new Map();
-      transitions.forEach((transition) => {
-        const from = reverse ? transition.toId : transition.fromId;
-        const to = reverse ? transition.fromId : transition.toId;
-        if (!adjacency.has(from)) adjacency.set(from, []);
-        adjacency.get(from).push(to);
-      });
-      const result = new Set();
-      const queue = start ? [start] : [];
-      while (queue.length) {
-        const current = queue.shift();
-        if (result.has(current)) continue;
-        result.add(current);
-        (adjacency.get(current) || []).forEach((next) => queue.push(next));
-      }
-      return result;
-    }
-
-    function visibleScreens() {
-      if (mode === 'module') {
-        return new Set(screens.filter((screen) => screen.moduleId === moduleSelect?.value).map((screen) => screen.id));
-      }
-      if (mode === 'unfinished') {
-        return new Set(screens.filter((screen) => ['planned', 'in-progress'].includes(screen.status?.kind)).map((screen) => screen.id));
-      }
-      if (mode === 'path' && pathFrom?.value && pathTo?.value) {
-        const forward = reachable(pathFrom.value);
-        if (!forward.has(pathTo.value)) {
-          if (message) message.textContent = 'Между выбранными экранами нет пути.';
-          return new Set();
-        }
-        const backward = reachable(pathTo.value, true);
-        if (message) message.textContent = 'Показаны все ветки, ведущие от начального экрана к конечному.';
-        return new Set([...forward].filter((id) => backward.has(id)));
-      }
-      if (message) message.textContent = mode === 'path' ? 'Выберите начальный и конечный экраны.' : '';
-      return new Set(screens.map((screen) => screen.id));
-    }
-
-    function sourceFor(visible) {
-      const grouped = new Map();
-      screens.forEach((screen) => {
-        if (!visible.has(screen.id)) return;
-        if (!grouped.has(screen.moduleId)) grouped.set(screen.moduleId, []);
-        grouped.get(screen.moduleId).push(screen);
-      });
-      const lines = ['flowchart LR'];
-      [...grouped.entries()].forEach(([moduleId, items], moduleIndex) => {
-        const title = modules[moduleId] ? `${moduleId} · ${modules[moduleId]}` : moduleId;
-        lines.push(`    subgraph module${moduleIndex}["${mermaidText(title)}"]`);
-        lines.push('        direction LR');
-        items.forEach((screen) => {
-          const label = `${mermaidText(screen.id)}<br/>${mermaidText(screen.title)}`;
-          lines.push(screen.kind === 'modal'
-            ? `        ${nodeIds.get(screen.id)}("${label}")`
-            : `        ${nodeIds.get(screen.id)}["${label}"]`);
-        });
-        lines.push('    end');
-      });
-      transitions.forEach((transition) => {
-        if (!visible.has(transition.fromId) || !visible.has(transition.toId)) return;
-        const label = transition.condition ? `${transition.action} · ${transition.condition}` : transition.action;
-        const arrow = transition.kind === 'redirect' ? '-.->' : '-->';
-        lines.push(`    ${nodeIds.get(transition.fromId)} ${arrow}|"${mermaidText(label)}"| ${nodeIds.get(transition.toId)}`);
-      });
-      screens.forEach((screen) => {
-        if (!visible.has(screen.id)) return;
-        const classes = ['screenNode', `node-${nodeIds.get(screen.id)}`];
-        if (screen.status?.kind === 'done') classes.push('screenDone');
-        if (screen.status?.kind === 'in-progress') classes.push('screenProgress');
-        if (screen.status?.kind === 'planned') classes.push('screenPlanned');
-        if (screen.id === selected) classes.push('screenSelected');
-        classes.forEach((className) => lines.push(`    class ${nodeIds.get(screen.id)} ${className}`));
-      });
-      lines.push(
-        '    classDef screenNode stroke-width:1.5px',
-        '    classDef screenDone stroke:#23825f',
-        '    classDef screenProgress stroke:#b97816',
-        '    classDef screenPlanned stroke:#65758b',
-        '    classDef screenSelected stroke:#1665d8,stroke-width:4px'
-      );
-      return lines.join('\n');
-    }
-
-    function bindNodes() {
-      screens.forEach((screen) => {
-        const node = $(`.node-${nodeIds.get(screen.id)}`, target);
-        if (!node) return;
-        node.classList.add('screen-map-node');
-        node.setAttribute('tabindex', '0');
-        node.setAttribute('role', 'button');
-        node.setAttribute('aria-label', `${screen.id}: ${screen.title}`);
-        const choose = (event) => {
-          event.stopPropagation();
-          selectScreen(screen.id, true);
-        };
-        node.addEventListener('click', choose);
-        node.addEventListener('keydown', (event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            choose(event);
-          }
-        });
-      });
-    }
-
-    async function renderNow() {
-      const visible = visibleScreens();
-      const source = sourceFor(visible);
-      if (sourceCode) sourceCode.textContent = source;
-      if (!window.mermaid) {
-        if (error) error.hidden = false;
-        return;
-      }
-      window.mermaid.initialize({
-        startOnLoad: false,
-        securityLevel: 'strict',
-        secure: ['secure', 'securityLevel', 'startOnLoad', 'maxTextSize', 'suppressErrorRendering'],
-        maxTextSize: 50000,
-        suppressErrorRendering: true,
-        ...mermaidThemeConfig(),
-      });
-      diagram.classList.remove('has-error');
-      if (error) error.hidden = true;
-      target.removeAttribute('data-processed');
-      target.textContent = source;
-      try {
-        await window.mermaid.run({ nodes: [target] });
-        viewport?.fit();
-        bindNodes();
-      } catch {
-        diagram.classList.add('has-error');
-        target.replaceChildren();
-        if (error) error.hidden = false;
-      }
-    }
-
-    function scheduleRender() {
-      renderQueue = renderQueue.then(renderNow, renderNow);
-    }
-
-    function selectScreen(id, scrollToRow = false) {
-      selected = id;
-      $$('[data-screen-row]').forEach((row) => row.classList.toggle('is-selected', row.dataset.screenRow === id));
-      if (scrollToRow) {
-        $(`[data-screen-row="${CSS.escape(id)}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      scheduleRender();
-    }
-
-    $$('[data-screen-mode]', workspace).forEach((button) => {
-      button.addEventListener('click', () => {
-        mode = button.dataset.screenMode;
-        $$('[data-screen-mode]', workspace).forEach((candidate) => {
-          const active = candidate === button;
-          candidate.classList.toggle('is-active', active);
-          candidate.setAttribute('aria-pressed', String(active));
-        });
-        if (moduleControl) moduleControl.hidden = mode !== 'module';
-        if (pathControls) pathControls.hidden = mode !== 'path';
-        scheduleRender();
-      });
-    });
-    moduleSelect?.addEventListener('change', scheduleRender);
-    pathFrom?.addEventListener('change', scheduleRender);
-    pathTo?.addEventListener('change', scheduleRender);
-    $$('[data-screen-select]').forEach((button) => button.addEventListener('click', () => selectScreen(button.dataset.screenSelect, false)));
-
-    const hashRow = $$('[data-screen-row]').find((row) => `#${row.id}` === window.location.hash);
-    if (hashRow) {
-      selected = hashRow.dataset.screenRow;
-      hashRow.classList.add('is-selected');
-    }
-    document.addEventListener('docu-docu:themechange', scheduleRender, { signal });
-    scheduleRender();
-  }
-
   function initializeTocTracking(signal) {
     const links = $$('.page-toc a[href^="#"]');
     if (!links.length || !('IntersectionObserver' in window)) return;
@@ -982,7 +698,6 @@
     initializeDocumentContextCopy();
     initializeCodeCopy();
     initializeMermaid(signal);
-    initializeScreenMap(signal);
     initializeUseCaseTabs(signal);
     initializeTocTracking(signal);
     if ($('[data-screen-map]')) {
@@ -996,8 +711,6 @@
   }
 
   let pageController = new AbortController();
-  initializeTheme();
-  initializeSiteTheme();
   initializeGlobalSearch();
   initializePrint();
   initializePage(pageController.signal);
