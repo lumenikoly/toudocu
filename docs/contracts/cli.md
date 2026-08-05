@@ -3,7 +3,7 @@
 - Идентификатор: CON-CLI-V1
 - Статус: Готово
 - Владелец: Команда Docu-docu
-- Последнее обновление: 2026-08-04
+- Последнее обновление: 2026-08-05
 
 Контракт фиксирует публичные команды, exit codes и машинные JSON-форматы
 Docu-docu.
@@ -102,6 +102,12 @@ canonical API. Editor API и его JSON schema v1
 определены в [отдельном HTTP-контракте](editor-http.md). `build` всегда остаётся
 static read-only: editor markup, CodeMirror, API URL и server-only scripts в его
 результат не входят.
+
+Configured translation root является полным read-only зеркалом canonical
+документации. На нём разрешены `check`, `build`, `search`, обычные `changes` и
+read-only `serve`; все `task *`, `scaffold` и editor-запись отклоняются с
+`TRANSLATION_ROOT_READ_ONLY`. Это ограничение действует до чтения work item или
+запуска команды и не меняет schema v1 успешных отчётов.
 
 Семантика `--host`, `--port` и `--open` не меняется; auto-open без `--open`
 отсутствует. Параметры `--no-open` и `--edit` не существуют и отклоняются как

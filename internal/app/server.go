@@ -56,17 +56,18 @@ type ServePortalState struct {
 }
 
 type documentationServer struct {
-	options      Options
-	stderr       io.Writer
-	mu           sync.Mutex
-	workspace    *editorWorkspace
-	model        *Model // canonical only: editor and changes APIs never cross this boundary.
-	result       GenerateResult
-	revision     string
-	overwrites   map[string]string
-	changesCache map[string]*ChangeSetReport
-	portals      map[string]*ServePortalState
-	configDigest string
+	options             Options
+	stderr              io.Writer
+	mu                  sync.Mutex
+	workspace           *editorWorkspace
+	model               *Model // canonical only: editor and changes APIs never cross this boundary.
+	result              GenerateResult
+	revision            string
+	overwrites          map[string]string
+	changesCache        map[string]*ChangeSetReport
+	portals             map[string]*ServePortalState
+	configDigest        string
+	translationReadOnly bool
 }
 
 func newDocumentationServer(options Options, stderr io.Writer) (*documentationServer, *Model, GenerateResult, error) {
@@ -88,22 +89,26 @@ func (s *documentationServer) rebuildRegistry() error {
 	if err != nil {
 		return err
 	}
-	// Starting serve directly on an independent translation root deliberately
-	// keeps the established single-locale behaviour.
+	// Starting serve directly on an independent translation root keeps a
+	// single-locale read-only portal. Translation sources are updated only by
+	// the explicit translation workflow.
 	for _, profile := range canonical.SiteConfig.Translations {
 		if root, rootErr := safeTranslationRoot(canonical.RepositoryRoot, profile.Root); rootErr == nil && filepath.Clean(root) == filepath.Clean(canonical.RootDirectory) {
 			state := &ServePortalState{Locale: canonical.SiteConfig.Project.Locale, BaseURL: "/", Root: canonical.RootDirectory, Portal: GeneratedPortal{OutputDirectory: s.options.OutputDirectory}, Status: portalRebuilding, options: s.options, model: canonical}
 			state.PageMap = outputPageMap(canonical)
-			if _, genErr := s.generatePortal(state, true); genErr != nil {
+			result, genErr := s.generatePortal(state, false)
+			if genErr != nil {
 				return genErr
 			}
 			s.portals = map[string]*ServePortalState{canonicalPortalKey(): state}
-			s.model, s.revision = canonical, state.revision
+			s.model, s.result, s.revision = canonical, result, state.revision
 			s.changesCache = map[string]*ChangeSetReport{}
 			s.configDigest = s.currentConfigDigest()
+			s.translationReadOnly = true
 			return nil
 		}
 	}
+	s.translationReadOnly = false
 	canonicalRoot := canonical.RootDirectory
 	states := map[string]*ServePortalState{canonicalPortalKey(): {Locale: canonical.SiteConfig.Project.Locale, BaseURL: "/", Root: canonicalRoot, Portal: GeneratedPortal{OutputDirectory: s.options.OutputDirectory}, Status: portalRebuilding, options: s.options}}
 	locales := make([]string, 0, len(canonical.SiteConfig.Translations))
@@ -308,7 +313,7 @@ func (s *documentationServer) rebuild() (*Model, GenerateResult, error) {
 	}
 	state.model = model
 	populateLanguageTargets(s.portals)
-	result, err := s.generatePortal(state, true)
+	result, err := s.generatePortal(state, !s.translationReadOnly)
 	if err != nil {
 		return nil, GenerateResult{}, err
 	}
@@ -366,6 +371,10 @@ func (s *documentationServer) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	defer s.mu.Unlock()
 	if strings.HasPrefix(r.URL.Path, localeMountBase) {
 		s.serveLocale(w, r)
+		return
+	}
+	if s.translationReadOnly && (strings.HasPrefix(r.URL.Path, editorAPIBase+"/") || r.URL.Path == editorUIPath || r.URL.Path == strings.TrimSuffix(editorUIPath, "/") || r.URL.Path == rebuildEndpoint) {
+		http.NotFound(w, r)
 		return
 	}
 	if strings.HasPrefix(r.URL.Path, editorAPIBase+"/") {

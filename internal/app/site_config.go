@@ -534,6 +534,61 @@ func selectTranslationProfile(config *SiteConfig, repositoryRoot, inputRoot stri
 	return validRoots, nil
 }
 
+const translationRootReadOnlyCode = "TRANSLATION_ROOT_READ_ONLY"
+
+func translationLocaleForRoot(config SiteConfig, repositoryRoot, inputRoot string) string {
+	inputRoot = filepath.Clean(inputRoot)
+	for locale, profile := range config.Translations {
+		root, err := safeTranslationRoot(repositoryRoot, profile.Root)
+		if err == nil && filepath.Clean(root) == inputRoot {
+			return locale
+		}
+	}
+	return ""
+}
+
+func translationRootReadOnlyError(locale string) error {
+	return fmt.Errorf("%s: translation root %q доступен только для чтения; используйте canonical docs root", translationRootReadOnlyCode, locale)
+}
+
+func translationLocaleForOptions(options Options) (string, error) {
+	inputRoot, err := filepath.Abs(options.InputDirectory)
+	if err != nil {
+		return "", err
+	}
+	repositoryRoot := options.RepositoryRoot
+	if repositoryRoot == "" {
+		repositoryRoot = filepath.Dir(inputRoot)
+	}
+	repositoryRoot, err = filepath.Abs(repositoryRoot)
+	if err != nil {
+		return "", err
+	}
+	config, _, err := loadSiteConfig(repositoryRoot)
+	if err != nil {
+		return "", err
+	}
+	return translationLocaleForRoot(config, repositoryRoot, inputRoot), nil
+}
+
+func rejectTranslationRootMutation(options Options) error {
+	locale, err := translationLocaleForOptions(options)
+	if err != nil {
+		return err
+	}
+	if locale != "" {
+		return translationRootReadOnlyError(locale)
+	}
+	return nil
+}
+
+func rejectTranslationTaskModel(model *Model) error {
+	if model != nil && model.translationLocale != "" {
+		return translationRootReadOnlyError(model.translationLocale)
+	}
+	return nil
+}
+
 func safeTranslationRoot(repositoryRoot, configured string) (string, error) {
 	if strings.TrimSpace(configured) == "" || filepath.IsAbs(configured) || strings.Contains(configured, "\\") {
 		return "", fmt.Errorf("translation root должен быть непустым относительным путём внутри repository root")

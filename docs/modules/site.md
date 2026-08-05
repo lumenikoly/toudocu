@@ -3,7 +3,7 @@
 - Идентификатор: MOD-SITE
 - Статус: Готово
 - Владелец: Команда Docu-docu
-- Последнее обновление: 2026-08-04
+- Последнее обновление: 2026-08-05
 
 Модуль формирует автономные HTML-страницы, навигацию, поиск и типизированный
 `report.json` из готовой проектной модели.
@@ -110,7 +110,8 @@ buffer можно скачать. Diagnostics не блокируют сохра
 output path, иначе используется locale homepage. Locale mount не получает
 editor, changes API, rebuild controls, source paths или canonical workspace.
 `build`, `file://` и `serve` непосредственно на translation root остаются
-одноязычными.
+одноязычными и read-only: server не добавляет editor markup, write API или
+rebuild controls.
 
 ### BR-SITE-010: Мягкая навигация ограничена canonical serve portal
 

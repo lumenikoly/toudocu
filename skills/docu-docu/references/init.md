@@ -55,7 +55,10 @@ another implicit skill trigger. The Docu-docu Go CLI has no `init` command.
    pack in [`assets/locale-packs.md`](../assets/locale-packs.md). Apply those canonical titles only to built-in entry documents created
    by this workflow; do not rewrite existing H1 headings.
 4. Select `assets/project-guidance/ru.md` or
-   `assets/project-guidance/en.md`.
+   `assets/project-guidance/en.md`. The selected managed block must contain the
+   translation-context isolation rule: ordinary work uses only the canonical
+   documentation root, while a selected translation root is read only for an
+   explicit locale-specific request.
 5. Upsert the complete asset into the repository-root `AGENTS.md`:
    - create the file with the block when it does not exist;
    - append the block after one blank line when both markers are absent;

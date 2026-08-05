@@ -95,6 +95,9 @@ func taskContextExternalDocument(model *Model, relativePath string) (TaskContext
 
 // BuildTaskContext returns compact, read-only implementation context for one task.
 func BuildTaskContext(model *Model, taskID string) (TaskContextReport, error) {
+	if err := rejectTranslationTaskModel(model); err != nil {
+		return TaskContextReport{}, err
+	}
 	item, err := findWorkItem(model, taskID)
 	if err != nil {
 		return TaskContextReport{}, err

@@ -197,7 +197,11 @@ project:
 
 `translations` описывает независимые порталы для workflow
 `$docu-docu translate`; это не новая Go CLI-команда. Канонический `docs/`
-остаётся единственным источником `task context` и `ProjectModel`.
+остаётся единственным источником обычного документационного, implementation и
+task-контекста агента. Настроенные translation roots не входят в репозиторный
+поиск, инвентаризацию, semantic review или анализ реализации при обычной работе.
+Translation tree хранит тот же набор читательских Markdown-файлов, включая
+`work/**`, `notes.md` и `ideas.md`, но не становится вторым backlog.
 
 ```yaml
 translations:
@@ -223,7 +227,15 @@ Root задаётся относительно repository root, находитс
 translation root либо каноническим docs root. При `check`, `build` или `serve`
 ровно на translation root профиль временно заменяет `project.locale` и
 `project.sections`. Обычная работа с canonical root не читает translation tree
-и не получает diagnostics незавершённого другого profile.
+и не получает diagnostics незавершённого другого profile. На translation root
+разрешены `check`, `build`, `search`, обычные `changes` и read-only `serve`.
+Task-команды, `scaffold` и editor-запись отклоняются с
+`TRANSLATION_ROOT_READ_ONLY`. Агент читает только выбранный translation root при
+явном `$docu-docu translate <locale>` или явном запросе проверить, найти,
+собрать, запустить или изучить эту локаль. Он обрабатывает одну необходимую
+source/target-пару за раз, а для проверки паритета сначала сравнивает пути,
+source-хеши manifest и структурные отчёты. Translation roots не добавляются в
+`.gitignore` или глобальные ignore-файлы.
 
 ## Mermaid
 

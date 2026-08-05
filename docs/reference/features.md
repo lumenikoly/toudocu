@@ -55,7 +55,20 @@ workflow и Git-backed changes. Прямые вызовы возвращают �
   требованиями и решениями;
 - `$docu-docu refresh diff` начинает со staged, unstaged и untracked файлов
   относительно `HEAD` и добавляет зависимые документы по ссылкам, stable ID,
-  task relationships и изменённому публичному поведению.
+  task relationships и изменённому публичному поведению;
+- `$docu-docu translate <locale> --all-stale` поддерживает полный файловый
+  паритет reader-facing Markdown, включая work items, notes и ideas. Locale root
+  остаётся read-only и не используется task workflow или editor-записью. При
+  обычной работе агент исключает все translation roots из поиска,
+  инвентаризации, semantic review, task context и анализа реализации. Явный
+  перевод или запрос проверить, найти, собрать, запустить либо изучить
+  конкретную локаль открывает только выбранный root и минимально необходимую
+  source/target-пару; проверка паритета начинается с путей, хешей и структурных
+  отчётов. Локализованные metadata keys и status values допустимы только при
+  сохранении нормализованной семантики: например, `Готово` (`done`) переводится
+  как `Completed` или `Done`, а `Готово к работе` (`planned`) — как `Ready`.
+  Перед обновлением manifest workflow сравнивает status kinds и вычисленное
+  состояние roadmap в JSON-моделях обеих локалей.
 
 Refresh обновляет только evidence-backed источники, не меняет код ради
 согласования с текстом и не выполняет init. Даты меняются только вместе с

@@ -654,7 +654,8 @@ func buildDocumentationModel(options Options, overlay map[string][]byte) (*Model
 		BrandingAssets: brandingAssets, SiteConfig: siteConfig,
 		Collections: map[string][]*Document{}, Knowledge: KnowledgeModel{},
 		HealthOutputPath: "health.html", ReportOutputPath: "report.json", ScreenMapEnabled: true,
-		sourceOverlay: overlay,
+		sourceOverlay:     overlay,
+		translationLocale: translationLocaleForRoot(siteConfig, repositoryRoot, root),
 	}
 	if model.RepositoryRef == "" {
 		model.RepositoryRef = "main"

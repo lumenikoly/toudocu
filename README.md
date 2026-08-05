@@ -161,10 +161,10 @@ This mode is useful before a commit or pull request.
 ### Update a translation
 
 ```text
-$docu-docu translate
+$docu-docu translate en --all-stale
 ```
 
-The skill updates a separate language version while keeping the main documentation as the source of truth.
+The skill updates a complete read-only language mirror while keeping the main documentation as the operational source of truth. It requires a locale and exactly one selection mode: `--task`, `--base`, or `--all-stale`.
 
 ---
 
@@ -381,10 +381,10 @@ project:
 To update a separate language version, use:
 
 ```text
-$docu-docu translate
+$docu-docu translate en --all-stale
 ```
 
-The main documentation remains the source of truth, while translations are stored separately.
+The main documentation remains the operational source of truth, while translations are stored as complete read-only mirrors. Each translation has a complete `translations.<locale>` profile with an independent root and built-in section names; this repository provides English in `docs-en/` alongside canonical Russian `docs/`. Task commands, scaffolding, and editor writes are rejected on translation roots.
 
 ---
 

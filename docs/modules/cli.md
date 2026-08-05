@@ -3,7 +3,7 @@
 - Идентификатор: MOD-CLI
 - Статус: Готово
 - Владелец: Команда Docu-docu
-- Последнее обновление: 2026-08-03
+- Последнее обновление: 2026-08-05
 
 Модуль предоставляет команды Docu-docu и детерминированный workflow от поиска и
 каркаса задачи до контекста и управляемого выполнения объявленных проверок.
@@ -57,6 +57,15 @@ Docu-docu создаёт нейтральные каркасы и проверя
 порядок, fields, validation, target path и renderer определяет тот же registry,
 который `serve` возвращает editor UI. Создание остаётся атомарным `O_EXCL`.
 
+### BR-CLI-006: Translation root не является рабочим контекстом
+
+Configured translation root доступен для `check`, `build`, read-only `serve`,
+`search` и обычного просмотра changes. `task init`, `task context`, `task ready`,
+`task verify`, `task changes`, `task archive`, `task restore`, `scaffold` и
+editor-запись отклоняются с `TRANSLATION_ROOT_READ_ONLY`. Work items перевода
+остаются читательским зеркалом, а агент и CI используют только canonical docs
+root.
+
 ## Инварианты
 
 - JSON-режим не смешивает отчёт с потоковым текстовым выводом;
@@ -66,6 +75,8 @@ Docu-docu создаёт нейтральные каркасы и проверя
 - сборка требует явного `docu-docu build`; путь без команды отклоняется;
 - зарезервированные skill-level имена `init` и `refresh` отклоняются как
   неизвестные команды Go CLI;
+- task workflow и создание сущностей никогда не используют configured
+  translation root;
 - `serve` по умолчанию слушает только loopback; сетевой доступ включается явно;
 - `--host`, `--port`, `--open` и отсутствие auto-open не изменены; `--no-open`
   не добавлен, а `--edit` остаётся неизвестным параметром.

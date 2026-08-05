@@ -50,6 +50,21 @@ For every operation, also read:
 Diagnostics prove structural facts, not missing product intent. Never invent
 behavior, status, owner, date, relationship, or procedure to silence one.
 
+## Isolate translation context
+
+The canonical documentation root is the only source for ordinary documentation
+work, repository search and inventory, semantic review, implementation analysis,
+and task context. Exclude every configured translation root from those activities,
+including translated work items. Do not add translation roots to `.gitignore` or
+global ignore files: explicit locale workflows must remain able to select them.
+
+Read a configured translation root only for an explicit `$docu-docu translate
+<locale>` request or an explicit request to check, find, build, run, or inspect
+that specific locale. Limit access to the selected locale and the source/target
+pair currently needed. Do not read other files in that locale merely for context;
+for parity checks, compare relative paths, source digests, and structural reports
+before opening document contents.
+
 ## Documentation invariants
 
 - Every project requires both `index.md` and

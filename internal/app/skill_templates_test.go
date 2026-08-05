@@ -460,6 +460,83 @@ func TestDocuDocuProjectGuidanceTemplates(t *testing.T) {
 	}
 }
 
+func TestDocuDocuTranslationContextIsolation(t *testing.T) {
+	skill := readDocuDocuFile(t, "SKILL.md")
+	workflows := readDocuDocuFile(t, filepath.Join("references", "workflows.md"))
+	refresh := readDocuDocuFile(t, filepath.Join("references", "refresh.md"))
+	translate := readDocuDocuFile(t, filepath.Join("references", "translate.md"))
+	initReference := readDocuDocuFile(t, filepath.Join("references", "init.md"))
+
+	for name, content := range map[string]string{
+		"SKILL.md":     skill,
+		"workflows.md": workflows,
+		"refresh.md":   refresh,
+	} {
+		for _, expected := range []string{"canonical documentation root", "translation root"} {
+			if !strings.Contains(content, expected) {
+				t.Errorf("%s does not isolate translations with %q", name, expected)
+			}
+		}
+	}
+
+	for _, expected := range []string{
+		"only source for ordinary documentation",
+		"implementation analysis",
+		"including translated work items",
+		"explicit `$docu-docu translate",
+		"check, find, build, run, or inspect",
+		"source digests, and structural reports",
+		"Do not add translation roots to `.gitignore`",
+	} {
+		if !strings.Contains(skill, expected) {
+			t.Errorf("SKILL.md does not contain translation isolation scenario %q", expected)
+		}
+	}
+
+	if !strings.Contains(refresh, "Never inventory a configured translation root") {
+		t.Error("refresh workflow may inventory translations")
+	}
+	if !strings.Contains(refresh, "translation review requires an explicit locale-specific request") {
+		t.Error("refresh workflow does not preserve the explicit locale exception")
+	}
+	if !strings.Contains(workflows, "Never read a translated `TASK-*` or `BUG-*` as task context") {
+		t.Error("task workflow may read translated work items")
+	}
+	for _, expected := range []string{
+		"one source/target pair at a time",
+		"relative paths",
+		"manifest source digests",
+		"structural reports",
+		"normalized semantic",
+		"`Готово` has `status.kind=done`",
+		"`Completed` or `Done`, never\n`Ready`",
+		"`Готово к работе` has `status.kind=planned`",
+		"`documents[].type` and `documents[].status.kind`",
+		"`effectiveCompleted`, `completionSource`",
+		"TRANSLATION_SEMANTIC_MISMATCH",
+	} {
+		if !strings.Contains(translate, expected) {
+			t.Errorf("translation workflow does not minimize context with %q", expected)
+		}
+	}
+	if !strings.Contains(initReference, "managed block must contain the\n   translation-context isolation rule") {
+		t.Error("init does not require translation isolation in installed guidance")
+	}
+
+	guidanceCases := map[string][]string{
+		"ru": {"единственным источником обычного", "translation roots из поиска по репозиторию", "явном `$docu-docu translate <locale>`", "проверить, найти, собрать, запустить или изучить", "source/target-парой", "пути, хеши и структурные отчёты", "Не добавляйте translation roots в ignore-файлы"},
+		"en": {"only source for ordinary", "translation roots from repository search", "explicit `$docu-docu translate", "check, find, build, run, or inspect", "source/target pair", "paths, hashes,\n  and structural reports", "Do not add translation roots to ignore files"},
+	}
+	for language, expectedValues := range guidanceCases {
+		guidance := readDocuDocuFile(t, filepath.Join("assets", "project-guidance", language+".md"))
+		for _, expected := range expectedValues {
+			if !strings.Contains(guidance, expected) {
+				t.Errorf("%s guidance does not contain translation isolation scenario %q", language, expected)
+			}
+		}
+	}
+}
+
 func TestDocuDocuTaskCreationThreshold(t *testing.T) {
 	skill := readDocuDocuFile(t, "SKILL.md")
 	workflows := readDocuDocuFile(t, filepath.Join("references", "workflows.md"))

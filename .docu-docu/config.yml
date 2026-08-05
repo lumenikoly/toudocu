@@ -13,3 +13,19 @@ project:
     reference: Справочник
     work: Рабочие задачи
     guides: Руководства
+translations:
+  en:
+    root: docs-en
+    sections:
+      architecture: Architecture
+      modules: Modules
+      use-cases: Use Cases
+      flows: Processes
+      screens: Screens
+      decisions: Architecture Decisions
+      contracts: Contracts
+      quality: Quality Standards
+      runbooks: Runbooks
+      reference: Reference
+      work: Work Items
+      guides: Guides

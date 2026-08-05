@@ -4,7 +4,7 @@
     "name": "Docu-docu",
     "version": "0.0.1"
   },
-  "generatedAt": "2026-08-05T07:35:12.125459749Z",
+  "generatedAt": "2026-08-05T11:39:39.210019045Z",
   "sourceDirectory": "docs",
   "staleDays": 90,
   "project": {
@@ -731,7 +731,7 @@
         "id": "CON-CLI-V1",
         "owner": "Команда Docu-docu",
         "status": "Готово",
-        "updated": "2026-08-04"
+        "updated": "2026-08-05"
       },
       "status": {
         "kind": "done",
@@ -745,7 +745,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-04T00:00:00Z",
+      "updatedAt": "2026-08-05T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -843,7 +843,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-04T17:37:50.257324912Z",
+      "updatedAt": "2026-08-05T08:15:03.403508286Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -870,7 +870,7 @@
         "id": "CON-GO-API-V1",
         "owner": "Команда Docu-docu",
         "status": "Готово",
-        "updated": "2026-08-04"
+        "updated": "2026-08-05"
       },
       "status": {
         "kind": "done",
@@ -884,7 +884,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-04T00:00:00Z",
+      "updatedAt": "2026-08-05T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1742,7 +1742,7 @@
         "id": "MOD-CLI",
         "owner": "Команда Docu-docu",
         "status": "Готово",
-        "updated": "2026-08-03"
+        "updated": "2026-08-05"
       },
       "status": {
         "kind": "done",
@@ -1756,7 +1756,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T00:00:00Z",
+      "updatedAt": "2026-08-05T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2101,7 +2101,7 @@
         "id": "MOD-SITE",
         "owner": "Команда Docu-docu",
         "status": "Готово",
-        "updated": "2026-08-04"
+        "updated": "2026-08-05"
       },
       "status": {
         "kind": "done",
@@ -2115,7 +2115,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-04T00:00:00Z",
+      "updatedAt": "2026-08-05T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2367,7 +2367,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-04T19:29:54.233235703Z",
+      "updatedAt": "2026-08-05T08:52:05.055793683Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2396,7 +2396,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-04T19:29:54.233235703Z",
+      "updatedAt": "2026-08-05T09:19:30.029984526Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -4087,7 +4087,8 @@
           "BR-CLI-002",
           "BR-CLI-003",
           "BR-CLI-004",
-          "BR-CLI-005"
+          "BR-CLI-005",
+          "BR-CLI-006"
         ]
       },
       {
@@ -4505,6 +4506,14 @@
         "line": 54
       },
       {
+        "id": "BR-CLI-006",
+        "title": "Translation root не является рабочим контекстом",
+        "moduleId": "MOD-CLI",
+        "document": "modules/cli.md",
+        "anchor": "br-cli-006-translation-root-не-является-рабочим-контекстом",
+        "line": 60
+      },
+      {
         "id": "BR-MD-001",
         "title": "Пользовательский HTML всегда экранируется",
         "moduleId": "MOD-MARKDOWN",
@@ -4678,7 +4687,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-010-мягкая-навигация-ограничена-canonical-serve-portal",
-        "line": 115
+        "line": 116
       }
     ],
     "workItems": [

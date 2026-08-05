@@ -15,12 +15,16 @@ explicit init.
 1. Read repository instructions, standards, runbooks, CI, task contracts, and
    documented Docu-docu commands. Resolve the repository root, documentation
    directory, language, strict policy, and tracked portal convention.
+   Use only the canonical documentation root. Exclude every configured
+   translation root from repository search, inventory, semantic review,
+   implementation evidence, and task context.
 2. Resolve Docu-docu as described in `SKILL.md` and run the existing ordinary
    project check with JSON output. Diagnostics describe structural state; they
    are not evidence that a claim is current or useful.
-3. For `$docu-docu refresh`, inventory every source Markdown document and the
-   current repository evidence relevant to it: code, tests, public interfaces,
-   schemas, configuration, CI, requirements, ADRs, and confirmed user input.
+3. For `$docu-docu refresh`, inventory every source Markdown document in the
+   canonical documentation root and the current repository evidence relevant to
+   it: code, tests, public interfaces, schemas, configuration, CI, requirements,
+   ADRs, and confirmed user input. Never inventory a configured translation root.
 4. For `$docu-docu refresh diff`, require a Git worktree with a valid `HEAD`.
    Determine changed tracked paths from `git diff --name-only HEAD --` and
    untracked paths from `git ls-files --others --exclude-standard`. This includes
@@ -31,7 +35,9 @@ explicit init.
    then add documentation affected through local links, backlinks, stable IDs,
    task relationships, declared repository paths, and changed public behavior
    or interfaces. Exclude generated portals, build output, caches, and vendored
-   artifacts as documentation sources even when they appear in the diff.
+   artifacts as documentation sources even when they appear in the diff. Also
+   exclude configured translation roots, even when their files are changed or
+   untracked; translation review requires an explicit locale-specific request.
 6. If the resulting diff set is empty, run the structural check, report that no
    semantic refresh candidates were found, and make no source changes.
 

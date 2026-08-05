@@ -2,6 +2,9 @@
 
 ## 0.0.1
 
+- Translation roots поддерживают полный файловый паритет с canonical docs,
+  включая work items, notes и ideas, но остаются read-only: task workflow,
+  scaffold и editor-запись отклоняются до использования переводного контекста.
 - Самодокументация согласована с текущим состоянием репозитория: исправлены
   onboarding и scaffold-примеры README, восстановлено описание Markdown subset,
   roadmap включает сценарий Documentation Changes, а стабильный фасад `api.go`

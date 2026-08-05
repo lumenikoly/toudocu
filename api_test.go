@@ -41,24 +41,37 @@ func TestPublicAPIFacadeIsDocumented(t *testing.T) {
 }
 
 func TestRootDocumentationMatchesPublishedState(t *testing.T) {
-	readme, err := os.ReadFile("README.md")
+	english, err := os.ReadFile("README.md")
 	if err != nil {
 		t.Fatal(err)
 	}
-	text := string(readme)
+	russian, err := os.ReadFile("README.ru.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(english)
 	for _, forbidden := range []string{"github.com/your-org/", "scaffold module payments"} {
-		if strings.Contains(text, forbidden) {
-			t.Errorf("README contains stale placeholder or invalid example %q", forbidden)
+		if strings.Contains(text, forbidden) || strings.Contains(string(russian), forbidden) {
+			t.Errorf("README files contain stale placeholder or invalid example %q", forbidden)
+		}
+	}
+	for _, expected := range []string{
+		"## Supported Markdown",
+		"scaffold module MOD-PAYMENTS",
+		"[Public Go API](docs/contracts/go-api.md)",
+		"[Project source documentation](docs/index.md)",
+	} {
+		if !strings.Contains(text, expected) {
+			t.Errorf("English README does not contain %q", expected)
 		}
 	}
 	for _, expected := range []string{
 		"## Поддерживаемый Markdown",
-		"scaffold module MOD-PAYMENTS",
 		"[Публичный Go API](docs/contracts/go-api.md)",
 		"[Исходная документация проекта](docs/index.md)",
 	} {
-		if !strings.Contains(text, expected) {
-			t.Errorf("README does not contain %q", expected)
+		if !strings.Contains(string(russian), expected) {
+			t.Errorf("Russian README does not contain %q", expected)
 		}
 	}
 }

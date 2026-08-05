@@ -14,6 +14,10 @@
 `Cache-Control: no-store` и не выдают CORS-заголовки. JSON-ответы содержат
 `schemaVersion: 1`.
 
+Контракт публикуется только для canonical docs root. При прямом `serve` на
+configured translation root портал собирается без editor UI и editor API;
+исходники перевода изменяются только явным workflow `$docu-docu translate`.
+
 ## Общие правила
 
 - Максимальный JSON request body — 3 MiB, поле `content` — 2 MiB.

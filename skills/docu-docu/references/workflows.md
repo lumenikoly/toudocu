@@ -25,6 +25,13 @@ The Go CLI also has no `refresh` command. Explicit `$docu-docu refresh` and
 reviews all source documentation; the second scopes evidence from the current
 worktree relative to `HEAD` and includes affected documentation.
 
+For ordinary CLI, portal, task, and documentation work, use the canonical documentation root
+as the only source for repository search, inventory, semantic review,
+implementation analysis, and task context. Exclude configured translation roots,
+including translated work items. A translation root may be read only when the
+user explicitly asks to check, find, build, run, or inspect that locale; restrict
+the operation to the selected locale and the minimum necessary files.
+
 ## Documentation gate
 
 For every documentation change, use this sequence:
@@ -133,6 +140,10 @@ docu-docu task context TASK-AREA-001 ./docs \
 Use the task, related entities, dependencies, documents, and issues from the
 report. Inspect source artifacts when the compact context is insufficient.
 `task context` never executes checks.
+
+Never read a translated `TASK-*` or `BUG-*` as task context. The canonical root
+is the only task source even when a translation profile contains a complete
+read-only mirror of `work/`.
 
 A task with `Flow` includes its `FLOW-*` document. A task with `Screens`
 includes selected screen records, incident transitions, and matching `SC-*`
