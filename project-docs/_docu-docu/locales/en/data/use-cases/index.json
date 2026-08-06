@@ -1,0 +1,80 @@
+[
+  {
+    "id": "UC-DOCS-01",
+    "title": "UC-DOCS-01: Create an offline portal",
+    "status": "done",
+    "module": "MOD-SITE",
+    "flows": [],
+    "screens": [],
+    "terminalScreens": []
+  },
+  {
+    "id": "UC-DOCS-02",
+    "title": "UC-DOCS-02: Check documentation",
+    "status": "done",
+    "module": "MOD-MODEL",
+    "flows": [],
+    "screens": [],
+    "terminalScreens": []
+  },
+  {
+    "id": "UC-DOCS-04",
+    "title": "UC-DOCS-04: Explore screen map",
+    "status": "done",
+    "module": "MOD-SITE",
+    "flows": [],
+    "screens": [],
+    "terminalScreens": []
+  },
+  {
+    "id": "UC-DOCS-03",
+    "title": "UC-DOCS-03: View documentation on local server",
+    "status": "done",
+    "module": "MOD-SITE",
+    "flows": [],
+    "screens": [],
+    "terminalScreens": []
+  },
+  {
+    "id": "UC-TASK-02",
+    "title": "UC-TASK-02: Check work task",
+    "status": "done",
+    "module": "MOD-CLI",
+    "flows": [
+      "FLOW-TASK-WORKFLOW"
+    ],
+    "screens": [],
+    "terminalScreens": []
+  },
+  {
+    "id": "UC-TASK-01",
+    "title": "UC-TASK-01: Get work task context",
+    "status": "done",
+    "module": "MOD-CLI",
+    "flows": [
+      "FLOW-TASK-WORKFLOW"
+    ],
+    "screens": [],
+    "terminalScreens": []
+  },
+  {
+    "id": "UC-DOCS-05",
+    "title": "UC-DOCS-05: View documentation changes",
+    "status": "done",
+    "module": "MOD-CHANGES",
+    "flows": [],
+    "screens": [],
+    "terminalScreens": []
+  },
+  {
+    "id": "UC-TASK-03",
+    "title": "UC-TASK-03: Prepare a new work task",
+    "status": "done",
+    "module": "MOD-CLI",
+    "flows": [
+      "FLOW-TASK-WORKFLOW"
+    ],
+    "screens": [],
+    "terminalScreens": []
+  }
+]

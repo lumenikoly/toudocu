@@ -306,7 +306,7 @@ func parseCriteriaAndVerification(model *Model, document *Document, item parsedW
 	return tasks, matrix, checks
 }
 
-func validateScopePaths(model *Model, document *Document, item parsedWorkItem) []string {
+func validateScopePaths(model *Model, document *Document, item parsedWorkItem, terminal bool) []string {
 	scope, found := workSection(item, "область изменения", "scope")
 	if !found {
 		return nil
@@ -335,6 +335,10 @@ func validateScopePaths(model *Model, document *Document, item parsedWorkItem) [
 		if strings.ContainsAny(value, "*?[") {
 			matches, _ := filepath.Glob(absolute)
 			if len(matches) == 0 {
+				if terminal {
+					result = append(result, value)
+					continue
+				}
 				addKnowledgeIssue(model, document, "error", "missing-scope-path", "Путь scope не существует: "+value+".", scope.Heading.Line+1)
 				continue
 			}
@@ -351,6 +355,10 @@ func validateScopePaths(model *Model, document *Document, item parsedWorkItem) [
 				continue
 			}
 		} else if _, err := os.Stat(absolute); err != nil {
+			if os.IsNotExist(err) && terminal {
+				result = append(result, value)
+				continue
+			}
 			if os.IsNotExist(err) && strings.HasSuffix(value, "/") {
 				addKnowledgeIssue(model, document, "error", "missing-scope-path", "Новый отсутствующий scope-путь должен быть файлом, а не каталогом: "+value+".", scope.Heading.Line+1)
 				continue
@@ -668,13 +676,18 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 			}
 		}
 	}
+	terminalScopeHistory := statusName == "cancelled"
 	if statusName == "done" {
+		terminalScopeHistory = true
 		if criteriaSection, found := workSection(item, "критерии приёмки", "критерии приемки", "acceptance criteria"); found {
 			for _, criterion := range criteriaSection.Tasks {
 				if !criterion.Completed {
+					terminalScopeHistory = false
 					addKnowledgeIssue(model, document, "error", "incomplete-completed-task", "У выполненной задачи все критерии приёмки должны быть отмечены [x].", criterion.Line)
 				}
 			}
+		} else {
+			terminalScopeHistory = false
 		}
 	}
 
@@ -705,7 +718,7 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 	planSection, _ := workSection(item, "план", "plan")
 	documentationImpactSection, _ := workSection(item, "влияние на документацию", "documentation impact")
 	blockerSection, _ := workSection(item, "блокер", "blocker")
-	repositoryPaths := append([]string{}, validateScopePaths(model, document, item)...)
+	repositoryPaths := append([]string{}, validateScopePaths(model, document, item, terminalScopeHistory)...)
 	return WorkItem{
 		ID: match[1], Title: match[2], Status: StatusFor(item.Metadata["status"]), Type: typeName,
 		Priority: item.Metadata["priority"], Severity: item.Metadata["severity"],

@@ -18,7 +18,8 @@
 - `internal/app/changes_*.go` — comparison, Git adapter, отчёты и специализированные diff;
 - `internal/app/server.go` — read-only changes API и live invalidation;
 - `internal/app/changes_http.go` — declarative route registry и единый schema-v1 error envelope;
-- `internal/app/assets/changes.*` — serve-only интерфейс просмотра.
+- `web/src/features/changes/`, `web/src/styles/changes.css` — serve-only
+  интерфейс просмотра; generated bundle встраивается из `internal/site/assets/generated/`.
 
 ## Границы
 

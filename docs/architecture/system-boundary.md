@@ -30,7 +30,7 @@ bootstrap, который использует сеть только до зап
 - CI использует exit code и `ProjectReport` schema v1;
 - файловая система предоставляет Markdown, локальные assets и разрешённые
   repository targets;
-- браузер читает автономный портал через `file://`; через canonical `serve` он
+- браузер читает backend-independent портал на HTTP(S) static hosting; через canonical `serve` он
   также читает revision, editor/changes API и OpenAPI UI и явно сохраняет
   разрешённый исходник;
 - shell и дочерние процессы доступны только явному `task verify --run`.

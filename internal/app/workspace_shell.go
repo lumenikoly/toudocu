@@ -1,6 +1,10 @@
 package docudocu
 
-import "strings"
+import (
+	frontend "docu-docu/internal/site"
+	"html/template"
+	"strings"
+)
 
 type workspaceSurface string
 
@@ -45,13 +49,6 @@ func appearanceAttributes(config SiteConfig) string {
 	return ` data-theme="` + escapeAttr(initial) + `" data-site-theme="` + escapeAttr(config.Theme) +
 		`" data-color-scheme="` + escapeAttr(config.ColorScheme) + `" data-accent="` + escapeAttr(config.Accent) +
 		`" data-density="` + escapeAttr(config.Density) + `" data-content-width="` + escapeAttr(config.ContentWidth) + `"`
-}
-
-func appearanceEarlyScript(config SiteConfig) string {
-	return `<script src="/assets/appearance.js" data-default-site-theme="` + escapeAttr(config.Theme) +
-		`" data-default-color-scheme="` + escapeAttr(config.ColorScheme) + `" data-default-accent="` + escapeAttr(config.Accent) +
-		`" data-default-density="` + escapeAttr(config.Density) + `" data-default-content-width="` + escapeAttr(config.ContentWidth) +
-		`" data-storage-site-theme="docu-docu-site-theme" data-storage-color-scheme="docu-docu-color-scheme"></script>`
 }
 
 func workspaceBrand(model *Model, href string) string {
@@ -101,5 +98,30 @@ func workspaceFavicon(model *Model) string {
 	if favicon := brandingOutput(model, "favicon"); favicon != "" {
 		return "/" + favicon
 	}
-	return "/assets/favicon.svg"
+	return "/assets/" + mustFrontendAsset("favicon.svg")
+}
+
+func workspacePageBootstrap(model *Model, pagePath, assetBase string, capabilities frontend.Capabilities) template.JS {
+	locale := model.SiteConfig.Project.Locale
+	if locale == "" {
+		locale = "en"
+	}
+	bootstrap, err := frontend.MarshalBootstrap(frontend.PageBootstrap{
+		SchemaVersion: 1,
+		Runtime:       frontend.RuntimeServe,
+		Page:          frontend.PageReference{Kind: "document", Path: pagePath},
+		Portal:        frontend.PortalReference{AssetBase: assetBase, DataBase: strings.Replace(assetBase, "assets/", "data/", 1)},
+		UI: frontend.UISettings{
+			Locale: locale, Theme: model.SiteConfig.Theme, ColorScheme: model.SiteConfig.ColorScheme,
+			Accent: model.SiteConfig.Accent, Density: model.SiteConfig.Density, ContentWidth: model.SiteConfig.ContentWidth,
+		},
+		Capabilities: capabilities,
+		Endpoints: &frontend.Endpoints{
+			Editor: editorAPIBase, EditorWorkspace: editorUIPath, Changes: changesAPIBase, Rebuild: rebuildEndpoint,
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+	return bootstrap
 }

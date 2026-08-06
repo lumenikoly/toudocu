@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+- Frontend source выделен в независимый TypeScript/CSS workspace `web/`;
+  детерминированные generated assets фиксируются в репозитории, проверяются CI
+  и встраиваются в один Go-бинарник. Node.js остаётся только build toolchain.
+- `build` создаёт backend-independent read-only портал для обычного HTTP(S)
+  static hosting, включая вложенный URL-путь. Go project model остаётся
+  единственным источником HTML, bootstrap и static JSON.
+- Static и serve runtime технически разделены: editor, changes, rebuild clients,
+  API URL, CodeMirror и Swagger UI отсутствуют в static output и добавляются
+  только явными serve capabilities.
+- Migration: прямое открытие `index.html` с диска больше не является
+  гарантированным контрактом. Для локальной работы используйте
+  `docu-docu serve`; для публикации — `docu-docu build` и static HTTP hosting.
+  Новая команда preview не добавлена.
+
 ## 0.0.1
 
 - Portal, Editor и Changes получили единый compact workspace shell, project

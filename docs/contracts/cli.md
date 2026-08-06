@@ -14,7 +14,7 @@ JSON-результаты CLI. Конкретный синтаксис флаг�
 | Команда | Что делает | Меняет данные |
 |---|---|---|
 | `check` | Проверяет документы, связи и OpenAPI | Нет |
-| `build` | Собирает автономный портал и `report.json` | Пишет только в output; `--clean` очищает проверенный output |
+| `build` | Собирает backend-independent static HTTP portal и `report.json` | Пишет только в output; `--clean` очищает проверенный output |
 | `serve` | Запускает локальный портал, watcher, Editor и Changes API | Меняет canonical docs только по явному сохранению в редакторе |
 | `search` | Ищет по актуальной модели | Нет |
 | `changes`, `changes file` | Сравнивает Git revisions, index и working tree | Нет |
@@ -37,7 +37,9 @@ JSON-результаты CLI. Конкретный синтаксис флаг�
   `127.0.0.1:8080` без TLS и аутентификации.
 - `--host 0.0.0.0` открывает `serve` для доверенной локальной сети.
 - `build` остаётся статическим и read-only. Editor, Swagger UI и server-only
-  scripts в результат не попадают; сами OpenAPI-файлы копируются.
+  scripts в результат не попадают; сами OpenAPI-файлы копируются. Для
+  локального browser runtime используется существующий `serve`; команды
+  `preview` нет.
 - Configured translation root доступен для проверки, сборки, поиска,
   просмотра изменений и read-only `serve`. Task workflow, scaffold и Editor
   возвращают `TRANSLATION_ROOT_READ_ONLY` до изменения файлов или запуска

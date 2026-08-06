@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "assets": {
+    "api-docs.js": {
+      "file": "api-docs.js",
+      "sha256": "dcc0df9db175ce942d60683580c8de0d99700ddfa1d2badecd67ef3130859c9a"
+    },
+    "appearance.js": {
+      "file": "appearance.js",
+      "sha256": "66dd49db5d79d92943d8c2ce60117bc3b62e7cd03d489df4a3a1c84913e45fb2"
+    },
+    "changes.css": {
+      "file": "changes.css",
+      "sha256": "7c14c42826ef9effc87b583537d553890fcc4a12a03403e10d4782a73503231d"
+    },
+    "changes.js": {
+      "file": "changes.js",
+      "sha256": "075e2ad4a87014c227dd23266a37344c5395ffb2da886fb0929b91ce3560f00c"
+    },
+    "codemirror.checksums.txt": {
+      "file": "codemirror.checksums.txt",
+      "sha256": "899a1e256ce0942e837e36d99e7ba010b8ea0be5fc3aea97ee051d517a493fba"
+    },
+    "codemirror.js": {
+      "file": "codemirror.js",
+      "sha256": "da26db86ae0cc278144ce186cfd7d993973ddd4026ef3cd4439860d12ef85b58"
+    },
+    "codemirror.LICENSE.txt": {
+      "file": "codemirror.LICENSE.txt",
+      "sha256": "22ae94c0f47fea57ce6f9ba0fcf9d988b9fdecbc8cae53c0984d38ad2d2f9c70"
+    },
+    "editor.css": {
+      "file": "editor.css",
+      "sha256": "c602777c51bd08c53ec5f3167480d503e04ac282d7553a30c0ba9a39b5913760"
+    },
+    "editor.js": {
+      "file": "editor.js",
+      "sha256": "4a408f84176e13a4fa4bd666f31a2e3bbc10dddb6219a01a12b28adf2411c2e2"
+    },
+    "favicon.svg": {
+      "file": "favicon.svg",
+      "sha256": "31ce0f2a1541797901b460482044903800361c4c727b2400690636c79512c4d3"
+    },
+    "mermaid.LICENSE.txt": {
+      "file": "mermaid.LICENSE.txt",
+      "sha256": "551b447d0b785689c232420c1c3188b76a01c26abd663228a3d5c41aa8d7c196"
+    },
+    "mermaid.tiny.js": {
+      "file": "mermaid.tiny.js",
+      "sha256": "a1bc2282b3d935693780f77931382c517e72eb72ff3427752cbb29941de11bee"
+    },
+    "playable-flow.css": {
+      "file": "playable-flow.css",
+      "sha256": "bd3316558719e2c62fb5a824464265d1e82e3937ff02555fe2813b7ac3c63371"
+    },
+    "playable-flow.js": {
+      "file": "playable-flow.js",
+      "sha256": "f390f55299106d6b54847fa230c0baba99d60739fb5a689d4c39d25430dd7168"
+    },
+    "portal.css": {
+      "file": "portal.css",
+      "sha256": "2cbab8fdd169bd140b182150454ea15a5a25bb0cf481fd8dfb7118e6071fb250"
+    },
+    "portal.js": {
+      "file": "portal.js",
+      "sha256": "5a064dbc63ef45ccbc37e6d4a921c6bf0505e1485beb6a1628cc047d5f2ec509"
+    },
+    "screen-map.css": {
+      "file": "screen-map.css",
+      "sha256": "818d1301aad9e1845476e62abeac2f8376efba0c773123a2291ea670d5d7bc30"
+    },
+    "screen-map.js": {
+      "file": "screen-map.js",
+      "sha256": "24556347bb94c47b0c010f86870877c9633528be10c73e014e239c400d489da6"
+    },
+    "serve.css": {
+      "file": "serve.css",
+      "sha256": "6965fe1e0044cfdfa662d12dbfa433234fcf2793efc7a406c4cbde870ef469b6"
+    },
+    "serve.js": {
+      "file": "serve.js",
+      "sha256": "b23d61e709af87d2beff055fc377c3124be7c8c64a2fb9ebbbc83dc7a07193e5"
+    },
+    "swagger-ui-bundle.js": {
+      "file": "swagger-ui-bundle.js",
+      "sha256": "8b188d7d3ee1ce26224908341bb9cdeac67f67f0b68440d2a9ac9e5f73e86d80"
+    },
+    "swagger-ui-bundle.LICENSE.txt": {
+      "file": "swagger-ui-bundle.LICENSE.txt",
+      "sha256": "f22a5ade2354a48bddcb9746c2d17ed94a267fa5dbf72f631f42a72eba0d081c"
+    },
+    "swagger-ui-standalone-preset.js": {
+      "file": "swagger-ui-standalone-preset.js",
+      "sha256": "ea327dbf3a0a047290f6b9cf4e4b86a63bb8534b43d416c6c07ee8d14269d9ff"
+    },
+    "swagger-ui-standalone-preset.LICENSE.txt": {
+      "file": "swagger-ui-standalone-preset.LICENSE.txt",
+      "sha256": "ad43bb2dce8515f9b917266073e3b3b132c4778ed7190726004ca0e47f24337e"
+    },
+    "swagger-ui.checksums.txt": {
+      "file": "swagger-ui.checksums.txt",
+      "sha256": "421940e71620599c3ecae75a31499175131be33c2f83d67e76bfdafa02b54bfe"
+    },
+    "swagger-ui.css": {
+      "file": "swagger-ui.css",
+      "sha256": "ca238f7d7c2cf4480c1e77a9c3b9da915ab216e96ffd354e69076560c650c6de"
+    },
+    "swagger-ui.LICENSE.txt": {
+      "file": "swagger-ui.LICENSE.txt",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    }
+  },
+  "runtimes": {
+    "static": [
+      "manifest.json",
+      "appearance.js",
+      "portal.css",
+      "portal.js",
+      "screen-map.css",
+      "screen-map.js",
+      "playable-flow.css",
+      "playable-flow.js",
+      "mermaid.tiny.js",
+      "mermaid.LICENSE.txt",
+      "favicon.svg"
+    ],
+    "serve": [
+      "manifest.json",
+      "appearance.js",
+      "portal.css",
+      "portal.js",
+      "screen-map.css",
+      "screen-map.js",
+      "playable-flow.css",
+      "playable-flow.js",
+      "mermaid.tiny.js",
+      "mermaid.LICENSE.txt",
+      "favicon.svg",
+      "serve.css",
+      "serve.js",
+      "editor.css",
+      "editor.js",
+      "changes.css",
+      "changes.js",
+      "codemirror.js",
+      "codemirror.LICENSE.txt",
+      "codemirror.checksums.txt",
+      "api-docs.js",
+      "swagger-ui.css",
+      "swagger-ui-bundle.js",
+      "swagger-ui-standalone-preset.js",
+      "swagger-ui.LICENSE.txt",
+      "swagger-ui-bundle.LICENSE.txt",
+      "swagger-ui-standalone-preset.LICENSE.txt",
+      "swagger-ui.checksums.txt"
+    ]
+  }
+}

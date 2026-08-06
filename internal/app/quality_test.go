@@ -408,7 +408,7 @@ func TestStandardAndRunbookScaffoldsAndCatalogs(t *testing.T) {
 	if err != nil || !strings.Contains(string(processes), "FLOW-CORE-01") {
 		t.Fatalf("processes catalog was not preserved: %v", err)
 	}
-	app, err := os.ReadFile("assets/app.js")
+	app, err := os.ReadFile(filepath.Join("..", "..", "web", "src", "core", "portal.ts"))
 	if err != nil || !strings.Contains(string(app), "item.dataset[key]") {
 		t.Fatalf("generic catalog filter behavior is missing: %v", err)
 	}

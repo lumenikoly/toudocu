@@ -13,7 +13,7 @@ import (
 )
 
 func TestEmbeddedMermaidVersionIsPinned(t *testing.T) {
-	content, err := EmbeddedFiles.ReadFile("assets/mermaid.tiny.js")
+	content, err := EmbeddedFiles.ReadFile("assets/generated/mermaid.tiny.js")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -21,7 +21,7 @@ func TestEmbeddedMermaidVersionIsPinned(t *testing.T) {
 	if actual := fmt.Sprintf("%x", sha256.Sum256(content)); actual != expected {
 		t.Fatalf("unexpected Mermaid bundle checksum: got %s want %s", actual, expected)
 	}
-	if _, err := EmbeddedFiles.ReadFile("assets/mermaid.LICENSE.txt"); err != nil {
+	if _, err := EmbeddedFiles.ReadFile("assets/generated/mermaid.LICENSE.txt"); err != nil {
 		t.Fatal("embedded Mermaid license is missing")
 	}
 }
@@ -108,7 +108,7 @@ func TestNavigationIconsReflectDocumentStatus(t *testing.T) {
 		t.Fatal("documents without declared status must keep a neutral icon without status annotation")
 	}
 
-	style, err := EmbeddedFiles.ReadFile("assets/style.css")
+	style, err := os.ReadFile(filepath.Join("..", "..", "web", "src", "styles", "portal.css"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -810,7 +810,7 @@ func TestGenerateSite(t *testing.T) {
 	if result.Pages < 10 {
 		t.Fatalf("pages=%d", result.Pages)
 	}
-	for _, name := range []string{"index.html", "health.html", "report.json", "assets/style.css", "assets/app.js", "assets/search-index.js", "modules/auth.html", "modules/index.html", "processes/index.html", "use-cases/UC-AUTH-01.html", "use-cases/index.html"} {
+	for _, name := range []string{"index.html", "health.html", "report.json", "assets/manifest.json", "assets/portal.css", "assets/portal.js", "data/search-index.json", "data/navigation.json", "data/relations.json", "data/screens.json", "data/use-cases/index.json", "modules/auth.html", "modules/index.html", "processes/index.html", "use-cases/UC-AUTH-01.html", "use-cases/index.html"} {
 		if _, err := os.Stat(filepath.Join(output, filepath.FromSlash(name))); err != nil {
 			t.Fatalf("missing %s: %v", name, err)
 		}
@@ -914,7 +914,7 @@ func TestDocumentContextCopyMarkupAndAssets(t *testing.T) {
 		t.Fatal("context outside repository root must use SourcePath without exposing an absolute path")
 	}
 
-	appScript, err := EmbeddedFiles.ReadFile("assets/app.js")
+	appScript, err := os.ReadFile(filepath.Join("..", "..", "web", "src", "core", "portal.ts"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -922,14 +922,14 @@ func TestDocumentContextCopyMarkupAndAssets(t *testing.T) {
 		"initializeDocumentContextCopy",
 		"navigator.clipboard?.writeText",
 		"document.execCommand('copy')",
-		"Документ: ${title}\\nПуть: ${path}",
-		"Не удалось скопировать",
+		"core.portal.015",
+		"core.portal.017",
 	} {
 		if !strings.Contains(string(appScript), part) {
 			t.Fatalf("document context browser behavior missing %q", part)
 		}
 	}
-	style, err := EmbeddedFiles.ReadFile("assets/style.css")
+	style, err := os.ReadFile(filepath.Join("..", "..", "web", "src", "styles", "portal.css"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -981,12 +981,12 @@ func TestPortalSimplifiedNavigationAndAccessibleHeadings(t *testing.T) {
 		t.Fatal("heading permalink aria-label leaked into accessible heading name")
 	}
 
-	app, err := EmbeddedFiles.ReadFile("assets/app.js")
+	app, err := os.ReadFile(filepath.Join("..", "..", "web", "src", "core", "portal.ts"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, expected := range []string{
-		"const containsActivePage = Boolean($('.is-active', folder));",
+		"containsActivePage",
 		"hasSavedState ? folderState[key] === true : true",
 		"section.insertBefore(toggle, body)",
 	} {
@@ -1066,7 +1066,7 @@ func TestGenerateMermaidSiteAssetsAndMarkup(t *testing.T) {
 		t.Fatal(err)
 	}
 	html := string(htmlBytes)
-	for _, part := range []string{`data-mermaid-diagram`, `class="mermaid-source"`, `../assets/app.js`, "Показать исходный код"} {
+	for _, part := range []string{`data-mermaid-diagram`, `class="mermaid-source"`, `../assets/portal.js`, `id="docu-docu-page"`, "Показать исходный код"} {
 		if !strings.Contains(html, part) {
 			t.Fatalf("Mermaid page missing %q: %s", part, html)
 		}
@@ -1074,11 +1074,11 @@ func TestGenerateMermaidSiteAssetsAndMarkup(t *testing.T) {
 	if strings.Contains(html, `data-mermaid-stage`) {
 		t.Fatalf("non-flow Mermaid page must keep the static diagram layout: %s", html)
 	}
-	if strings.Contains(html, `type="module"`) || strings.Contains(html, "cdn.") {
-		t.Fatalf("Mermaid page must be file:// compatible and offline: %s", html)
+	if !strings.Contains(html, `type="module"`) || strings.Contains(html, "cdn.") {
+		t.Fatalf("Mermaid page must use local ES modules without CDN: %s", html)
 	}
 	if strings.Contains(html, "assets/mermaid.tiny.js") {
-		t.Fatal("Mermaid bundle must be loaded lazily by app.js")
+		t.Fatal("Mermaid bundle must be loaded lazily by portal.js")
 	}
 	indexBytes, _ := os.ReadFile(filepath.Join(output, "index.html"))
 	if strings.Contains(string(indexBytes), "assets/mermaid.tiny.js") {
@@ -1096,18 +1096,18 @@ func TestPortalHeavyAssetsAreLazy(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, eager := range []string{"assets/search-index.js", "assets/mermaid.tiny.js", "assets/screen-map.js", "assets/playable-flow.js"} {
+	for _, eager := range []string{"search-index.json", "assets/mermaid.tiny.js", "assets/screen-map.js", "assets/playable-flow.js"} {
 		if strings.Contains(string(page), eager) {
 			t.Fatalf("ordinary page eagerly loads %s", eager)
 		}
 	}
-	app, err := os.ReadFile(filepath.Join(output, "assets", "app.js"))
+	app, err := os.ReadFile(filepath.Join("..", "..", "web", "src", "core", "portal.ts"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, lazy := range []string{"loadScript('search-index.js')", "loadScript('mermaid.tiny.js')", "loadScript('screen-map.js')", "loadScript('playable-flow.js')"} {
+	for _, lazy := range []string{"search-index.json", "loadScript('mermaid.tiny.js')", "loadScript('screen-map.js')", "loadScript('playable-flow.js')"} {
 		if !strings.Contains(string(app), lazy) {
-			t.Fatalf("app.js missing lazy loader %q", lazy)
+			t.Fatalf("portal source missing lazy loader %q", lazy)
 		}
 	}
 }

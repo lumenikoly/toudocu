@@ -17,6 +17,13 @@ go run ./cmd/docu-docu check ./docs --strict --stale-days 0
 ```bash
 go test -count=1 ./...
 go test -count=1 -race ./...
+cd web
+npm ci
+npm run typecheck
+npm test
+npm run build
+npm run test:browser
+cd ..
 go run ./cmd/docu-docu build ./docs \
   --output ./build/project-docs \
   --repository-root . \
@@ -40,6 +47,9 @@ GOOS=windows GOARCH=amd64 go build -o /tmp/docu-docu-windows.exe ./cmd/docu-docu
 - timeout проверяется не только fake runner, но и реальным дочерним процессом;
 - тест не должен исполнять команды work item через обычные `check` или `build`;
 - временные outputs создаются через `t.TempDir` или `/tmp`.
+- static browser smoke запускается через HTTP, включая вложенный URL-путь;
+  прямое открытие HTML с диска не является тестовым контрактом;
+- CI повторно собирает `internal/site/assets/generated/` и отклоняет diff.
 
 ## Проверка документационной задачи
 

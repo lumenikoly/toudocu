@@ -1,0 +1,104 @@
+import assert from "node:assert/strict";
+import { readFile, readdir } from "node:fs/promises";
+import { test } from "node:test";
+
+const generated = new URL("../../internal/site/assets/generated/", import.meta.url);
+
+test("manifest separates static and serve assets", async () => {
+  const manifest = JSON.parse(await readFile(new URL("manifest.json", generated), "utf8"));
+  assert.equal(manifest.schemaVersion, 1);
+  assert.ok(manifest.runtimes.static.includes("appearance.js"));
+  assert.ok(manifest.runtimes.serve.includes("appearance.js"));
+  assert.ok(manifest.runtimes.static.includes("portal.js"));
+  assert.ok(manifest.runtimes.serve.includes("editor.js"));
+  assert.ok(manifest.runtimes.serve.includes("changes.js"));
+  for (const forbidden of ["editor.js", "changes.js", "serve.js", "codemirror.js", "api-docs.js"]) {
+    assert.equal(manifest.runtimes.static.includes(forbidden), false, `${forbidden} leaked into static runtime`);
+  }
+});
+
+test("portal bundle has no server-only endpoint", async () => {
+  const staticBundles = ["portal.js", "screen-map.js", "playable-flow.js"];
+  for (const name of staticBundles) {
+    const source = await readFile(new URL(name, generated), "utf8");
+    for (const forbidden of ["/_docu-docu/api/editor", "/_docu-docu/api/changes", "/__docu-docu/rebuild", "localhost"]) {
+      assert.equal(source.includes(forbidden), false, `${forbidden} leaked into ${name}`);
+    }
+  }
+  const portal = await readFile(new URL("portal.js", generated), "utf8");
+  assert.equal(portal.includes("search-index.json"), true);
+});
+
+test("bootstrap source uses stable page kinds and explicit failure states", async () => {
+  const source = await readFile(new URL("../src/core/bootstrap.ts", import.meta.url), "utf8");
+  for (const kind of ["document", "architecture", "module", "use-case", "flow", "screen", "standard", "runbook", "task"]) {
+    assert.equal(source.includes(`\"${kind}\"`), true, `missing stable kind ${kind}`);
+  }
+  for (const state of ["bootstrap unavailable", "unsupported schema", "invalid bootstrap"]) {
+    assert.equal(source.includes(state), true, `missing state ${state}`);
+  }
+  assert.equal(source.includes("querySelector(\"h1\")"), false);
+});
+
+test("design primitives are model-independent", async () => {
+  const source = await readFile(new URL("../src/components/index.ts", import.meta.url), "utf8");
+  for (const component of ["createButton", "createIconButton", "createBadge", "createTabs", "wireDisclosure", "createDialog", "installTooltip", "createCommandMenu", "createTree", "createDataTable", "createEmptyState", "createDiagnostic", "createDiffBlock"]) {
+    assert.equal(source.includes(component), true, `missing component ${component}`);
+  }
+  for (const forbidden of ["ProjectModel", "task readiness", "semantic diff", "filesystem path"]) {
+    assert.equal(source.includes(forbidden), false, `component layer contains project rule ${forbidden}`);
+  }
+  const portal = await readFile(new URL("../src/core/portal.ts", import.meta.url), "utf8");
+  const editor = await readFile(new URL("../src/features/editor/index.ts", import.meta.url), "utf8");
+  assert.equal(portal.includes('from "../components"'), true, "portal does not use component primitives");
+  assert.equal(editor.includes('from "../../components"'), true, "editor does not use dialog primitive");
+});
+
+test("strict TypeScript has no file-level bypass", async () => {
+  const root = new URL("../src/", import.meta.url);
+  async function sources(directory) {
+    const entries = await readdir(directory, { withFileTypes: true });
+    const files = [];
+    for (const entry of entries) {
+      const target = new URL(`${entry.name}${entry.isDirectory() ? "/" : ""}`, directory);
+      if (entry.isDirectory()) files.push(...await sources(target));
+      else if (entry.name.endsWith(".ts")) files.push(target);
+    }
+    return files;
+  }
+  for (const file of await sources(root)) {
+    const source = await readFile(file, "utf8");
+    assert.equal(source.includes("@ts-nocheck"), false, `${file.pathname} bypasses strict checking`);
+  }
+});
+
+test("serve navigation replaces the versioned bootstrap", async () => {
+  const source = await readFile(new URL("../src/core/serve-navigation.ts", import.meta.url), "utf8");
+  for (const required of ["syncBootstrap", "parseBootstrap", "window.DocuDocuPage = parsed.value"]) {
+    assert.equal(source.includes(required), true, `serve navigation misses ${required}`);
+  }
+});
+
+test("browser behavior reads user-facing copy from the locale catalog", async () => {
+  const root = new URL("../src/", import.meta.url);
+  const catalogSource = await readFile(new URL("../src/core/messages.ru.ts", import.meta.url), "utf8");
+  const baseSource = await readFile(new URL("../src/core/locale.ts", import.meta.url), "utf8");
+  const defined = new Set([...`${catalogSource}\n${baseSource}`.matchAll(/^\s*["']?([a-z][a-z0-9.-]+)["']?\s*:/gmi)].map((match) => match[1]));
+  async function sources(directory) {
+    const entries = await readdir(directory, { withFileTypes: true });
+    const files = [];
+    for (const entry of entries) {
+      const target = new URL(`${entry.name}${entry.isDirectory() ? "/" : ""}`, directory);
+      if (entry.isDirectory()) files.push(...await sources(target));
+      else if (entry.name.endsWith(".ts") && !["locale.ts", "messages.ru.ts"].includes(entry.name)) files.push(target);
+    }
+    return files;
+  }
+  for (const file of await sources(root)) {
+    const source = await readFile(file, "utf8");
+    assert.equal(/[А-Яа-яЁё]/.test(source), false, `${file.pathname} contains copy outside the locale catalog`);
+    for (const match of source.matchAll(/text\("([^"]+)"/g)) {
+      assert.equal(defined.has(match[1]), true, `${file.pathname} uses missing locale key ${match[1]}`);
+    }
+  }
+});

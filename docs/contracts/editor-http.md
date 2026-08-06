@@ -16,6 +16,8 @@
 
 Editor API существует только в canonical `docu-docu serve`. Его нет в
 статической сборке, locale-разделах и при прямом `serve` translation root.
+Go включает editor UI только при capability `editor` и передаёт same-origin API
+base в versioned page bootstrap; frontend не выводит endpoint из URL страницы.
 
 Редактор видит только разрешённые `.md`, `.yaml`, `.yml` и `.json` внутри
 documentation root. OpenAPI-файлы проверяются тем же валидатором, что и при

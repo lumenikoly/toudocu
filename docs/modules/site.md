@@ -5,24 +5,28 @@
 - Владелец: Команда Docu-docu
 - Последнее обновление: 2026-08-05
 
-Модуль формирует автономные HTML-страницы, навигацию, поиск и типизированный
-`report.json` из готовой проектной модели.
+Модуль формирует backend-independent HTML-страницы, навигацию, статические
+JSON-ресурсы и типизированный `report.json` из готовой проектной модели.
 
 ## Назначение
 
-Сделать проектную документацию удобной для человека через `file://` или
-небольшой dev-сервер и одновременно предоставить полную модель CI и агентам.
+Сделать проектную документацию удобной для человека на обычном HTTP(S) static
+hosting или через локальный `serve` и одновременно предоставить полную модель
+CI и агентам.
 
 ## Расположение в коде
 
-- оболочка HTML и отчёт: `internal/app/site.go`, `internal/app/report_types.go`;
+- application services и отчёт: `internal/app/site.go`, `internal/app/report_types.go`;
+- типизированный bootstrap, templates, asset manifest и embed:
+  `internal/site/`;
+- frontend source и независимая сборка: `web/src/`, `web/build.mjs`;
+- производные встроенные assets: `internal/site/assets/generated/`;
 - каталоги процессов и use cases: `internal/app/process_site.go`;
 - Screen Map, каталог и страницы экранов: `internal/app/screen_site.go`;
 - локальная HTTP-раздача и offline API docs: `internal/app/server.go`,
   `internal/app/api_docs.go`;
 - editor workspace, API и platform-specific atomic replace: `internal/app/editor_*.go`;
-- общая оболочка Editor и Changes: `internal/app/workspace_shell.go`;
-- встроенные ресурсы: `internal/app/embed.go`, `internal/app/assets/`;
+- общая оболочка Editor и Changes: `internal/site/workspace.go`;
 - конфигурация тем и безопасного брендинга: `internal/app/site_config.go`.
 
 ## Границы
@@ -38,10 +42,13 @@ Markdown. Только явный режим `serve` предоставляет 
 `--clean` запрещает системный корень, исходную документацию, её родительские
 каталоги и прямые output-симлинки. Решение принимается по раскрытым путям.
 
-### BR-SITE-002: Портал работает через file protocol
+### BR-SITE-002: Портал работает на static HTTP hosting
 
-Все внутренние URL, assets, поиск и страницы каталогов генерируются как
-относительные файлы и не требуют HTTP-сервера.
+Результат `build` не требует Docu-docu backend, базы данных, Node.js, CDN или
+внешнего runtime. HTML, CSS, JavaScript и JSON находятся в output, используют
+относительные URL и работают как в корне HTTP(S) host, так и во вложенном
+URL-пути. Прямое открытие через `file://` не является гарантированным
+продуктовым контрактом.
 
 ### BR-SITE-003: Dev-сервер не раскрывает исходный репозиторий
 
@@ -61,8 +68,7 @@ Markdown. Только явный режим `serve` предоставляет 
 ### BR-SITE-005: Карта экранов работает автономно
 
 Карта, фильтры, SVG-связи, масштабирование, pan, боковая панель и пошаговый
-viewer работают через `file://` на локальных JavaScript и CSS без CDN и
-дополнительных runtime.
+viewer работают на локальных JavaScript и CSS без CDN и backend-запросов.
 
 «Пользовательские сценарии» являются самостоятельным верхнеуровневым разделом
 для `UC-*`, а «Процессы» — единственный каталог документов `FLOW-*` по адресу
@@ -91,8 +97,9 @@ fallback favicon и браузерные ресурсы встроены чер�
 
 ### BR-SITE-007: Build и serve имеют разные возможности
 
-`GenerateSite` всегда создаёт автономный read-only результат для `file://` без
-editor markup, API UI, Swagger UI, CodeMirror и server-only rebuild code. Он
+`GenerateSite` всегда создаёт backend-independent read-only результат для
+static HTTP hosting без editor markup, API UI, Swagger UI, CodeMirror и
+server-only rebuild code. Он
 копирует найденные OpenAPI specs как обычные portal assets. `serve` отдельно
 добавляет live workspace, editor/source actions, polling, API, watcher и
 vendored Swagger UI для canonical contracts.
@@ -113,7 +120,7 @@ buffer можно скачать. Diagnostics не блокируют сохра
 сопоставляется по relative source path, generated page — по существующему
 output path, иначе используется locale homepage. Locale mount не получает
 editor, changes API, rebuild controls, source paths или canonical workspace.
-`build`, `file://` и `serve` непосредственно на translation root остаются
+`build` и `serve` непосредственно на translation root остаются
 одноязычными и read-only: server не добавляет editor markup, write API или
 rebuild controls.
 
@@ -143,15 +150,25 @@ direct translation serve и static build не содержат UI, assets или
 
 Canonical portal режима `serve`, Editor и Changes используют одинаковые
 ключи `localStorage` для `classic`/`paper`/`terminal` и
-`system`/`light`/`dark`. Встроенный `appearance.js` применяет сохранённые
-theme, scheme, accent, density и content width до основной инициализации и
-публикует `docu-docu:themechange` при последующих изменениях.
+`system`/`light`/`dark`. Общий блокирующий `appearance.js` до загрузки CSS
+применяет сохранённые theme, scheme, accent, density и content width и
+публикует `docu-docu:themechange` при последующих изменениях. Отложенные
+surface bundles не повторяют эту инициализацию.
 
 Editor и Changes получают общий header с project branding, навигацией
 «Портал / Редактор / Изменения», активным `aria-current` и селекторами темы.
 Их рабочие действия остаются в отдельной контекстной панели. CodeMirror
 переключает theme compartment без пересоздания editor state, а активный
 Mermaid diff перерисовывается без сброса отчёта, фильтров и URL state.
+
+### BR-SITE-013: Go явно задаёт frontend capabilities
+
+Каждая страница содержит безопасно сериализованный `application/json` bootstrap
+со `schemaVersion`, runtime, page reference, относительными asset/data bases и
+capabilities. Static runtime всегда выключает `editor`, `changes`, `rebuild` и
+`taskWorkspace`. Serve-only endpoints присутствуют только в serve bootstrap и
+остаются same-origin. Frontend игнорирует неизвестные поля, но явно показывает
+ошибку при отсутствии bootstrap или неподдерживаемой версии схемы.
 
 ## Инварианты
 
@@ -183,7 +200,7 @@ Mermaid diff перерисовывается без сброса отчёта, 
   контекст документа;
 - в canonical `serve` общий surface navigation открывает portal, Editor и
   Changes полной навигацией, а rebuild остаётся отдельным портальным действием;
-  через `file://` специальных маршрутов, действий и serve-only assets нет;
+  в static output специальных маршрутов, действий и serve-only assets нет;
 - compact navigation сохраняет доступные названия у 40×40 control surfaces;
   контекстные панели складываются без горизонтального overflow страницы, а
   локальная прокрутка остаётся у дерева, метрик и diff;
@@ -220,5 +237,5 @@ Mermaid diff перерисовывается без сброса отчёта, 
 
 ## Связанные процессы
 
-- [FLOW-DOCS-BUILD: Сборка автономного портала](../flows/FLOW-DOCS-BUILD.md)
+- [FLOW-DOCS-BUILD: Сборка статического HTTP-портала](../flows/FLOW-DOCS-BUILD.md)
 - [FLOW-DOCS-SERVE: Локальный просмотр портала](../flows/FLOW-DOCS-SERVE.md)

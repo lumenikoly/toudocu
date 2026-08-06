@@ -2,7 +2,7 @@
 
 **English** | [Русский](README.ru.md)
 
-**A tool for verifiable Markdown documentation and standalone HTML portals.**
+**A tool for verifiable Markdown documentation and static HTTP portals.**
 
 **Docu-docu** helps keep documentation aligned with the codebase, find inconsistencies, and build clean static portals for reading.
 
@@ -11,7 +11,7 @@
 * **Ready-to-use Go CLI** — a fast binary with no Node.js or additional dependencies.
 * **Skills for AI agents** — help analyze repositories, create documentation, and update it after changes.
 * **Documentation validation** — structure, links, and relationships can be checked locally and in CI.
-* **Standalone portal** — the static website opens directly from disk and does not require a running server.
+* **Static HTTP portal** — the generated website needs no backend and can be published on ordinary static hosting.
 * **Local mode** — an editor, automatic rebuilds, and Git change browsing.
 * **Minimal infrastructure** — no database, npm, CDN, or separate runtime.
 
@@ -106,7 +106,7 @@ http://127.0.0.1:8080
 
 Local mode includes an editor, file watching, and automatic rebuilds.
 
-### 6. Build a standalone version
+### 6. Build a backend-independent static portal
 
 ```bash
 docu-docu build ./docs \
@@ -114,10 +114,12 @@ docu-docu build ./docs \
   --clean
 ```
 
-The generated portal can be opened directly from disk:
+Publish the generated directory with any HTTP(S) static host. For local work,
+use the existing `docu-docu serve` command; opening `index.html` through
+`file://` is not a supported contract.
 
 ```text
-site/index.html
+https://docs.example.com/project/
 ```
 
 ---
@@ -188,7 +190,7 @@ Validation can be run locally or added to CI.
 
 ---
 
-## Standalone HTML portal
+## Static HTTP portal
 
 ```bash
 docu-docu build ./docs \
@@ -198,14 +200,15 @@ docu-docu build ./docs \
 
 The generated portal:
 
-* opens through `file://`;
-* does not require a running server;
+* runs on ordinary HTTP(S) static hosting, including a nested URL path;
+* does not require Docu-docu or another backend after generation;
 * does not use a database;
 * does not load resources from a CDN;
 * does not require Node.js or npm;
 * works well as a CI artifact or on static hosting.
 
-The portal is read-only.
+The portal is read-only. For local viewing, use `docu-docu serve`; direct
+double-click opening of `index.html` is not a supported contract.
 
 ---
 

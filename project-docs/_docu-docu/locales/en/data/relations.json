@@ -1,0 +1,77 @@
+[
+  {
+    "id": "MOD-CLI",
+    "useCases": [
+      "UC-TASK-01",
+      "UC-TASK-02",
+      "UC-TASK-03"
+    ],
+    "screens": [],
+    "rules": [
+      "BR-CLI-001",
+      "BR-CLI-002",
+      "BR-CLI-003",
+      "BR-CLI-004",
+      "BR-CLI-005",
+      "BR-CLI-006"
+    ]
+  },
+  {
+    "id": "MOD-MARKDOWN",
+    "useCases": [],
+    "screens": [],
+    "rules": [
+      "BR-MD-001",
+      "BR-MD-002",
+      "BR-MD-003"
+    ]
+  },
+  {
+    "id": "MOD-CHANGES",
+    "useCases": [
+      "UC-DOCS-05"
+    ],
+    "screens": [],
+    "rules": [
+      "BR-CHANGES-001",
+      "BR-CHANGES-002",
+      "BR-CHANGES-003",
+      "BR-CHANGES-004"
+    ]
+  },
+  {
+    "id": "MOD-MODEL",
+    "useCases": [
+      "UC-DOCS-02"
+    ],
+    "screens": [],
+    "rules": [
+      "BR-MODEL-001",
+      "BR-MODEL-002",
+      "BR-MODEL-003",
+      "BR-MODEL-004",
+      "BR-MODEL-005"
+    ]
+  },
+  {
+    "id": "MOD-SITE",
+    "useCases": [
+      "UC-DOCS-01",
+      "UC-DOCS-03",
+      "UC-DOCS-04"
+    ],
+    "screens": [],
+    "rules": [
+      "BR-SITE-001",
+      "BR-SITE-002",
+      "BR-SITE-003",
+      "BR-SITE-004",
+      "BR-SITE-005",
+      "BR-SITE-006",
+      "BR-SITE-007",
+      "BR-SITE-008",
+      "BR-SITE-009",
+      "BR-SITE-010"
+    ]
+  }
+]

@@ -1,3 +1,0 @@
-6903c5a3949b0c4883a10fad4262315db7777186555b4b811c17dd8e45e9945f  codemirror.js
-22ae94c0f47fea57ce6f9ba0fcf9d988b9fdecbc8cae53c0984d38ad2d2f9c70  codemirror.LICENSE.txt
-0f444f294c1cc5e28a9c1523560c297377b7eeed0510ec9d9e432ea883fbb013  package-lock.json

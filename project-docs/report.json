@@ -4,12 +4,12 @@
     "name": "Docu-docu",
     "version": "0.0.1"
   },
-  "generatedAt": "2026-08-05T19:56:07.842729387Z",
+  "generatedAt": "2026-08-06T08:12:51.988538519Z",
   "sourceDirectory": "docs",
   "staleDays": 90,
   "project": {
     "title": "Docu-docu",
-    "description": "Docu-docu — dependency-free CLI на Go с публичным Go-фасадом для проверяемой проектной документации в структурированном Markdown и автономного HTML-портала, работающего через file:// .",
+    "description": "Docu-docu — dependency-free CLI на Go с публичным Go-фасадом для проверяемой проектной документации в структурированном Markdown и backend-independent HTML-портала для обычного HTTP(S) static hosting.",
     "status": {
       "kind": "in-progress",
       "symbol": "◐",
@@ -20,7 +20,7 @@
     "version": "0.0.1",
     "owner": "Команда Docu-docu",
     "updated": "2026-08-05",
-    "summary": "CLI проверяет, собирает и локально раздаёт документацию, формирует типизированные JSON-отчёты, выдаёт контекст выбранной задачи и выполняет её проверки только по явной команде. Корневой Go-пакет предоставляет стабильный фасад модели, рендеринга и отчётов для локального встраивания; канонический удалённый module path пока не опубликован. Встроенная Mermaid Tiny отображает связанные процессы без CDN или Node.js. Безопасность путей, HTML, диаграмм, HTTP-раздачи и process timeout проверяется негативными тестами. Модель процессов формирует раздельные каталоги UC- и FLOW- , стабильные URL по ID и рабочее пространство use case с описанием, картой, проигрыванием и связями. Экранная модель формирует основной каталог, отдельную общую карту с SVG-связями, sitemap, hotspots и traceability. Всё работает через file:// , поддерживает клавиатуру, touch, состояния, ошибки и fallback без preview. Активные задачи, блокеры и следующий результат вычисляются из work items и roadmap и отображаются в HTML автоматически."
+    "summary": "CLI проверяет, собирает и локально раздаёт документацию, формирует типизированные JSON-отчёты, выдаёт контекст выбранной задачи и выполняет её проверки только по явной команде. Корневой Go-пакет предоставляет стабильный фасад модели, рендеринга и отчётов для локального встраивания; канонический удалённый module path пока не опубликован. Встроенная Mermaid Tiny отображает связанные процессы без CDN или Node.js. Безопасность путей, HTML, диаграмм, HTTP-раздачи и process timeout проверяется негативными тестами. Модель процессов формирует раздельные каталоги UC- и FLOW- , стабильные URL по ID и рабочее пространство use case с описанием, картой, проигрыванием и связями. Экранная модель формирует основной каталог, отдельную общую карту с SVG-связями, sitemap, hotspots и traceability. Static portal работает через HTTP(S), поддерживает клавиатуру, touch, состояния, ошибки и fallback; для локального просмотра используется serve . Активные задачи, блокеры и следующий результат вычисляются из work items и roadmap и отображаются в HTML автоматически."
   },
   "currentStatus": {
     "activeWork": [],
@@ -37,17 +37,17 @@
     }
   },
   "stats": {
-    "documents": 74,
+    "documents": 79,
     "totalTasks": 14,
     "completedTasks": 13,
     "remainingTasks": 1,
     "taskProgress": 93,
-    "documentsComplete": 13,
+    "documentsComplete": 14,
     "documentsInProgress": 2,
     "documentsNotStarted": 0,
-    "documentsWithoutTasks": 59,
+    "documentsWithoutTasks": 63,
     "staleDocuments": 0,
-    "documentsWithoutDescription": 13,
+    "documentsWithoutDescription": 14,
     "documentsWithoutStatus": 0,
     "brokenLinks": 0,
     "warnings": 0,
@@ -86,7 +86,7 @@
       "outputPath": "index.html",
       "type": "overview",
       "title": "Docu-docu",
-      "description": "Docu-docu — dependency-free CLI на Go с публичным Go-фасадом для проверяемой проектной документации в структурированном Markdown и автономного HTML-портала, работающего через file:// .",
+      "description": "Docu-docu — dependency-free CLI на Go с публичным Go-фасадом для проверяемой проектной документации в структурированном Markdown и backend-independent HTML-портала для обычного HTTP(S) static hosting.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -100,7 +100,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T13:22:12.765478409Z",
+      "updatedAt": "2026-08-05T21:02:24.880819933Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -347,12 +347,95 @@
     },
     {
       "id": "",
+      "sourcePath": "architecture/frontend-runtime-boundary.md",
+      "outputPath": "architecture/frontend-runtime-boundary.html",
+      "type": "architecture",
+      "sectionType": "architecture",
+      "title": "Где проходит граница между Go-ядром и frontend runtime?",
+      "description": "Go остаётся единственным источником проектной модели и доверенной границей для файловой системы, Git и task verification. Frontend получает только подготовленное представление страницы, производные статические данные и явно выданные возможности runtime.",
+      "metadata": {
+        "architectureQuestion": "Где проходит граница между Go-ядром и frontend runtime?",
+        "documentType": "Architecture"
+      },
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-06T08:02:14.6918359Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "runtime-components.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "architecture/runtime-components.md",
+          "href": "runtime-components.html"
+        },
+        {
+          "destination": "trust-boundaries.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "architecture/trust-boundaries.md",
+          "href": "trust-boundaries.html"
+        },
+        {
+          "destination": "../modules/site.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/site.md",
+          "href": "../modules/site.html"
+        },
+        {
+          "destination": "../use-cases/build-portal.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/build-portal.md",
+          "href": "../use-cases/UC-DOCS-01.html"
+        },
+        {
+          "destination": "../flows/FLOW-DOCS-BUILD.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "flows/FLOW-DOCS-BUILD.md",
+          "href": "../flows/FLOW-DOCS-BUILD.html"
+        }
+      ],
+      "backlinks": [
+        "architecture/overview.md",
+        "guides/deployment.md",
+        "guides/frontend-development.md"
+      ],
+      "relatedDocuments": [
+        "architecture/runtime-components.md",
+        "architecture/trust-boundaries.md",
+        "modules/site.md",
+        "use-cases/build-portal.md",
+        "flows/FLOW-DOCS-BUILD.md"
+      ]
+    },
+    {
+      "id": "",
       "sourcePath": "architecture/overview.md",
       "outputPath": "architecture/overview.html",
       "type": "architecture",
       "sectionType": "architecture",
       "title": "Архитектура",
-      "description": "Docu-docu — локальный dependency-free Go runtime между исходным каталогом документации и потребителями проверенной модели: Go-кодом через публичный фасад, автоматизацией через CLI/JSON и читателем автономного HTML-портала. Опциональный serve добавляет локальный HTTP/editor runtime и offline каталог OpenAPI; база данных, CDN и внешний runtime в границу системы не входят.",
+      "description": "Docu-docu — локальный dependency-free Go runtime между исходным каталогом документации и потребителями проверенной модели: Go-кодом через публичный фасад, автоматизацией через CLI/JSON и читателем статического HTTP-портала. Опциональный serve добавляет локальный HTTP/editor runtime и offline каталог OpenAPI; база данных, CDN и внешний runtime в границу системы не входят.",
       "metadata": {
         "documentType": "Architecture Overview"
       },
@@ -368,7 +451,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T17:45:16.808083952Z",
+      "updatedAt": "2026-08-05T21:01:05.58531506Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -388,6 +471,14 @@
           "targetKind": "document",
           "target": "architecture/runtime-components.md",
           "href": "runtime-components.html"
+        },
+        {
+          "destination": "frontend-runtime-boundary.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "architecture/frontend-runtime-boundary.md",
+          "href": "frontend-runtime-boundary.html"
         },
         {
           "destination": "trust-boundaries.md",
@@ -418,6 +509,7 @@
       "relatedDocuments": [
         "architecture/system-boundary.md",
         "architecture/runtime-components.md",
+        "architecture/frontend-runtime-boundary.md",
         "architecture/trust-boundaries.md",
         "architecture/failure-isolation.md",
         "architecture/documentation-changes.md"
@@ -447,7 +539,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T18:21:17.721521948Z",
+      "updatedAt": "2026-08-05T21:03:40.634060162Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -526,6 +618,7 @@
         }
       ],
       "backlinks": [
+        "architecture/frontend-runtime-boundary.md",
         "architecture/overview.md"
       ],
       "relatedDocuments": [
@@ -564,7 +657,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T18:21:17.722521957Z",
+      "updatedAt": "2026-08-05T21:02:24.882819945Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -676,6 +769,7 @@
         }
       ],
       "backlinks": [
+        "architecture/frontend-runtime-boundary.md",
         "architecture/overview.md",
         "contracts/editor-http.md"
       ],
@@ -759,6 +853,7 @@
       ],
       "backlinks": [
         "guides/documentation-changes.md",
+        "guides/local-workflow.md",
         "modules/site.md",
         "reference/api.md"
       ],
@@ -839,6 +934,7 @@
         "flows/FLOW-DOCS-BUILD.md",
         "flows/FLOW-DOCS-SERVE.md",
         "flows/FLOW-TASK-WORKFLOW.md",
+        "guides/deployment.md",
         "guides/work-items.md",
         "modules/cli.md",
         "modules/model.md",
@@ -933,6 +1029,7 @@
       ],
       "backlinks": [
         "flows/FLOW-DOCS-SERVE.md",
+        "guides/local-workflow.md",
         "modules/site.md",
         "reference/api.md",
         "reference/features.md",
@@ -959,7 +1056,7 @@
         "date": "2026-07-25",
         "id": "ADR-001",
         "status": "Принято",
-        "updated": "2026-07-26"
+        "updated": "2026-08-05"
       },
       "status": {
         "kind": "accepted",
@@ -973,7 +1070,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-26T00:00:00Z",
+      "updatedAt": "2026-08-05T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1113,12 +1210,12 @@
       "outputPath": "flows/FLOW-DOCS-BUILD.html",
       "type": "flow",
       "sectionType": "flows",
-      "title": "FLOW-DOCS-BUILD: Сборка автономного портала",
+      "title": "FLOW-DOCS-BUILD: Сборка статического HTTP-портала",
       "description": "Схема визуализирует конвейер команды build . Требования к результату, exit codes и безопасной очистке определяет UC-DOCS-01, а не диаграмма.",
       "metadata": {
         "id": "FLOW-DOCS-BUILD",
         "module": "MOD-SITE",
-        "updated": "2026-07-28",
+        "updated": "2026-08-05",
         "useCase": "UC-DOCS-01"
       },
       "status": {
@@ -1133,7 +1230,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-28T00:00:00Z",
+      "updatedAt": "2026-08-05T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1180,6 +1277,7 @@
         }
       ],
       "backlinks": [
+        "architecture/frontend-runtime-boundary.md",
         "architecture/runtime-components.md",
         "flows/FLOW-DOCS-SERVE.md",
         "modules/site.md",
@@ -1568,6 +1666,75 @@
     },
     {
       "id": "",
+      "sourcePath": "guides/deployment.md",
+      "outputPath": "guides/deployment.html",
+      "type": "guide",
+      "sectionType": "guides",
+      "title": "Публикация статического портала",
+      "description": "docu-docu build создаёт read-only output, который после генерации не требует Docu-docu backend, Node.js, базы данных или CDN.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-05T21:10:02.099598501Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "local-workflow.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/local-workflow.md",
+          "href": "local-workflow.html"
+        },
+        {
+          "destination": "../use-cases/build-portal.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/build-portal.md",
+          "href": "../use-cases/UC-DOCS-01.html"
+        },
+        {
+          "destination": "../architecture/frontend-runtime-boundary.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "architecture/frontend-runtime-boundary.md",
+          "href": "../architecture/frontend-runtime-boundary.html"
+        },
+        {
+          "destination": "../contracts/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "../contracts/cli.html"
+        }
+      ],
+      "backlinks": [
+        "guides/local-workflow.md"
+      ],
+      "relatedDocuments": [
+        "guides/local-workflow.md",
+        "use-cases/build-portal.md",
+        "architecture/frontend-runtime-boundary.md",
+        "contracts/cli.md"
+      ]
+    },
+    {
+      "id": "",
       "sourcePath": "guides/documentation-changes.md",
       "outputPath": "guides/documentation-changes.html",
       "type": "guide",
@@ -1628,6 +1795,64 @@
     },
     {
       "id": "",
+      "sourcePath": "guides/frontend-development.md",
+      "outputPath": "guides/frontend-development.html",
+      "type": "guide",
+      "sectionType": "guides",
+      "title": "Разработка frontend",
+      "description": "Frontend source находится в web/ ; Node.js является только build/test toolchain для разработчика. Обычный пользователь и go build ./... используют закоммиченные assets из internal/site/assets/generated/ .",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-06T08:10:22.93238389Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../architecture/frontend-runtime-boundary.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "architecture/frontend-runtime-boundary.md",
+          "href": "../architecture/frontend-runtime-boundary.html"
+        },
+        {
+          "destination": "../modules/site.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/site.md",
+          "href": "../modules/site.html"
+        },
+        {
+          "destination": "testing.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/testing.md",
+          "href": "testing.html"
+        }
+      ],
+      "backlinks": [],
+      "relatedDocuments": [
+        "architecture/frontend-runtime-boundary.md",
+        "modules/site.md",
+        "guides/testing.md"
+      ]
+    },
+    {
+      "id": "",
       "sourcePath": "guides/installation.md",
       "outputPath": "guides/installation.html",
       "type": "guide",
@@ -1659,6 +1884,75 @@
     },
     {
       "id": "",
+      "sourcePath": "guides/local-workflow.md",
+      "outputPath": "guides/local-workflow.html",
+      "type": "guide",
+      "sectionType": "guides",
+      "title": "Локальная работа с порталом",
+      "description": "Для локального browser runtime используется существующая команда:",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-05T21:03:14.072978469Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "deployment.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/deployment.md",
+          "href": "deployment.html"
+        },
+        {
+          "destination": "../use-cases/serve-portal.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/serve-portal.md",
+          "href": "../use-cases/UC-DOCS-03.html"
+        },
+        {
+          "destination": "../contracts/editor-http.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/editor-http.md",
+          "href": "../contracts/editor-http.html"
+        },
+        {
+          "destination": "../contracts/changes-http.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/changes-http.md",
+          "href": "../contracts/changes-http.html"
+        }
+      ],
+      "backlinks": [
+        "guides/deployment.md"
+      ],
+      "relatedDocuments": [
+        "guides/deployment.md",
+        "use-cases/serve-portal.md",
+        "contracts/editor-http.md",
+        "contracts/changes-http.md"
+      ]
+    },
+    {
+      "id": "",
       "sourcePath": "guides/processes.md",
       "outputPath": "guides/processes.html",
       "type": "guide",
@@ -1678,7 +1972,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-04T17:37:50.258773593Z",
+      "updatedAt": "2026-08-05T21:02:24.885104732Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1739,7 +2033,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-04T17:37:50.25898079Z",
+      "updatedAt": "2026-08-05T21:02:24.885104732Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1771,13 +2065,14 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-04T17:37:50.259132707Z",
+      "updatedAt": "2026-08-05T21:03:14.071978466Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
       "links": [],
       "backlinks": [
         "flows/FLOW-DOCS-CHECK.md",
+        "guides/frontend-development.md",
         "use-cases/check-documentation.md"
       ],
       "relatedDocuments": []
@@ -2207,7 +2502,7 @@
       "type": "module",
       "sectionType": "modules",
       "title": "Статический портал",
-      "description": "Модуль формирует автономные HTML-страницы, навигацию, поиск и типизированный report.json из готовой проектной модели.",
+      "description": "Модуль формирует backend-independent HTML-страницы, навигацию, статические JSON-ресурсы и типизированный report.json из готовой проектной модели.",
       "metadata": {
         "id": "MOD-SITE",
         "owner": "Команда Docu-docu",
@@ -2305,10 +2600,12 @@
         }
       ],
       "backlinks": [
+        "architecture/frontend-runtime-boundary.md",
         "architecture/runtime-components.md",
         "contracts/editor-http.md",
         "flows/FLOW-DOCS-BUILD.md",
         "flows/FLOW-DOCS-SERVE.md",
+        "guides/frontend-development.md",
         "use-cases/build-portal.md",
         "use-cases/screen-map.md",
         "use-cases/serve-portal.md",
@@ -2622,7 +2919,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T17:45:33.069165595Z",
+      "updatedAt": "2026-08-05T21:02:24.885104732Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2842,7 +3139,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T18:26:24.813127808Z",
+      "updatedAt": "2026-08-05T21:13:57.125773277Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -3210,15 +3507,15 @@
       "outputPath": "use-cases/UC-DOCS-01.html",
       "type": "use-case",
       "sectionType": "use-cases",
-      "title": "UC-DOCS-01: Создать автономный портал",
-      "description": "Разработчик преобразует каталог проектной документации в статический портал, который можно открыть с диска без HTTP-сервера.",
+      "title": "UC-DOCS-01: Создать статический HTTP-портал",
+      "description": "Разработчик преобразует каталог проектной документации в read-only портал, который публикуется на обычном HTTP(S) static hosting и после сборки не требует Docu-docu backend.",
       "metadata": {
         "actor": "Разработчик",
         "id": "UC-DOCS-01",
         "module": "MOD-SITE",
         "priority": "Высокий",
         "status": "Готово",
-        "updated": "2026-07-28"
+        "updated": "2026-08-05"
       },
       "status": {
         "kind": "done",
@@ -3232,7 +3529,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-28T00:00:00Z",
+      "updatedAt": "2026-08-05T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -3246,12 +3543,12 @@
           "href": "../modules/site.html#br-site-001-очистка-output-не-затрагивает-защищённые-каталоги"
         },
         {
-          "destination": "../modules/site.md#br-site-002-портал-работает-через-file-protocol",
+          "destination": "../modules/site.md#br-site-002-портал-работает-на-static-http-hosting",
           "broken": false,
           "blocked": false,
           "targetKind": "document",
           "target": "modules/site.md",
-          "href": "../modules/site.html#br-site-002-портал-работает-через-file-protocol"
+          "href": "../modules/site.html#br-site-002-портал-работает-на-static-http-hosting"
         },
         {
           "destination": "../modules/markdown.md#br-md-001-пользовательский-html-всегда-экранируется",
@@ -3319,7 +3616,9 @@
         }
       ],
       "backlinks": [
+        "architecture/frontend-runtime-boundary.md",
         "flows/FLOW-DOCS-BUILD.md",
+        "guides/deployment.md",
         "modules/markdown.md",
         "modules/site.md"
       ],
@@ -3656,6 +3955,7 @@
       "backlinks": [
         "contracts/editor-http.md",
         "flows/FLOW-DOCS-SERVE.md",
+        "guides/local-workflow.md",
         "modules/cli.md",
         "modules/site.md"
       ],
@@ -4659,6 +4959,46 @@
       "relatedDocuments": [
         "contracts/editor-http.md"
       ]
+    },
+    {
+      "id": "",
+      "sourcePath": "work/TASK-SITE-003.md",
+      "outputPath": "work/TASK-SITE-003.html",
+      "type": "work",
+      "sectionType": "work",
+      "title": "TASK-SITE-003: Разделить Go-ядро и frontend-слой портала",
+      "description": "",
+      "metadata": {
+        "flow": "FLOW-DOCS-BUILD",
+        "module": "MOD-SITE",
+        "owner": "Команда Docu-docu",
+        "priority": "Высокий",
+        "screens": "SC-SITE-HOME, SC-SITE-DOCUMENT, SC-SITE-USE-CASE, SC-SITE-SCREEN-MAP, SC-SITE-EDITOR, SC-CHANGES-WORKSPACE",
+        "standards": "STD-GO-001, STD-DOCS-001",
+        "status": "Выполнено",
+        "type": "Feature",
+        "updated": "2026-08-06",
+        "useCase": "UC-DOCS-01"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Выполнено",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 30,
+        "completed": 30,
+        "remaining": 0,
+        "percent": 100
+      },
+      "updatedAt": "2026-08-06T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
     }
   ],
   "roadmap": [
@@ -5111,14 +5451,15 @@
           "BR-SITE-009",
           "BR-SITE-010",
           "BR-SITE-011",
-          "BR-SITE-012"
+          "BR-SITE-012",
+          "BR-SITE-013"
         ]
       }
     ],
     "useCases": [
       {
         "id": "UC-DOCS-01",
-        "title": "UC-DOCS-01: Создать автономный портал",
+        "title": "UC-DOCS-01: Создать статический HTTP-портал",
         "status": {
           "kind": "done",
           "symbol": "✓",
@@ -5354,7 +5695,7 @@
     "flows": [
       {
         "id": "FLOW-DOCS-BUILD",
-        "title": "FLOW-DOCS-BUILD: Сборка автономного портала",
+        "title": "FLOW-DOCS-BUILD: Сборка статического HTTP-портала",
         "moduleId": "MOD-SITE",
         "useCaseIds": [
           "UC-DOCS-01"
@@ -5522,7 +5863,7 @@
         "moduleId": "MOD-CHANGES",
         "document": "modules/MOD-CHANGES.md",
         "anchor": "br-changes-001-git-является-единственным-источником-версий",
-        "line": 35
+        "line": 36
       },
       {
         "id": "BR-CHANGES-002",
@@ -5530,7 +5871,7 @@
         "moduleId": "MOD-CHANGES",
         "document": "modules/MOD-CHANGES.md",
         "anchor": "br-changes-002-исходный-diff-имеет-приоритет",
-        "line": 41
+        "line": 42
       },
       {
         "id": "BR-CHANGES-003",
@@ -5538,7 +5879,7 @@
         "moduleId": "MOD-CHANGES",
         "document": "modules/MOD-CHANGES.md",
         "anchor": "br-changes-003-диапазон-всегда-явный",
-        "line": 46
+        "line": 47
       },
       {
         "id": "BR-CHANGES-004",
@@ -5546,7 +5887,7 @@
         "moduleId": "MOD-CHANGES",
         "document": "modules/MOD-CHANGES.md",
         "anchor": "br-changes-004-анализ-ограничен-документационными-roots",
-        "line": 51
+        "line": 52
       },
       {
         "id": "BR-MODEL-001",
@@ -5602,15 +5943,15 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-001-очистка-output-не-затрагивает-защищённые-каталоги",
-        "line": 36
+        "line": 40
       },
       {
         "id": "BR-SITE-002",
-        "title": "Портал работает через file protocol",
+        "title": "Портал работает на static HTTP hosting",
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
-        "anchor": "br-site-002-портал-работает-через-file-protocol",
-        "line": 41
+        "anchor": "br-site-002-портал-работает-на-static-http-hosting",
+        "line": 45
       },
       {
         "id": "BR-SITE-003",
@@ -5618,7 +5959,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-003-dev-сервер-не-раскрывает-исходный-репозиторий",
-        "line": 46
+        "line": 53
       },
       {
         "id": "BR-SITE-004",
@@ -5626,7 +5967,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-004-mermaid-работает-автономно-и-в-строгом-режиме",
-        "line": 54
+        "line": 61
       },
       {
         "id": "BR-SITE-005",
@@ -5634,7 +5975,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-005-карта-экранов-работает-автономно",
-        "line": 61
+        "line": 68
       },
       {
         "id": "BR-SITE-006",
@@ -5642,7 +5983,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-006-темы-не-расширяют-доверенную-поверхность",
-        "line": 80
+        "line": 86
       },
       {
         "id": "BR-SITE-007",
@@ -5650,7 +5991,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-007-build-и-serve-имеют-разные-возможности",
-        "line": 92
+        "line": 98
       },
       {
         "id": "BR-SITE-008",
@@ -5658,7 +5999,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-008-запись-защищена-optimistic-concurrency",
-        "line": 100
+        "line": 107
       },
       {
         "id": "BR-SITE-009",
@@ -5666,7 +6007,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-009-locale-portals-изолированы-от-canonical-workspace",
-        "line": 108
+        "line": 115
       },
       {
         "id": "BR-SITE-010",
@@ -5674,7 +6015,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-010-мягкая-навигация-ограничена-canonical-serve-portal",
-        "line": 120
+        "line": 127
       },
       {
         "id": "BR-SITE-011",
@@ -5682,7 +6023,7 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-011-api-docs-остаётся-offline-и-read-mostly",
-        "line": 135
+        "line": 142
       },
       {
         "id": "BR-SITE-012",
@@ -5690,7 +6031,15 @@
         "moduleId": "MOD-SITE",
         "document": "modules/site.md",
         "anchor": "br-site-012-рабочие-поверхности-используют-единое-оформление",
-        "line": 142
+        "line": 149
+      },
+      {
+        "id": "BR-SITE-013",
+        "title": "Go явно задаёт frontend capabilities",
+        "moduleId": "MOD-SITE",
+        "document": "modules/site.md",
+        "anchor": "br-site-013-go-явно-задаёт-frontend-capabilities",
+        "line": 164
       }
     ],
     "workItems": [
@@ -8775,6 +9124,569 @@
         "plan": "Разделить статическую и serve-генерацию портала. Реализовать безопасный workspace, diagnostics overlay и atomic CAS save. Реализовать editor HTTP API, live rebuild и watcher. Вынести общий реестр scaffold/task templates. Собрать и встроить CodeMirror, реализовать адаптивный editor UI. Добавить негативные, concurrency и end-to-end тесты. Обновить связанные источники истины и пересобрать порталы. Выполнить semantic, automated и browser verification.",
         "documentationImpact": "Обновляются use case и flow режима serve, Site/CLI/Model contracts, runtime и trust boundaries, README, feature/configuration references и changelog. Добавляется отдельный editor HTTP contract; новая архитектурная страница не нужна, потому что новые вопросы принадлежат существующим источникам истины.",
         "documentationPaths": []
+      },
+      {
+        "id": "TASK-SITE-003",
+        "title": "Разделить Go-ядро и frontend-слой портала",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Выполнено",
+          "recognized": true
+        },
+        "type": "Feature",
+        "archived": false,
+        "priority": "Высокий",
+        "updated": "2026-08-06",
+        "owner": "Команда Docu-docu",
+        "moduleId": "MOD-SITE",
+        "useCaseId": "UC-DOCS-01",
+        "flowId": "FLOW-DOCS-BUILD",
+        "screenIds": [
+          "SC-SITE-HOME",
+          "SC-SITE-DOCUMENT",
+          "SC-SITE-USE-CASE",
+          "SC-SITE-SCREEN-MAP",
+          "SC-SITE-EDITOR",
+          "SC-CHANGES-WORKSPACE"
+        ],
+        "transitionIds": [],
+        "standardIds": [
+          "STD-GO-001",
+          "STD-DOCS-001"
+        ],
+        "runbookIds": [],
+        "dependsOn": [],
+        "document": "work/TASK-SITE-003.md",
+        "anchor": "task-site-003-разделить-go-ядро-и-frontend-слой-портала",
+        "criteria": [
+          {
+            "line": 116,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-01 Go остаётся единственным источником Project Model, diagnostics,"
+          },
+          {
+            "line": 120,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-02 Централизованный Go renderer использует html/template,"
+          },
+          {
+            "line": 124,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-03 Каждая интерактивная страница получает безопасно сериализованный"
+          },
+          {
+            "line": 128,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-04 web/ использует TypeScript strict, standard DOM API, обычный CSS,"
+          },
+          {
+            "line": 132,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-05 Frontend build детерминированно создаёт manifest, portal.css,"
+          },
+          {
+            "line": 136,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-06 go build ./... после clone не требует Node.js и включает только"
+          },
+          {
+            "line": 140,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-07 docu-docu build создаёт backend-independent read-only MPA со"
+          },
+          {
+            "line": 144,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-08 Static output работает через обычный HTTP(S) как в корне, так и во"
+          },
+          {
+            "line": 148,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-09 Search index и дополнительные navigation/relations/screens/use-case"
+          },
+          {
+            "line": 152,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-10 docu-docu serve использует тот же renderer и portal.js, но"
+          },
+          {
+            "line": 156,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-11 Portal, serve, editor и changes bundles изолированы технически:"
+          },
+          {
+            "line": 160,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-12 Общие tokens и компоненты Button, IconButton, Badge, Tabs,"
+          },
+          {
+            "line": 165,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-13 Frontend определяет document/page kind только по стабильным"
+          },
+          {
+            "line": 170,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-14 Bootstrap, static data и serve features имеют изолированные"
+          },
+          {
+            "line": 175,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-15 Security regression покрывает Markdown/script injection, опасные"
+          },
+          {
+            "line": 180,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-16 Публичные команды build и serve, существующие flags/exit codes,"
+          },
+          {
+            "line": 184,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-17 Browser smoke запускает static output через обычный HTTP server и"
+          },
+          {
+            "line": 188,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-18 Browser smoke serve проверяет rebuild, editor open/save/CAS"
+          },
+          {
+            "line": 191,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-19 README, build/local-workflow/deployment/frontend guides, module,"
+          },
+          {
+            "line": 197,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-20 После cutover в repository нет старых inline scripts, мёртвых CSS"
+          }
+        ],
+        "verificationMatrix": [
+          {
+            "criterionId": "AC-01",
+            "criterion": "Go остаётся единственным источником Project Model, diagnostics,",
+            "completed": true,
+            "commands": [
+              "go test ./..."
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-02",
+            "criterion": "Централизованный Go renderer использует html/template,",
+            "completed": true,
+            "commands": [
+              "go test ./..."
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-03",
+            "criterion": "Каждая интерактивная страница получает безопасно сериализованный",
+            "completed": true,
+            "commands": [
+              "go test ./... \u0026\u0026 make web-check"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-04",
+            "criterion": "web/ использует TypeScript strict, standard DOM API, обычный CSS,",
+            "completed": true,
+            "commands": [
+              "make web-check"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-05",
+            "criterion": "Frontend build детерминированно создаёт manifest, portal.css,",
+            "completed": true,
+            "commands": [
+              "make web \u0026\u0026 git diff --exit-code -- internal/site/assets/generated"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-06",
+            "criterion": "go build ./... после clone не требует Node.js и включает только",
+            "completed": true,
+            "commands": [
+              "go build ./... \u0026\u0026 make web-check"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-07",
+            "criterion": "docu-docu build создаёт backend-independent read-only MPA со",
+            "completed": true,
+            "commands": [
+              "go test ./..."
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-08",
+            "criterion": "Static output работает через обычный HTTP(S) как в корне, так и во",
+            "completed": true,
+            "commands": [
+              "make browser-test"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-09",
+            "criterion": "Search index и дополнительные navigation/relations/screens/use-case",
+            "completed": true,
+            "commands": [
+              "go test ./... \u0026\u0026 make browser-test"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-10",
+            "criterion": "docu-docu serve использует тот же renderer и portal.js, но",
+            "completed": true,
+            "commands": [
+              "go test ./... \u0026\u0026 make browser-test"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-11",
+            "criterion": "Portal, serve, editor и changes bundles изолированы технически:",
+            "completed": true,
+            "commands": [
+              "make test \u0026\u0026 make browser-test"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-12",
+            "criterion": "Общие tokens и компоненты Button, IconButton, Badge, Tabs,",
+            "completed": true,
+            "commands": [
+              "make web-check \u0026\u0026 make browser-test"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-13",
+            "criterion": "Frontend определяет document/page kind только по стабильным",
+            "completed": true,
+            "commands": [
+              "make web-check \u0026\u0026 make browser-test"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-14",
+            "criterion": "Bootstrap, static data и serve features имеют изолированные",
+            "completed": true,
+            "commands": [
+              "make web-check \u0026\u0026 make browser-test"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-15",
+            "criterion": "Security regression покрывает Markdown/script injection, опасные",
+            "completed": true,
+            "commands": [
+              "go test ./... \u0026\u0026 make browser-test"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-16",
+            "criterion": "Публичные команды build и serve, существующие flags/exit codes,",
+            "completed": true,
+            "commands": [
+              "go test ./..."
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-17",
+            "criterion": "Browser smoke запускает static output через обычный HTTP server и",
+            "completed": true,
+            "commands": [
+              "make browser-test"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-18",
+            "criterion": "Browser smoke serve проверяет rebuild, editor open/save/CAS",
+            "completed": true,
+            "commands": [
+              "make browser-test"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-19",
+            "criterion": "README, build/local-workflow/deployment/frontend guides, module,",
+            "completed": true,
+            "commands": [
+              "go test ./... -run 'TestFileProtocolPublicContract|TestStaticHTTPDocumentationContract' \u0026\u0026 go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-20",
+            "criterion": "После cutover в repository нет старых inline scripts, мёртвых CSS",
+            "completed": true,
+            "commands": [
+              "make check \u0026\u0026 make web-check \u0026\u0026 make browser-test \u0026\u0026 go run ./cmd/docu-docu build ./docs --repository-root . --clean"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          }
+        ],
+        "checks": [
+          {
+            "target": "AC-01",
+            "commands": [
+              "go test ./..."
+            ],
+            "line": 236
+          },
+          {
+            "target": "AC-02",
+            "commands": [
+              "go test ./..."
+            ],
+            "line": 237
+          },
+          {
+            "target": "AC-03",
+            "commands": [
+              "go test ./... \u0026\u0026 make web-check"
+            ],
+            "line": 238
+          },
+          {
+            "target": "AC-04",
+            "commands": [
+              "make web-check"
+            ],
+            "line": 239
+          },
+          {
+            "target": "AC-05",
+            "commands": [
+              "make web \u0026\u0026 git diff --exit-code -- internal/site/assets/generated"
+            ],
+            "line": 240
+          },
+          {
+            "target": "AC-06",
+            "commands": [
+              "go build ./... \u0026\u0026 make web-check"
+            ],
+            "line": 241
+          },
+          {
+            "target": "AC-07",
+            "commands": [
+              "go test ./..."
+            ],
+            "line": 242
+          },
+          {
+            "target": "AC-08",
+            "commands": [
+              "make browser-test"
+            ],
+            "line": 243
+          },
+          {
+            "target": "AC-09",
+            "commands": [
+              "go test ./... \u0026\u0026 make browser-test"
+            ],
+            "line": 244
+          },
+          {
+            "target": "AC-10",
+            "commands": [
+              "go test ./... \u0026\u0026 make browser-test"
+            ],
+            "line": 245
+          },
+          {
+            "target": "AC-11",
+            "commands": [
+              "make test \u0026\u0026 make browser-test"
+            ],
+            "line": 246
+          },
+          {
+            "target": "AC-12",
+            "commands": [
+              "make web-check \u0026\u0026 make browser-test"
+            ],
+            "line": 247
+          },
+          {
+            "target": "AC-13",
+            "commands": [
+              "make web-check \u0026\u0026 make browser-test"
+            ],
+            "line": 248
+          },
+          {
+            "target": "AC-14",
+            "commands": [
+              "make web-check \u0026\u0026 make browser-test"
+            ],
+            "line": 249
+          },
+          {
+            "target": "AC-15",
+            "commands": [
+              "go test ./... \u0026\u0026 make browser-test"
+            ],
+            "line": 250
+          },
+          {
+            "target": "AC-16",
+            "commands": [
+              "go test ./..."
+            ],
+            "line": 251
+          },
+          {
+            "target": "AC-17",
+            "commands": [
+              "make browser-test"
+            ],
+            "line": 252
+          },
+          {
+            "target": "AC-18",
+            "commands": [
+              "make browser-test"
+            ],
+            "line": 253
+          },
+          {
+            "target": "AC-19",
+            "commands": [
+              "go test ./... -run 'TestFileProtocolPublicContract|TestStaticHTTPDocumentationContract' \u0026\u0026 go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
+            ],
+            "line": 254
+          },
+          {
+            "target": "AC-20",
+            "commands": [
+              "make check \u0026\u0026 make web-check \u0026\u0026 make browser-test \u0026\u0026 go run ./cmd/docu-docu build ./docs --repository-root . --clean"
+            ],
+            "line": 255
+          },
+          {
+            "target": "ALL",
+            "commands": [
+              "make check \u0026\u0026 make web-check \u0026\u0026 make browser-test \u0026\u0026 make build"
+            ],
+            "line": 256
+          },
+          {
+            "target": "DOCS",
+            "commands": [
+              "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
+            ],
+            "line": 257
+          },
+          {
+            "target": "QUALITY",
+            "commands": [
+              "go vet ./... \u0026\u0026 go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
+            ],
+            "line": 258
+          }
+        ],
+        "repositoryPaths": [
+          ".github/workflows/",
+          "api.go",
+          "CHANGELOG.md",
+          "cmd/docu-docu/",
+          "docs/architecture/frontend-runtime-boundary.md",
+          "docs/architecture/overview.md",
+          "docs/contracts/changes-http.md",
+          "docs/contracts/cli.md",
+          "docs/contracts/editor-http.md",
+          "docs/flows/FLOW-DOCS-BUILD.md",
+          "docs/flows/FLOW-DOCS-SERVE.md",
+          "docs/guides/deployment.md",
+          "docs/guides/frontend-development.md",
+          "docs/guides/local-workflow.md",
+          "docs/guides/testing.md",
+          "docs/modules/site.md",
+          "docs/reference/api.md",
+          "docs/reference/configuration.md",
+          "docs/reference/features.md",
+          "docs/use-cases/build-portal.md",
+          "docs/use-cases/serve-portal.md",
+          "editor-bundle.mjs",
+          "go:embed",
+          "internal/app/",
+          "internal/site/assets/generated/",
+          "Makefile",
+          "README.md",
+          "swagger-ui-vendor.mjs",
+          "THIRD_PARTY_NOTICES.md"
+        ],
+        "result": "Пользователь получает один автономный Go-бинарник Docu-docu: build создаёт read-only multi-page портал для обычного HTTP(S) static hosting без работающего backend, а существующий serve добавляет локальный editor/changes/rebuild runtime. Go остаётся единственным источником проектной модели и доверенной границей файловой системы, Git и task verification; TypeScript/CSS образуют отдельно собираемый presentation-слой и встраиваются в бинарник как готовые assets.",
+        "behaviorChange": "Было HTML shell и крупные фрагменты отдельных workspace-страниц собираются рядом с application logic строками в internal/app ; CSS и browser JavaScript лежат в internal/app/assets , имеют несколько несвязанных entrypoints и частично полагаются на глобальные переменные и DOM markers. Статический портал обещает полную работу через file:// , поэтому search data выдаётся как исполняемый JS, а frontend ограничен этим контрактом. Существующая Node-сборка обслуживает отдельные vendored bundles, но не образует самостоятельный frontend workspace. Станет Go строит Project Model, page view models, безопасный HTML shell, bootstrap JSON, static data и serve-only API DTO, а независимый web/ на TypeScript strict и обычном CSS реализует presentation и browser behavior. Собранные deterministic assets сохраняются в репозитории и встраиваются через go:embed ; Node.js нужен только разработчику frontend. build не содержит editor/API/rebuild code и работает без backend на root или nested HTTP(S) path. serve использует тот же renderer и базовый frontend, явно добавляя capability-gated server bundles и same-origin endpoints. file:// удаляется из поддерживаемого и проверяемого продуктового контракта, а локальная работа документируется через docu-docu serve . Не требуется сохранять текущую внутреннюю раскладку пакетов, Go-функций, HTML-фрагментов, DOM hooks, глобальных browser API и имён прежних assets. Сохраняются явно заданные продуктовые границы: команды build и serve , их пользовательские flags и exit codes, stable ID-based routes и существующие JSON schemas. Новая команда preview не появляется.",
+        "before": "HTML shell и крупные фрагменты отдельных workspace-страниц собираются рядом с application logic строками в internal/app ; CSS и browser JavaScript лежат в internal/app/assets , имеют несколько несвязанных entrypoints и частично полагаются на глобальные переменные и DOM markers. Статический портал обещает полную работу через file:// , поэтому search data выдаётся как исполняемый JS, а frontend ограничен этим контрактом. Существующая Node-сборка обслуживает отдельные vendored bundles, но не образует самостоятельный frontend workspace.",
+        "after": "Go строит Project Model, page view models, безопасный HTML shell, bootstrap JSON, static data и serve-only API DTO, а независимый web/ на TypeScript strict и обычном CSS реализует presentation и browser behavior. Собранные deterministic assets сохраняются в репозитории и встраиваются через go:embed ; Node.js нужен только разработчику frontend. build не содержит editor/API/rebuild code и работает без backend на root или nested HTTP(S) path. serve использует тот же renderer и базовый frontend, явно добавляя capability-gated server bundles и same-origin endpoints. file:// удаляется из поддерживаемого и проверяемого продуктового контракта, а локальная работа документируется через docu-docu serve . Не требуется сохранять текущую внутреннюю раскладку пакетов, Go-функций, HTML-фрагментов, DOM hooks, глобальных browser API и имён прежних assets. Сохраняются явно заданные продуктовые границы: команды build и serve , их пользовательские flags и exit codes, stable ID-based routes и существующие JSON schemas. Новая команда preview не появляется.",
+        "outOfScope": "перенос Markdown parsing, document classification, validation, relationship resolution, readiness, semantic diff, path normalization, permission checks, Git comparison или verification mapping в TypeScript; вторая TypeScript-модель документации, SPA, client-side router или обязательная клиентская маршрутизация; React, Vue, Svelte или другой application framework без отдельного ADR; Node.js, npm, frontend dev server, CDN, database или внешний backend как runtime-зависимость пользователя или release archive; новая команда preview , отдельный static-server command или обязательный baseURL parameter; editor API, rebuild API client, server URL, write action или task execution в static output; изменение правил editor workspace, path/symlink/CAS/size guards, Git read-only semantics или разделения task verify --run и неисполняющих команд; custom CSS, web fonts, theme plugins, пользовательский JavaScript plugin API, cloud backend, authentication и remote collaboration; полный визуальный редизайн страниц: задача вводит архитектурную границу, tokens и базовые reusable components, а не новую визуальную концепцию; поддержка и CI-проверка прямого открытия generated index.html через file:// ; случайное отображение базового HTML не блокируется намеренно; сохранение текущей внутренней package/DOM/asset реализации после завершения миграции.",
+        "plan": "Зафиксировать inventory текущих assets, HTML string generation, DOM/URL hooks и static/serve-only behavior; добавить browser smoke baseline до смены контракта. Выделить Go application/site boundary, page view models, html/template renderer, partials и versioned bootstrap contract; сохранить Project Model источником всех представлений. Создать web/ , strict TypeScript/CSS structure, component primitives, esbuild manifest и deterministic generation в embedded assets; перенести базовый portal behavior без визуального redesign. Добавить static JSON resources и единое relative asset/data resolution, перевести browser tests на HTTP и nested path, удалить file:// из product contract без добавления новой CLI-команды. Разрезать entries и capabilities на portal , serve , editor , changes и lazy feature chunks; доказать отрицательными тестами отсутствие server-only кода и URL в static output. Перенести editor, changes, task workspace, diagrams и screen/use-case interaction на новый frontend contract, не меняя Go security и model responsibilities. Ввести design tokens, общие accessible components и унифицированные loading/empty/error states при сохранении существующих appearance settings; вынести подписи в locale catalog и использовать stable page-kind IDs вместо анализа H1 или локализованного DOM. Настроить make /CI regeneration gate, Go-only clone build, frontend unit и browser suites, static/serve/security regression и reproducibility check. Выполнить единый cutover: удалить legacy UI generation/assets и исключить временную дублирующую реализацию из итоговой ветки. Обновить все перечисленные источники истины, добавить отдельный architecture question document и прямую ссылку из overview, обновить release и migration notes, затем пройти semantic и structural gates.",
+        "documentationImpact": "Изменяется продуктовый контракт портала: автономность означает отсутствие backend после build , но публикация и интерактивные static data требуют обычного HTTP(S). Обновляются архитектурная карта и отдельный ответ о границе Go/frontend, MOD-SITE , build/serve use cases и flows, README, CLI/features/API references, testing/deployment/frontend development guides, root CHANGELOG.md и notices. Editor/Changes Markdown/OpenAPI contracts и configuration reference меняются только при фактическом изменении wire contract, runtime availability или параметров. Translation roots не входят в implementation и documentation context этой задачи и обновляются только отдельным явным locale workflow.",
+        "documentationPaths": [
+          "CHANGELOG.md"
+        ]
       }
     ]
   },
@@ -8800,7 +9712,9 @@
       "useCases": [
         "UC-DOCS-05"
       ],
-      "workItems": [],
+      "workItems": [
+        "TASK-SITE-003"
+      ],
       "contracts": [],
       "document": "screens/SC-CHANGES-WORKSPACE.md"
     },
@@ -8851,7 +9765,9 @@
       "useCases": [
         "UC-DOCS-03"
       ],
-      "workItems": [],
+      "workItems": [
+        "TASK-SITE-003"
+      ],
       "contracts": [],
       "document": "screens/SC-SITE-DOCUMENT.md"
     },
@@ -8877,7 +9793,9 @@
       "useCases": [
         "UC-DOCS-03"
       ],
-      "workItems": [],
+      "workItems": [
+        "TASK-SITE-003"
+      ],
       "contracts": [],
       "document": "screens/SC-SITE-EDITOR.md"
     },
@@ -8909,7 +9827,8 @@
         "UC-DOCS-05"
       ],
       "workItems": [
-        "TASK-API-001"
+        "TASK-API-001",
+        "TASK-SITE-003"
       ],
       "contracts": [],
       "document": "screens/SC-SITE-HOME.md"
@@ -8935,7 +9854,9 @@
       "useCases": [
         "UC-DOCS-04"
       ],
-      "workItems": [],
+      "workItems": [
+        "TASK-SITE-003"
+      ],
       "contracts": [],
       "document": "screens/SC-SITE-SCREEN-MAP.md"
     },
@@ -8959,7 +9880,9 @@
       "useCases": [
         "UC-DOCS-04"
       ],
-      "workItems": [],
+      "workItems": [
+        "TASK-SITE-003"
+      ],
       "contracts": [],
       "document": "screens/SC-SITE-USE-CASE.md"
     }

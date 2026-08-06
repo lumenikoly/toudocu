@@ -28,7 +28,7 @@ URL state при invalidation. Компоненты активны для `chang
 | Go API | Предоставить типизированный фасад без доступа к `internal/app` | [Обзор публичного Go API](../reference/features.md#публичный-go-api) |
 | Markdown | Извлечь поддерживаемую структуру и безопасно отрендерить содержимое | [MOD-MARKDOWN](../modules/markdown.md) |
 | Project model | Классифицировать документы, проверить OpenAPI, разрешить связи и сформировать diagnostics | [MOD-MODEL](../modules/model.md) |
-| Site | Создать автономный read-only портал или canonical serve workspace с editor, changes и offline API docs | [MOD-SITE](../modules/site.md) |
+| Site | Создать backend-independent static HTTP portal или canonical serve workspace с editor, changes и offline API docs | [MOD-SITE](../modules/site.md) |
 
 Статический generator и serve-вариант разделены. Serve хранит отдельные
 runtime snapshots canonical и configured translation roots: HTTP читает только

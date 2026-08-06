@@ -180,11 +180,11 @@ func TestAPIDocsUI(t *testing.T) {
 }
 
 func TestSwaggerUIVendoredAssets(t *testing.T) {
-	manifest, err := os.ReadFile(filepath.Join("..", "..", "package.json"))
+	manifest, err := os.ReadFile(filepath.Join("..", "..", "web", "package.json"))
 	if err != nil || !strings.Contains(string(manifest), `"swagger-ui-dist": "5.32.12"`) {
 		t.Fatalf("Swagger UI version is not pinned: %v", err)
 	}
-	checksums, err := os.ReadFile("assets/swagger-ui.checksums.txt")
+	checksums, err := os.ReadFile(filepath.Join("..", "site", "assets", "generated", "swagger-ui.checksums.txt"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -193,7 +193,7 @@ func TestSwaggerUIVendoredAssets(t *testing.T) {
 		if len(parts) != 2 {
 			t.Fatalf("bad checksum line %q", line)
 		}
-		content, err := os.ReadFile(filepath.Join("assets", parts[1]))
+		content, err := os.ReadFile(filepath.Join("..", "site", "assets", "generated", parts[1]))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -202,7 +202,7 @@ func TestSwaggerUIVendoredAssets(t *testing.T) {
 			t.Fatalf("checksum mismatch for %s", parts[1])
 		}
 	}
-	initializer, err := os.ReadFile("assets/api-docs.js")
+	initializer, err := os.ReadFile(filepath.Join("..", "..", "web", "src", "features", "api-docs.ts"))
 	if err != nil {
 		t.Fatal(err)
 	}

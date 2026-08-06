@@ -1,8 +1,9 @@
 package docudocu
 
 import (
+	frontend "docu-docu/internal/site"
 	"encoding/json"
-	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -34,6 +35,26 @@ func (s *documentationServer) serveAPIDocsUI(w http.ResponseWriter, request *htt
 		specs = append(specs, swaggerSpec{Name: contract.Title, URL: "/" + contract.Path})
 	}
 	encoded, _ := json.Marshal(specs)
-	title := escapeHTML(s.model.Project.Title)
-	_, _ = fmt.Fprintf(w, `<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>HTTP API — %s</title><link rel="icon" href="/assets/favicon.svg"><link rel="stylesheet" href="/assets/swagger-ui.css"><script src="/assets/swagger-ui-bundle.js" defer></script><script src="/assets/swagger-ui-standalone-preset.js" defer></script><script src="/assets/api-docs.js" defer></script></head><body><div id="swagger-ui" data-specs="%s"></div></body></html>`, title, escapeAttr(string(encoded)))
+	uiModel := workspaceModel(s.model)
+	locale := uiModel.SiteConfig.Project.Locale
+	if locale == "" {
+		locale = "en"
+	}
+	html, err := frontend.RenderAPIDocs(frontend.WorkspaceView{
+		Lang: locale, Title: "HTTP API — " + uiModel.Project.Title,
+		Favicon: workspaceFavicon(uiModel),
+		Styles:  []string{"/assets/" + mustFrontendAsset("swagger-ui.css")},
+		Scripts: []frontend.ScriptAsset{
+			{URL: "/assets/" + mustFrontendAsset("swagger-ui-bundle.js")},
+			{URL: "/assets/" + mustFrontendAsset("swagger-ui-standalone-preset.js")},
+			{URL: "/assets/" + mustFrontendAsset("api-docs.js"), Module: true},
+		},
+		Bootstrap: workspacePageBootstrap(uiModel, "_docu-docu/api-docs/index.html", "../../assets/", frontend.Capabilities{}),
+		SpecsJSON: string(encoded),
+	})
+	if err != nil {
+		http.Error(w, "Не удалось сформировать каталог API", http.StatusInternalServerError)
+		return
+	}
+	_, _ = io.WriteString(w, html)
 }

@@ -1,8 +1,10 @@
 package docudocu
 
 import (
+	frontend "docu-docu/internal/site"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/url"
 	"os"
 	"path"
@@ -312,6 +314,85 @@ func projectChangelogSearchItem(document *Document) SearchItem {
 	}
 }
 
+func mustFrontendAsset(logical string) string {
+	asset, err := frontend.AssetName(logical)
+	if err != nil {
+		panic(err)
+	}
+	return asset
+}
+
+func pageReference(model *Model, current string) (kind, id string) {
+	kind = "document"
+	var document *Document
+	for _, candidate := range model.Documents {
+		if candidate.OutputPath == current {
+			document = candidate
+			break
+		}
+	}
+	if document == nil && model.ProjectChangelog != nil && model.ProjectChangelog.OutputPath == current {
+		document = model.ProjectChangelog
+	}
+	if document == nil {
+		if strings.HasPrefix(current, "screens/") {
+			return "screen", ""
+		}
+		return kind, ""
+	}
+	id = stableDocumentID(model, document.SourcePath)
+	switch document.Type {
+	case "architecture", "module", "use-case", "flow", "screen", "standard", "runbook":
+		kind = document.Type
+	case "work":
+		kind = "task"
+	case "screen-map", "screen-index":
+		kind = "screen"
+	case "quality-index":
+		kind = "standard"
+	}
+	return kind, id
+}
+
+func stableDocumentID(model *Model, sourcePath string) string {
+	for _, module := range model.Knowledge.Modules {
+		if module.Document == sourcePath {
+			return module.ID
+		}
+	}
+	for _, useCase := range model.Knowledge.UseCases {
+		if useCase.Document == sourcePath {
+			return useCase.ID
+		}
+	}
+	for _, flow := range model.Knowledge.Flows {
+		if flow.Document == sourcePath {
+			return flow.ID
+		}
+	}
+	for _, screen := range model.Knowledge.Screens {
+		if screen.Document == sourcePath {
+			return screen.ID
+		}
+	}
+	for _, standard := range model.Knowledge.Standards {
+		if standard.Document == sourcePath {
+			return standard.ID
+		}
+	}
+	for _, runbook := range model.Knowledge.Runbooks {
+		if runbook.Document == sourcePath {
+			return runbook.ID
+		}
+	}
+	for _, item := range model.Knowledge.WorkItems {
+		if item.Document == sourcePath {
+			return item.ID
+		}
+	}
+	return ""
+}
+
 func pageShell(model *Model, current, title, description, content, toc string) string {
 	prefix := rootPrefix(current)
 	config := model.SiteConfig
@@ -327,16 +408,15 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 	}
 	extraStyles := ""
 	if strings.Contains(content, `data-screen-map`) {
-		extraStyles += `<link rel="stylesheet" data-page-style="screen-map" href="` + escapeAttr(prefix) + `assets/screen-map.css">`
+		extraStyles += `<link rel="stylesheet" data-page-style="screen-map" href="` + escapeAttr(prefix+"assets/"+mustFrontendAsset("screen-map.css")) + `">`
 	}
 	if strings.Contains(content, `data-playable-flow`) {
-		extraStyles += `<link rel="stylesheet" data-page-style="playable-flow" href="` + escapeAttr(prefix) + `assets/playable-flow.css">`
+		extraStyles += `<link rel="stylesheet" data-page-style="playable-flow" href="` + escapeAttr(prefix+"assets/"+mustFrontendAsset("playable-flow.css")) + `">`
 	}
-	favicon := "assets/favicon.svg"
+	favicon := "assets/" + mustFrontendAsset("favicon.svg")
 	if custom := brandingOutput(model, "favicon"); custom != "" {
 		favicon = custom
 	}
-	earlyTheme := `<script src="` + escapeAttr(prefix) + `assets/appearance.js" data-default-site-theme="` + escapeAttr(config.Theme) + `" data-default-color-scheme="` + escapeAttr(config.ColorScheme) + `" data-default-accent="` + escapeAttr(config.Accent) + `" data-default-density="` + escapeAttr(config.Density) + `" data-default-content-width="` + escapeAttr(config.ContentWidth) + `" data-storage-site-theme="docu-docu-site-theme" data-storage-color-scheme="docu-docu-color-scheme"></script>`
 	attributes := appearanceAttributes(config)
 	brandMark := `<span class="brand-mark" aria-hidden="true">DD</span>`
 	if logo := brandingOutput(model, "logo"); logo != "" {
@@ -351,17 +431,56 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 	themeSelect := `<label class="header-select site-theme-select"><span class="header-select-visual" aria-hidden="true"><span class="site-theme-indicator" data-site-theme-indicator>` + escapeHTML(themeIndicator) + `</span><span data-site-theme-label>` + escapeHTML(themeLabel) + `</span></span><select data-site-theme-select aria-label="Тема оформления">` + selectOptions(config.Theme, []selectOption{{"classic", "Классика"}, {"paper", "Бумага"}, {"terminal", "Терминал"}}) + `</select></label>`
 	schemeSelect := `<label class="header-select scheme-select"><span class="header-select-visual" aria-hidden="true"><span class="scheme-toggle-indicator"></span><span data-theme-label>` + escapeHTML(schemeLabel) + `</span></span><select data-color-scheme-select aria-label="Цветовая схема">` + selectOptions(config.ColorScheme, []selectOption{{"system", "Система"}, {"light", "Светлая"}, {"dark", "Тёмная"}}) + `</select></label>`
 	languageSelect := renderLanguageSelect(model.languageTargets[current])
-	serveControls, serveAssets, serveRevision := "", "", ""
+	serveControls, serveCSS, serveJS, serveRevision := "", "", "", ""
 	if model.serveMode {
 		serveControls = workspaceNavigation(workspacePortal) + `<button class="icon-button server-rebuild" type="button" data-server-rebuild aria-label="Пересобрать документацию" title="Пересобрать документацию"><svg class="server-rebuild-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 5v6h-6"/></svg></button><span class="visually-hidden" data-server-rebuild-status role="status" aria-live="polite"></span>`
-		serveAssets = `<link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/serve.css"><script src="` + escapeAttr(prefix) + `assets/serve.js" defer></script><script src="` + escapeAttr(prefix) + `assets/serve-navigation.js" defer data-docu-docu-serve-navigation></script>`
-		serveRevision = `<meta name="docu-docu-revision" content="` + escapeAttr(model.serveRevision) + `">`
+		serveCSS = prefix + "assets/" + mustFrontendAsset("serve.css")
+		serveJS = prefix + "assets/" + mustFrontendAsset("serve.js")
+		serveRevision = model.serveRevision
 	}
 	locale := model.SiteConfig.Project.Locale
 	if locale == "" {
 		locale = "en"
 	}
-	return `<!doctype html><html lang="` + escapeAttr(locale) + `"` + attributes + `><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` + serveRevision + `<meta name="description" content="` + escapeAttr(description) + `"><title>` + escapeHTML(fullTitle) + `</title><link rel="icon" href="` + escapeAttr(relativeURL(current, favicon)) + `">` + earlyTheme + `<link rel="stylesheet" href="` + escapeAttr(prefix) + `assets/style.css">` + extraStyles + serveAssets + `<script src="` + escapeAttr(prefix) + `assets/app.js" defer></script></head><body data-root-prefix="` + escapeAttr(prefix) + `" data-task-filter="all"><a class="skip-link" href="#main-content">Перейти к содержимому</a><header class="site-header"><div class="brand-area"><button class="icon-button sidebar-toggle" type="button" data-sidebar-toggle aria-label="Открыть навигацию">☰</button><a class="brand" href="` + escapeAttr(relativeURL(current, "index.html")) + `">` + brandMark + `<span class="brand-text">` + escapeHTML(model.Project.Title) + `</span></a></div><div class="global-search" role="search"><div class="search-input-wrap"><input type="search" data-global-search placeholder="Поиск по документации" aria-label="Поиск по документации"><span class="search-shortcut">/</span></div><div class="search-results" id="global-search-results" data-search-results role="listbox" hidden></div></div><div class="header-actions"><button class="icon-button" type="button" data-print aria-label="Печать">⎙</button>` + serveControls + languageSelect + themeSelect + schemeSelect + `</div></header><div class="site-layout"><aside class="sidebar">` + renderNavigation(model, current) + `</aside><div class="main-area"><main id="main-content" class="page-grid` + gridClass + `"><div class="page-content">` + content + `</div>` + tocHTML + `</main><footer class="site-footer">` + footer + `</footer></div></div></body></html>`
+	kind, id := pageReference(model, current)
+	runtime := frontend.RuntimeStatic
+	capabilities := frontend.Capabilities{Search: true, Diagrams: true}
+	var endpoints *frontend.Endpoints
+	if model.serveMode {
+		runtime = frontend.RuntimeServe
+		capabilities.Editor, capabilities.Changes, capabilities.Rebuild, capabilities.TaskWorkspace = true, true, true, true
+		endpoints = &frontend.Endpoints{Editor: editorAPIBase, Changes: changesAPIBase, Rebuild: rebuildEndpoint}
+	}
+	bootstrap, err := frontend.MarshalBootstrap(frontend.PageBootstrap{
+		SchemaVersion: 1,
+		Runtime:       runtime,
+		Page:          frontend.PageReference{Kind: kind, ID: id, Path: current},
+		Portal:        frontend.PortalReference{AssetBase: prefix + "assets/", DataBase: prefix + "data/"},
+		UI: frontend.UISettings{
+			Locale: locale, Theme: config.Theme, ColorScheme: config.ColorScheme,
+			Accent: config.Accent, Density: config.Density, ContentWidth: config.ContentWidth,
+		},
+		Capabilities: capabilities,
+		Endpoints:    endpoints,
+	})
+	if err != nil {
+		panic(err)
+	}
+	header := `<header class="site-header"><div class="brand-area"><button class="icon-button sidebar-toggle" type="button" data-sidebar-toggle aria-label="Открыть навигацию">☰</button><a class="brand" href="` + escapeAttr(relativeURL(current, "index.html")) + `">` + brandMark + `<span class="brand-text">` + escapeHTML(model.Project.Title) + `</span></a></div><div class="global-search" role="search"><div class="search-input-wrap"><input type="search" data-global-search placeholder="Поиск по документации" aria-label="Поиск по документации" aria-expanded="false" aria-controls="global-search-results"><span class="search-shortcut">/</span></div><div class="search-results" id="global-search-results" data-search-results role="listbox" hidden></div></div><div class="header-actions"><button class="icon-button" type="button" data-print aria-label="Печать">⎙</button>` + serveControls + languageSelect + themeSelect + schemeSelect + `</div></header>`
+	rendered, err := frontend.RenderShell(frontend.ShellView{
+		Lang: locale, HTMLAttributes: template.HTMLAttr(attributes), Revision: serveRevision,
+		Description: description, Title: fullTitle, Favicon: relativeURL(current, favicon),
+		AppearanceJS: prefix + "assets/" + mustFrontendAsset("appearance.js"),
+		PortalCSS:    prefix + "assets/" + mustFrontendAsset("portal.css"), ServeCSS: serveCSS,
+		ExtraStyles: template.HTML(extraStyles), Bootstrap: bootstrap,
+		PortalJS: prefix + "assets/" + mustFrontendAsset("portal.js"), ServeJS: serveJS,
+		RootPrefix: prefix, Header: template.HTML(header), Navigation: template.HTML(renderNavigation(model, current)),
+		MainClass: gridClass, Content: template.HTML(content), TOC: template.HTML(tocHTML), Footer: template.HTML(footer),
+	})
+	if err != nil {
+		panic(err)
+	}
+	return rendered
 }
 
 func renderLanguageSelect(targets []LanguageTarget) string {
@@ -1061,7 +1180,7 @@ func ensureOutputSafety(inputDirectory, outputDirectory string) error {
 	return nil
 }
 
-// GenerateSite writes a fully static, file:// compatible portal.
+// GenerateSite writes a backend-independent portal for HTTP(S) static hosting.
 func GenerateSite(model *Model, options Options) (GenerateResult, error) {
 	return generateSite(model, options, false)
 }
@@ -1091,37 +1210,46 @@ func generateSite(model *Model, options Options, serve bool) (GenerateResult, er
 	if err = mkdirp(output); err != nil {
 		return GenerateResult{}, err
 	}
-	serveOnlyAssets := []string{"serve.css", "serve.js", "serve-navigation.js", "editor.css", "editor.js", "changes.css", "changes.js", "codemirror.js", "codemirror.LICENSE.txt", "codemirror.checksums.txt", "api-docs.js", "swagger-ui.css", "swagger-ui-bundle.js", "swagger-ui-standalone-preset.js", "swagger-ui.LICENSE.txt", "swagger-ui-bundle.LICENSE.txt", "swagger-ui-standalone-preset.LICENSE.txt", "swagger-ui.checksums.txt"}
+	runtime := "static"
+	if serve {
+		runtime = "serve"
+	}
+	assets, err := frontend.RuntimeAssets(runtime)
+	if err != nil {
+		return GenerateResult{}, err
+	}
+	generated, err := frontend.GeneratedFS()
+	if err != nil {
+		return GenerateResult{}, err
+	}
 	if !serve {
-		for _, asset := range serveOnlyAssets {
-			if removeErr := os.Remove(filepath.Join(output, "assets", asset)); removeErr != nil && !os.IsNotExist(removeErr) {
+		serveAssets, manifestErr := frontend.RuntimeAssets("serve")
+		if manifestErr != nil {
+			return GenerateResult{}, manifestErr
+		}
+		staticSet := map[string]struct{}{}
+		for _, asset := range assets {
+			staticSet[asset] = struct{}{}
+		}
+		for _, asset := range serveAssets {
+			if _, keep := staticSet[asset]; keep {
+				continue
+			}
+			if removeErr := os.Remove(filepath.Join(output, "assets", filepath.FromSlash(asset))); removeErr != nil && !os.IsNotExist(removeErr) {
 				return GenerateResult{}, removeErr
 			}
 		}
 	}
-	for _, asset := range []string{"style.css", "appearance.js", "app.js", "favicon.svg", "screen-map.css", "screen-map.js", "playable-flow.css", "playable-flow.js", "mermaid.tiny.js", "mermaid.LICENSE.txt"} {
-		if err = copyFSFile(EmbeddedFiles, "assets/"+asset, filepath.Join(output, "assets", asset)); err != nil {
+	for _, asset := range assets {
+		if err = copyFSFile(generated, asset, filepath.Join(output, "assets", filepath.FromSlash(asset))); err != nil {
 			return GenerateResult{}, err
-		}
-	}
-	serveAssetCount := 0
-	if serve {
-		for _, asset := range serveOnlyAssets {
-			if err = copyFSFile(EmbeddedFiles, "assets/"+asset, filepath.Join(output, "assets", asset)); err != nil {
-				return GenerateResult{}, err
-			}
-			serveAssetCount++
 		}
 	}
 	searchIndex := append([]SearchItem{}, model.SearchIndex...)
 	if model.ProjectChangelog != nil {
 		searchIndex = append(searchIndex, projectChangelogSearchItem(model.ProjectChangelog))
 	}
-	searchJSON, err := jsonForScript(searchIndex)
-	if err != nil {
-		return GenerateResult{}, err
-	}
-	if err = writeFileEnsured(filepath.Join(output, "assets", "search-index.js"), append([]byte("window.PROJECT_DOCS_SEARCH_INDEX = "), append(searchJSON, []byte(";\n")...)...)); err != nil {
+	if err = writeStaticData(output, model, searchIndex); err != nil {
 		return GenerateResult{}, err
 	}
 	for outputPath, sourcePath := range model.Assets {
@@ -1233,5 +1361,5 @@ func generateSite(model *Model, options Options, serve bool) (GenerateResult, er
 	if err = writeFileEnsured(filepath.Join(output, model.ReportOutputPath), report); err != nil {
 		return GenerateResult{}, err
 	}
-	return GenerateResult{OutputDirectory: output, Pages: pages, Assets: len(model.Assets) + len(model.BrandingAssets) + 10 + serveAssetCount}, nil
+	return GenerateResult{OutputDirectory: output, Pages: pages, Assets: len(model.Assets) + len(model.BrandingAssets) + len(assets) + 1}, nil
 }

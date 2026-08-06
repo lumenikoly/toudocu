@@ -74,7 +74,7 @@ flowchart TD
   приближении диаграммы к viewport; загруженные runtime сохраняются между
   мягкими переходами.
 - Editor, CodeMirror, API, polling и ручная пересборка существуют только в
-  `serve`; статический портал через `file://` не содержит их markup или assets.
+  `serve`; static build не содержит их markup, endpoints или assets.
 - API docs существует только в canonical `serve`, не загружает CDN и разрешает
   Try it out только для `GET`/`HEAD`; static и locale portals его не содержат.
 - Ошибка пересборки не останавливает уже запущенный сервер.
@@ -82,7 +82,7 @@ flowchart TD
 ## Связанные документы
 
 - [UC-DOCS-03: Просматривать документацию на локальном сервере](../use-cases/serve-portal.md)
-- [FLOW-DOCS-BUILD: Сборка автономного портала](FLOW-DOCS-BUILD.md)
+- [FLOW-DOCS-BUILD: Сборка статического HTTP-портала](FLOW-DOCS-BUILD.md)
 - [MOD-SITE: Статический портал](../modules/site.md)
 - [CLI-контракт](../contracts/cli.md)
 - [HTTP-контракт editor API](../contracts/editor-http.md)

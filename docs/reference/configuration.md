@@ -151,8 +151,9 @@ remote. Лимит отключает тяжёлое представление 
 ручную пересборку модели, HTML и поиска. Editor API всегда работает на том же
 listener и не получает отдельного CLI-флага.
 `--host`, `--port` и `--open` сохраняют прежнюю семантику; `--no-open` и `--edit`
-не существуют. Через `file://` или другой статический HTTP-сервер editor markup,
-API URL, CodeMirror и server-only scripts отсутствуют.
+не существуют. В результате `build`, опубликованном любым статическим
+HTTP-сервером, editor markup, API URL, CodeMirror и server-only scripts
+отсутствуют.
 
 Canonical `serve` без отдельной настройки публикует найденные OpenAPI contracts
 через `/_docu-docu/api-docs/`. Static build копирует specs, но не Swagger UI;

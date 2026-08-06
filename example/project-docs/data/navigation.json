@@ -1,0 +1,160 @@
+[
+  {
+    "title": "Service Desk Showcase",
+    "kind": "document",
+    "url": "index.html"
+  },
+  {
+    "title": "Текущее состояние",
+    "kind": "document",
+    "url": "status.html"
+  },
+  {
+    "title": "Дорожная карта",
+    "kind": "document",
+    "url": "roadmap.html"
+  },
+  {
+    "title": "Риски",
+    "kind": "document",
+    "url": "risks.html"
+  },
+  {
+    "title": "Идеи",
+    "kind": "document",
+    "url": "ideas.html"
+  },
+  {
+    "title": "Заметки",
+    "kind": "document",
+    "url": "notes.html"
+  },
+  {
+    "title": "Компонентная модель Service Desk",
+    "kind": "architecture",
+    "url": "architecture/component-model.html"
+  },
+  {
+    "title": "Владение данными обращения",
+    "kind": "architecture",
+    "url": "architecture/data-ownership.html"
+  },
+  {
+    "title": "Топология развёртывания Service Desk",
+    "kind": "architecture",
+    "url": "architecture/deployment-topology.html"
+  },
+  {
+    "title": "Архитектура Service Desk",
+    "kind": "architecture",
+    "url": "architecture/overview.html"
+  },
+  {
+    "title": "Системный контекст Service Desk",
+    "kind": "architecture",
+    "url": "architecture/system-context.html"
+  },
+  {
+    "title": "Границы доверия Service Desk",
+    "kind": "architecture",
+    "url": "architecture/trust-boundaries.html"
+  },
+  {
+    "title": "API-контракт",
+    "kind": "document",
+    "url": "contracts/api.html"
+  },
+  {
+    "title": "ADR-000: Разделить Web Frontend, Backend API и PostgreSQL",
+    "kind": "document",
+    "url": "decisions/000-decision.html"
+  },
+  {
+    "id": "FLOW-CORE-ENTRY",
+    "title": "FLOW-CORE-ENTRY: Маршрутизация с главной",
+    "kind": "flow",
+    "url": "flows/FLOW-CORE-ENTRY.html"
+  },
+  {
+    "id": "FLOW-CORE-REQUEST",
+    "title": "FLOW-CORE-REQUEST: Создание запроса",
+    "kind": "flow",
+    "url": "flows/FLOW-CORE-REQUEST.html"
+  },
+  {
+    "title": "Тестирование",
+    "kind": "document",
+    "url": "guides/testing.html"
+  },
+  {
+    "id": "MOD-CORE",
+    "title": "Основной модуль",
+    "kind": "module",
+    "url": "modules/core.html"
+  },
+  {
+    "id": "MOD-SUPPORT",
+    "title": "Внешняя поддержка",
+    "kind": "module",
+    "url": "modules/support.html"
+  },
+  {
+    "title": "Конфигурация",
+    "kind": "document",
+    "url": "reference/configuration.html"
+  },
+  {
+    "id": "SC-CORE-HELP",
+    "title": "SC-CORE-HELP: Подсказка",
+    "kind": "screen",
+    "url": "screens/SC-CORE-HELP.html"
+  },
+  {
+    "id": "SC-CORE-HOME",
+    "title": "SC-CORE-HOME: Главная",
+    "kind": "screen",
+    "url": "screens/SC-CORE-HOME.html"
+  },
+  {
+    "id": "SC-CORE-REQUEST",
+    "title": "SC-CORE-REQUEST: Новый запрос",
+    "kind": "screen",
+    "url": "screens/SC-CORE-REQUEST.html"
+  },
+  {
+    "id": "SC-CORE-RESULT",
+    "title": "SC-CORE-RESULT: Результат",
+    "kind": "screen",
+    "url": "screens/SC-CORE-RESULT.html"
+  },
+  {
+    "id": "SC-SUPPORT-PORTAL",
+    "title": "SC-SUPPORT-PORTAL: Центр поддержки",
+    "kind": "screen",
+    "url": "screens/SC-SUPPORT-PORTAL.html"
+  },
+  {
+    "id": "UC-CORE-01",
+    "title": "UC-CORE-01: Основной пользовательский сценарий",
+    "kind": "use-case",
+    "url": "use-cases/UC-CORE-01.html"
+  },
+  {
+    "id": "UC-CORE-02",
+    "title": "UC-CORE-02: Открыть центр поддержки",
+    "kind": "use-case",
+    "url": "use-cases/UC-CORE-02.html"
+  },
+  {
+    "id": "TASK-CORE-001",
+    "title": "TASK-CORE-001: Реализовать основной сценарий",
+    "kind": "task",
+    "url": "work/TASK-CORE-001-main-scenario.html"
+  },
+  {
+    "id": "TASK-SUPPORT-002",
+    "title": "TASK-SUPPORT-002: Проверить внешний переход",
+    "kind": "task",
+    "url": "work/TASK-SUPPORT-002-external-support.html"
+  }
+]

@@ -1,8 +1,6 @@
 package docudocu
 
-import "embed"
+import frontend "docu-docu/internal/site"
 
-// EmbeddedFiles contains the browser assets.
-//
-//go:embed assets
-var EmbeddedFiles embed.FS
+// EmbeddedFiles contains reproducible browser build output.
+var EmbeddedFiles = frontend.Files

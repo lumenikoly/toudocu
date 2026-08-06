@@ -13,12 +13,16 @@ import (
 var activeAssetExtensions = map[string]struct{}{".html": {}, ".htm": {}, ".xhtml": {}, ".js": {}, ".mjs": {}, ".cjs": {}, ".svg": {}, ".svgz": {}, ".xml": {}}
 var safeImageExtensions = map[string]struct{}{".png": {}, ".jpg": {}, ".jpeg": {}, ".gif": {}, ".webp": {}, ".avif": {}, ".bmp": {}}
 var reservedOutputAssets = map[string]struct{}{
-	"assets/style.css": {}, "assets/app.js": {}, "assets/search-index.js": {},
+	"assets/manifest.json": {}, "assets/portal.css": {}, "assets/portal.js": {},
 	"assets/screen-map.css": {}, "assets/screen-map.js": {},
 	"assets/playable-flow.css": {}, "assets/playable-flow.js": {},
-	"assets/mermaid.tiny.js": {}, "assets/mermaid.LICENSE.txt": {}, "report.json": {},
-	"assets/serve.css": {}, "assets/serve.js": {}, "assets/serve-navigation.js": {}, "assets/editor.css": {}, "assets/editor.js": {}, "assets/api-docs.js": {}, "assets/swagger-ui.css": {}, "assets/swagger-ui-bundle.js": {}, "assets/swagger-ui-standalone-preset.js": {},
+	"assets/mermaid.tiny.js": {}, "assets/mermaid.LICENSE.txt": {}, "assets/favicon.svg": {},
+	"assets/serve.css": {}, "assets/serve.js": {}, "assets/editor.css": {}, "assets/editor.js": {},
+	"assets/changes.css": {}, "assets/changes.js": {}, "assets/api-docs.js": {},
+	"assets/swagger-ui.css": {}, "assets/swagger-ui-bundle.js": {}, "assets/swagger-ui-standalone-preset.js": {},
 	"assets/codemirror.js": {}, "assets/codemirror.LICENSE.txt": {}, "assets/codemirror.checksums.txt": {},
+	"data/search-index.json": {}, "data/navigation.json": {}, "data/relations.json": {},
+	"data/screens.json": {}, "data/use-cases/index.json": {}, "report.json": {},
 }
 
 func splitLinkDestination(destination string) (pathPart, query, hash string) {

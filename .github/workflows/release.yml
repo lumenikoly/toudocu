@@ -24,6 +24,12 @@ jobs:
         with:
           go-version: 'stable'
           cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci --prefix web
       - name: Validate release
         shell: bash
         env:

@@ -5,6 +5,14 @@ licensed and retain their own copyright and license notices. Release packaging
 generates one complete `THIRD_PARTY_NOTICES.md` by combining this inventory with
 the notices of the embedded browser assets.
 
+## Frontend development toolchain
+
+TypeScript, esbuild and Playwright are pinned development dependencies used to
+type-check, build and test `web/`. They are not embedded as runtime packages and
+are not required by the released Go binary. Their license notices remain in the
+npm dependency distributions and lockfile; only the deterministic build output
+and separately listed vendored browser libraries are shipped.
+
 ## CodeMirror 6
 
 The serve-only editor bundles `codemirror@6.0.2`,

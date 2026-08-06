@@ -468,10 +468,17 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 		"use-cases/index.html":      `Пользовательские сценарии`,
 		"use-cases/UC-AUTH-01.html": `data-playable-flow`,
 		"traceability.html":         `Матрица трассируемости`,
-		"assets/screen-map.js":      `computeVisible`,
-		"assets/playable-flow.js":   `function activate`,
 	} {
 		data, err := os.ReadFile(filepath.Join(output, filepath.FromSlash(file)))
+		if err != nil || !strings.Contains(string(data), expected) {
+			t.Fatalf("%s missing %q: %v", file, expected, err)
+		}
+	}
+	for file, expected := range map[string]string{
+		filepath.Join("..", "..", "web", "src", "features", "screen-map", "index.ts"):       `computeVisible`,
+		filepath.Join("..", "..", "web", "src", "features", "use-case", "playable-flow.ts"): `function activate`,
+	} {
+		data, err := os.ReadFile(file)
 		if err != nil || !strings.Contains(string(data), expected) {
 			t.Fatalf("%s missing %q: %v", file, expected, err)
 		}
@@ -619,7 +626,7 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(output, "flows", "UC-AUTH-01.html")); !os.IsNotExist(err) {
 		t.Fatalf("legacy duplicate playable page must not be generated: %v", err)
 	}
-	mapScript, err := os.ReadFile(filepath.Join(output, "assets", "screen-map.js"))
+	mapScript, err := os.ReadFile(filepath.Join("..", "..", "web", "src", "features", "screen-map", "index.ts"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -627,8 +634,8 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 		"edge.type === 'return'",
 		"screen-edge-external-outer",
 		"screen-edge-external-inner",
-		"MODULE_COLUMN_GAP = 144",
-		"MODULE_ROW_GAP = 112",
+		"MODULE_COLUMN_GAP",
+		"MODULE_ROW_GAP",
 		"function routeAroundObstacles",
 		"function findLabelPlacement",
 		"function createTransitionLabel",
@@ -638,14 +645,14 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 			t.Fatalf("screen map script missing visual transition contract %q", expected)
 		}
 	}
-	playableScript, err := os.ReadFile(filepath.Join(output, "assets", "playable-flow.js"))
+	playableScript, err := os.ReadFile(filepath.Join("..", "..", "web", "src", "features", "use-case", "playable-flow.ts"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !strings.Contains(string(playableScript), "button.classList.toggle('is-visible'") || strings.Contains(string(playableScript), "button.hidden =") {
 		t.Fatal("hotspots must remain interactive while visually hidden and reveal on hover")
 	}
-	appScript, err := os.ReadFile(filepath.Join(output, "assets", "app.js"))
+	appScript, err := os.ReadFile(filepath.Join("..", "..", "web", "src", "core", "portal.ts"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -659,7 +666,7 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 			t.Fatalf("app.js retains legacy screen-map initializer contract %q", removed)
 		}
 	}
-	styleData, err := os.ReadFile(filepath.Join(output, "assets", "style.css"))
+	styleData, err := os.ReadFile(filepath.Join("..", "..", "web", "src", "styles", "portal.css"))
 	if err != nil {
 		t.Fatal(err)
 	}

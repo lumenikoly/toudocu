@@ -141,8 +141,8 @@ gate, а schema v1 сохраняет `documents[].type: "architecture"`.
 - таблицы, inline code и fenced code blocks;
 - Mermaid `flowchart`, `stateDiagram-v2` и `sequenceDiagram`.
 
-Произвольный HTML экранируется. Mermaid Tiny встроена локально, работает через
-`file://`, следует светлой или тёмной теме и всегда запускается с
+Произвольный HTML экранируется. Mermaid Tiny встроена локально, работает на
+static HTTP hosting, следует светлой или тёмной теме и всегда запускается с
 `securityLevel: strict`. Front matter, Mermaid directives и блоки более
 50 000 UTF-8 байт отклоняются.
 
@@ -175,8 +175,9 @@ gate, а schema v1 сохраняет `documents[].type: "architecture"`.
 - светлую и тёмную темы, печатную версию и адаптивный sidebar;
 - управление Mermaid-диаграммой: zoom, pan, fit и fullscreen.
 
-Все внутренние URL относительны. Портал не требует сервера, CDN, Node.js,
-браузерного расширения или сетевого доступа.
+Все внутренние URL относительны. Портал не требует Go backend, CDN, Node.js или
+браузерного расширения, но публикуется через HTTP(S) и может загружать
+собственные static JSON resources из output.
 
 ## Live workspace serve
 
@@ -334,8 +335,7 @@ Timeout завершает дерево процессов, а stdout и stderr 
   canonical workspace paths внутри docs root; listener слушает loopback по
   умолчанию и не использует кеширование;
 - ручная пересборка `serve` принимает только служебный `POST` с заголовком
-  действия; статический портал через `file://` или другой HTTP-сервер кнопку не
-  показывает;
+  действия; static build кнопку и endpoint не содержит;
 - ошибка отдельной Screen Map или проигрываемого сценария не лишает доступа к остальной
   документации;
 - editor writes требуют JSON/action/same-origin guards, лимиты 3 MiB/2 MiB и не

@@ -1,0 +1,349 @@
+[
+  {
+    "title": "Docu-docu",
+    "kind": "document",
+    "url": "index.html"
+  },
+  {
+    "title": "Current state",
+    "kind": "document",
+    "url": "status.html"
+  },
+  {
+    "title": "Roadmap",
+    "kind": "document",
+    "url": "roadmap.html"
+  },
+  {
+    "title": "Risks",
+    "kind": "document",
+    "url": "risks.html"
+  },
+  {
+    "title": "Development ideas",
+    "kind": "document",
+    "url": "ideas.html"
+  },
+  {
+    "title": "Notes",
+    "kind": "document",
+    "url": "notes.html"
+  },
+  {
+    "title": "Architecture for viewing documentation changes",
+    "kind": "architecture",
+    "url": "architecture/documentation-changes.html"
+  },
+  {
+    "title": "Isolation of documentation and check errors",
+    "kind": "architecture",
+    "url": "architecture/failure-isolation.html"
+  },
+  {
+    "title": "Architecture",
+    "kind": "architecture",
+    "url": "architecture/overview.html"
+  },
+  {
+    "title": "Separation of responsibilities between runtime components",
+    "kind": "architecture",
+    "url": "architecture/runtime-components.html"
+  },
+  {
+    "title": "Docu-docu system boundary",
+    "kind": "architecture",
+    "url": "architecture/system-boundary.html"
+  },
+  {
+    "title": "Docu-docu trust boundaries",
+    "kind": "architecture",
+    "url": "architecture/trust-boundaries.html"
+  },
+  {
+    "title": "HTTP contract Documentation Changes v1",
+    "kind": "document",
+    "url": "contracts/changes-http.html"
+  },
+  {
+    "title": "CLI contract Docu-docu v1",
+    "kind": "document",
+    "url": "contracts/cli.html"
+  },
+  {
+    "title": "CONTRACT-EDITOR-HTTP: Local editor API",
+    "kind": "document",
+    "url": "contracts/editor-http.html"
+  },
+  {
+    "title": "Go API contract Docu-docu v1",
+    "kind": "document",
+    "url": "contracts/go-api.html"
+  },
+  {
+    "title": "ADR-001: Dependency-free Go CLI",
+    "kind": "document",
+    "url": "decisions/001-dependency-free.html"
+  },
+  {
+    "title": "ADR-002: Limitation of responsibility between Agent and Docu-docu",
+    "kind": "document",
+    "url": "decisions/ADR-002.html"
+  },
+  {
+    "title": "ADR-003: Supported YAML parser for OpenAPI diff",
+    "kind": "document",
+    "url": "decisions/ADR-003.html"
+  },
+  {
+    "id": "FLOW-DOCS-BUILD",
+    "title": "FLOW-DOCS-BUILD: Building a standalone portal",
+    "kind": "flow",
+    "url": "flows/FLOW-DOCS-BUILD.html"
+  },
+  {
+    "id": "FLOW-DOCS-CHANGES",
+    "title": "FLOW-DOCS-CHANGES: Build and view documentation changes",
+    "kind": "flow",
+    "url": "flows/FLOW-DOCS-CHANGES.html"
+  },
+  {
+    "id": "FLOW-DOCS-CHECK",
+    "title": "FLOW-DOCS-CHECK: Documentation contract check",
+    "kind": "flow",
+    "url": "flows/FLOW-DOCS-CHECK.html"
+  },
+  {
+    "id": "FLOW-DOCS-SERVE",
+    "title": "FLOW-DOCS-SERVE: Local portal browsing",
+    "kind": "flow",
+    "url": "flows/FLOW-DOCS-SERVE.html"
+  },
+  {
+    "id": "FLOW-TASK-WORKFLOW",
+    "title": "FLOW-TASK-WORKFLOW: Working with the task being checked",
+    "kind": "flow",
+    "url": "flows/FLOW-TASK-WORKFLOW.html"
+  },
+  {
+    "title": "View documentation changes",
+    "kind": "document",
+    "url": "guides/documentation-changes.html"
+  },
+  {
+    "title": "Installing and updating Docu-docu",
+    "kind": "document",
+    "url": "guides/installation.html"
+  },
+  {
+    "title": "Processes and user scripts",
+    "kind": "document",
+    "url": "guides/processes.html"
+  },
+  {
+    "title": "Standards, Runbooks and Custom sections",
+    "kind": "document",
+    "url": "guides/quality-runbooks.html"
+  },
+  {
+    "title": "Map of screens and playable user scenarios",
+    "kind": "document",
+    "url": "guides/screens.html"
+  },
+  {
+    "title": "Checking Docu-docu changes",
+    "kind": "document",
+    "url": "guides/testing.html"
+  },
+  {
+    "title": "Work tasks",
+    "kind": "document",
+    "url": "guides/work-items.html"
+  },
+  {
+    "id": "MOD-CLI",
+    "title": "CLI and workflow tasks",
+    "kind": "module",
+    "url": "modules/cli.html"
+  },
+  {
+    "id": "MOD-MARKDOWN",
+    "title": "Secure Markdown",
+    "kind": "module",
+    "url": "modules/markdown.html"
+  },
+  {
+    "id": "MOD-CHANGES",
+    "title": "MOD-CHANGES: Documentation changes",
+    "kind": "module",
+    "url": "modules/MOD-CHANGES.html"
+  },
+  {
+    "id": "MOD-MODEL",
+    "title": "Design model and validation",
+    "kind": "module",
+    "url": "modules/model.html"
+  },
+  {
+    "id": "MOD-SITE",
+    "title": "Static portal",
+    "kind": "module",
+    "url": "modules/site.html"
+  },
+  {
+    "title": "Quality Standards",
+    "kind": "standard",
+    "url": "quality/index.html"
+  },
+  {
+    "id": "STD-DOCS-001",
+    "title": "STD-DOCS-001: Verifiable Documentation",
+    "kind": "standard",
+    "url": "quality/STD-DOCS-001.html"
+  },
+  {
+    "id": "STD-GO-001",
+    "title": "STD-GO-001: Go Code Quality",
+    "kind": "standard",
+    "url": "quality/STD-GO-001.html"
+  },
+  {
+    "title": "ChangeSetReport schema v1",
+    "kind": "document",
+    "url": "reference/changes-report.html"
+  },
+  {
+    "title": "Configuration reference",
+    "kind": "document",
+    "url": "reference/configuration.html"
+  },
+  {
+    "title": "Catalog of features",
+    "kind": "document",
+    "url": "reference/features.html"
+  },
+  {
+    "id": "UC-DOCS-01",
+    "title": "UC-DOCS-01: Create an offline portal",
+    "kind": "use-case",
+    "url": "use-cases/UC-DOCS-01.html"
+  },
+  {
+    "id": "UC-DOCS-02",
+    "title": "UC-DOCS-02: Check documentation",
+    "kind": "use-case",
+    "url": "use-cases/UC-DOCS-02.html"
+  },
+  {
+    "id": "UC-DOCS-04",
+    "title": "UC-DOCS-04: Explore screen map",
+    "kind": "use-case",
+    "url": "use-cases/UC-DOCS-04.html"
+  },
+  {
+    "id": "UC-DOCS-03",
+    "title": "UC-DOCS-03: View documentation on local server",
+    "kind": "use-case",
+    "url": "use-cases/UC-DOCS-03.html"
+  },
+  {
+    "id": "UC-TASK-02",
+    "title": "UC-TASK-02: Check work task",
+    "kind": "use-case",
+    "url": "use-cases/UC-TASK-02.html"
+  },
+  {
+    "id": "UC-TASK-01",
+    "title": "UC-TASK-01: Get work task context",
+    "kind": "use-case",
+    "url": "use-cases/UC-TASK-01.html"
+  },
+  {
+    "id": "UC-DOCS-05",
+    "title": "UC-DOCS-05: View documentation changes",
+    "kind": "use-case",
+    "url": "use-cases/UC-DOCS-05.html"
+  },
+  {
+    "id": "UC-TASK-03",
+    "title": "UC-TASK-03: Prepare a new work task",
+    "kind": "use-case",
+    "url": "use-cases/UC-TASK-03.html"
+  },
+  {
+    "id": "TASK-ARCH-001",
+    "title": "TASK-ARCH-001: Implement Question-Driven Architectural Documentation",
+    "kind": "task",
+    "url": "work/TASK-ARCH-001.html"
+  },
+  {
+    "id": "TASK-CHANGES-001",
+    "title": "TASK-CHANGES-001: View documentation changes",
+    "kind": "task",
+    "url": "work/TASK-CHANGES-001.html"
+  },
+  {
+    "id": "TASK-CLI-001",
+    "title": "TASK-CLI-001: Implement the complete workflow of a work task",
+    "kind": "task",
+    "url": "work/TASK-CLI-001.html"
+  },
+  {
+    "id": "TASK-DOCS-001",
+    "title": "TASK-DOCS-001: Add Docu-docu self-documentation",
+    "kind": "task",
+    "url": "work/TASK-DOCS-001-self-documentation.html"
+  },
+  {
+    "id": "TASK-DOCS-002",
+    "title": "TASK-DOCS-002: Add extensible Quality, Runbooks and Custom sections",
+    "kind": "task",
+    "url": "work/TASK-DOCS-002.html"
+  },
+  {
+    "id": "TASK-DOCS-003",
+    "title": "TASK-DOCS-003: Add explicit skill initialization",
+    "kind": "task",
+    "url": "work/TASK-DOCS-003.html"
+  },
+  {
+    "id": "TASK-DOCS-004",
+    "title": "TASK-DOCS-004: Add refresh workflow to update documentation",
+    "kind": "task",
+    "url": "work/TASK-DOCS-004.html"
+  },
+  {
+    "id": "TASK-MODEL-001",
+    "title": "TASK-MODEL-001: Stabilize built-in sections and FLOW route",
+    "kind": "task",
+    "url": "work/TASK-MODEL-001.html"
+  },
+  {
+    "id": "TASK-RELEASE-001",
+    "title": "TASK-RELEASE-001: Prepare stable release 0.0.1",
+    "kind": "task",
+    "url": "work/TASK-RELEASE-001.html"
+  },
+  {
+    "id": "TASK-RELEASE-002",
+    "title": "TASK-RELEASE-002: Add installation and update from GitHub Release",
+    "kind": "task",
+    "url": "work/TASK-RELEASE-002.html"
+  },
+  {
+    "id": "TASK-SITE-001",
+    "title": "TASK-SITE-001: Add document context copying",
+    "kind": "task",
+    "url": "work/TASK-SITE-001.html"
+  },
+  {
+    "id": "TASK-SITE-002",
+    "title": "TASK-SITE-002: Editing source documentation in serve",
+    "kind": "task",
+    "url": "work/TASK-SITE-002.html"
+  },
+  {
+    "title": "Changelog",
+    "kind": "document",
+    "url": "project-changelog.html"
+  }
+]

@@ -17,6 +17,8 @@
 API работает только в режиме `serve` и ничего не записывает. При прямом запуске
 translation root он читает выбранный root; locale-разделы canonical portal
 отдельного API не получают.
+Go включает changes UI только при capability `changes` и передаёт same-origin
+API base в versioned page bootstrap; static frontend endpoint не содержит.
 
 ## Сравнение версий
 
