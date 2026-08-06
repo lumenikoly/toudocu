@@ -1,8 +1,12 @@
 # Справочник конфигурации
 
 CLI работает без конфигурационного файла. Необязательный
-`<repository-root>/.docu-docu/config.yml` настраивает портал и автоматически
-читается командами `build`, `check` и `serve`.
+`<repository-root>/.docu-docu/config.yml` целиком разбирается и валидируется при
+загрузке, включая configured branding assets. После общей валидации `build`,
+`check` и `serve` используют project/site configuration; `changes` и `task
+changes` — секцию `changes`; `task init` и `scaffold` — `project.locale`.
+Поэтому ошибка в общей структуре или site asset может остановить и операцию,
+которая непосредственно не использует эту настройку.
 
 ## Значения по умолчанию
 
@@ -147,8 +151,13 @@ remote. Лимит отключает тяжёлое представление 
 ручную пересборку модели, HTML и поиска. Editor API всегда работает на том же
 listener и не получает отдельного CLI-флага.
 `--host`, `--port` и `--open` сохраняют прежнюю семантику; `--no-open` и `--edit`
-не существуют. Через `file://` или другой статический HTTP-сервер editor markup,
-API URL, CodeMirror и server-only scripts отсутствуют.
+не существуют. В результате `build`, опубликованном любым статическим
+HTTP-сервером, editor markup, API URL, CodeMirror и server-only scripts
+отсутствуют.
+
+Canonical `serve` без отдельной настройки публикует найденные OpenAPI contracts
+через `/_docu-docu/api-docs/`. Static build копирует specs, но не Swagger UI;
+translation mounts и direct translation serve не публикуют ни UI, ни ссылку.
 
 Workspace включает обычные `.md`, `.yaml`, `.yml` и `.json` внутри docs root и
 исключает hidden, configured excludes, output subtree и symlink paths. JSON body
@@ -196,8 +205,12 @@ project:
 ## Отдельные roots переводов
 
 `translations` описывает независимые порталы для workflow
-`$use-docu-docu translate`; это не новая Go CLI-команда. Канонический `docs/`
-остаётся единственным источником `task context` и `ProjectModel`.
+`$docu-docu translate`; это не новая Go CLI-команда. Канонический `docs/`
+остаётся единственным источником обычного документационного, implementation и
+task-контекста агента. Настроенные translation roots не входят в репозиторный
+поиск, инвентаризацию, semantic review или анализ реализации при обычной работе.
+Translation tree хранит тот же набор читательских Markdown-файлов, включая
+`work/**`, `notes.md` и `ideas.md`, но не становится вторым backlog.
 
 ```yaml
 translations:
@@ -223,7 +236,15 @@ Root задаётся относительно repository root, находитс
 translation root либо каноническим docs root. При `check`, `build` или `serve`
 ровно на translation root профиль временно заменяет `project.locale` и
 `project.sections`. Обычная работа с canonical root не читает translation tree
-и не получает diagnostics незавершённого другого profile.
+и не получает diagnostics незавершённого другого profile. На translation root
+разрешены `check`, `build`, `search`, обычные `changes` и read-only `serve`.
+Task-команды, `scaffold` и editor-запись отклоняются с
+`TRANSLATION_ROOT_READ_ONLY`. Агент читает только выбранный translation root при
+явном `$docu-docu translate <locale>` или явном запросе проверить, найти,
+собрать, запустить или изучить эту локаль. Он обрабатывает одну необходимую
+source/target-пару за раз, а для проверки паритета сначала сравнивает пути,
+source-хеши manifest и структурные отчёты. Translation roots не добавляются в
+`.gitignore` или глобальные ignore-файлы.
 
 ## Mermaid
 

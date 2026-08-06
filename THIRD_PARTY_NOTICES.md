@@ -5,6 +5,14 @@ licensed and retain their own copyright and license notices. Release packaging
 generates one complete `THIRD_PARTY_NOTICES.md` by combining this inventory with
 the notices of the embedded browser assets.
 
+## Frontend development toolchain
+
+TypeScript, esbuild and Playwright are pinned development dependencies used to
+type-check, build and test `web/`. They are not embedded as runtime packages and
+are not required by the released Go binary. Their license notices remain in the
+npm dependency distributions and lockfile; only the deterministic build output
+and separately listed vendored browser libraries are shipped.
+
 ## CodeMirror 6
 
 The serve-only editor bundles `codemirror@6.0.2`,
@@ -56,6 +64,51 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## Goldmark
+
+- Package: `github.com/yuin/goldmark`
+- Version: `v1.8.5`
+- Source: <https://github.com/yuin/goldmark>
+- License: MIT
+
+Goldmark parses CommonMark and the enabled GFM extensions into the internal
+Markdown AST. It is linked into the Docu-docu binary and requires no runtime
+service, network access or CGO.
+
+Copyright (c) 2019 Yusuke Inuzuka
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+## Swagger UI
+
+- Package: `swagger-ui-dist`
+- Version: `5.32.12`
+- Source: <https://github.com/swagger-api/swagger-ui>
+- License: Apache-2.0
+
+The canonical serve-only API documentation embeds `swagger-ui.css`,
+`swagger-ui-bundle.js` and `swagger-ui-standalone-preset.js`. The upstream
+license and generated bundle notices are embedded beside them as
+`assets/swagger-ui*.LICENSE.txt`; `assets/swagger-ui.checksums.txt` records
+their SHA-256 digests. Node.js is used only to refresh these vendored files and
+is not a Go or end-user runtime dependency.
 
 ## Mermaid Tiny and bundled dependencies
 

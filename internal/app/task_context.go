@@ -85,7 +85,7 @@ func taskContextExternalDocument(model *Model, relativePath string) (TaskContext
 	if err != nil {
 		return TaskContextDocument{}, false
 	}
-	parsed := AnalyzeMarkdown(string(content))
+	parsed := analyzeMarkdown(string(content))
 	return TaskContextDocument{
 		Path: relativePath, Type: "document", Title: parsed.Title, Description: parsed.Description,
 		Status:   StatusFor(parsed.Metadata["status"]),
@@ -95,6 +95,9 @@ func taskContextExternalDocument(model *Model, relativePath string) (TaskContext
 
 // BuildTaskContext returns compact, read-only implementation context for one task.
 func BuildTaskContext(model *Model, taskID string) (TaskContextReport, error) {
+	if err := rejectTranslationTaskModel(model); err != nil {
+		return TaskContextReport{}, err
+	}
 	item, err := findWorkItem(model, taskID)
 	if err != nil {
 		return TaskContextReport{}, err

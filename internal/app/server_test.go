@@ -97,7 +97,7 @@ func TestDocumentationServerServesAndRebuilds(t *testing.T) {
 	assertRequestContains(http.MethodGet, "/", "Первая версия.")
 	assertRequestContains(http.MethodGet, "/", "data-server-rebuild")
 	assertRequestContains(http.MethodHead, "/", "")
-	assertRequestContains(http.MethodGet, "/assets/style.css", "font-family")
+	assertRequestContains(http.MethodGet, "/assets/portal.css", "font-family")
 	assertRequestContains(http.MethodGet, "/report.json", `"schemaVersion": 1`)
 
 	writeTestFile(t, docs, "index.md", "# Серверный проект\n\nВторая версия после обновления.\n")
@@ -319,7 +319,7 @@ func TestDocumentationServerSerializesConcurrentRequests(t *testing.T) {
 		wait.Add(1)
 		go func(index int) {
 			defer wait.Done()
-			target := "/assets/style.css"
+			target := "/assets/portal.css"
 			if index%2 == 0 {
 				target = "/"
 			}

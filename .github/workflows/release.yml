@@ -1,23 +1,76 @@
 name: release
 
 on:
-  push:
-    tags: ['0.0.1']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version (for example, 0.0.2)
+        required: true
+        type: string
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
+          go-version: 'stable'
           cache: true
-      - name: Verify tag version
-        run: test "$(go run ./cmd/docu-docu version)" = "$GITHUB_REF_NAME"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci --prefix web
+      - name: Validate release
+        shell: bash
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo "Release workflow must run from main, got $GITHUB_REF" >&2
+            exit 1
+          fi
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Release version must use X.Y.Z format, got $VERSION" >&2
+            exit 1
+          fi
+
+          actual_version="$(go run ./cmd/docu-docu version)"
+          if [[ "$actual_version" != "$VERSION" ]]; then
+            echo "CLI version $actual_version does not match release version $VERSION" >&2
+            exit 1
+          fi
+
+          heading_count="$(awk -v heading="## $VERSION" '$0 == heading { count++ } END { print count + 0 }' CHANGELOG.md)"
+          if [[ "$heading_count" != "1" ]]; then
+            echo "CHANGELOG.md must contain exactly one '## $VERSION' heading" >&2
+            exit 1
+          fi
+          awk -v heading="## $VERSION" '
+            $0 == heading { capture=1; next }
+            /^## / && capture { exit }
+            capture
+          ' CHANGELOG.md > release-notes.md
+          if ! grep -q '[^[:space:]]' release-notes.md; then
+            echo "CHANGELOG.md section for $VERSION is empty" >&2
+            exit 1
+          fi
+
+          if git ls-remote --exit-code --tags origin "refs/tags/$VERSION" >/dev/null 2>&1; then
+            echo "Tag $VERSION already exists" >&2
+            exit 1
+          fi
       - run: make release
       - uses: actions/upload-artifact@v4
         with:
@@ -27,6 +80,8 @@ jobs:
   publish:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
@@ -34,10 +89,30 @@ jobs:
           name: release-bundle
           path: dist
       - name: Extract release notes
+        shell: bash
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
-          awk '/^## 0\.0\.1$/{capture=1; next} /^## /{if(capture) exit} capture' CHANGELOG.md > release-notes.md
-          test -s release-notes.md
-      - uses: softprops/action-gh-release@v2
-        with:
-          body_path: release-notes.md
-          files: dist/*
+          set -euo pipefail
+          awk -v heading="## $VERSION" '
+            $0 == heading { capture=1; next }
+            /^## / && capture { exit }
+            capture
+          ' CHANGELOG.md > release-notes.md
+          grep -q '[^[:space:]]' release-notes.md
+      - name: Publish release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --tags origin "refs/tags/$VERSION" >/dev/null 2>&1; then
+            echo "Tag $VERSION already exists" >&2
+            exit 1
+          fi
+          gh release create "$VERSION" dist/* \
+            --target "$GITHUB_SHA" \
+            --title "$VERSION" \
+            --notes-file release-notes.md \
+            --fail-on-no-commits

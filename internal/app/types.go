@@ -73,10 +73,12 @@ type MetadataExtra struct {
 }
 
 type Heading struct {
-	Level int    `json:"level"`
-	Title string `json:"title"`
-	ID    string `json:"id"`
-	Line  int    `json:"line"`
+	Level       int    `json:"level"`
+	Title       string `json:"title"`
+	ID          string `json:"id"`
+	Line        int    `json:"line"`
+	startOffset int
+	endOffset   int
 }
 
 type Task struct {
@@ -124,6 +126,7 @@ type Section struct {
 	Tasks          []Task          `json:"tasks"`
 	Text           string          `json:"text"`
 	Markdown       string          `json:"markdown"`
+	children       []Section
 }
 
 type TaskStats struct {
@@ -139,6 +142,7 @@ type Issue struct {
 	Message      string `json:"message"`
 	DocumentPath string `json:"documentPath,omitempty"`
 	Line         int    `json:"line,omitempty"`
+	Column       int    `json:"column,omitempty"`
 }
 
 type Document struct {
@@ -154,13 +158,13 @@ type Document struct {
 	Title               string
 	Description         string
 	Content             string
-	Lines               []string
 	Headings            []Heading
-	HeadingByLine       map[int]Heading
 	Sections            []Section
 	Metadata            Metadata
 	MetadataExtras      []MetadataExtra
-	MetadataLineIndexes map[int]struct{}
+	markdownDiagnostics []Issue
+	mermaidBlocks       []mermaidBlock
+	markdownTables      []markdownTable
 	Tasks               []Task
 	TaskStats           TaskStats
 	Links               []Link
@@ -532,35 +536,37 @@ type SearchItem struct {
 }
 
 type Model struct {
-	RootDirectory    string
-	RepositoryRoot   string
-	RepositoryURL    string
-	RepositoryRef    string
-	GeneratedAt      time.Time
-	StaleDays        int
-	Documents        []*Document
-	DocByPath        map[string]*Document
-	Directories      map[string]struct{}
-	Assets           map[string]string
-	BrandingAssets   map[string]string
-	SiteConfig       SiteConfig
-	Issues           []Issue
-	Collections      map[string][]*Document
-	Risks            []Risk
-	RoadmapStages    []RoadmapStage
-	Knowledge        KnowledgeModel
-	Project          ProjectInfo
-	CurrentStatus    CurrentStatus
-	Stats            Stats
-	SearchIndex      []SearchItem
-	ProjectChangelog *Document
-	HealthOutputPath string
-	ReportOutputPath string
-	ScreenMapEnabled bool
-	sourceOverlay    map[string][]byte
-	serveMode        bool
-	serveRevision    string
-	languageTargets  map[string][]LanguageTarget
+	RootDirectory     string
+	RepositoryRoot    string
+	RepositoryURL     string
+	RepositoryRef     string
+	GeneratedAt       time.Time
+	StaleDays         int
+	Documents         []*Document
+	DocByPath         map[string]*Document
+	Directories       map[string]struct{}
+	Assets            map[string]string
+	BrandingAssets    map[string]string
+	SiteConfig        SiteConfig
+	Issues            []Issue
+	Collections       map[string][]*Document
+	Risks             []Risk
+	RoadmapStages     []RoadmapStage
+	Knowledge         KnowledgeModel
+	Project           ProjectInfo
+	CurrentStatus     CurrentStatus
+	Stats             Stats
+	SearchIndex       []SearchItem
+	ProjectChangelog  *Document
+	HealthOutputPath  string
+	ReportOutputPath  string
+	ScreenMapEnabled  bool
+	sourceOverlay     map[string][]byte
+	serveMode         bool
+	serveRevision     string
+	languageTargets   map[string][]LanguageTarget
+	translationLocale string
+	openAPIContracts  []OpenAPIContract
 }
 
 type GenerateResult struct {

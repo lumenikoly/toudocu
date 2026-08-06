@@ -1,4 +1,4 @@
-// Package docudocu exposes the stable Go API for the Docu-docu CLI.
+// Package docudocu exposes the typed Go facade for the Docu-docu CLI.
 //
 // The implementation is kept in internal/app so command and library consumers
 // use this package without coupling to the repository layout.
@@ -54,11 +54,6 @@ type (
 	SearchItem               = core.SearchItem
 	Model                    = core.Model
 	GenerateResult           = core.GenerateResult
-	LinkResolution           = core.LinkResolution
-	LinkResolver             = core.LinkResolver
-	ParsedMarkdown           = core.ParsedMarkdown
-	RenderContext            = core.RenderContext
-	RenderOptions            = core.RenderOptions
 	FooterConfig             = core.FooterConfig
 	HeroConfig               = core.HeroConfig
 	ChangesConfig            = core.ChangesConfig
@@ -129,16 +124,6 @@ func StatusFor(status string) StatusInfo { return core.StatusFor(status) }
 
 func BuildDocumentationModel(options Options) (*Model, error) {
 	return core.BuildDocumentationModel(options)
-}
-
-func AnalyzeMarkdown(content string) ParsedMarkdown { return core.AnalyzeMarkdown(content) }
-
-func RenderMarkdown(document ParsedMarkdown, context RenderContext, options RenderOptions) string {
-	return core.RenderMarkdown(document, context, options)
-}
-
-func RenderMarkdownFragment(markdown string, context RenderContext) string {
-	return core.RenderMarkdownFragment(markdown, context)
 }
 
 func BuildReport(model *Model) ProjectReport { return core.BuildReport(model) }

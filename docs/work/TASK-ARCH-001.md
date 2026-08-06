@@ -38,7 +38,7 @@ RU/EN-шаблоны, безопасный init и semantic gate `ARCH001`–`AR
 - `integration_test.go`;
 - `screens_test.go`;
 - `skill_templates_test.go`;
-- `skills/use-docu-docu/`;
+- `skills/docu-docu/`;
 - `docs/`;
 - `example/docs/`;
 - `project-docs/`;

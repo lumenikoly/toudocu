@@ -3,7 +3,7 @@
 - Идентификатор: MOD-CLI
 - Статус: Готово
 - Владелец: Команда Docu-docu
-- Последнее обновление: 2026-08-03
+- Последнее обновление: 2026-08-05
 
 Модуль предоставляет команды Docu-docu и детерминированный workflow от поиска и
 каркаса задачи до контекста и управляемого выполнения объявленных проверок.
@@ -19,14 +19,15 @@
 - CLI и локальный HTTP-сервер: `internal/app/cli.go`, `internal/app/server.go`;
 - read-only контекст и readiness: `internal/app/task_context.go`, `internal/app/task_ready.go`;
 - search и каркасы: `internal/app/search.go`, `internal/app/scaffold.go`;
-- выполнение verify и управление процессами: `internal/app/task_verify.go`, `internal/app/command_process_*.go`.
+- выполнение verify и управление процессами: `internal/app/task_verify.go`, `internal/app/command_process_*.go`;
+- архивирование и восстановление work items: `internal/app/task_archive.go`.
 
 ## Границы
 
 CLI не интерпретирует пользовательский запрос. `task ready` и `task context`
 только читают данные, а `task verify --run` запускает команды после локального
-validation gate. Prompt-workflows `$use-docu-docu init`, `$use-docu-docu refresh`
-и `$use-docu-docu refresh diff` находятся за границей Go CLI.
+validation gate. Prompt-workflows `$docu-docu init`, `$docu-docu refresh`
+и `$docu-docu refresh diff` находятся за границей Go CLI.
 
 ## Бизнес-правила
 
@@ -57,6 +58,21 @@ Docu-docu создаёт нейтральные каркасы и проверя
 порядок, fields, validation, target path и renderer определяет тот же registry,
 который `serve` возвращает editor UI. Создание остаётся атомарным `O_EXCL`.
 
+### BR-CLI-006: Translation root не является рабочим контекстом
+
+Configured translation root доступен для `check`, `build`, read-only `serve`,
+`search` и обычного просмотра changes. `task init`, `task context`, `task ready`,
+`task verify`, `task changes`, `task archive`, `task restore`, `scaffold` и
+editor-запись отклоняются с `TRANSLATION_ROOT_READ_ONLY`. Work items перевода
+остаются читательским зеркалом, а агент и CI используют только canonical docs
+root.
+
+### BR-CLI-007: Архивирование не изменяет контракт задачи
+
+`task archive` и `task restore` перемещают один допустимый work item без
+перезаписи и не изменяют его Markdown или статус. Операция блокируется, если
+перемещение разорвёт разрешение прямой Markdown-ссылки.
+
 ## Инварианты
 
 - JSON-режим не смешивает отчёт с потоковым текстовым выводом;
@@ -66,6 +82,8 @@ Docu-docu создаёт нейтральные каркасы и проверя
 - сборка требует явного `docu-docu build`; путь без команды отклоняется;
 - зарезервированные skill-level имена `init` и `refresh` отклоняются как
   неизвестные команды Go CLI;
+- task workflow и создание сущностей никогда не используют configured
+  translation root;
 - `serve` по умолчанию слушает только loopback; сетевой доступ включается явно;
 - `--host`, `--port`, `--open` и отсутствие auto-open не изменены; `--no-open`
   не добавлен, а `--edit` остаётся неизвестным параметром.
@@ -83,6 +101,7 @@ Docu-docu создаёт нейтральные каркасы и проверя
 - [UC-TASK-01: Контекст рабочей задачи](../use-cases/task-workflow.md)
 - [UC-TASK-02: Проверка рабочей задачи](../use-cases/task-verify.md)
 - [UC-TASK-03: Подготовка рабочей задачи](../use-cases/UC-TASK-03.md)
+- [UC-TASK-04: Архивирование и восстановление задачи](../use-cases/UC-TASK-04.md)
 - [UC-DOCS-02: Проверка документации](../use-cases/check-documentation.md)
 - [UC-DOCS-03: Локальный сервер](../use-cases/serve-portal.md)
 

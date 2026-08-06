@@ -1,9 +1,10 @@
 package docudocu
 
 import (
+	frontend "docu-docu/internal/site"
 	"encoding/json"
 	"errors"
-	"fmt"
+	"html/template"
 	"io"
 	"mime"
 	"net/http"
@@ -16,6 +17,24 @@ const (
 	editorUIPath    = "/_docu-docu/editor/"
 	editorBodyLimit = 3 << 20
 )
+
+type apiRoute struct {
+	Path    string
+	Methods []string
+	Handler func(*documentationServer, http.ResponseWriter, *http.Request)
+}
+
+var editorRouteRegistry = []apiRoute{
+	{Path: editorAPIBase + "/files", Methods: []string{http.MethodGet}, Handler: (*documentationServer).serveEditorFiles},
+	{Path: editorAPIBase + "/file", Methods: []string{http.MethodGet, http.MethodPut}, Handler: (*documentationServer).serveEditorFile},
+	{Path: editorAPIBase + "/preview", Methods: []string{http.MethodPost}, Handler: (*documentationServer).serveEditorPreview},
+	{Path: editorAPIBase + "/validate", Methods: []string{http.MethodPost}, Handler: (*documentationServer).serveEditorValidate},
+	{Path: editorAPIBase + "/create", Methods: []string{http.MethodPost}, Handler: (*documentationServer).serveEditorCreate},
+}
+
+var editorServiceRouteRegistry = []apiRoute{
+	{Path: rebuildEndpoint, Methods: []string{http.MethodPost}, Handler: (*documentationServer).serveRebuild},
+}
 
 type editorErrorEnvelope struct {
 	SchemaVersion int               `json:"schemaVersion"`
@@ -137,20 +156,16 @@ func editorStatusForError(err error) (int, string) {
 }
 
 func (s *documentationServer) serveEditorAPI(w http.ResponseWriter, r *http.Request) {
-	switch strings.TrimPrefix(r.URL.Path, editorAPIBase) {
-	case "/files":
-		s.serveEditorFiles(w, r)
-	case "/file":
-		s.serveEditorFile(w, r)
-	case "/preview":
-		s.serveEditorPreview(w, r)
-	case "/validate":
-		s.serveEditorValidate(w, r)
-	case "/create":
-		s.serveEditorCreate(w, r)
-	default:
-		writeEditorError(w, http.StatusNotFound, "route_not_found", "Editor API route не найден", nil)
+	for _, route := range editorRouteRegistry {
+		if r.URL.Path == route.Path {
+			if !allowEditorMethods(w, r, route.Methods...) {
+				return
+			}
+			route.Handler(s, w, r)
+			return
+		}
 	}
+	writeEditorError(w, http.StatusNotFound, "route_not_found", "Editor API route не найден", nil)
 }
 
 func (s *documentationServer) serveEditorFiles(w http.ResponseWriter, r *http.Request) {
@@ -197,6 +212,7 @@ func (s *documentationServer) serveEditorFile(w http.ResponseWriter, r *http.Req
 		return
 	}
 	if r.Method == http.MethodGet {
+		w.Header().Set("X-Content-Type-Options", "nosniff")
 		filePath := r.URL.Query().Get("path")
 		item, err := s.workspace.read(filePath, s.model, r.URL.Query().Get("raw") != "1")
 		if err != nil {
@@ -206,7 +222,6 @@ func (s *documentationServer) serveEditorFile(w http.ResponseWriter, r *http.Req
 		}
 		if r.URL.Query().Get("raw") == "1" {
 			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-			w.Header().Set("X-Content-Type-Options", "nosniff")
 			_, _ = io.WriteString(w, item.Content)
 			return
 		}
@@ -437,6 +452,26 @@ func (s *documentationServer) serveEditorUI(w http.ResponseWriter, r *http.Reque
 	if r.Method == http.MethodHead {
 		return
 	}
-	title := escapeHTML(s.model.Project.Title)
-	_, _ = fmt.Fprintf(w, `<!doctype html><html lang="ru" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><title>Редактор — %s</title><link rel="icon" href="/assets/favicon.svg"><link rel="stylesheet" href="/assets/editor.css"><script src="/assets/codemirror.js" defer></script><script src="/assets/editor.js" defer></script></head><body><a class="editor-skip" href="#editor-workspace">Перейти к редактору</a><div class="editor-shell"><header class="editor-header"><a class="editor-brand" href="/"><span aria-hidden="true">DG</span><strong>%s</strong></a><div class="editor-path"><button type="button" data-tree-toggle aria-label="Открыть дерево файлов">Файлы</button><span data-current-path>Выберите документ</span><span class="dirty-mark" data-dirty-state hidden>Изменён</span></div><div class="editor-actions"><a data-raw-link href="#" target="_blank" rel="noopener" hidden>Исходник</a><button type="button" data-create-open>Создать</button><button class="primary" type="button" data-save disabled>Сохранить</button></div></header><div class="editor-layout"><aside class="editor-tree" data-tree><div class="tree-heading"><strong>Документы</strong><button type="button" data-tree-close aria-label="Закрыть дерево">Закрыть</button></div><label class="tree-search"><span>Фильтр</span><input type="search" data-file-filter placeholder="Путь или название"></label><nav aria-label="Исходные файлы" data-file-tree></nav></aside><main id="editor-workspace" class="editor-workspace"><div class="editor-notice" data-conflict hidden role="alert"><strong>Файл изменён снаружи.</strong><span data-conflict-message>Ваш текст сохранён в редакторе. Сравните версии или подтвердите перезапись.</span><button type="button" data-conflict-load>Загрузить внешнюю</button><button type="button" data-conflict-overwrite>Перезаписать</button><button type="button" data-conflict-download hidden>Скачать текст</button></div><div class="editor-tabs" role="tablist" aria-label="Режим просмотра"><button role="tab" aria-selected="true" data-view="editor">Редактор</button><button role="tab" aria-selected="false" data-view="preview">Preview</button><button role="tab" aria-selected="false" data-view="split">Разделённый экран</button></div><div class="editor-stage" data-stage="editor"><section class="source-pane" aria-label="Редактор исходного текста"><div data-editor-host></div><textarea data-editor-fallback spellcheck="false" aria-label="Содержимое документа"></textarea></section><section class="preview-pane" aria-label="Preview" data-preview><div class="preview-empty">Preview доступен для Markdown.</div></section></div><section class="diagnostics" aria-labelledby="diagnostics-title"><div class="diagnostics-heading"><strong id="diagnostics-title">Diagnostics</strong><span data-diagnostic-count>0</span></div><ol data-diagnostics></ol></section></main></div></div><dialog data-create-dialog><form method="dialog" data-create-form><header><h2>Создать документ</h2><button value="cancel" aria-label="Закрыть">Закрыть</button></header><label>Шаблон<select data-template-select></select></label><label>Язык<select data-template-language></select></label><div data-template-fields></div><p class="form-error" data-create-error role="alert"></p><footer><button value="cancel">Отмена</button><button class="primary" type="submit" value="default">Создать</button></footer></form></dialog><div class="editor-toast" data-toast role="status" aria-live="polite"></div></body></html>`, title, title)
+	uiModel := workspaceModel(s.model)
+	locale := uiModel.SiteConfig.Project.Locale
+	if locale == "" {
+		locale = "en"
+	}
+	html, err := frontend.RenderEditor(frontend.WorkspaceView{
+		Lang: locale, HTMLAttributes: template.HTMLAttr(appearanceAttributes(uiModel.SiteConfig)),
+		Title: "Редактор — " + uiModel.Project.Title, Favicon: workspaceFavicon(uiModel),
+		AppearanceJS: "/assets/" + mustFrontendAsset("appearance.js"),
+		Styles:       []string{"/assets/" + mustFrontendAsset("portal.css"), "/assets/" + mustFrontendAsset("editor.css")},
+		Scripts: []frontend.ScriptAsset{
+			{URL: "/assets/" + mustFrontendAsset("codemirror.js"), Module: true},
+			{URL: "/assets/" + mustFrontendAsset("editor.js"), Module: true},
+		},
+		Bootstrap: workspacePageBootstrap(uiModel, "_docu-docu/editor/index.html", "../../assets/", frontend.Capabilities{Editor: true, Rebuild: true}),
+		Header:    template.HTML(workspaceHeader(uiModel, workspaceEditor)),
+	})
+	if err != nil {
+		http.Error(w, "Не удалось сформировать редактор", http.StatusInternalServerError)
+		return
+	}
+	_, _ = io.WriteString(w, html)
 }

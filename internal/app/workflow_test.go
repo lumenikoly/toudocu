@@ -433,6 +433,16 @@ func TestTaskReadyContextAndVerifyDryRun(t *testing.T) {
 		t.Fatalf("missing scope directory passed readiness: %#v", missingDirectory)
 	}
 
+	writeTestFile(t, docs, "work/TASK-AUTH-021.md", strings.Replace(terminalTaskFixture("Done"), "`new.go`", "`removed/legacy/asset.js`", 1))
+	model, err = BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	completed := BuildTaskReady(model, "TASK-AUTH-021", false)
+	if hasIssueCode(completed.Issues, "missing-scope-path") {
+		t.Fatalf("completed task history must preserve removed scope paths: %#v", completed)
+	}
+
 	writeTestFile(t, docs, "work/TASK-AUTH-021.md", completeTaskFixture("Ready"))
 	model, err = BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
 	if err != nil {

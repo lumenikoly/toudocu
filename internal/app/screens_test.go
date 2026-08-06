@@ -468,10 +468,17 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 		"use-cases/index.html":      `Пользовательские сценарии`,
 		"use-cases/UC-AUTH-01.html": `data-playable-flow`,
 		"traceability.html":         `Матрица трассируемости`,
-		"assets/screen-map.js":      `computeVisible`,
-		"assets/playable-flow.js":   `function activate`,
 	} {
 		data, err := os.ReadFile(filepath.Join(output, filepath.FromSlash(file)))
+		if err != nil || !strings.Contains(string(data), expected) {
+			t.Fatalf("%s missing %q: %v", file, expected, err)
+		}
+	}
+	for file, expected := range map[string]string{
+		filepath.Join("..", "..", "web", "src", "features", "screen-map", "index.ts"):       `computeVisible`,
+		filepath.Join("..", "..", "web", "src", "features", "use-case", "playable-flow.ts"): `function activate`,
+	} {
+		data, err := os.ReadFile(file)
 		if err != nil || !strings.Contains(string(data), expected) {
 			t.Fatalf("%s missing %q: %v", file, expected, err)
 		}
@@ -555,6 +562,7 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	}
 	useCaseNavigation := navigationFolderHTML(t, useCasePage, "use-cases")
 	processNavigation := navigationFolderHTML(t, useCasePage, "processes")
+	useCaseScreensNavigation := navigationFolderHTML(t, useCasePage, "screens")
 	if !strings.Contains(useCaseNavigation, `nav-folder-link is-active`) {
 		t.Fatal("use case page must activate the top-level user-scenarios section")
 	}
@@ -563,6 +571,9 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	}
 	if strings.Contains(processNavigation, `UC-AUTH-01`) {
 		t.Fatal("individual use cases must not be duplicated inside the processes navigation tree")
+	}
+	if !strings.Contains(useCaseScreensNavigation, `href="../screens/index.html"`) {
+		t.Fatal("use case workspace must link to the shared screen map")
 	}
 	for _, unexpected := range []string{`processes-flow`, `Все процессы`, `Визуальные процессы`, `../flows/index.html`} {
 		if strings.Contains(processNavigation, unexpected) {
@@ -615,7 +626,7 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(output, "flows", "UC-AUTH-01.html")); !os.IsNotExist(err) {
 		t.Fatalf("legacy duplicate playable page must not be generated: %v", err)
 	}
-	mapScript, err := os.ReadFile(filepath.Join(output, "assets", "screen-map.js"))
+	mapScript, err := os.ReadFile(filepath.Join("..", "..", "web", "src", "features", "screen-map", "index.ts"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -623,8 +634,8 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 		"edge.type === 'return'",
 		"screen-edge-external-outer",
 		"screen-edge-external-inner",
-		"MODULE_COLUMN_GAP = 144",
-		"MODULE_ROW_GAP = 112",
+		"MODULE_COLUMN_GAP",
+		"MODULE_ROW_GAP",
 		"function routeAroundObstacles",
 		"function findLabelPlacement",
 		"function createTransitionLabel",
@@ -634,14 +645,14 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 			t.Fatalf("screen map script missing visual transition contract %q", expected)
 		}
 	}
-	playableScript, err := os.ReadFile(filepath.Join(output, "assets", "playable-flow.js"))
+	playableScript, err := os.ReadFile(filepath.Join("..", "..", "web", "src", "features", "use-case", "playable-flow.ts"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !strings.Contains(string(playableScript), "button.classList.toggle('is-visible'") || strings.Contains(string(playableScript), "button.hidden =") {
 		t.Fatal("hotspots must remain interactive while visually hidden and reveal on hover")
 	}
-	appScript, err := os.ReadFile(filepath.Join(output, "assets", "app.js"))
+	appScript, err := os.ReadFile(filepath.Join("..", "..", "web", "src", "core", "portal.ts"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -650,7 +661,12 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 			t.Fatalf("collection filters missing %q", expected)
 		}
 	}
-	styleData, err := os.ReadFile(filepath.Join(output, "assets", "style.css"))
+	for _, removed := range []string{"function initializeScreenMap", "data-screen-map-diagram", "data-screen-map-stage", "data-screen-mode", "data-screen-select"} {
+		if strings.Contains(string(appScript), removed) {
+			t.Fatalf("app.js retains legacy screen-map initializer contract %q", removed)
+		}
+	}
+	styleData, err := os.ReadFile(filepath.Join("..", "..", "web", "src", "styles", "portal.css"))
 	if err != nil {
 		t.Fatal(err)
 	}

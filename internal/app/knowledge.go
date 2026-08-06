@@ -43,6 +43,7 @@ type workSubsection struct {
 	Markdown string
 	Text     string
 	Tasks    []Task
+	Nested   map[string]string
 }
 
 type parsedWorkItem struct {
@@ -58,39 +59,69 @@ func parseWorkItems(document *Document) []parsedWorkItem {
 		if workItemHeadingRE.FindStringSubmatch(heading.Title) == nil {
 			continue
 		}
-		end := len(document.Lines)
+		end := strings.Count(document.Content, "\n") + 1
+		itemEndOffset := len(document.Content)
 		for _, candidate := range document.Headings[headingIndex+1:] {
 			if candidate.Level <= heading.Level {
 				end = candidate.Line
+				itemEndOffset = candidate.startOffset
 				break
 			}
 		}
-		metadata := extractMetadata(document.Lines, heading.Line+1, end, false)
+		metadata := Metadata{}
+		if heading.Level == 1 {
+			for key, value := range document.Metadata {
+				metadata[key] = value
+			}
+		}
 		subsections := map[string]workSubsection{}
 		for childIndex, child := range document.Headings {
 			if child.Line <= heading.Line || child.Line >= end || child.Level != heading.Level+1 {
 				continue
 			}
 			childEnd := end
+			childEndOffset := itemEndOffset
 			for _, candidate := range document.Headings[childIndex+1:] {
 				if candidate.Line >= end {
 					break
 				}
 				if candidate.Level <= child.Level {
 					childEnd = candidate.Line
+					childEndOffset = candidate.startOffset
 					break
 				}
 			}
-			lines := document.Lines[child.Line+1 : childEnd]
+			content := strings.TrimSpace(document.Content[child.endOffset:childEndOffset])
+			nested := map[string]string{}
+			sectionText := ""
+			for _, section := range document.Sections {
+				if section.StartLine == child.Line {
+					sectionText = strings.TrimSpace(section.Text)
+					for _, candidate := range section.children {
+						nested[canonicalText(candidate.Title)] = strings.TrimSpace(candidate.Text)
+					}
+				}
+			}
 			subsections[canonicalText(child.Title)] = workSubsection{
 				Heading:  child,
 				EndLine:  childEnd,
-				Markdown: strings.TrimSpace(strings.Join(lines, "\n")),
-				Text:     stripMarkdown(strings.Join(lines, "\n")),
-				Tasks:    extractTasks(lines, nil, child.Line+1),
+				Markdown: content,
+				Text:     sectionText,
+				Tasks:    tasksInRange(document.Tasks, child.Line+2, childEnd),
+				Nested:   nested,
 			}
 		}
-		result = append(result, parsedWorkItem{Heading: heading, EndLine: end, Metadata: metadata.Values, Subsections: subsections})
+		result = append(result, parsedWorkItem{Heading: heading, EndLine: end, Metadata: metadata, Subsections: subsections})
+	}
+	return result
+}
+
+func tasksInRange(tasks []Task, startLine, endLine int) []Task {
+	result := []Task{}
+	for _, task := range tasks {
+		if task.Line >= startLine && task.Line <= endLine {
+			result = append(result, task)
+		}
 	}
 	return result
 }
@@ -241,8 +272,8 @@ func parseCriteriaAndVerification(model *Model, document *Document, item parsedW
 	checks := []VerificationCheck{}
 	seenTargets := map[string]bool{}
 	if verificationFound {
-		for lineIndex := verificationSection.Heading.Line + 1; lineIndex < verificationSection.EndLine; lineIndex++ {
-			line := document.Lines[lineIndex]
+		for localIndex, line := range strings.Split(verificationSection.Markdown, "\n") {
+			lineIndex := verificationSection.Heading.Line + 1 + localIndex
 			targets := targetsForVerificationLine(line)
 			if len(targets) == 0 {
 				continue
@@ -306,7 +337,7 @@ func parseCriteriaAndVerification(model *Model, document *Document, item parsedW
 	return tasks, matrix, checks
 }
 
-func validateScopePaths(model *Model, document *Document, item parsedWorkItem) []string {
+func validateScopePaths(model *Model, document *Document, item parsedWorkItem, terminal bool) []string {
 	scope, found := workSection(item, "область изменения", "scope")
 	if !found {
 		return nil
@@ -335,6 +366,10 @@ func validateScopePaths(model *Model, document *Document, item parsedWorkItem) [
 		if strings.ContainsAny(value, "*?[") {
 			matches, _ := filepath.Glob(absolute)
 			if len(matches) == 0 {
+				if terminal {
+					result = append(result, value)
+					continue
+				}
 				addKnowledgeIssue(model, document, "error", "missing-scope-path", "Путь scope не существует: "+value+".", scope.Heading.Line+1)
 				continue
 			}
@@ -351,6 +386,10 @@ func validateScopePaths(model *Model, document *Document, item parsedWorkItem) [
 				continue
 			}
 		} else if _, err := os.Stat(absolute); err != nil {
+			if os.IsNotExist(err) && terminal {
+				result = append(result, value)
+				continue
+			}
 			if os.IsNotExist(err) && strings.HasSuffix(value, "/") {
 				addKnowledgeIssue(model, document, "error", "missing-scope-path", "Новый отсутствующий scope-путь должен быть файлом, а не каталогом: "+value+".", scope.Heading.Line+1)
 				continue
@@ -370,22 +409,9 @@ func validateScopePaths(model *Model, document *Document, item parsedWorkItem) [
 }
 
 func nestedWorkSection(section workSubsection, names ...string) string {
-	parsed := AnalyzeMarkdown("# Section\n\n" + section.Markdown)
-	targets := map[string]bool{}
 	for _, name := range names {
-		targets[canonicalText(name)] = true
-	}
-	for _, candidate := range parsed.Sections {
-		if targets[canonicalText(candidate.Title)] {
-			return strings.TrimSpace(candidate.Text)
-		}
-	}
-	// AnalyzeMarkdown only exposes H2 sections; demote the original H3 headings.
-	content := regexp.MustCompile(`(?m)^###\s+`).ReplaceAllString(section.Markdown, "## ")
-	parsed = AnalyzeMarkdown("# Section\n\n" + content)
-	for _, candidate := range parsed.Sections {
-		if targets[canonicalText(candidate.Title)] {
-			return strings.TrimSpace(candidate.Text)
+		if value := section.Nested[canonicalText(name)]; value != "" {
+			return value
 		}
 	}
 	return ""
@@ -497,7 +523,11 @@ func validateRequiredBugMetadata(model *Model, document *Document, item parsedWo
 		}
 	}
 	if regression == "yes" {
-		body := strings.ToLower(strings.Join(document.Lines[item.Heading.Line+1:item.EndLine], "\n"))
+		bodyParts := []string{}
+		for _, section := range item.Subsections {
+			bodyParts = append(bodyParts, section.Markdown)
+		}
+		body := strings.ToLower(strings.Join(bodyParts, "\n"))
 		versionOrPeriod := regexp.MustCompile(`(?m)^\s*[-*+]\s*(?:версия|version|период|period)\s*[:：]\s*\S+`).MatchString(body)
 		if !versionOrPeriod {
 			addKnowledgeIssue(model, document, "error", "missing-regression-version", "Для регрессии требуется версия или период, где наблюдался дефект.", item.Heading.Line+1)
@@ -613,7 +643,7 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 			checklistLines[step.Line] = struct{}{}
 		}
 	}
-	for _, task := range extractTasks(document.Lines[item.Heading.Line+1:item.EndLine], nil, item.Heading.Line+1) {
+	for _, task := range tasksInRange(document.Tasks, item.Heading.Line+2, item.EndLine) {
 		if _, allowed := checklistLines[task.Line]; !allowed {
 			message := "Чекбоксы задачи разрешены только в разделах «Критерии приёмки» и «План»."
 			if isBug {
@@ -668,13 +698,18 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 			}
 		}
 	}
+	terminalScopeHistory := statusName == "cancelled"
 	if statusName == "done" {
+		terminalScopeHistory = true
 		if criteriaSection, found := workSection(item, "критерии приёмки", "критерии приемки", "acceptance criteria"); found {
 			for _, criterion := range criteriaSection.Tasks {
 				if !criterion.Completed {
+					terminalScopeHistory = false
 					addKnowledgeIssue(model, document, "error", "incomplete-completed-task", "У выполненной задачи все критерии приёмки должны быть отмечены [x].", criterion.Line)
 				}
 			}
+		} else {
+			terminalScopeHistory = false
 		}
 	}
 
@@ -705,7 +740,7 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 	planSection, _ := workSection(item, "план", "plan")
 	documentationImpactSection, _ := workSection(item, "влияние на документацию", "documentation impact")
 	blockerSection, _ := workSection(item, "блокер", "blocker")
-	repositoryPaths := append([]string{}, validateScopePaths(model, document, item)...)
+	repositoryPaths := append([]string{}, validateScopePaths(model, document, item, terminalScopeHistory)...)
 	return WorkItem{
 		ID: match[1], Title: match[2], Status: StatusFor(item.Metadata["status"]), Type: typeName,
 		Priority: item.Metadata["priority"], Severity: item.Metadata["severity"],

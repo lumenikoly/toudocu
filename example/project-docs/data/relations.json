@@ -1,0 +1,29 @@
+[
+  {
+    "id": "MOD-CORE",
+    "useCases": [
+      "UC-CORE-01",
+      "UC-CORE-02"
+    ],
+    "screens": [
+      "SC-CORE-HELP",
+      "SC-CORE-HOME",
+      "SC-CORE-REQUEST",
+      "SC-CORE-RESULT"
+    ],
+    "rules": [
+      "BR-CORE-001",
+      "BR-CORE-002"
+    ]
+  },
+  {
+    "id": "MOD-SUPPORT",
+    "useCases": [],
+    "screens": [
+      "SC-SUPPORT-PORTAL"
+    ],
+    "rules": [
+      "BR-SUPPORT-001"
+    ]
+  }
+]

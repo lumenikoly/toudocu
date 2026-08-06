@@ -65,19 +65,23 @@ func TestStaticSiteExcludesEditor(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, forbidden := range []string{"/_docu-docu/editor", "/changes/", "editor.js", "changes.js", "serve.js", "data-server-rebuild"} {
+	for _, forbidden := range []string{"/_docu-docu/editor", "/changes/", "editor.js", "changes.js", "serve.js", "serve-navigation.js", "data-server-rebuild", "docu-docu-revision"} {
 		if strings.Contains(string(page), forbidden) {
 			t.Fatalf("static page contains %q", forbidden)
 		}
 	}
-	app, err := os.ReadFile(filepath.Join(options.OutputDirectory, "assets", "app.js"))
-	if err != nil {
-		t.Fatal(err)
+	for _, asset := range []string{"portal.js", "screen-map.js", "playable-flow.js"} {
+		app, readErr := os.ReadFile(filepath.Join(options.OutputDirectory, "assets", asset))
+		if readErr != nil {
+			t.Fatal(readErr)
+		}
+		for _, forbidden := range []string{"__docu-docu", "server-rebuild", "localhost", options.InputDirectory} {
+			if strings.Contains(string(app), forbidden) {
+				t.Fatalf("static asset %s contains %q", asset, forbidden)
+			}
+		}
 	}
-	if strings.Contains(string(app), "__docu-docu") || strings.Contains(string(app), "server-rebuild") {
-		t.Fatal("static app contains server-only rebuild code")
-	}
-	for _, asset := range []string{"editor.js", "changes.js", "changes.css", "codemirror.js", "serve.js"} {
+	for _, asset := range []string{"editor.js", "changes.js", "changes.css", "codemirror.js", "serve.js", "api-docs.js"} {
 		if _, err := os.Stat(filepath.Join(options.OutputDirectory, "assets", asset)); !os.IsNotExist(err) {
 			t.Fatalf("static output contains %s", asset)
 		}
@@ -90,9 +94,26 @@ func TestServeSiteIncludesEditor(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, expected := range []string{"/_docu-docu/editor/", "/changes/", "assets/serve.js", "data-server-rebuild", "Рабочая область serve", "Область пересборки: модель, HTML и поиск", "Готово к пересборке", `meta name="docu-docu-revision" content="` + server.revision + `"`} {
+	for _, expected := range []string{"/_docu-docu/editor/", "/changes/", "assets/serve.js", "data-docu-docu-serve-navigation", "data-server-rebuild", `aria-label="Открыть редактор"`, `aria-label="Пересобрать документацию"`, `meta name="docu-docu-revision" content="` + server.revision + `"`} {
 		if !strings.Contains(string(page), expected) {
 			t.Fatalf("serve page missing %q", expected)
+		}
+	}
+	for _, forbidden := range []string{"workspace-bar", "Рабочая область serve", "Область пересборки: модель, HTML и поиск"} {
+		if strings.Contains(string(page), forbidden) {
+			t.Fatalf("serve page contains removed workspace UI %q", forbidden)
+		}
+	}
+	if strings.Contains(string(page), "data/search-index.json") || strings.Contains(string(page), "assets/mermaid.tiny.js") {
+		t.Fatal("serve page must not eagerly load search or Mermaid")
+	}
+	navigation, err := os.ReadFile(filepath.Join("..", "..", "web", "src", "core", "serve-navigation.ts"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, expected := range []string{"pointerover", "focusin", "80", "maxCacheEntries", "popstate", "aria-busy", "window.location.assign", "docu-docu:pagechange", "syncBootstrap"} {
+		if !strings.Contains(string(navigation), expected) {
+			t.Fatalf("serve navigation missing %q", expected)
 		}
 	}
 	files := performEditorRequest(server, editorRequest(http.MethodGet, editorAPIBase+"/files", "", nil))
@@ -100,11 +121,11 @@ func TestServeSiteIncludesEditor(t *testing.T) {
 		t.Fatalf("serve page and polling endpoint use different revisions: meta=%s etag=%s body=%s", server.revision, files.Header().Get("ETag"), files.Body.String())
 	}
 	response := performEditorRequest(server, editorRequest(http.MethodGet, editorUIPath, "", nil))
-	if response.Code != http.StatusOK || !strings.Contains(response.Body.String(), "data-editor-host") {
+	if response.Code != http.StatusOK || !strings.Contains(response.Body.String(), "data-editor-host") || !strings.Contains(response.Body.String(), `class="workspace-brand brand" href="/"`) || !strings.Contains(response.Body.String(), `href="/_docu-docu/editor/" aria-label="Открыть редактор" aria-current="page"`) || !strings.Contains(response.Body.String(), `data-site-theme-select`) {
 		t.Fatalf("editor UI: status=%d body=%s", response.Code, response.Body.String())
 	}
 	changes := performEditorRequest(server, editorRequest(http.MethodGet, changesUIPath, "", nil))
-	if changes.Code != http.StatusOK || !strings.Contains(changes.Body.String(), "data-file-list") {
+	if changes.Code != http.StatusOK || !strings.Contains(changes.Body.String(), "data-file-list") || !strings.Contains(changes.Body.String(), `href="/changes/" aria-label="Открыть изменения" aria-current="page"`) || !strings.Contains(changes.Body.String(), `data-color-scheme-select`) {
 		t.Fatalf("changes UI: status=%d body=%s", changes.Code, changes.Body.String())
 	}
 }
@@ -319,7 +340,7 @@ func TestEditorRebuild(t *testing.T) {
 		t.Fatalf("save status=%d body=%s", response.Code, response.Body.String())
 	}
 	page, _ := os.ReadFile(filepath.Join(options.OutputDirectory, "index.html"))
-	search, _ := os.ReadFile(filepath.Join(options.OutputDirectory, "assets", "search-index.js"))
+	search, _ := os.ReadFile(filepath.Join(options.OutputDirectory, "data", "search-index.json"))
 	if !strings.Contains(string(page), "Rebuilt content") || !strings.Contains(string(search), "rebuilt content") {
 		t.Fatal("save did not rebuild HTML and search")
 	}
@@ -343,21 +364,58 @@ func TestEditorWatcher(t *testing.T) {
 }
 
 func TestEditorPollingStateMachine(t *testing.T) {
-	for _, expected := range []string{"window.setInterval(() => loadFiles({ conditional: true })", "Файл удалён с диска", "Загрузить внешнюю версию и потерять", "new Blob([currentContent()]"} {
+	for _, expected := range []string{"window.setInterval(() => loadFiles({ conditional: true })", "features.editor.index.004", "features.editor.index.013", "new Blob([currentContent()]"} {
 		assertEditorAssetContains(t, "editor.js", expected)
 	}
-	for _, expected := range []string{`meta[name="docu-docu-revision"]`, "let etag = baseline"} {
+	for _, expected := range []string{`meta[name="docu-docu-revision"]`, "etag", "baseline"} {
 		assertEditorAssetContains(t, "serve.js", expected)
 	}
 }
 func TestEditorKeyboardAndDirtyGuards(t *testing.T) {
-	for _, expected := range []string{"beforeunload", "event.ctrlKey || event.metaKey", "stale_digest", "Ваш текст не потерян"} {
+	for _, expected := range []string{"beforeunload", "event.ctrlKey || event.metaKey", "stale_digest", "features.editor.index.010"} {
 		assertEditorAssetContains(t, "editor.js", expected)
 	}
 }
 func TestEditorResponsiveContract(t *testing.T) {
 	for _, expected := range []string{"@media (max-width: 900px)", "@media (max-width: 720px)", ".editor-tree.is-open", "data-stage=\"split\""} {
 		assertEditorAssetContains(t, "editor.css", expected)
+	}
+}
+
+func TestSharedAppearanceAndDynamicEditorTheme(t *testing.T) {
+	for _, expected := range []string{"docu-docu:themechange", "docu-docu-site-theme", "docu-docu-color-scheme", "docu-docu-content-width"} {
+		assertEditorAssetContains(t, "preferences.ts", expected)
+	}
+	for _, expected := range []string{"setTheme", "themeCompartment.reconfigure", "new Compartment"} {
+		data, err := os.ReadFile(filepath.Join("..", "..", "web", "src", "features", "editor", "codemirror.ts"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(string(data), expected) {
+			t.Fatalf("CodeMirror adapter missing %q", expected)
+		}
+	}
+}
+
+func TestWorkspaceShellUsesProjectBranding(t *testing.T) {
+	model := &Model{
+		Project:        ProjectInfo{Title: "Branded docs"},
+		SiteConfig:     defaultSiteConfig(),
+		BrandingAssets: map[string]string{"assets/branding/logo.svg": "", "assets/branding/favicon.png": ""},
+	}
+	server := &documentationServer{model: model}
+	for name, handler := range map[string]func(http.ResponseWriter, *http.Request){
+		"editor":  server.serveEditorUI,
+		"changes": server.serveChangesUI,
+	} {
+		response := httptest.NewRecorder()
+		handler(response, httptest.NewRequest(http.MethodGet, "/", nil))
+		body := response.Body.String()
+		for _, expected := range []string{`src="/assets/branding/logo.svg"`, `href="/assets/branding/favicon.png"`, `data-site-theme="classic"`, `data-color-scheme="system"`} {
+			if !strings.Contains(body, expected) {
+				t.Fatalf("%s workspace missing %q", name, expected)
+			}
+		}
 	}
 }
 func TestEditorAssetsContract(t *testing.T) {
@@ -372,7 +430,17 @@ func TestEditorAssetsContract(t *testing.T) {
 
 func assertEditorAssetContains(t *testing.T, name, expected string) {
 	t.Helper()
-	data, err := os.ReadFile(filepath.Join("assets", name))
+	sources := map[string]string{
+		"editor.js":      filepath.Join("..", "..", "web", "src", "features", "editor", "index.ts"),
+		"serve.js":       filepath.Join("..", "..", "web", "src", "core", "serve-runtime.ts"),
+		"editor.css":     filepath.Join("..", "..", "web", "src", "styles", "editor.css"),
+		"preferences.ts": filepath.Join("..", "..", "web", "src", "core", "preferences.ts"),
+	}
+	path := sources[name]
+	if path == "" {
+		t.Fatalf("unknown frontend source %s", name)
+	}
+	data, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -542,16 +610,16 @@ func TestEditorAPIContract(t *testing.T) {
 }
 
 func TestEditorVendoredAssets(t *testing.T) {
-	bundle, err := os.ReadFile("assets/codemirror.js")
+	bundle, err := os.ReadFile(filepath.Join("..", "site", "assets", "generated", "codemirror.js"))
 	if err != nil || len(bundle) < 100000 {
 		t.Fatalf("bundle missing or unexpectedly small: %d %v", len(bundle), err)
 	}
 	sum := sha256.Sum256(bundle)
-	checksums, err := os.ReadFile("assets/codemirror.checksums.txt")
+	checksums, err := os.ReadFile(filepath.Join("..", "site", "assets", "generated", "codemirror.checksums.txt"))
 	if err != nil || !strings.Contains(string(checksums), hex.EncodeToString(sum[:])) {
 		t.Fatalf("bundle checksum missing: %v", err)
 	}
-	lock, err := os.ReadFile(filepath.Join("..", "..", "package-lock.json"))
+	lock, err := os.ReadFile(filepath.Join("..", "..", "web", "package-lock.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -560,17 +628,17 @@ func TestEditorVendoredAssets(t *testing.T) {
 			t.Fatalf("lockfile missing %s", version)
 		}
 	}
-	if _, err := EmbeddedFiles.ReadFile("assets/codemirror.LICENSE.txt"); err != nil {
+	if _, err := EmbeddedFiles.ReadFile("assets/generated/codemirror.LICENSE.txt"); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := EmbeddedFiles.ReadFile("assets/codemirror.checksums.txt"); err != nil {
+	if _, err := EmbeddedFiles.ReadFile("assets/generated/codemirror.checksums.txt"); err != nil {
 		t.Fatal(err)
 	}
 	makefile, err := os.ReadFile(filepath.Join("..", "..", "Makefile"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, artifact := range []string{"THIRD_PARTY_NOTICES.md", "CODEMIRROR-CHECKSUMS.txt", "cat internal/app/assets/mermaid.LICENSE.txt", "cat internal/app/assets/codemirror.LICENSE.txt"} {
+	for _, artifact := range []string{"THIRD_PARTY_NOTICES.md", "CODEMIRROR-CHECKSUMS.txt", "cat internal/site/assets/generated/mermaid.LICENSE.txt", "cat internal/site/assets/generated/codemirror.LICENSE.txt"} {
 		if !strings.Contains(string(makefile), artifact) {
 			t.Fatalf("release packaging missing %s", artifact)
 		}

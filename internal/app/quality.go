@@ -80,13 +80,14 @@ func parseISODate(value string) (time.Time, bool) {
 }
 
 func hasNumberedProcedure(document *Document) bool {
+	parsed := analyzeMarkdownPath(document.Content, document.SourcePath)
 	for _, section := range document.Sections {
 		if canonicalText(section.Title) != "процедура" && canonicalText(section.Title) != "procedure" {
 			continue
 		}
-		for line := section.StartLine + 1; line < section.EndLine && line < len(document.Lines); line++ {
-			match := listLineRE.FindStringSubmatch(document.Lines[line])
-			if match != nil && len(match) > 2 && match[2][0] >= '0' && match[2][0] <= '9' {
+		for _, list := range parsed.OrderedLists {
+			line := list.Start.Line - 1
+			if line > section.StartLine && line < section.EndLine {
 				return true
 			}
 		}

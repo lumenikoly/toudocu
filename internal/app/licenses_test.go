@@ -38,7 +38,7 @@ func TestLicenseAndThirdPartyNotices(t *testing.T) {
 		t.Errorf("NOTICE must not be part of this distribution model: %v", err)
 	}
 
-	asset, err := EmbeddedFiles.ReadFile("assets/mermaid.LICENSE.txt")
+	asset, err := EmbeddedFiles.ReadFile("assets/generated/mermaid.LICENSE.txt")
 	if err != nil {
 		t.Fatal(err)
 	}

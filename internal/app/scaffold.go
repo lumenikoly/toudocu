@@ -114,7 +114,7 @@ func nextTaskNumber(docsDir, prefix, area string) (int, error) {
 		if readErr != nil {
 			return readErr
 		}
-		for _, heading := range AnalyzeMarkdown(string(content)).Headings {
+		for _, heading := range analyzeMarkdown(string(content)).Headings {
 			if match := workItemHeadingRE.FindStringSubmatch(heading.Title); match != nil {
 				consider(match[1])
 			}
@@ -257,6 +257,9 @@ Not established.
 }
 
 func InitTask(options Options) (TaskInitReport, error) {
+	if err := rejectTranslationRootMutation(options); err != nil {
+		return TaskInitReport{}, err
+	}
 	if info, err := os.Stat(options.InputDirectory); err != nil || !info.IsDir() {
 		return TaskInitReport{}, fmt.Errorf("каталог документации не найден: %s", options.InputDirectory)
 	}
@@ -407,6 +410,9 @@ func renderEntityScaffold(kind, id, title, language, date string) string {
 }
 
 func Scaffold(options Options) (ScaffoldReport, error) {
+	if err := rejectTranslationRootMutation(options); err != nil {
+		return ScaffoldReport{}, err
+	}
 	if info, err := os.Stat(options.InputDirectory); err != nil || !info.IsDir() {
 		return ScaffoldReport{}, fmt.Errorf("каталог документации не найден: %s", options.InputDirectory)
 	}

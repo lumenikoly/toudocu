@@ -15,6 +15,15 @@ const (
 	changesUIPath  = "/changes/"
 )
 
+var changesRouteRegistry = []apiRoute{
+	{Path: changesAPIBase, Methods: []string{http.MethodGet, http.MethodHead}, Handler: (*documentationServer).serveChangesSummary},
+	{Path: changesAPIBase + "/file", Methods: []string{http.MethodGet}, Handler: (*documentationServer).serveChangesFile},
+	{Path: changesAPIBase + "/task", Methods: []string{http.MethodGet}, Handler: (*documentationServer).serveChangesTask},
+	{Path: changesAPIBase + "/content", Methods: []string{http.MethodGet}, Handler: (*documentationServer).serveChangesContent},
+	{Path: changesAPIBase + "/render", Methods: []string{http.MethodGet}, Handler: (*documentationServer).serveChangesRenderedContent},
+	{Path: changesAPIBase + "/screen-map", Methods: []string{http.MethodGet}, Handler: (*documentationServer).serveChangesScreenMap},
+}
+
 func changesOptionsFromRequest(base Options, request *http.Request) Options {
 	options := base
 	query := request.URL.Query()
@@ -110,46 +119,111 @@ func writeChangesAPIError(w http.ResponseWriter, err error) {
 	writeChangesJSON(w, status, map[string]any{"schemaVersion": 1, "diagnostics": []Issue{{Severity: "error", Code: code, Message: err.Error()}}})
 }
 
+func writeChangesDiagnostic(w http.ResponseWriter, status int, code, message string) {
+	writeChangesJSON(w, status, map[string]any{"schemaVersion": 1, "diagnostics": []Issue{{Severity: "error", Code: code, Message: message}}})
+}
+
+func matchAPIRoute(registry []apiRoute, request *http.Request) (*apiRoute, bool) {
+	for index := range registry {
+		route := &registry[index]
+		if request.URL.Path != route.Path && !(route.Path == changesAPIBase && request.URL.Path == changesAPIBase+"/") {
+			continue
+		}
+		for _, method := range route.Methods {
+			if request.Method == method {
+				return route, true
+			}
+		}
+		return route, false
+	}
+	return nil, false
+}
+
 func (s *documentationServer) serveChangesAPI(w http.ResponseWriter, request *http.Request) {
-	if request.Method != http.MethodGet && request.Method != http.MethodHead {
-		w.Header().Set("Allow", "GET, HEAD")
-		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
+	route, methodAllowed := matchAPIRoute(changesRouteRegistry, request)
+	if route == nil {
+		writeChangesDiagnostic(w, http.StatusNotFound, "route_not_found", "Changes API route не найден")
 		return
 	}
+	if !methodAllowed {
+		w.Header().Set("Allow", strings.Join(route.Methods, ", "))
+		writeChangesDiagnostic(w, http.StatusMethodNotAllowed, "method_not_allowed", "Метод не поддерживается")
+		return
+	}
+	route.Handler(s, w, request)
+}
+
+func (s *documentationServer) changesReport(w http.ResponseWriter, request *http.Request) (*ChangeSetReport, bool) {
 	report, err := s.buildChanges(request)
 	if err != nil {
 		writeChangesAPIError(w, err)
+		return nil, false
+	}
+	return report, true
+
+}
+
+func (s *documentationServer) serveChangesSummary(w http.ResponseWriter, request *http.Request) {
+	report, ok := s.changesReport(w, request)
+	if !ok {
 		return
 	}
-	endpoint := strings.TrimPrefix(request.URL.Path, changesAPIBase)
-	switch endpoint {
-	case "", "/":
-		if request.Method == http.MethodHead {
-			w.Header().Set("ETag", `"`+report.ChangeSetDigest+`"`)
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-		w.Header().Set("ETag", `"`+report.ChangeSetDigest+`"`)
-		writeChangesJSON(w, http.StatusOK, report)
-	case "/file":
-		change := findRequestedChange(report, request.URL.Query().Get("path"))
-		if change == nil {
-			writeChangesJSON(w, http.StatusNotFound, map[string]any{"schemaVersion": 1, "diagnostics": []Issue{{Severity: "error", Code: "change-new-version-missing", Message: "Изменение файла не найдено."}}})
-			return
-		}
-		writeChangesJSON(w, http.StatusOK, change)
-	case "/task":
-		if report.TaskImpact == nil {
-			writeChangesJSON(w, http.StatusBadRequest, map[string]any{"schemaVersion": 1, "diagnostics": []Issue{{Severity: "error", Code: "task-not-found", Message: "Параметр task обязателен."}}})
-			return
-		}
-		writeChangesJSON(w, http.StatusOK, report.TaskImpact)
-	case "/content", "/render":
-		s.serveChangedContent(w, request, report, endpoint == "/render")
-	case "/screen-map":
+	etag := `"` + report.ChangeSetDigest + `"`
+	w.Header().Set("ETag", etag)
+	if request.Header.Get("If-None-Match") == etag {
+		w.WriteHeader(http.StatusNotModified)
+		return
+	}
+	if request.Method == http.MethodHead {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	writeChangesJSON(w, http.StatusOK, report)
+}
+
+func (s *documentationServer) serveChangesFile(w http.ResponseWriter, request *http.Request) {
+	report, ok := s.changesReport(w, request)
+	if !ok {
+		return
+	}
+	change := findRequestedChange(report, request.URL.Query().Get("path"))
+	if change == nil {
+		writeChangesDiagnostic(w, http.StatusNotFound, "change-new-version-missing", "Изменение файла не найдено.")
+		return
+	}
+	writeChangesJSON(w, http.StatusOK, change)
+}
+
+func (s *documentationServer) serveChangesTask(w http.ResponseWriter, request *http.Request) {
+	report, ok := s.changesReport(w, request)
+	if !ok {
+		return
+	}
+	if report.TaskImpact == nil {
+		writeChangesDiagnostic(w, http.StatusBadRequest, "task-not-found", "Параметр task или id обязателен.")
+		return
+	}
+	writeChangesJSON(w, http.StatusOK, report.TaskImpact)
+}
+
+func (s *documentationServer) serveChangesContent(w http.ResponseWriter, request *http.Request) {
+	report, ok := s.changesReport(w, request)
+	if ok {
+		s.serveChangedContent(w, request, report, false)
+	}
+}
+
+func (s *documentationServer) serveChangesRenderedContent(w http.ResponseWriter, request *http.Request) {
+	report, ok := s.changesReport(w, request)
+	if ok {
+		s.serveChangedContent(w, request, report, true)
+	}
+}
+
+func (s *documentationServer) serveChangesScreenMap(w http.ResponseWriter, request *http.Request) {
+	report, ok := s.changesReport(w, request)
+	if ok {
 		writeChangesJSON(w, http.StatusOK, buildScreenMapChanges(report))
-	default:
-		http.NotFound(w, request)
 	}
 }
 
@@ -169,7 +243,7 @@ func findRequestedChange(report *ChangeSetReport, requested string) *Documentati
 func (s *documentationServer) serveChangedContent(w http.ResponseWriter, request *http.Request, report *ChangeSetReport, render bool) {
 	change := findRequestedChange(report, request.URL.Query().Get("path"))
 	if change == nil {
-		http.NotFound(w, request)
+		writeChangesDiagnostic(w, http.StatusNotFound, "change-new-version-missing", "Изменение файла не найдено.")
 		return
 	}
 	sideName := request.URL.Query().Get("side")
@@ -181,7 +255,7 @@ func (s *documentationServer) serveChangedContent(w http.ResponseWriter, request
 			path = change.OldPath
 		}
 	} else if sideName != "after" {
-		http.Error(w, "side должен быть before или after", http.StatusBadRequest)
+		writeChangesDiagnostic(w, http.StatusBadRequest, "invalid-change-side", "side должен быть before или after")
 		return
 	}
 	if sideName == "before" && (change.Status == "added" || change.Status == "untracked") || sideName == "after" && change.Status == "deleted" {
@@ -208,11 +282,11 @@ func (s *documentationServer) serveChangedContent(w http.ResponseWriter, request
 	}
 	if render {
 		if strings.ToLower(filepath.Ext(path)) != ".md" {
-			http.Error(w, "Rendered diff поддерживает Markdown", http.StatusUnsupportedMediaType)
+			writeChangesDiagnostic(w, http.StatusUnsupportedMediaType, "render-not-supported", "Rendered diff поддерживает Markdown")
 			return
 		}
-		parsed := AnalyzeMarkdown(string(content))
-		html := RenderMarkdown(parsed, RenderContext{HeadingByLine: parsed.HeadingByLine}, RenderOptions{SkipH1: false, SuppressMetadata: false, InteractiveMermaid: true})
+		parsed := analyzeMarkdown(string(content))
+		html := renderMarkdown(parsed, renderContext{}, renderOptions{SkipH1: false, SuppressMetadata: false, InteractiveMermaid: true})
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		_, _ = fmt.Fprint(w, html)
 		return

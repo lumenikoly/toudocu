@@ -5,7 +5,11 @@
 - Актор: Разработчик
 - Модуль: MOD-SITE
 - Приоритет: Средний
-- Последнее обновление: 2026-08-03
+- Экраны: SC-SITE-HOME, SC-SITE-EDITOR, SC-SITE-DOCUMENT, SC-SITE-API-DOCS
+- Начальный экран: SC-SITE-HOME
+- Конечные экраны: SC-SITE-DOCUMENT, SC-SITE-API-DOCS
+- Разрешить цикл: Да
+- Последнее обновление: 2026-08-05
 
 Разработчик просматривает и редактирует документацию через локальный HTTP-сервер
 и получает обновлённую модель и портал после сохранения или внешнего изменения.
@@ -27,23 +31,30 @@
 1. Разработчик вызывает `docu-docu serve ./docs`.
 2. Docu-docu собирает портал в выходной каталог.
 3. Docu-docu запускает HTTP-сервер на `127.0.0.1:8080` и сообщает адрес.
-4. Разработчик открывает портал или `/_docu-docu/editor/` в браузере.
-5. Editor получает revision, безопасный список файлов и общий реестр шаблонов.
-6. Разработчик открывает исходник, меняет текст, проверяет Markdown preview и
+4. Разработчик открывает портал в браузере.
+5. Если разработчик переходит в `/_docu-docu/api-docs/`, он выбирает Editor или
+   Changes contract, раскрывает operation и при необходимости выполняет
+   безопасный `GET`/`HEAD`; сценарий завершается на `SC-SITE-API-DOCS`.
+6. Иначе разработчик открывает `/_docu-docu/editor/`; Editor получает revision,
+   безопасный список файлов и общий реестр шаблонов.
+7. Разработчик открывает исходник, меняет текст, проверяет Markdown preview и
    positional diagnostics и сохраняет его.
-7. Docu-docu сравнивает SHA-256 digest, атомарно заменяет файл и синхронно
+8. Docu-docu сравнивает SHA-256 digest, атомарно заменяет файл и синхронно
    перестраивает модель, HTML, поиск и diagnostics.
-8. Browser polling получает новую revision: обычная страница перезагружается,
+9. При переходе между canonical HTML-документами portal может заранее получить
+   целевую страницу, проверить текущую revision и заменить document layout без
+   rebuild. Back/Forward, anchors, scroll и keyboard focus продолжают работать.
+10. Browser polling получает новую revision: обычная страница перезагружается,
    чистый editor обновляется, а dirty editor сохраняет текст и показывает
    конфликт.
-9. HTTP-навигация отдаёт последний успешный snapshot и не запускает rebuild.
+11. HTTP-навигация отдаёт последний успешный snapshot и не запускает rebuild.
    Watcher стабилизирует внешние изменения и перестраивает только изменившийся
    documentation root; ручная пересборка canonical portal показывает область
    «модель, HTML и поиск», progress и итог перед перезагрузкой.
-10. Если `serve` запущен из canonical root с `translations.<locale>`, header
+12. Если `serve` запущен из canonical root с `translations.<locale>`, header
    предлагает locale tags. Соответствующий Markdown открывается в выбранном
    locale, а отсутствующая страница — на его homepage.
-11. Разработчик останавливает сервер сочетанием `Ctrl+C`.
+13. Разработчик останавливает сервер сочетанием `Ctrl+C`.
 
 ## Ошибочные сценарии
 
@@ -60,6 +71,8 @@
   server log watcher, но не останавливает listener;
 - ошибка ручной пересборки остаётся на текущей странице, снимает состояние
   загрузки и предлагает повторить действие;
+- ошибка загрузки HTML, неподходящая страница или несовпадающая revision во
+  время мягкого перехода выполняет обычную полную навигацию;
 - translation portal с неуспешной первой сборкой показывает безопасную страницу
   `Unavailable`; последующая ошибка не заменяет last-known-good snapshot;
 - `--host 0.0.0.0` открывает сервер для локальной сети без TLS и авторизации;
@@ -71,7 +84,7 @@
 читает и изменяет только разрешённый workspace внутри docs root. Остальные файлы
 репозитория недоступны. После остановки процесса API исчезает и порт освобождён.
 Locale mount `/_docu-docu/locales/<locale>/` является read-only: он не содержит
-editor, changes, workspace или canonical API.
+editor, changes, workspace, API docs или canonical API.
 
 ## Бизнес-правила
 
@@ -79,6 +92,7 @@ editor, changes, workspace или canonical API.
 
 - [BR-SITE-003](../modules/site.md#br-site-003-dev-сервер-не-раскрывает-исходный-репозиторий) — dev-сервер не раскрывает исходный репозиторий.
 - [BR-SITE-007](../modules/site.md#br-site-007-build-и-serve-имеют-разные-возможности) — build остаётся static read-only, serve предоставляет live workspace.
+- [BR-SITE-010](../modules/site.md#br-site-010-мягкая-навигация-ограничена-canonical-serve-portal) — мягкие переходы не меняют offline/file и locale semantics.
 
 ## Реализация
 
@@ -87,6 +101,8 @@ editor, changes, workspace или canonical API.
 - [CLI и workflow задач](../modules/cli.md)
 - [CLI-контракт](../contracts/cli.md)
 - [HTTP-контракт editor API](../contracts/editor-http.md)
+- [Editor OpenAPI](../contracts/editor.openapi.yaml)
+- [Changes OpenAPI](../contracts/changes.openapi.yaml)
 
 ## Проверка
 
@@ -101,3 +117,8 @@ editor, changes, workspace или canonical API.
 - HTTP 500 при ошибке пересборки без остановки процесса;
 - недоступность исходных файлов репозитория;
 - проверка loopback по умолчанию и сетевого предупреждения.
+- root и nested переходы, Back/Forward, anchors и keyboard navigation;
+- поиск, Mermaid, Screen Map и playable flow после нескольких мягких переходов;
+- полная навигация для editor, changes, locale и external links, а также
+  fallback при network error и revision mismatch;
+- отсутствие eager-запросов search index и Mermaid на обычной странице.

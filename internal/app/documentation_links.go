@@ -13,12 +13,16 @@ import (
 var activeAssetExtensions = map[string]struct{}{".html": {}, ".htm": {}, ".xhtml": {}, ".js": {}, ".mjs": {}, ".cjs": {}, ".svg": {}, ".svgz": {}, ".xml": {}}
 var safeImageExtensions = map[string]struct{}{".png": {}, ".jpg": {}, ".jpeg": {}, ".gif": {}, ".webp": {}, ".avif": {}, ".bmp": {}}
 var reservedOutputAssets = map[string]struct{}{
-	"assets/style.css": {}, "assets/app.js": {}, "assets/search-index.js": {},
+	"assets/manifest.json": {}, "assets/portal.css": {}, "assets/portal.js": {},
 	"assets/screen-map.css": {}, "assets/screen-map.js": {},
 	"assets/playable-flow.css": {}, "assets/playable-flow.js": {},
-	"assets/mermaid.tiny.js": {}, "assets/mermaid.LICENSE.txt": {}, "report.json": {},
+	"assets/mermaid.tiny.js": {}, "assets/mermaid.LICENSE.txt": {}, "assets/favicon.svg": {},
 	"assets/serve.css": {}, "assets/serve.js": {}, "assets/editor.css": {}, "assets/editor.js": {},
+	"assets/changes.css": {}, "assets/changes.js": {}, "assets/api-docs.js": {},
+	"assets/swagger-ui.css": {}, "assets/swagger-ui-bundle.js": {}, "assets/swagger-ui-standalone-preset.js": {},
 	"assets/codemirror.js": {}, "assets/codemirror.LICENSE.txt": {}, "assets/codemirror.checksums.txt": {},
+	"data/search-index.json": {}, "data/navigation.json": {}, "data/relations.json": {},
+	"data/screens.json": {}, "data/use-cases/index.json": {}, "report.json": {},
 }
 
 func splitLinkDestination(destination string) (pathPart, query, hash string) {
@@ -49,6 +53,21 @@ func isExternalDestination(destination string) bool {
 		return true
 	}
 	return destinationHasScheme(destination)
+}
+
+func destinationHasScheme(destination string) bool {
+	for index, character := range destination {
+		if index == 0 && !((character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z')) {
+			return false
+		}
+		if character == ':' {
+			return true
+		}
+		if !((character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '+' || character == '.' || character == '-') {
+			return false
+		}
+	}
+	return false
 }
 
 func allowedExternalProtocol(destination string) bool {

@@ -1,0 +1,20 @@
+:root {
+  --font-body: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-interface: var(--font-body);
+  --font-heading: var(--font-body);
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --surface: var(--bg-card, #ffffff);
+  --surface-muted: var(--surface-soft, #f5f6f8);
+  --surface-raised: var(--surface-strong, #ffffff);
+  --text-primary: var(--text, #172033);
+  --text-secondary: var(--muted, #647084);
+  --border-color: var(--border, #d7dce5);
+  --success-color: #16845b;
+  --warning-color: #a86600;
+  --danger-color: #c43d4f;
+  --focus-color: var(--accent, #5b5bd6);
+  --radius-control: 0.55rem;
+  --shadow-raised: 0 0.75rem 2rem rgb(15 23 42 / 12%);
+  --spacing-unit: 0.25rem;
+  --content-width-token: 76rem;
+}

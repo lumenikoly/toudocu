@@ -23,14 +23,14 @@ workflow для систематического ревью актуальнос
 
 ### Станет
 
-`$use-docu-docu refresh` проверяет весь проект, а `$use-docu-docu refresh diff`
+`$docu-docu refresh` проверяет весь проект, а `$docu-docu refresh diff`
 проверяет staged, unstaged и untracked изменения относительно `HEAD` и
 зависимую документацию. Оба режима могут обновлять, удалять и переименовывать
 документы при однозначной доказательной базе.
 
 ## Область изменения
 
-- `skills/use-docu-docu/`;
+- `skills/docu-docu/`;
 - `internal/app/cli.go`;
 - `skill_templates_test.go`;
 - `integration_test.go`;
@@ -51,7 +51,7 @@ workflow для систематического ревью актуальнос
 
 ## Критерии приёмки
 
-- [x] `AC-01` Skill маршрутизирует `$use-docu-docu refresh` и `$use-docu-docu
+- [x] `AC-01` Skill маршрутизирует `$docu-docu refresh` и `$docu-docu
   refresh diff` в отдельный workflow, не ослабляя эксклюзивность init.
 - [x] `AC-02` Полный режим проверяет всю документацию, а diff-режим использует
   `HEAD`, включает staged, unstaged и untracked файлы и расширяет охват через

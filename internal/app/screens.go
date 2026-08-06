@@ -22,8 +22,9 @@ var safePreviewExtensions = map[string]bool{
 }
 
 type markdownTable struct {
-	Headers []string
-	Rows    []markdownTableRow
+	Headers   []string
+	Rows      []markdownTableRow
+	StartLine int
 }
 
 type markdownTableRow struct {
@@ -40,7 +41,7 @@ func screenTableSection(document *Document, names ...string) (Heading, int, bool
 		if !targets[canonicalText(heading.Title)] {
 			continue
 		}
-		end := len(document.Lines)
+		end := strings.Count(document.Content, "\n") + 1
 		for _, candidate := range document.Headings[index+1:] {
 			if candidate.Level <= heading.Level {
 				end = candidate.Line
@@ -57,21 +58,26 @@ func parseScreenTable(document *Document, sectionNames ...string) (markdownTable
 	if !found {
 		return markdownTable{}, false
 	}
-	start := heading.Line + 1
-	for start < end && strings.TrimSpace(document.Lines[start]) == "" {
-		start++
-	}
-	if start+1 >= end || !strings.Contains(document.Lines[start], "|") || !isTableDelimiter(document.Lines[start+1]) {
-		return markdownTable{}, false
-	}
-	table := markdownTable{Headers: parseTableRow(document.Lines[start])}
-	for line := start + 2; line < end; line++ {
-		if strings.TrimSpace(document.Lines[line]) == "" || !strings.Contains(document.Lines[line], "|") {
-			break
+	for _, candidate := range document.markdownTables {
+		line := candidate.StartLine - 1
+		if line <= heading.Line || line >= end {
+			continue
 		}
-		table.Rows = append(table.Rows, markdownTableRow{Cells: parseTableRow(document.Lines[line]), Line: line + 1})
+		return candidate, true
 	}
-	return table, true
+	return markdownTable{}, false
+}
+
+func markdownTablesFromAnalysis(parsed markdownAnalysis) []markdownTable {
+	result := []markdownTable{}
+	for _, candidate := range parsed.Tables {
+		table := markdownTable{Headers: candidate.Headers, StartLine: candidate.Range.Start.Line}
+		for _, row := range candidate.Rows {
+			table.Rows = append(table.Rows, markdownTableRow{Cells: row.Cells, Line: row.Range.Start.Line})
+		}
+		result = append(result, table)
+	}
+	return result
 }
 
 func canonicalScreenHeader(value string) string {
@@ -218,11 +224,16 @@ func resolveScreenPreview(model *Model, document *Document, value string, line i
 		addDocumentIssue(model, document, newIssue("error", "unsafe-screen-preview", "Preview должен быть обычным файлом, а не symlink.", document.SourcePath, line))
 		return ""
 	}
-	output := ""
-	if ensureInside(model.RootDirectory, resolved) {
-		output = toPosixRelative(model.RootDirectory, resolved)
+	output, insideDocumentation := relativePathInside(model.RootDirectory, resolved)
+	if !insideDocumentation {
+		repositoryPath, insideRepository := relativePathInside(model.RepositoryRoot, resolved)
+		if !insideRepository {
+			addDocumentIssue(model, document, newIssue("error", "unsafe-screen-preview", "Preview выходит за пределы repository-root.", document.SourcePath, line))
+			return ""
+		}
+		output = path.Join("_screen-assets", repositoryPath)
 	} else {
-		output = path.Join("_screen-assets", toPosixRelative(model.RepositoryRoot, resolved))
+		output = path.Clean(output)
 	}
 	model.Assets[output] = resolved
 	return output
@@ -745,8 +756,8 @@ func flowResult(document *Document) string {
 	if document == nil {
 		return ""
 	}
-	if heading, end, found := screenTableSection(document, "Постусловия", "Postconditions"); found {
-		return strings.TrimSpace(stripMarkdown(strings.Join(document.Lines[heading.Line+1:end], "\n")))
+	if section := sectionByNames(document, []string{"Постусловия", "Postconditions"}); section != nil {
+		return strings.TrimSpace(section.Text)
 	}
 	return ""
 }

@@ -79,6 +79,22 @@ func TestChangesForceIncludeAssetsOverridesConfigOnly(t *testing.T) {
 	}
 }
 
+func TestOpenGitChangeSourceResolvesRepositoryAlias(t *testing.T) {
+	root, _ := newChangesRepository(t)
+	alias := filepath.Join(t.TempDir(), "repository")
+	if err := os.Symlink(root, alias); err != nil {
+		t.Skipf("symlink is unavailable: %v", err)
+	}
+
+	source, err := openGitChangeSource(filepath.Join(alias, "docs"), 60)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if source.docsRel != "docs" {
+		t.Fatalf("unexpected documentation path: %q", source.docsRel)
+	}
+}
+
 func TestSourceDiffHunksKeepLocationsAndPatch(t *testing.T) {
 	patch := "diff --git a/docs/a.md b/docs/a.md\n--- a/docs/a.md\n+++ b/docs/a.md\n@@ -2,2 +2,3 @@ heading\n old\n+new\n@@ -20 +21,0 @@ tail\n-gone\n"
 	hunks := parseSourceDiffHunks(patch)

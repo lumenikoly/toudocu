@@ -2,6 +2,9 @@
 /dist/
 /build/
 /example/site/
+/web/node_modules/
+/web/test-results/
+/web/playwright-report/
 *.out
 *.test
 .DS_Store

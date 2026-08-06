@@ -3,9 +3,11 @@ package docudocu
 import (
 	"fmt"
 	"strings"
+
+	markdowncore "docu-docu/internal/markdown"
 )
 
-const mermaidMaxBytes = 50_000
+const mermaidMaxBytes = markdowncore.MermaidMaxBytes
 
 type mermaidBlock struct {
 	OpeningLine int
@@ -26,51 +28,11 @@ func isMermaidFenceInfo(value string) bool {
 }
 
 func mermaidDiagramType(source string) string {
-	first := ""
-	for _, line := range strings.Split(source, "\n") {
-		if strings.TrimSpace(line) != "" {
-			first = strings.TrimSpace(line)
-			break
-		}
-	}
-	if first == "" {
-		return ""
-	}
-	fields := strings.Fields(first)
-	switch fields[0] {
-	case "flowchart":
-		if len(fields) == 1 {
-			return "flowchart"
-		}
-		if len(fields) == 2 && containsString([]string{"TD", "TB", "BT", "LR", "RL"}, fields[1]) {
-			return "flowchart"
-		}
-	case "stateDiagram-v2":
-		if len(fields) == 1 {
-			return "stateDiagram-v2"
-		}
-	case "sequenceDiagram":
-		if len(fields) == 1 {
-			return "sequenceDiagram"
-		}
-	}
-	return ""
+	return markdowncore.CheckMermaid(source).DiagramType
 }
 
 func containsMermaidConfiguration(source string) bool {
-	lines := strings.Split(source, "\n")
-	for _, line := range lines {
-		if strings.HasPrefix(strings.TrimSpace(line), "%%{") {
-			return true
-		}
-	}
-	for _, line := range lines {
-		if strings.TrimSpace(line) == "" {
-			continue
-		}
-		return strings.TrimSpace(line) == "---"
-	}
-	return false
+	return markdowncore.CheckMermaid(source).ConfigurationForbidden
 }
 
 func analyzeMermaidBlock(openingLine, closingLine int, source string, closed bool) mermaidBlock {
@@ -93,7 +55,8 @@ func analyzeMermaidBlock(openingLine, closingLine int, source string, closed boo
 		})
 		return block
 	}
-	if len([]byte(source)) > mermaidMaxBytes {
+	policy := markdowncore.CheckMermaid(source)
+	if policy.TooLarge {
 		block.Problems = append(block.Problems, mermaidProblem{
 			Code:    "mermaid-diagram-too-large",
 			Message: fmt.Sprintf("Размер блока Mermaid превышает %d байт.", mermaidMaxBytes),
@@ -106,7 +69,7 @@ func analyzeMermaidBlock(openingLine, closingLine int, source string, closed boo
 		})
 		return block
 	}
-	block.DiagramType = mermaidDiagramType(source)
+	block.DiagramType = policy.DiagramType
 	if block.DiagramType == "" {
 		block.Problems = append(block.Problems, mermaidProblem{
 			Code:    "unsupported-mermaid-diagram-type",
@@ -117,33 +80,17 @@ func analyzeMermaidBlock(openingLine, closingLine int, source string, closed boo
 }
 
 func scanMermaidBlocks(lines []string) []mermaidBlock {
+	parsed := analyzeMarkdown(strings.Join(lines, "\n"))
+	return mermaidBlocksFromAnalysis(parsed)
+}
+
+func mermaidBlocksFromAnalysis(parsed markdownAnalysis) []mermaidBlock {
 	blocks := []mermaidBlock{}
-	for index := 0; index < len(lines); index++ {
-		marker, fenceLength, info, ok := fenceAt(lines[index])
-		if !ok {
+	for _, block := range parsed.CodeBlocks {
+		if !isMermaidFenceInfo(block.Info) {
 			continue
 		}
-		body := []string{}
-		closingLine := len(lines) - 1
-		closed := false
-		cursor := index + 1
-		for ; cursor < len(lines); cursor++ {
-			closingMarker, closingLength, closingTail, closing := fenceAt(lines[cursor])
-			if closing && closingMarker == marker && closingLength >= fenceLength && closingTail == "" {
-				closingLine = cursor
-				closed = true
-				break
-			}
-			body = append(body, lines[cursor])
-		}
-		if isMermaidFenceInfo(info) {
-			blocks = append(blocks, analyzeMermaidBlock(index, closingLine, strings.Join(body, "\n"), closed))
-		}
-		if closed {
-			index = cursor
-		} else {
-			index = len(lines)
-		}
+		blocks = append(blocks, analyzeMermaidBlock(block.Range.Start.Line-1, block.Range.End.Line-1, block.Source, block.Closed))
 	}
 	return blocks
 }
@@ -215,7 +162,7 @@ func validateFlowReferences(model *Model, document *Document, byID map[string]*D
 func validateMermaidDocuments(model *Model) {
 	byID := documentsByStableID(model)
 	for _, document := range model.Documents {
-		blocks := scanMermaidBlocks(document.Lines)
+		blocks := document.mermaidBlocks
 		if document.Type == "flow" {
 			validateFlowReferences(model, document, byID)
 			if len(blocks) == 0 {

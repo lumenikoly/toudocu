@@ -58,14 +58,28 @@ view.
 docu-docu changes ./docs --format text
 docu-docu changes ./docs --base main --target working-tree --format json
 docu-docu changes ./docs --branch-base main --format markdown
+docu-docu changes ./docs --status modified --module MOD-AUTH --type use-case
+docu-docu changes ./docs --permanent-only --format json
 docu-docu changes file docs/modules/MOD-AUTH.md --base HEAD --target index
 docu-docu task changes TASK-AUTH-015 ./docs --format json
 ```
 
+CLI-фильтры применяются к уже построенному change set:
+
+| Флаг | Отбор |
+|---|---|
+| `--status STATUS` | точное состояние `added`, `untracked`, `modified`, `deleted` или `renamed` |
+| `--module VALUE` | совпадение по path, ID/названию сущности или semantic summary |
+| `--type TYPE` | тип нормализованной сущности, например `module`, `use-case`, `flow`, `screen` или `task` |
+| `--permanent-only` | только classification `permanent-documentation`, без work artifacts, contracts и assets |
+
+Фильтры можно сочетать. Text, JSON и Markdown получают одну отфильтрованную
+сводку; `-o FILE` записывает выбранный формат в отдельный файл.
+
 Exit code `1` означает построенный отчёт с error, `2` — неверный диапазон, `3`
 — Git недоступен/не найден, `4` — внутренняя ошибка.
 
-Workflow `$use-docu-docu translate` использует этот report только как входные
+Workflow `$docu-docu translate` использует этот report только как входные
 данные: skill-параметр `--task` вызывает канонический `task changes` до
 `working-tree`, а `--base` —
 `<base> → working-tree`. Его API-only override включает assets даже если

@@ -42,8 +42,8 @@ func TestProjectChangelogBuildsPortalPageAndSearchEntry(t *testing.T) {
 	if err != nil || !strings.Contains(string(localPage), "This is an ordinary document.") {
 		t.Fatalf("local changelog page: %v\n%s", err, localPage)
 	}
-	search, err := os.ReadFile(filepath.Join(output, "assets", "search-index.js"))
-	if err != nil || !strings.Contains(string(search), "OpenAPI compatibility reports") || !strings.Contains(string(search), projectChangelogOutput) || !strings.Contains(string(search), `"path":"CHANGELOG.md"`) {
+	search, err := os.ReadFile(filepath.Join(output, "data", "search-index.json"))
+	if err != nil || !strings.Contains(string(search), "OpenAPI compatibility reports") || !strings.Contains(string(search), projectChangelogOutput) || !strings.Contains(string(search), `"path": "CHANGELOG.md"`) {
 		t.Fatalf("portal search index: %v\n%s", err, search)
 	}
 	if _, err := generateServeSite(model, Options{OutputDirectory: output}); err != nil {

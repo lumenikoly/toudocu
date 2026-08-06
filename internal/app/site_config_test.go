@@ -327,11 +327,18 @@ func TestGenerateSiteBrandingAndThemeContract(t *testing.T) {
 		`data-site-theme="terminal"`, `data-color-scheme="system"`, `data-accent="rose"`,
 		`data-density="compact"`, `data-content-width="narrow"`,
 		`assets/branding/logo.svg`, `assets/branding/favicon.svg`, `assets/branding/hero.webp`,
-		`data-color-scheme-select`, `data-site-theme-select`, `docu-docu-site-theme`, `&lt;strong&gt;Escaped&lt;/strong&gt;`,
+		`assets/portal.js`, `data-color-scheme-select`, `data-site-theme-select`, `&lt;strong&gt;Escaped&lt;/strong&gt;`,
 	} {
 		if !strings.Contains(html, part) {
 			t.Fatalf("missing %q", part)
 		}
+	}
+	portalSource, err := os.ReadFile(filepath.Join("..", "..", "web", "src", "core", "preferences.ts"))
+	if err != nil || !strings.Contains(string(portalSource), "docu-docu-site-theme") {
+		t.Fatalf("portal theme preference key is missing: %v", err)
+	}
+	if strings.Count(html, `data-theme="`) != 1 {
+		t.Fatalf("portal must render one data-theme attribute, got %d", strings.Count(html, `data-theme="`))
 	}
 	if strings.Contains(html, "<strong>Escaped</strong>") {
 		t.Fatal("footer HTML was not escaped")
@@ -353,7 +360,7 @@ func TestHeroCanBeDisabled(t *testing.T) {
 	writeSiteConfig(t, root, "site:\n  hero:\n    enabled: false\n")
 	model := buildConfigFixture(t, root, docs, "")
 	html := renderDashboard(model)
-	if strings.Contains(html, `class="hero`) || !strings.Contains(html, `class="page-header"`) {
+	if strings.Contains(html, `class="hero dashboard-about"`) || strings.Contains(html, `class="hero has-image dashboard-about"`) || !strings.Contains(html, `class="page-header dashboard-about"`) {
 		t.Fatalf("disabled hero rendered incorrectly")
 	}
 }

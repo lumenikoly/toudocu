@@ -1,0 +1,293 @@
+import { expect, test, type Page } from "@playwright/test";
+import { spawn, spawnSync, type ChildProcess } from "node:child_process";
+import { cpSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { createServer, type Server } from "node:http";
+import { tmpdir } from "node:os";
+import { dirname, extname, join, normalize, resolve, sep } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
+
+function run(command: string, args: string[], cwd = repo): void {
+  const result = spawnSync(command, args, { cwd, encoding: "utf8" });
+  if (result.status !== 0) {
+    throw new Error(`${command} ${args.join(" ")} failed\n${result.stdout}\n${result.stderr}`);
+  }
+}
+
+function mime(path: string): string {
+  return ({ ".html": "text/html", ".css": "text/css", ".js": "text/javascript", ".json": "application/json", ".svg": "image/svg+xml" } as Record<string, string>)[extname(path)] ?? "application/octet-stream";
+}
+
+async function staticServer(root: string, mount = "/docs/"): Promise<{ server: Server; origin: string }> {
+  const server = createServer((request, response) => {
+    const url = new URL(request.url ?? "/", "http://127.0.0.1");
+    if (!url.pathname.startsWith(mount)) {
+      response.writeHead(404).end();
+      return;
+    }
+    const relative = decodeURIComponent(url.pathname.slice(mount.length)) || "index.html";
+    const target = normalize(join(root, relative));
+    if (target !== root && !target.startsWith(`${root}${sep}`)) {
+      response.writeHead(403).end();
+      return;
+    }
+    try {
+      response.setHeader("Content-Type", mime(target));
+      response.end(readFileSync(target));
+    } catch {
+      response.writeHead(404).end();
+    }
+  });
+  await new Promise<void>((resolveListen) => server.listen(0, "127.0.0.1", resolveListen));
+  const address = server.address();
+  if (!address || typeof address === "string") throw new Error("static server did not bind TCP");
+  return { server, origin: `http://127.0.0.1:${address.port}${mount}` };
+}
+
+async function waitForHTTP(url: string): Promise<void> {
+  const deadline = Date.now() + 30_000;
+  while (Date.now() < deadline) {
+    try {
+      if ((await fetch(url)).ok) return;
+    } catch {
+      // The listener is still starting.
+    }
+    await new Promise((resolveWait) => setTimeout(resolveWait, 100));
+  }
+  throw new Error(`timed out waiting for ${url}`);
+}
+
+async function exerciseStaticPortal(page: Page, origin: string): Promise<void> {
+  const responses: string[] = [];
+  page.on("response", (response) => responses.push(response.url()));
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(`${origin}index.html`);
+  await expect(page.locator("main")).toContainText("Docu-docu");
+  await expect(page.locator("script#docu-docu-page")).toHaveCount(1);
+  await expect(page.locator("[data-server-rebuild], a[href^='/_docu-docu/editor'], a[href='/changes/']")).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior)).toBe("auto");
+  await page.locator("[data-global-search]").fill("Core");
+  await expect(page.locator("[data-search-results]")).not.toBeEmpty();
+  await page.locator("[data-color-scheme-select]").selectOption("dark");
+  await expect(page.locator("html")).toHaveAttribute("data-color-scheme", "dark");
+  await page.goto(`${origin}use-cases/UC-CORE-01.html`);
+  await expect(page.locator("main article.doc-content").first()).toContainText("Пользователь");
+  await expect.poll(() => page.locator("script#docu-docu-page").textContent()).toContain("UC-CORE-01");
+  const tabs = page.locator("[data-usecase-tab]");
+  await expect(tabs).toHaveCount(4);
+  await tabs.nth(1).click();
+  await expect(tabs.nth(1)).toHaveAttribute("aria-selected", "true");
+  await tabs.nth(1).press("ArrowRight");
+  await expect(tabs.nth(2)).toHaveAttribute("aria-selected", "true");
+  await expect(tabs.nth(2)).toBeFocused();
+  await page.goto(`${origin}flows/FLOW-CORE-REQUEST.html`);
+  await expect(page.locator("[data-mermaid-diagram] svg").first()).toBeVisible();
+  await expect.poll(() => responses.some((url) => url.endsWith("/assets/portal.css"))).toBe(true);
+  await expect.poll(() => responses.some((url) => url.endsWith("/assets/portal.js"))).toBe(true);
+  await page.goto(`${origin}notes.html`);
+  await expect(page.locator("[data-mermaid-error]")).toBeVisible();
+  await page.goto(`${origin}risks.html`);
+  await expect(page.locator(".risk-status")).toContainText("Незакрытых рисков: 1 из 1");
+  await expect(page.locator(".risk-status-explanations")).toContainText("Открыт — требует решения.");
+}
+
+test("static portal works over HTTP at root and nested paths", async ({ browser }) => {
+  const fixture = mkdtempSync(join(tmpdir(), "docu-docu-static-"));
+  cpSync(join(repo, "example", "docs"), join(fixture, "docs"), { recursive: true });
+  const output = join(fixture, "site");
+  run("go", ["run", "./cmd/docu-docu", "build", join(fixture, "docs"), "--repository-root", fixture, "-o", output, "--clean"]);
+  const notesPage = join(output, "notes.html");
+  writeFileSync(notesPage, readFileSync(notesPage, "utf8").replace("</article>", '<figure data-mermaid-container><pre class="mermaid" data-mermaid-diagram>graph TD\nbroken[</pre><p data-mermaid-error hidden>Не удалось отобразить диаграмму.</p></figure></article>'));
+  for (const mount of ["/", "/docs/"]) {
+    const hosted = await staticServer(output, mount);
+    const page = await browser.newPage();
+    try {
+      await exerciseStaticPortal(page, hosted.origin);
+    } finally {
+      await page.close();
+      await new Promise<void>((resolveClose) => hosted.server.close(() => resolveClose()));
+    }
+  }
+});
+
+test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }) => {
+  const fixture = mkdtempSync(join(tmpdir(), "docu-docu-serve-"));
+  cpSync(join(repo, "example", "docs"), join(fixture, "docs"), { recursive: true });
+  cpSync(join(repo, "example", ".docu-docu"), join(fixture, ".docu-docu"), { recursive: true });
+  run("git", ["init", "-q"], fixture);
+  run("git", ["config", "user.email", "browser@example.invalid"], fixture);
+  run("git", ["config", "user.name", "Browser Test"], fixture);
+  run("git", ["add", "."], fixture);
+  run("git", ["commit", "-qm", "fixture"], fixture);
+  const portServer = createServer();
+  await new Promise<void>((resolveListen) => portServer.listen(0, "127.0.0.1", resolveListen));
+  const address = portServer.address();
+  if (!address || typeof address === "string") throw new Error("failed to reserve port");
+  const port = address.port;
+  await new Promise<void>((resolveClose) => portServer.close(() => resolveClose()));
+  const child: ChildProcess = spawn("go", ["run", "./cmd/docu-docu", "serve", join(fixture, "docs"), "--repository-root", fixture, "-o", join(fixture, "site"), "--host", "127.0.0.1", "--port", String(port)], { cwd: repo, stdio: "pipe" });
+  const origin = `http://127.0.0.1:${port}`;
+  try {
+    await waitForHTTP(origin);
+    await page.route("**/assets/*.js", async (route) => {
+      if (!route.request().url().endsWith("/appearance.js")) await new Promise((resolveDelay) => setTimeout(resolveDelay, 250));
+      await route.continue();
+    });
+    await page.addInitScript(() => {
+      localStorage.setItem("docu-docu-site-theme", "paper");
+      localStorage.setItem("docu-docu-color-scheme", "dark");
+      localStorage.setItem("docu-docu-accent", "violet");
+      requestAnimationFrame(() => {
+        (window as any).__docuDocuFirstFrame = {
+          siteTheme: document.documentElement.dataset.siteTheme,
+          colorScheme: document.documentElement.dataset.colorScheme,
+          theme: document.documentElement.dataset.theme,
+          accent: document.documentElement.dataset.accent,
+        };
+      });
+    });
+    await page.goto(origin);
+    await expect.poll(() => page.evaluate(() => (window as any).__docuDocuFirstFrame)).toEqual({ siteTheme: "paper", colorScheme: "dark", theme: "dark", accent: "violet" });
+    await expect(page.locator("[data-server-rebuild]")).toBeVisible();
+    const portalFonts: Record<string, Record<string, string>> = {};
+    for (const siteTheme of ["classic", "paper", "terminal"]) {
+      await page.locator("[data-site-theme-select]").selectOption(siteTheme);
+      portalFonts[siteTheme] = await page.evaluate(() => {
+        const codeProbe = document.createElement("span");
+        codeProbe.style.fontFamily = "var(--font-mono)";
+        document.body.append(codeProbe);
+        const mono = getComputedStyle(codeProbe).fontFamily;
+        codeProbe.remove();
+        return {
+          body: getComputedStyle(document.body).fontFamily,
+          interface: getComputedStyle(document.querySelector(".site-header")!).fontFamily,
+          heading: getComputedStyle(document.querySelector("h1")!).fontFamily,
+          mono,
+        };
+      });
+    }
+    await page.locator('main a.recommended-entry[href="architecture/overview.html"]').click();
+    await page.waitForURL("**/architecture/overview.html");
+    await expect.poll(() => page.evaluate(() => window.DocuDocuPage?.page.path)).toBe("architecture/overview.html");
+    await expect.poll(() => page.evaluate(() => window.DocuDocuPage?.portal.dataBase)).toBe("../data/");
+    await page.locator("[data-global-search]").fill("Core");
+    await expect(page.locator("[data-search-results]")).not.toBeEmpty();
+    await page.goto(origin);
+    await page.locator("[data-server-rebuild]").click();
+    await expect(page.locator("[data-server-rebuild]")).not.toHaveClass(/is-rebuilding/);
+
+    await page.goto(`${origin}/_docu-docu/editor/`);
+    await expect.poll(() => page.evaluate(() => (window as any).__docuDocuFirstFrame)).toEqual({ siteTheme: "paper", colorScheme: "dark", theme: "dark", accent: "violet" });
+    await page.locator("[data-create-open]").click();
+    await expect(page.locator("[data-create-dialog]")).toBeVisible();
+    await page.locator("[data-create-dialog]").press("Escape");
+    await expect(page.locator("[data-create-dialog]")).not.toBeVisible();
+    await page.locator('[data-file-path="notes.md"]').click();
+    await expect(page.locator("[data-current-path]")).toHaveText("notes.md");
+    for (const siteTheme of ["classic", "paper", "terminal"]) {
+      await page.locator("[data-site-theme-select]").selectOption(siteTheme);
+      const workspaceFonts = await page.evaluate(() => ({
+        body: getComputedStyle(document.querySelector(".preview-pane")!).fontFamily,
+        interface: getComputedStyle(document.querySelector(".workspace-header")!).fontFamily,
+        heading: getComputedStyle(document.querySelector("dialog h2")!).fontFamily,
+        mono: getComputedStyle(document.querySelector(".cm-scroller")!).fontFamily,
+      }));
+      expect(workspaceFonts.body).toBe(portalFonts[siteTheme].body);
+      expect(workspaceFonts.interface).toBe(portalFonts[siteTheme].interface);
+      expect(workspaceFonts.mono).toBe(portalFonts[siteTheme].mono);
+      expect(workspaceFonts.heading).toBe(portalFonts[siteTheme].heading);
+    }
+    const filePath = join(fixture, "docs", "notes.md");
+    const editor = page.locator(".cm-content");
+    await editor.click();
+    await editor.press("Control+End");
+    await editor.pressSequentially("\nBrowser save.");
+    await page.locator("[data-site-theme-select]").selectOption("terminal");
+    await expect(page.locator("[data-dirty-state]")).toBeVisible();
+    await expect(editor).toContainText("Browser save.");
+    await editor.click();
+    await editor.press("Control+z");
+    await expect(editor).not.toContainText("Browser save.");
+    await editor.press("Control+Shift+z");
+    await expect(editor).toContainText("Browser save.");
+    await page.locator("[data-save]").click();
+    await expect(page.locator("[data-dirty-state]")).toBeHidden();
+    writeFileSync(filePath, `${readFileSync(filePath, "utf8")}\nExternal edit.\n`);
+    await editor.click();
+    await editor.press("Control+End");
+    await editor.pressSequentially("\nBrowser conflict.");
+    await page.locator("[data-save]").click();
+    await expect(page.locator("[data-conflict]")).toBeVisible();
+
+    await page.route("**/_docu-docu/api/changes?**", async (route) => {
+      const response = await route.fetch();
+      const report = await response.json();
+      for (const change of report.changes ?? []) {
+        if (change.path.endsWith("notes.md")) {
+          change.semanticDiffAvailable = false;
+          change.semanticChanges = [];
+          change.diagnostics = [...(change.diagnostics ?? []), { severity: "warning", code: "semantic-unavailable", message: "semantic unavailable" }];
+        }
+      }
+      await route.fulfill({ response, json: report });
+    });
+    await page.route("**/_docu-docu/api/changes/render?**", (route) => route.fulfill({ status: 503, body: "render unavailable" }));
+    await page.goto(`${origin}/changes/`);
+    await expect.poll(() => page.evaluate(() => (window as any).__docuDocuFirstFrame)).toEqual({ siteTheme: "paper", colorScheme: "dark", theme: "dark", accent: "violet" });
+    await expect(page.locator("[data-file-list]")).toBeVisible();
+    await expect(page.locator("body")).toContainText("notes.md");
+    await page.locator('[data-file-list] [data-path$="notes.md"]').click();
+    await expect(page.locator('[data-tab="semantic"]')).toHaveCount(0);
+    await page.locator('[data-tab="rendered"]').click();
+    await expect(page.locator("[data-tab-panel]")).toContainText("Rendered diff недоступен");
+    await page.locator('[data-tab="source"]').click();
+    await expect(page.locator("[data-source-view]")).toContainText("External edit");
+    await page.locator("[data-site-theme-select]").selectOption("terminal");
+    await expect(page.locator('[data-tab="source"]')).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("[data-source-view]")).toContainText("External edit");
+
+    const fallbackContext = await page.context().browser()!.newContext();
+    const fallbackPage = await fallbackContext.newPage();
+    try {
+      await fallbackPage.emulateMedia({ colorScheme: "dark" });
+      await fallbackPage.addInitScript(() => {
+        localStorage.setItem("docu-docu-site-theme", "invalid-theme");
+        localStorage.setItem("docu-docu-color-scheme", "system");
+      });
+      await fallbackPage.goto(origin);
+      await expect(fallbackPage.locator("html")).toHaveAttribute("data-site-theme", "classic");
+      await expect(fallbackPage.locator("html")).toHaveAttribute("data-color-scheme", "system");
+      await expect(fallbackPage.locator("html")).toHaveAttribute("data-theme", "dark");
+    } finally {
+      await fallbackContext.close();
+    }
+
+    const privateContext = await page.context().browser()!.newContext();
+    const privatePage = await privateContext.newPage();
+    try {
+      await privatePage.emulateMedia({ colorScheme: "dark" });
+      await privatePage.addInitScript(() => {
+        Object.defineProperty(window, "localStorage", { configurable: true, get() { throw new Error("storage unavailable"); } });
+      });
+      await privatePage.goto(`${origin}/_docu-docu/editor/`);
+      await expect(privatePage.locator("html")).toHaveAttribute("data-site-theme", "classic");
+      await expect(privatePage.locator("html")).toHaveAttribute("data-color-scheme", "system");
+      await expect(privatePage.locator("html")).toHaveAttribute("data-theme", "dark");
+      await expect(privatePage.locator("[data-file-tree]")).toBeVisible();
+    } finally {
+      await privateContext.close();
+    }
+
+    await page.route("**/_docu-docu/editor/?disabled=1", async (route) => {
+      const response = await route.fetch();
+      const body = (await response.text()).replace('"editor":true', '"editor":false');
+      await route.fulfill({ response, body });
+    });
+    await page.goto(`${origin}/_docu-docu/editor/?disabled=1`);
+    await expect(page.locator('[data-ui-state="capability-unavailable"]')).toContainText("Редактор недоступен");
+  } finally {
+    child.kill("SIGTERM");
+    await new Promise<void>((resolveExit) => child.once("exit", () => resolveExit()));
+  }
+});

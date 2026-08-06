@@ -2,7 +2,11 @@
 
 Страница перечисляет реализованные возможности Docu-docu и указывает, где
 зафиксирован их подробный контракт. Источником истины остаются Markdown-файлы:
-портал и JSON не редактируют их и не хранят отдельную модель.
+JSON и результат `build` не хранят отдельную модель и не редактируют исходники;
+только `serve` добавляет явные операции записи в canonical workspace.
+
+Быстрые точки входа: [единая карта API и программных интерфейсов](api.md) и
+[интерактивная Screen Map](../screens/).
 
 ## CLI
 
@@ -19,12 +23,17 @@ Docu-docu поставляется одним Go-бинарником без в�
 | Строгая проверка | `docu-docu check ./docs --strict` | warning также даёт exit code `1` |
 | Сборка портала | `docu-docu build ./docs` | автономный HTML и `report.json` |
 | Локальный workspace | `docu-docu serve ./docs` | view/edit, editor API, watcher и live rebuild |
+| Просмотр изменений | `docu-docu changes ./docs` | text, Markdown или `ChangeSetReport` v1 |
+| Изменение одного файла | `docu-docu changes file PATH ./docs` | detail выбранного изменённого path |
 | Поиск документов | `docu-docu search "query" ./docs` | `SearchReport` по свежим Markdown |
 | Создание задачи | `docu-docu task init ./docs --area AREA --title TITLE --type TYPE` | новый Draft и `TaskInitReport` |
-| Создание сущности | `docu-docu scaffold module|use-case|flow|screen|decision ID ./docs --title TITLE` | атомарный scaffold и `ScaffoldReport` |
+| Создание сущности | `docu-docu scaffold module|use-case|flow|screen|decision|standard|runbook ID ./docs --title TITLE` | атомарный scaffold и `ScaffoldReport` |
 | Проверка готовности | `docu-docu task ready TASK-ID ./docs` | read-only `TaskReadyReport` |
 | Контекст задачи | `docu-docu task context TASK-ID ./docs` | read-only `TaskContextReport` |
 | Проверка задачи | `docu-docu task verify TASK-ID ./docs --dry-run|--run` | план или выполнение команд и `TaskVerifyReport` |
+| Изменения задачи | `docu-docu task changes TASK-ID ./docs` | task-scoped change report и impact diagnostics |
+| Архивирование задачи | `docu-docu task archive TASK-ID ./docs` | перемещение терминальной задачи в годовой архив |
+| Восстановление задачи | `docu-docu task restore TASK-ID ./docs` | возврат задачи из годового архива |
 | Версия | `docu-docu version` | версия генератора |
 
 Сборка требует явного `docu-docu build ./docs`; путь без команды отклоняется.
@@ -33,29 +42,47 @@ Docu-docu поставляется одним Go-бинарником без в�
 work item. Параметры и exit codes
 определены в [CLI-контракте](../contracts/cli.md).
 
+Команды `changes` поддерживают фильтры `--status`, `--module`, `--type` и
+`--permanent-only`. Последний оставляет только постоянную документацию и
+исключает work artifacts, contracts и assets.
+
 ## Публичный Go API
 
 Корневой пакет `docu-docu` экспортирует типизированный фасад над CLI,
-документной моделью, Markdown-рендерером, генератором портала, поиском, task
+документной моделью, генератором портала, поиском, task
 workflow и Git-backed changes. Прямые вызовы возвращают модели и отчёты без
 обязательной сериализации или запуска отдельного процесса.
 
 Канонический удалённый module path пока не опубликован. Текущий import path
-предназначен для исходного модуля или явного локального `replace`; операции,
-побочные эффекты и совместимость перечислены в
-[Go API-контракте](../contracts/go-api.md).
+предназначен для исходного модуля или явного локального `replace`. Фактическую
+публичную поверхность определяют объявления и package documentation в
+корневом `api.go`; до публикации модуля отдельные гарантии совместимости для
+внешних потребителей не заявлены.
 
 ## Skill workflows актуализации
 
-Устанавливаемый `use-docu-docu` предоставляет изменяющие agent workflows,
+Устанавливаемый `docu-docu` предоставляет изменяющие agent workflows,
 которые не входят в Go CLI: `init`, `refresh`, `refresh diff` и `translate`.
 
-- `$use-docu-docu refresh` сверяет весь набор исходных Markdown-документов с
+- `$docu-docu refresh` сверяет весь набор исходных Markdown-документов с
   текущим кодом, тестами, публичными интерфейсами, schemas, configuration, CI,
   требованиями и решениями;
-- `$use-docu-docu refresh diff` начинает со staged, unstaged и untracked файлов
+- `$docu-docu refresh diff` начинает со staged, unstaged и untracked файлов
   относительно `HEAD` и добавляет зависимые документы по ссылкам, stable ID,
-  task relationships и изменённому публичному поведению.
+  task relationships и изменённому публичному поведению;
+- `$docu-docu translate <locale> --all-stale` поддерживает полный файловый
+  паритет reader-facing Markdown, включая work items, notes и ideas. Locale root
+  остаётся read-only и не используется task workflow или editor-записью. При
+  обычной работе агент исключает все translation roots из поиска,
+  инвентаризации, semantic review, task context и анализа реализации. Явный
+  перевод или запрос проверить, найти, собрать, запустить либо изучить
+  конкретную локаль открывает только выбранный root и минимально необходимую
+  source/target-пару; проверка паритета начинается с путей, хешей и структурных
+  отчётов. Локализованные metadata keys и status values допустимы только при
+  сохранении нормализованной семантики: например, `Готово` (`done`) переводится
+  как `Completed` или `Done`, а `Готово к работе` (`planned`) — как `Ready`.
+  Перед обновлением manifest workflow сравнивает status kinds и вычисленное
+  состояние roadmap в JSON-моделях обеих локалей.
 
 Refresh обновляет только evidence-backed источники, не меняет код ради
 согласования с текстом и не выполняет init. Даты меняются только вместе с
@@ -64,7 +91,13 @@ Refresh обновляет только evidence-backed источники, не
 После semantic и structural gates пересобираются только tracked или явно
 предписанные проектом portals.
 
+Полные пользовательские последовательности `init`, `refresh`, `refresh diff` и
+`translate` описаны в [руководстве по agent-workflows](../guides/agent-workflows.md).
+
 ## Документная модель
+
+Единая таблица назначения, границ и правил выбора находится в
+[справочнике видов документов](document-types.md).
 
 Минимальная документация содержит `index.md` и карту
 `architecture/overview.md` с типом `Architecture Overview`. Каждый другой
@@ -100,16 +133,19 @@ gate, а schema v1 сохраняет `documents[].type: "architecture"`.
 
 ## Markdown и диаграммы
 
-Поддерживаемое безопасное подмножество включает:
+Goldmark `v1.8.5` разбирает CommonMark и только явно включённые расширения:
 
 - заголовки и автоматические уникальные anchors;
 - абзацы, выделение, ссылки, изображения и цитаты;
 - маркированные, нумерованные и task-списки;
 - таблицы, inline code и fenced code blocks;
+- strikethrough и literal HTTP(S), `www` и email autolinks;
 - Mermaid `flowchart`, `stateDiagram-v2` и `sequenceDiagram`.
 
-Произвольный HTML экранируется. Mermaid Tiny встроена локально, работает через
-`file://`, следует светлой или тёмной теме и всегда запускается с
+Raw HTML и ведущий завершённый front matter создают errors; safe preview и
+rendered diff показывают их только как escaped source. Attributes, footnotes,
+definition lists и typographer не включены. Mermaid Tiny встроена локально, работает на
+static HTTP hosting, следует светлой или тёмной теме и всегда запускается с
 `securityLevel: strict`. Front matter, Mermaid directives и блоки более
 50 000 UTF-8 байт отклоняются.
 
@@ -126,7 +162,11 @@ gate, а schema v1 сохраняет `documents[].type: "architecture"`.
 - отдельную страницу «Журнал изменений проекта» из корневого `CHANGELOG.md`,
   если это обычный читаемый файл; она участвует в portal search, но не входит в
   `report.json`, task context, semantic model или editor workspace;
-- 3–5 рекомендуемых точек входа и единый фильтруемый полный каталог;
+- спокойную главную сводку: сведения о проекте, следующий результат, числа
+  активных задач, блокеров и открытых рисков и до пяти рекомендуемых точек
+  входа; подробные списки доступны через поиск, навигацию и каталоги разделов;
+- содержательную часть `index.md` без повторения H1 и структурных metadata в
+  постоянно видимом подробном обзоре, включая печатную версию;
 - оглавление и сворачиваемые разделы документа с чистыми accessible names;
 - копирование названия и repository-relative пути исходного Markdown-документа
   для передачи контекста агенту;
@@ -138,8 +178,9 @@ gate, а schema v1 сохраняет `documents[].type: "architecture"`.
 - светлую и тёмную темы, печатную версию и адаптивный sidebar;
 - управление Mermaid-диаграммой: zoom, pan, fit и fullscreen.
 
-Все внутренние URL относительны. Портал не требует сервера, CDN, Node.js,
-браузерного расширения или сетевого доступа.
+Все внутренние URL относительны. Портал не требует Go backend, CDN, Node.js или
+браузерного расширения, но публикуется через HTTP(S) и может загружать
+собственные static JSON resources из output.
 
 ## Live workspace serve
 
@@ -147,7 +188,10 @@ gate, а schema v1 сохраняет `documents[].type: "architecture"`.
 исходников, path/dirty/save toolbar, CodeMirror, вкладки Editor/Preview/Split и
 positional diagnostics. Markdown preview использует существующий safe renderer;
 JSON получает syntax и hotspots diagnostics, а произвольный YAML — только
-доступные Docu-docu diagnostics без выдуманной общей schema.
+доступные Docu-docu diagnostics без выдуманной общей schema. Исключение —
+`contracts/**/*.openapi.{yaml,yml,json}`: эти файлы получают OpenAPI 3.0/3.1
+root, operation, operationId, path-parameter и internal `$ref` validation с
+line/column; external references не загружаются.
 
 Save использует SHA-256 CAS и atomic replace. После save/create модель, HTML,
 search и diagnostics перестраиваются синхронно; watcher проверяет внешние
@@ -155,9 +199,14 @@ search и diagnostics перестраиваются синхронно; watcher
 и dirty conflict без потери local text. `Ctrl`/`Cmd`+`S`, leave guard,
 diagnostic navigation и mobile drawer входят в тот же UI.
 
-Browser create и CLI-команды `task init`/`scaffold` используют один ordered
-template registry. Editor API описан в
-[отдельном schema-v1 контракте](../contracts/editor-http.md).
+Создание документа в браузере и команды `task init`/`scaffold` используют один
+реестр шаблонов. Wire-контракт Editor API находится в
+[OpenAPI](../contracts/editor.openapi.yaml), а гарантии записи и границы
+workspace — в [поведенческом описании](../contracts/editor-http.md).
+
+Canonical `serve` также публикует `/_docu-docu/api-docs/`: vendored Swagger UI
+5.32.12 переключает Editor/Changes specs, не использует CDN и разрешает Try it
+out только для `GET`/`HEAD`. Static и translation portals UI не получают.
 
 ## Процессы и пользовательские сценарии
 
@@ -182,6 +231,10 @@ template registry. Editor API описан в
 «Проиграть» и «Связи»; отдельная страница `flows/UC-*.html` не создаётся.
 
 ## Карта экранов
+
+[Открыть собственную интерактивную Screen Map](../screens/). Она показывает
+высокоуровневую продуктовую навигацию и намеренно не перечисляет каждый
+generated route.
 
 При наличии `screens/SC-*.md` генерируются:
 
@@ -285,8 +338,7 @@ Timeout завершает дерево процессов, а stdout и stderr 
   canonical workspace paths внутри docs root; listener слушает loopback по
   умолчанию и не использует кеширование;
 - ручная пересборка `serve` принимает только служебный `POST` с заголовком
-  действия; статический портал через `file://` или другой HTTP-сервер кнопку не
-  показывает;
+  действия; static build кнопку и endpoint не содержит;
 - ошибка отдельной Screen Map или проигрываемого сценария не лишает доступа к остальной
   документации;
 - editor writes требуют JSON/action/same-origin guards, лимиты 3 MiB/2 MiB и не

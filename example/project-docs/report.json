@@ -4,9 +4,9 @@
     "name": "Docu-docu",
     "version": "0.0.1"
   },
-  "generatedAt": "2026-08-03T18:51:52.153210791Z",
+  "generatedAt": "2026-08-06T14:21:04.17059179Z",
   "sourceDirectory": "docs",
-  "staleDays": 90,
+  "staleDays": 0,
   "project": {
     "title": "Service Desk Showcase",
     "description": "Демонстрационный проект показывает возможности Docu-docu на документации небольшого сервиса обращений: от модели требований и задач до интерактивной карты экранов и проигрываемых сценариев.",
@@ -20,7 +20,7 @@
     "version": "0.1.0",
     "owner": "Команда проекта",
     "updated": "2026-07-30",
-    "summary": "Портал показывает документы всех основных типов, раздельные каталоги UC- и FLOW- , автономные Mermaid-диаграммы, карту экранов с пятью видами переходов, два проигрываемых сценария, raster preview, fallback без изображения, hotspots и traceability рабочей задачи. Активные задачи, блокеры и следующий результат автоматически выводятся в HTML-представлении из work items и roadmap."
+    "summary": "Портал показывает документы всех основных типов, раздельные каталоги UC-* и FLOW-*, автономные Mermaid-диаграммы, карту экранов с пятью видами переходов, два проигрываемых сценария, raster preview, fallback без изображения, hotspots и traceability рабочей задачи. Активные задачи, блокеры и следующий результат автоматически выводятся в HTML-представлении из work items и roadmap."
   },
   "currentStatus": {
     "activeWork": [
@@ -123,7 +123,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-03T18:02:41.691871371Z",
+      "updatedAt": "2026-08-04T17:37:50.265414496Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -291,7 +291,7 @@
         "remaining": 2,
         "percent": 50
       },
-      "updatedAt": "2026-07-29T13:25:09.584045203Z",
+      "updatedAt": "2026-08-04T17:37:45.174160717Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -321,7 +321,7 @@
         "remaining": 2,
         "percent": 0
       },
-      "updatedAt": "2026-07-25T20:07:08.032515405Z",
+      "updatedAt": "2026-08-04T17:37:43.548130706Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -351,7 +351,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-29T13:25:09.592045285Z",
+      "updatedAt": "2026-08-04T17:37:45.173732382Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -381,7 +381,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-29T13:25:09.593045296Z",
+      "updatedAt": "2026-08-04T17:37:45.174051391Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -415,7 +415,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T08:58:45.592910174Z",
+      "updatedAt": "2026-08-04T17:37:47.499939031Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -487,7 +487,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T08:58:45.594837926Z",
+      "updatedAt": "2026-08-04T17:37:47.500047183Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -541,7 +541,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T09:04:25.008537822Z",
+      "updatedAt": "2026-08-04T17:37:47.500156968Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -594,7 +594,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T08:58:45.592910174Z",
+      "updatedAt": "2026-08-04T17:37:47.500291357Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -675,7 +675,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T08:58:45.592910174Z",
+      "updatedAt": "2026-08-04T17:37:47.500401554Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -738,7 +738,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-31T08:58:45.595372627Z",
+      "updatedAt": "2026-08-04T17:37:47.500521218Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -775,7 +775,7 @@
       "type": "contract",
       "sectionType": "contracts",
       "title": "API-контракт",
-      "description": "REST-контракт между Web Frontend и Backend API. Все ответы имеют Content-Type: application/json ; время передаётся в UTC по RFC 3339.",
+      "description": "REST-контракт между Web Frontend и Backend API. Все ответы имеют Content-Type: application/json; время передаётся в UTC по RFC 3339.",
       "metadata": {
         "id": "CON-CORE-API"
       },
@@ -791,7 +791,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-29T18:19:48.356890411Z",
+      "updatedAt": "2026-08-04T17:37:45.976967682Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -851,7 +851,7 @@
       "type": "flow",
       "sectionType": "flows",
       "title": "FLOW-CORE-ENTRY: Маршрутизация с главной",
-      "description": "Переиспользуемый процесс показывает развилку между внутренним сценарием создания обращения и переходом во внешний центр поддержки. Связь с двумя UC- демонстрирует двустороннюю модель процессов.",
+      "description": "Переиспользуемый процесс показывает развилку между внутренним сценарием создания обращения и переходом во внешний центр поддержки. Связь с двумя UC-* демонстрирует двустороннюю модель процессов.",
       "metadata": {
         "id": "FLOW-CORE-ENTRY",
         "module": "MOD-CORE",
@@ -914,7 +914,7 @@
       "type": "flow",
       "sectionType": "flows",
       "title": "FLOW-CORE-REQUEST: Создание запроса",
-      "description": "Диаграммы визуализируют основной сценарий и состояния формы. Источником переходов для Screen Map остаются документы screens/SC- .md .",
+      "description": "Диаграммы визуализируют основной сценарий и состояния формы. Источником переходов для Screen Map остаются документы screens/SC-*.md.",
       "metadata": {
         "id": "FLOW-CORE-REQUEST",
         "module": "MOD-CORE",
@@ -986,7 +986,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-25T20:07:08.140516562Z",
+      "updatedAt": "2026-08-04T17:37:43.547309531Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1123,7 +1123,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-07-29T18:18:48.009211105Z",
+      "updatedAt": "2026-08-04T17:37:45.977879804Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1867,31 +1867,41 @@
             "line": 42,
             "indent": 0,
             "completed": false,
-            "text": "AC-01 С главного экрана можно открыть новый запрос."
+            "text": "AC-01 С главного экрана можно открыть новый запрос.",
+            "headingId": "критерии-приёмки",
+            "headingTitle": "Критерии приёмки"
           },
           {
             "line": 43,
             "indent": 0,
             "completed": false,
-            "text": "AC-02 Из запроса можно открыть подсказку."
+            "text": "AC-02 Из запроса можно открыть подсказку.",
+            "headingId": "критерии-приёмки",
+            "headingTitle": "Критерии приёмки"
           },
           {
             "line": 44,
             "indent": 0,
             "completed": false,
-            "text": "AC-03 Подсказку можно закрыть с возвратом к запросу."
+            "text": "AC-03 Подсказку можно закрыть с возвратом к запросу.",
+            "headingId": "критерии-приёмки",
+            "headingTitle": "Критерии приёмки"
           },
           {
             "line": 45,
             "indent": 0,
             "completed": false,
-            "text": "AC-04 Корректный запрос открывает результат."
+            "text": "AC-04 Корректный запрос открывает результат.",
+            "headingId": "критерии-приёмки",
+            "headingTitle": "Критерии приёмки"
           },
           {
             "line": 46,
             "indent": 0,
             "completed": false,
-            "text": "AC-05 Некорректный запрос остаётся на текущем экране с ошибкой."
+            "text": "AC-05 Некорректный запрос остаётся на текущем экране с ошибкой.",
+            "headingId": "критерии-приёмки",
+            "headingTitle": "Критерии приёмки"
           }
         ],
         "verificationMatrix": [
@@ -1972,49 +1982,49 @@
             "commands": [
               "test -f ./docs/screens/SC-CORE-HOME.md"
             ],
-            "line": 51
+            "line": 50
           },
           {
             "target": "AC-02",
             "commands": [
               "test -f ./docs/screens/SC-CORE-HELP.md"
             ],
-            "line": 53
+            "line": 52
           },
           {
             "target": "AC-03",
             "commands": [
               "test -f ./docs/screens/SC-CORE-HELP.md"
             ],
-            "line": 55
+            "line": 54
           },
           {
             "target": "AC-04",
             "commands": [
               "test -f ./docs/screens/SC-CORE-RESULT.md"
             ],
-            "line": 57
+            "line": 56
           },
           {
             "target": "AC-05",
             "commands": [
               "test -f ./docs/contracts/api.md"
             ],
-            "line": 59
+            "line": 58
           },
           {
             "target": "ALL",
             "commands": [
               "go test ./..."
             ],
-            "line": 60
+            "line": 59
           },
           {
             "target": "DOCS",
             "commands": [
               "go run ./cmd/docu-docu check ./example/docs --repository-root ./example"
             ],
-            "line": 61
+            "line": 60
           }
         ],
         "repositoryPaths": [
@@ -2026,7 +2036,7 @@
         "behaviorChange": "Было Основной экранный сценарий не был связан с проверяемыми переходами. Станет Основной сценарий проходит по документированным переходам и состояниям.",
         "before": "Основной экранный сценарий не был связан с проверяемыми переходами.",
         "after": "Основной сценарий проходит по документированным переходам и состояниям.",
-        "outOfScope": "реализация внешнего Support Center; изменение публичного API за пределами CON-CORE-API ; хранение реальных пользовательских данных.",
+        "outOfScope": "реализация внешнего Support Center; изменение публичного API за пределами CON-CORE-API; хранение реальных пользовательских данных.",
         "plan": "Реализовать переход с главной страницы к форме. Добавить подсказку и возврат к форме. Обработать успешную и ошибочную отправку. Связать критерии с переходами и проверками.",
         "documentationImpact": "Обновляются use case, экранные переходы, flowchart и API-контракт ошибок.",
         "documentationPaths": []
@@ -2064,7 +2074,9 @@
             "line": 19,
             "indent": 0,
             "completed": false,
-            "text": "AC-01 Внешний переход ведёт на SC-SUPPORT-PORTAL."
+            "text": "AC-01 Внешний переход ведёт на SC-SUPPORT-PORTAL.",
+            "headingId": "критерии-приёмки",
+            "headingTitle": "Критерии приёмки"
           }
         ],
         "verificationMatrix": [
@@ -2345,7 +2357,7 @@
         "TR-CORE-004",
         "TR-CORE-005"
       ],
-      "result": "При успехе обращение сохранено со статусом new ; при ошибке новая запись отсутствует.",
+      "result": "При успехе обращение сохранено со статусом new; при ошибке новая запись отсутствует.",
       "valid": true,
       "issueCodes": []
     },

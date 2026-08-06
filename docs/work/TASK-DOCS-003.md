@@ -10,7 +10,7 @@
 
 ## Результат
 
-Пользователь явно подключает Docu-docu к проекту через `$use-docu-docu init`;
+Пользователь явно подключает Docu-docu к проекту через `$docu-docu init`;
 skill создаёт минимальную документацию при необходимости и безопасно
 устанавливает ограниченные правила использования в `AGENTS.md`.
 
@@ -23,14 +23,14 @@ Skill не имел отдельного onboarding-вызова, а workflow б
 
 ### Станет
 
-Только явный `$use-docu-docu init` выполняет preflight, создаёт отсутствующий
+Только явный `$docu-docu init` выполняет preflight, создаёт отсутствующий
 `docs/index.md`, устанавливает управляемый блок `AGENTS.md` и запускает
 структурную проверку. Обычные вызовы не меняют project instructions, а новые
 `TASK-*` создаются только для существенной работы.
 
 ## Область изменения
 
-- `skills/use-docu-docu/`;
+- `skills/docu-docu/`;
 - `skill_templates_test.go`;
 - `README.md`;
 - `CHANGELOG.md`;
@@ -46,7 +46,7 @@ Skill не имел отдельного onboarding-вызова, а workflow б
 
 ## Критерии приёмки
 
-- [x] `AC-01` Skill трактует `$use-docu-docu init` как единственный явный
+- [x] `AC-01` Skill трактует `$docu-docu init` как единственный явный
   onboarding-вызов с read-only preflight, минимальным `index.md`,
   управляемым блоком `AGENTS.md` и финальным check.
 - [x] `AC-02` Русский и английский блоки используют одинаковые стабильные
@@ -74,7 +74,7 @@ Skill не имел отдельного onboarding-вызова, а workflow б
 
 ## Влияние на документацию
 
-Обновлены `skills/use-docu-docu/`, `README.md`, `CHANGELOG.md`,
+Обновлены `skills/docu-docu/`, `README.md`, `CHANGELOG.md`,
 `docs/guides/work-items.md` и `skill_templates_test.go`. Публичные Go API, CLI
 и JSON schema не меняются; generated portals не редактируются.
 

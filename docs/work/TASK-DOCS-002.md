@@ -42,7 +42,7 @@ typed validation без новых глобально обязательных �
 - `internal/app/task_verify.go`;
 - `internal/app/site.go`;
 - `quality_test.go`;
-- `skills/use-docu-docu/`;
+- `skills/docu-docu/`;
 - `docs/`;
 - `AGENTS.md`.
 
@@ -88,7 +88,7 @@ typed validation без новых глобально обязательных �
 Обновлены `README.md`, `CHANGELOG.md`, `docs/index.md`, `docs/modules/model.md`,
 `docs/use-cases/check-documentation.md`, `docs/contracts/cli.md`,
 `docs/reference/features.md`, `docs/guides/work-items.md` и
-`skills/use-docu-docu/SKILL.md`; добавлены руководство
+`skills/docu-docu/SKILL.md`; добавлены руководство
 `docs/guides/quality-runbooks.md`, исходный раздел `docs/quality/`, обновлённая
 reference-модель skill и восемь RU/EN skill-шаблонов standards, runbooks и их
 manifest. Сгенерированные порталы остаются производными от Markdown.

@@ -2,10 +2,42 @@
 
 ## 0.0.1
 
+- Markdown полностью переведён на закреплённый Goldmark `v1.8.5`: один
+  CommonMark/GFM AST обслуживает model, validation, portal, editor и changes.
+  Включены только tables, task lists, strikethrough и literal autolinks.
+- Raw HTML и ведущий завершённый front matter теперь являются policy errors;
+  preview и rendered diff сохраняют безопасное escaped представление. Из
+  публичного Go facade удалены низкоуровневые parser/renderer types и функции;
+  высокоуровневые операции и JSON schema v1 сохранены.
+- Frontend source выделен в независимый TypeScript/CSS workspace `web/`;
+  детерминированные generated assets фиксируются в репозитории, проверяются CI
+  и встраиваются в один Go-бинарник. Node.js остаётся только build toolchain.
+- `build` создаёт backend-independent read-only портал для обычного HTTP(S)
+  static hosting, включая вложенный URL-путь. Go project model остаётся
+  единственным источником HTML, bootstrap и static JSON.
+- Static и serve runtime технически разделены: editor, changes, rebuild clients,
+  API URL, CodeMirror и Swagger UI отсутствуют в static output и добавляются
+  только явными serve capabilities.
+- Migration: прямое открытие `index.html` с диска больше не является
+  гарантированным контрактом. Для локальной работы используйте
+  `docu-docu serve`; для публикации — `docu-docu build` и static HTTP hosting.
+  Новая команда preview не добавлена.
+- Portal, Editor и Changes получили единый compact workspace shell, project
+  branding, навигацию и синхронные темы; CodeMirror меняет оформление без
+  потери editor state, а responsive layout сохраняет локальную прокрутку
+  рабочих областей без горизонтального overflow страницы.
+- Editor и Changes HTTP API получили OpenAPI 3.1.0 sources of truth,
+  declarative route parity и единый positional check; canonical `serve`
+  показывает оба контракта через offline Swagger UI 5.32.12, а static и
+  translation portals UI не получают.
+- Changes API разрешает `HEAD` только для summary и возвращает schema-v1
+  diagnostics envelope для всех API-ошибок без изменения успешных media types.
+- Translation roots поддерживают полный файловый паритет с canonical docs,
+  включая work items, notes и ideas, но остаются read-only: task workflow,
+  scaffold и editor-запись отклоняются до использования переводного контекста.
 - Самодокументация согласована с текущим состоянием репозитория: исправлены
   onboarding и scaffold-примеры README, восстановлено описание Markdown subset,
-  roadmap включает сценарий Documentation Changes, а стабильный фасад `api.go`
-  получил отдельный Go API-контракт.
+  а roadmap включает сценарий Documentation Changes.
 - Первый стабильный релиз dependency-free Go CLI для проверки Markdown и
   построения автономного статического HTML-портала.
 - Команды `check`, `build`, `search`, `changes` и `task changes` обеспечивают
@@ -18,7 +50,10 @@
   воспроизводимый портал с поиском, темами, branding и локализацией.
 - Workflow рабочих задач включает typed scaffolds, readiness, контекст, проверку
   и traceability; все публичные JSON-отчёты используют schema v1.
-- Skill `use-docu-docu` добавляет явные agent-workflow для инициализации,
+- Skill `docu-docu` добавляет явные agent-workflow для инициализации,
   проверки актуальности исходной документации и перевода locale tree.
 - Релиз собирается для пяти платформ с единым quality gate, checksums, лицензией
   Apache-2.0 и notices для встроенных сторонних компонентов.
+- POSIX- и PowerShell-installers автоматически выбирают релизный
+  бинарник, проверяют SHA-256 и без `sudo` устанавливают или
+  обновляют Docu-docu в профиле пользователя.

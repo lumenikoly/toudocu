@@ -1,0 +1,114 @@
+[
+  {
+    "id": "UC-DOCS-01",
+    "title": "UC-DOCS-01: Build a Static HTTP Portal",
+    "status": "done",
+    "module": "MOD-SITE",
+    "flows": [
+      "FLOW-DOCS-BUILD"
+    ],
+    "screens": [],
+    "terminalScreens": []
+  },
+  {
+    "id": "UC-DOCS-02",
+    "title": "UC-DOCS-02: Check documentation",
+    "status": "done",
+    "module": "MOD-MODEL",
+    "flows": [],
+    "screens": [],
+    "terminalScreens": []
+  },
+  {
+    "id": "UC-DOCS-04",
+    "title": "UC-DOCS-04: Explore the Screen Map",
+    "status": "done",
+    "module": "MOD-SITE",
+    "flows": [],
+    "screens": [
+      "SC-SITE-SCREEN-MAP",
+      "SC-SITE-USE-CASE"
+    ],
+    "startScreen": "SC-SITE-USE-CASE",
+    "terminalScreens": [
+      "SC-SITE-SCREEN-MAP"
+    ]
+  },
+  {
+    "id": "UC-DOCS-03",
+    "title": "UC-DOCS-03: View documentation on local server",
+    "status": "done",
+    "module": "MOD-SITE",
+    "flows": [
+      "FLOW-DOCS-SERVE"
+    ],
+    "screens": [
+      "SC-SITE-API-DOCS",
+      "SC-SITE-DOCUMENT",
+      "SC-SITE-EDITOR",
+      "SC-SITE-HOME"
+    ],
+    "startScreen": "SC-SITE-HOME",
+    "terminalScreens": [
+      "SC-SITE-DOCUMENT",
+      "SC-SITE-API-DOCS"
+    ]
+  },
+  {
+    "id": "UC-TASK-02",
+    "title": "UC-TASK-02: Check work task",
+    "status": "done",
+    "module": "MOD-CLI",
+    "flows": [
+      "FLOW-TASK-WORKFLOW"
+    ],
+    "screens": [],
+    "terminalScreens": []
+  },
+  {
+    "id": "UC-TASK-01",
+    "title": "UC-TASK-01: Get work task context",
+    "status": "done",
+    "module": "MOD-CLI",
+    "flows": [
+      "FLOW-TASK-WORKFLOW"
+    ],
+    "screens": [],
+    "terminalScreens": []
+  },
+  {
+    "id": "UC-DOCS-05",
+    "title": "UC-DOCS-05: View documentation changes",
+    "status": "done",
+    "module": "MOD-CHANGES",
+    "flows": [],
+    "screens": [
+      "SC-CHANGES-WORKSPACE",
+      "SC-SITE-HOME"
+    ],
+    "startScreen": "SC-SITE-HOME",
+    "terminalScreens": [
+      "SC-CHANGES-WORKSPACE"
+    ]
+  },
+  {
+    "id": "UC-TASK-03",
+    "title": "UC-TASK-03: Prepare a new work task",
+    "status": "done",
+    "module": "MOD-CLI",
+    "flows": [
+      "FLOW-TASK-WORKFLOW"
+    ],
+    "screens": [],
+    "terminalScreens": []
+  },
+  {
+    "id": "UC-TASK-04",
+    "title": "UC-TASK-04: Archive or Restore a Work Item",
+    "status": "done",
+    "module": "MOD-CLI",
+    "flows": [],
+    "screens": [],
+    "terminalScreens": []
+  }
+]
