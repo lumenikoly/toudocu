@@ -85,7 +85,7 @@ func TestInstallerPlatformContract(t *testing.T) {
 		"PROCESSOR_ARCHITECTURE": "ARM64",
 		"DOCU_DOCU_INSTALL_DIR":  filepath.Join(t.TempDir(), "bin"),
 	})
-	if err == nil || !strings.Contains(output, "only AMD64 is published") {
+	if err == nil || !strings.Contains(output, "unsupported Windows architecture: ARM64; only AMD64 is published") {
 		t.Fatalf("ARM64 rejection: err=%v output=%q", err, output)
 	}
 }
@@ -232,24 +232,11 @@ func runPowerShellInstaller(t *testing.T, serverURL string, overrides map[string
 	for key, value := range overrides {
 		values[key] = value
 	}
-	command.Env = windowsEnvironmentWith(values)
+	for key, value := range values {
+		t.Setenv(key, value)
+	}
 	output, err := command.CombinedOutput()
 	return string(output), err
-}
-
-func windowsEnvironmentWith(values map[string]string) []string {
-	environment := os.Environ()
-	for key, value := range values {
-		prefix := strings.ToUpper(key) + "="
-		filtered := environment[:0]
-		for _, entry := range environment {
-			if !strings.HasPrefix(strings.ToUpper(entry), prefix) {
-				filtered = append(filtered, entry)
-			}
-		}
-		environment = append(filtered, key+"="+value)
-	}
-	return environment
 }
 
 func windowsContainsString(values []string, target string) bool {
