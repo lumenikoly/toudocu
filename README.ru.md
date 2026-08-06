@@ -319,16 +319,19 @@ Docu-docu подходит для описания:
 
 ## Поддерживаемый Markdown
 
-Docu-docu намеренно поддерживает безопасное подмножество Markdown:
+Docu-docu использует Goldmark `v1.8.5` как единый CommonMark AST-движок и
+включает только:
 
 * заголовки, абзацы, выделение и цитаты;
 * ссылки и безопасные локальные raster-изображения;
 * маркированные, нумерованные и task-списки;
 * таблицы, inline code и fenced code blocks;
+* strikethrough и literal autolinks для HTTP(S), `www` и email;
 * Mermaid `flowchart`, `stateDiagram-v2` и `sequenceDiagram`.
 
-Произвольный HTML экранируется. Front matter, Mermaid directives и конструкции,
-зависящие от полного CommonMark, не поддерживаются. Подробные ограничения
+Raw HTML и ведущий завершённый front matter являются ошибками проверки;
+preview и rendered diff всё равно показывают source как escaped text.
+Attributes, footnotes, definition lists и typographer не включены. Подробные ограничения
 зафиксированы в [модуле безопасного Markdown](docs/modules/markdown.md).
 
 ---
@@ -417,7 +420,7 @@ $docu-docu translate en --all-stale
 
 ## Публичный Go API
 
-Корневой пакет предоставляет типизированный фасад над моделью, рендерером,
+Корневой пакет предоставляет типизированный фасад над моделью, генератором,
 отчётами и отдельными операциями CLI. Текущий module path — локальный
 `docu-docu`; канонический удалённый Go module ещё не опубликован, поэтому
 внешним потребителям пока не следует фиксировать этот import path.
@@ -426,6 +429,9 @@ $docu-docu translate en --all-stale
 `api.go`. До публикации канонического module path отдельные гарантии
 совместимости для внешних потребителей не заявлены. CLI остаётся основным
 пользовательским способом запуска готового бинарника.
+
+Markdown AST и низкоуровневые parser/renderer намеренно остаются внутренними;
+типы Goldmark не входят в facade или JSON schema v1.
 
 ---
 

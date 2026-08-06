@@ -4,12 +4,12 @@
     "name": "Docu-docu",
     "version": "0.0.1"
   },
-  "generatedAt": "2026-08-06T12:08:24.326331313Z",
+  "generatedAt": "2026-08-06T16:17:38.463941533Z",
   "sourceDirectory": "docs-en",
   "staleDays": 90,
   "project": {
     "title": "Docu-docu",
-    "description": "Docu-docu - dependency-free CLI on Go with a public Go facade for the testable project documentation in structured Markdown and stand-alone HTML portal, working through file:// .",
+    "description": "Docu-docu - dependency-free CLI on Go with a public Go facade for the testable project documentation in structured Markdown and stand-alone HTML portal, working through file://.",
     "status": {
       "kind": "done",
       "symbol": "✓",
@@ -86,7 +86,7 @@
       "outputPath": "index.html",
       "type": "overview",
       "title": "Docu-docu",
-      "description": "Docu-docu - dependency-free CLI on Go with a public Go facade for the testable project documentation in structured Markdown and stand-alone HTML portal, working through file:// .",
+      "description": "Docu-docu - dependency-free CLI on Go with a public Go facade for the testable project documentation in structured Markdown and stand-alone HTML portal, working through file://.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -148,7 +148,7 @@
       "outputPath": "roadmap.html",
       "type": "roadmap",
       "title": "Roadmap",
-      "description": "Roadmap defines Docu-docu's product coverage; state of the associated UC- calculated from user script documents.",
+      "description": "Roadmap defines Docu-docu's product coverage; state of the associated UC-* calculated from user script documents.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -261,7 +261,7 @@
       "type": "architecture",
       "sectionType": "architecture",
       "title": "Architecture for viewing documentation changes",
-      "description": "Docu-docu resolves explicitly chosen local Git states, represents each side with lazy snapshot and combines Git metadata with normalized ones document entities into one versioned ChangeSetReport .",
+      "description": "Docu-docu resolves explicitly chosen local Git states, represents each side with lazy snapshot and combines Git metadata with normalized ones document entities into one versioned ChangeSetReport.",
       "metadata": {
         "architectureQuestion": "How do Git states turn into a consistent change set of documentation?",
         "documentType": "Architecture"
@@ -546,7 +546,7 @@
       "type": "architecture",
       "sectionType": "architecture",
       "title": "Docu-docu system boundary",
-      "description": "Docu-docu is limited to one local process that reads the documentation and repository, builds a proven model and issues diagnostics or derivatives presentations. Embedding Go code calls the same model façade and operations without a separate process. In serve , the process accepts limited editor requests and atomically saves the selected workspace file. User, library the consumer, agent, CI and browser remain the communicating parties behind this border. The Release installer also remains outside: it is separate bootstrap, which only uses the network before the Go runtime.",
+      "description": "Docu-docu is limited to one local process that reads the documentation and repository, builds a proven model and issues diagnostics or derivatives presentations. Embedding Go code calls the same model façade and operations without a separate process. In serve, the process accepts limited editor requests and atomically saves the selected workspace file. User, library the consumer, agent, CI and browser remain the communicating parties behind this border. The Release installer also remains outside: it is separate bootstrap, which only uses the network before the Go runtime.",
       "metadata": {
         "architectureQuestion": "Where is the Docu-docu system boundary and who interacts with it?",
         "documentType": "Architecture"
@@ -690,7 +690,7 @@
       "type": "contract",
       "sectionType": "contracts",
       "title": "HTTP contract Documentation Changes v1",
-      "description": "All endpoints are read-only, use Cache-Control: no-store , accept only local Git revisions and restrict access to documentation roots.",
+      "description": "All endpoints are read-only, use Cache-Control: no-store, accept only local Git revisions and restrict access to documentation roots.",
       "metadata": {
         "id": "CON-CHANGES-HTTP-V1",
         "owner": "Docu-docu Team",
@@ -823,7 +823,7 @@
       "type": "contract",
       "sectionType": "contracts",
       "title": "CONTRACT-EDITOR-HTTP: Local editor API",
-      "description": "The contract defines the current same-origin API of the local workspace. All routes are prefixed with / docu-docu/api/editor and always return Cache-Control: no-store and do not issue CORS headers. JSON responses contain schemaVersion: 1 .",
+      "description": "The contract defines the current same-origin API of the local workspace. All routes are prefixed with /_docu-docu/api/editor and always return Cache-Control: no-store and do not issue CORS headers. JSON responses contain schemaVersion: 1.",
       "metadata": {
         "flow": "FLOW-DOCS-SERVE",
         "module": "MOD-SITE",
@@ -1470,7 +1470,7 @@
       "type": "guide",
       "sectionType": "guides",
       "title": "View documentation changes",
-      "description": "Docu-docu uses Git as the sole source of the old and new version. He doesn't creates snapshots, does not fetch or modify history, refs, index or working tree. The section is only available in serve at /changes/ ; regular build remains a standalone representation of the current documentation and does not require Git history.",
+      "description": "Docu-docu uses Git as the sole source of the old and new version. He doesn't creates snapshots, does not fetch or modify history, refs, index or working tree. The section is only available in serve at /changes/; regular build remains a standalone representation of the current documentation and does not require Git history.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -1590,7 +1590,7 @@
       "type": "guide",
       "sectionType": "guides",
       "title": "Standards, Runbooks and Custom sections",
-      "description": "The manual describes the author's contract for optional sections. Globally index.md and architecture/overview.md are required; lack of manifest appeared quality/ , runbooks/ or custom section is a warning and becomes gate only with --strict .",
+      "description": "The manual describes the author's contract for optional sections. Globally index.md and architecture/overview.md are required; lack of manifest appeared quality/, runbooks/ or custom section is a warning and becomes gate only with --strict.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -1621,7 +1621,7 @@
       "type": "guide",
       "sectionType": "guides",
       "title": "Map of screens and playable user scenarios",
-      "description": "Docu-docu builds map, directory, step-by-step scripts and traceability from documents screens/SC- .md . A separate screens/map.md is not used.",
+      "description": "Docu-docu builds map, directory, step-by-step scripts and traceability from documents screens/SC-*.md. A separate screens/map.md is not used.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -1685,7 +1685,7 @@
       "type": "guide",
       "sectionType": "guides",
       "title": "Work tasks",
-      "description": "Docu-docu stores each work item in a separate file, work/ .md . Functionality, maintenance, documentation and research uses TASK- , and bugs - BUG- . All types remain one WorkItem entity, use general statuses, dependencies, context/verify commands and the annual archive.",
+      "description": "Docu-docu stores each work item in a separate file, work/*.md. Functionality, maintenance, documentation and research uses TASK-*, and bugs - BUG-*. All types remain one WorkItem entity, use general statuses, dependencies, context/verify commands and the annual archive.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -2189,7 +2189,7 @@
       "type": "quality-index",
       "sectionType": "quality",
       "title": "Quality Standards",
-      "description": "The section records confirmed rules for the development and maintenance of documentation Docu-docu. The standards apply to their expressly stated scope and are not command source task verify : executable commands remain in the work item.",
+      "description": "The section records confirmed rules for the development and maintenance of documentation Docu-docu. The standards apply to their expressly stated scope and are not command source task verify: executable commands remain in the work item.",
       "metadata": {
         "owner": "Docu-docu Team"
       },
@@ -2316,7 +2316,7 @@
       "type": "reference",
       "sectionType": "reference",
       "title": "ChangeSetReport schema v1",
-      "description": "docu-docu changes --format json returns a deterministic report with schemaVersion , repository/branch/HEAD/dirty, resolved base/target, changeSetDigest , file/line/entity/classification summary, changes[] , task impact and diagnostics.",
+      "description": "docu-docu changes --format json returns a deterministic report with schemaVersion, repository/branch/HEAD/dirty, resolved base/target, changeSetDigest, file/line/entity/classification summary, changes[], task impact and diagnostics.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -2348,7 +2348,7 @@
       "type": "reference",
       "sectionType": "reference",
       "title": "Configuration reference",
-      "description": "The CLI works without a configuration file. Optional \u003crepository-root\u003e/.docu-docu/config.yml configures the portal and automatically read by the commands build , check and serve .",
+      "description": "The CLI works without a configuration file. Optional \u003crepository-root\u003e/.docu-docu/config.yml configures the portal and automatically read by the commands build, check and serve.",
       "metadata": {},
       "status": {
         "kind": "neutral",
@@ -4421,8 +4421,8 @@
         "owner": "Docu-docu Team",
         "scope": "Source documentation, skill templates and tracked portals",
         "updated": "2026-07-31",
-        "rules": "Global coverage is determined by roadmap.md ; state of the explicitly bound UC- taken from the use case. The remaining local checklists are not aggregated. Generated build/ , dist/ , example/site/ , project-docs/ and example/project-docs/ are not edited as a source of truth. Monitored portals are rebuilt from Markdown after semantic review and structural check. A typed document is created only for confirmed semantics; unknown owner, date, status or procedure are not invented for the sake of lack of warning. Explicitly related standards and runbooks are read along with the task context; region other applicable standards are checked by the author without CLI glob heuristics. docs/runbooks/ is created only if there is real operational procedures. docs/architecture/overview.md is a required card; every other The Markdown file in architecture/ answers one obvious architectural question and is added with a direct link from overview. Details of FLOW, CONTRACT, REFERENCE, RUNBOOK, ADR and MODULE remain in corresponding sources of truth, and the semantic gate checks the architectural form and meaning by ARCH001 – ARCH013 . $docu-docu refresh and $docu-docu refresh diff update the original documentation only for current repository evidence; dates change with content or relationships, and Last verified requires actual verification runbook. The root CHANGELOG.md , if it exists, is the only one a special source for release changes. It cannot be duplicated in docs/changelog.md : such a file remains a regular Markdown document. Don't create a root log just for the portal tab.",
-        "automaticChecks": "go run ./cmd/docu-docu check ./docs --strict --stale-days 0 ; integrity tests of templates and public JSON schema; tests of links, stable IDs, task context and portal navigation. Commands are run from work item or trusted CI workflow, and not directly from this standard.",
+        "rules": "Global coverage is determined by roadmap.md; state of the explicitly bound UC-* taken from the use case. The remaining local checklists are not aggregated. Generated build/, dist/, example/site/, project-docs/ and example/project-docs/ are not edited as a source of truth. Monitored portals are rebuilt from Markdown after semantic review and structural check. A typed document is created only for confirmed semantics; unknown owner, date, status or procedure are not invented for the sake of lack of warning. Explicitly related standards and runbooks are read along with the task context; region other applicable standards are checked by the author without CLI glob heuristics. docs/runbooks/ is created only if there is real operational procedures. docs/architecture/overview.md is a required card; every other The Markdown file in architecture/ answers one obvious architectural question and is added with a direct link from overview. Details of FLOW, CONTRACT, REFERENCE, RUNBOOK, ADR and MODULE remain in corresponding sources of truth, and the semantic gate checks the architectural form and meaning by ARCH001–ARCH013. $docu-docu refresh and $docu-docu refresh diff update the original documentation only for current repository evidence; dates change with content or relationships, and Last verified requires actual verification runbook. The root CHANGELOG.md, if it exists, is the only one a special source for release changes. It cannot be duplicated in docs/changelog.md: such a file remains a regular Markdown document. Don't create a root log just for the portal tab.",
+        "automaticChecks": "go run ./cmd/docu-docu check ./docs --strict --stale-days 0; integrity tests of templates and public JSON schema; tests of links, stable IDs, task context and portal navigation. Commands are run from work item or trusted CI workflow, and not directly from this standard.",
         "document": "quality/STD-DOCS-001.md"
       },
       {
@@ -4437,8 +4437,8 @@
         "owner": "Docu-docu Team",
         "scope": "Go code and repository tests",
         "updated": "2026-08-03",
-        "rules": "Do not add external dependency unless proven necessary. Public operations are called only by explicit commands; there is no way without a command runs the implicit build . Each new validation rule should be accompanied by a behavioral test. Each security fix must be accompanied by a negative test. Do not weaken the check of repository-root and secure --clean . Save the usual check , build , serve and task context not executing work item commands.",
-        "automaticChecks": "gofmt -w . ; go vet ./... ; go test ./... ; go test -race ./... . Commands are run from work item or trusted CI workflow, and not directly from this standard.",
+        "rules": "Do not add external dependency unless proven necessary. Public operations are called only by explicit commands; there is no way without a command runs the implicit build. Each new validation rule should be accompanied by a behavioral test. Each security fix must be accompanied by a negative test. Do not weaken the check of repository-root and secure --clean. Save the usual check, build, serve and task context not executing work item commands.",
+        "automaticChecks": "gofmt -w .; go vet ./...; go test ./...; go test -race ./.... Commands are run from work item or trusted CI workflow, and not directly from this standard.",
         "document": "quality/STD-GO-001.md"
       }
     ],
@@ -4701,43 +4701,55 @@
             "line": 61,
             "indent": 0,
             "completed": true,
-            "text": "AC-01 A regular check produces stable errors for a missing or"
+            "text": "AC-01 A regular check produces stable errors for a missing or mistyped overview, missing question and document out direct recursive map overview.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 64,
             "indent": 0,
             "completed": true,
-            "text": "AC-02 Architectural broken/blocked links are errors, and"
+            "text": "AC-02 Architectural broken/blocked links are errors, and a non-punctuation non-blank question is acceptable.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 66,
             "indent": 0,
             "completed": true,
-            "text": "AC-03 JSON schema remains v1, and overview is serialized with"
+            "text": "AC-03 JSON schema remains v1, and overview is serialized with type: architecture.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 68,
             "indent": 0,
             "completed": true,
-            "text": "AC-04 RU/EN skill assets contain separate overview/detail templates,"
+            "text": "AC-04 RU/EN skill assets contain separate overview/detail templates, minimal init creates index.md and overview, and legacy architecture stops init without automatic migration.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 71,
             "indent": 0,
             "completed": true,
-            "text": "AC-05 Managed guidance and semantic gate synchronously set type boundaries,"
+            "text": "AC-05 Managed guidance and semantic gate synchronously set type boundaries, direct overview map and codes ARCH001–ARCH013.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 73,
             "indent": 0,
             "completed": true,
-            "text": "AC-06 Docu-docu and Service Desk architecture divided into confirmed"
+            "text": "AC-06 Docu-docu and Service Desk architecture divided into confirmed question-oriented documents, and both portals are reassembled only from original Markdown after independent review.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           }
         ],
         "verificationMatrix": [
           {
             "criterionId": "AC-01",
-            "criterion": "A regular check produces stable errors for a missing or",
+            "criterion": "A regular check produces stable errors for a missing or mistyped overview, missing question and document out direct recursive map overview.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestArchitectureContract'"
@@ -4747,7 +4759,7 @@
           },
           {
             "criterionId": "AC-02",
-            "criterion": "Architectural broken/blocked links are errors, and",
+            "criterion": "Architectural broken/blocked links are errors, and a non-punctuation non-blank question is acceptable.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestArchitectureContract'"
@@ -4757,7 +4769,7 @@
           },
           {
             "criterionId": "AC-03",
-            "criterion": "JSON schema remains v1, and overview is serialized with",
+            "criterion": "JSON schema remains v1, and overview is serialized with type: architecture.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestArchitectureSchemaContract'"
@@ -4767,7 +4779,7 @@
           },
           {
             "criterionId": "AC-04",
-            "criterion": "RU/EN skill assets contain separate overview/detail templates,",
+            "criterion": "RU/EN skill assets contain separate overview/detail templates, minimal init creates index.md and overview, and legacy architecture stops init without automatic migration.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestUseDocu-docuArchitecture|TestUseDocu-docuInitContract'"
@@ -4777,7 +4789,7 @@
           },
           {
             "criterionId": "AC-05",
-            "criterion": "Managed guidance and semantic gate synchronously set type boundaries,",
+            "criterion": "Managed guidance and semantic gate synchronously set type boundaries, direct overview map and codes ARCH001–ARCH013.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestUseDocu-docuArchitecture'"
@@ -4787,7 +4799,7 @@
           },
           {
             "criterionId": "AC-06",
-            "criterion": "Docu-docu and Service Desk architecture divided into confirmed",
+            "criterion": "Docu-docu and Service Desk architecture divided into confirmed question-oriented documents, and both portals are reassembled only from original Markdown after independent review.",
             "completed": true,
             "commands": [
               "go run ./cmd/docu-docu build ./docs --output ./project-docs --repository-root . --clean --strict --stale-days 0 \u0026\u0026 go run ./cmd/docu-docu build ./example/docs --output ./example/project-docs --repository-root ./example --clean --strict --stale-days 0"
@@ -4802,63 +4814,63 @@
             "commands": [
               "go test ./... -run 'TestArchitectureContract'"
             ],
-            "line": 88
+            "line": 87
           },
           {
             "target": "AC-02",
             "commands": [
               "go test ./... -run 'TestArchitectureContract'"
             ],
-            "line": 89
+            "line": 88
           },
           {
             "target": "AC-03",
             "commands": [
               "go test ./... -run 'TestArchitectureSchemaContract'"
             ],
-            "line": 90
+            "line": 89
           },
           {
             "target": "AC-04",
             "commands": [
               "go test ./... -run 'TestUseDocu-docuArchitecture|TestUseDocu-docuInitContract'"
             ],
-            "line": 91
+            "line": 90
           },
           {
             "target": "AC-05",
             "commands": [
               "go test ./... -run 'TestUseDocu-docuArchitecture'"
             ],
-            "line": 92
+            "line": 91
           },
           {
             "target": "AC-06",
             "commands": [
               "go run ./cmd/docu-docu build ./docs --output ./project-docs --repository-root . --clean --strict --stale-days 0 \u0026\u0026 go run ./cmd/docu-docu build ./example/docs --output ./example/project-docs --repository-root ./example --clean --strict --stale-days 0"
             ],
-            "line": 93
+            "line": 92
           },
           {
             "target": "ALL",
             "commands": [
               "go test -count=1 ./..."
             ],
-            "line": 94
+            "line": 93
           },
           {
             "target": "DOCS",
             "commands": [
               "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0 \u0026\u0026 go run ./cmd/docu-docu check ./example/docs --repository-root ./example --strict --stale-days 0"
             ],
-            "line": 95
+            "line": 94
           },
           {
             "target": "QUALITY",
             "commands": [
               "go test ./... -run 'TestArchitectureContract|TestArchitectureSchemaContract|TestUseDocu-docuArchitecture'"
             ],
-            "line": 96
+            "line": 95
           }
         ],
         "repositoryPaths": [
@@ -4878,10 +4890,10 @@
           "skills/docu-docu/"
         ],
         "result": "docs/architecture/overview.md is a required architecture map, and every other Markdown document in architecture/ responds to one explicit architectural question and is directly listed in the overview.",
-        "behaviorChange": "Before The architecture/ directory was an optional set of specialized Markdown documents without mandatory map, explicit question and increased strictness of local links. After Regular check requires a correct architecture overview, one non-empty question for each detailed document, a direct recursive document map and secure existing local links. Skill provides separate RU/EN templates, safe init and semantic gate ARCH001 – ARCH013 .",
+        "behaviorChange": "Before The architecture/ directory was an optional set of specialized Markdown documents without mandatory map, explicit question and increased strictness of local links. After Regular check requires a correct architecture overview, one non-empty question for each detailed document, a direct recursive document map and secure existing local links. Skill provides separate RU/EN templates, safe init and semantic gate ARCH001–ARCH013.",
         "before": "The architecture/ directory was an optional set of specialized Markdown documents without mandatory map, explicit question and increased strictness of local links.",
-        "after": "Regular check requires a correct architecture overview, one non-empty question for each detailed document, a direct recursive document map and secure existing local links. Skill provides separate RU/EN templates, safe init and semantic gate ARCH001 – ARCH013 .",
-        "outOfScope": "new Go command docu-docu init ; changing ProjectReport schema v1 or documents[].type type; automatic migration of legacy architecture; checking punctuation, question words or architectural meaning in the CLI; Docu-docu documents about deployment or data ownership without confirmation architectural issue.",
+        "after": "Regular check requires a correct architecture overview, one non-empty question for each detailed document, a direct recursive document map and secure existing local links. Skill provides separate RU/EN templates, safe init and semantic gate ARCH001–ARCH013.",
+        "outOfScope": "new Go command docu-docu init; changing ProjectReport schema v1 or documents[].type type; automatic migration of legacy architecture; checking punctuation, question words or architectural meaning in the CLI; Docu-docu documents about deployment or data ownership without confirmation architectural issue.",
         "plan": "Add metadata aliases and structural architecture diagnostics. Expand behavioral and schema contract tests. Update templates, init workflow, managed guidance and semantic gate. Migrate Docu-docu and demo Service Desk documentation. Perform an independent semantic review and eliminate the comments. Go through full Go/Docu-docu verification and rebuild portals.",
         "documentationImpact": "The public architecture contract, skill init and guidance are updated, self-documentation Docu-docu, demo Service Desk, README, CLI/reference, model, use case, changelog, documentation standard and monitored portals.",
         "documentationPaths": []
@@ -4918,79 +4930,103 @@
             "line": 53,
             "indent": 0,
             "completed": true,
-            "text": "AC-01 Git adapter supports commit, index and working-tree snapshots,"
+            "text": "AC-01 Git adapter supports commit, index and working-tree snapshots, staged/unstaged/untracked, rename/copy/type change and Unicode paths without shell, external diff, textconv, hooks or fetch.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 56,
             "indent": 0,
             "completed": true,
-            "text": "AC-02 ChangeSetReport schema v1 contains an explicit resolved comparison,"
+            "text": "AC-02 ChangeSetReport schema v1 contains an explicit resolved comparison, digest, file/entity summaries, changes, task impact and diagnostics.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 58,
             "indent": 0,
             "completed": true,
-            "text": "AC-03 Unified diff is exactly derived from Git, side-by-side is derived from hunks,"
+            "text": "AC-03 Unified diff is exactly derived from Git, side-by-side is derived from hunks, and large or binary files do not block change set.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 60,
             "indent": 0,
             "completed": true,
-            "text": "AC-04 Deterministic semantic diff supports UC, FLOW, SC/TR, MOD,"
+            "text": "AC-04 Deterministic semantic diff supports UC, FLOW, SC/TR, MOD, ADR, TASK, Architecture and relations, ignoring minor formatting.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 62,
             "indent": 0,
             "completed": true,
-            "text": "AC-05 OpenAPI YAML/JSON diff compares operations, requests, responses,"
+            "text": "AC-05 OpenAPI YAML/JSON diff compares operations, requests, responses, schemas and security and classifies compatibility.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 64,
             "indent": 0,
             "completed": true,
-            "text": "AC-06 Rendered Markdown, Mermaid, Screen Map and image assets available until"
+            "text": "AC-06 Rendered Markdown, Mermaid, Screen Map and image assets available until and after isolating the error of one side.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 66,
             "indent": 0,
             "completed": true,
-            "text": "AC-07 Task impact separates task contract from permanent documentation and"
+            "text": "AC-07 Task impact separates task contract from permanent documentation and returns declared/actual/scope diagnostics.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 68,
             "indent": 0,
             "completed": true,
-            "text": "AC-08 CLI supports summary, file and task reports, filters,"
+            "text": "AC-08 CLI supports summary, file and task reports, filters, text/JSON/Markdown/output and exit codes 0–4.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 70,
             "indent": 0,
             "completed": true,
-            "text": "AC-09 Read-only HTTP API checks revisions/paths/limits, supports"
+            "text": "AC-09 Read-only HTTP API checks revisions/paths/limits, supports lazy detail, ETag and live digest update.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 72,
             "indent": 0,
             "completed": true,
-            "text": "AC-10 Changes UI supports comparison selector, filters/search,"
+            "text": "AC-10 Changes UI supports comparison selector, filters/search, unified/merge/rendered/semantic/specialized tabs, deep links and accessibility.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 74,
             "indent": 0,
             "completed": true,
-            "text": "AC-11 serve saves filters/open file with invalidation, and absence"
+            "text": "AC-11 serve saves filters/open file with invalidation, and absence Git shows diagnostic and does not break the rest of the portal.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 76,
             "indent": 0,
             "completed": true,
-            "text": "AC-12 Static build, existing check, ProjectReport schema v1 and"
+            "text": "AC-12 Static build, existing check, ProjectReport schema v1 and editor workflows remain compatible and pass regression tests.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           }
         ],
         "verificationMatrix": [
           {
             "criterionId": "AC-01",
-            "criterion": "Git adapter supports commit, index and working-tree snapshots,",
+            "criterion": "Git adapter supports commit, index and working-tree snapshots, staged/unstaged/untracked, rename/copy/type change and Unicode paths without shell, external diff, textconv, hooks or fetch.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestGitChange|TestChangeComparison'"
@@ -5000,7 +5036,7 @@
           },
           {
             "criterionId": "AC-02",
-            "criterion": "ChangeSetReport schema v1 contains an explicit resolved comparison,",
+            "criterion": "ChangeSetReport schema v1 contains an explicit resolved comparison, digest, file/entity summaries, changes, task impact and diagnostics.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestChangeSetReport|TestChangeSetDigest'"
@@ -5010,7 +5046,7 @@
           },
           {
             "criterionId": "AC-03",
-            "criterion": "Unified diff is exactly derived from Git, side-by-side is derived from hunks,",
+            "criterion": "Unified diff is exactly derived from Git, side-by-side is derived from hunks, and large or binary files do not block change set.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestSourceDiff|TestSideBySideDiff|TestLargeChange'"
@@ -5020,7 +5056,7 @@
           },
           {
             "criterionId": "AC-04",
-            "criterion": "Deterministic semantic diff supports UC, FLOW, SC/TR, MOD,",
+            "criterion": "Deterministic semantic diff supports UC, FLOW, SC/TR, MOD, ADR, TASK, Architecture and relations, ignoring minor formatting.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestSemanticDiff'"
@@ -5030,7 +5066,7 @@
           },
           {
             "criterionId": "AC-05",
-            "criterion": "OpenAPI YAML/JSON diff compares operations, requests, responses,",
+            "criterion": "OpenAPI YAML/JSON diff compares operations, requests, responses, schemas and security and classifies compatibility.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestOpenAPIDiff'"
@@ -5040,7 +5076,7 @@
           },
           {
             "criterionId": "AC-06",
-            "criterion": "Rendered Markdown, Mermaid, Screen Map and image assets available until",
+            "criterion": "Rendered Markdown, Mermaid, Screen Map and image assets available until and after isolating the error of one side.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestRenderedChange|TestMermaidChange|TestAssetChange|TestScreenMapChange'"
@@ -5050,7 +5086,7 @@
           },
           {
             "criterionId": "AC-07",
-            "criterion": "Task impact separates task contract from permanent documentation and",
+            "criterion": "Task impact separates task contract from permanent documentation and returns declared/actual/scope diagnostics.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestTaskImpact'"
@@ -5060,7 +5096,7 @@
           },
           {
             "criterionId": "AC-08",
-            "criterion": "CLI supports summary, file and task reports, filters,",
+            "criterion": "CLI supports summary, file and task reports, filters, text/JSON/Markdown/output and exit codes 0–4.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestChangesCLI'"
@@ -5070,7 +5106,7 @@
           },
           {
             "criterionId": "AC-09",
-            "criterion": "Read-only HTTP API checks revisions/paths/limits, supports",
+            "criterion": "Read-only HTTP API checks revisions/paths/limits, supports lazy detail, ETag and live digest update.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestChangesHTTP'"
@@ -5080,7 +5116,7 @@
           },
           {
             "criterionId": "AC-10",
-            "criterion": "Changes UI supports comparison selector, filters/search,",
+            "criterion": "Changes UI supports comparison selector, filters/search, unified/merge/rendered/semantic/specialized tabs, deep links and accessibility.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestChangesAssetsContract'"
@@ -5090,7 +5126,7 @@
           },
           {
             "criterionId": "AC-11",
-            "criterion": "serve saves filters/open file with invalidation, and absence",
+            "criterion": "serve saves filters/open file with invalidation, and absence Git shows diagnostic and does not break the rest of the portal.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestChangesInvalidation|TestChangesWithoutGit'"
@@ -5100,7 +5136,7 @@
           },
           {
             "criterionId": "AC-12",
-            "criterion": "Static build, existing check, ProjectReport schema v1 and",
+            "criterion": "Static build, existing check, ProjectReport schema v1 and editor workflows remain compatible and pass regression tests.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestStaticSiteExcludesChanges|TestProjectReport'"
@@ -5115,105 +5151,105 @@
             "commands": [
               "go test ./... -run 'TestGitChange|TestChangeComparison'"
             ],
-            "line": 90
+            "line": 89
           },
           {
             "target": "AC-02",
             "commands": [
               "go test ./... -run 'TestChangeSetReport|TestChangeSetDigest'"
             ],
-            "line": 91
+            "line": 90
           },
           {
             "target": "AC-03",
             "commands": [
               "go test ./... -run 'TestSourceDiff|TestSideBySideDiff|TestLargeChange'"
             ],
-            "line": 92
+            "line": 91
           },
           {
             "target": "AC-04",
             "commands": [
               "go test ./... -run 'TestSemanticDiff'"
             ],
-            "line": 93
+            "line": 92
           },
           {
             "target": "AC-05",
             "commands": [
               "go test ./... -run 'TestOpenAPIDiff'"
             ],
-            "line": 94
+            "line": 93
           },
           {
             "target": "AC-06",
             "commands": [
               "go test ./... -run 'TestRenderedChange|TestMermaidChange|TestAssetChange|TestScreenMapChange'"
             ],
-            "line": 95
+            "line": 94
           },
           {
             "target": "AC-07",
             "commands": [
               "go test ./... -run 'TestTaskImpact'"
             ],
-            "line": 96
+            "line": 95
           },
           {
             "target": "AC-08",
             "commands": [
               "go test ./... -run 'TestChangesCLI'"
             ],
-            "line": 97
+            "line": 96
           },
           {
             "target": "AC-09",
             "commands": [
               "go test ./... -run 'TestChangesHTTP'"
             ],
-            "line": 98
+            "line": 97
           },
           {
             "target": "AC-10",
             "commands": [
               "go test ./... -run 'TestChangesAssetsContract'"
             ],
-            "line": 99
+            "line": 98
           },
           {
             "target": "AC-11",
             "commands": [
               "go test ./... -run 'TestChangesInvalidation|TestChangesWithoutGit'"
             ],
-            "line": 100
+            "line": 99
           },
           {
             "target": "AC-12",
             "commands": [
               "go test ./... -run 'TestStaticSiteExcludesChanges|TestProjectReport'"
             ],
-            "line": 101
+            "line": 100
           },
           {
             "target": "ALL",
             "commands": [
               "go test ./..."
             ],
-            "line": 102
+            "line": 101
           },
           {
             "target": "DOCS",
             "commands": [
               "go run ./cmd/docu-docu check ./docs --repository-root ."
             ],
-            "line": 103
+            "line": 102
           },
           {
             "target": "QUALITY",
             "commands": [
               "go vet ./... \u0026\u0026 go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docu-docu check ./docs --strict --stale-days 0"
             ],
-            "line": 104
+            "line": 103
           }
         ],
         "repositoryPaths": [
@@ -5243,7 +5279,7 @@
         "after": "serve provides a read-only Changes workspace with an explicit range, lazy specialized views and live invalidation. CLI and CI get the same report without changing Git.",
         "outOfScope": "changing Git index, history, refs or working tree; fetch, checkout, commit, merge, rebase and GitHub PR API; inline review comments, approvals and conflict editor; AI-generated summaries and documentation correction; pixel diff Mermaid or images; Git diff source code outside documentation roots.",
         "plan": "Implement Git snapshots, comparison model and ChangeSetReport. Add source, semantic, OpenAPI, task and specialized diff engines. Add CLI reports and exit-code mapping. Implement changes service, HTTP API, cache and invalidation. Implement Changes UI and integration with document/task/screen pages. Update documentation, generated portals and run all gates.",
-        "documentationImpact": "Added module/use case/flow, architecture answer, YAML ADR, changes guide, HTTP/JSON contracts and diagnostics reference. CLI, serve, task, are updated OpenAPI, Screen Map, configuration, security, README and changelog. docs/modules/MOD-CHANGES.md ; docs/use-cases/UC-DOCS-05.md ; docs/flows/FLOW-DOCS-CHANGES.md ; docs/architecture/documentation-changes.md ; docs/architecture/overview.md ; docs/architecture/runtime-components.md ; docs/architecture/trust-boundaries.md ; docs/decisions/ADR-003.md ; docs/decisions/001-dependency-free.md ; docs/contracts/cli.md ; docs/contracts/changes-http.md ; docs/guides/documentation-changes.md ; docs/guides/work-items.md ; docs/guides/screens.md ; docs/reference/changes-report.md ; docs/reference/configuration.md ; docs/reference/features.md ; README.md ; CHANGELOG.md .",
+        "documentationImpact": "Added module/use case/flow, architecture answer, YAML ADR, changes guide, HTTP/JSON contracts and diagnostics reference. CLI, serve, task, are updated OpenAPI, Screen Map, configuration, security, README and changelog. docs/modules/MOD-CHANGES.md; docs/use-cases/UC-DOCS-05.md; docs/flows/FLOW-DOCS-CHANGES.md; docs/architecture/documentation-changes.md; docs/architecture/overview.md; docs/architecture/runtime-components.md; docs/architecture/trust-boundaries.md; docs/decisions/ADR-003.md; docs/decisions/001-dependency-free.md; docs/contracts/cli.md; docs/contracts/changes-http.md; docs/guides/documentation-changes.md; docs/guides/work-items.md; docs/guides/screens.md; docs/reference/changes-report.md; docs/reference/configuration.md; docs/reference/features.md; README.md; CHANGELOG.md.",
         "documentationPaths": [
           "CHANGELOG.md",
           "docs/architecture/documentation-changes.md",
@@ -5295,31 +5331,41 @@
             "line": 52,
             "indent": 0,
             "completed": true,
-            "text": "AC-01 New CLI forms are parsed deterministically, and task check is rejected."
+            "text": "AC-01 New CLI forms are parsed deterministically, and task check is rejected.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 53,
             "indent": 0,
             "completed": true,
-            "text": "AC-02 Search, init and scaffold respect ranking, ID-based paths and atomic create."
+            "text": "AC-02 Search, init and scaffold respect ranking, ID-based paths and atomic create.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 54,
             "indent": 0,
             "completed": true,
-            "text": "AC-03 Ready and context return the full local contract without modifying files or executing commands."
+            "text": "AC-03 Ready and context return the full local contract without modifying files or executing commands.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 55,
             "indent": 0,
             "completed": true,
-            "text": "AC-04 Verify supports dry-run, targeted and full run with secure reporting and limited output."
+            "text": "AC-04 Verify supports dry-run, targeted and full run with secure reporting and limited output.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 56,
             "indent": 0,
             "completed": true,
-            "text": "AC-05 All public JSON reports use a single schema v1."
+            "text": "AC-05 All public JSON reports use a single schema v1.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           }
         ],
         "verificationMatrix": [
@@ -5380,49 +5426,49 @@
             "commands": [
               "go test ./... -run 'TestCLI|TestTask'"
             ],
-            "line": 68
+            "line": 67
           },
           {
             "target": "AC-02",
             "commands": [
               "go test ./... -run 'TestSearch|TestInit|TestScaffold'"
             ],
-            "line": 69
+            "line": 68
           },
           {
             "target": "AC-03",
             "commands": [
               "go test ./... -run 'TestTaskReady|TestTaskContext'"
             ],
-            "line": 70
+            "line": 69
           },
           {
             "target": "AC-04",
             "commands": [
               "go test ./... -run 'TestTaskVerify|TestCommandProcess'"
             ],
-            "line": 71
+            "line": 70
           },
           {
             "target": "AC-05",
             "commands": [
               "go test ./... -run 'TestGenerateSite|TestProjectReport'"
             ],
-            "line": 72
+            "line": 71
           },
           {
             "target": "ALL",
             "commands": [
               "go test ./..."
             ],
-            "line": 73
+            "line": 72
           },
           {
             "target": "DOCS",
             "commands": [
               "go run ./cmd/docu-docu check ./docs --repository-root . --strict"
             ],
-            "line": 74
+            "line": 73
           }
         ],
         "repositoryPaths": [
@@ -5439,12 +5485,12 @@
           "skills/docu-docu/"
         ],
         "result": "The CLI provides a deterministic path from searching documentation and creating framework to readiness, context and explicit verification of the selected task.",
-        "behaviorChange": "Before The CLI provided only task context and the task check execution command; frameworks, readiness and source-level search were missing. After The CLI provides search , task init , scaffold , task ready , extended task context and task verify ; The old task check command is missing.",
+        "behaviorChange": "Before The CLI provided only task context and the task check execution command; frameworks, readiness and source-level search were missing. After The CLI provides search, task init, scaffold, task ready, extended task context and task verify; The old task check command is missing.",
         "before": "The CLI provided only task context and the task check execution command; frameworks, readiness and source-level search were missing.",
-        "after": "The CLI provides search , task init , scaffold , task ready , extended task context and task verify ; The old task check command is missing.",
+        "after": "The CLI provides search, task init, scaffold, task ready, extended task context and task verify; The old task check command is missing.",
         "outOfScope": "interpretation of natural-language request inside Docu-docu; automatic selection or filling of entities; automatic change of statuses and acceptance checkboxes; new external dependencies.",
         "plan": "Expand parser, report types and task contract. Implement search, wireframes and readiness. Expand context and replace check with verify. Synchronize documentation, skills and tests. Run a full verification cycle.",
-        "documentationImpact": "README.md , CHANGELOG.md , docs/contracts/cli.md , docs/roadmap.md , docs/use-cases/ , docs/flows/FLOW-TASK-WORKFLOW.md , docs/decisions/ADR-002.md and skills/docu-docu/ .",
+        "documentationImpact": "README.md, CHANGELOG.md, docs/contracts/cli.md, docs/roadmap.md, docs/use-cases/, docs/flows/FLOW-TASK-WORKFLOW.md, docs/decisions/ADR-002.md and skills/docu-docu/.",
         "documentationPaths": [
           "CHANGELOG.md",
           "docs/contracts/cli.md",
@@ -5482,19 +5528,25 @@
             "line": 29,
             "indent": 0,
             "completed": true,
-            "text": "AC-01 Self-documentation passes docu-docu check --strict without comments."
+            "text": "AC-01 Self-documentation passes docu-docu check --strict without comments.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 30,
             "indent": 0,
             "completed": true,
-            "text": "AC-02 Modules, scripts, rules, roadmap and CLI contract are linked by stable IDs."
+            "text": "AC-02 Modules, scripts, rules, roadmap and CLI contract are linked by stable IDs.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 31,
             "indent": 0,
             "completed": true,
-            "text": "AC-03 README contains a direct link to the project's original documentation."
+            "text": "AC-03 README contains a direct link to the project's original documentation.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           }
         ],
         "verificationMatrix": [
@@ -5535,35 +5587,35 @@
             "commands": [
               "go run ./cmd/docu-docu check ./docs --strict --stale-days 0"
             ],
-            "line": 42
+            "line": 41
           },
           {
             "target": "AC-02",
             "commands": [
               "go test ./... -run 'TestKnowledgeModel|TestMinimalDocumentationCheckAndBuild'"
             ],
-            "line": 43
+            "line": 42
           },
           {
             "target": "AC-03",
             "commands": [
               "grep -Fq 'Исходная документация проекта' README.md \u0026\u0026 grep -Fq 'docs/index.md' README.md"
             ],
-            "line": 44
+            "line": 43
           },
           {
             "target": "ALL",
             "commands": [
               "go test ./..."
             ],
-            "line": 45
+            "line": 44
           },
           {
             "target": "DOCS",
             "commands": [
               "go run ./cmd/docu-docu check ./docs --strict --stale-days 0"
             ],
-            "line": 46
+            "line": 45
           }
         ],
         "repositoryPaths": [
@@ -5573,7 +5625,7 @@
         "result": "The repository contains its own consistent documentation that describes current implementation and undergoes strict testing by Docu-docu itself.",
         "outOfScope": "changing the behavior of CLI or JSON schema; publication of release artifacts; generating and adding an output portal to Git.",
         "plan": "Capture the current state, architecture and product coverage. Describe modules, use cases, business rules and public contracts. Add risks, ADR, verification guide and parameter reference. Link documents, run strict-check and complete Go loop.",
-        "documentationImpact": "Created source design documents in docs/ . README now leads to docs/index.md ; the generated portal remains a build artifact.",
+        "documentationImpact": "Created source design documents in docs/. README now leads to docs/index.md; the generated portal remains a build artifact.",
         "documentationPaths": [
           "docs/index.md"
         ]
@@ -5609,37 +5661,49 @@
             "line": 59,
             "indent": 0,
             "completed": true,
-            "text": "AC-01 Standards, runbooks and custom manifests are validated with errors and warnings separated."
+            "text": "AC-01 Standards, runbooks and custom manifests are validated with errors and warnings separated.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 60,
             "indent": 0,
             "completed": true,
-            "text": "AC-02 Freshness respects --stale-days boundaries, including disabling age-based overdue with 0 value."
+            "text": "AC-02 Freshness respects --stale-days boundaries, including disabling age-based overdue with 0 value.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 61,
             "indent": 0,
             "completed": true,
-            "text": "AC-03 Task references, conditional QUALITY, context and additive JSON save empty collections as []."
+            "text": "AC-03 Task references, conditional QUALITY, context and additive JSON save empty collections as [].",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 62,
             "indent": 0,
             "completed": true,
-            "text": "AC-04 RU/EN scaffolds are created atomically and do not invent the owner or check date of the runbook."
+            "text": "AC-04 RU/EN scaffolds are created atomically and do not invent the owner or check date of the runbook.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 63,
             "indent": 0,
             "completed": true,
-            "text": "AC-05 The standalone portal saves processes and adds catalogs, filters and four runbook metrics."
+            "text": "AC-05 The standalone portal saves processes and adds catalogs, filters and four runbook metrics.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 64,
             "indent": 0,
             "completed": true,
-            "text": "AC-06 Self-documentation contains only verified standards and does not create a fictitious runbook."
+            "text": "AC-06 Self-documentation contains only verified standards and does not create a fictitious runbook.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           }
         ],
         "verificationMatrix": [
@@ -5710,63 +5774,63 @@
             "commands": [
               "go test ./... -run 'TestQualityMetadataStatusAliasesAndValidationBoundaries|TestTypedKnowledgeErrorsAndCustomManifest'"
             ],
-            "line": 76
+            "line": 75
           },
           {
             "target": "AC-02",
             "commands": [
               "go test ./... -run TestStandardsRunbooksAndFreshness"
             ],
-            "line": 77
+            "line": 76
           },
           {
             "target": "AC-03",
             "commands": [
               "go test ./... -run 'TestQualityTaskContextAndConditionalVerification|TestQualityDanglingReferencesAndAdditiveJSON'"
             ],
-            "line": 78
+            "line": 77
           },
           {
             "target": "AC-04",
             "commands": [
               "go test ./... -run TestStandardAndRunbookScaffoldsAndCatalogs"
             ],
-            "line": 79
+            "line": 78
           },
           {
             "target": "AC-05",
             "commands": [
               "go test ./... -run TestStandardAndRunbookScaffoldsAndCatalogs"
             ],
-            "line": 80
+            "line": 79
           },
           {
             "target": "AC-06",
             "commands": [
               "go run ./cmd/docu-docu check ./docs --strict --stale-days 0"
             ],
-            "line": 81
+            "line": 80
           },
           {
             "target": "ALL",
             "commands": [
               "go test ./..."
             ],
-            "line": 82
+            "line": 81
           },
           {
             "target": "DOCS",
             "commands": [
               "go run ./cmd/docu-docu check ./docs --strict --stale-days 0"
             ],
-            "line": 83
+            "line": 82
           },
           {
             "target": "QUALITY",
             "commands": [
               "go test ./... -run 'TestStandardsRunbooks|TestQualityTask|TestStandardAndRunbook|TestTypedKnowledge'"
             ],
-            "line": 84
+            "line": 83
           }
         ],
         "repositoryPaths": [
@@ -5786,13 +5850,13 @@
           "report_types.go",
           "skills/docu-docu/"
         ],
-        "result": "Docu-docu supports optional STD- standards, operational procedures RB- , user top-level sections, their task connections, schema-v1 collections, scaffolds and stand-alone portal catalogs.",
-        "behaviorChange": "Before Unknown directories remained completely free-form, and Quality and Runbooks did not had standardized contracts, task connections and a specialized portal. After The appeared quality/ , runbooks/ and custom sections receive explicit manifest and typed validation without new globally required files; task workflow only transfers the explicitly bound STD- and RB- .",
+        "result": "Docu-docu supports optional STD-* standards, operational procedures RB-*, user top-level sections, their task connections, schema-v1 collections, scaffolds and stand-alone portal catalogs.",
+        "behaviorChange": "Before Unknown directories remained completely free-form, and Quality and Runbooks did not had standardized contracts, task connections and a specialized portal. After The appeared quality/, runbooks/ and custom sections receive explicit manifest and typed validation without new globally required files; task workflow only transfers the explicitly bound STD-* and RB-*.",
         "before": "Unknown directories remained completely free-form, and Quality and Runbooks did not had standardized contracts, task connections and a specialized portal.",
-        "after": "The appeared quality/ , runbooks/ and custom sections receive explicit manifest and typed validation without new globally required files; task workflow only transfers the explicitly bound STD- and RB- .",
+        "after": "The appeared quality/, runbooks/ and custom sections receive explicit manifest and typed validation without new globally required files; task workflow only transfers the explicitly bound STD-* and RB-*.",
         "outOfScope": "external dependencies; automatic comparison of task scope with the standard glob area; execution of commands directly from the standard; creating your own runbook without a real operational procedure; change the version of schema v1 or generator.",
         "plan": "Add typed model, diagnostics, freshness and custom manifests. Expand task workflow, schema v1 and scaffolds. Add specialized catalogs and portal tests. Update self-documentation and undergo semantic review. Perform a full Go loop, strict-check, and secure portal rebuild.",
-        "documentationImpact": "Updated README.md , CHANGELOG.md , docs/index.md , docs/modules/model.md , docs/use-cases/check-documentation.md , docs/contracts/cli.md , docs/reference/features.md , docs/guides/work-items.md and skills/docu-docu/SKILL.md ; added guide docs/guides/quality-runbooks.md , original section docs/quality/ , updated reference skill model and eight RU/EN skill templates standards, runbooks and their manifest. The generated portals remain derived from Markdown.",
+        "documentationImpact": "Updated README.md, CHANGELOG.md, docs/index.md, docs/modules/model.md, docs/use-cases/check-documentation.md, docs/contracts/cli.md, docs/reference/features.md, docs/guides/work-items.md and skills/docu-docu/SKILL.md; added guide docs/guides/quality-runbooks.md, original section docs/quality/, updated reference skill model and eight RU/EN skill templates standards, runbooks and their manifest. The generated portals remain derived from Markdown.",
         "documentationPaths": [
           "CHANGELOG.md",
           "docs/contracts/cli.md",
@@ -5836,31 +5900,39 @@
             "line": 49,
             "indent": 0,
             "completed": true,
-            "text": "AC-01 Skill treats $docu-docu init as the only explicit"
+            "text": "AC-01 Skill treats $docu-docu init as the only explicit onboarding call with read-only preflight, minimal index.md, controlled by the AGENTS.md block and the final check.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 52,
             "indent": 0,
             "completed": true,
-            "text": "AC-02 Russian and English blocks use the same stable"
+            "text": "AC-02 Russian and English blocks use the same stable tokens, limit skill triggers and disable TASK-* for each prompt.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 54,
             "indent": 0,
             "completed": true,
-            "text": "AC-03 Task workflow creates a new work item only for essential"
+            "text": "AC-03 Task workflow creates a new work item only for essential work or at the explicit request of the user or project.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 56,
             "indent": 0,
             "completed": true,
-            "text": "AC-04 Metadata skill describes an explicit init and remains valid."
+            "text": "AC-04 Metadata skill describes an explicit init and remains valid.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           }
         ],
         "verificationMatrix": [
           {
             "criterionId": "AC-01",
-            "criterion": "Skill treats $docu-docu init as the only explicit",
+            "criterion": "Skill treats $docu-docu init as the only explicit onboarding call with read-only preflight, minimal index.md, controlled by the AGENTS.md block and the final check.",
             "completed": true,
             "commands": [
               "go test ./... -run TestUseDocu-docuInitContract"
@@ -5870,7 +5942,7 @@
           },
           {
             "criterionId": "AC-02",
-            "criterion": "Russian and English blocks use the same stable",
+            "criterion": "Russian and English blocks use the same stable tokens, limit skill triggers and disable TASK-* for each prompt.",
             "completed": true,
             "commands": [
               "go test ./... -run TestUseDocu-docuProjectGuidanceTemplates"
@@ -5880,7 +5952,7 @@
           },
           {
             "criterionId": "AC-03",
-            "criterion": "Task workflow creates a new work item only for essential",
+            "criterion": "Task workflow creates a new work item only for essential work or at the explicit request of the user or project.",
             "completed": true,
             "commands": [
               "go test ./... -run TestUseDocu-docuTaskCreationThreshold"
@@ -5905,49 +5977,49 @@
             "commands": [
               "go test ./... -run TestUseDocu-docuInitContract"
             ],
-            "line": 67
+            "line": 66
           },
           {
             "target": "AC-02",
             "commands": [
               "go test ./... -run TestUseDocu-docuProjectGuidanceTemplates"
             ],
-            "line": 68
+            "line": 67
           },
           {
             "target": "AC-03",
             "commands": [
               "go test ./... -run TestUseDocu-docuTaskCreationThreshold"
             ],
-            "line": 69
+            "line": 68
           },
           {
             "target": "AC-04",
             "commands": [
               "go test ./... -run TestUseDocu-docuMetadata"
             ],
-            "line": 70
+            "line": 69
           },
           {
             "target": "ALL",
             "commands": [
               "go test ./..."
             ],
-            "line": 71
+            "line": 70
           },
           {
             "target": "DOCS",
             "commands": [
               "go run ./cmd/docu-docu check ./docs --strict --stale-days 0"
             ],
-            "line": 72
+            "line": 71
           },
           {
             "target": "QUALITY",
             "commands": [
               "go test ./... -run 'TestUseDocu-docu'"
             ],
-            "line": 73
+            "line": 72
           }
         ],
         "repositoryPaths": [
@@ -5958,13 +6030,13 @@
           "skill_templates_test.go",
           "skills/docu-docu/"
         ],
-        "result": "The user explicitly connects Docu-docu to the project via $docu-docu init ; skill creates minimal documentation when necessary and safely sets limited usage rules for AGENTS.md .",
-        "behaviorChange": "Before Skill did not have a separate onboarding call, but workflow certainly offered create TASK- for each new request. After Only explicit $docu-docu init performs preflight, creates the missing one docs/index.md , sets the AGENTS.md managed block and runs structural check. Regular calls do not change project instructions, but new ones TASK- are created only for essential work.",
-        "before": "Skill did not have a separate onboarding call, but workflow certainly offered create TASK- for each new request.",
-        "after": "Only explicit $docu-docu init performs preflight, creates the missing one docs/index.md , sets the AGENTS.md managed block and runs structural check. Regular calls do not change project instructions, but new ones TASK- are created only for essential work.",
-        "outOfScope": "new Go CLI command docu-docu init ; automatic change of AGENTS.md when skill is implicitly triggered; external runtime or dependency for Markdown merging; creation of complete starter pack documentation.",
+        "result": "The user explicitly connects Docu-docu to the project via $docu-docu init; skill creates minimal documentation when necessary and safely sets limited usage rules for AGENTS.md.",
+        "behaviorChange": "Before Skill did not have a separate onboarding call, but workflow certainly offered create TASK-* for each new request. After Only explicit $docu-docu init performs preflight, creates the missing one docs/index.md, sets the AGENTS.md managed block and runs structural check. Regular calls do not change project instructions, but new ones TASK-* are created only for essential work.",
+        "before": "Skill did not have a separate onboarding call, but workflow certainly offered create TASK-* for each new request.",
+        "after": "Only explicit $docu-docu init performs preflight, creates the missing one docs/index.md, sets the AGENTS.md managed block and runs structural check. Regular calls do not change project instructions, but new ones TASK-* are created only for essential work.",
+        "outOfScope": "new Go CLI command docu-docu init; automatic change of AGENTS.md when skill is implicitly triggered; external runtime or dependency for Markdown merging; creation of complete starter pack documentation.",
         "plan": "Add init reference and RU/EN project-guidance assets. Synchronize SKILL.md, workflow and metadata. Fix the contract with tests and user documentation. Perform semantic review and full verification cycle.",
-        "documentationImpact": "Updated skills/docu-docu/ , README.md , CHANGELOG.md , docs/guides/work-items.md and skill templates test.go . Public Go API, CLI and JSON schema do not change; generated portals cannot be edited.",
+        "documentationImpact": "Updated skills/docu-docu/, README.md, CHANGELOG.md, docs/guides/work-items.md and skill_templates_test.go. Public Go API, CLI and JSON schema do not change; generated portals cannot be edited.",
         "documentationPaths": [
           "CHANGELOG.md",
           "docs/guides/work-items.md",
@@ -6001,43 +6073,55 @@
             "line": 54,
             "indent": 0,
             "completed": true,
-            "text": "AC-01 Skill routes $docu-docu refresh and `$docu-docu"
+            "text": "AC-01 Skill routes $docu-docu refresh and $docu-docu refresh diff into a separate workflow without weakening the exclusivity of init.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 56,
             "indent": 0,
             "completed": true,
-            "text": "AC-02 Full mode checks all documentation, and diff mode uses"
+            "text": "AC-02 Full mode checks all documentation, and diff mode uses HEAD, includes staged, unstaged and untracked files and expands coverage through documentation dependencies.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 59,
             "indent": 0,
             "completed": true,
-            "text": "AC-03 Workflow applies evidence-first update, secure policy"
+            "text": "AC-03 Workflow applies evidence-first update, secure policy dates, provable delete/rename/ID migration and honestly reports unresolved findings.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 62,
             "indent": 0,
             "completed": true,
-            "text": "AC-04 Semantic and structural gates precede conditional reassembly"
+            "text": "AC-04 Semantic and structural gates precede conditional reassembly tracked portals; generated output is not editable as a source.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 64,
             "indent": 0,
             "completed": true,
-            "text": "AC-05 RU/EN guidance, metadata and user documentation"
+            "text": "AC-05 RU/EN guidance, metadata and user documentation synchronously describe both teams as skill-level workflows.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 66,
             "indent": 0,
             "completed": true,
-            "text": "AC-06 Go CLI still rejects docu-docu refresh and full loop"
+            "text": "AC-06 Go CLI still rejects docu-docu refresh and full loop tests and strict verification complete without warnings/errors.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           }
         ],
         "verificationMatrix": [
           {
             "criterionId": "AC-01",
-            "criterion": "Skill routes $docu-docu refresh and `$docu-docu",
+            "criterion": "Skill routes $docu-docu refresh and $docu-docu refresh diff into a separate workflow without weakening the exclusivity of init.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestUseDocu-docuRefresh'"
@@ -6047,7 +6131,7 @@
           },
           {
             "criterionId": "AC-02",
-            "criterion": "Full mode checks all documentation, and diff mode uses",
+            "criterion": "Full mode checks all documentation, and diff mode uses HEAD, includes staged, unstaged and untracked files and expands coverage through documentation dependencies.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestUseDocu-docuRefresh'"
@@ -6057,7 +6141,7 @@
           },
           {
             "criterionId": "AC-03",
-            "criterion": "Workflow applies evidence-first update, secure policy",
+            "criterion": "Workflow applies evidence-first update, secure policy dates, provable delete/rename/ID migration and honestly reports unresolved findings.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestUseDocu-docuRefresh'"
@@ -6067,7 +6151,7 @@
           },
           {
             "criterionId": "AC-04",
-            "criterion": "Semantic and structural gates precede conditional reassembly",
+            "criterion": "Semantic and structural gates precede conditional reassembly tracked portals; generated output is not editable as a source.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestUseDocu-docuRefresh'"
@@ -6077,7 +6161,7 @@
           },
           {
             "criterionId": "AC-05",
-            "criterion": "RU/EN guidance, metadata and user documentation",
+            "criterion": "RU/EN guidance, metadata and user documentation synchronously describe both teams as skill-level workflows.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestUseDocu-docuRefresh|TestUseDocu-docuMetadata|TestUseDocu-docuProjectGuidanceTemplates'"
@@ -6087,7 +6171,7 @@
           },
           {
             "criterionId": "AC-06",
-            "criterion": "Go CLI still rejects docu-docu refresh and full loop",
+            "criterion": "Go CLI still rejects docu-docu refresh and full loop tests and strict verification complete without warnings/errors.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestCLIArguments|TestUseDocu-docuRefresh'"
@@ -6102,63 +6186,63 @@
             "commands": [
               "go test ./... -run 'TestUseDocu-docuRefresh'"
             ],
-            "line": 79
+            "line": 78
           },
           {
             "target": "AC-02",
             "commands": [
               "go test ./... -run 'TestUseDocu-docuRefresh'"
             ],
-            "line": 80
+            "line": 79
           },
           {
             "target": "AC-03",
             "commands": [
               "go test ./... -run 'TestUseDocu-docuRefresh'"
             ],
-            "line": 81
+            "line": 80
           },
           {
             "target": "AC-04",
             "commands": [
               "go test ./... -run 'TestUseDocu-docuRefresh'"
             ],
-            "line": 82
+            "line": 81
           },
           {
             "target": "AC-05",
             "commands": [
               "go test ./... -run 'TestUseDocu-docuRefresh|TestUseDocu-docuMetadata|TestUseDocu-docuProjectGuidanceTemplates'"
             ],
-            "line": 83
+            "line": 82
           },
           {
             "target": "AC-06",
             "commands": [
               "go test ./... -run 'TestCLIArguments|TestUseDocu-docuRefresh'"
             ],
-            "line": 84
+            "line": 83
           },
           {
             "target": "ALL",
             "commands": [
               "go test -count=1 ./..."
             ],
-            "line": 85
+            "line": 84
           },
           {
             "target": "DOCS",
             "commands": [
               "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0 \u0026\u0026 go run ./cmd/docu-docu check ./example/docs --repository-root ./example --strict --stale-days 0"
             ],
-            "line": 86
+            "line": 85
           },
           {
             "target": "QUALITY",
             "commands": [
               "go test ./... -run 'TestUseDocu-docu'"
             ],
-            "line": 87
+            "line": 86
           }
         ],
         "repositoryPaths": [
@@ -6177,7 +6261,7 @@
         "behaviorChange": "Before Skill only updated the documentation for a specific request and did not have an explicit workflow for systematic review of relevance. After $docu-docu refresh checks the entire project, and $docu-docu refresh diff checks staged, unstaged and untracked changes against HEAD and dependent documentation. Both modes can update, delete and rename documents with an unambiguous evidence base.",
         "before": "Skill only updated the documentation for a specific request and did not have an explicit workflow for systematic review of relevance.",
         "after": "$docu-docu refresh checks the entire project, and $docu-docu refresh diff checks staged, unstaged and untracked changes against HEAD and dependent documentation. Both modes can update, delete and rename documents with an unambiguous evidence base.",
-        "outOfScope": "new Go command docu-docu refresh ; separate read-only refresh workflow; merge-base or comparison with default branch; changing the code to comply with the documentation; updating Last verified without actually checking the runbook.",
+        "outOfScope": "new Go command docu-docu refresh; separate read-only refresh workflow; merge-base or comparison with default branch; changing the code to comply with the documentation; updating Last verified without actually checking the runbook.",
         "plan": "Add refresh reference and command routing. Synchronize managed guidance, metadata and self-documentation. Fix full, diff, safety and no-CLI contracts with tests. Conduct an independent semantic review and eliminate the comments. Perform full verification and rebuild tracked portals.",
         "documentationImpact": "Public workflow skill, RU/EN managed guidance, README are updated, changelog, self-documentation, root AGENTS.md and both tracked portal.",
         "documentationPaths": [
@@ -6214,43 +6298,57 @@
             "line": 45,
             "indent": 0,
             "completed": true,
-            "text": "AC-01 Twelve SectionTypes have a stable order and derived lookup."
+            "text": "AC-01 Twelve SectionTypes have a stable order and derived lookup.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 46,
             "indent": 0,
             "completed": true,
-            "text": "AC-02 Config accepts project-only locale and full sections map."
+            "text": "AC-02 Config accepts project-only locale and full sections map.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 47,
             "indent": 0,
             "completed": true,
-            "text": "AC-03 Invalid locales are rejected, but unknown valid locales are accepted."
+            "text": "AC-03 Invalid locales are rejected, but unknown valid locales are accepted.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 48,
             "indent": 0,
             "completed": true,
-            "text": "AC-04 Navigation, routes, HTML lang and report use SectionType."
+            "text": "AC-04 Navigation, routes, HTML lang and report use SectionType.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 49,
             "indent": 0,
             "completed": true,
-            "text": "AC-05 Full Go and strict documentation verification pass."
+            "text": "AC-05 Full Go and strict documentation verification pass.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 50,
             "indent": 0,
             "completed": true,
-            "text": "AC-06 The FLOW directory exists only as processes/index.html, its"
+            "text": "AC-06 The FLOW directory exists only as processes/index.html, its label is taken from project.sections.flows, and the FLOW page activates this navigation section.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 53,
             "indent": 0,
             "completed": true,
-            "text": "AC-07 Demo project sets full localized project.locale and"
+            "text": "AC-07 Demo project sets full localized project.locale and project.sections and undergoes strict documentation check without warning.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           }
         ],
         "verificationMatrix": [
@@ -6306,7 +6404,7 @@
           },
           {
             "criterionId": "AC-06",
-            "criterion": "The FLOW directory exists only as processes/index.html, its",
+            "criterion": "The FLOW directory exists only as processes/index.html, its label is taken from project.sections.flows, and the FLOW page activates this navigation section.",
             "completed": true,
             "commands": [
               "go test ./... -run TestScreenPortalAndReportV1"
@@ -6316,7 +6414,7 @@
           },
           {
             "criterionId": "AC-07",
-            "criterion": "Demo project sets full localized project.locale and",
+            "criterion": "Demo project sets full localized project.locale and project.sections and undergoes strict documentation check without warning.",
             "completed": true,
             "commands": [
               "go run ./cmd/docu-docu check ./example/docs --repository-root ./example --strict --stale-days 0"
@@ -6331,80 +6429,80 @@
             "commands": [
               "go test ./... -run TestBuiltinSectionsStableOrderAndLookups"
             ],
-            "line": 58
+            "line": 57
           },
           {
             "target": "AC-02",
             "commands": [
               "go test ./... -run TestProjectLocaleConfiguration"
             ],
-            "line": 59
+            "line": 58
           },
           {
             "target": "AC-03",
             "commands": [
               "go test ./... -run TestProjectLocaleConfiguration"
             ],
-            "line": 60
+            "line": 59
           },
           {
             "target": "AC-04",
             "commands": [
               "go test ./... -run TestMissingProjectConfigurationUsesEnglishAndWarning"
             ],
-            "line": 61
+            "line": 60
           },
           {
             "target": "AC-05",
             "commands": [
               "go vet ./... \u0026\u0026 go test ./... \u0026\u0026 go test -race ./..."
             ],
-            "line": 62
+            "line": 61
           },
           {
             "target": "AC-06",
             "commands": [
               "go test ./... -run TestScreenPortalAndReportV1"
             ],
-            "line": 63
+            "line": 62
           },
           {
             "target": "AC-07",
             "commands": [
               "go run ./cmd/docu-docu check ./example/docs --repository-root ./example --strict --stale-days 0"
             ],
-            "line": 64
+            "line": 63
           },
           {
             "target": "ALL",
             "commands": [
               "go vet ./... \u0026\u0026 go test ./... \u0026\u0026 go test -race ./..."
             ],
-            "line": 65
+            "line": 64
           },
           {
             "target": "DOCS",
             "commands": [
               "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0 \u0026\u0026 go run ./cmd/docu-docu check ./example/docs --repository-root ./example --strict --stale-days 0"
             ],
-            "line": 66
+            "line": 65
           },
           {
             "target": "QUALITY",
             "commands": [
               "go test ./..."
             ],
-            "line": 67
+            "line": 66
           }
         ],
         "repositoryPaths": [
           "$docu-docu",
           "internal/app/sections.go"
         ],
-        "result": "The model and portal use an ordered registry of built-in partitions, localized project names, additive JSON sectionType and a single directory FLOW- via route processes/index.html .",
-        "behaviorChange": "Before Navigation and classification of built-in sections depended on directory lines, and The section title may have been implicitly derived from H1. After Stable SectionType and project configuration determine the route, order, name and JSON representation of the built-in section; flows remains source directory and the route of individual documents, and its directory becomes only processes .",
+        "result": "The model and portal use an ordered registry of built-in partitions, localized project names, additive JSON sectionType and a single directory FLOW-* via route processes/index.html.",
+        "behaviorChange": "Before Navigation and classification of built-in sections depended on directory lines, and The section title may have been implicitly derived from H1. After Stable SectionType and project configuration determine the route, order, name and JSON representation of the built-in section; flows remains source directory and the route of individual documents, and its directory becomes only processes.",
         "before": "Navigation and classification of built-in sections depended on directory lines, and The section title may have been implicitly derived from H1.",
-        "after": "Stable SectionType and project configuration determine the route, order, name and JSON representation of the built-in section; flows remains source directory and the route of individual documents, and its directory becomes only processes .",
+        "after": "Stable SectionType and project configuration determine the route, order, name and JSON representation of the built-in section; flows remains source directory and the route of individual documents, and its directory becomes only processes.",
         "outOfScope": "multi-local assembly of one portal; migration fallback from H1 for built-in sections.",
         "plan": "Add SectionType, registry and locale/config contracts. Translate model, JSON and navigation to registry. Record behavior with tests and update documentation. Delete the legacy directory flows/index.html and rebuild the portals. Add full project configuration of the demo portal.",
         "documentationImpact": "Updated reference configuration, module contracts, CLI contract, README and init/refresh instructions skill. Generated portal is rebuilt only after successful strict structural check.",
@@ -6440,37 +6538,47 @@
             "line": 38,
             "indent": 0,
             "completed": true,
-            "text": "AC-01 The CLI and canonical documentation use the 0.0.1 version, and"
+            "text": "AC-01 The CLI and canonical documentation use the 0.0.1 version, and release workflow accepts a tag with exactly the same name.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 40,
             "indent": 0,
             "completed": true,
-            "text": "AC-02 Identical sources give the same byte-by-byte"
+            "text": "AC-02 Identical sources give the same byte-by-byte assets/search-index.js regardless of the order in which the metadata map is traversed.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 42,
             "indent": 0,
             "completed": true,
-            "text": "AC-03 Single local command checks formatting, Go code,"
+            "text": "AC-03 Single local command checks formatting, Go code, race detector, modules and both documentation root.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 44,
             "indent": 0,
             "completed": true,
-            "text": "AC-04 The local release bundle contains five target binaries,"
+            "text": "AC-04 The local release bundle contains five target binaries, notices, licenses and verifiable checksums.txt.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 46,
             "indent": 0,
             "completed": true,
-            "text": "AC-05 The original documentation and both monitored portals are consistent with"
+            "text": "AC-05 The original documentation and both monitored portals are consistent with behavior of the release without prematurely marking the publication.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           }
         ],
         "verificationMatrix": [
           {
             "criterionId": "AC-01",
-            "criterion": "The CLI and canonical documentation use the 0.0.1 version, and",
+            "criterion": "The CLI and canonical documentation use the 0.0.1 version, and release workflow accepts a tag with exactly the same name.",
             "completed": true,
             "commands": [
               "go run ./cmd/docu-docu version \u0026\u0026 test \"$(go run ./cmd/docu-docu version)\" = \"0.0.1\""
@@ -6480,7 +6588,7 @@
           },
           {
             "criterionId": "AC-02",
-            "criterion": "Identical sources give the same byte-by-byte",
+            "criterion": "Identical sources give the same byte-by-byte assets/search-index.js regardless of the order in which the metadata map is traversed.",
             "completed": true,
             "commands": [
               "go test ./internal/app -run TestSearchIndexMetadataOrderIsDeterministic"
@@ -6490,7 +6598,7 @@
           },
           {
             "criterionId": "AC-03",
-            "criterion": "Single local command checks formatting, Go code,",
+            "criterion": "Single local command checks formatting, Go code, race detector, modules and both documentation root.",
             "completed": true,
             "commands": [
               "make check"
@@ -6500,7 +6608,7 @@
           },
           {
             "criterionId": "AC-04",
-            "criterion": "The local release bundle contains five target binaries,",
+            "criterion": "The local release bundle contains five target binaries, notices, licenses and verifiable checksums.txt.",
             "completed": true,
             "commands": [
               "make release \u0026\u0026 cd dist \u0026\u0026 sha256sum -c checksums.txt"
@@ -6510,7 +6618,7 @@
           },
           {
             "criterionId": "AC-05",
-            "criterion": "The original documentation and both monitored portals are consistent with",
+            "criterion": "The original documentation and both monitored portals are consistent with behavior of the release without prematurely marking the publication.",
             "completed": true,
             "commands": [
               "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
@@ -6525,56 +6633,56 @@
             "commands": [
               "go run ./cmd/docu-docu version \u0026\u0026 test \"$(go run ./cmd/docu-docu version)\" = \"0.0.1\""
             ],
-            "line": 60
+            "line": 59
           },
           {
             "target": "AC-02",
             "commands": [
               "go test ./internal/app -run TestSearchIndexMetadataOrderIsDeterministic"
             ],
-            "line": 61
+            "line": 60
           },
           {
             "target": "AC-03",
             "commands": [
               "make check"
             ],
-            "line": 62
+            "line": 61
           },
           {
             "target": "AC-04",
             "commands": [
               "make release \u0026\u0026 cd dist \u0026\u0026 sha256sum -c checksums.txt"
             ],
-            "line": 63
+            "line": 62
           },
           {
             "target": "AC-05",
             "commands": [
               "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
             ],
-            "line": 64
+            "line": 63
           },
           {
             "target": "ALL",
             "commands": [
               "go test ./..."
             ],
-            "line": 65
+            "line": 64
           },
           {
             "target": "DOCS",
             "commands": [
               "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
             ],
-            "line": 66
+            "line": 65
           },
           {
             "target": "QUALITY",
             "commands": [
               "make check"
             ],
-            "line": 67
+            "line": 66
           }
         ],
         "repositoryPaths": [
@@ -6587,7 +6695,7 @@
           "project-docs/",
           "README.md"
         ],
-        "result": "The repository is locally ready to publish a stable release 0.0.1 : version, deterministic portals, reviews, release bundle and GitHub workflow are consistent, but the tag and post fail.",
+        "result": "The repository is locally ready to publish a stable release 0.0.1: version, deterministic portals, reviews, release bundle and GitHub workflow are consistent, but the tag and post fail.",
         "outOfScope": "creating a Git tag; setting up or reading GitHub remote; push, GitHub Actions and GitHub Release publication; changing the set or signatures of CLI commands, Go API exports and JSON structure schema v1; only the value of the existing docu-docu.Version constant changes.",
         "plan": "Fix the version and release contract. Eliminate non-deterministic ordering of the search index. Unify local and CI release gates. Update documentation and rebuild portals. Perform a full local release cycle without accessing GitHub. Get an independent semantic review of the changed release documentation.",
         "documentationImpact": "Version, current state, completed Changes entities, canonical are updated changelog and description of dependency-free delivery. Both monitored portals rebuilt from the original Markdown.",
@@ -6622,43 +6730,55 @@
             "line": 68,
             "indent": 0,
             "completed": true,
-            "text": "AC-01 Installer unambiguously selects five existing ones"
+            "text": "AC-01 Installer unambiguously selects five existing ones Linux, macOS and Windows artifacts, and unsupported platform rejects before loading.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 71,
             "indent": 0,
             "completed": true,
-            "text": "AC-02 By default, the latest stable release is selected;"
+            "text": "AC-02 By default, the latest stable release is selected; DOCU_DOCU_VERSION=X.Y.Z fixes the version and allows downgrade, DOCU_DOCU_INSTALL_DIR selects a non-standard directory, and DOCU_DOCU_NO_MODIFY_PATH=1 prevents modification of PATH.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 75,
             "indent": 0,
             "completed": true,
-            "text": "AC-03 The binary is replaced only after an accurate check"
+            "text": "AC-03 The binary is replaced only after an accurate check release checksum and versions; download, checksum and filesystem failure do not damage the already installed version, but the matching checksum gives idempotent no-op.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 79,
             "indent": 0,
             "completed": true,
-            "text": "AC-04 Release bundle contains both installer scripts, and"
+            "text": "AC-04 Release bundle contains both installer scripts, and checksums.txt covers them along with binaries and notices.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 81,
             "indent": 0,
             "completed": true,
-            "text": "AC-05 README and canonical documentation describe"
+            "text": "AC-05 README and canonical documentation describe commands, matrix, update/version override, PATH, check SHA-256, bootstrap-only network boundary and what's up publishing 0.0.1 by the owner of one-liner is not yet available.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 85,
             "indent": 0,
             "completed": true,
-            "text": "AC-06 Restart, upgrade, downgrade and add"
+            "text": "AC-06 Restart, upgrade, downgrade and add standard user install dir in shell/user PATH are idempotent; the non-standard directory does not change the profile and receives a hint.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           }
         ],
         "verificationMatrix": [
           {
             "criterionId": "AC-01",
-            "criterion": "Installer unambiguously selects five existing ones",
+            "criterion": "Installer unambiguously selects five existing ones Linux, macOS and Windows artifacts, and unsupported platform rejects before loading.",
             "completed": true,
             "commands": [
               "go test ./internal/app -run TestInstallerPlatformContract"
@@ -6668,7 +6788,7 @@
           },
           {
             "criterionId": "AC-02",
-            "criterion": "By default, the latest stable release is selected;",
+            "criterion": "By default, the latest stable release is selected; DOCU_DOCU_VERSION=X.Y.Z fixes the version and allows downgrade, DOCU_DOCU_INSTALL_DIR selects a non-standard directory, and DOCU_DOCU_NO_MODIFY_PATH=1 prevents modification of PATH.",
             "completed": true,
             "commands": [
               "go test ./internal/app -run TestInstallerSelectionAndPathContract"
@@ -6678,7 +6798,7 @@
           },
           {
             "criterionId": "AC-03",
-            "criterion": "The binary is replaced only after an accurate check",
+            "criterion": "The binary is replaced only after an accurate check release checksum and versions; download, checksum and filesystem failure do not damage the already installed version, but the matching checksum gives idempotent no-op.",
             "completed": true,
             "commands": [
               "go test ./internal/app -run TestInstallerIntegrityAndReplacement"
@@ -6688,7 +6808,7 @@
           },
           {
             "criterionId": "AC-04",
-            "criterion": "Release bundle contains both installer scripts, and",
+            "criterion": "Release bundle contains both installer scripts, and checksums.txt covers them along with binaries and notices.",
             "completed": true,
             "commands": [
               "make release \u0026\u0026 cd dist \u0026\u0026 sha256sum -c checksums.txt \u0026\u0026 test \"$(wc -l \u003c checksums.txt)\" -eq 10 \u0026\u0026 for file in docu-docu-linux-amd64 docu-docu-linux-arm64 docu-docu-darwin-amd64 docu-docu-darwin-arm64 docu-docu-windows-amd64.exe install.sh install.ps1 LICENSE THIRD_PARTY_NOTICES.md CODEMIRROR-CHECKSUMS.txt; do awk -v file=\"$file\" '$2 == file { found=1 } END { exit !found }' checksums.txt || exit 1; done"
@@ -6698,7 +6818,7 @@
           },
           {
             "criterionId": "AC-05",
-            "criterion": "README and canonical documentation describe",
+            "criterion": "README and canonical documentation describe commands, matrix, update/version override, PATH, check SHA-256, bootstrap-only network boundary and what's up publishing 0.0.1 by the owner of one-liner is not yet available.",
             "completed": true,
             "commands": [
               "go test ./internal/app -run TestInstallerDocumentationContract \u0026\u0026 go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
@@ -6708,7 +6828,7 @@
           },
           {
             "criterionId": "AC-06",
-            "criterion": "Restart, upgrade, downgrade and add",
+            "criterion": "Restart, upgrade, downgrade and add standard user install dir in shell/user PATH are idempotent; the non-standard directory does not change the profile and receives a hint.",
             "completed": true,
             "commands": [
               "go test ./internal/app -run TestInstallerRepeatUpgradeDowngradeAndPath"
@@ -6723,63 +6843,63 @@
             "commands": [
               "go test ./internal/app -run TestInstallerPlatformContract"
             ],
-            "line": 99
+            "line": 98
           },
           {
             "target": "AC-02",
             "commands": [
               "go test ./internal/app -run TestInstallerSelectionAndPathContract"
             ],
-            "line": 100
+            "line": 99
           },
           {
             "target": "AC-03",
             "commands": [
               "go test ./internal/app -run TestInstallerIntegrityAndReplacement"
             ],
-            "line": 101
+            "line": 100
           },
           {
             "target": "AC-04",
             "commands": [
               "make release \u0026\u0026 cd dist \u0026\u0026 sha256sum -c checksums.txt \u0026\u0026 test \"$(wc -l \u003c checksums.txt)\" -eq 10 \u0026\u0026 for file in docu-docu-linux-amd64 docu-docu-linux-arm64 docu-docu-darwin-amd64 docu-docu-darwin-arm64 docu-docu-windows-amd64.exe install.sh install.ps1 LICENSE THIRD_PARTY_NOTICES.md CODEMIRROR-CHECKSUMS.txt; do awk -v file=\"$file\" '$2 == file { found=1 } END { exit !found }' checksums.txt || exit 1; done"
             ],
-            "line": 102
+            "line": 101
           },
           {
             "target": "AC-05",
             "commands": [
               "go test ./internal/app -run TestInstallerDocumentationContract \u0026\u0026 go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
             ],
-            "line": 103
+            "line": 102
           },
           {
             "target": "AC-06",
             "commands": [
               "go test ./internal/app -run TestInstallerRepeatUpgradeDowngradeAndPath"
             ],
-            "line": 104
+            "line": 103
           },
           {
             "target": "ALL",
             "commands": [
               "go test ./..."
             ],
-            "line": 105
+            "line": 104
           },
           {
             "target": "DOCS",
             "commands": [
               "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
             ],
-            "line": 106
+            "line": 105
           },
           {
             "target": "QUALITY",
             "commands": [
               "make check"
             ],
-            "line": 107
+            "line": 106
           }
         ],
         "repositoryPaths": [
@@ -6791,12 +6911,12 @@
           "README.md"
         ],
         "result": "Release bundle and workflow 0.0.1 are ready for POSIX- and PowerShell-bootstrap: after publishing by owner, user of one command installs or updates Docu-docu, and bootstrap itself selects a supported OS/architecture artifact and checks SHA-256 before replacing the file.",
-        "behaviorChange": "Before The user manually selects a binary in GitHub Releases, checks it is added to PATH . After POSIX and PowerShell commands download the appropriate artifact and checksums.txt , check integrity even without sudo atomically set it to /.local/bin/docu-docu or %LOCALAPPDATA%\\Programs\\docu-docu\\docu-docu.exe . Canonical commands: Both install. are published as assets of a not yet published release 0.0.1 . If the standard user dir is not already in PATH , POSIX installer once adds managed entry to .zshrc for zsh, .bashrc for bash, fish conf.d , and for other POSIX shells - in .profile . PowerShell installer adds once standard directory in user PATH . The current parent shell is not changes: installer prints the exact source /fish command, for .profile asks for login/re-login, and for Windows, opens a new terminal.",
-        "before": "The user manually selects a binary in GitHub Releases, checks it is added to PATH .",
-        "after": "POSIX and PowerShell commands download the appropriate artifact and checksums.txt , check integrity even without sudo atomically set it to /.local/bin/docu-docu or %LOCALAPPDATA%\\Programs\\docu-docu\\docu-docu.exe . Canonical commands: Both install. are published as assets of a not yet published release 0.0.1 . If the standard user dir is not already in PATH , POSIX installer once adds managed entry to .zshrc for zsh, .bashrc for bash, fish conf.d , and for other POSIX shells - in .profile . PowerShell installer adds once standard directory in user PATH . The current parent shell is not changes: installer prints the exact source /fish command, for .profile asks for login/re-login, and for Windows, opens a new terminal.",
+        "behaviorChange": "Before The user manually selects a binary in GitHub Releases, checks it is added to PATH. After POSIX and PowerShell commands download the appropriate artifact and checksums.txt, check integrity even without sudo atomically set it to ~/.local/bin/docu-docu or %LOCALAPPDATA%\\Programs\\docu-docu\\docu-docu.exe. Canonical commands: Both install.* are published as assets of a not yet published release 0.0.1. If the standard user dir is not already in PATH, POSIX installer once adds managed entry to .zshrc for zsh, .bashrc for bash, fish conf.d, and for other POSIX shells - in .profile. PowerShell installer adds once standard directory in user PATH. The current parent shell is not changes: installer prints the exact source/fish command, for .profile asks for login/re-login, and for Windows, opens a new terminal.",
+        "before": "The user manually selects a binary in GitHub Releases, checks it is added to PATH.",
+        "after": "POSIX and PowerShell commands download the appropriate artifact and checksums.txt, check integrity even without sudo atomically set it to ~/.local/bin/docu-docu or %LOCALAPPDATA%\\Programs\\docu-docu\\docu-docu.exe. Canonical commands: Both install.* are published as assets of a not yet published release 0.0.1. If the standard user dir is not already in PATH, POSIX installer once adds managed entry to .zshrc for zsh, .bashrc for bash, fish conf.d, and for other POSIX shells - in .profile. PowerShell installer adds once standard directory in user PATH. The current parent shell is not changes: installer prints the exact source/fish command, for .profile asks for login/re-login, and for Windows, opens a new terminal.",
         "outOfScope": "publication of a Git tag or GitHub Release; background self-update or new Go CLI command; system-wide installation via sudo and package managers; Windows ARM64 and other new release targets; signature or notarization of release binaries.",
         "plan": "Implement the same installer contract for POSIX and PowerShell. Include scripts in the release bundle and checksum generation. Add platform, integrity, replacement and release contract tests. Update source documents and release notes. Go through semantic gate, full check and rebuild the portal.",
-        "documentationImpact": "Installation guide is added; README, CHANGELOG.md , are updated current state, system/trust boundary and monitored portal.",
+        "documentationImpact": "Installation guide is added; README, CHANGELOG.md, are updated current state, system/trust boundary and monitored portal.",
         "documentationPaths": [
           "CHANGELOG.md"
         ]
@@ -6829,31 +6949,39 @@
             "line": 53,
             "indent": 0,
             "completed": true,
-            "text": "AC-01 Regular document, use case and dashboard copy the title and"
+            "text": "AC-01 Regular document, use case and dashboard copy the title and repository-relative path in a consistent two-line format.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 55,
             "indent": 0,
             "completed": true,
-            "text": "AC-02 Directories and service pages do not receive a context button."
+            "text": "AC-02 Directories and service pages do not receive a context button.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 56,
             "indent": 0,
             "completed": true,
-            "text": "AC-03 Copying works via Clipboard API and offline fallback for"
+            "text": "AC-03 Copying works via Clipboard API and offline fallback for file://, reports the result and is accessible from the keyboard.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 58,
             "indent": 0,
             "completed": true,
-            "text": "AC-04 Path does not reveal the absolute location of the document; outside"
+            "text": "AC-04 Path does not reveal the absolute location of the document; outside repository-root uses the secure SourcePath.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           }
         ],
         "verificationMatrix": [
           {
             "criterionId": "AC-01",
-            "criterion": "Regular document, use case and dashboard copy the title and",
+            "criterion": "Regular document, use case and dashboard copy the title and repository-relative path in a consistent two-line format.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestGenerateSite|TestDocumentContext'"
@@ -6873,7 +7001,7 @@
           },
           {
             "criterionId": "AC-03",
-            "criterion": "Copying works via Clipboard API and offline fallback for",
+            "criterion": "Copying works via Clipboard API and offline fallback for file://, reports the result and is accessible from the keyboard.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestDocumentContext'"
@@ -6883,7 +7011,7 @@
           },
           {
             "criterionId": "AC-04",
-            "criterion": "Path does not reveal the absolute location of the document; outside",
+            "criterion": "Path does not reveal the absolute location of the document; outside repository-root uses the secure SourcePath.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestDocumentContext'"
@@ -6898,42 +7026,42 @@
             "commands": [
               "go test ./... -run 'TestGenerateSite|TestDocumentContext'"
             ],
-            "line": 71
+            "line": 70
           },
           {
             "target": "AC-02",
             "commands": [
               "go test ./... -run 'TestDocumentContext'"
             ],
-            "line": 72
+            "line": 71
           },
           {
             "target": "AC-03",
             "commands": [
               "go test ./... -run 'TestDocumentContext'"
             ],
-            "line": 73
+            "line": 72
           },
           {
             "target": "AC-04",
             "commands": [
               "go test ./... -run 'TestDocumentContext'"
             ],
-            "line": 74
+            "line": 73
           },
           {
             "target": "ALL",
             "commands": [
               "go test ./..."
             ],
-            "line": 75
+            "line": 74
           },
           {
             "target": "DOCS",
             "commands": [
               "go run ./cmd/docu-docu check ./docs --repository-root ."
             ],
-            "line": 76
+            "line": 75
           }
         ],
         "repositoryPaths": [
@@ -6987,109 +7115,143 @@
             "line": 65,
             "indent": 0,
             "completed": true,
-            "text": "AC-01 GenerateSite always creates a standalone static portal, and"
+            "text": "AC-01 GenerateSite always creates a standalone static portal, and The serve option separately adds edit/source actions and server-only assets.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 67,
             "indent": 0,
             "completed": true,
-            "text": "AC-02 Workspace only lists the regular .md, .yaml, .yml and"
+            "text": "AC-02 Workspace only lists the regular .md, .yaml, .yml and .json inside docs root, including screens/hotspots.json but excluding hidden, excluded, output subtree and any symlink paths; other extensions and irregular files are not workspace entries.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 71,
             "indent": 0,
             "completed": true,
-            "text": "AC-03 API only accepts canonical relative POSIX paths and"
+            "text": "AC-03 API only accepts canonical relative POSIX paths and rejects absolute, .., backslash, NUL, encoded and re-encoded traversal.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 73,
             "indent": 0,
             "completed": true,
-            "text": "AC-04 Read and write use SHA-256 digest; save saves mode,"
+            "text": "AC-04 Read and write use SHA-256 digest; save saves mode, synchronizes the temp file, re-checks the CAS and atomically replaces the source: Unix uses same-directory rename and directory Sync, Windows - write-through replace. Each path component is re-checked against symlink / reparse before writing and replacing.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 78,
             "indent": 0,
             "completed": true,
-            "text": "AC-05 Stale digest returns 409 staledigest, and confirmed"
+            "text": "AC-05 Stale digest returns 409 stale_digest, and confirmed overwrite is executed only by the second request with digest from the conflict response and confirmOverwrite: true; the new external conflict returns 409 again.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 81,
             "indent": 0,
             "completed": true,
-            "text": "AC-06 Markdown diagnostics are built using the full model with in-memory overlay;"
+            "text": "AC-06 Markdown diagnostics are built using the full model with in-memory overlay; JSON receives syntax and hotspots diagnostics, YAML - only available Docu-docu diagnostics; diagnostics do not block save.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 84,
             "indent": 0,
             "completed": true,
-            "text": "AC-07 Save/create synchronously updates the model, HTML, search and revision;"
+            "text": "AC-07 Save/create synchronously updates the model, HTML, search and revision; watcher notices external changes with an interval of 750 ms and stabilization of 200 ms.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 86,
             "indent": 0,
             "completed": true,
-            "text": "AC-08 Serve frontend polls file revision via ETag every two times"
+            "text": "AC-08 Serve frontend polls file revision via ETag every two times seconds and without loss of text distinguishes between reload, clean update and dirty conflict.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 88,
             "indent": 0,
             "completed": true,
-            "text": "AC-09 Editor provides tree, path/dirty/save toolbar, Editor,"
+            "text": "AC-09 Editor provides tree, path/dirty/save toolbar, Editor, Preview and Split, diagnostics navigation, Ctrl/Cmd+S and unsaved-leave guard.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 90,
             "indent": 0,
             "completed": true,
-            "text": "AC-10 On mobile, the sidebar works as a drawer, and split becomes one"
+            "text": "AC-10 On mobile, the sidebar works as a drawer, and split becomes one presentation; all basic actions are accessible from the keyboard.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 92,
             "indent": 0,
             "completed": true,
-            "text": "AC-11 Markdown preview uses the existing secure renderer;"
+            "text": "AC-11 Markdown preview uses the existing secure renderer; other formats return preview_not_supported, raw source opens read-only as text/plain.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 95,
             "indent": 0,
             "completed": true,
-            "text": "AC-12 task init and seven scaffold types use one ordered"
+            "text": "AC-12 task init and seven scaffold types use one ordered registry accessible by CLI and browser create with general validation, path and renderer; creation remains atomic O_EXCL.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 98,
             "indent": 0,
             "completed": true,
-            "text": "AC-13 All editor JSON responses have schemaVersion: 1, no-store and a single"
+            "text": "AC-13 All editor JSON responses have schemaVersion: 1, no-store and a single error envelope; malformed, unknown fields, trailing JSON, \u003e3 MiB body and \u003e2 MiB content are rejected.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 101,
             "indent": 0,
             "completed": true,
-            "text": "AC-14 Entry requires JSON content type, X-Docu-docu-Action and same-origin /"
+            "text": "AC-14 Entry requires JSON content type, X-Docu-docu-Action and same-origin / Sec-Fetch-Site; The API does not issue CORS headers and cannot run commands. With an explicit non-loopback listener, the operator includes local network clients in trust boundary: browser guards protect against cross-origin pages, but do not serve direct HTTP client authentication; warning CLI remains required.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 106,
             "indent": 0,
             "completed": true,
-            "text": "AC-15 Methods /files, /file, /preview, /validate, /create, ETag /"
+            "text": "AC-15 Methods /files, /file, /preview, /validate, /create, ETag / 304, payloads, statuses, revision and error envelope correspond CONTRACT-EDITOR-HTTP.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 109,
             "indent": 0,
             "completed": true,
-            "text": "AC-16 Vendored CodeMirror IIFE bundle and licenses/checksums built into Go;"
+            "text": "AC-16 Vendored CodeMirror IIFE bundle and licenses/checksums built into Go; build-only lock locks in consistent versions, and runtime doesn't require Node.js.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           },
           {
             "line": 111,
             "indent": 0,
             "completed": true,
-            "text": "AC-17 The documentation fixes the build = static read-only boundary,"
+            "text": "AC-17 The documentation fixes the build = static read-only boundary, serve = view/edit/live rebuild; backend, race, static-negative, cross-build, browser desktop/mobile QA, semantic review and strict Docu-docu checks pass.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
           }
         ],
         "verificationMatrix": [
           {
             "criterionId": "AC-01",
-            "criterion": "GenerateSite always creates a standalone static portal, and",
+            "criterion": "GenerateSite always creates a standalone static portal, and The serve option separately adds edit/source actions and server-only assets.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestStaticSiteExcludesEditor|TestServeSiteIncludesEditor'"
@@ -7099,7 +7261,7 @@
           },
           {
             "criterionId": "AC-02",
-            "criterion": "Workspace only lists the regular .md, .yaml, .yml and",
+            "criterion": "Workspace only lists the regular .md, .yaml, .yml and .json inside docs root, including screens/hotspots.json but excluding hidden, excluded, output subtree and any symlink paths; other extensions and irregular files are not workspace entries.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestEditorWorkspaceFiles|TestEditorWorkspaceExclusions'"
@@ -7109,7 +7271,7 @@
           },
           {
             "criterionId": "AC-03",
-            "criterion": "API only accepts canonical relative POSIX paths and",
+            "criterion": "API only accepts canonical relative POSIX paths and rejects absolute, .., backslash, NUL, encoded and re-encoded traversal.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestEditorPathValidation'"
@@ -7119,7 +7281,7 @@
           },
           {
             "criterionId": "AC-04",
-            "criterion": "Read and write use SHA-256 digest; save saves mode,",
+            "criterion": "Read and write use SHA-256 digest; save saves mode, synchronizes the temp file, re-checks the CAS and atomically replaces the source: Unix uses same-directory rename and directory Sync, Windows - write-through replace. Each path component is re-checked against symlink / reparse before writing and replacing.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestEditorAtomicSave|TestEditorAtomicFailure'"
@@ -7129,7 +7291,7 @@
           },
           {
             "criterionId": "AC-05",
-            "criterion": "Stale digest returns 409 staledigest, and confirmed",
+            "criterion": "Stale digest returns 409 stale_digest, and confirmed overwrite is executed only by the second request with digest from the conflict response and confirmOverwrite: true; the new external conflict returns 409 again.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestEditorStaleDigest'"
@@ -7139,7 +7301,7 @@
           },
           {
             "criterionId": "AC-06",
-            "criterion": "Markdown diagnostics are built using the full model with in-memory overlay;",
+            "criterion": "Markdown diagnostics are built using the full model with in-memory overlay; JSON receives syntax and hotspots diagnostics, YAML - only available Docu-docu diagnostics; diagnostics do not block save.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestEditorDiagnostics'"
@@ -7149,7 +7311,7 @@
           },
           {
             "criterionId": "AC-07",
-            "criterion": "Save/create synchronously updates the model, HTML, search and revision;",
+            "criterion": "Save/create synchronously updates the model, HTML, search and revision; watcher notices external changes with an interval of 750 ms and stabilization of 200 ms.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestEditorRebuild|TestEditorWatcher'"
@@ -7159,7 +7321,7 @@
           },
           {
             "criterionId": "AC-08",
-            "criterion": "Serve frontend polls file revision via ETag every two times",
+            "criterion": "Serve frontend polls file revision via ETag every two times seconds and without loss of text distinguishes between reload, clean update and dirty conflict.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestEditorPollingStateMachine|TestEditorAssetsContract'"
@@ -7169,7 +7331,7 @@
           },
           {
             "criterionId": "AC-09",
-            "criterion": "Editor provides tree, path/dirty/save toolbar, Editor,",
+            "criterion": "Editor provides tree, path/dirty/save toolbar, Editor, Preview and Split, diagnostics navigation, Ctrl/Cmd+S and unsaved-leave guard.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestEditorKeyboardAndDirtyGuards|TestEditorAssetsContract'"
@@ -7179,7 +7341,7 @@
           },
           {
             "criterionId": "AC-10",
-            "criterion": "On mobile, the sidebar works as a drawer, and split becomes one",
+            "criterion": "On mobile, the sidebar works as a drawer, and split becomes one presentation; all basic actions are accessible from the keyboard.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestEditorResponsiveContract|TestEditorAssetsContract'"
@@ -7189,7 +7351,7 @@
           },
           {
             "criterionId": "AC-11",
-            "criterion": "Markdown preview uses the existing secure renderer;",
+            "criterion": "Markdown preview uses the existing secure renderer; other formats return preview_not_supported, raw source opens read-only as text/plain.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestEditorPreviewAndRaw'"
@@ -7199,7 +7361,7 @@
           },
           {
             "criterionId": "AC-12",
-            "criterion": "task init and seven scaffold types use one ordered",
+            "criterion": "task init and seven scaffold types use one ordered registry accessible by CLI and browser create with general validation, path and renderer; creation remains atomic O_EXCL.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestScaffoldRegistryParity|TestEditorCreate'"
@@ -7209,7 +7371,7 @@
           },
           {
             "criterionId": "AC-13",
-            "criterion": "All editor JSON responses have schemaVersion: 1, no-store and a single",
+            "criterion": "All editor JSON responses have schemaVersion: 1, no-store and a single error envelope; malformed, unknown fields, trailing JSON, \u003e3 MiB body and \u003e2 MiB content are rejected.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestEditorJSONContract|TestEditorLimits'"
@@ -7219,7 +7381,7 @@
           },
           {
             "criterionId": "AC-14",
-            "criterion": "Entry requires JSON content type, X-Docu-docu-Action and same-origin /",
+            "criterion": "Entry requires JSON content type, X-Docu-docu-Action and same-origin / Sec-Fetch-Site; The API does not issue CORS headers and cannot run commands. With an explicit non-loopback listener, the operator includes local network clients in trust boundary: browser guards protect against cross-origin pages, but do not serve direct HTTP client authentication; warning CLI remains required.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestEditorWriteGuards|TestEditorCannotExecuteCommands'"
@@ -7229,7 +7391,7 @@
           },
           {
             "criterionId": "AC-15",
-            "criterion": "Methods /files, /file, /preview, /validate, /create, ETag /",
+            "criterion": "Methods /files, /file, /preview, /validate, /create, ETag / 304, payloads, statuses, revision and error envelope correspond CONTRACT-EDITOR-HTTP.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestEditorAPIContract'"
@@ -7239,7 +7401,7 @@
           },
           {
             "criterionId": "AC-16",
-            "criterion": "Vendored CodeMirror IIFE bundle and licenses/checksums built into Go;",
+            "criterion": "Vendored CodeMirror IIFE bundle and licenses/checksums built into Go; build-only lock locks in consistent versions, and runtime doesn't require Node.js.",
             "completed": true,
             "commands": [
               "go test ./... -run 'TestEditorVendoredAssets'"
@@ -7249,7 +7411,7 @@
           },
           {
             "criterionId": "AC-17",
-            "criterion": "The documentation fixes the build = static read-only boundary,",
+            "criterion": "The documentation fixes the build = static read-only boundary, serve = view/edit/live rebuild; backend, race, static-negative, cross-build, browser desktop/mobile QA, semantic review and strict Docu-docu checks pass.",
             "completed": true,
             "commands": [
               "go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docu-docu check ./docs --strict --stale-days 0 \u0026\u0026 GOOS=windows GOARCH=amd64 go test -c -o /tmp/docu-docu-editor-windows.test . \u0026\u0026 GOOS=darwin GOARCH=amd64 go build -o /tmp/docu-docu-editor-darwin ./cmd/docu-docu \u0026\u0026 GOOS=linux GOARCH=amd64 go build -o /tmp/docu-docu-editor-linux ./cmd/docu-docu \u0026\u0026 test -s build/editor-qa/report.md \u0026\u0026 test -s build/editor-qa/semantic-review.txt"
@@ -7264,140 +7426,140 @@
             "commands": [
               "go test ./... -run 'TestStaticSiteExcludesEditor|TestServeSiteIncludesEditor'"
             ],
-            "line": 128
+            "line": 127
           },
           {
             "target": "AC-02",
             "commands": [
               "go test ./... -run 'TestEditorWorkspaceFiles|TestEditorWorkspaceExclusions'"
             ],
-            "line": 129
+            "line": 128
           },
           {
             "target": "AC-03",
             "commands": [
               "go test ./... -run 'TestEditorPathValidation'"
             ],
-            "line": 130
+            "line": 129
           },
           {
             "target": "AC-04",
             "commands": [
               "go test ./... -run 'TestEditorAtomicSave|TestEditorAtomicFailure'"
             ],
-            "line": 131
+            "line": 130
           },
           {
             "target": "AC-05",
             "commands": [
               "go test ./... -run 'TestEditorStaleDigest'"
             ],
-            "line": 132
+            "line": 131
           },
           {
             "target": "AC-06",
             "commands": [
               "go test ./... -run 'TestEditorDiagnostics'"
             ],
-            "line": 133
+            "line": 132
           },
           {
             "target": "AC-07",
             "commands": [
               "go test ./... -run 'TestEditorRebuild|TestEditorWatcher'"
             ],
-            "line": 134
+            "line": 133
           },
           {
             "target": "AC-08",
             "commands": [
               "go test ./... -run 'TestEditorPollingStateMachine|TestEditorAssetsContract'"
             ],
-            "line": 135
+            "line": 134
           },
           {
             "target": "AC-09",
             "commands": [
               "go test ./... -run 'TestEditorKeyboardAndDirtyGuards|TestEditorAssetsContract'"
             ],
-            "line": 136
+            "line": 135
           },
           {
             "target": "AC-10",
             "commands": [
               "go test ./... -run 'TestEditorResponsiveContract|TestEditorAssetsContract'"
             ],
-            "line": 137
+            "line": 136
           },
           {
             "target": "AC-11",
             "commands": [
               "go test ./... -run 'TestEditorPreviewAndRaw'"
             ],
-            "line": 138
+            "line": 137
           },
           {
             "target": "AC-12",
             "commands": [
               "go test ./... -run 'TestScaffoldRegistryParity|TestEditorCreate'"
             ],
-            "line": 139
+            "line": 138
           },
           {
             "target": "AC-13",
             "commands": [
               "go test ./... -run 'TestEditorJSONContract|TestEditorLimits'"
             ],
-            "line": 140
+            "line": 139
           },
           {
             "target": "AC-14",
             "commands": [
               "go test ./... -run 'TestEditorWriteGuards|TestEditorCannotExecuteCommands'"
             ],
-            "line": 141
+            "line": 140
           },
           {
             "target": "AC-15",
             "commands": [
               "go test ./... -run 'TestEditorAPIContract'"
             ],
-            "line": 142
+            "line": 141
           },
           {
             "target": "AC-16",
             "commands": [
               "go test ./... -run 'TestEditorVendoredAssets'"
             ],
-            "line": 143
+            "line": 142
           },
           {
             "target": "AC-17",
             "commands": [
               "go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docu-docu check ./docs --strict --stale-days 0 \u0026\u0026 GOOS=windows GOARCH=amd64 go test -c -o /tmp/docu-docu-editor-windows.test . \u0026\u0026 GOOS=darwin GOARCH=amd64 go build -o /tmp/docu-docu-editor-darwin ./cmd/docu-docu \u0026\u0026 GOOS=linux GOARCH=amd64 go build -o /tmp/docu-docu-editor-linux ./cmd/docu-docu \u0026\u0026 test -s build/editor-qa/report.md \u0026\u0026 test -s build/editor-qa/semantic-review.txt"
             ],
-            "line": 144
+            "line": 143
           },
           {
             "target": "ALL",
             "commands": [
               "go test ./..."
             ],
-            "line": 145
+            "line": 144
           },
           {
             "target": "DOCS",
             "commands": [
               "go run ./cmd/docu-docu check ./docs --repository-root ."
             ],
-            "line": 146
+            "line": 145
           },
           {
             "target": "QUALITY",
             "commands": [
               "go vet ./... \u0026\u0026 go test ./... \u0026\u0026 go test -race ./... \u0026\u0026 go run ./cmd/docu-docu check ./docs --strict --stale-days 0"
             ],
-            "line": 147
+            "line": 146
           }
         ],
         "repositoryPaths": [
@@ -7434,11 +7596,11 @@
           "README.md",
           "THIRD_PARTY_NOTICES.md"
         ],
-        "result": "docu-docu serve provides a local live workspace in which the user securely edits and creates source documents, sees previews and diagnostics, and the portal synchronously updates the model, HTML and search. docu-docu build remains stand-alone read-only portal for file:// .",
+        "result": "docu-docu serve provides a local live workspace in which the user securely edits and creates source documents, sees previews and diagnostics, and the portal synchronously updates the model, HTML and search. docu-docu build remains stand-alone read-only portal for file://.",
         "behaviorChange": "Before serve rebuilds the static portal when opening HTML and on a manual button, but does not provide access to the source files and does not notice the external change until next viewing or manual reassembly. After serve always includes a protected same-origin editor API, separate Operate UI, live rebuild after recording and watcher of external changes. Static generation is not receives editor markup, server-only scripts or API links.",
         "before": "serve rebuilds the static portal when opening HTML and on a manual button, but does not provide access to the source files and does not notice the external change until next viewing or manual reassembly.",
         "after": "serve always includes a protected same-origin editor API, separate Operate UI, live rebuild after recording and watcher of external changes. Static generation is not receives editor markup, server-only scripts or API links.",
-        "outOfScope": "changing the semantics of --host , --port , --open or auto-open; parameters --no-open and --edit ; editor or editor API as a result of build ; TLS, separate authentication, CORS or remote co-editing; launching Git, shell, task verification or any commands via editor API; general schema validation of arbitrary YAML.",
+        "outOfScope": "changing the semantics of --host, --port, --open or auto-open; parameters --no-open and --edit; editor or editor API as a result of build; TLS, separate authentication, CORS or remote co-editing; launching Git, shell, task verification or any commands via editor API; general schema validation of arbitrary YAML.",
         "plan": "Separate static and serve generation of the portal. Implement secure workspace, diagnostics overlay and atomic CAS save. Implement editor HTTP API, live rebuild and watcher. Remove the general registry scaffold/task templates. Build and embed CodeMirror, implement an adaptive editor UI. Add negative, concurrency and end-to-end tests. Update related sources of truth and rebuild portals. Perform semantic, automated and browser verification.",
         "documentationImpact": "The use case and flow of the serve mode, Site/CLI/Model contracts, runtime and trust boundaries, README, feature/configuration references and changelog. A separate editor HTTP contract is added; new architectural page necessary because new questions belong to existing sources of truth.",
         "documentationPaths": []

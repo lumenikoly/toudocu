@@ -262,7 +262,9 @@ exist and remain inside `--repository-root`.
 
 ## Supported Markdown
 
-Prefer headings, paragraphs, emphasis, links, safe raster images, blockquotes,
-lists, task lists, tables, inline code, and fenced code. Do not use raw HTML,
-active SVG/XML/HTML assets, JavaScript URLs, or syntax that depends on full
-CommonMark. Fenced code is not parsed as headings, links, or tasks.
+Use CommonMark headings, paragraphs, emphasis, links, safe raster images,
+blockquotes, lists, task lists, tables, strikethrough, literal autolinks, inline
+code, and fenced code. Do not use raw HTML, front matter, attributes, footnotes,
+definition lists, active SVG/XML/HTML assets, or JavaScript URLs. Raw HTML and
+front matter are policy errors. Fenced code is not parsed as headings, links,
+or tasks.

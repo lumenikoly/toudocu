@@ -135,7 +135,7 @@ func loadProjectChangelog(repositoryRoot string, staleDays int, now time.Time) (
 		return nil, ptrIssue(newIssue("warning", "project-changelog-unavailable", "Не удалось прочитать корневой CHANGELOG.md: "+err.Error(), projectChangelogFile, 0))
 	}
 	content := string(contentBytes)
-	parsed := AnalyzeMarkdown(content)
+	parsed := analyzeMarkdown(content)
 	title := parsed.Title
 	if title == "" {
 		title = "Журнал изменений проекта"
@@ -160,13 +160,13 @@ func loadProjectChangelog(repositoryRoot string, staleDays int, now time.Time) (
 		ID: projectChangelogFile, AbsolutePath: filePath, SourcePath: projectChangelogFile,
 		OutputPath: projectChangelogOutput, Directory: ".", FileName: projectChangelogFile,
 		Type: "changelog", TypeLabel: typeLabels["changelog"], Title: title, Description: parsed.Description,
-		Content: content, Lines: parsed.Lines, Headings: parsed.Headings, HeadingByLine: parsed.HeadingByLine,
+		Content: content, Headings: parsed.Headings,
 		Sections: parsed.Sections, Metadata: parsed.Metadata, MetadataExtras: parsed.MetadataExtras,
-		MetadataLineIndexes: parsed.MetadataLineIndexes, Tasks: parsed.Tasks,
+		Tasks:     parsed.Tasks,
 		TaskStats: TaskStats{Total: len(parsed.Tasks), Completed: completed, Remaining: len(parsed.Tasks) - completed, Percent: progress(completed, len(parsed.Tasks))},
 		Links:     parsed.Links, PlainText: parsed.PlainText, MTime: info.ModTime().UTC(), UpdatedAt: updatedAt,
 		AgeDays: int(now.UTC().Sub(updatedAt).Hours() / 24), Stale: staleDays > 0 && int(now.UTC().Sub(updatedAt).Hours()/24) > staleDays,
-		Status: StatusFor(""),
+		Status: StatusFor(""), markdownDiagnostics: markdownIssues(parsed, projectChangelogFile), mermaidBlocks: mermaidBlocksFromAnalysis(parsed), markdownTables: markdownTablesFromAnalysis(parsed),
 	}, nil
 }
 
@@ -317,7 +317,7 @@ func createDocument(file scannedFile, root string, staleDays int, now time.Time,
 		return nil
 	}
 	content := string(contentBytes)
-	parsed := AnalyzeMarkdown(content)
+	parsed := analyzeMarkdown(content)
 	typeName := ClassifyDocument(file.RelativePath)
 	section := sectionTypeForPath(file.RelativePath)
 	fallback := strings.TrimSuffix(path.Base(file.RelativePath), path.Ext(file.RelativePath))
@@ -353,13 +353,21 @@ func createDocument(file scannedFile, root string, staleDays int, now time.Time,
 		ID: file.RelativePath, AbsolutePath: file.AbsolutePath, SourcePath: normalizeSlashes(file.RelativePath),
 		OutputPath: outputPathForDocument(file.RelativePath), Directory: directory, FileName: path.Base(file.RelativePath),
 		Type: typeName, SectionType: section, TypeLabel: typeLabels[typeName], Title: title, Description: parsed.Description,
-		Content: content, Lines: parsed.Lines, Headings: parsed.Headings, HeadingByLine: parsed.HeadingByLine,
+		Content: content, Headings: parsed.Headings,
 		Sections: parsed.Sections, Metadata: parsed.Metadata, MetadataExtras: parsed.MetadataExtras,
-		MetadataLineIndexes: parsed.MetadataLineIndexes, Tasks: parsed.Tasks,
+		Tasks:     parsed.Tasks,
 		TaskStats: TaskStats{Total: len(parsed.Tasks), Completed: completed, Remaining: len(parsed.Tasks) - completed, Percent: progress(completed, len(parsed.Tasks))},
 		Links:     parsed.Links, PlainText: parsed.PlainText, MTime: info.ModTime().UTC(), UpdatedAt: updatedAt,
-		AgeDays: ageDays, Stale: staleDays > 0 && ageDays > staleDays, Status: StatusFor(parsed.Metadata["status"]),
+		AgeDays: ageDays, Stale: staleDays > 0 && ageDays > staleDays, Status: StatusFor(parsed.Metadata["status"]), markdownDiagnostics: markdownIssues(parsed, normalizeSlashes(file.RelativePath)), mermaidBlocks: mermaidBlocksFromAnalysis(parsed), markdownTables: markdownTablesFromAnalysis(parsed),
 	}
+}
+
+func markdownIssues(parsed markdownAnalysis, sourcePath string) []Issue {
+	issues := make([]Issue, 0, len(parsed.Diagnostics))
+	for _, diagnostic := range parsed.Diagnostics {
+		issues = append(issues, newIssue(diagnostic.Severity, diagnostic.Code, diagnostic.Message, sourcePath, diagnostic.Range.Start.Line))
+	}
+	return issues
 }
 
 func addDocumentIssue(model *Model, document *Document, issue Issue) {
@@ -385,6 +393,9 @@ func hasSection(document *Document, names []string) bool {
 }
 
 func validateDocumentBasics(model *Model, document *Document) {
+	for _, issue := range document.markdownDiagnostics {
+		addDocumentIssue(model, document, issue)
+	}
 	if containsType([]string{"notes", "ideas"}, document.Type) {
 		return
 	}

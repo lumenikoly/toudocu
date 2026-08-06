@@ -177,7 +177,7 @@ func (w *editorWorkspace) scan(model *Model) ([]editorFile, string, error) {
 			item.Title = document.Title
 			item.DocumentURL = document.OutputPath
 		} else if language == "markdown" {
-			item.Title = AnalyzeMarkdown(string(content)).Title
+			item.Title = analyzeMarkdown(string(content)).Title
 		}
 		files = append(files, item)
 		return nil
@@ -296,7 +296,7 @@ func (w *editorWorkspace) read(filePath string, model *Model, diagnostics bool) 
 		item.Title = document.Title
 		item.DocumentURL = document.OutputPath
 	} else if language == "markdown" {
-		item.Title = AnalyzeMarkdown(string(content)).Title
+		item.Title = analyzeMarkdown(string(content)).Title
 	}
 	if diagnostics {
 		item.Diagnostics, err = w.diagnostics(filePath, content)

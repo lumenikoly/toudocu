@@ -3,10 +3,10 @@
 - Идентификатор: MOD-MARKDOWN
 - Статус: Готово
 - Владелец: Команда Docu-docu
-- Последнее обновление: 2026-07-28
+- Последнее обновление: 2026-08-06
 
-Модуль разбирает поддерживаемое подмножество Markdown и создаёт безопасные
-HTML-фрагменты без исполнения встроенного содержимого.
+Модуль превращает CommonMark и разрешённые GFM-конструкции в единую
+нормализованную модель и безопасный HTML без исполнения встроенного содержимого.
 
 ## Назначение
 
@@ -15,22 +15,26 @@ HTML-фрагменты без исполнения встроенного со�
 
 ## Расположение в коде
 
-- анализ: `internal/app/markdown_parse.go`;
-- рендеринг: `internal/app/markdown_render.go`;
+- AST, анализ и renderer: `internal/markdown/`;
+- преобразование в project model: `internal/app/markdown_parse.go`;
+- portal integration: `internal/app/markdown_render.go`;
 - нормализация и экранирование: `internal/app/utils.go`;
 - поведенческие тесты: `internal/app/markdown_test.go`.
 
 ## Границы
 
-Модуль не реализует полный CommonMark и не разрешает произвольный HTML. Связи с
-репозиторием и копирование assets определяются проектной моделью.
+Goldmark AST закрыт внутри модуля и не входит в публичный Go facade или JSON.
+Включены CommonMark, tables, task lists, strikethrough и literal autolinks;
+attributes, front matter, footnotes, definition lists и typographer не входят в
+dialect. Связи с репозиторием и копирование assets определяются проектной моделью.
 
 ## Бизнес-правила
 
-### BR-MD-001: Пользовательский HTML всегда экранируется
+### BR-MD-001: Пользовательский HTML является policy error
 
-Текст, атрибуты, код и метаданные проходят контекстное экранирование до
-включения в сгенерированную страницу.
+Raw block/inline HTML, в том числе внутри таблиц, создаёт
+`forbidden-raw-html`. `check` и `build` завершаются неуспешно, а preview и
+rendered diff показывают исходник только как escaped text.
 
 ### BR-MD-002: Опасные протоколы и активные assets блокируются
 
@@ -49,6 +53,8 @@ HTML-фрагменты без исполнения встроенного со�
 
 - fenced code не анализируется как заголовки, ссылки или задачи;
 - одинаковые заголовки получают уникальные anchors;
+- source ranges используют 0-based byte offsets и 1-based line/column;
+- metadata — только первый top-level unordered list сразу после H1;
 - неизвестный или неподдерживаемый синтаксис остаётся безопасным текстом;
 - локальные изображения ограничены безопасными растровыми форматами;
 - `sequenceDiagram` подчиняется общим правилам связи Mermaid-документов;
@@ -58,10 +64,9 @@ HTML-фрагменты без исполнения встроенного со�
 
 ## Стабильные интерфейсы
 
-- `AnalyzeMarkdown`;
-- `RenderMarkdown`;
-- `RenderMarkdownFragment`;
-- `LinkResolver` как граница между Markdown и проектной моделью.
+Высокоуровневые операции document model, `check`, `build`, `serve`, editor и
+changes используют одну нормализованную модель. Низкоуровневый parser/renderer
+намеренно не является публичным Go API.
 
 ## Связанные сценарии
 

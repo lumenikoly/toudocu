@@ -5,13 +5,17 @@
       "file": "api-docs.js",
       "sha256": "dcc0df9db175ce942d60683580c8de0d99700ddfa1d2badecd67ef3130859c9a"
     },
+    "appearance.js": {
+      "file": "appearance.js",
+      "sha256": "66dd49db5d79d92943d8c2ce60117bc3b62e7cd03d489df4a3a1c84913e45fb2"
+    },
     "changes.css": {
       "file": "changes.css",
-      "sha256": "c664b30cfdb5a4c982431b2b5e8fdab286e59f76299795016c73e4a07da4a0b0"
+      "sha256": "7c14c42826ef9effc87b583537d553890fcc4a12a03403e10d4782a73503231d"
     },
     "changes.js": {
       "file": "changes.js",
-      "sha256": "9e623175021b6ef041e98c8ed1cfa8b479b79b77374c259301a2187254b69cb3"
+      "sha256": "075e2ad4a87014c227dd23266a37344c5395ffb2da886fb0929b91ce3560f00c"
     },
     "codemirror.checksums.txt": {
       "file": "codemirror.checksums.txt",
@@ -27,11 +31,11 @@
     },
     "editor.css": {
       "file": "editor.css",
-      "sha256": "ad2e86b1a218cc2bb72d7909cab0e50aa0f7c908cf6457c818dd557623e7a793"
+      "sha256": "c602777c51bd08c53ec5f3167480d503e04ac282d7553a30c0ba9a39b5913760"
     },
     "editor.js": {
       "file": "editor.js",
-      "sha256": "af79fae14439fa4f930bd3b68051f6873e1a1d0a356c09096004050319ab508a"
+      "sha256": "4a408f84176e13a4fa4bd666f31a2e3bbc10dddb6219a01a12b28adf2411c2e2"
     },
     "favicon.svg": {
       "file": "favicon.svg",
@@ -47,7 +51,7 @@
     },
     "playable-flow.css": {
       "file": "playable-flow.css",
-      "sha256": "50b1943af912749673ec2d871ba71354f30defc0202ef27652176c502c3d3110"
+      "sha256": "bd3316558719e2c62fb5a824464265d1e82e3937ff02555fe2813b7ac3c63371"
     },
     "playable-flow.js": {
       "file": "playable-flow.js",
@@ -55,15 +59,15 @@
     },
     "portal.css": {
       "file": "portal.css",
-      "sha256": "43d4e35177abe5a5a60542e229370b4b485b3a2479fffebf3e1ff49ee3755f7b"
+      "sha256": "648da70558de6291503a41a457ed6179cf317c67195eee92b11281e904624202"
     },
     "portal.js": {
       "file": "portal.js",
-      "sha256": "feb3433ded116d465f9158da31c2bb876e02e8232b1f816a2d320ca8f6b018aa"
+      "sha256": "5a064dbc63ef45ccbc37e6d4a921c6bf0505e1485beb6a1628cc047d5f2ec509"
     },
     "screen-map.css": {
       "file": "screen-map.css",
-      "sha256": "7811920efd37e8f862e72515711f6ce84a63b418f3ead15bf7da3945e7796b2b"
+      "sha256": "818d1301aad9e1845476e62abeac2f8376efba0c773123a2291ea670d5d7bc30"
     },
     "screen-map.js": {
       "file": "screen-map.js",
@@ -109,6 +113,7 @@
   "runtimes": {
     "static": [
       "manifest.json",
+      "appearance.js",
       "portal.css",
       "portal.js",
       "screen-map.css",
@@ -121,6 +126,7 @@
     ],
     "serve": [
       "manifest.json",
+      "appearance.js",
       "portal.css",
       "portal.js",
       "screen-map.css",

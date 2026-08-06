@@ -285,8 +285,8 @@ func (s *documentationServer) serveChangedContent(w http.ResponseWriter, request
 			writeChangesDiagnostic(w, http.StatusUnsupportedMediaType, "render-not-supported", "Rendered diff поддерживает Markdown")
 			return
 		}
-		parsed := AnalyzeMarkdown(string(content))
-		html := RenderMarkdown(parsed, RenderContext{HeadingByLine: parsed.HeadingByLine}, RenderOptions{SkipH1: false, SuppressMetadata: false, InteractiveMermaid: true})
+		parsed := analyzeMarkdown(string(content))
+		html := renderMarkdown(parsed, renderContext{}, renderOptions{SkipH1: false, SuppressMetadata: false, InteractiveMermaid: true})
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		_, _ = fmt.Fprint(w, html)
 		return

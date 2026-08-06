@@ -49,7 +49,7 @@ work item. Параметры и exit codes
 ## Публичный Go API
 
 Корневой пакет `docu-docu` экспортирует типизированный фасад над CLI,
-документной моделью, Markdown-рендерером, генератором портала, поиском, task
+документной моделью, генератором портала, поиском, task
 workflow и Git-backed changes. Прямые вызовы возвращают модели и отчёты без
 обязательной сериализации или запуска отдельного процесса.
 
@@ -133,15 +133,18 @@ gate, а schema v1 сохраняет `documents[].type: "architecture"`.
 
 ## Markdown и диаграммы
 
-Поддерживаемое безопасное подмножество включает:
+Goldmark `v1.8.5` разбирает CommonMark и только явно включённые расширения:
 
 - заголовки и автоматические уникальные anchors;
 - абзацы, выделение, ссылки, изображения и цитаты;
 - маркированные, нумерованные и task-списки;
 - таблицы, inline code и fenced code blocks;
+- strikethrough и literal HTTP(S), `www` и email autolinks;
 - Mermaid `flowchart`, `stateDiagram-v2` и `sequenceDiagram`.
 
-Произвольный HTML экранируется. Mermaid Tiny встроена локально, работает на
+Raw HTML и ведущий завершённый front matter создают errors; safe preview и
+rendered diff показывают их только как escaped source. Attributes, footnotes,
+definition lists и typographer не включены. Mermaid Tiny встроена локально, работает на
 static HTTP hosting, следует светлой или тёмной теме и всегда запускается с
 `securityLevel: strict`. Front matter, Mermaid directives и блоки более
 50 000 UTF-8 байт отклоняются.

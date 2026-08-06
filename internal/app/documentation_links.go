@@ -55,6 +55,21 @@ func isExternalDestination(destination string) bool {
 	return destinationHasScheme(destination)
 }
 
+func destinationHasScheme(destination string) bool {
+	for index, character := range destination {
+		if index == 0 && !((character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z')) {
+			return false
+		}
+		if character == ':' {
+			return true
+		}
+		if !((character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '+' || character == '.' || character == '-') {
+			return false
+		}
+	}
+	return false
+}
+
 func allowedExternalProtocol(destination string) bool {
 	lower := strings.ToLower(destination)
 	return strings.HasPrefix(lower, "http:") || strings.HasPrefix(lower, "https:") || strings.HasPrefix(lower, "mailto:") || strings.HasPrefix(lower, "tel:") || strings.HasPrefix(destination, "//")

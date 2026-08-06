@@ -55,7 +55,7 @@ static data и `ProjectReport` schema v1. Исходный Markdown не изм�
 
 - [BR-SITE-001](../modules/site.md#br-site-001-очистка-output-не-затрагивает-защищённые-каталоги) — очистка output не затрагивает защищённые каталоги.
 - [BR-SITE-002](../modules/site.md#br-site-002-портал-работает-на-static-http-hosting) — портал работает на обычном static HTTP hosting и во вложенном URL-пути.
-- [BR-MD-001](../modules/markdown.md#br-md-001-пользовательский-html-всегда-экранируется) — пользовательский HTML всегда экранируется.
+- [BR-MD-001](../modules/markdown.md#br-md-001-пользовательский-html-является-policy-error) — raw HTML блокирует проверку и остаётся escaped в безопасных представлениях.
 - [BR-MD-002](../modules/markdown.md#br-md-002-опасные-протоколы-и-активные-assets-блокируются) — опасные протоколы и активные assets блокируются.
 - [BR-MD-003](../modules/markdown.md#br-md-003-mermaid-остаётся-визуализацией) — Mermaid остаётся визуализацией.
 - [BR-SITE-004](../modules/site.md#br-site-004-mermaid-работает-автономно-и-в-строгом-режиме) — Mermaid работает автономно и в строгом режиме.

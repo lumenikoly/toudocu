@@ -15,10 +15,6 @@ func TestPublicAPIFacadeDelegatesToInternalImplementation(t *testing.T) {
 	if actual := docudocu.ClassifyDocument("architecture/overview.md"); actual != "architecture" {
 		t.Fatalf("ClassifyDocument() = %q, want architecture", actual)
 	}
-	parsed := docudocu.AnalyzeMarkdown("# Title\n\nBody.\n")
-	if parsed.Title != "Title" {
-		t.Fatalf("AnalyzeMarkdown() title = %q, want Title", parsed.Title)
-	}
 }
 
 func TestRootDocumentationMatchesPublishedState(t *testing.T) {

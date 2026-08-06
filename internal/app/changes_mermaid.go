@@ -84,37 +84,29 @@ func validMermaidSource(source string) bool {
 }
 
 func extractMermaidBlocks(content string) (map[string]changeMermaidBlock, bool) {
-	parsed := AnalyzeMarkdown(content)
+	parsed := analyzeMarkdown(content)
 	blocks := map[string]changeMermaidBlock{}
 	ambiguous := false
 	sectionCounts := map[string]int{}
-	for line := 0; line < len(parsed.Lines); line++ {
-		if !strings.EqualFold(strings.TrimSpace(parsed.Lines[line]), "```mermaid") {
-			continue
-		}
-		start := line
-		line++
-		body := []string{}
-		for line < len(parsed.Lines) && strings.TrimSpace(parsed.Lines[line]) != "```" {
-			body = append(body, parsed.Lines[line])
-			line++
-		}
+	for _, block := range parsed.MermaidBlocks {
+		start := block.Range.Start.Line - 1
+		body := block.Source
 		sectionID, caption := mermaidContext(parsed, start)
 		sectionCounts[sectionID]++
 		id := sectionID + "-mermaid-" + strconv.Itoa(sectionCounts[sectionID])
-		if match := mermaidExplicitIDRE.FindStringSubmatch(strings.Join(body, "\n")); match != nil {
+		if match := mermaidExplicitIDRE.FindStringSubmatch(body); match != nil {
 			id = "id-" + match[1]
 		}
 		if _, exists := blocks[id]; exists {
 			ambiguous = true
 			continue
 		}
-		blocks[id] = changeMermaidBlock{id: id, caption: caption, source: strings.Join(body, "\n"), line: start + 1}
+		blocks[id] = changeMermaidBlock{id: id, caption: caption, source: body, line: start + 1}
 	}
 	return blocks, ambiguous
 }
 
-func mermaidContext(parsed ParsedMarkdown, line int) (string, string) {
+func mermaidContext(parsed markdownAnalysis, line int) (string, string) {
 	sectionID, caption := "document", ""
 	for _, heading := range parsed.Headings {
 		if heading.Line > line {

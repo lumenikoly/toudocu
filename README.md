@@ -323,16 +323,18 @@ Mermaid can be used for diagrams.
 
 ## Supported Markdown
 
-Docu-docu intentionally supports a safe subset of Markdown:
+Docu-docu uses Goldmark `v1.8.5` as one CommonMark AST engine and enables only:
 
 * headings, paragraphs, emphasis, and blockquotes;
 * links and safe local raster images;
 * unordered, ordered, and task lists;
 * tables, inline code, and fenced code blocks;
+* strikethrough and literal HTTP(S), `www`, and email autolinks;
 * Mermaid `flowchart`, `stateDiagram-v2`, and `sequenceDiagram`.
 
-Arbitrary HTML is escaped. Front matter, Mermaid directives, and syntax that
-depends on full CommonMark support are not supported. Detailed limitations are
+Raw HTML and leading closed front matter are validation errors; preview and
+rendered diffs still show their source as escaped text. Attributes, footnotes,
+definition lists, and typographer extensions are not enabled. Detailed limitations are
 documented in the [safe Markdown module](docs/modules/markdown.md).
 
 ---
@@ -421,7 +423,7 @@ Users of a released binary should run `docu-docu` commands directly.
 
 ## Public Go API
 
-The root package provides a typed facade over the model, renderer, reports, and
+The root package provides a typed facade over the model, generator, reports, and
 individual CLI operations. The current module path is the local
 `docu-docu`; a canonical remote Go module has not been published yet, so
 external consumers should not depend on this import path.
@@ -430,6 +432,9 @@ The exported declarations and package documentation in `api.go` define the
 current facade. The CLI remains the primary user-facing way to run the released
 binary; no external module compatibility promise is made before a canonical
 module path is published.
+
+The Markdown AST and low-level parser/renderer are intentionally internal;
+Goldmark types are not exposed by the facade or JSON schema v1.
 
 ---
 

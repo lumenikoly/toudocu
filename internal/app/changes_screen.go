@@ -77,13 +77,13 @@ func screenSnapshot(content []byte, path string) (*ScreenNodeSnapshot, map[strin
 	if len(content) == 0 {
 		return nil, transitions
 	}
-	parsed := AnalyzeMarkdown(string(content))
+	parsed := analyzeMarkdown(string(content))
 	id := parsed.Metadata["id"]
 	if id == "" {
 		id = stableEntityIDRE.FindString(parsed.Title)
 	}
 	node := &ScreenNodeSnapshot{ID: id, Title: screenSnapshotTitle(parsed.Title, id), Route: parsed.Metadata["route"], Module: parsed.Metadata["module"], Status: parsed.Metadata["status"], Kind: parsed.Metadata["type"]}
-	document := &Document{SourcePath: path, Title: parsed.Title, Lines: parsed.Lines, Headings: parsed.Headings, Sections: parsed.Sections, Metadata: parsed.Metadata}
+	document := &Document{SourcePath: path, Content: string(content), Title: parsed.Title, Headings: parsed.Headings, Sections: parsed.Sections, Metadata: parsed.Metadata, markdownTables: markdownTablesFromAnalysis(parsed)}
 	table, found := parseScreenTable(document, "Переходы", "Transitions")
 	if !found {
 		return node, transitions

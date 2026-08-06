@@ -73,10 +73,12 @@ type MetadataExtra struct {
 }
 
 type Heading struct {
-	Level int    `json:"level"`
-	Title string `json:"title"`
-	ID    string `json:"id"`
-	Line  int    `json:"line"`
+	Level       int    `json:"level"`
+	Title       string `json:"title"`
+	ID          string `json:"id"`
+	Line        int    `json:"line"`
+	startOffset int
+	endOffset   int
 }
 
 type Task struct {
@@ -124,6 +126,7 @@ type Section struct {
 	Tasks          []Task          `json:"tasks"`
 	Text           string          `json:"text"`
 	Markdown       string          `json:"markdown"`
+	children       []Section
 }
 
 type TaskStats struct {
@@ -155,13 +158,13 @@ type Document struct {
 	Title               string
 	Description         string
 	Content             string
-	Lines               []string
 	Headings            []Heading
-	HeadingByLine       map[int]Heading
 	Sections            []Section
 	Metadata            Metadata
 	MetadataExtras      []MetadataExtra
-	MetadataLineIndexes map[int]struct{}
+	markdownDiagnostics []Issue
+	mermaidBlocks       []mermaidBlock
+	markdownTables      []markdownTable
 	Tasks               []Task
 	TaskStats           TaskStats
 	Links               []Link

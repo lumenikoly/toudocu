@@ -202,6 +202,8 @@ func buildDocumentationChange(g *gitChangeSource, base, target ChangeSide, file 
 	ext := strings.ToLower(filepath.Ext(file.path))
 	if ext == ".md" && !change.Binary {
 		change.RenderedDiffAvailable = options.ChangeRenderedDiff && len(oldContent)+len(newContent) <= options.ChangeMaxRenderedFileBytes
+		change.Diagnostics = append(change.Diagnostics, markdownChangePolicyDiagnostics(oldContent, oldPath, "Старая версия")...)
+		change.Diagnostics = append(change.Diagnostics, markdownChangePolicyDiagnostics(newContent, file.path, "Новая версия")...)
 		change.EntitiesBefore = entitiesFromMarkdown(oldContent, oldPath)
 		change.EntitiesAfter = entitiesFromMarkdown(newContent, file.path)
 		oldSemanticValid := markdownSemanticValid(oldContent)
@@ -240,21 +242,35 @@ func buildDocumentationChange(g *gitChangeSource, base, target ChangeSide, file 
 	return change
 }
 
+func markdownChangePolicyDiagnostics(content []byte, path, side string) []Issue {
+	if len(content) == 0 {
+		return nil
+	}
+	parsed := analyzeMarkdownPath(string(content), path)
+	result := []Issue{}
+	for _, diagnostic := range parsed.Diagnostics {
+		if diagnostic.Code != "forbidden-raw-html" && diagnostic.Code != "forbidden-front-matter" {
+			continue
+		}
+		result = append(result, Issue{Severity: "error", Code: diagnostic.Code, Message: side + ": " + diagnostic.Message, DocumentPath: path, Line: diagnostic.Range.Start.Line, Column: diagnostic.Range.Start.Column})
+	}
+	return result
+}
+
 func markdownSemanticValid(content []byte) bool {
 	if len(content) == 0 {
 		return true
 	}
-	parsed := AnalyzeMarkdown(string(content))
+	parsed := analyzeMarkdown(string(content))
 	if strings.TrimSpace(parsed.Title) == "" {
 		return false
 	}
-	fences := 0
-	for _, line := range parsed.Lines {
-		if strings.HasPrefix(strings.TrimSpace(line), "```") {
-			fences++
+	for _, diagnostic := range parsed.Diagnostics {
+		if diagnostic.Code == "unclosed-fence" {
+			return false
 		}
 	}
-	return fences%2 == 0
+	return true
 }
 
 func firstEntityType(groups ...[]ChangeEntity) string {
@@ -300,7 +316,7 @@ func parseSourceDiffHunks(patch string) []SourceDiffHunk {
 }
 
 func renderedSectionDiff(oldContent, newContent []byte, oldPath, newPath string, diagnostics []Issue) ([]RenderedSectionChange, []Issue) {
-	oldParsed, newParsed := AnalyzeMarkdown(string(oldContent)), AnalyzeMarkdown(string(newContent))
+	oldParsed, newParsed := analyzeMarkdown(string(oldContent)), analyzeMarkdown(string(newContent))
 	type indexedSection struct {
 		Section
 		index int
@@ -382,7 +398,7 @@ func entitiesFromMarkdown(content []byte, path string) []ChangeEntity {
 	if len(content) == 0 {
 		return []ChangeEntity{}
 	}
-	parsed := AnalyzeMarkdown(string(content))
+	parsed := analyzeMarkdown(string(content))
 	typ := ClassifyDocument(strings.TrimPrefix(filepath.ToSlash(path), "docs/"))
 	id := parsed.Metadata["id"]
 	if id == "" {
@@ -405,7 +421,7 @@ func semanticMarkdownDiff(oldContent, newContent []byte, oldPath, newPath string
 	if len(newContent) == 0 && len(oldContent) > 0 {
 		return []SemanticChange{{Kind: "entity-removed", Entity: entity, Before: entity, Summary: "Удалён " + semanticEntityName(entity) + ".", SourceBefore: &ChangeLocation{Path: oldPath, Line: 1}}}
 	}
-	oldParsed, newParsed := AnalyzeMarkdown(string(oldContent)), AnalyzeMarkdown(string(newContent))
+	oldParsed, newParsed := analyzeMarkdown(string(oldContent)), analyzeMarkdown(string(newContent))
 	if oldParsed.Title != newParsed.Title {
 		changes = append(changes, SemanticChange{Kind: "field-changed", Entity: entity, Field: "title", Before: oldParsed.Title, After: newParsed.Title, Summary: "Изменено название сущности.", SourceBefore: &ChangeLocation{Path: oldPath, Line: 1}, SourceAfter: &ChangeLocation{Path: newPath, Line: 1}})
 	}
@@ -507,12 +523,9 @@ func semanticFieldSummary(kind, key string) string {
 	}
 }
 
-func metadataLocation(path string, parsed ParsedMarkdown, key string) *ChangeLocation {
-	for index := range parsed.MetadataLineIndexes {
-		line, ok := parseMetadataLine(parsed.Lines[index])
-		if ok && line.Key == key {
-			return &ChangeLocation{Path: path, Line: index + 1}
-		}
+func metadataLocation(path string, parsed markdownAnalysis, key string) *ChangeLocation {
+	if line := parsed.MetadataLocations[key]; line > 0 {
+		return &ChangeLocation{Path: path, Line: line}
 	}
 	return nil
 }
@@ -537,25 +550,36 @@ type semanticSubject struct {
 	line   int
 }
 
-func semanticStableSubjects(parsed ParsedMarkdown) map[string]semanticSubject {
+func semanticStableSubjects(parsed markdownAnalysis) map[string]semanticSubject {
 	result := map[string]semanticSubject{}
-	for index, line := range parsed.Lines {
-		ids := stableEntityIDRE.FindAllString(line, -1)
+	add := func(value string, line int) {
+		ids := stableEntityIDRE.FindAllString(value, -1)
 		for _, id := range ids {
 			typ := entityTypeFromID(id)
 			if typ != "business-rule" && typ != "invariant" && typ != "transition" {
 				continue
 			}
-			value := normalizeSemanticText(stripMarkdown(line))
-			if existing, exists := result[id]; !exists || len(value) > len(existing.value) {
-				result[id] = semanticSubject{entity: ChangeEntity{ID: id, Type: typ}, value: value, line: index + 1}
+			normalized := normalizeSemanticText(value)
+			if existing, exists := result[id]; !exists || len(normalized) > len(existing.value) {
+				result[id] = semanticSubject{entity: ChangeEntity{ID: id, Type: typ}, value: normalized, line: line}
 			}
+		}
+	}
+	for _, heading := range parsed.Headings {
+		add(heading.Title, heading.Line+1)
+	}
+	for _, item := range parsed.ListItems {
+		add(item.Text, item.Range.Start.Line)
+	}
+	for _, table := range parsed.Tables {
+		for _, row := range table.Rows {
+			add(strings.Join(row.Cells, " | "), row.Range.Start.Line)
 		}
 	}
 	return result
 }
 
-func semanticStableSubjectDiff(oldParsed, newParsed ParsedMarkdown, oldPath, newPath string, entity ChangeEntity) []SemanticChange {
+func semanticStableSubjectDiff(oldParsed, newParsed markdownAnalysis, oldPath, newPath string, entity ChangeEntity) []SemanticChange {
 	oldSubjects, newSubjects := semanticStableSubjects(oldParsed), semanticStableSubjects(newParsed)
 	ids := map[string]bool{}
 	for id := range oldSubjects {
@@ -619,13 +643,13 @@ func subjectLocation(path string, subject semanticSubject, exists bool) *ChangeL
 	return &ChangeLocation{Path: path, Line: subject.line}
 }
 
-func semanticVerificationDiff(oldParsed, newParsed ParsedMarkdown, oldPath, newPath string, entity ChangeEntity) []SemanticChange {
+func semanticVerificationDiff(oldParsed, newParsed markdownAnalysis, oldPath, newPath string, entity ChangeEntity) []SemanticChange {
 	type criterion struct {
 		completed bool
 		text      string
 		line      int
 	}
-	collect := func(parsed ParsedMarkdown) map[string]criterion {
+	collect := func(parsed markdownAnalysis) map[string]criterion {
 		result := map[string]criterion{}
 		for _, task := range parsed.Tasks {
 			id := regexp.MustCompile(`\bAC-[A-Z0-9-]+\b`).FindString(task.Text)
@@ -949,7 +973,7 @@ func declaredTaskDocumentation(content []byte) []string {
 	if len(content) == 0 {
 		return []string{}
 	}
-	parsed := AnalyzeMarkdown(string(content))
+	parsed := analyzeMarkdown(string(content))
 	sectionText := ""
 	for _, section := range parsed.Sections {
 		title := strings.ToLower(section.Title)
@@ -997,7 +1021,7 @@ func taskScopePaths(content []byte) []string {
 	if len(content) == 0 {
 		return nil
 	}
-	parsed := AnalyzeMarkdown(string(content))
+	parsed := analyzeMarkdown(string(content))
 	values := []string{}
 	for _, section := range parsed.Sections {
 		title := strings.ToLower(section.Title)

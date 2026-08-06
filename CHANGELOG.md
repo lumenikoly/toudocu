@@ -1,7 +1,14 @@
 # Changelog
 
-## Unreleased
+## 0.0.1
 
+- Markdown полностью переведён на закреплённый Goldmark `v1.8.5`: один
+  CommonMark/GFM AST обслуживает model, validation, portal, editor и changes.
+  Включены только tables, task lists, strikethrough и literal autolinks.
+- Raw HTML и ведущий завершённый front matter теперь являются policy errors;
+  preview и rendered diff сохраняют безопасное escaped представление. Из
+  публичного Go facade удалены низкоуровневые parser/renderer types и функции;
+  высокоуровневые операции и JSON schema v1 сохранены.
 - Frontend source выделен в независимый TypeScript/CSS workspace `web/`;
   детерминированные generated assets фиксируются в репозитории, проверяются CI
   и встраиваются в один Go-бинарник. Node.js остаётся только build toolchain.
@@ -15,9 +22,6 @@
   гарантированным контрактом. Для локальной работы используйте
   `docu-docu serve`; для публикации — `docu-docu build` и static HTTP hosting.
   Новая команда preview не добавлена.
-
-## 0.0.1
-
 - Portal, Editor и Changes получили единый compact workspace shell, project
   branding, навигацию и синхронные темы; CodeMirror меняет оформление без
   потери editor state, а responsive layout сохраняет локальную прокрутку

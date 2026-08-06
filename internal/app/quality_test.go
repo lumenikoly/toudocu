@@ -21,7 +21,7 @@ func TestQualityMetadataStatusAliasesAndValidationBoundaries(t *testing.T) {
 			t.Errorf("runbook status %q was not recognized", value)
 		}
 	}
-	parsed := AnalyzeMarkdown(`# Entity
+	parsed := analyzeMarkdown(`# Entity
 
 - Область: Код
 - Environment: Production

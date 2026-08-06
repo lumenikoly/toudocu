@@ -114,7 +114,7 @@ func nextTaskNumber(docsDir, prefix, area string) (int, error) {
 		if readErr != nil {
 			return readErr
 		}
-		for _, heading := range AnalyzeMarkdown(string(content)).Headings {
+		for _, heading := range analyzeMarkdown(string(content)).Headings {
 			if match := workItemHeadingRE.FindStringSubmatch(heading.Title); match != nil {
 				consider(match[1])
 			}
