@@ -3,10 +3,10 @@
 - Identifier: MOD-MARKDOWN
 - Status: Completed
 - Owner: Docu-docu Team
-- Last updated: 2026-07-28
+- Last updated: 2026-08-06
 
-The module parses a supported subset of Markdown and creates safe
-HTML fragments without executing embedded content.
+The module turns CommonMark and allowed GFM constructs into one normalized
+model and safe HTML without executing embedded content.
 
 ## Purpose
 
@@ -15,22 +15,27 @@ quotes, code and limited Mermaid fences without external Markdown runtime.
 
 ## Code location
 
-- analysis: `internal/app/markdown_parse.go`;
-- rendering: `internal/app/markdown_render.go`;
-- normalization and screening: `internal/app/utils.go`;
+- AST, analysis, and renderer: `internal/markdown/`;
+- conversion to the project model: `internal/app/markdown_parse.go`;
+- portal integration: `internal/app/markdown_render.go`;
+- normalization and escaping: `internal/app/utils.go`;
 - behavioral tests: `internal/app/markdown_test.go`.
 
 ## Module boundaries
 
-The module does not implement full CommonMark and does not allow arbitrary HTML. Connections with
-the repository and copying of assets are determined by the design model.
+The Goldmark AST is encapsulated inside the module and is not part of the public
+Go façade or JSON. CommonMark, tables, task lists, strikethrough, and literal
+autolinks are enabled; attributes, front matter, footnotes, definition lists,
+and typographer are outside the dialect. Repository relationships and asset
+copying are defined by the project model.
 
 ## Business rules
 
-### BR-MD-001: Custom HTML is always escaped
+### BR-MD-001: User HTML is a policy error
 
-Text, attributes, code and metadata are contextually escaped before
-inclusion in the generated page.
+Raw block or inline HTML, including inside tables, produces
+`forbidden-raw-html`. `check` and `build` fail, while preview and rendered diff
+show the source only as escaped text.
 
 ### BR-MD-002: Dangerous protocols and active assets are blocked
 
@@ -49,6 +54,8 @@ The generated screen map receives a structure only from tables
 
 - fenced code is not parsed as headers, links or tasks;
 - identical headings receive unique anchors;
+- source ranges use 0-based byte offsets and 1-based line/column values;
+- metadata is only the first top-level unordered list immediately after the H1;
 - unknown or unsupported syntax remains safe text;
 - local images are limited to safe raster formats;
 - `sequenceDiagram` obeys the general rules for communicating Mermaid documents;
@@ -58,10 +65,9 @@ The generated screen map receives a structure only from tables
 
 ## Stable interfaces
 
-- `AnalyzeMarkdown`;
-- `RenderMarkdown`;
-- `RenderMarkdownFragment`;
-- `LinkResolver` as the boundary between Markdown and the design model.
+High-level document-model operations, `check`, `build`, `serve`, editor, and
+changes use one normalized model. The low-level parser/renderer is intentionally
+not a public Go API.
 
 ## Related use cases
 

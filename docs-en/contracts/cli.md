@@ -1,231 +1,83 @@
-# CLI contract Docu-docu v1
+# Docu-docu CLI v1
 
 - Identifier: CON-CLI-V1
 - Status: Completed
 - Owner: Docu-docu Team
 - Last updated: 2026-08-05
 
-The contract fixes public commands, exit codes and native JSON formats
-Docu-docu.
+This document defines CLI commands, side effects, exit codes, and versioned JSON
+results. `docu-docu COMMAND --help` shows the exact flag syntax.
 
-Direct embedding of the root Go package and side effects of exported ones
-operations are described in [Go API contract](go-api.md).
+## Commands
 
-## Teams
-
-| Team | Side effects | Result |
+| Command | What it does | Changes data |
 |---|---|---|
-| `check` | missing | diagnostics or `ProjectReport` |
-| `build` | writes output, with `--clean` safely clears it | offline portal and `report.json` |
-| `serve` | collects output, launches HTTP and explicitly changes browser save to workspace | editor API, watcher and live rebuild |
-| `changes` | absent; read-only Git | text, Markdown or `ChangeSetReport` v1 |
-| `changes file` | missing | detail of one modified path |
-| `search` | missing | `SearchReport` by fresh Markdown |
-| `task init` | atomically creates a new `TASK-*` or `BUG-*` by type | `TaskInitReport` |
-| `scaffold` | atomically creates the selected entity | `ScaffoldReport` |
-| `task ready` | missing | `TaskReadyReport` |
-| `task context` | missing | `TaskContextReport` of the selected Ready+ task |
-| `task verify --dry-run` | missing | plan `TaskVerifyReport` |
-| `task verify --run` | executes trusted task commands | `TaskVerifyReport` |
-| `task archive` | without rewriting, moves one terminal work item to `work/archive/YYYY/` | `TaskMoveReport` |
-| `task restore` | without rewriting, returns one archived work item to `work/` | `TaskMoveReport` |
-| `task changes` | missing | task-specific report and impact diagnostics |
-| `version` | missing | generator version |
+| `check` | Validates documents, relationships, and OpenAPI | No |
+| `build` | Builds a backend-independent static HTTP portal and `report.json` | Writes only to output; `--clean` clears validated output |
+| `serve` | Starts the local portal, watcher, Editor API, and Changes API | Changes canonical docs only after an explicit editor save |
+| `search` | Searches the current model | No |
+| `changes`, `changes file` | Compares Git revisions, index, and working tree | No |
+| `task changes` | Shows changes and impact for the selected task | No |
+| `task init` | Creates a draft `TASK-*` or `BUG-*` | Creates one new file without overwriting |
+| `scaffold` | Creates a typed document | Creates one new file without overwriting |
+| `task ready`, `task context` | Checks readiness or returns task context | No |
+| `task verify --dry-run` | Shows the task verification plan | No |
+| `task verify --run` | Runs commands explicitly recorded in the task | Yes, within the effects of the repository commands themselves |
+| `task archive`, `task restore` | Moves a completed task to the archive or back | Moves one file without overwriting |
+| `version` | Prints the version | No |
 
-The assembly is called only as `docu-docu build ./docs ...`. Path without command
-rejected as an unknown command.
-Historical top-level command `init`, skill-level name `refresh` and
-old `task check` are missing without alias. Calls to `docu-docu init` and `docu-docu
-refresh` отклоняются как неизвестные команды; `$docu-docu init`,
-`$docu-docu refresh` and `$docu-docu refresh diff` belong to AI-skill.
+A path without a command name does not start an implicit build. There are no
+top-level `init` and `refresh` commands: the similarly named `$docu-docu`
+workflows belong to the AI skill, not the Go CLI.
 
-```text
-docu-docu search "<query>" [docs-dir] [--limit N] [--format text|json]
-docu-docu task init [docs-dir] --area AREA --title TITLE --type TYPE [--lang en|ru]
-docu-docu scaffold module|use-case|flow|screen|decision|standard|runbook ID [docs-dir] --title TITLE [--lang en|ru]
-docu-docu task ready TASK-ID [docs-dir] [--strict] [--format text|json]
-docu-docu task context TASK-ID [docs-dir] [--format text|json]
-docu-docu task verify TASK-ID [docs-dir] (--dry-run|--run) [--target TARGET] [--report FILE] [--timeout DURATION] [--format text|json]
-docu-docu task archive TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]
-docu-docu task restore TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]
-docu-docu changes [docs-dir] [--base REV|--branch-base REF] [--target working-tree|index|HEAD|REV] [--format text|json|markdown]
-docu-docu changes file PATH [docs-dir] [параметры changes]
-docu-docu task changes TASK-ID [docs-dir] [параметры changes]
-```
+## General rules
 
-The documentation directory expects `index.md` and
-`architecture/overview.md`. Overview must be of type `Architecture Overview`,
-and every other `architecture/**/*.md` is a non-empty architectural question and
-direct local link from overview. Architectural broken/blocked links are
-errors. `status.md`, `roadmap.md` and other typed directories
-optional; the rules of a particular type apply if it exists.
+- The input directory is specified explicitly; by default, the server listens
+  on `127.0.0.1:8080` without TLS or authentication.
+- `--host 0.0.0.0` exposes `serve` to a trusted local network.
+- `build` remains static and read-only. Editor, Swagger UI, and server-only
+  scripts are not included in the result; the OpenAPI files themselves are
+  copied. The existing `serve` provides a local browser runtime; there is no
+  `preview` command.
+- A configured translation root may be checked, built, searched, compared, and
+  served read-only. Task workflows, scaffold, and Editor return
+  `TRANSLATION_ROOT_READ_ONLY` before changing files or running checks.
+- `task verify --run` is allowed only for Ready, In Progress, Blocked, and Done;
+  `--dry-run` may also be used for a complete Draft.
+- `changes` reads Git directly without a shell, fetch, checkout, or index write.
 
-Statuses, types, required fields, sections and commands `TASK-*`/`BUG-*` are described in
-[work task manual](../guides/work-items.md).
-The `--title` value for `task init` and `scaffold` is always a single line.
-Without `--lang` both commands use `project.locale` from
-`.docu-docu/config.yml` if its primary language is supported (`en` or `ru`),
-otherwise use `en`. Explicit `--lang` takes precedence.
+## JSON results
 
-## Command parameters
+Every public report uses `schemaVersion: 1`.
 
-The contextual `COMMAND --help` shows only the applicable parameters, example and
-side effects and exits with `0`, including incomplete forms of `task
---help`, `task OPERATION --help` и `scaffold --help`.
+- `ProjectReport` describes the project, documents, relationships, roadmap,
+  risks, knowledge, screens, flows, and diagnostics.
+- `SearchReport`, `TaskInitReport`, `ScaffoldReport`, `TaskReadyReport`,
+  `TaskContextReport`, `TaskMoveReport`, and `TaskVerifyReport` belong to their
+  corresponding workflows.
+- `ChangeSetReport` is a separate change-report schema and is not part of
+  `ProjectReport`.
 
-- `build`: output, title, exclude, stale policy, repository links, clean,
-  open, strict and screen map;
-- `check`: exclude, stale policy, repository root, strict and text/json format;
-- `serve`: build parameters, host and port;
-- `changes`, `changes file`, `task changes`: comparison, filters,
-  text/json/markdown format and optional output file;
-- `search`: limit and text/json format;
-- `task init`, `scaffold`: required fields, locale and text/json format;
-- `task ready`: strict and text/json format;
-- `task context`, `task archive`, `task restore`: repository root and
-  text/json format;
-- `task verify`: exactly one of `--dry-run`/`--run`, target, report, timeout,
-  repository root and text/json format.
+Empty collections serialize as `[]`; line numbers start at one. New optional
+fields may be added without changing the schema version.
 
-The `changes --task` flag is missing. Task-scoped report is only available via
-`task changes TASK-ID`.
-
-`--host` and `--port` are only allowed for `serve`; default values -
-`127.0.0.1` and `8080`. Access from the local network requires explicit
-`--host 0.0.0.0`.
-
-While `serve` is running, save/create, watcher and canonical portal manual button can
-rebuild the portal without closing the listener; HTML request always returns ready
-snapshot When running from canonical root configured `translations.<locale>`
-read-only available via `/_docu-docu/locales/<locale>/`; they don't get editor or
-canonical API. Editor API and its JSON schema v1
-defined in [separate HTTP contract](editor-http.md). `build` always remains
-static read-only: editor markup, CodeMirror, API URL and server-only scripts in it
-results are not included.
-
-A configured translation root is a complete read-only mirror of canonical
-documentation. It permits `check`, `build`, `search`, ordinary `changes`,
-and read-only `serve`; every `task *` command, `scaffold`, and editor write
-is rejected with `TRANSLATION_ROOT_READ_ONLY`. The restriction is applied
-before reading a work item or starting a command and does not change successful
-schema-v1 reports.
-
-The semantics of `--host`, `--port` and `--open` do not change; auto-open without `--open`
-missing. The parameters `--no-open` and `--edit` do not exist and are rejected as
-unknown. The editor does not legally depend on the listener address. With explicit
-non-loopback listener available direct HTTP clients are included in the trust boundary;
-same-origin guards are not network authentication.
-
-`--report` and `--timeout` are only allowed for `task verify`.
-`task verify --run` is allowed only for Ready, In Progress, Blocked and
-Done; secure `--dry-run` can also be used for full Draft.
-
-Changes parameters, JSON/Markdown contract and Git security are described in
-[manual](../guides/documentation-changes.md). Exit codes changes: `0` —
-no blocking diagnostics, `1` — report built with error, `2` — arguments or
-revision, `3` - Git/repository is unavailable, `4` - internal error.
-
-`--screen-map` and `--no-screen-map` are allowed for `build` and `serve`. Map
-generated by default if `screens/SC-*.md` is present; `--no-screen-map`
-disables only the general map page, keeping the directory, use cases pages with
-step by step mode and JSON.
+For every command, `task verify` records the exit code, time, duration, bounded
+stdout/stderr, and associated targets. The final status is `passed`, `failed`,
+or `blocked`.
 
 ## Exit codes
 
-- `0` — operation completed successfully;
-- `1` - error in arguments, I/O, model, generation or verification;
-- with `--strict`, the presence of warning also leads to `1`;
-- `task ready` returns `0` for `contract_ready` and `ready`;
-- `task verify` returns `0` for `planned` and `passed`.
-- `task archive` and `task restore` return `0` only after successful
-  movement; policy lock returns `1` and `TaskMoveReport`.
-- `serve` returns `1` if the initial build or listener launch
-  ended with an error; the subsequent rebuild error is returned to the client as
-  HTTP 500 without stopping the server; If there is a manual reassembly error, the button receives
-  error state, the available message is advertised through the live region, and the request
-  can be repeated; editor API returns schema-v1 error envelope, and conflict -
-  `409 stale_digest` without losing text.
+- `0` — the operation completed successfully.
+- `1` — an argument, I/O, model, generation, or verification error.
+- `1` with `--strict` — at least one warning was found.
+- `changes`: `2` for an argument or revision error, `3` when Git is unavailable,
+  and `4` for an internal error.
+- `serve`: an initial build or listener error ends the command with `1`; a later
+  rebuild error does not stop the server.
 
-## Architecture diagnostics
+## Detailed rules
 
-The architecture's structural contract uses stable error codes:
-
-- `missing-architecture-overview`;
-- `invalid-architecture-overview-type`;
-- `missing-architecture-question`;
-- `unlisted-architecture-document`.
-
-Broken and blocked local links retain common codes
-`broken-link` and `blocked-link`, but inside `architecture/` they have severity
-`error`. The optional stable ID of the architectural document participates in
-general `duplicate-id` check. CLI does not evaluate punctuation, interrogatives
-words and architectural meaning of a non-empty question.
-
-## ProjectReport schema v1
-
-Schema v1 additively includes `knowledge.standards`, `knowledge.runbooks`,
-`standardIds`/`runbookIds` with `WorkItem`, typed collections task context and
-four runbook metrics in `stats`. Empty collections are serialized as `[]`;
-The version of schema and generator does not change.
-
-Architecture overview and detailed responses are serialized as regular documents with
-`type: "architecture"`; the difference remains in `sourcePath` and `metadata`.
-Each document additively contains `sectionType` for a known builtin
-section; this does not change the previous `type`.
-
-`check --format json` and the generated `report.json` contain:
-
-- `schemaVersion`, generator and build time;
-- project, current status and aggregated stats;
-- documents securely resolved by links and backlinks;
-- optional `flowId` for work item, if the task refers to `FLOW-*`;
-- `knowledge.flows[]` and two-way connections `UC.flowIds ↔ FLOW.useCaseIds`;
-- screens, states and transitions in top-level collections `screens` and
-  `transitions`;
-- calculated screen `playableFlows`, hotspots, error reference and traceability;
-- screen statistics and `screenIds` for related entities;
-- roadmap with declared and effective completion;
-- risks, knowledge model and issues.
-
-Empty collections have the form `[]`. Lines business rules, criteria, roadmap and
-issues start from one.
-
-## TaskContextReport schema v1
-
-Read-only report contains complete `WorkItem`, `requiredReads`, business rules,
-dependencies, documentation-impact documents and fixed related sections
-module, use case, flow and screens.
-
-The command does not execute the contents of `checks`.
-
-## Workflow reports schema v1
-
-`SearchReport`, `TaskInitReport`, `ScaffoldReport` and `TaskReadyReport`
-use schema v1.
-
-`WorkItem` and the search results contain `archived` and optional `archiveYear`.
-`TaskMoveReport` uses schema v1 and contains `kind`, resulting in `status`
-(`archived`, `restored` or `blocked`), task snapshot, source and destination paths,
-optional `archiveYear` and issues. Move commands do not edit Markdown.
-
-## TaskVerifyReport schema v1
-
-The resulting `status` accepts `passed`, `failed`, or `blocked`. Team status:
-`passed`, `failed`, `timed_out` or `start_error`.
-
-The report contains:
-
-- task snapshot and task-local `validationIssues`;
-- all project issues for diagnostics;
-- uniquely executed commands and their targets;
-- `exitCode`, timestamps, duration and limited stdout/stderr;
-- the result of each `AC-*`, `ALL` and `DOCS`;
-- final summary.
-
-## Compatibility
-
-All public reports use schema v1. The contract develops directly without
-legacy layer, converters and parallel output of several versions of the circuit.
-
-`ChangeSetReport` has an independent schema v1 and is not added to the regular
-`ProjectReport`; fields are defined in [JSON reference](../reference/changes-report.md).
+- [Work items](../guides/work-items.md)
+- [Viewing changes](../guides/documentation-changes.md)
+- [Document types](../reference/document-types.md)
+- [Configuration](../reference/configuration.md)

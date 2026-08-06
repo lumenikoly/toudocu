@@ -1,31 +1,35 @@
-# STD-GO-001: Go Code Quality
+# STD-GO-001: Go code quality
 
 - Identifier: STD-GO-001
 - Status: Active
 - Owner: Docu-docu Team
-- Scope: Go code and repository tests
-- Last updated: 2026-08-03
+- Scope: Repository Go code and tests
+- Last updated: 2026-08-06
 
-The standard keeps Docu-docu implementation small, predictable,
-dependency-free and testable on supported Go platforms.
+This standard keeps the Docu-docu implementation small, predictable,
+self-contained, and verifiable on supported Go platforms.
 
 ## Rules
 
-1. Do not add external dependency unless proven necessary.
-2. Public operations are called only by explicit commands; there is no way without a command
-   runs the implicit `build`.
-3. Each new validation rule should be accompanied by a behavioral test.
-4. Each security fix must be accompanied by a negative test.
-5. Do not weaken the check of `repository-root` and secure `--clean`.
-6. Save the usual `check`, `build`, `serve` and `task context`
-   not executing work item commands.
+1. Do not add an external dependency without an ADR, a pinned version, notices,
+   a license check, and demonstrated need. A pure-Go dependency must preserve a
+   self-contained binary and CGO-disabled cross-builds.
+2. Public operations are invoked only by explicit commands; a path without a
+   command does not trigger an implicit `build`.
+3. Every new validation rule is accompanied by a behavioral test.
+4. Every security fix is accompanied by a negative test.
+5. Do not weaken `repository-root` checks or safe `--clean` behavior.
+6. Keep ordinary `check`, `build`, `serve`, and `task context` from executing
+   work-item commands.
 
-## Automatic checks
+## Automated checks
 
 - `gofmt -w .`;
 - `go vet ./...`;
 - `go test ./...`;
-- `go test -race ./...`.
+- `go test -race ./...`;
+- `go mod verify`;
+- CGO-disabled cross-builds for supported targets.
 
-Commands are run from work item or trusted CI workflow, and not directly from
+Commands are run from a work item or trusted CI workflow, not directly from
 this standard.

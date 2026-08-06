@@ -5,160 +5,213 @@
 - Owner: Docu-docu Team
 - Last updated: 2026-08-05
 
-The module generates standalone HTML pages, navigation, search and typed
-`report.json` from the finished design model.
+The module produces backend-independent HTML pages, navigation, static JSON
+resources, and a typed `report.json` from the completed project model.
 
 ## Purpose
 
-Make project documentation human-friendly through `file://` or
-a small dev server and at the same time provide a full model to CI and agents.
+Make project documentation convenient for people on ordinary HTTP(S) static
+hosting or through local `serve`, while also providing the complete model to CI
+and agents.
 
 ## Code location
 
-- HTML shell and report: `internal/app/site.go`, `internal/app/report_types.go`;
-- catalogs of processes and use cases: `internal/app/process_site.go`;
-- Screen Map, catalog and screen pages: `internal/app/screen_site.go`;
-- local HTTP distribution: `internal/app/server.go`;
-- editor workspace, API and platform-specific atomic replace: `internal/app/editor_*.go`;
-- built-in resources: `internal/app/embed.go`, `internal/app/assets/`;
-- configuration of themes and safe branding: `internal/app/site_config.go`.
+- application services and report: `internal/app/site.go`, `internal/app/report_types.go`;
+- typed bootstrap, templates, asset manifest, and embed: `internal/site/`;
+- frontend source and independent build: `web/src/`, `web/build.mjs`;
+- derived embedded assets: `internal/site/assets/generated/`;
+- process and use-case catalogs: `internal/app/process_site.go`;
+- Screen Map, catalog, and screen pages: `internal/app/screen_site.go`;
+- local HTTP serving and offline API docs: `internal/app/server.go`,
+  `internal/app/api_docs.go`;
+- editor workspace, API, and platform-specific atomic replacement: `internal/app/editor_*.go`;
+- shared Editor and Changes shell: `internal/site/workspace.go`;
+- theme and safe-branding configuration: `internal/app/site_config.go`.
 
 ## Module boundaries
 
-Static generation does not re-validate or edit business entities
-Markdown. Only the explicit `serve` mode provides workspace operations, after
-which the model is rebuilt using the `MOD-MODEL` module.
+Static generation does not revalidate business entities or edit Markdown. Only
+the explicit `serve` mode provides workspace operations, after which it rebuilds
+the model through `MOD-MODEL`.
 
 ## Business rules
 
 ### BR-SITE-001: Cleaning output does not affect protected directories
 
-`--clean` prohibits the system root, the original documentation, its parents
-directories and direct output symlinks. The decision is made along the revealed paths.
+`--clean` rejects the system root, source documentation, its parent directories,
+and direct output symlinks. The decision is based on resolved paths.
 
-### BR-SITE-002: The portal works via file protocol
+### BR-SITE-002: The portal works on static HTTP hosting
 
-All internal URLs, assets, search and directory pages are generated as
-relative files and do not require an HTTP server.
+The `build` result requires no Docu-docu backend, database, Node.js, CDN, or
+external runtime. HTML, CSS, JavaScript, and JSON reside in output, use relative
+URLs, and work both at the root of an HTTP(S) host and under a nested URL path.
+Direct opening through `file://` is not a guaranteed product contract.
 
 ### BR-SITE-003: Dev server does not expose source repository
 
-Regular `serve` routes distribute only the output directory. Separate editor API
-allows regular `.md`, `.yaml`, `.yml` and `.json` only inside docs root,
-excludes hidden/excluded/output and symlink paths and does not open the rest
-repository. By default, listener uses loopback; `--host 0.0.0.0`
-explicitly includes available LAN clients in the trust boundary.
+Ordinary `serve` routes expose only the output directory. A separate editor API
+allows regular `.md`, `.yaml`, `.yml`, and `.json` files only within docs root,
+excludes hidden/excluded/output and symlink paths, and does not expose the rest
+of the repository. By default, the listener uses loopback; `--host 0.0.0.0`
+explicitly includes reachable local-network clients in the trust boundary.
 
 ### BR-SITE-004: Mermaid works autonomously and in strict mode
 
-Pinned classic bundle Mermaid Tiny copied from `go:embed`, loaded
-only when the diagram approaches the viewport and is launched with `securityLevel: strict`.
-Syntax error doesn't break page: portal shows message and original
-chart code.
+The pinned classic Mermaid Tiny bundle is copied from `go:embed`, loaded only
+when a diagram approaches the viewport, and started with `securityLevel: strict`.
+A syntax error does not break the page: the portal shows a message and the
+original diagram source.
 
-### BR-SITE-005: Screen map works autonomously
+### BR-SITE-005: The Screen Map works autonomously
 
-Map, filters, SVG links, zoom, pan, sidebar and step by step
-viewer work via `file://` on local JavaScript and CSS without CDN and
-additional runtime.
+The map, filters, SVG links, zoom, pan, sidebar, and step-by-step viewer work on
+local JavaScript and CSS without a CDN or backend requests.
 
-“User Scripts” is an independent top-level section
-for `UC-*`, and "Processes" is the only document directory `FLOW-*` at
-`processes/index.html`. The canonical use case page combines
-description, map, playback and connections. The “Screens” section opens the catalog
-`SC-*`; The general map is available as a separate item when its generation is enabled.
-Cards show the number of incoming and outgoing transitions. Transition types
-differ in line shape; hotspots appear on hover and focus, and
-The terminal screen contains links to the map and a description of the use case.
+“Use Cases” is an independent top-level section for `UC-*`, while “Processes”
+is the only catalog of `FLOW-*` documents at `processes/index.html`. The
+canonical use-case page combines the description, map, playback, and
+relationships. The “Screens” section opens the `SC-*` catalog; the overall map
+is available as a separate item when its generation is enabled. Cards show the
+number of incoming and outgoing transitions. Transition types differ by line
+shape; hotspots appear on hover and focus, and the terminal screen links to the
+map and the use-case description.
 
-The main navigation follows a stable registry order of built-in sections;
-it does not depend on the order of the Go map traversal. The names of built-in sections are taken from
-`project.sections`, and `flows` is output by the `processes` route.
+The main navigation follows the stable registry order of built-in sections; it
+does not depend on Go map iteration order. Built-in section names come from
+`project.sections`, and `flows` is emitted under the `processes` route.
 
-### BR-SITE-006: Topics do not extend trusted surface
+### BR-SITE-006: Themes do not expand the trusted surface
 
-`classic`, `paper` and `terminal`, their tokens, color scheme switch,
-fallback favicon and browser resources are embedded via `go:embed`. Configuration
-selects only fixed options; custom CSS, fonts and theme plugins are not
-are loading.
+`classic`, `paper`, and `terminal`, their tokens, the color-scheme switch,
+fallback favicon, and browser resources are embedded through `go:embed`.
+Configuration selects only fixed options; custom CSS, fonts, and theme plugins
+are not loaded.
 
-Custom logo, favicon and hero are read only as regular files from
-`.docu-docu/assets/`, are checked when building the model and copied to
-`assets/branding/`. `build`, `check` and `serve` use the same diagnostics and
+Custom logo, favicon, and hero files are read only as regular files from
+`.docu-docu/assets/`, validated when the model is built, and copied to
+`assets/branding/`. `build`, `check`, and `serve` use the same diagnostics and
 remain offline-first.
 
 ### BR-SITE-007: Build and serve have different capabilities
 
-`GenerateSite` always produces a standalone read-only result for `file://` without
-editor markup, API URL, CodeMirror and server-only rebuild code. `serve` separately
-adds live workspace, editor/source actions, polling, API and watcher.
+`GenerateSite` always creates a backend-independent read-only result for static
+HTTP hosting without editor markup, API UI, Swagger UI, CodeMirror, or
+server-only rebuild code. It copies discovered OpenAPI specs as ordinary portal
+assets. `serve` separately adds the live workspace, editor/source actions,
+polling, API, watcher, and vendored Swagger UI for canonical contracts.
 
-### BR-SITE-008: Record protected by optimistic concurrency
+### BR-SITE-008: Writes are protected by optimistic concurrency
 
-Content is identified by SHA-256 digest. Save checks the digest before and after
-records same-directory temp, saves mode, synchronizes data and atomically
-replaces the source. The conflict does not lose local text and requires a separate overwrite
-with actual digest and explicit `confirmOverwrite`; when deleting the source dirty
-buffer can be downloaded. Diagnostics do not block saving.
+Content is identified by a SHA-256 digest. Save checks the digest before and
+after writing a same-directory temporary file, preserves mode, synchronizes the
+data, and atomically replaces the source. A conflict does not lose local text
+and requires a separate overwrite with the current digest and explicit
+`confirmOverwrite`; if the source was deleted, the dirty buffer can be
+downloaded. Diagnostics do not block saving.
 
-### BR-SITE-009: Locale portals isolated from canonical workspace
+### BR-SITE-009: Locale portals are isolated from the canonical workspace
 
-When running `serve` from canonical root configured `translations.<locale>`
-create independent read-only snapshots using `/_docu-docu/locales/<locale>/`.
-The switch only gets the URL from server-computed targets: Markdown
-is compared by relative source path, generated page - by existing
-output path, otherwise locale homepage is used. Locale mount does not get
-editor, changes API, rebuild controls, source paths or canonical workspace.
-`build`, `file://`, and direct `serve` on a translation root remain
-single-language and read-only: the server adds no editor markup, write API, or
-rebuild controls.
+When `serve` runs from the canonical root, configured `translations.<locale>`
+create independent read-only snapshots at `/_docu-docu/locales/<locale>/`.
+The switch receives URLs only from server-computed targets: Markdown is matched
+by relative source path, a generated page by an existing output path, and
+otherwise the locale homepage is used. A locale mount receives no editor,
+changes API, rebuild controls, source paths, or canonical workspace. `build`
+and `serve` directly on a translation root remain single-language and
+read-only: the server adds no editor markup, write API, or rebuild controls.
 
 ### BR-SITE-010: Soft navigation limited to canonical serve portal
 
-Only canonical portal mode `serve` intercepts regular same-origin
-transitions between HTML documents. It preloads up to the last eight
-pages after pointer hover or keyboard focus, checks workspace revision and
-replaces the document shell without rebuild. Back/Forward, anchors, recovery
-scroll and main focus preserve browser semantics. Editor, changes, API,
-locale, external and special transitions always remain full navigation;
-network error, inappropriate HTML or new revision also lead to complete
-loading.
+Only the canonical portal in `serve` mode intercepts ordinary same-origin
+transitions between HTML documents. It preloads up to the last eight pages
+after pointer hover or keyboard focus, checks the workspace revision, and
+replaces the document shell without a rebuild. Back/Forward, anchors, scroll
+restoration, and main focus preserve browser semantics. Editor, changes, API,
+locale, external, and special transitions always use full navigation; a network
+error, unsuitable HTML, or a new revision also causes a full load.
 
-The search index is loaded only the first time a search is accessed and is saved
-in memory between soft transitions. Mermaid bundle loads when approached
-the first diagram and is reused until the page is completely loaded.
+The search index loads only on first use of search and remains in memory across
+soft transitions. The Mermaid bundle loads when the first diagram approaches
+and is reused until a full page load.
+
+### BR-SITE-011: API docs remain offline and read-mostly
+
+`/_docu-docu/api-docs/` exists only in canonical `serve`, uses same-origin specs
+and pinned Swagger UI 5.32.12 without a CDN. CSP prohibits external network
+access, and Try it out is available only for `GET`/`HEAD`. Locale mounts, direct
+translation serve, and static build contain no UI, assets, or navigation for it.
+
+### BR-SITE-012: Work surfaces use consistent appearance
+
+The canonical portal in `serve`, Editor, and Changes use the same `localStorage`
+keys for `classic`/`paper`/`terminal` and `system`/`light`/`dark`. A shared
+blocking `appearance.js` applies the saved theme, scheme, accent, density, and
+content width before CSS loads and publishes `docu-docu:themechange` on later
+changes. Deferred surface bundles do not repeat this initialization.
+
+Editor and Changes receive a shared header with project branding, “Portal /
+Editor / Changes” navigation, an active `aria-current`, and theme selectors.
+Their work actions remain in a separate contextual panel. CodeMirror switches
+the theme compartment without recreating editor state, while an active Mermaid
+diff rerenders without resetting the report, filters, or URL state.
+
+### BR-SITE-013: Go explicitly defines frontend capabilities
+
+Every page contains a safely serialized `application/json` bootstrap with
+`schemaVersion`, runtime, page reference, relative asset/data bases, and
+capabilities. Static runtime always disables `editor`, `changes`, `rebuild`, and
+`taskWorkspace`. Serve-only endpoints occur only in the serve bootstrap and
+remain same-origin. The frontend ignores unknown fields, but explicitly shows
+an error when bootstrap is missing or its schema version is unsupported.
 
 ## Invariants
 
-- the original `index.md` is displayed by the dashboard, and not by a duplicate page;
-- pages of source Markdown documents, including dashboard and canonical
-  use case, allow you to copy the name and safe path to the source;
-- side navigation colors the type icon according to the recognized document status,
-  and for `TASK-*` and `BUG-*` it further distinguishes between outstanding `☐` and
-  completed `☑`; the status text signature remains available regardless of
-  colors;
-- the active navigation group is expanded, the rest of the groups are by default
-  collapsed, and the user's explicit selection is saved locally;
-- dashboard shows no more than five recommended entry points; the only one
-  The filtered catalog remains the full surface;
-- catalogs, Screen Map, traceability and health page do not provide synthetic
+- the source `index.md` is displayed by the dashboard rather than a duplicate
+  page: the home page presents project information, a compact current focus, no
+  more than five recommended entry points, and the substantive content of
+  `index.md` in order, without repeating its H1 or structural metadata inside
+  the always-visible detailed overview;
+- current focus exists only when there is a roadmap, work items, or risks, links
+  the next result to its target document, and states the number of active tasks,
+  blockers, and open risks in text, including zero states; detailed items remain
+  on the status page and in catalogs;
+- pages for source Markdown documents, including the dashboard and canonical
+  use case, allow the title and safe source path to be copied; dashboard actions
+  sit inside the always-visible overview, where `serve` also exposes editor,
+  source, and changes;
+- side navigation colors its type icon according to recognized document status
+  and, for `TASK-*` and `BUG-*`, additionally distinguishes incomplete `☐` from
+  completed `☑`; the textual status label remains available regardless of color;
+- the active navigation group is expanded, other groups are collapsed by
+  default, and the user's explicit selection is stored locally;
+- the dashboard does not duplicate the full catalog, detailed roadmap and risk
+  cards, or active-task lists; global search, side navigation, and section
+  catalogs provide the complete document overview;
+- the detailed overview always shows the substantive part of `index.md`, and
+  the print version preserves it in full;
+- catalogs, Screen Map, traceability, and the health page do not emit synthetic
   document context;
-- in `serve` a separate workspace panel allows you to open the editor and manually
-  rebuild the model, HTML and search without stopping the listener; she shows
-  area, progress, result or error with retry; via `file://` of these
-  no actions or assets;
-- save/create and stable external change update model, HTML, search,
-  diagnostics and workspace revision synchronously;
-- a regular HTTP request does not trigger rebuild; watcher publishes snapshot only
-  after a successful build, and locale rebuild does not change the canonical editor or changes state;
-- soft transition to canonical `serve` does not trigger rebuild and accepts HTML
-  only with the current workspace revision; watcher and manual rebuild complete
-  full reboot, which synchronizes runtime and snapshot;
-- a regular page does not load the search index or Mermaid before accessing
-  searching for or bringing the diagram closer to the viewport;
-- Screen Map and playable flow are reinitialized for the new layout; at
-  replacing DOM previous page lifecycle cancels listeners and observers;
-- the service output conflict receives a separate safe path;
+- in canonical `serve`, shared surface navigation opens portal, Editor, and
+  Changes using full navigation, while rebuild remains a separate portal
+  action; static output contains none of the special routes, actions, or
+  serve-only assets;
+- compact navigation preserves accessible names on 40×40 control surfaces;
+  contextual panels collapse without horizontal page overflow, while trees,
+  metrics, and diffs retain local scrolling;
+- save/create and a stable external change synchronously update the model, HTML,
+  search, diagnostics, and workspace revision;
+- an ordinary HTTP request does not trigger rebuild; the watcher publishes a
+  snapshot only after a successful build, and a locale rebuild does not change
+  canonical editor or changes state;
+- a soft transition in canonical `serve` does not trigger rebuild and accepts
+  HTML only with the current workspace revision; watcher and manual rebuild end
+  in a full reload that synchronizes runtime and snapshot;
+- an ordinary page does not load the search index or Mermaid until search is
+  used or a diagram approaches the viewport;
+- Screen Map and playable flow are reinitialized for the new layout; when the
+  DOM is replaced, the previous page lifecycle cancels listeners and observers;
+- a service-output conflict receives a separate safe path;
 - `ProjectReport` and HTML are built from the same model;
 - generated files do not become a source of truth.
 
@@ -167,17 +220,18 @@ the first diagram and is reused until the page is completely loaded.
 - `GenerateSite`;
 - `BuildReport`;
 - CLI command `serve`;
-- [Editor HTTP schema v1](../contracts/editor-http.md);
+- [Editor OpenAPI](../contracts/editor.openapi.yaml) and [Changes OpenAPI](../contracts/changes.openapi.yaml);
+- [Editor API behavior](../contracts/editor-http.md) and [Changes API behavior](../contracts/changes-http.md);
 - `ProjectReport` schema v1;
-- HTML entrypoint `index.html` and machine `report.json`.
+- HTML entrypoint `index.html` and machine-readable `report.json`.
 
 ## Related use cases
 
-- [UC-DOCS-01: Portal assembly](../use-cases/build-portal.md)
-- [UC-DOCS-03: Local Server](../use-cases/serve-portal.md)
+- [UC-DOCS-01: Build the portal](../use-cases/build-portal.md)
+- [UC-DOCS-03: Local server](../use-cases/serve-portal.md)
 - [UC-DOCS-04: Screen Map](../use-cases/screen-map.md)
 
 ## Related processes
 
-- [FLOW-DOCS-BUILD: Building a standalone portal](../flows/FLOW-DOCS-BUILD.md)
-- [FLOW-DOCS-SERVE: Local portal browsing](../flows/FLOW-DOCS-SERVE.md)
+- [FLOW-DOCS-BUILD: Build a static HTTP portal](../flows/FLOW-DOCS-BUILD.md)
+- [FLOW-DOCS-SERVE: Browse the portal locally](../flows/FLOW-DOCS-SERVE.md)

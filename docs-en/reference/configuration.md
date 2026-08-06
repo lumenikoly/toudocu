@@ -1,8 +1,12 @@
 # Configuration reference
 
 The CLI works without a configuration file. Optional
-`<repository-root>/.docu-docu/config.yml` configures the portal and automatically
-read by the commands `build`, `check` and `serve`.
+`<repository-root>/.docu-docu/config.yml` is parsed and validated in full when
+loaded, including configured branding assets. After shared validation, `build`,
+`check`, and `serve` use project/site configuration; `changes` and `task
+changes` use the `changes` section; and `task init` and `scaffold` use
+`project.locale`. Therefore, an error in the shared structure or a site asset
+can also stop an operation that does not directly use that setting.
 
 ## Default values
 
@@ -143,12 +147,17 @@ remote. The limit disables the heavy representation of one file, not the entire 
 are accepted only by this command. The `0.0.0.0` address allows access from the local
 network, but the server does not provide TLS or authorization and displays a warning.
 
-When viewed via `serve`, a separate workspace panel shows editor and
-manual rebuilding of the model, HTML and search. Editor API always runs on the same
-listener and does not receive a separate CLI flag.
-`--host`, `--port` and `--open` retain the same semantics; `--no-open` and `--edit`
-do not exist. Via `file://` or other static HTTP server editor markup,
-API URLs, CodeMirror and server-only scripts are missing.
+When viewed through `serve`, a separate workspace panel shows the editor and
+manual rebuilding of the model, HTML, and search. The Editor API always runs on
+the same listener and has no separate CLI flag. `--host`, `--port`, and `--open`
+retain their existing semantics; `--no-open` and `--edit` do not exist. A
+`build` result published by any static HTTP server contains no editor markup,
+API URL, CodeMirror, or server-only scripts.
+
+Canonical `serve` publishes discovered OpenAPI contracts at
+`/_docu-docu/api-docs/` without separate configuration. Static build copies the
+specs but not Swagger UI; translation mounts and direct translation serve
+publish neither the UI nor its link.
 
 Workspace includes the usual `.md`, `.yaml`, `.yml` and `.json` inside docs root and
 excludes hidden, configured excludes, output subtree and symlink paths. JSON body

@@ -1,49 +1,54 @@
-# STD-DOCS-001: Verifiable Documentation
+# STD-DOCS-001: Verifiable documentation
 
 - Identifier: STD-DOCS-001
 - Status: Active
 - Owner: Docu-docu Team
-- Scope: Source documentation, skill templates and tracked portals
-- Last updated: 2026-07-31
+- Scope: Source documentation, skill templates, and tracked portals
+- Last updated: 2026-08-05
 
-The standard keeps Markdown as the source of truth and separates proven ones.
-global rules from local or generated views.
+This standard separates confirmed sources from local or generated views.
+Markdown remains the source of the document model; explicitly recognized
+OpenAPI may own only the HTTP wire contract.
 
 ## Rules
 
-1. Global coverage is determined by `roadmap.md`; state of the explicitly bound `UC-*`
-   taken from the use case. The remaining local checklists are not aggregated.
-2. Generated `build/`, `dist/`, `example/site/`, `project-docs/` and
-   `example/project-docs/` are not edited as a source of truth.
-3. Monitored portals are rebuilt from Markdown after semantic review and
+1. Global scope is defined by `roadmap.md`; the state of an explicitly linked
+   `UC-*` comes from its use case. Other local checklists are not aggregated.
+2. Generated `build/`, `dist/`, `example/site/`, `project-docs/`, and
+   `example/project-docs/` are not edited as sources of truth.
+3. Tracked portals are rebuilt from Markdown after semantic review and a
    structural check.
-4. A typed document is created only for confirmed semantics;
-   unknown owner, date, status or procedure are not invented for the sake of
-   lack of warning.
-5. Explicitly related standards and runbooks are read along with the task context; region
-   other applicable standards are checked by the author without CLI glob heuristics.
-6. `docs/runbooks/` is created only if there is real operational
-   procedures.
-7. `docs/architecture/overview.md` is a required card; every other
-   The Markdown file in `architecture/` answers one obvious architectural question
-   and is added with a direct link from overview.
-8. Details of FLOW, CONTRACT, REFERENCE, RUNBOOK, ADR and MODULE remain in
-   corresponding sources of truth, and the semantic gate checks the architectural
-   form and meaning by `ARCH001`–`ARCH013`.
-9. `$docu-docu refresh` and `$docu-docu refresh diff` update the original
-   documentation only for current repository evidence; dates change with
-   content or relationships, and `Last verified` requires actual verification
-   runbook.
-10. The root `CHANGELOG.md`, if it exists, is the only one
-    a special source for release changes. It cannot be duplicated in
-    `docs/changelog.md`: such a file remains a regular Markdown document.
-    Don't create a root log just for the portal tab.
+4. A typed document is created only for confirmed semantics; an unknown owner,
+   date, status, or procedure is not invented merely to remove a warning.
+5. Explicitly linked standards and runbooks are read together with task
+   context; the author checks the scope of other applicable standards without
+   CLI glob heuristics.
+6. `docs/runbooks/` is created only when a real operational procedure exists.
+7. `docs/architecture/overview.md` is the required map; every other Markdown
+   file under `architecture/` answers one explicit architectural question and
+   is listed by a direct link from the overview.
+8. FLOW, CONTRACT, REFERENCE, RUNBOOK, ADR, and MODULE details remain in their
+   corresponding sources of truth, while the semantic gate checks architectural
+   form and meaning under `ARCH001`–`ARCH013`.
+9. `$docu-docu refresh` and `$docu-docu refresh diff` update source
+   documentation only from current repository evidence; dates change together
+   with content or relationships, and `Last verified` requires an actual
+   runbook verification.
+10. A root `CHANGELOG.md`, when present, is the sole special source of release
+    changes. It must not be duplicated in `docs/changelog.md`: such a file
+    remains an ordinary Markdown document. Do not create a root changelog only
+    for a portal tab.
+11. `contracts/**/*.openapi.{yaml,yml,json}` owns HTTP paths, methods,
+    parameters, headers, statuses, media types, examples, and JSON schemas. Its
+    Markdown companion does not repeat them and records behavior, security,
+    filesystem, and trust-boundary invariants. External `$ref` values are not
+    loaded.
 
-## Automatic checks
+## Automated checks
 
 - `go run ./cmd/docu-docu check ./docs --strict --stale-days 0`;
-- integrity tests of templates and public JSON schema;
-- tests of links, stable IDs, task context and portal navigation.
+- template-integrity and public JSON-schema tests;
+- tests for links, stable IDs, task context, and portal navigation.
 
-Commands are run from work item or trusted CI workflow, and not directly from
+Commands are run from a work item or trusted CI workflow, not directly from
 this standard.

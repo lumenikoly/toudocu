@@ -4,7 +4,8 @@
     "useCases": [
       "UC-TASK-01",
       "UC-TASK-02",
-      "UC-TASK-03"
+      "UC-TASK-03",
+      "UC-TASK-04"
     ],
     "screens": [],
     "rules": [
@@ -13,7 +14,8 @@
       "BR-CLI-003",
       "BR-CLI-004",
       "BR-CLI-005",
-      "BR-CLI-006"
+      "BR-CLI-006",
+      "BR-CLI-007"
     ]
   },
   {
@@ -31,7 +33,9 @@
     "useCases": [
       "UC-DOCS-05"
     ],
-    "screens": [],
+    "screens": [
+      "SC-CHANGES-WORKSPACE"
+    ],
     "rules": [
       "BR-CHANGES-001",
       "BR-CHANGES-002",
@@ -50,7 +54,8 @@
       "BR-MODEL-002",
       "BR-MODEL-003",
       "BR-MODEL-004",
-      "BR-MODEL-005"
+      "BR-MODEL-005",
+      "BR-MODEL-006"
     ]
   },
   {
@@ -60,7 +65,14 @@
       "UC-DOCS-03",
       "UC-DOCS-04"
     ],
-    "screens": [],
+    "screens": [
+      "SC-SITE-API-DOCS",
+      "SC-SITE-DOCUMENT",
+      "SC-SITE-EDITOR",
+      "SC-SITE-HOME",
+      "SC-SITE-SCREEN-MAP",
+      "SC-SITE-USE-CASE"
+    ],
     "rules": [
       "BR-SITE-001",
       "BR-SITE-002",
@@ -71,7 +83,10 @@
       "BR-SITE-007",
       "BR-SITE-008",
       "BR-SITE-009",
-      "BR-SITE-010"
+      "BR-SITE-010",
+      "BR-SITE-011",
+      "BR-SITE-012",
+      "BR-SITE-013"
     ]
   }
 ]

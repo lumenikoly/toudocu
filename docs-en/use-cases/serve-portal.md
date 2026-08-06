@@ -5,17 +5,21 @@
 - Actor: Developer
 - Module: MOD-SITE
 - Priority: Medium
-- Last updated: 2026-08-04
+- Screens: SC-SITE-HOME, SC-SITE-EDITOR, SC-SITE-DOCUMENT, SC-SITE-API-DOCS
+- Start screen: SC-SITE-HOME
+- Terminal screens: SC-SITE-DOCUMENT, SC-SITE-API-DOCS
+- Allow cycle: Yes
+- Last updated: 2026-08-05
 
 The developer views and edits documentation via a local HTTP server
 and receives an updated model and portal after saving or external changes.
 
 ## Inputs
 
-- catalog of design documentation;
+- project-documentation directory;
 - output directory;
 - server address and port;
-- the usual `.md`, `.yaml`, `.yml` and `.json` inside the documentation directory.
+- regular `.md`, `.yaml`, `.yml`, and `.json` files inside the documentation directory.
 
 ## Preconditions
 
@@ -24,29 +28,33 @@ and receives an updated model and portal after saving or external changes.
 
 ## Main scenario
 
-1. The developer calls `docu-docu serve ./docs`.
-2. Docu-docu assembles the portal into the output directory.
+1. The developer runs `docu-docu serve ./docs`.
+2. Docu-docu builds the portal in the output directory.
 3. Docu-docu starts an HTTP server on `127.0.0.1:8080` and reports the address.
-4. The developer opens the portal or `/_docu-docu/editor/` in the browser.
-5. The Editor receives a revision, a safe list of files and a general registry of templates.
-6. The developer opens the source, changes the text, checks the Markdown preview and
-   positional diagnostics and saves it.
-7. Docu-docu compares SHA-256 digest, atomically replaces file and synchronously
+4. The developer opens the portal in a browser.
+5. If the developer navigates to `/_docu-docu/api-docs/`, they select the Editor
+   or Changes contract, expand an operation, and optionally execute a safe
+   `GET`/`HEAD`; the scenario ends at `SC-SITE-API-DOCS`.
+6. Otherwise, the developer opens `/_docu-docu/editor/`; the Editor receives a
+   revision, a safe file list, and the shared template registry.
+7. The developer opens the source, changes the text, checks the Markdown preview
+   and positional diagnostics, and saves it.
+8. Docu-docu compares the SHA-256 digest, atomically replaces the file, and synchronously
    rebuilds model, HTML, search and diagnostics.
-8. When transitioning between canonical HTML documents, the portal can receive in advance
+9. When transitioning between canonical HTML documents, the portal can prefetch the
    target page, check the current revision and replace the document layout without
    rebuild. Back/Forward, anchors, scroll and keyboard focus continue to work.
-9. Browser polling receives a new revision: the normal page is reloaded,
-   the clean editor is updated, and the dirty editor saves the text and shows
+10. Browser polling receives a new revision: the normal page is reloaded,
+   a clean editor updates, while a dirty editor retains its text and shows a
    conflict.
-10. HTTP navigation returns the last successful snapshot and does not start rebuild.
+11. HTTP navigation returns the last successful snapshot and does not start a rebuild.
    Watcher stabilizes external changes and rebuilds only the changed
-   documentation root; manual reassembly canonical portal shows the area
-   “model, HTML and search”, progress and summary before reboot.
-11. If `serve` is launched from canonical root with `translations.<locale>`, header
+   documentation root; a manual canonical-portal rebuild shows the scope
+   “model, HTML, and search”, progress, and the result before reloading.
+12. If `serve` is launched from canonical root with `translations.<locale>`, header
    offers locale tags. The corresponding Markdown opens in the selected
-   locale, and the missing page is on its homepage.
-12. The developer stops the server with the `Ctrl+C` combination.
+   locale, while a missing page leads to that locale's homepage.
+13. The developer stops the server with `Ctrl+C`.
 
 ## Error scenarios
 
@@ -55,28 +63,29 @@ and receives an updated model and portal after saving or external changes.
 - stale digest returns `409 stale_digest`; explicit overwrite is repeated with
   current digest and `confirmOverwrite: true`, and the request without confirmation and
   second external conflict get `409` again;
-- when deleting a dirty file externally, the editor saves the buffer and offers to download
+- when a dirty file is deleted externally, the editor retains the buffer and offers to download
   it without showing inapplicable load/overwrite actions;
-- malformed, oversized, cross-origin and unsafe-path requests receive JSON errors
-  envelope and do not change the source;
-- subsequent rebuild error returns HTTP 500 for the current request or
-  server log watcher, but does not stop listener;
-- manual rebuild error remains on the current page, clears the state
-  downloads and prompts you to repeat the action;
+- malformed, oversized, cross-origin, and unsafe-path requests receive a JSON
+  error envelope and do not change the source;
+- a subsequent rebuild error returns HTTP 500 for the current request or is
+  written to the watcher server log, but does not stop the listener;
+- a manual rebuild error remains on the current page, clears the loading state,
+  and offers to retry the action;
 - HTML loading error, inappropriate page or mismatched revision in
   soft transition time performs normal full navigation;
-- translation portal with unsuccessful first build shows secure page
+- a translation portal whose first build fails shows a safe page
   `Unavailable`; subsequent error does not replace last-known-good snapshot;
 - `--host 0.0.0.0` opens the server for the local network without TLS and authorization;
   Docu-docu displays an explicit warning.
 
 ## Postconditions
 
-While the command is running, regular routes distribute output, and a separate editor API
-reads and modifies only allowed workspace within docs root. Other files
-repositories are not available. After the process is stopped, the API disappears and the port is freed.
-Locale mount `/_docu-docu/locales/<locale>/` is read-only: it does not contain
-editor, changes, workspace or canonical API.
+While the command is running, ordinary routes serve output, and a separate
+editor API reads and modifies only the permitted workspace inside the docs
+root. Other repository files are unavailable. After the process stops, the API
+disappears and the port is released. The locale mount
+`/_docu-docu/locales/<locale>/` is read-only: it contains no Editor, Changes,
+workspace, API docs, or canonical API.
 
 ## Business rules
 
@@ -93,20 +102,22 @@ The rules are defined in the module document:
 - [CLI and workflow tasks](../modules/cli.md)
 - [CLI contract](../contracts/cli.md)
 - [HTTP contract editor API](../contracts/editor-http.md)
+- [Editor OpenAPI](../contracts/editor.openapi.yaml)
+- [Changes OpenAPI](../contracts/changes.openapi.yaml)
 
-## Examination
+## Verification
 
 - initial assembly and HTTP distribution of the portal;
 - save/create and watcher rebuild model, HTML, search and diagnostics;
 - path, symlink, body/content limits, same-origin guards and CAS conflicts;
 - Markdown preview, JSON/YAML diagnostics and raw `text/plain`;
 - desktop/mobile keyboard flow without losing dirty text;
-- manual reassembly from the workspace panel with a visible area, progress, total and
+- manual rebuild from the workspace panel with visible scope, progress, result, and
   subsequent page reload;
 - inaccessibility of the button outside `serve` and handling of manual rebuild errors;
 - HTTP 500 when rebuilding fails without stopping the process;
 - inaccessibility of the repository source files;
-- check default loopback and network warning.
+- default-loopback and network-warning checks;
 - root and nested transitions, Back/Forward, anchors and keyboard navigation;
 - search, Mermaid, Screen Map and playable flow after several soft transitions;
 - full navigation for editor, changes, locale and external links, as well as

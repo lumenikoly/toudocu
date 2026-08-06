@@ -4,15 +4,16 @@
 - Type: Maintenance
 - Priority: High
 - Module: MOD-MODEL
+- Transitions: TR-SITE-004
 - Standards: STD-GO-001, STD-DOCS-001
 - Owner: Docu-docu Team
-- Last updated: 2026-08-03
+- Last updated: 2026-08-05
 
 ## Result
 
-The model and portal use an ordered registry of built-in partitions,
-localized project names, additive JSON `sectionType` and a single
-directory `FLOW-*` via route `processes/index.html`.
+The model and portal use an ordered registry of built-in sections, localized
+project names, additive JSON `sectionType`, and a single `FLOW-*` catalog at
+`processes/index.html`.
 
 ## Scope
 
@@ -23,15 +24,15 @@ directory `FLOW-*` via route `processes/index.html`.
 
 ## Out of scope
 
-- multi-local assembly of one portal;
+- building one portal for multiple locales;
 - migration fallback from H1 for built-in sections.
 
 ## Behavior change
 
 ### Before
 
-Navigation and classification of built-in sections depended on directory lines, and
-The section title may have been implicitly derived from H1.
+Navigation and classification of built-in sections depended on directory
+strings, and the section title could be derived implicitly from H1.
 
 ### After
 
@@ -55,6 +56,7 @@ directory and the route of individual documents, and its directory becomes only
 
 ## Verification
 
+- `AC-06` → `TR-SITE-004` → `TestScreenPortalAndReportV1`
 - `AC-01` → `go test ./... -run TestBuiltinSectionsStableOrderAndLookups`
 - `AC-02` → `go test ./... -run TestProjectLocaleConfiguration`
 - `AC-03` → `go test ./... -run TestProjectLocaleConfiguration`
@@ -82,5 +84,5 @@ successful strict structural check.
 
 ## Use-case omission reason
 
-The change stabilizes the internal model and configuration contract; it's not
-adds a standalone custom Docu-docu script.
+The change stabilizes the internal model and configuration contract; it does
+not add a standalone Docu-docu user scenario.

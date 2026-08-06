@@ -3,21 +3,23 @@
 - Identifier: MOD-CHANGES
 - Status: Completed
 - Owner: Docu-docu Team
-- Last updated: 2026-08-03
+- Last updated: 2026-08-05
 
 The module turns explicitly selected Git source documentation states into
-deterministic report for CLI, CI and local portal.
+a deterministic report for the CLI, CI, and local portal.
 
 ## Purpose
 
 Receive read-only Git snapshots, accurately show text changes and
-complement them with a comparison of the normalized design model without LLM.
+complement them with a comparison of the normalized project model without an LLM.
 
 ## Code location
 
-- `internal/app/changes_*.go` - comparison, Git adapter, reports and specialized diff;
+- `internal/app/changes_*.go` — comparison, Git adapter, reports, and specialized diffs;
 - `internal/app/server.go` — read-only changes API and live invalidation;
-- `internal/app/assets/changes.*` — serve-only browsing interface.
+- `internal/app/changes_http.go` — declarative route registry and the common schema-v1 error envelope;
+- `web/src/features/changes/`, `web/src/styles/changes.css` — serve-only
+  browsing interface; the generated bundle is embedded from `internal/site/assets/generated/`.
 
 ## Module boundaries
 
@@ -26,6 +28,10 @@ The module does not change the working tree, index, refs or Git history. Static
 remains the responsibility of `MOD-MARKDOWN`, and the portal shell is `MOD-SITE`.
 
 ## Business rules
+
+Wire-level paths, methods, responses, and schemas are defined by
+[Changes OpenAPI](../contracts/changes.openapi.yaml); this module owns
+comparison and isolation behavior.
 
 ### BR-CHANGES-001: Git is the only version source
 

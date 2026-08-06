@@ -1,7 +1,7 @@
 # Checking Docu-docu changes
 
-The manual sets a single local and CI cycle for the code and its own
-project documentation.
+This guide defines a single local and CI cycle for the project's code and its
+own documentation.
 
 ## Quick check
 
@@ -17,6 +17,13 @@ go run ./cmd/docu-docu check ./docs --strict --stale-days 0
 ```bash
 go test -count=1 ./...
 go test -count=1 -race ./...
+cd web
+npm ci
+npm run typecheck
+npm test
+npm run build
+npm run test:browser
+cd ..
 go run ./cmd/docu-docu build ./docs \
   --output ./build/project-docs \
   --repository-root . \
@@ -34,12 +41,16 @@ GOOS=windows GOARCH=amd64 go build -o /tmp/docu-docu-windows.exe ./cmd/docu-docu
 
 ## Test rules
 
-- the new validation rule receives a behavioral test;
-- a security fix receives a negative test;
-- CLI JSON is verified by decoding into a public report type;
-- timeout is checked not only by the fake runner, but also by the real child process;
-- the test should not execute work item commands through regular `check` or `build`;
-- temporary outputs are created via `t.TempDir` or `/tmp`.
+- every new validation rule gets a behavioral test;
+- every security fix gets a negative test;
+- CLI JSON is checked by decoding it into the public report type;
+- timeout behavior is checked with both a fake runner and a real child process;
+- tests must not execute work-item commands through ordinary `check` or
+  `build` operations;
+- temporary outputs are created with `t.TempDir` or under `/tmp`;
+- static browser smoke tests run over HTTP, including under a nested URL path;
+  opening HTML directly from disk is not a test contract;
+- CI rebuilds `internal/site/assets/generated/` and rejects any diff.
 
 ## Checking a documentation task
 
@@ -48,16 +59,16 @@ go run ./cmd/docu-docu task context TASK-DOCS-001 ./docs --format json
 go run ./cmd/docu-docu task verify TASK-DOCS-001 ./docs --dry-run --format json
 ```
 
-`task verify --run` runs commands from the document and should only be used for
-trusted task of the current repository.
+`task verify --run` executes commands from the document and must be used only
+for a trusted task in the current repository.
 
 ## Readiness criterion
 
-The change is ready when:
+A change is ready when:
 
-1. formatting does not create diff;
-2. vet, regular and race tests are carried out;
-3. `docu-docu check ./docs --strict` does not contain warnings and errors;
-4. example and minimal project with `index.md` and architecture overview remain
-   valid;
+1. formatting produces no diff;
+2. vet, ordinary tests, and race tests pass;
+3. `docu-docu check ./docs --strict` contains no warnings or errors;
+4. the example and a minimal project with `index.md` and an architecture
+   overview remain valid;
 5. behavior and public contracts are reflected in the documentation.

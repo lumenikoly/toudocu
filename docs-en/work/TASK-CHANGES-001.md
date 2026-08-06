@@ -6,15 +6,16 @@
 - Module: MOD-CHANGES
 - Use case: UC-DOCS-05
 - Flow: FLOW-DOCS-CHANGES
+- Transitions: TR-SITE-005
 - Standards: STD-GO-001, STD-DOCS-001
 - Owner: Docu-docu Team
-- Last updated: 2026-08-01
+- Last updated: 2026-08-05
 
 ## Result
 
-`docu-docu changes` and the `/changes` section show Git changes to the original
-documentation like source, rendered and deterministic semantic diff compare
-them with task impact and export `ChangeSetReport` schema v1.
+`docu-docu changes` and the `/changes` section show Git changes to source
+documentation as source, rendered, and deterministic semantic diffs, correlate
+them with task impact, and export `ChangeSetReport` schema v1.
 
 ## Behavior change
 
@@ -61,8 +62,8 @@ get the same report without changing Git.
   ADR, TASK, Architecture and relations, ignoring minor formatting.
 - [x] `AC-05` OpenAPI YAML/JSON diff compares operations, requests, responses,
   schemas and security and classifies compatibility.
-- [x] `AC-06` Rendered Markdown, Mermaid, Screen Map and image assets available until
-  and after isolating the error of one side.
+- [x] `AC-06` Rendered Markdown, Mermaid, Screen Map, and image assets are
+  available before and after, with failures on either side isolated.
 - [x] `AC-07` Task impact separates task contract from permanent documentation and
   returns declared/actual/scope diagnostics.
 - [x] `AC-08` CLI supports summary, file and task reports, filters,
@@ -71,8 +72,9 @@ get the same report without changing Git.
   lazy detail, ETag and live digest update.
 - [x] `AC-10` Changes UI supports comparison selector, filters/search,
   unified/merge/rendered/semantic/specialized tabs, deep links and accessibility.
-- [x] `AC-11` `serve` saves filters/open file with invalidation, and absence
-  Git shows diagnostic and does not break the rest of the portal.
+- [x] `AC-11` `serve` preserves filters and the open file during invalidation,
+  while unavailable Git produces a diagnostic without breaking the rest of the
+  portal.
 - [x] `AC-12` Static `build`, existing `check`, ProjectReport schema v1 and
   editor workflows remain compatible and pass regression tests.
 
@@ -87,6 +89,7 @@ get the same report without changing Git.
 
 ## Verification
 
+- `AC-10` → `TR-SITE-005` → `TestServeSiteIncludesEditor`
 - `AC-01` → `go test ./... -run 'TestGitChange|TestChangeComparison'`
 - `AC-02` → `go test ./... -run 'TestChangeSetReport|TestChangeSetDigest'`
 - `AC-03` → `go test ./... -run 'TestSourceDiff|TestSideBySideDiff|TestLargeChange'`
@@ -105,9 +108,9 @@ get the same report without changing Git.
 
 ## Documentation impact
 
-Added module/use case/flow, architecture answer, YAML ADR, changes guide,
-HTTP/JSON contracts and diagnostics reference. CLI, serve, task, are updated
-OpenAPI, Screen Map, configuration, security, README and changelog.
+A module/use case/flow, architecture answer, YAML ADR, changes guide, HTTP/JSON
+contracts, and diagnostics reference were added. CLI, serve, task, OpenAPI,
+Screen Map, configuration, security, README, and changelog were updated.
 
 - `docs/modules/MOD-CHANGES.md`;
 - `docs/use-cases/UC-DOCS-05.md`;

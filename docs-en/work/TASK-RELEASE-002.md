@@ -1,33 +1,32 @@
-# TASK-RELEASE-002: Add installation and update from GitHub Release
+# TASK-RELEASE-002: Add installation and updates from GitHub Release
 
 - Status: Completed
 - Type: Maintenance
 - Module: MOD-CLI
 - Standards: STD-GO-001, STD-DOCS-001
 - Owner: Docu-docu Team
-- Last updated: 2026-08-04
+- Last updated: 2026-08-05
 
 ## Result
 
-Release bundle and workflow `0.0.1` are ready for POSIX- and
-PowerShell-bootstrap: after publishing by owner, user of one
-command installs or updates Docu-docu, and bootstrap itself
-selects a supported OS/architecture artifact and checks SHA-256
-before replacing the file.
+The `0.0.1` release bundle and workflow are ready to publish the POSIX and
+PowerShell bootstraps: a user installs or updates Docu-docu with one command,
+while the bootstrap selects the supported OS/architecture artifact and verifies
+its SHA-256 before replacing the file.
 
 ## Behavior change
 
 ### Before
 
-The user manually selects a binary in GitHub Releases, checks
-it is added to `PATH`.
+The user manually selects a binary in GitHub Releases, verifies it, and adds it
+to `PATH`.
 
 ### After
 
-POSIX and PowerShell commands download the appropriate artifact and
-`checksums.txt`, check integrity even without `sudo` atomically
-set it to `~/.local/bin/docu-docu` or
-`%LOCALAPPDATA%\Programs\docu-docu\docu-docu.exe`. Canonical commands:
+The POSIX and PowerShell commands download the appropriate artifact and
+`checksums.txt`, verify integrity, and atomically install it without `sudo` at
+`~/.local/bin/docu-docu` or
+`%LOCALAPPDATA%\Programs\docu-docu\docu-docu.exe`. The canonical commands are:
 
 ```sh
 curl -fsSL https://github.com/lumenikoly/docu-docu/releases/latest/download/install.sh | sh
@@ -37,62 +36,60 @@ curl -fsSL https://github.com/lumenikoly/docu-docu/releases/latest/download/inst
 irm https://github.com/lumenikoly/docu-docu/releases/latest/download/install.ps1 | iex
 ```
 
-Both `install.*` are published as assets of a not yet published
-release `0.0.1`.
+Both `install.*` files are included in the release assets for version `0.0.1`.
 
-If the standard user dir is not already in `PATH`, POSIX installer once
-adds managed entry to `.zshrc` for zsh, `.bashrc` for bash, fish
-`conf.d`, and for other POSIX shells - in `.profile`. PowerShell installer
-adds once
-standard directory in user `PATH`. The current parent shell is not
-changes: installer prints the exact `source`/fish command, for
-`.profile` asks for login/re-login, and for Windows, opens a new terminal.
+If the standard user directory is not yet in `PATH`, the POSIX installer adds
+one managed entry to `.zshrc` for zsh, `.bashrc` for bash, fish `conf.d`, or
+`.profile` for other POSIX shells. The PowerShell installer adds the standard
+directory to the user `PATH` once. The current parent shell is not changed: the
+installer prints the exact `source`/fish command, requests a login/re-login for
+`.profile`, or asks the user to open a new terminal on Windows.
 
 ## Scope
 
 - new installer scripts in the scripts directory;
 - `Makefile` and `.github/workflows/`;
 - installer contract tests in `internal/app/`;
-- `README.md`, `CHANGELOG.md` and `docs/`.
+- `README.md`, `CHANGELOG.md`, and `docs/`.
 
 ## Out of scope
 
-- publication of a Git tag or GitHub Release;
-- background self-update or new Go CLI command;
-- system-wide installation via `sudo` and package managers;
+- publishing a Git tag or GitHub Release;
+- background self-update or a new Go CLI command;
+- system-wide installation through `sudo` and package managers;
 - Windows ARM64 and other new release targets;
-- signature or notarization of release binaries.
+- signing or notarization of release binaries.
 
 ## Acceptance criteria
 
-- [x] `AC-01` Installer unambiguously selects five existing ones
-  Linux, macOS and Windows artifacts, and unsupported
-  platform rejects before loading.
-- [x] `AC-02` By default, the latest stable release is selected;
-  `DOCU_DOCU_VERSION=X.Y.Z` fixes the version and allows downgrade,
-  `DOCU_DOCU_INSTALL_DIR` selects a non-standard directory, and
-  `DOCU_DOCU_NO_MODIFY_PATH=1` prevents modification of `PATH`.
-- [x] `AC-03` The binary is replaced only after an accurate check
-  release checksum and versions; download, checksum and filesystem failure
-  do not damage the already installed version, but the matching checksum
-  gives idempotent no-op.
-- [x] `AC-04` Release bundle contains both installer scripts, and
-  `checksums.txt` covers them along with binaries and notices.
-- [x] `AC-05` README and canonical documentation describe
-  commands, matrix, update/version override, `PATH`, check
-  SHA-256, bootstrap-only network boundary and what's up
-  publishing `0.0.1` by the owner of one-liner is not yet available.
-- [x] `AC-06` Restart, upgrade, downgrade and add
-  standard user install dir in shell/user `PATH` are idempotent;
-  the non-standard directory does not change the profile and receives a hint.
+- [x] `AC-01` The installer unambiguously selects the five existing Linux,
+  macOS, and Windows artifacts and rejects an unsupported platform before any
+  download.
+- [x] `AC-02` The latest stable release is selected by default;
+  `DOCU_DOCU_VERSION=X.Y.Z` pins the version and permits a downgrade,
+  `DOCU_DOCU_INSTALL_DIR` selects a nonstandard directory, and
+  `DOCU_DOCU_NO_MODIFY_PATH=1` prevents changes to `PATH`.
+- [x] `AC-03` The binary is replaced only after exact verification of the
+  release checksum and version; download, checksum, and filesystem failures do
+  not damage the installed version, while a matching checksum produces an
+  idempotent no-op.
+- [x] `AC-04` The release bundle contains both installer scripts, and
+  `checksums.txt` covers them together with the binaries and notices.
+- [x] `AC-05` The README and canonical documentation describe the commands,
+  matrix, update/version override, `PATH`, SHA-256 verification, the
+  bootstrap-only network boundary, and standard installation commands from a
+  stable GitHub Release.
+- [x] `AC-06` Repeated runs, upgrades, downgrades, and adding the standard user
+  install directory to the shell/user `PATH` are idempotent; a nonstandard
+  directory does not change the profile and receives a hint.
 
 ## Plan
 
 1. Implement the same installer contract for POSIX and PowerShell.
-2. Include scripts in the release bundle and checksum generation.
-3. Add platform, integrity, replacement and release contract tests.
-4. Update source documents and release notes.
-5. Go through semantic gate, full check and rebuild the portal.
+2. Include the scripts in the release bundle and checksum generation.
+3. Add platform, integrity, replacement, and release contract tests.
+4. Update the source documents and release notes.
+5. Pass the semantic gate and full check, then rebuild the portal.
 
 ## Verification
 
@@ -108,10 +105,10 @@ changes: installer prints the exact `source`/fish command, for
 
 ## Documentation impact
 
-Installation guide is added; README, `CHANGELOG.md`, are updated
-current state, system/trust boundary and monitored portal.
+An installation guide is added; the README, `CHANGELOG.md`, current status,
+system/trust boundary, and tracked portal are updated.
 
 ## Use-case omission reason
 
-The task changes release engineering and bootstrap delivery without adding
-main Go CLI command or script.
+The task changes release engineering and bootstrap delivery without adding a
+command or scenario to the main Go CLI.

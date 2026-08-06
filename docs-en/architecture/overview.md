@@ -2,26 +2,28 @@
 
 - Document type: Architecture Overview
 
-Docu-docu - local dependency-free Go runtime between source directory
-documentation and consumers of a proven model: Go-code through a public façade,
-automation via CLI/JSON and standalone HTML portal reader.
-Optional `serve` adds a local HTTP/editor runtime; database and
-external runtime is not included in the system boundary.
+Docu-docu is a local dependency-free Go runtime between the source
+documentation directory and consumers of the validated model: Go code through
+the public facade, automation through CLI/JSON, and readers of the static HTTP
+portal. Optional `serve` adds a local HTTP/editor runtime and an offline OpenAPI
+catalog; a database, CDN, and external runtime are outside the system boundary.
 
 ## System boundary
 
-A developer, library user, agent or CI submits a Docu-docu catalog
-documentation and explicitly selected repository root. Docu-docu reads Markdown and
-local assets, checks declared connections and either returns diagnostics,
-or builds derived HTML/JSON files. In `build` the browser only opens
-ready-made read-only portal. In `serve` it can send a limited
-workspace record, after which the Go process builds the model again. Only separate
-explicit task check mode can run repository commands.
+A developer, library consumer, agent, or CI provides Docu-docu with a
+documentation directory and an explicitly selected repository root. Docu-docu
+reads Markdown, local assets, and recognized OpenAPI contracts, validates
+declared relationships and wire structure, and either returns diagnostics or
+builds derived HTML/JSON files. With `build`, the browser only opens the
+ready-made read-only portal. With `serve`, it may submit a constrained workspace
+write, after which the Go process rebuilds the model. Only a separate, explicit
+task verification mode may run repository commands.
 
-## Map of architectural issues
+## Map of architectural questions
 
 - [Where is the Docu-docu system boundary and who interacts with it?](system-boundary.md)
-- [How do runtime components share responsibilities?](runtime-components.md)
-- [Where are the boundaries of trust?](trust-boundaries.md)
-- [How are errors in documentation and running checks isolated?](failure-isolation.md)
-- [How do Git states turn into consistent change set documentation?](documentation-changes.md)
+- [How do runtime components divide responsibilities?](runtime-components.md)
+- [Where is the boundary between the Go core and the frontend runtime?](frontend-runtime-boundary.md)
+- [Where are the trust boundaries?](trust-boundaries.md)
+- [How are documentation and verification failures isolated?](failure-isolation.md)
+- [How do Git states become a consistent documentation change set?](documentation-changes.md)

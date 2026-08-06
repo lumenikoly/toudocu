@@ -5,7 +5,7 @@
     "url": "index.html"
   },
   {
-    "title": "Current state",
+    "title": "Current status",
     "kind": "document",
     "url": "status.html"
   },
@@ -40,37 +40,42 @@
     "url": "architecture/failure-isolation.html"
   },
   {
+    "title": "Where Is the Boundary Between the Go Core and the Frontend Runtime?",
+    "kind": "architecture",
+    "url": "architecture/frontend-runtime-boundary.html"
+  },
+  {
     "title": "Architecture",
     "kind": "architecture",
     "url": "architecture/overview.html"
   },
   {
-    "title": "Separation of responsibilities between runtime components",
+    "title": "Runtime Component Responsibilities",
     "kind": "architecture",
     "url": "architecture/runtime-components.html"
   },
   {
-    "title": "Docu-docu system boundary",
+    "title": "Docu-docu System Boundary",
     "kind": "architecture",
     "url": "architecture/system-boundary.html"
   },
   {
-    "title": "Docu-docu trust boundaries",
+    "title": "Docu-docu Trust Boundaries",
     "kind": "architecture",
     "url": "architecture/trust-boundaries.html"
   },
   {
-    "title": "HTTP contract Documentation Changes v1",
+    "title": "Changes HTTP API: Behavior and Boundaries",
     "kind": "document",
     "url": "contracts/changes-http.html"
   },
   {
-    "title": "CLI contract Docu-docu v1",
+    "title": "Docu-docu CLI v1",
     "kind": "document",
     "url": "contracts/cli.html"
   },
   {
-    "title": "CONTRACT-EDITOR-HTTP: Local editor API",
+    "title": "Editor HTTP API: Behavior and Boundaries",
     "kind": "document",
     "url": "contracts/editor-http.html"
   },
@@ -95,8 +100,18 @@
     "url": "decisions/ADR-003.html"
   },
   {
+    "title": "ADR-004: Hybrid Source of Truth for the HTTP API",
+    "kind": "document",
+    "url": "decisions/ADR-004.html"
+  },
+  {
+    "title": "ADR-005: Goldmark as the Single Markdown Engine",
+    "kind": "document",
+    "url": "decisions/ADR-005.html"
+  },
+  {
     "id": "FLOW-DOCS-BUILD",
-    "title": "FLOW-DOCS-BUILD: Building a standalone portal",
+    "title": "FLOW-DOCS-BUILD: Building a Static HTTP Portal",
     "kind": "flow",
     "url": "flows/FLOW-DOCS-BUILD.html"
   },
@@ -114,7 +129,7 @@
   },
   {
     "id": "FLOW-DOCS-SERVE",
-    "title": "FLOW-DOCS-SERVE: Local portal browsing",
+    "title": "FLOW-DOCS-SERVE: Viewing the Portal Locally",
     "kind": "flow",
     "url": "flows/FLOW-DOCS-SERVE.html"
   },
@@ -125,9 +140,24 @@
     "url": "flows/FLOW-TASK-WORKFLOW.html"
   },
   {
-    "title": "View documentation changes",
+    "title": "Docu-docu agent workflows",
+    "kind": "document",
+    "url": "guides/agent-workflows.html"
+  },
+  {
+    "title": "Publishing the static portal",
+    "kind": "document",
+    "url": "guides/deployment.html"
+  },
+  {
+    "title": "Viewing documentation changes",
     "kind": "document",
     "url": "guides/documentation-changes.html"
+  },
+  {
+    "title": "Frontend development",
+    "kind": "document",
+    "url": "guides/frontend-development.html"
   },
   {
     "title": "Installing and updating Docu-docu",
@@ -135,7 +165,12 @@
     "url": "guides/installation.html"
   },
   {
-    "title": "Processes and user scripts",
+    "title": "Working with the portal locally",
+    "kind": "document",
+    "url": "guides/local-workflow.html"
+  },
+  {
+    "title": "Processes and use cases",
     "kind": "document",
     "url": "guides/processes.html"
   },
@@ -145,7 +180,7 @@
     "url": "guides/quality-runbooks.html"
   },
   {
-    "title": "Map of screens and playable user scenarios",
+    "title": "Screen map and playable use cases",
     "kind": "document",
     "url": "guides/screens.html"
   },
@@ -179,7 +214,7 @@
   },
   {
     "id": "MOD-MODEL",
-    "title": "Design model and validation",
+    "title": "Project model and validation",
     "kind": "module",
     "url": "modules/model.html"
   },
@@ -196,15 +231,20 @@
   },
   {
     "id": "STD-DOCS-001",
-    "title": "STD-DOCS-001: Verifiable Documentation",
+    "title": "STD-DOCS-001: Verifiable documentation",
     "kind": "standard",
     "url": "quality/STD-DOCS-001.html"
   },
   {
     "id": "STD-GO-001",
-    "title": "STD-GO-001: Go Code Quality",
+    "title": "STD-GO-001: Go code quality",
     "kind": "standard",
     "url": "quality/STD-GO-001.html"
+  },
+  {
+    "title": "API and programmatic interface map",
+    "kind": "document",
+    "url": "reference/api.html"
   },
   {
     "title": "ChangeSetReport schema v1",
@@ -217,13 +257,60 @@
     "url": "reference/configuration.html"
   },
   {
+    "title": "Docu-docu document types",
+    "kind": "document",
+    "url": "reference/document-types.html"
+  },
+  {
     "title": "Catalog of features",
     "kind": "document",
     "url": "reference/features.html"
   },
   {
+    "id": "SC-CHANGES-WORKSPACE",
+    "title": "SC-CHANGES-WORKSPACE: Changes Viewer",
+    "kind": "screen",
+    "url": "screens/SC-CHANGES-WORKSPACE.html"
+  },
+  {
+    "id": "SC-SITE-API-DOCS",
+    "title": "SC-SITE-API-DOCS: HTTP API",
+    "kind": "screen",
+    "url": "screens/SC-SITE-API-DOCS.html"
+  },
+  {
+    "id": "SC-SITE-DOCUMENT",
+    "title": "SC-SITE-DOCUMENT: Document Page",
+    "kind": "screen",
+    "url": "screens/SC-SITE-DOCUMENT.html"
+  },
+  {
+    "id": "SC-SITE-EDITOR",
+    "title": "SC-SITE-EDITOR: Editor",
+    "kind": "screen",
+    "url": "screens/SC-SITE-EDITOR.html"
+  },
+  {
+    "id": "SC-SITE-HOME",
+    "title": "SC-SITE-HOME: Portal Home",
+    "kind": "screen",
+    "url": "screens/SC-SITE-HOME.html"
+  },
+  {
+    "id": "SC-SITE-SCREEN-MAP",
+    "title": "SC-SITE-SCREEN-MAP: Global Screen Map",
+    "kind": "screen",
+    "url": "screens/SC-SITE-SCREEN-MAP.html"
+  },
+  {
+    "id": "SC-SITE-USE-CASE",
+    "title": "SC-SITE-USE-CASE: Use-Case Workspace",
+    "kind": "screen",
+    "url": "screens/SC-SITE-USE-CASE.html"
+  },
+  {
     "id": "UC-DOCS-01",
-    "title": "UC-DOCS-01: Create an offline portal",
+    "title": "UC-DOCS-01: Build a Static HTTP Portal",
     "kind": "use-case",
     "url": "use-cases/UC-DOCS-01.html"
   },
@@ -235,7 +322,7 @@
   },
   {
     "id": "UC-DOCS-04",
-    "title": "UC-DOCS-04: Explore screen map",
+    "title": "UC-DOCS-04: Explore the Screen Map",
     "kind": "use-case",
     "url": "use-cases/UC-DOCS-04.html"
   },
@@ -268,6 +355,18 @@
     "title": "UC-TASK-03: Prepare a new work task",
     "kind": "use-case",
     "url": "use-cases/UC-TASK-03.html"
+  },
+  {
+    "id": "UC-TASK-04",
+    "title": "UC-TASK-04: Archive or Restore a Work Item",
+    "kind": "use-case",
+    "url": "use-cases/UC-TASK-04.html"
+  },
+  {
+    "id": "TASK-API-001",
+    "title": "TASK-API-001: OpenAPI Contracts and Offline Swagger UI",
+    "kind": "task",
+    "url": "work/TASK-API-001.html"
   },
   {
     "id": "TASK-ARCH-001",
@@ -325,7 +424,7 @@
   },
   {
     "id": "TASK-RELEASE-002",
-    "title": "TASK-RELEASE-002: Add installation and update from GitHub Release",
+    "title": "TASK-RELEASE-002: Add installation and updates from GitHub Release",
     "kind": "task",
     "url": "work/TASK-RELEASE-002.html"
   },
@@ -337,9 +436,15 @@
   },
   {
     "id": "TASK-SITE-002",
-    "title": "TASK-SITE-002: Editing source documentation in serve",
+    "title": "TASK-SITE-002: Edit source documentation in serve",
     "kind": "task",
     "url": "work/TASK-SITE-002.html"
+  },
+  {
+    "id": "TASK-SITE-003",
+    "title": "TASK-SITE-003: Separate the Go Core from the Portal Frontend Layer",
+    "kind": "task",
+    "url": "work/TASK-SITE-003.html"
   },
   {
     "title": "Changelog",

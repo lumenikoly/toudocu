@@ -1,53 +1,52 @@
 # Risks
 
-Current technical and operational risks Docu-docu.
+Current technical and operational risks for Docu-docu.
 
-## RISK-01: Divergence with full Markdown
+## RISK-01: Changes to the Markdown dialect or engine
 
-- Status: Open
-- Probability: Medium
+- Status: Mitigating
+- Probability: Low
 - Impact: Medium
 - Owner: Docu-docu Team
 
-Our own secure Markdown parser only supports documented
-subset of syntax. The user may expect different Markdown behavior
-engine.
+Goldmark provides a single CommonMark/GFM AST, but an update to the version or
+extension set can change normalization, source ranges, and canonical HTML.
 
-### Risk Mitigation Plan
+### Risk mitigation plan
 
-- [x] Fix supported constructs in README and reference book
-  opportunities.
+- [x] Record the supported constructs in README and the feature reference.
 - [x] Cover rendering and escaping with behavioral tests.
-- [ ] Add new syntax only along with positive and negative tests.
+- [x] Convert current documents into the Goldmark cutover regression corpus.
+- [ ] Update the dialect or engine only together with corpus, security, and semantic review.
 
-## RISK-02: Execute trusted task commands
+## RISK-02: Execution of trusted task commands
 
 - Status: Risk accepted
 - Probability: Low
 - Impact: High
 - Owner: Repository user
 
-The commands in the work item check section are executed through the system shell and
-have the rights of the user who launched Docu-docu.
+Commands in the work-item verification section are executed through the system
+shell and have the permissions of the user who launched Docu-docu.
 
-### Risk Mitigation Plan
+### Risk mitigation plan
 
-- [x] Never execute commands with `check`, `build` or `task context`.
-- [x] Require an explicit call to `task verify --run`.
-- [x] Limit the time and volume of saved command output.
+- [x] Never execute commands during `check`, `build`, or `task context`.
+- [x] Require an explicit `task verify --run` invocation.
+- [x] Limit command duration and the amount of retained output.
 
-## RISK-03: Error when clearing output
+## RISK-03: Error while cleaning output
 
-- Status: Declining
+- Status: Mitigating
 - Probability: Low
 - Impact: High
 - Owner: Docu-docu Team
 
-A faulty implementation of `--clean` can corrupt data outside the directory
-generation.
+An incorrect `--clean` implementation could damage data outside the generation
+directory.
 
-### Risk Mitigation Plan
+### Risk mitigation plan
 
-- [x] Disable root, documentation directory and its parent directories.
-- [x] Check expanded paths and symbolic links.
-- [x] Save negative tests for each fixed script.
+- [x] Reject the root, documentation directory, and its parent directories.
+- [x] Check resolved paths and symbolic links.
+- [x] Retain negative tests for every corrected scenario.

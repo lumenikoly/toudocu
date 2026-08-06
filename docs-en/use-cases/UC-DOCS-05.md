@@ -5,10 +5,13 @@
 - Actor: Developer
 - Module: MOD-CHANGES
 - Priority: High
-- Last updated: 2026-08-03
+- Screens: SC-SITE-HOME, SC-CHANGES-WORKSPACE
+- Start screen: SC-SITE-HOME
+- Terminal screens: SC-CHANGES-WORKSPACE
+- Last updated: 2026-08-05
 
 The developer considers changes to the source documentation in terms of Git,
-rendered pages and design entities before completing the task.
+rendered pages and project entities before completing the task.
 
 ## Inputs
 
@@ -35,9 +38,9 @@ rendered pages and design entities before completing the task.
 
 - Without Git, the portal continues to work, and the changes section explains the limitation.
 - A parsing error on one side leaves the source diff available.
-- Large or binary file shows metadata and diagnostic without crashing the report.
-- When changing the working tree, the current change set becomes stale and is replaced
-  new one, preserving the applicable filters.
+- A large or binary file shows metadata and a diagnostic without crashing the report.
+- When the working tree changes, the current change set becomes stale and is replaced
+  by a new one while preserving applicable filters.
 
 ## Postconditions
 

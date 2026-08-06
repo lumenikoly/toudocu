@@ -1,7 +1,7 @@
-# Map of screens and playable user scenarios
+# Screen map and playable use cases
 
-Docu-docu builds map, directory, step-by-step scripts and traceability from documents
-`screens/SC-*.md`. A separate `screens/map.md` is not used.
+Docu-docu builds a map, catalog, step-by-step scenarios, and traceability from
+`screens/SC-*.md` documents. A separate `screens/map.md` is not used.
 
 The map page can be explicitly enabled or disabled:
 
@@ -10,15 +10,16 @@ docu-docu build ./docs --screen-map
 docu-docu build ./docs --no-screen-map
 ```
 
-When the general map is disabled, the directory, use case pages with step-by-step mode and
-the machine model is saved.
+When the overall map is disabled, the catalog, use-case pages with step mode,
+and the machine model remain available.
 
-In the portal navigation, the “Screens” section opens the catalog and contains documents
-separate screens. When a shared map is enabled, it is available to individual child maps.
-point; `--no-screen-map` removes this item and page without changing the directory.
-`UC-*` are located in a separate section “User Scripts”, and
-`FLOW-*` - in “Processes”. Screen map and step-by-step mode of the selected scenario
-embedded in the canonical `/use-cases/UC-*.html` page.
+In portal navigation, "Screens" opens the catalog and contains individual
+screen documents. When the overall map is enabled, it is available as a
+separate child item; `--no-screen-map` removes that item and page without
+changing the catalog. `UC-*` entries live in the separate "Use cases" section,
+while `FLOW-*` entries live under "Processes". The screen map and step mode for
+a selected scenario are embedded in its canonical
+`/use-cases/UC-*.html` page.
 
 ## Screen document
 
@@ -48,34 +49,34 @@ embedded in the canonical `/use-cases/UC-*.html` page.
 | TR-AUTH-002 | UC-AUTH-01 | Войти | Неверные данные | SC-AUTH-LOGIN | INVALID-CREDENTIALS | INVALID_CREDENTIALS |
 ```
 
-ID, type, module and status are required. Supported are `Экран`, `Страница`,
-`Модальное окно`, `Панель`, `Внешняя страница` and `Системное состояние`.
-`DEFAULT` exists implicitly. The unscripted transition is global and
-participates in all reachable playable scenarios. `Родительский экран` defines
-sitemap, not user flow order.
+ID, type, module, and status are required. Supported types are Screen, Page,
+Modal window, Panel, External page, and System state. `DEFAULT` exists
+implicitly. A transition without a use case is global and participates in all
+reachable playable scenarios. `Parent screen` defines the sitemap, not user-flow
+order.
 
-A transition requires an ID, action, condition, and result. Additionally you can
-indicate the status, error, message, contract and type:
+A transition requires an ID, action, condition, and result. State, error,
+message, contract, and type may also be specified:
 
-| Type | Mapping |
+| Type | Map rendering |
 |---|---|
-| `navigation` | solid directional line |
+| `navigation` | solid directed line |
 | `error` | dotted line |
 | `redirect` | dashed line |
-| `return` | reverse curved line |
+| `return` | reverse-curved line |
 | `external` | double line |
 
-Routes automatically use free corridors between cards.
-The transition signature is placed separately from the line, does not cross the cards and
-shows the action and condition in a maximum of two lines. Full text always
-available when selecting a transition in the sidebar.
+Routes automatically use available corridors between cards. A transition label
+is positioned separately from its line, does not cross cards, and shows the
+action and condition in at most two lines. The full text is always available
+when the transition is selected in the side panel.
 
-Going to the same screen is only allowed with a status, error or message,
-which explains the observed change.
+A transition to the same screen is allowed only with a state, error, or message
+that explains the observable change.
 
 ## Use case
 
-The screen script specifies:
+A screen scenario defines:
 
 ```md
 - Начальный экран: SC-AUTH-LOGIN
@@ -83,63 +84,65 @@ The screen script specifies:
 - Разрешить цикл: Да
 ```
 
-Docu-docu adds transitions of the selected `UC-*` and global transitions, calculates
-reachable screens, dead ends, loops and paths to terminal screens.
+Docu-docu adds transitions for the selected `UC-*` plus global transitions,
+then calculates reachable screens, dead ends, cycles, and paths to terminal
+screens.
 
-A non-finite reachable screen must have an output. A cycle without exit is considered
-an error if the use case does not explicitly contain `Разрешить цикл: Да`.
+A reachable nonterminal screen must have an outgoing transition. A cycle with
+no exit is an error unless the use case explicitly contains
+`Разрешить цикл: Да`.
 
 ## Map
 
-The changes section adds a change overlay to `serve`. New SC/TR have green
-contour or line and label `added`, changed - yellow `modified`, deleted
-old-side ghost elements - red dotted line and `removed`. Status is not transferred
-only in color. Filters module/use case/status/changed-only apply to
-combined old/new model; selecting an element opens semantic diff. JSON
-available via `/_docu-docu/api/changes/screen-map`.
+In `serve`, the changes section adds a change overlay. New SC/TR entries have a
+green outline or line and the `added` label; changed entries have a yellow
+`modified` label; removed old-side ghost elements use a red dotted line and the
+`removed` label. State is never conveyed by color alone. The
+module/use-case/status/changed-only filters operate on the combined old/new
+model; selecting an element opens its semantic diff. JSON is available at
+`/_docu-docu/api/changes/screen-map`.
 
-The card shows preview or placeholder, ID, name, route, status,
-module and number of incoming and outgoing transitions. Available:
+A card shows a preview or placeholder, ID, name, route, status, module, and the
+number of incoming and outgoing transitions. Available modes include:
 
-- a common map with groups of modules;
-- filter of the selected module;
-- filter of the selected use case;
-- status filter and search;
-- mode of only unfinished screens;
-- sitemap for parental connections.
+- the overall map grouped by module;
+- a selected-module filter;
+- a selected-use-case filter;
+- status filtering and search;
+- an incomplete-screens-only mode;
+- a sitemap based on parent relationships.
 
-Click to select the screen and open the sidebar. Double click opens the document.
-The connection can also be selected: the panel will show action, condition, source, target,
-use case, status and error.
+A click selects a screen and opens the side panel. A double click opens its
+document. A relationship can also be selected: the panel shows its action,
+condition, source, target, use case, state, and error.
 
 Mouse and touch controls:
 
 - wheel — zoom relative to the pointer;
-- drag on free space - pan;
-- buttons - zoom in, zoom out, fit, reset and fullscreen.
+- drag on empty space — pan;
+- buttons — zoom in, zoom out, fit, reset, and fullscreen.
 
-`Ctrl`/`Cmd` along with the wheel remains browser zoom. They work from the keyboard
-`+`, `-`, `0`, `Esc` and `Enter`.
+`Ctrl`/`Cmd` plus the wheel remains browser zoom. `+`, `-`, `0`, `Esc`, and
+`Enter` work from the keyboard.
 
-## Walkthrough
+## Step-by-step playback
 
-The Viewer starts with the initial use case screen. Available actions are formed from
-transitions of the selected scenario and global transitions. Each step saves
-previous screen and page memory status.
+The viewer starts at the use case's start screen. Available actions come from
+transitions for the selected scenario plus global transitions. Each step stores
+the previous screen and state in page memory.
 
-- `Назад` restores the previous step;
-- `Сначала` clears history;
-- an error or message is displayed next to the preview;
-- the state selects its own preview, if it is declared;
-- terminal screen shows "Start over", "Show map" and
-  “Open use case.”
+- `Back` restores the previous step;
+- `Start over` clears history;
+- an error or message appears next to the preview;
+- a state selects its own preview when declared;
+- a terminal screen shows "Start over", "Show map", and "Open use case".
 
-The history is not saved after reloading the page. Viewer is a simulation
-documentation and does not execute actual API requests.
+History is not preserved after a page reload. The viewer simulates the
+documentation and does not make real API requests.
 
-## Bugs and previews
+## Errors and previews
 
-Error codes are declared in the contract document:
+Error codes are declared in a contract document:
 
 ```md
 ## Ошибки
@@ -149,13 +152,13 @@ Error codes are declared in the contract document:
 | INVALID_CREDENTIALS | Неверный email или пароль. |
 ```
 
-Preview allows PNG, JPG, JPEG, WEBP, AVIF and GIF inside the repository root.
-The missing file gives placeholder and warning. SVG, HTML, XML, JavaScript,
-absolute path, traversal and symlink are blocked.
+A preview may be PNG, JPG, JPEG, WEBP, AVIF, or GIF inside the repository root.
+A missing file produces a placeholder and warning. SVG, HTML, XML, JavaScript,
+absolute paths, traversal, and symlinks are blocked.
 
 ## Hotspots
 
-The optional `screens/hotspots.json` stores percentage coordinates:
+Optional `screens/hotspots.json` stores percentage coordinates:
 
 ```json
 {
@@ -171,18 +174,19 @@ The optional `screens/hotspots.json` stores percentage coordinates:
 }
 ```
 
-The invalid zone is excluded from the HTML, but the list of flow actions continues
-work. The valid zone always remains an accessible button: in hidden mode it
-appears on hover or keyboard focus, and the Show
-interactive zones" makes all hotspots constantly visible.
+An invalid area is excluded from HTML, but the flow action list continues to
+work. A valid area always remains accessible as a button: when hidden, it
+appears on hover or keyboard focus, while the "Show interactive areas" toggle
+makes every hotspot permanently visible.
 
-Coordinates and dimensions must be positive, in the range `0–100` and
-do not extend the rectangle beyond the boundaries of preview. One transition is not duplicated on
-screen without explicit `allowDuplicate`.
+Coordinates and dimensions must be positive, within `0–100`, and keep the
+rectangle inside the preview. A transition is not duplicated on one screen
+without an explicit `allowDuplicate`.
 
 ## Traceability
 
-The task declares the affected transitions, the symbolic link, and a separate command:
+A task declares affected transitions, a symbolic relationship, and a command
+separately:
 
 ```md
 - Переходы: TR-AUTH-001
@@ -193,22 +197,24 @@ The task declares the affected transitions, the symbolic link, and a separate co
 - `AC-01` → `go test ./... -run TestSuccessfulLogin`
 ```
 
-Generated portal contains `/screens/index.html`, directory,
-`/use-cases/UC-*.html` with tabs `#overview`, `#map`, `#play`, `#links`,
-`/traceability.html` and top-level screen model in `report.json` schema v1. All
-pages work via `file://`.
+The generated portal contains `/screens/index.html`, the catalog,
+`/use-cases/UC-*.html` with `#overview`, `#map`, `#play`, and `#links` tabs,
+`/traceability.html`, and the top-level screen model in `report.json` schema v1.
+All pages work on ordinary HTTP(S) static hosting without a Go backend.
 
 ## What the CLI checks
 
-For screens, ID, type, status, module existence, uniqueness are checked
-route, preview and route safety. For transitions - ID, required fields,
-target, use case, state, error definition and meaningfulness of self-transition.
+For screens, the CLI checks ID, type, status, module existence, route
+uniqueness, preview, and path safety. For transitions, it checks ID, required
+fields, target, use case, state, error definition, and meaningful
+self-transitions.
 
-For flow, start and terminal screens, reachability, dead ends, branches,
-cycles and exits from erroneous states. For hotspots, links are checked,
-coordinates, boundaries and duplication. Work items are checked for existing ones
-`SC-*`, `TR-*` and `AC → TR → verification` relationships.
+For a flow, it checks start and terminal screens, reachability, dead ends,
+branches, cycles, and exits from error states. For hotspots, it checks
+references, coordinates, boundaries, and duplication. Work items are checked
+for existing `SC-*`, `TR-*`, and `AC → TR → verification` relationships.
 
-A screen graph error only blocks the card, and an individual flow error only blocks
-its launch. The remaining documents and catalogs continue to be generated. Absence
-preview creates a warning and placeholder, but does not stop the build.
+A screen-graph error blocks only the map, while an error in an individual flow
+blocks only its playback. Other documents and catalogs continue to be
+generated. A missing preview produces a warning and placeholder but does not
+stop the build.

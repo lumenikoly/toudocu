@@ -1,10 +1,12 @@
 [
   {
     "id": "UC-DOCS-01",
-    "title": "UC-DOCS-01: Create an offline portal",
+    "title": "UC-DOCS-01: Build a Static HTTP Portal",
     "status": "done",
     "module": "MOD-SITE",
-    "flows": [],
+    "flows": [
+      "FLOW-DOCS-BUILD"
+    ],
     "screens": [],
     "terminalScreens": []
   },
@@ -19,21 +21,38 @@
   },
   {
     "id": "UC-DOCS-04",
-    "title": "UC-DOCS-04: Explore screen map",
+    "title": "UC-DOCS-04: Explore the Screen Map",
     "status": "done",
     "module": "MOD-SITE",
     "flows": [],
-    "screens": [],
-    "terminalScreens": []
+    "screens": [
+      "SC-SITE-SCREEN-MAP",
+      "SC-SITE-USE-CASE"
+    ],
+    "startScreen": "SC-SITE-USE-CASE",
+    "terminalScreens": [
+      "SC-SITE-SCREEN-MAP"
+    ]
   },
   {
     "id": "UC-DOCS-03",
     "title": "UC-DOCS-03: View documentation on local server",
     "status": "done",
     "module": "MOD-SITE",
-    "flows": [],
-    "screens": [],
-    "terminalScreens": []
+    "flows": [
+      "FLOW-DOCS-SERVE"
+    ],
+    "screens": [
+      "SC-SITE-API-DOCS",
+      "SC-SITE-DOCUMENT",
+      "SC-SITE-EDITOR",
+      "SC-SITE-HOME"
+    ],
+    "startScreen": "SC-SITE-HOME",
+    "terminalScreens": [
+      "SC-SITE-DOCUMENT",
+      "SC-SITE-API-DOCS"
+    ]
   },
   {
     "id": "UC-TASK-02",
@@ -63,8 +82,14 @@
     "status": "done",
     "module": "MOD-CHANGES",
     "flows": [],
-    "screens": [],
-    "terminalScreens": []
+    "screens": [
+      "SC-CHANGES-WORKSPACE",
+      "SC-SITE-HOME"
+    ],
+    "startScreen": "SC-SITE-HOME",
+    "terminalScreens": [
+      "SC-CHANGES-WORKSPACE"
+    ]
   },
   {
     "id": "UC-TASK-03",
@@ -74,6 +99,15 @@
     "flows": [
       "FLOW-TASK-WORKFLOW"
     ],
+    "screens": [],
+    "terminalScreens": []
+  },
+  {
+    "id": "UC-TASK-04",
+    "title": "UC-TASK-04: Archive or Restore a Work Item",
+    "status": "done",
+    "module": "MOD-CLI",
+    "flows": [],
     "screens": [],
     "terminalScreens": []
   }

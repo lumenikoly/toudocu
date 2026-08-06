@@ -19,7 +19,8 @@ predictable CLI with stable exit codes and JSON output.
 - CLI and local HTTP server: `internal/app/cli.go`, `internal/app/server.go`;
 - read-only context and readiness: `internal/app/task_context.go`, `internal/app/task_ready.go`;
 - search and frameworks: `internal/app/search.go`, `internal/app/scaffold.go`;
-- perform verify and manage processes: `internal/app/task_verify.go`, `internal/app/command_process_*.go`.
+- verification execution and process management: `internal/app/task_verify.go`, `internal/app/command_process_*.go`;
+- work-item archiving and restoration: `internal/app/task_archive.go`.
 
 ## Module boundaries
 
@@ -42,8 +43,8 @@ The repeating command is executed once and saves all associated targets.
 
 ### BR-CLI-003: Timeout terminates process tree
 
-When the timeout is exceeded, not only the shell, but also the child shells it created terminates.
-processes; the report receives the status `timed_out`.
+When the timeout is exceeded, both the shell and the child processes it created
+are terminated; the report receives the status `timed_out`.
 
 ### BR-CLI-004: Docu-docu does not interpret user request
 
@@ -57,7 +58,7 @@ responsibility of the performer.
 the order, fields, validation, target path and renderer are determined by the same registry,
 which `serve` returns editor UI. Creation remains atomic `O_EXCL`.
 
-### BR-CLI-006: A translation root is not a working context
+### BR-CLI-006: A translation root is not a work context
 
 A configured translation root is available to `check`, `build`, read-only
 `serve`, `search`, and ordinary changes browsing. `task init`, `task
@@ -66,13 +67,19 @@ context`, `task ready`, `task verify`, `task changes`, `task archive`,
 `TRANSLATION_ROOT_READ_ONLY`. Translated work items remain a reader-facing
 mirror, while agents and CI use only the canonical docs root.
 
+### BR-CLI-007: Archiving does not change the task contract
+
+`task archive` and `task restore` move one valid work item without overwriting
+and do not change its Markdown or status. The operation is blocked if the move
+would break resolution of a direct Markdown link.
+
 ## Invariants
 
 - JSON mode does not mix the report with streaming text output;
 - commands are executed consistently even after an error;
 - each command is launched from repository root;
 - stdout and stderr are limited to the last 1 MiB of each stream;
-- assembly requires explicit `docu-docu build`; the path without a command is deviated;
+- building requires an explicit `docu-docu build`; a path without a command is rejected;
 - reserved skill-level names `init` and `refresh` are rejected as
   unknown Go CLI commands;
 - task workflow and entity creation never use a configured translation root;
@@ -93,6 +100,7 @@ mirror, while agents and CI use only the canonical docs root.
 - [UC-TASK-01: Work Task Context](../use-cases/task-workflow.md)
 - [UC-TASK-02: Checking a work task](../use-cases/task-verify.md)
 - [UC-TASK-03: Preparing a work task](../use-cases/UC-TASK-03.md)
+- [UC-TASK-04: Archiving and restoring a task](../use-cases/UC-TASK-04.md)
 - [UC-DOCS-02: Documentation Check](../use-cases/check-documentation.md)
 - [UC-DOCS-03: Local Server](../use-cases/serve-portal.md)
 

@@ -2,13 +2,17 @@
 
 The page lists the implemented features of Docu-docu and indicates where
 their detailed contract is recorded. Markdown files remain the source of truth:
-portal and JSON do not edit them and do not store a separate model.
+JSON and `build` output do not store a separate model or edit sources; only
+`serve` adds explicit write operations in the canonical workspace.
+
+Quick entry points: the [unified API and programmatic interface map](api.md)
+and the [interactive Screen Map](../screens/).
 
 ## CLI
 
 - Git-backed `changes`, `changes file` and `task changes` for working tree,
   index, revisions and branch merge-base; text, JSON and Markdown reports.
-- IN `serve`: unified/CodeMirror merge/rendered/semantic diff, OpenAPI,
+- In `serve`: unified/CodeMirror merge/rendered/semantic diff, OpenAPI,
   Mermaid, assets, screen-map overlay and task impact.
 
 Docu-docu comes as a single Go binary with no external runtime dependencies.
@@ -19,12 +23,17 @@ Docu-docu comes as a single Go binary with no external runtime dependencies.
 | Strict inspection | `docu-docu check ./docs --strict` | warning also gives exit code `1` |
 | Portal assembly | `docu-docu build ./docs` | standalone HTML and `report.json` |
 | Local workspace | `docu-docu serve ./docs` | view/edit, editor API, watcher and live rebuild |
+| View changes | `docu-docu changes ./docs` | text, Markdown, or `ChangeSetReport` v1 |
+| Change to one file | `docu-docu changes file PATH ./docs` | details for the selected changed path |
 | Document search | `docu-docu search "query" ./docs` | `SearchReport` by fresh Markdown |
 | Create a task | `docu-docu task init ./docs --area AREA --title TITLE --type TYPE` | new Draft and `TaskInitReport` |
-| Creating an Entity | `docu-docu scaffold module|use-case|flow|screen|decision ID ./docs --title TITLE` | atomic scaffold and `ScaffoldReport` |
+| Creating an Entity | `docu-docu scaffold module|use-case|flow|screen|decision|standard|runbook ID ./docs --title TITLE` | atomic scaffold and `ScaffoldReport` |
 | Readiness check | `docu-docu task ready TASK-ID ./docs` | read-only `TaskReadyReport` |
 | Task context | `docu-docu task context TASK-ID ./docs` | read-only `TaskContextReport` |
 | Checking the task | `docu-docu task verify TASK-ID ./docs --dry-run|--run` | plan or execute commands and `TaskVerifyReport` |
+| Task changes | `docu-docu task changes TASK-ID ./docs` | task-scoped change report and impact diagnostics |
+| Archive a task | `docu-docu task archive TASK-ID ./docs` | move a terminal task to its yearly archive |
+| Restore a task | `docu-docu task restore TASK-ID ./docs` | return a task from its yearly archive |
 | Version | `docu-docu version` | generator version |
 
 The build requires an explicit `docu-docu build ./docs`; the path without a command is rejected.
@@ -33,6 +42,10 @@ There is no separate top-level command `init`: the minimal project is created by
 work item. Parameters and exit codes
 defined in [CLI contract](../contracts/cli.md).
 
+The `changes` commands support `--status`, `--module`, `--type`, and
+`--permanent-only` filters. The last keeps only permanent documentation and
+excludes work artifacts, contracts, and assets.
+
 ## Public Go API
 
 The root package `docu-docu` exports a typed façade over the CLI,
@@ -40,10 +53,11 @@ document model, Markdown renderer, portal generator, search, task
 workflow and Git-backed changes. Direct calls return models and reports without
 mandatory serialization or launching a separate process.
 
-The canonical remote module path has not yet been published. Current import path
-intended for source module or explicit local `replace`; operations,
-side effects and compatibility are listed in
-[Go API contract](../contracts/go-api.md).
+The canonical remote module path has not yet been published. The current import
+path is intended for the source module or an explicit local `replace`. The
+actual public surface is defined by declarations and package documentation in
+the root `api.go`; no separate compatibility guarantees for external consumers
+are claimed before module publication.
 
 ## Skill workflows update
 
@@ -77,7 +91,13 @@ Provable delete, rename and stable-ID migration update all references together.
 After semantic and structural gates, only tracked or explicitly are rebuilt
 portals prescribed by the project.
 
+Complete user sequences for `init`, `refresh`, `refresh diff`, and `translate`
+are described in the [agent workflows guide](../guides/agent-workflows.md).
+
 ## Document model
+
+The unified table of purposes, boundaries, and selection rules is in the
+[document types reference](document-types.md).
 
 Minimal documentation contains `index.md` and a map
 `architecture/overview.md` with type `Architecture Overview`. Everyone is different
@@ -113,18 +133,21 @@ documents do not increase the global percentage.
 
 ## Markdown and diagrams
 
-The supported secure subset includes:
+Goldmark `v1.8.5` parses CommonMark and only explicitly enabled extensions:
 
 - headers and automatic unique anchors;
 - paragraphs, highlighting, links, images and quotes;
 - bulleted, numbered and task lists;
 - tables, inline code and fenced code blocks;
+- strikethrough and literal HTTP(S), `www` and email autolinks;
 - Mermaid `flowchart`, `stateDiagram-v2` and `sequenceDiagram`.
 
-Arbitrary HTML is escaped. Mermaid Tiny is built in locally and works via
-`file://`, follows a light or dark theme and always starts with
-`securityLevel: strict`. Front matter, Mermaid directives and blocks more
-50,000 UTF-8 bytes are rejected.
+Raw block or inline HTML is a policy error, including inside a table. `check`
+and `build` fail; editor preview and rendered diff show it as escaped text.
+Attributes, front matter, footnotes, definition lists, and typographer are not
+enabled. Mermaid Tiny is embedded locally, follows the light or dark theme, and
+always starts with `securityLevel: strict`. Mermaid front matter, directives,
+and blocks over 50,000 UTF-8 bytes are rejected.
 
 ## Offline portal
 
@@ -151,8 +174,9 @@ search and `report.json`. The interface provides:
 - light and dark themes, printed version and adaptive sidebar;
 - Mermaid diagram control: zoom, pan, fit and fullscreen.
 
-All internal URLs are relative. The portal does not require a server, CDN, Node.js,
-browser extension or network access.
+All internal URLs are relative. The portal requires no Go backend, CDN, Node.js,
+or browser extension, but it is published over HTTP(S) and may load its own
+static JSON resources from output.
 
 ## Live workspace serve
 
@@ -160,7 +184,10 @@ browser extension or network access.
 sources, path/dirty/save toolbar, CodeMirror, Editor/Preview/Split and
 positional diagnostics. Markdown preview uses the existing safe renderer;
 JSON receives syntax and hotspots diagnostics, while arbitrary YAML only receives
-accessible Docu-docu diagnostics without a fictitious general schema.
+accessible Docu-docu diagnostics without a fictitious general schema. The
+exception is `contracts/**/*.openapi.{yaml,yml,json}`: these files receive
+OpenAPI 3.0/3.1 root, operation, operationId, path-parameter, and internal
+`$ref` validation with line/column positions; external references are not loaded.
 
 Save uses SHA-256 CAS and atomic replace. After save/create model, HTML,
 search and diagnostics are rebuilt synchronously; watcher checks external
@@ -168,9 +195,14 @@ changes, and browser polling via ETag distinguishes between a regular page, clea
 and dirty conflict without losing local text. `Ctrl`/`Cmd`+`S`, leave guard,
 diagnostic navigation and mobile drawer are included in the same UI.
 
-Browser create and CLI commands `task init`/`scaffold` use one ordered
-template registry. Editor API is described in
-[separate schema-v1 contract](../contracts/editor-http.md).
+Browser creation and CLI commands `task init`/`scaffold` use one template
+registry. The Editor API wire contract is in
+[OpenAPI](../contracts/editor.openapi.yaml), while write guarantees and the
+workspace boundary are in the [behavioral description](../contracts/editor-http.md).
+
+Canonical `serve` also publishes `/_docu-docu/api-docs/`: vendored Swagger UI
+5.32.12 switches between Editor and Changes specs, uses no CDN, and permits Try
+it out only for `GET`/`HEAD`. Static and translation portals do not receive it.
 
 ## Processes and user scripts
 
@@ -196,6 +228,9 @@ automatically. The use case page combines the tabs “Description”, “Map”,
 
 ## Screen map
 
+[Open the interactive Screen Map](../screens/). It shows high-level product
+navigation and intentionally does not list every generated route.
+
 If `screens/SC-*.md` is present, the following are generated:
 
 - `screens/index.html` - interactive map;
@@ -214,7 +249,7 @@ status, module and number of incoming and outgoing transitions. Available modes:
 - selected module;
 - selected use case;
 - only unfinished screens;
-- sitemap by field `Родительский экран`.
+- sitemap by the `Parent screen` field.
 
 Additionally, search, status filter, zoom, pan, fit, reset,
 fullscreen, screen or transition selection, and sidebar connections. Mouse wheel
@@ -234,8 +269,8 @@ The detailed format and verification rules are described in
 
 ## Playable scenarios and hotspots
 
-The Play tab on the `use-cases/UC-*.html` page begins with
-`Начального экрана` use case and suggests transitions of this script and global
+The Play tab on the `use-cases/UC-*.html` page begins with the use case's
+`Start screen` and suggests transitions of this scenario and global
 transitions. When selecting the viewer action:
 
 1. adds the current step to history;
@@ -243,7 +278,7 @@ transitions. When selecting the viewer action:
 3. shows an error code or message;
 4. Updates the step number and available actions.
 
-`Назад` returns the previous step, `Сначала` clears the history. On terminal screen
+`Back` returns to the previous step, and `Start over` clears the history. On a terminal screen
 the individual actions “Start over”, “Show map” and
 “Open use case.” The map opens on the `#map` tab, and the description opens on
 `#overview`.
@@ -297,9 +332,8 @@ The contract evolves directly into v1 without a parallel version of the schema.
 - regular `serve` routes only distribute output, and the editor API is limited
   canonical workspace paths inside docs root; listener listens to loopback
   default and does not use caching;
-- manual rebuilding of `serve` accepts only the service `POST` with a header
-  actions; static portal via `file://` or other HTTP server button not
-  shows;
+- manual rebuilding in `serve` accepts only the service `POST` with an action
+  header; static build contains neither the button nor the endpoint;
 - an error in a particular Screen Map or playing script does not deprive access to the rest
   documentation;
 - editor writes require JSON/action/same-origin guards, limits 3 MiB/2 MiB and not

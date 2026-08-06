@@ -1,43 +1,46 @@
-# Docu-docu system boundary
+# Docu-docu System Boundary
 
 - Document type: Architecture
 - Architecture question: Where is the Docu-docu system boundary and who interacts with it?
 
-Docu-docu is limited to one local process that reads the documentation and
-repository, builds a proven model and issues diagnostics or derivatives
-presentations. Embedding Go code calls the same model façade and operations without
-a separate process. In `serve`, the process accepts limited editor requests and
-atomically saves the selected workspace file. User, library
-the consumer, agent, CI and browser remain the communicating parties behind this
-border. The Release installer also remains outside: it is separate
-bootstrap, which only uses the network before the Go runtime.
+Docu-docu is limited to one local process that reads documentation and the
+repository, builds a validated model, and emits diagnostics or derived
+representations. Embedding Go code invokes the same model and operation facade
+without a separate process. In `serve`, the process accepts constrained
+editor/changes requests, serves an offline OpenAPI UI, and atomically saves the
+selected workspace file. The user, library consumer, agent, CI, and browser
+remain interacting parties outside this boundary. The release installer also
+remains outside: it is a separate bootstrap that uses the network only before
+the Go runtime starts.
 
-## Area
+## Scope
 
-The answer describes the boundary of one Go runtime accessible via the CLI or public
-package, and its external interactions. Teams, formats, Go façade and reasons
-dependency-free deliveries remain in [CLI contract](../contracts/cli.md),
-[Go API contract](../contracts/go-api.md) and
+This answer describes the boundary and external interactions of one Go runtime
+available through the CLI or public package. Commands and formats are defined in
+the [CLI contract](../contracts/cli.md), the Go facade is summarized in the
+[feature reference](../reference/features.md#public-go-api), and the reason
+for dependency-free delivery is recorded in
 [ADR-001](../decisions/001-dependency-free.md).
 
 ## Interacting parties
 
-- the developer or agent selects the login, repository root and operation;
-- the library consumer calls the exported facade `api.go` and receives
-  a typed model or report;
-- CI uses exit code and `ProjectReport` schema v1;
-- the file system provides Markdown, local assets and resolved
-  repository targets;
-- the browser reads the offline portal via `file://`; via `serve` it also
-  reads the revision/editor API and explicitly saves the allowed source;
-- shell and child processes are accessible only by explicit `task verify --run`.
+- A developer or agent selects the input, repository root, and operation.
+- A library consumer invokes the exported `api.go` facade and receives a typed
+  model or report.
+- CI uses the exit code and `ProjectReport` schema v1.
+- The filesystem provides Markdown, local assets, and allowed repository
+  targets.
+- A browser reads the backend-independent portal on HTTP(S) static hosting;
+  through canonical `serve`, it also reads the revision, editor/changes API,
+  and OpenAPI UI and explicitly saves an allowed source file.
+- The shell and child processes are available only to an explicit
+  `task verify --run`.
 
 ## What remains outside
 
-Docu-docu does not store server state, does not access the database, or
-interprets the user request. The boundary between deterministic CLI and
-the semantic work of the performer is recorded in
-[ADR-002](../decisions/ADR-002.md).
-Downloading release assets and writing the binary to the user install dir belongs to
-separate installer workflow described in
+Docu-docu does not store server state, access a database, or interpret the
+user's request. The boundary between the deterministic CLI and an agent's
+semantic work is recorded in [ADR-002](../decisions/ADR-002.md). Downloading
+release assets and writing the binary to a user install dir belong to a
+separate installer workflow described in the
 [installation guide](../guides/installation.md).

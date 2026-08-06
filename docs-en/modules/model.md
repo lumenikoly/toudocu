@@ -1,9 +1,9 @@
-# Design model and validation
+# Project model and validation
 
 - Identifier: MOD-MODEL
 - Status: Completed
 - Owner: Docu-docu Team
-- Last updated: 2026-08-04
+- Last updated: 2026-08-05
 
 The module reads the documentation directory, builds the associated project model and generates
 diagnostics of structure, identifiers, paths and dependencies.
@@ -22,10 +22,10 @@ suitable for inspection, HTML rendering and machine reporting.
 
 ## Module boundaries
 
-The module does not generate HTML files and does not run task commands. He returns
-model and diagnostics without changing the original documentation. Editor can send
-one in-memory overlay for preview/validation; regular public build model
-still reads filesystem snapshot.
+The module does not generate HTML files or run task commands. It returns a
+model and diagnostics without changing the source documentation. The editor can
+provide one in-memory overlay for preview/validation; the ordinary public model
+build still reads a filesystem snapshot.
 
 ## Business rules
 
@@ -56,8 +56,15 @@ understood as requirements or connections.
 
 `architecture/overview.md` is required and has type `Architecture Overview`.
 Every other Markdown file under `architecture/` specifies one non-empty
-architectural issue and directly related to the overview; no transitive link
-is considered a listing.
+architectural question and is linked directly from the overview; a transitive link
+does not count as a listing.
+
+### BR-MODEL-006: OpenAPI contracts are validated as a separate source type
+
+Only `contracts/**/*.openapi.{yaml,yml,json}` receives built-in OpenAPI 3.0/3.1
+validation. Root fields, operations/responses, unique `operationId` values,
+path parameters, and internal `$ref` values are checked; external references are
+never loaded. Arbitrary YAML is not assigned an invented schema.
 
 ## Invariants
 
@@ -74,14 +81,14 @@ is considered a listing.
 - each played script reaches the terminal screen or contains diagnostic;
 - one `work/*.md` file contains exactly one `TASK-*` or `BUG-*` work item;
 - line numbers in public reports begin with one;
+- an OpenAPI issue additively includes a column when the parser knows its position;
 - normal model assembly does not execute commands;
 - the calculated state never overwrites the original Markdown files;
   the user entry to `serve` remains a separate workspace operation.
 
 ## Stable interfaces
 
-- `BuildDocumentationModel(Options)` and other operations
-  [public Go API](../contracts/go-api.md);
+- `BuildDocumentationModel(Options)` and the other exports from the root `api.go`;
 - `ProjectReport` schema v1;
 - architectural documents save `documents[].type = architecture`;
 - `documents[].sectionType` additively transfers a stable built-in section;
