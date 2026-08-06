@@ -47,14 +47,22 @@ func openGitChangeSource(docsRoot string, similarity int) (*gitChangeSource, err
 		return nil, &changeFailure{Code: 3, IssueCode: "git-repository-not-found", Err: fmt.Errorf("каталог документации не находится в Git-репозитории")}
 	}
 	root := strings.TrimSpace(string(out))
-	rel, err := filepath.Rel(root, absDocs)
+	canonicalRoot, err := resolvePathForSafety(root)
+	if err != nil {
+		return nil, err
+	}
+	canonicalDocs, err := resolvePathForSafety(absDocs)
+	if err != nil {
+		return nil, err
+	}
+	rel, err := filepath.Rel(canonicalRoot, canonicalDocs)
 	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
 		return nil, &changeFailure{Code: 2, IssueCode: "git-path-outside-documentation-root", Err: fmt.Errorf("каталог документации находится вне корня Git")}
 	}
 	if similarity < 1 || similarity > 100 {
 		similarity = 60
 	}
-	return &gitChangeSource{root: root, docsRoot: absDocs, docsRel: filepath.ToSlash(rel), similarity: similarity}, nil
+	return &gitChangeSource{root: canonicalRoot, docsRoot: canonicalDocs, docsRel: filepath.ToSlash(rel), similarity: similarity}, nil
 }
 
 func (g *gitChangeSource) run(args ...string) ([]byte, error) {

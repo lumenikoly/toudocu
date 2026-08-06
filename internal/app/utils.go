@@ -101,11 +101,11 @@ func stripMarkdown(value string) string {
 }
 
 func ensureInside(root, candidate string) bool {
-	rootAbs, err := filepath.Abs(root)
+	rootAbs, err := resolvePathForSafety(root)
 	if err != nil {
 		return false
 	}
-	candidateAbs, err := filepath.Abs(candidate)
+	candidateAbs, err := resolvePathForSafety(candidate)
 	if err != nil {
 		return false
 	}
