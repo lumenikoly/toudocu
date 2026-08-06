@@ -218,11 +218,16 @@ func resolveScreenPreview(model *Model, document *Document, value string, line i
 		addDocumentIssue(model, document, newIssue("error", "unsafe-screen-preview", "Preview должен быть обычным файлом, а не symlink.", document.SourcePath, line))
 		return ""
 	}
-	output := ""
-	if ensureInside(model.RootDirectory, resolved) {
-		output = toPosixRelative(model.RootDirectory, resolved)
+	output, insideDocumentation := relativePathInside(model.RootDirectory, resolved)
+	if !insideDocumentation {
+		repositoryPath, insideRepository := relativePathInside(model.RepositoryRoot, resolved)
+		if !insideRepository {
+			addDocumentIssue(model, document, newIssue("error", "unsafe-screen-preview", "Preview выходит за пределы repository-root.", document.SourcePath, line))
+			return ""
+		}
+		output = path.Join("_screen-assets", repositoryPath)
 	} else {
-		output = path.Join("_screen-assets", toPosixRelative(model.RepositoryRoot, resolved))
+		output = path.Clean(output)
 	}
 	model.Assets[output] = resolved
 	return output

@@ -101,19 +101,28 @@ func stripMarkdown(value string) string {
 }
 
 func ensureInside(root, candidate string) bool {
+	_, inside := relativePathInside(root, candidate)
+	return inside
+}
+
+func relativePathInside(root, candidate string) (string, bool) {
 	rootAbs, err := resolvePathForSafety(root)
 	if err != nil {
-		return false
+		return "", false
 	}
 	candidateAbs, err := resolvePathForSafety(candidate)
 	if err != nil {
-		return false
+		return "", false
 	}
 	rel, err := filepath.Rel(rootAbs, candidateAbs)
 	if err != nil {
-		return false
+		return "", false
 	}
-	return rel == "." || (rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) && !filepath.IsAbs(rel))
+	inside := rel == "." || (rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) && !filepath.IsAbs(rel))
+	if !inside {
+		return "", false
+	}
+	return filepath.ToSlash(rel), true
 }
 
 // resolvePathForSafety resolves symlinks in the longest existing path prefix and

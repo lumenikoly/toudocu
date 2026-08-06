@@ -16,6 +16,10 @@ func TestEnsureInsideResolvesSymlinkAliases(t *testing.T) {
 	if !ensureInside(alias, filepath.Join(physicalRoot, "docs", "missing.md")) {
 		t.Fatal("different aliases of the same root must be treated as the same path")
 	}
+	relative, inside := relativePathInside(alias, filepath.Join(physicalRoot, "docs", "missing.md"))
+	if !inside || relative != "docs/missing.md" {
+		t.Fatalf("unexpected canonical relative path: %q, inside=%t", relative, inside)
+	}
 }
 
 func TestEnsureInsideRejectsSymlinkEscape(t *testing.T) {
