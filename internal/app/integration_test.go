@@ -938,6 +938,60 @@ func TestDocumentContextCopyMarkupAndAssets(t *testing.T) {
 	}
 }
 
+func TestRiskPageExplainsRiskStatusesAndMitigationProgress(t *testing.T) {
+	_, docs, _ := createFixture(t)
+	writeTestFile(t, docs, "risks.md", `# Риски
+
+Описание рисков.
+
+## RISK-01: Требует решения
+
+- Статус: Открыт
+
+- [ ] Назначить решение
+
+## RISK-02: Меры выполняются
+
+- Статус: Снижается
+
+- [x] Выполнить первую меру
+
+## RISK-03: Решение принято владельцем
+
+- Статус: Риск принят
+
+- [x] Зафиксировать принятие
+`)
+	model := buildFixture(t, docs)
+	if model.Stats.OpenRisks != 2 {
+		t.Fatalf("open risks = %d, want 2", model.Stats.OpenRisks)
+	}
+	html := renderDocumentPage(model, model.DocByPath["risks.md"])
+	for _, expected := range []string{
+		"Статус рисков",
+		"Незакрытых рисков: 2 из 3",
+		"1 открыт",
+		"1 снижается",
+		"1 риск принят",
+		"Открыт</strong> — требует решения.",
+		"Снижается</strong> — меры выполняются, риск ещё не закрыт.",
+		"Риск принят</strong> — владелец осознанно принимает риск; в незакрытые не входит.",
+		"Выполнение мер снижения",
+		">Меры снижения</span>",
+	} {
+		if !strings.Contains(html, expected) {
+			t.Fatalf("risk page missing %q: %s", expected, html)
+		}
+	}
+	if strings.Contains(html, "Готовность документа") || strings.Contains(html, ">Чек-лист</span>") {
+		t.Fatal("risk page must not present mitigation tasks as document readiness")
+	}
+	dashboard := renderDashboard(model)
+	if !strings.Contains(dashboard, "Незакрытые риски") || !strings.Contains(dashboard, ">2</strong>") {
+		t.Fatalf("dashboard must expose the matching unresolved-risk count: %s", dashboard)
+	}
+}
+
 func TestPortalSimplifiedNavigationAndAccessibleHeadings(t *testing.T) {
 	_, docs, _ := createFixture(t)
 	model := buildFixture(t, docs)
@@ -945,7 +999,7 @@ func TestPortalSimplifiedNavigationAndAccessibleHeadings(t *testing.T) {
 	if count := strings.Count(dashboard, `class="recommended-entry"`); count < 3 || count > 5 {
 		t.Fatalf("recommended entry count = %d", count)
 	}
-	for _, expected := range []string{"Текущий фокус", "Следующий результат", "Активная работа", "Блокеры", "Открытые риски", "С чего начать", "Подробный обзор", "Матрица трассируемости"} {
+	for _, expected := range []string{"Текущий фокус", "Следующий результат", "Активная работа", "Блокеры", "Незакрытые риски", "С чего начать", "Подробный обзор", "Матрица трассируемости"} {
 		if !strings.Contains(dashboard+renderTraceabilityPage(model, "traceability.html"), expected) {
 			t.Fatalf("portal missing %q", expected)
 		}
@@ -1026,7 +1080,7 @@ func TestDashboardFocusFallbacksAndAlwaysVisibleOverview(t *testing.T) {
 	for _, expected := range []string{
 		"Следующий результат не определён.",
 		`class="focus-signal focus-signal-work" href="work/index.html"`,
-		"Нет открытых рисков",
+		"Нет незакрытых рисков",
 	} {
 		if !strings.Contains(html, expected) {
 			t.Fatalf("dashboard fallback missing %q", expected)
@@ -1762,7 +1816,7 @@ func TestMinimalDocumentationCheckAndBuild(t *testing.T) {
 	if !strings.Contains(html, `<section class="dashboard-section dashboard-overview" data-dashboard-overview`) || strings.Contains(html, `<details class="dashboard-section dashboard-overview"`) {
 		t.Fatal("minimal dashboard overview must remain permanently visible")
 	}
-	for _, absent := range []string{"Текущий фокус", "Дорожная карта", "Вычисляемое состояние", "Открытые риски", "metric-label\">Модули", "Каталог документации"} {
+	for _, absent := range []string{"Текущий фокус", "Дорожная карта", "Вычисляемое состояние", "Незакрытые риски", "metric-label\">Модули", "Каталог документации"} {
 		if strings.Contains(html, absent) {
 			t.Fatalf("minimal dashboard contains optional block %q", absent)
 		}

@@ -87,6 +87,9 @@ async function exerciseStaticPortal(page: Page, origin: string): Promise<void> {
   await expect.poll(() => responses.some((url) => url.endsWith("/assets/portal.js"))).toBe(true);
   await page.goto(`${origin}notes.html`);
   await expect(page.locator("[data-mermaid-error]")).toBeVisible();
+  await page.goto(`${origin}risks.html`);
+  await expect(page.locator(".risk-status")).toContainText("Незакрытых рисков: 1 из 1");
+  await expect(page.locator(".risk-status-explanations")).toContainText("Открыт — требует решения.");
 }
 
 test("static portal works over HTTP at root and nested paths", async ({ browser }) => {

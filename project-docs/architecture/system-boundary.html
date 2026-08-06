@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="docu-docu-revision" content="82d93a7ae20e109ace2a9cc66f95bba3d12a27d9d18575cf9fd127c572b8f869">
+  <meta name="docu-docu-revision" content="87cf23190b1d3af1c5de5384f39915f08997b2bc2d8c6b7e4b3b57163993e4d8">
 
   <meta name="description" content="Docu-docu ограничен одним локальным процессом, который читает документацию и репозиторий, строит проверенную модель и выдаёт diagnostics либо производные представления. Встраивающий Go-код вызывает тот же фасад модели и операций без отдельного процесса. В serve процесс принимает ограниченные editor/changes запросы, отдаёт offline OpenAPI UI и атомарно сохраняет выбранный workspace-файл. Пользователь, библиотечный потребитель, агент, CI и браузер остаются взаимодействующими сторонами за этой границей. Release installer также остаётся снаружи: это отдельный bootstrap, который использует сеть только до запуска Go runtime.">
   <title>Системная граница Docu-docu — Docu-docu</title>

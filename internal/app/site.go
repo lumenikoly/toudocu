@@ -618,6 +618,34 @@ func renderRelated(model *Model, document *Document) string {
 	return `<section class="dashboard-section"><h2>Связанные документы</h2><ul class="related-list">` + b.String() + `</ul></section>`
 }
 
+func renderRiskStatus(model *Model, document *Document) string {
+	if document == nil || document.Type != "risks" {
+		return ""
+	}
+	counts := map[string]int{}
+	labels := []string{}
+	total := 0
+	for _, risk := range model.Risks {
+		if risk.Document != document {
+			continue
+		}
+		label := risk.Status.Label
+		if counts[label] == 0 {
+			labels = append(labels, label)
+		}
+		counts[label]++
+		total++
+	}
+	if total == 0 {
+		return ""
+	}
+	statusCounts := make([]string, 0, len(labels))
+	for _, label := range labels {
+		statusCounts = append(statusCounts, fmt.Sprintf(`<span>%d %s</span>`, counts[label], escapeHTML(strings.ToLower(label))))
+	}
+	return `<section class="risk-status" aria-labelledby="risk-status-title"><div><h2 id="risk-status-title">Статус рисков</h2><p class="risk-status-total">Незакрытых рисков: ` + fmt.Sprintf(`%d из %d`, model.Stats.OpenRisks, total) + `</p><p class="risk-status-counts">` + strings.Join(statusCounts, ` <span aria-hidden="true">·</span> `) + `</p></div><ul class="risk-status-explanations"><li><strong>Открыт</strong> — требует решения.</li><li><strong>Снижается</strong> — меры выполняются, риск ещё не закрыт.</li><li><strong>Риск принят</strong> — владелец осознанно принимает риск; в незакрытые не входит.</li></ul></section>`
+}
+
 func renderDocumentPage(model *Model, document *Document) string {
 	resolver := linkResolverFor(model, document)
 	taskCompletionByLine := map[int]bool{}
@@ -634,7 +662,11 @@ func renderDocumentPage(model *Model, document *Document) string {
 	body := renderDocumentMarkdown(document, resolver, taskCompletionByLine)
 	controls := ""
 	if document.TaskStats.Total > 0 {
-		controls = `<div class="document-toolbar task-toolbar"><span class="toolbar-label" id="task-filter-label">Чек-лист</span><div class="task-filter-group" role="group" aria-labelledby="task-filter-label"><button class="toolbar-button" type="button" data-task-filter="all">Все</button><button class="toolbar-button" type="button" data-task-filter="open">Невыполненные</button><button class="toolbar-button" type="button" data-task-filter="complete">Выполненные</button></div></div>`
+		label := "Чек-лист"
+		if document.Type == "risks" {
+			label = "Меры снижения"
+		}
+		controls = `<div class="document-toolbar task-toolbar"><span class="toolbar-label" id="task-filter-label">` + label + `</span><div class="task-filter-group" role="group" aria-labelledby="task-filter-label"><button class="toolbar-button" type="button" data-task-filter="all">Все</button><button class="toolbar-button" type="button" data-task-filter="open">Невыполненные</button><button class="toolbar-button" type="button" data-task-filter="complete">Выполненные</button></div></div>`
 	}
 	issues := ""
 	if len(document.Warnings)+len(document.Errors) > 0 {
@@ -667,7 +699,11 @@ func renderDocumentPage(model *Model, document *Document) string {
 	if strings.TrimSpace(document.Metadata["status"]) != "" {
 		statusChip = renderStatusChip(displayStatus)
 	}
-	content := breadcrumbs(model, document.OutputPath, document.Title) + `<header class="page-header"><div class="page-kicker">` + statusChip + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + issues + `</div><h1>` + escapeHTML(document.Title) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` + renderMetadata(document) + renderProgress(document.TaskStats, "Готовность документа") + controls + `<div class="page-actions">` + renderDocumentContextButton(model, document) + renderOpenAPIContractButton(model, document) + `<button class="collapse-all-button" type="button" data-collapse-all data-collapse-state="expanded" aria-expanded="true"><span class="collapse-all-icon" aria-hidden="true"><span class="collapse-icon collapse-icon-up">↑</span><span class="collapse-icon collapse-icon-down">↓</span></span><span data-collapse-label>Свернуть разделы</span></button></div></header>` + computedStatus + `<article class="doc-content">` + body + `</article>` + screenConnections + renderRelated(model, document)
+	progressLabel := "Готовность документа"
+	if document.Type == "risks" {
+		progressLabel = "Выполнение мер снижения"
+	}
+	content := breadcrumbs(model, document.OutputPath, document.Title) + `<header class="page-header"><div class="page-kicker">` + statusChip + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + issues + `</div><h1>` + escapeHTML(document.Title) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` + renderMetadata(document) + renderRiskStatus(model, document) + renderProgress(document.TaskStats, progressLabel) + controls + `<div class="page-actions">` + renderDocumentContextButton(model, document) + renderOpenAPIContractButton(model, document) + `<button class="collapse-all-button" type="button" data-collapse-all data-collapse-state="expanded" aria-expanded="true"><span class="collapse-all-icon" aria-hidden="true"><span class="collapse-icon collapse-icon-up">↑</span><span class="collapse-icon collapse-icon-down">↓</span></span><span data-collapse-label>Свернуть разделы</span></button></div></header>` + computedStatus + `<article class="doc-content">` + body + `</article>` + screenConnections + renderRelated(model, document)
 	content += flowConnections
 	return pageShell(model, document.OutputPath, document.Title, document.Description, content, renderTOC(document))
 }
@@ -918,7 +954,7 @@ func renderDashboardFocus(model *Model) string {
 	return `<section class="dashboard-section dashboard-focus" aria-labelledby="dashboard-focus-title"><div class="section-heading"><div><h2 id="dashboard-focus-title">Текущий фокус</h2><p>Ближайший результат и сигналы, требующие внимания.</p></div></div><div class="focus-layout"><div class="focus-result"><span class="focus-eyebrow">Следующий результат</span>` + nextResult + `</div><div class="focus-signals" aria-label="Сводка текущего состояния">` +
 		signal("focus-signal-work", workHref, "Активная работа", "Нет активных задач", activeCount) +
 		signal("focus-signal-blockers", workHref, "Блокеры", "Нет блокеров", blockerCount) +
-		signal("focus-signal-risks", riskHref, "Открытые риски", "Нет открытых рисков", openRiskCount) +
+		signal("focus-signal-risks", riskHref, "Незакрытые риски", "Нет незакрытых рисков", openRiskCount) +
 		`</div></div></section>`
 }
 
