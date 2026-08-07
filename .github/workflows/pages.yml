@@ -1,12 +1,8 @@
-name: deploy landing to pages
+name: deploy site to pages
 
 on:
   push:
     branches: [main]
-    paths:
-      - 'landing/**'
-      - 'project-docs/**'
-      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -27,13 +23,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
       - name: Configure Pages
         uses: actions/configure-pages@v6
-      - name: Prepare Pages artifact
+      - name: Build documentation
         run: |
-          mkdir -p "${RUNNER_TEMP}/docu-docu-pages/project-docs"
-          cp -a landing/. "${RUNNER_TEMP}/docu-docu-pages/"
-          cp -a project-docs/. "${RUNNER_TEMP}/docu-docu-pages/project-docs/"
+          go run ./cmd/docu-docu build ./docs \
+            --output "${RUNNER_TEMP}/docu-docu-pages/project-docs" \
+            --repository-root . \
+            --clean \
+            --strict \
+            --stale-days 0
+      - name: Add landing page
+        run: |
+          mkdir -p "${RUNNER_TEMP}/docu-docu-pages/assets"
+          cp landing/index.html landing/favicon.svg landing/styles.css landing/script.js \
+            "${RUNNER_TEMP}/docu-docu-pages/"
+          cp -a landing/assets/. "${RUNNER_TEMP}/docu-docu-pages/assets/"
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:

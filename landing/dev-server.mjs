@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const landingRoot = join(repoRoot, "landing");
-const documentationRoot = join(repoRoot, "project-docs");
+const documentationRoot = join(repoRoot, "build", "project-docs");
 const port = Number.parseInt(process.env.PORT ?? "4173", 10);
 
 const mimeTypes = new Map([

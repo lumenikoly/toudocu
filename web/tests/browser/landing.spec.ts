@@ -1,6 +1,8 @@
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
-import { readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
 import { createServer, type Server } from "node:http";
+import { tmpdir } from "node:os";
 import { dirname, extname, join, normalize, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -13,12 +15,14 @@ function mime(path: string): string {
     ".css": "text/css",
     ".html": "text/html",
     ".js": "text/javascript",
+    ".json": "application/json",
     ".png": "image/png",
     ".svg": "image/svg+xml",
+    ".woff2": "font/woff2",
   } as Record<string, string>)[extname(path)] ?? "application/octet-stream";
 }
 
-async function serveLanding(): Promise<{ server: Server; origin: string }> {
+async function serveLanding(root = landing): Promise<{ server: Server; origin: string }> {
   const server = createServer((request, response) => {
     const url = new URL(request.url ?? "/", "http://127.0.0.1");
     if (!url.pathname.startsWith(mount)) {
@@ -26,12 +30,13 @@ async function serveLanding(): Promise<{ server: Server; origin: string }> {
       return;
     }
     const relative = decodeURIComponent(url.pathname.slice(mount.length)) || "index.html";
-    const target = normalize(join(landing, relative));
-    if (target !== landing && !target.startsWith(`${landing}${sep}`)) {
+    let target = normalize(join(root, relative));
+    if (target !== root && !target.startsWith(`${root}${sep}`)) {
       response.writeHead(403).end();
       return;
     }
     try {
+      if (statSync(target).isDirectory()) target = join(target, "index.html");
       response.setHeader("Content-Type", mime(target));
       response.end(readFileSync(target));
     } catch {
@@ -42,6 +47,27 @@ async function serveLanding(): Promise<{ server: Server; origin: string }> {
   const address = server.address();
   if (!address || typeof address === "string") throw new Error("landing server did not bind TCP");
   return { server, origin: `http://127.0.0.1:${address.port}${mount}` };
+}
+
+function buildPagesArtifact(): string {
+  const artifact = mkdtempSync(join(tmpdir(), "docu-docu-pages-"));
+  for (const file of ["index.html", "favicon.svg", "styles.css", "script.js"]) {
+    cpSync(join(landing, file), join(artifact, file));
+  }
+  cpSync(join(landing, "assets"), join(artifact, "assets"), { recursive: true });
+  const result = spawnSync("go", [
+    "run", "./cmd/docu-docu", "build", "./docs",
+    "--output", join(artifact, "project-docs"),
+    "--repository-root", ".",
+    "--clean",
+    "--strict",
+    "--stale-days", "0",
+  ], { cwd: repo, encoding: "utf8" });
+  if (result.status !== 0) {
+    rmSync(artifact, { recursive: true, force: true });
+    throw new Error(`Pages artifact build failed\n${result.stdout}\n${result.stderr}`);
+  }
+  return artifact;
 }
 
 async function closeServer(server: Server): Promise<void> {
@@ -105,6 +131,30 @@ test("landing loads from the GitHub Pages mount without missing or external asse
     expect([...runtimeOrigins]).toEqual([new URL(hosted.origin).origin]);
   } finally {
     await closeServer(hosted.server);
+  }
+});
+
+test("Pages artifact keeps landing and documentation working under the repository path", async ({ page }) => {
+  const artifact = buildPagesArtifact();
+  expect(existsSync(join(artifact, "dev-server.mjs"))).toBe(false);
+  const hosted = await serveLanding(artifact);
+  const failed: string[] = [];
+  page.on("response", (response) => {
+    if (response.status() >= 400) failed.push(`${response.status()} ${new URL(response.url()).pathname}`);
+  });
+  try {
+    await page.goto(hosted.origin);
+    await page.locator('a[href="./project-docs/"]').first().click();
+    await expect(page).toHaveURL(`${hosted.origin}project-docs/`);
+    await expect(page.locator("main")).toContainText("Docu-docu");
+    await page.locator("[data-global-search]").fill("архитектура");
+    await expect(page.locator("[data-search-results]")).not.toBeEmpty();
+    await page.goto(`${hosted.origin}project-docs/architecture/overview.html`);
+    await expect(page.locator("main article.doc-content").first()).toContainText("Граница системы");
+    await expect.poll(() => failed).toEqual([]);
+  } finally {
+    await closeServer(hosted.server);
+    rmSync(artifact, { recursive: true, force: true });
   }
 });
 

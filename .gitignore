@@ -2,6 +2,8 @@
 /dist/
 /build/
 /example/site/
+/project-docs/
+/example/project-docs/
 /web/node_modules/
 /web/test-results/
 /web/playwright-report/
