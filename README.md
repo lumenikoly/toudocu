@@ -2,6 +2,11 @@
 
 **English** | [Русский](README.ru.md)
 
+[![CI](https://github.com/lumenikoly/docu-docu/actions/workflows/test.yml/badge.svg)](https://github.com/lumenikoly/docu-docu/actions/workflows/test.yml)
+[![Docs contract](https://github.com/lumenikoly/docu-docu/actions/workflows/docs.yml/badge.svg)](https://github.com/lumenikoly/docu-docu/actions/workflows/docs.yml)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/lumenikoly/docu-docu)](https://go.dev/)
+[![License](https://img.shields.io/github/license/lumenikoly/docu-docu)](LICENSE)
+
 **A tool for verifiable Markdown documentation and static HTTP portals.**
 
 **Docu-docu** helps keep documentation aligned with the codebase, find inconsistencies, and build clean static portals for reading.
@@ -64,7 +69,28 @@ see the [installation guide](docs/guides/installation.md).
 
 ### 2. Install the skill
 
-The skill is installed separately in a supported AI tool.
+Install the offline skill package embedded in the CLI for the detected AI host:
+
+```bash
+docu-docu skill install
+```
+
+For non-interactive environments, or when several hosts are detected, select
+one explicitly:
+
+```bash
+docu-docu skill install --agent codex
+docu-docu skill install --agent claude-code --scope user
+docu-docu skill status --agent all
+```
+
+Supported hosts are Codex, Claude Code, and Copilot. Project scope is the
+default; user scope is selected with `--scope user`. Managed copies can be
+checked, updated, and removed with `skill status`, `skill update`, and
+`skill uninstall`. Local changes and unmanaged directories are never
+overwritten; there is intentionally no `--force` option. See the
+[skill installation guide](docs/guides/skill-installation.md) for targets and
+conflict handling.
 
 After installation, it will be available as:
 

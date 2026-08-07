@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"testing"
@@ -41,10 +42,10 @@ func newWindowsInstallerFixture(t *testing.T, binaries map[string][]byte) *windo
 			if fixture.badChecksum {
 				digest = strings.Repeat("0", 64)
 			}
-			fmt.Fprintf(response, "%s  docu-docu-windows-amd64.exe\n", digest)
+			fmt.Fprintf(response, "%s  docu-docu-windows-amd64.exe\n%s  docu-docu-windows-arm64.exe\n", digest, digest)
 			return
 		}
-		if file != "docu-docu-windows-amd64.exe" {
+		if file != "docu-docu-windows-amd64.exe" && file != "docu-docu-windows-arm64.exe" {
 			http.NotFound(response, request)
 			return
 		}
@@ -76,17 +77,16 @@ func TestInstallerPlatformContract(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, expected := range []string{"docu-docu-windows-amd64.exe", "PROCESSOR_ARCHITEW6432", "only AMD64 is published"} {
+	for _, expected := range []string{"RuntimeInformation]::OSArchitecture", "docu-docu-windows-amd64.exe", "docu-docu-windows-arm64.exe", "PROCESSOR_ARCHITEW6432", "only AMD64 and ARM64 are published"} {
 		if !strings.Contains(string(content), expected) {
 			t.Errorf("PowerShell installer missing %q", expected)
 		}
 	}
-	output, err := runPowerShellInstaller(t, "http://127.0.0.1:1", map[string]string{
-		"PROCESSOR_ARCHITECTURE": "ARM64",
-		"DOCU_DOCU_INSTALL_DIR":  filepath.Join(t.TempDir(), "bin"),
-	})
-	if err == nil || !strings.Contains(output, "unsupported Windows architecture: ARM64; only AMD64 is published") {
-		t.Fatalf("ARM64 rejection: err=%v output=%q", err, output)
+	output, err := runPowerShellInstallerWithArchitecture(t, "http://127.0.0.1:1", map[string]string{
+		"DOCU_DOCU_INSTALL_DIR": filepath.Join(t.TempDir(), "bin"),
+	}, "X86")
+	if err == nil || !strings.Contains(output, "unsupported Windows architecture: X86; only AMD64 and ARM64 are published") {
+		t.Fatalf("x86 rejection: err=%v output=%q", err, output)
 	}
 }
 
@@ -105,8 +105,12 @@ func TestInstallerSelectionAndPathContract(t *testing.T) {
 	if err != nil {
 		t.Fatalf("latest install: %v\n%s", err, output)
 	}
+	expectedAsset := windowsInstallerAssetForRuntime(t)
 	if !windowsContainsString(fixture.paths(), "/releases/latest/download/checksums.txt") {
 		t.Fatalf("latest URL not used: %v", fixture.paths())
+	}
+	if !windowsContainsString(fixture.paths(), "/releases/latest/download/"+expectedAsset) {
+		t.Fatalf("runtime asset %s not used for latest install: %v", expectedAsset, fixture.paths())
 	}
 
 	pinnedDir := filepath.Join(t.TempDir(), "bin")
@@ -120,6 +124,22 @@ func TestInstallerSelectionAndPathContract(t *testing.T) {
 	}
 	if !windowsContainsString(fixture.paths(), "/releases/download/0.0.1/checksums.txt") {
 		t.Fatalf("pinned URL not used: %v", fixture.paths())
+	}
+	if !windowsContainsString(fixture.paths(), "/releases/download/0.0.1/"+expectedAsset) {
+		t.Fatalf("runtime asset %s not used for pinned install: %v", expectedAsset, fixture.paths())
+	}
+
+	arm64Dir := filepath.Join(t.TempDir(), "bin")
+	output, err = runPowerShellInstallerWithArchitecture(t, fixture.server.URL, map[string]string{
+		"DOCU_DOCU_INSTALL_DIR":    arm64Dir,
+		"DOCU_DOCU_NO_MODIFY_PATH": "1",
+		"DOCU_DOCU_VERSION":        "0.0.1",
+	}, "Arm64")
+	if err != nil {
+		t.Fatalf("ARM64 install: %v\n%s", err, output)
+	}
+	if !windowsContainsString(fixture.paths(), "/releases/download/0.0.1/docu-docu-windows-arm64.exe") {
+		t.Fatalf("ARM64 asset not used: %v", fixture.paths())
 	}
 
 	script := string(content)
@@ -208,11 +228,23 @@ func buildWindowsInstallerFixtureBinary(t *testing.T, version string) []byte {
 
 func runPowerShellInstaller(t *testing.T, serverURL string, overrides map[string]string) (string, error) {
 	t.Helper()
+	return runPowerShellInstallerWithArchitecture(t, serverURL, overrides, "")
+}
+
+func runPowerShellInstallerWithArchitecture(t *testing.T, serverURL string, overrides map[string]string, architecture string) (string, error) {
+	t.Helper()
 	content, err := os.ReadFile(filepath.Join("..", "..", "scripts", "install.ps1"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	script := strings.ReplaceAll(string(content), "https://github.com/$Repository", serverURL)
+	if architecture != "" {
+		const detector = `$Architecture = [Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()`
+		if count := strings.Count(script, detector); count != 1 {
+			t.Fatalf("architecture detector occurrences = %d, want 1", count)
+		}
+		script = strings.Replace(script, detector, `$Architecture = "`+architecture+`"`, 1)
+	}
 	scriptPath := filepath.Join(t.TempDir(), "install.ps1")
 	if err := os.WriteFile(scriptPath, []byte(script), 0o600); err != nil {
 		t.Fatal(err)
@@ -221,22 +253,33 @@ func runPowerShellInstaller(t *testing.T, serverURL string, overrides map[string
 	if _, err := exec.LookPath(shell); err != nil {
 		shell = "powershell"
 	}
-	command := exec.Command(shell, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", scriptPath)
 	values := map[string]string{
-		"OS":                       "Windows_NT",
-		"PROCESSOR_ARCHITECTURE":   "AMD64",
-		"PROCESSOR_ARCHITEW6432":   "",
 		"DOCU_DOCU_VERSION":        "",
 		"DOCU_DOCU_NO_MODIFY_PATH": "1",
 	}
 	for key, value := range overrides {
+		if !strings.HasPrefix(key, "DOCU_DOCU_") {
+			t.Fatalf("installer override %q is not DOCU_DOCU_*", key)
+		}
 		values[key] = value
 	}
 	for key, value := range values {
 		t.Setenv(key, value)
 	}
+	command := exec.Command(shell, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", scriptPath)
 	output, err := command.CombinedOutput()
 	return string(output), err
+}
+
+func windowsInstallerAssetForRuntime(t *testing.T) string {
+	t.Helper()
+	switch runtime.GOARCH {
+	case "amd64", "arm64":
+		return "docu-docu-windows-" + runtime.GOARCH + ".exe"
+	default:
+		t.Fatalf("unsupported Windows test architecture %q", runtime.GOARCH)
+		return ""
+	}
 }
 
 func windowsContainsString(values []string, target string) bool {

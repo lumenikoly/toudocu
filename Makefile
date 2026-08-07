@@ -5,7 +5,7 @@ DOCU_DOCU := go run $(CMD)
 DOCS_DIR := docs
 DEMO_DOCS_DIR := example/docs
 
-.PHONY: fmt fmt-check vet test web web-check browser-test check build docs docs-serve demo demo-serve clean release
+.PHONY: fmt fmt-check vet test web web-check browser-test check build docs docs-serve landing-serve demo demo-serve clean release
 
 fmt:
 	gofmt -w .
@@ -48,6 +48,9 @@ docs:
 docs-serve:
 	$(DOCU_DOCU) serve ./$(DOCS_DIR)
 
+landing-serve:
+	node landing/dev-server.mjs
+
 demo:
 	rm -rf example/site
 	$(DOCU_DOCU) build ./$(DEMO_DOCS_DIR) --output ./example/site --clean --stale-days 0
@@ -63,6 +66,7 @@ release: check
 	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o $(DIST)/docu-docu-darwin-amd64 $(CMD)
 	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags="-s -w" -o $(DIST)/docu-docu-darwin-arm64 $(CMD)
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o $(DIST)/docu-docu-windows-amd64.exe $(CMD)
+	CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -trimpath -ldflags="-s -w" -o $(DIST)/docu-docu-windows-arm64.exe $(CMD)
 	cp LICENSE $(DIST)/
 	{ cat THIRD_PARTY_NOTICES.md; printf '\n\n# Embedded browser asset notices\n'; cat internal/site/assets/generated/mermaid.LICENSE.txt; printf '\n\n'; cat internal/site/assets/generated/codemirror.LICENSE.txt; printf '\n\n'; cat internal/site/assets/generated/swagger-ui.LICENSE.txt; printf '\n\n'; cat internal/site/assets/generated/swagger-ui-bundle.LICENSE.txt; printf '\n\n'; cat internal/site/assets/generated/swagger-ui-standalone-preset.LICENSE.txt; } > $(DIST)/THIRD_PARTY_NOTICES.md
 	cp internal/site/assets/generated/codemirror.checksums.txt $(DIST)/CODEMIRROR-CHECKSUMS.txt

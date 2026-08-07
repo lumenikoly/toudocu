@@ -34,6 +34,8 @@ people as HTML and to automation as JSON ProjectReport schema v1.
 - preparation, archiving, and restoration of verifiable work items;
 - execution of explicitly declared checks for the selected task;
 - full and HEAD-diff currency refresh through the installable AI skill;
+- offline install/status/update/uninstall of the embedded AI skill for Codex,
+  Claude Code, and Copilot;
 - versioned JSON schemas for the project, task context, and task workflow;
 - a public Go API for embedding the model, generator, and typed reports;
 - operation as one binary without external runtime dependencies; pinned Go

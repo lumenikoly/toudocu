@@ -3,7 +3,7 @@
 - Identifier: FLOW-DOCS-SERVE
 - Scenario: UC-DOCS-03
 - Module: MOD-SITE
-- Last updated: 2026-08-05
+- Last updated: 2026-08-06
 
 The diagram visualizes the lifecycle of the `serve` command. Network
 restrictions, error scenarios, and postconditions are defined by
@@ -25,7 +25,12 @@ flowchart TD
     Locale -->|No| APIDocs{"API docs?"}
     APIDocs -->|Yes| Swagger["Serve vendored Swagger UI and same-origin specs"]
     Swagger --> Request
-    APIDocs -->|No| Editor{"Editor save or create?"}
+    APIDocs -->|No| Roadmap{"Roadmap add?"}
+    Roadmap -->|Yes| RoadmapGuard["Check stage, DLV ID, text, origin, action and digest"]
+    RoadmapGuard --> RoadmapAccepted{"Is the write allowed?"}
+    RoadmapAccepted -->|No| APIError
+    RoadmapAccepted -->|Yes| Atomic
+    Roadmap -->|No| Editor{"Editor save or create?"}
     Editor -->|Yes| Guard["Check origin, action, path and limits; for save, check digest"]
     Guard --> Accepted{"Is the write allowed?"}
     Accepted -->|No| APIError["Return a JSON error without changing the file"]
@@ -75,6 +80,8 @@ flowchart TD
   navigations.
 - Editor, CodeMirror, API, polling, and manual rebuild exist only in `serve`;
   static build contains none of their markup, endpoints, or assets.
+- On the roadmap, canonical `serve` adds only a new unfinished `DLV-*` to an
+  existing stage; a CAS conflict preserves the browser form and does not overwrite.
 - API docs exist only in canonical `serve`, load no CDN, and allow Try it out
   only for `GET`/`HEAD`; static and locale portals do not contain them.
 - A rebuild failure does not stop an already running server.

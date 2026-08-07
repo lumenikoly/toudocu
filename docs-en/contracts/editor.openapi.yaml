@@ -73,6 +73,39 @@ paths:
         "413": {$ref: "#/components/responses/EditorError"}
         "415": {$ref: "#/components/responses/EditorError"}
         "500": {$ref: "#/components/responses/EditorError"}
+  /_docu-docu/api/editor/roadmap:
+    get:
+      operationId: getEditorRoadmap
+      summary: Read canonical roadmap state and the next suggested deliverable ID
+      responses:
+        "200": {description: Current roadmap editor state, headers: {Cache-Control: {$ref: "#/components/headers/NoStore"}}, content: {application/json: {schema: {$ref: "#/components/schemas/RoadmapState"}}}}
+        "404": {$ref: "#/components/responses/RoadmapNotFound"}
+        "405": {$ref: "#/components/responses/MethodNotAllowed"}
+        "500": {$ref: "#/components/responses/EditorError"}
+  /_docu-docu/api/editor/roadmap/items:
+    post:
+      operationId: addEditorRoadmapItem
+      summary: Add one unfinished deliverable to an existing roadmap stage
+      parameters:
+        - {$ref: "#/components/parameters/RoadmapAddAction"}
+        - {$ref: "#/components/parameters/Origin"}
+        - {$ref: "#/components/parameters/FetchSite"}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/RoadmapItemRequest"}
+            example: {stageAnchor: next-release, id: DLV-ROADMAP-001, text: Roadmap can be extended in serve., expectedDigest: abc123}
+      responses:
+        "201": {description: Created item, refreshed roadmap state and rebuild counts, headers: {Cache-Control: {$ref: "#/components/headers/NoStore"}}, content: {application/json: {schema: {$ref: "#/components/schemas/RoadmapItemResponse"}}}}
+        "400": {$ref: "#/components/responses/RoadmapRequestError"}
+        "403": {$ref: "#/components/responses/EditorError"}
+        "404": {$ref: "#/components/responses/RoadmapTargetNotFound"}
+        "405": {$ref: "#/components/responses/MethodNotAllowed"}
+        "409": {$ref: "#/components/responses/RoadmapConflict"}
+        "413": {$ref: "#/components/responses/EditorError"}
+        "415": {$ref: "#/components/responses/EditorError"}
+        "500": {$ref: "#/components/responses/EditorError"}
   /_docu-docu/api/editor/preview:
     post:
       operationId: previewEditorSource
@@ -160,6 +193,7 @@ components:
     PreviewAction: {name: X-Docu-docu-Action, in: header, required: true, schema: {type: string, const: preview}}
     ValidateAction: {name: X-Docu-docu-Action, in: header, required: true, schema: {type: string, const: validate}}
     CreateAction: {name: X-Docu-docu-Action, in: header, required: true, schema: {type: string, const: create}}
+    RoadmapAddAction: {name: X-Docu-docu-Action, in: header, required: true, schema: {type: string, const: roadmap-add}}
     RebuildAction: {name: X-Docu-docu-Action, in: header, required: true, schema: {type: string, const: rebuild}}
     Origin: {name: Origin, in: header, schema: {type: string, format: uri}}
     FetchSite: {name: Sec-Fetch-Site, in: header, schema: {type: string, const: same-origin}}
@@ -179,6 +213,22 @@ components:
       description: Method not allowed
       headers: {Allow: {schema: {type: string}}, Cache-Control: {$ref: "#/components/headers/NoStore"}}
       content: {application/json: {schema: {$ref: "#/components/schemas/ErrorEnvelope"}}}
+    RoadmapNotFound:
+      description: The canonical roadmap source is absent (`roadmap_not_found`).
+      headers: {Cache-Control: {$ref: "#/components/headers/NoStore"}}
+      content: {application/json: {schema: {$ref: "#/components/schemas/RoadmapNotFoundEnvelope"}}}
+    RoadmapRequestError:
+      description: The JSON body is malformed or the proposed item is invalid (`invalid_json` or `invalid_roadmap_item`).
+      headers: {Cache-Control: {$ref: "#/components/headers/NoStore"}}
+      content: {application/json: {schema: {$ref: "#/components/schemas/RoadmapRequestErrorEnvelope"}}}
+    RoadmapTargetNotFound:
+      description: The canonical roadmap or selected stage is absent (`roadmap_not_found` or `stage_not_found`).
+      headers: {Cache-Control: {$ref: "#/components/headers/NoStore"}}
+      content: {application/json: {schema: {$ref: "#/components/schemas/RoadmapTargetNotFoundEnvelope"}}}
+    RoadmapConflict:
+      description: The ID already exists or the digest is stale (`duplicate_roadmap_id` or `stale_digest`). A stale response includes the refreshed roadmap state and never overwrites automatically.
+      headers: {Cache-Control: {$ref: "#/components/headers/NoStore"}}
+      content: {application/json: {schema: {$ref: "#/components/schemas/RoadmapConflictEnvelope"}}}
   schemas:
     Diagnostic:
       type: object
@@ -235,6 +285,136 @@ components:
         pages: {type: integer, minimum: 0}
         warnings: {type: integer, minimum: 0}
         errors: {type: integer, minimum: 0}
+    RoadmapStage:
+      type: object
+      additionalProperties: false
+      required: [anchor, title, status, itemCount]
+      properties:
+        anchor: {type: string, minLength: 1}
+        title: {type: string, minLength: 1}
+        status: {$ref: "#/components/schemas/StatusInfo"}
+        itemCount: {type: integer, minimum: 0}
+    StatusInfo:
+      type: object
+      additionalProperties: false
+      required: [kind, symbol, label, recognized]
+      properties:
+        kind: {type: string}
+        symbol: {type: string}
+        label: {type: string}
+        recognized: {type: boolean}
+    RoadmapState:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, revision, path, digest, suggestedId, stages]
+      properties:
+        schemaVersion: {type: integer, const: 1}
+        revision: {type: string}
+        path: {type: string, const: roadmap.md}
+        digest: {type: string}
+        suggestedId: {type: string, pattern: '^DLV-ROADMAP-[0-9]{3,}$'}
+        stages: {type: array, items: {$ref: "#/components/schemas/RoadmapStage"}}
+    RoadmapItemRequest:
+      type: object
+      additionalProperties: false
+      required: [stageAnchor, id, text, expectedDigest]
+      properties:
+        stageAnchor: {type: string, minLength: 1}
+        id: {type: string, pattern: '^DLV-[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$'}
+        text: {type: string, minLength: 1, pattern: '^[^\r\n]+$'}
+        expectedDigest: {type: string, minLength: 1}
+    CreatedRoadmapItem:
+      type: object
+      additionalProperties: false
+      required: [stageAnchor, id, text, completed]
+      properties:
+        stageAnchor: {type: string}
+        id: {type: string}
+        text: {type: string}
+        completed: {type: boolean, const: false}
+    RoadmapItemResponse:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, item, roadmap, rebuild]
+      properties:
+        schemaVersion: {type: integer, const: 1}
+        item: {$ref: "#/components/schemas/CreatedRoadmapItem"}
+        roadmap: {$ref: "#/components/schemas/RoadmapState"}
+        rebuild: {$ref: "#/components/schemas/Rebuild"}
+    RoadmapNotFoundEnvelope:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, error]
+      properties:
+        schemaVersion: {type: integer, const: 1}
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message]
+          properties:
+            code: {type: string, const: roadmap_not_found}
+            message: {type: string}
+            details: {}
+    RoadmapRequestErrorEnvelope:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, error]
+      properties:
+        schemaVersion: {type: integer, const: 1}
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message]
+          properties:
+            code: {type: string, enum: [invalid_json, invalid_roadmap_item]}
+            message: {type: string}
+            details: {}
+    RoadmapTargetNotFoundEnvelope:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, error]
+      properties:
+        schemaVersion: {type: integer, const: 1}
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message]
+          properties:
+            code: {type: string, enum: [roadmap_not_found, stage_not_found]}
+            message: {type: string}
+            details: {}
+    RoadmapConflictEnvelope:
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [schemaVersion, error]
+          properties:
+            schemaVersion: {type: integer, const: 1}
+            error:
+              type: object
+              additionalProperties: false
+              required: [code, message, details]
+              properties:
+                code: {type: string, const: duplicate_roadmap_id}
+                message: {type: string}
+                details:
+                  type: object
+                  additionalProperties: false
+                  required: [id]
+                  properties: {id: {type: string}}
+        - type: object
+          additionalProperties: false
+          required: [schemaVersion, error]
+          properties:
+            schemaVersion: {type: integer, const: 1}
+            error:
+              type: object
+              additionalProperties: false
+              required: [code, message, details]
+              properties:
+                code: {type: string, const: stale_digest}
+                message: {type: string}
+                details: {$ref: "#/components/schemas/RoadmapState"}
     FileListResponse:
       type: object
       required: [schemaVersion, revision, files, templates]

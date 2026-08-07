@@ -5,7 +5,7 @@
 - Модуль: MOD-CLI
 - Стандарты: STD-GO-001, STD-DOCS-001
 - Владелец: Команда Docu-docu
-- Последнее обновление: 2026-08-05
+- Последнее обновление: 2026-08-07
 
 ## Результат
 
@@ -59,12 +59,12 @@ irm https://github.com/lumenikoly/docu-docu/releases/latest/download/install.ps1
 - публикация Git-тега или GitHub Release;
 - фоновое самообновление или новая команда Go CLI;
 - system-wide установка через `sudo` и package managers;
-- Windows ARM64 и другие новые release targets;
+- другие новые release targets, кроме Windows ARM64;
 - подпись или notarization релизных бинарников.
 
 ## Критерии приёмки
 
-- [x] `AC-01` Installer однозначно выбирает пять существующих
+- [x] `AC-01` Installer однозначно выбирает шесть существующих
   Linux, macOS и Windows artifacts, а неподдерживаемую
   платформу отклоняет до загрузки.
 - [x] `AC-02` По умолчанию выбирается latest stable release;
@@ -98,7 +98,7 @@ irm https://github.com/lumenikoly/docu-docu/releases/latest/download/install.ps1
 - `AC-01` → `go test ./internal/app -run TestInstallerPlatformContract`
 - `AC-02` → `go test ./internal/app -run TestInstallerSelectionAndPathContract`
 - `AC-03` → `go test ./internal/app -run TestInstallerIntegrityAndReplacement`
-- `AC-04` → `make release && cd dist && sha256sum -c checksums.txt && test "$(wc -l < checksums.txt)" -eq 10 && for file in docu-docu-linux-amd64 docu-docu-linux-arm64 docu-docu-darwin-amd64 docu-docu-darwin-arm64 docu-docu-windows-amd64.exe install.sh install.ps1 LICENSE THIRD_PARTY_NOTICES.md CODEMIRROR-CHECKSUMS.txt; do awk -v file="$file" '$2 == file { found=1 } END { exit !found }' checksums.txt || exit 1; done`
+- `AC-04` → `make release && cd dist && sha256sum -c checksums.txt && test "$(wc -l < checksums.txt)" -eq 12 && for file in docu-docu-linux-amd64 docu-docu-linux-arm64 docu-docu-darwin-amd64 docu-docu-darwin-arm64 docu-docu-windows-amd64.exe docu-docu-windows-arm64.exe install.sh install.ps1 LICENSE THIRD_PARTY_NOTICES.md CODEMIRROR-CHECKSUMS.txt SWAGGER-UI-CHECKSUMS.txt; do awk -v file="$file" '$2 == file { found=1 } END { exit !found }' checksums.txt || exit 1; done`
 - `AC-05` → `go test ./internal/app -run TestInstallerDocumentationContract && go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
 - `AC-06` → `go test ./internal/app -run TestInstallerRepeatUpgradeDowngradeAndPath`
 - `ALL` → `go test ./...`

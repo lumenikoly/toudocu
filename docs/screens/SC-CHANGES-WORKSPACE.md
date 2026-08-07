@@ -5,7 +5,8 @@
 - Модуль: MOD-CHANGES
 - Статус: Реализован
 - Маршрут: `/changes/`
-- Последнее обновление: 2026-08-05
+- Превью: `../assets/screens/changes-workspace.png`
+- Последнее обновление: 2026-08-06
 
 Read-only workspace сравнения выбранных Git-состояний документации: сводка,
 исходный, rendered и semantic diff, экранная overlay-карта и task impact.

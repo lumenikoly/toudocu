@@ -31,9 +31,11 @@ irm https://github.com/lumenikoly/docu-docu/releases/latest/download/install.ps1
 | macOS | Intel | `docu-docu-darwin-amd64` |
 | macOS | Apple silicon | `docu-docu-darwin-arm64` |
 | Windows | AMD64 / x86-64 | `docu-docu-windows-amd64.exe` |
+| Windows | ARM64 | `docu-docu-windows-arm64.exe` |
 
-Windows ARM64 и другие неперечисленные комбинации завершаются ошибкой до
-загрузки. Installer не полагается на x64-эмуляцию Windows ARM64.
+На Windows ARM64 installer выбирает нативный ARM64-бинарник, в том числе при
+запуске из x64-процесса под эмуляцией. Другие неперечисленные комбинации
+завершаются ошибкой до загрузки.
 
 ## Выбрать версию
 

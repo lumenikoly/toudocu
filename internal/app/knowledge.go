@@ -784,12 +784,11 @@ func validateRoadmap(model *Model, documentIDs map[string]*Document) {
 	}
 	seenDeliverables := map[string]int{}
 	for _, task := range document.Tasks {
-		ids := uniqueStrings(roadmapIDRE.FindAllString(strings.ToUpper(task.Text), -1))
-		if len(ids) != 1 {
+		id, valid := roadmapItemID(task.Text)
+		if !valid {
 			addKnowledgeIssue(model, document, "error", "invalid-roadmap-item-id", "Каждый элемент roadmap должен содержать ровно один стабильный ID сценария, контракта или deliverable.", task.Line)
 			continue
 		}
-		id := ids[0]
 		if strings.HasPrefix(id, "DLV-") || strings.HasPrefix(id, "DELIVERABLE-") {
 			if previousLine := seenDeliverables[id]; previousLine > 0 {
 				addKnowledgeIssue(model, document, "error", "duplicate-roadmap-id", fmt.Sprintf("Deliverable %s уже объявлен в строке %d.", id, previousLine), task.Line)
@@ -804,6 +803,14 @@ func validateRoadmap(model *Model, documentIDs map[string]*Document) {
 			continue
 		}
 	}
+}
+
+func roadmapItemID(text string) (string, bool) {
+	ids := uniqueStrings(roadmapIDRE.FindAllString(strings.ToUpper(text), -1))
+	if len(ids) != 1 {
+		return "", false
+	}
+	return ids[0], true
 }
 
 func addKnowledgeIssue(model *Model, document *Document, severity, code, message string, line int) {

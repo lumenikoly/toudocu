@@ -3,7 +3,7 @@
 - Идентификатор: MOD-CLI
 - Статус: Готово
 - Владелец: Команда Docu-docu
-- Последнее обновление: 2026-08-05
+- Последнее обновление: 2026-08-06
 
 Модуль предоставляет команды Docu-docu и детерминированный workflow от поиска и
 каркаса задачи до контекста и управляемого выполнения объявленных проверок.
@@ -21,6 +21,9 @@
 - search и каркасы: `internal/app/search.go`, `internal/app/scaffold.go`;
 - выполнение verify и управление процессами: `internal/app/task_verify.go`, `internal/app/command_process_*.go`;
 - архивирование и восстановление work items: `internal/app/task_archive.go`.
+- embedded skill bundle: `skills/bundle.go`;
+- registry, planner, manifest и filesystem lifecycle: `internal/skillinstall/`;
+- text CLI и внутренний TTY-контекст: `internal/app/skill_cli.go`.
 
 ## Границы
 
@@ -28,6 +31,8 @@ CLI не интерпретирует пользовательский запр�
 только читают данные, а `task verify --run` запускает команды после локального
 validation gate. Prompt-workflows `$docu-docu init`, `$docu-docu refresh`
 и `$docu-docu refresh diff` находятся за границей Go CLI.
+Команда `skill` управляет только файлами embedded package и не исполняет его
+содержимое; lifecycle намеренно не добавлен в публичный Go-фасад.
 
 ## Бизнес-правила
 
@@ -73,6 +78,25 @@ root.
 перезаписи и не изменяют его Markdown или статус. Операция блокируется, если
 перемещение разорвёт разрешение прямой Markdown-ссылки.
 
+### BR-CLI-008: Managed skill не перезаписывает пользовательские изменения
+
+Lifecycle изменяет только отсутствующую или неизменённую managed-копию с
+валидным manifest. Дополнительный, изменённый, удалённый bundled-файл,
+изменение permissions, symlink, unmanaged каталог, повреждённый manifest и
+более новая версия блокируют запись; `--force` отсутствует.
+
+### BR-CLI-009: Skill lifecycle работает offline
+
+Единственный канонический package встраивается в binary. `skill install`,
+`status`, `update` и `uninstall` не используют сеть, shell, marketplace и не
+исполняют scripts из bundle.
+
+### BR-CLI-010: Multi-target планируется до записи
+
+Для `--agent all` CLI сначала разрешает и классифицирует все дедуплицированные
+targets. Выполнение каждого target независимо продолжается после ошибки;
+конфликт или частичный результат возвращает exit code `1`.
+
 ## Инварианты
 
 - JSON-режим не смешивает отчёт с потоковым текстовым выводом;
@@ -87,6 +111,9 @@ root.
 - `serve` по умолчанию слушает только loopback; сетевой доступ включается явно;
 - `--host`, `--port`, `--open` и отсутствие auto-open не изменены; `--no-open`
   не добавлен, а `--edit` остаётся неизвестным параметром.
+- `skill status` не пишет filesystem; изменяющие skill-команды повторно сверяют
+  snapshot после атомарного backup move и восстанавливают прежнюю копию при
+  ошибке публикации.
 
 ## Стабильные интерфейсы
 
@@ -104,6 +131,7 @@ root.
 - [UC-TASK-04: Архивирование и восстановление задачи](../use-cases/UC-TASK-04.md)
 - [UC-DOCS-02: Проверка документации](../use-cases/check-documentation.md)
 - [UC-DOCS-03: Локальный сервер](../use-cases/serve-portal.md)
+- [UC-AGENT-01: Установка AI-skill](../use-cases/UC-AGENT-01.md)
 
 ## Связанные процессы
 

@@ -33,6 +33,7 @@ URL state при invalidation. Компоненты активны для `chang
 | Markdown | Разобрать CommonMark/GFM в закрытый AST, нормализовать структуру и безопасно отрендерить содержимое | [MOD-MARKDOWN](../modules/markdown.md), [ADR-005](../decisions/ADR-005.md) |
 | Project model | Классифицировать документы, проверить OpenAPI, разрешить связи и сформировать diagnostics | [MOD-MODEL](../modules/model.md) |
 | Site | Создать backend-independent static HTTP portal или canonical serve workspace с editor, changes и offline API docs | [MOD-SITE](../modules/site.md) |
+| Skill bundle и installer | Проверить embedded package, разрешить host target, классифицировать managed state и атомарно выполнить lifecycle | [MOD-CLI](../modules/cli.md), [руководство](../guides/skill-installation.md) |
 
 Статический generator и serve-вариант разделены. Serve хранит отдельные
 runtime snapshots canonical и configured translation roots: HTTP читает только
@@ -49,3 +50,10 @@ gate. Конкретные последовательности операций
 [FLOW-DOCS-BUILD](../flows/FLOW-DOCS-BUILD.md) и
 [FLOW-DOCS-SERVE](../flows/FLOW-DOCS-SERVE.md),
 [FLOW-TASK-WORKFLOW](../flows/FLOW-TASK-WORKFLOW.md).
+
+Skill lifecycle образует отдельную короткую ветвь CLI и не строит document
+model: `skills` возвращает проверенный immutable bundle,
+`internal/skillinstall` выполняет registry/detection, read-only planning и
+filesystem transaction, а `internal/app` отвечает только за аргументы,
+TTY-выбор и text output. Публичная сигнатура `RunCLI` не меняется;
+stdin/TTY доступны только внутреннему `Main`.

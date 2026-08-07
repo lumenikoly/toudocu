@@ -1,8 +1,43 @@
 import assert from "node:assert/strict";
-import { readFile, readdir } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+import { mkdtemp, readFile, readdir, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { test } from "node:test";
 
 const generated = new URL("../../internal/site/assets/generated/", import.meta.url);
+const repo = resolve(fileURLToPath(new URL("../..", import.meta.url)));
+
+test("generated project portal stays static and read-only", async (context) => {
+  const temporary = await mkdtemp(join(tmpdir(), "docu-docu-contract-"));
+  context.after(() => rm(temporary, { recursive: true, force: true }));
+  const output = join(temporary, "project-docs");
+  const result = spawnSync("go", [
+    "run", "./cmd/docu-docu", "build", "./docs",
+    "--output", output,
+    "--repository-root", ".",
+    "--clean",
+    "--strict",
+    "--stale-days", "0",
+  ], { cwd: repo, encoding: "utf8" });
+  assert.equal(result.status, 0, `portal build failed\n${result.stdout}\n${result.stderr}`);
+  const portal = pathToFileURL(`${output}/`);
+  const pages = ["index.html", "reference/configuration.html"];
+  for (const page of pages) {
+    const source = await readFile(new URL(page, portal), "utf8");
+    assert.equal(source.includes('"runtime":"static"'), true, `${page} is not a static runtime`);
+    assert.equal(source.includes('"runtime":"serve"'), false, `${page} leaked serve runtime`);
+    assert.equal(source.includes("data-server-rebuild"), false, `${page} leaked rebuild control`);
+    assert.equal(source.includes('href="/_docu-docu/editor/'), false, `${page} leaked editor action`);
+    assert.equal(source.includes('href="/changes/'), false, `${page} leaked changes action`);
+  }
+
+  const assets = new Set(await readdir(new URL("assets/", portal)));
+  for (const forbidden of ["serve.js", "serve.css", "editor.js", "editor.css", "changes.js", "changes.css", "codemirror.js", "api-docs.js"]) {
+    assert.equal(assets.has(forbidden), false, `${forbidden} leaked into static portal`);
+  }
+});
 
 test("manifest separates static and serve assets", async () => {
   const manifest = JSON.parse(await readFile(new URL("manifest.json", generated), "utf8"));

@@ -29,6 +29,13 @@ The input directory, repository root, output, and report are normalized before
 operations. Symbolic links cannot replace the cleanup or write boundary, and
 generated output never becomes a documentation source.
 
+The skill target is additionally confined to the canonical project root or
+user home and cannot equal or escape that boundary. Symlink/reparse components,
+symlinks inside a managed package, and non-regular files block the lifecycle.
+Manifest schema v1 and its SHA-256 table distinguish an unchanged managed copy
+from unmanaged or locally modified content; a conflict is never replaced
+automatically.
+
 In `serve`, the editor workspace additionally accepts only a canonical relative
 POSIX path to a regular `.md`, `.yaml`, `.yml`, or `.json` file inside docs
 root. Hidden/excluded/output paths, traversal, encoded remnants, and every
@@ -83,3 +90,17 @@ install dir and one idempotent `PATH` entry. An explicit
 the profile. Download, verification, and staging finish before replacement; a
 failure does not damage an already installed binary. Direct `curl | sh` and
 `irm | iex` deliberately add the remote installer to the user's trust boundary.
+
+## Embedded skill boundary
+
+The skill package is compiled into the binary and needs no network access after
+installation. The bundle validator permits only regular relative paths and
+limits both individual file size and total package size; `SKILL.md` must declare
+the expected name. The lifecycle does not invoke a shell or execute embedded
+scripts.
+
+Writes are prepared in a sibling stage, and the manifest is created last. For
+update and uninstall, the target is first moved atomically to a unique backup
+and checked against the snapshot again. An error or concurrent replacement
+causes rollback; if restoration is impossible, the backup is preserved and its
+exact path is reported to the user.

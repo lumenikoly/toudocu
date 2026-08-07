@@ -65,7 +65,7 @@ func TestStaticSiteExcludesEditor(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, forbidden := range []string{"/_docu-docu/editor", "/changes/", "editor.js", "changes.js", "serve.js", "serve-navigation.js", "data-server-rebuild", "docu-docu-revision"} {
+	for _, forbidden := range []string{"/_docu-docu/editor", "/changes/", "editor.js", "changes.js", "serve.js", "serve-navigation.js", "data-server-rebuild", "data-roadmap-add", "docu-docu-revision"} {
 		if strings.Contains(string(page), forbidden) {
 			t.Fatalf("static page contains %q", forbidden)
 		}
@@ -127,6 +127,35 @@ func TestServeSiteIncludesEditor(t *testing.T) {
 	changes := performEditorRequest(server, editorRequest(http.MethodGet, changesUIPath, "", nil))
 	if changes.Code != http.StatusOK || !strings.Contains(changes.Body.String(), "data-file-list") || !strings.Contains(changes.Body.String(), `href="/changes/" aria-label="Открыть изменения" aria-current="page"`) || !strings.Contains(changes.Body.String(), `data-color-scheme-select`) {
 		t.Fatalf("changes UI: status=%d body=%s", changes.Code, changes.Body.String())
+	}
+}
+
+func TestRoadmapAddControlIsServeOnly(t *testing.T) {
+	options, docs := serveTestOptions(t)
+	writeTestFile(t, docs, "roadmap.md", "# Roadmap\n\n## Next\n\n- [ ] `DLV-NEXT-001` Next.\n")
+	server, model, _, err := newDocumentationServer(options, &strings.Builder{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	servePage, err := os.ReadFile(filepath.Join(options.OutputDirectory, "roadmap.html"))
+	if err != nil || !strings.Contains(string(servePage), "data-roadmap-add") || !strings.Contains(string(servePage), "Добавить результат") {
+		t.Fatalf("serve roadmap control: %v %s", err, servePage)
+	}
+	if response := performEditorRequest(server, editorRequest(http.MethodGet, editorAPIBase+"/roadmap", "", nil)); response.Code != http.StatusOK {
+		t.Fatalf("serve roadmap API: %d %s", response.Code, response.Body.String())
+	}
+	staticOutput := filepath.Join(filepath.Dir(options.OutputDirectory), "static")
+	if _, err = GenerateSite(model, Options{InputDirectory: docs, RepositoryRoot: options.RepositoryRoot, OutputDirectory: staticOutput}); err != nil {
+		t.Fatal(err)
+	}
+	staticPage, err := os.ReadFile(filepath.Join(staticOutput, "roadmap.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, forbidden := range []string{"data-roadmap-add", "Добавить результат", "/_docu-docu/api/editor/roadmap"} {
+		if strings.Contains(string(staticPage), forbidden) {
+			t.Fatalf("static roadmap leaked %q", forbidden)
+		}
 	}
 }
 

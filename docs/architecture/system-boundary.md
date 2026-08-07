@@ -10,8 +10,10 @@ Docu-docu ограничен одним локальным процессом, �
 запросы, отдаёт offline OpenAPI UI и атомарно сохраняет выбранный
 workspace-файл. Пользователь, библиотечный
 потребитель, агент, CI и браузер остаются взаимодействующими сторонами за этой
-границей. Release installer также остаётся снаружи: это отдельный
-bootstrap, который использует сеть только до запуска Go runtime.
+границей. Release installer также остаётся снаружи: это отдельный bootstrap,
+который использует сеть только до запуска Go runtime. Внутри runtime команда
+`skill` читает embedded package и ограниченно изменяет выбранный project/user
+target; она не загружает и не исполняет содержимое skill.
 
 ## Область
 
@@ -34,6 +36,8 @@ bootstrap, который использует сеть только до зап
   также читает revision, editor/changes API и OpenAPI UI и явно сохраняет
   разрешённый исходник;
 - shell и дочерние процессы доступны только явному `task verify --run`.
+- filesystem host AI-skill получает изменения только через явные
+  `skill install`, `update` или `uninstall`; `status` остаётся read-only.
 
 ## Что остаётся снаружи
 
@@ -44,3 +48,5 @@ Docu-docu не хранит серверное состояние, не обра
 Загрузка release assets и запись бинарника в user install dir принадлежат
 отдельному installer workflow, описанному в
 [руководстве по установке](../guides/installation.md).
+Offline-размещение embedded AI-skill является отдельной явной командой
+runtime и описано в [руководстве skill lifecycle](../guides/skill-installation.md).

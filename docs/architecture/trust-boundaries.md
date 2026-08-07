@@ -28,6 +28,12 @@ Markdown находятся в [CLI-контракте](../contracts/cli.md) и
 Символические ссылки не позволяют подменить границу очистки или записи, а
 generated output никогда не становится источником документации.
 
+Skill target дополнительно ограничен canonical project root или user home и не
+может совпадать с boundary либо выходить за неё. Symlink/reparse components,
+symlink внутри managed package и non-regular файлы блокируют lifecycle. Manifest
+schema v1 и SHA-256 таблица отличают неизменённую managed-копию от unmanaged и
+локально изменённой; конфликт никогда не заменяется автоматически.
+
 В `serve` editor workspace дополнительно принимает только canonical relative
 POSIX path к обычному `.md`, `.yaml`, `.yml` или `.json` внутри docs root.
 Hidden/excluded/output, traversal, encoded остатки и любой обнаруженный
@@ -79,3 +85,16 @@ install dir и одной idempotent `PATH` entry. Явный `DOCU_DOCU_INSTALL
 проверка и staging завершаются до замены; ошибка не повреждает уже
 установленный binary. Прямые `curl | sh` и `irm | iex` осознанно добавляют
 удалённый installer в trust boundary пользователя.
+
+## Граница embedded skill
+
+Skill package компилируется в binary и после установки не требует сети.
+Bundle validator ограничивает обычные относительные пути, размер отдельного
+файла и общий размер package; `SKILL.md` обязан объявлять ожидаемое имя.
+Lifecycle не вызывает shell и не исполняет embedded scripts.
+
+Запись готовится в sibling stage, manifest создаётся последним. Для update и
+uninstall target сначала атомарно перемещается в уникальный backup и повторно
+сверяется со snapshot. Ошибка или параллельная подмена приводит к rollback;
+если восстановление невозможно, backup сохраняется и его точный путь выводится
+пользователю.

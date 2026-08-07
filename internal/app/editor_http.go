@@ -27,6 +27,8 @@ type apiRoute struct {
 var editorRouteRegistry = []apiRoute{
 	{Path: editorAPIBase + "/files", Methods: []string{http.MethodGet}, Handler: (*documentationServer).serveEditorFiles},
 	{Path: editorAPIBase + "/file", Methods: []string{http.MethodGet, http.MethodPut}, Handler: (*documentationServer).serveEditorFile},
+	{Path: editorAPIBase + "/roadmap", Methods: []string{http.MethodGet}, Handler: (*documentationServer).serveEditorRoadmap},
+	{Path: editorAPIBase + "/roadmap/items", Methods: []string{http.MethodPost}, Handler: (*documentationServer).serveEditorRoadmapItems},
 	{Path: editorAPIBase + "/preview", Methods: []string{http.MethodPost}, Handler: (*documentationServer).serveEditorPreview},
 	{Path: editorAPIBase + "/validate", Methods: []string{http.MethodPost}, Handler: (*documentationServer).serveEditorValidate},
 	{Path: editorAPIBase + "/create", Methods: []string{http.MethodPost}, Handler: (*documentationServer).serveEditorCreate},

@@ -5,7 +5,8 @@
 - Module: MOD-CHANGES
 - Status: Implemented
 - Route: `/changes/`
-- Last updated: 2026-08-05
+- Preview: `../assets/screens/changes-workspace.png`
+- Last updated: 2026-08-06
 
 A read-only workspace for comparing selected Git states of the documentation:
 summary, source, rendered and semantic diffs, screen overlay map, and task impact.

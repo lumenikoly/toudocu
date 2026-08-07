@@ -4,7 +4,8 @@
 - Type: Page
 - Module: MOD-SITE
 - Status: Implemented
-- Last updated: 2026-08-05
+- Preview: `../assets/screens/site-use-case.png`
+- Last updated: 2026-08-06
 
 A single page for a selected `UC-*`, with its description, map, playback, and
 relationships. The URL depends on the generated use case and is not declared as

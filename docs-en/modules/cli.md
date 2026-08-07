@@ -3,7 +3,7 @@
 - Identifier: MOD-CLI
 - Status: Completed
 - Owner: Docu-docu Team
-- Last updated: 2026-08-05
+- Last updated: 2026-08-06
 
 The module provides Docu-docu commands and deterministic workflow from search and
 task framework to context and controlled execution of declared checks.
@@ -21,6 +21,9 @@ predictable CLI with stable exit codes and JSON output.
 - search and frameworks: `internal/app/search.go`, `internal/app/scaffold.go`;
 - verification execution and process management: `internal/app/task_verify.go`, `internal/app/command_process_*.go`;
 - work-item archiving and restoration: `internal/app/task_archive.go`.
+- embedded skill bundle: `skills/bundle.go`;
+- registry, planner, manifest, and filesystem lifecycle: `internal/skillinstall/`;
+- text CLI and internal TTY context: `internal/app/skill_cli.go`.
 
 ## Module boundaries
 
@@ -28,6 +31,8 @@ The CLI does not interpret the user request. `task ready` and `task context`
 only read data, and `task verify --run` runs commands after local
 validation gate. Prompt-workflows `$docu-docu init`, `$docu-docu refresh`
 and `$docu-docu refresh diff` are outside the Go CLI boundary.
+The `skill` command manages only files from the embedded package and does not
+execute its content; the lifecycle is intentionally absent from the public Go facade.
 
 ## Business rules
 
@@ -73,6 +78,25 @@ mirror, while agents and CI use only the canonical docs root.
 and do not change its Markdown or status. The operation is blocked if the move
 would break resolution of a direct Markdown link.
 
+### BR-CLI-008: A managed skill does not overwrite user changes
+
+The lifecycle changes only an absent or unchanged managed copy with a valid
+manifest. An extra, changed, or deleted bundled file, changed permissions, a
+symlink, unmanaged directory, damaged manifest, or newer version blocks the
+write; there is no `--force`.
+
+### BR-CLI-009: The skill lifecycle works offline
+
+The only canonical package is embedded in the binary. `skill install`,
+`status`, `update`, and `uninstall` do not use the network, a shell, or a
+marketplace and do not execute scripts from the bundle.
+
+### BR-CLI-010: Multi-target operations are planned before writing
+
+For `--agent all`, the CLI first resolves and classifies every deduplicated
+target. Each target is then processed independently after an error; a conflict
+or partial result returns exit code `1`.
+
 ## Invariants
 
 - JSON mode does not mix the report with streaming text output;
@@ -86,6 +110,9 @@ would break resolution of a direct Markdown link.
 - `serve` listens only to loopback by default; network access is enabled explicitly;
 - `--host`, `--port`, `--open` and lack of auto-open are not changed; `--no-open`
   is not added, and `--edit` remains an unknown parameter.
+- `skill status` does not write to the filesystem; mutating skill commands
+  recheck the snapshot after an atomic backup move and restore the prior copy
+  if publication fails.
 
 ## Stable interfaces
 
@@ -103,6 +130,7 @@ would break resolution of a direct Markdown link.
 - [UC-TASK-04: Archiving and restoring a task](../use-cases/UC-TASK-04.md)
 - [UC-DOCS-02: Documentation Check](../use-cases/check-documentation.md)
 - [UC-DOCS-03: Local Server](../use-cases/serve-portal.md)
+- [UC-AGENT-01: Installing the AI skill](../use-cases/UC-AGENT-01.md)
 
 ## Related processes
 

@@ -5,7 +5,8 @@
 - Module: MOD-SITE
 - Status: Implemented
 - Route: `/`
-- Last updated: 2026-08-05
+- Preview: `../assets/screens/site-home.png`
+- Last updated: 2026-08-06
 
 The main entry point to the built documentation: it shows project status and
 links to documents, the local editor, the changes viewer, and the HTTP API.

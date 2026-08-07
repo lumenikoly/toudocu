@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Docu-docu turns Markdown documentation into a verified model and a backend-independent static portal.">
+    <meta name="theme-color" content="#F5E6CA">
+    <title>Docu-docu — Code on vibes. Document with proof.</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./script.js" defer></script>
+  </head>
+  <body>
+    <!--
+      THESIS: Reproduce the Variant engineering landing grammar exactly, replacing invented claims with real Docu-docu proof.
+      OWN-WORLD: Parchment canvas, oversized cobalt sans type, pale green/blue/violet/gray rounded blocks, pill actions, and soft white UI insets.
+      STORY: Understand the verified Markdown model, inspect its real portal surfaces, follow CHECK → BUILD → SERVE, then install the CLI.
+      FIRST VIEWPORT: Compact brand/actions above a left-anchored three-line headline, factual summary, and a wide command panel on open parchment space.
+      FORM: Brief-pinned Variant composition; reference selected directly; seed key VARIANT-D16FF949.
+      FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+    -->
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <a class="wordmark" href="#top" aria-label="Docu-docu home">DOCU-DOCU</a>
+      <nav class="header-actions" aria-label="Primary navigation">
+        <a class="pill pill-outline header-source-link" href="https://github.com/lumenikoly/docu-docu" target="_blank" rel="noreferrer">View source</a>
+        <a class="pill pill-outline" href="./project-docs/">Docs</a>
+        <a class="pill pill-black" href="#install">Install CLI</a>
+      </nav>
+    </header>
+
+    <main id="main" tabindex="-1">
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow hero-stage">MARKDOWN IN / VERIFIED MODEL OUT</p>
+          <h1 id="hero-title" class="hero-stage">CODE ON VIBES.<br />DOCUMENT WITH<br />PROOF.</h1>
+        </div>
+
+        <div class="terminal hero-stage" aria-label="Agent task-context example">
+          <div class="terminal-line"><span aria-hidden="true">$</span><code>cursor-agent &quot;Refactor the payment gateway to use the new provider&quot;</code></div>
+          <div class="terminal-line"><span aria-hidden="true">→</span><span>Thinking... Vibe coding session initiated.</span></div>
+          <div class="terminal-line"><span aria-hidden="true">→</span><span>Modified 14 files. Built project.</span></div>
+          <div class="terminal-line terminal-error"><span aria-hidden="true"></span><span>Panic: runtime error: invalid memory address or nil pointer dereference</span></div>
+          <div class="terminal-line terminal-note"><span aria-hidden="true"></span><span>// Oh no. The agent missed the required ProviderConfig contract.</span></div>
+          <div class="terminal-line"><span aria-hidden="true">$</span><code>docu-docu task context TASK-PAYMENTS-001 ./docs --format json</code></div>
+          <div class="terminal-line terminal-highlight"><span aria-hidden="true">✓</span><span>Task context loaded: the ProviderConfig contract and verification steps.</span></div>
+          <div class="terminal-line terminal-note"><span aria-hidden="true"></span><span>Agent updated. Architecture alignment: 100%.</span></div>
+        </div>
+      </section>
+
+      <section class="landing-grid" id="proof" aria-labelledby="proof-title">
+        <h2 class="visually-hidden" id="proof-title">What Docu-docu proves</h2>
+
+        <div class="audience-row reveal reveal-rise">
+          <article class="audience-item">
+            <p class="section-label">FOR ENGINEERS</p>
+            <p>Follow architecture, requirements, and implementation context without leaving the repository.</p>
+          </article>
+          <article class="audience-item">
+            <p class="section-label">FOR DOCUMENTATION AUTHORS</p>
+            <p>Check structure and relationships before publishing the same model as a static portal.</p>
+          </article>
+          <article class="audience-item">
+            <p class="section-label">FOR AGENTS</p>
+            <p>Request focused task context and Git-backed changes instead of scanning an undifferentiated archive.</p>
+          </article>
+        </div>
+
+        <article class="feature-card card-green reveal reveal-rise">
+          <div class="card-copy">
+            <p class="section-label">VERIFICATION 01</p>
+            <h2>MARKDOWN BECOMES A MODEL.</h2>
+            <p>Validate typed documents, links, transitions, contracts, and relationships locally or in CI.</p>
+          </div>
+          <figure class="ui-inset">
+            <div class="ui-inset-header"><span>Screen Map</span><span class="status-chip">VERIFIED VIEW</span></div>
+            <img src="./assets/site-screen-map.png" width="1440" height="900" alt="Docu-docu Screen Map showing documented screens and the transitions between them.">
+          </figure>
+        </article>
+
+        <article class="feature-card card-blue reveal reveal-rise">
+          <div class="card-copy">
+            <p class="section-label">STATIC OUTPUT</p>
+            <h2>THE PORTAL SHIPS WITHOUT A BACKEND.</h2>
+            <p>Generate a read-only HTTP portal with no database, CDN, npm runtime, or server process after build.</p>
+          </div>
+          <figure class="ui-inset">
+            <div class="ui-inset-header"><span>Project Home</span><span class="neutral-chip">STATIC HTML</span></div>
+            <img src="./assets/site-home.png" width="1440" height="900" alt="Generated Docu-docu portal home showing project status and documentation navigation.">
+          </figure>
+        </article>
+
+        <article class="workflow-card reveal reveal-wipe" id="workflow" aria-labelledby="workflow-title">
+          <div class="workflow-intro">
+            <p class="section-label">DETERMINISTIC PIPELINE</p>
+            <h2 id="workflow-title">CHECK. BUILD. SERVE.</h2>
+            <p>Three explicit commands operate on one repository-backed documentation model.</p>
+          </div>
+          <ol class="workflow-steps">
+            <li><span class="step-name">CHECK</span><code>docu-docu check ./docs --strict</code></li>
+            <li><span class="step-name">BUILD</span><code>docu-docu build ./docs --output ./site --clean</code></li>
+            <li><span class="step-name">SERVE</span><code>docu-docu serve ./docs</code></li>
+          </ol>
+        </article>
+
+        <article class="feature-card card-violet reveal reveal-rise">
+          <div class="card-copy">
+            <p class="section-label">GIT-BACKED CONTEXT</p>
+            <h2>CHANGES STAY CLOSE TO THE EVIDENCE.</h2>
+            <p>Review affected documentation and request focused task context from the same repository state.</p>
+          </div>
+          <figure class="ui-inset">
+            <div class="ui-inset-header"><span>Changes Workspace</span><span class="neutral-chip">WORKING TREE</span></div>
+            <img src="./assets/changes-workspace.png" width="1440" height="900" alt="Changes workspace comparing Git revisions and listing affected documentation files.">
+          </figure>
+        </article>
+
+        <article class="install-card reveal reveal-rise" id="install" aria-labelledby="install-title">
+          <div class="card-copy">
+            <p class="section-label">INSTALL THE CLI</p>
+            <h2 id="install-title">ONE BINARY. NO RUNTIME ENTOURAGE.</h2>
+            <p>The installer selects your platform, verifies SHA-256, and installs or updates Docu-docu in your user directory.</p>
+          </div>
+          <div class="install-commands">
+            <div class="install-command">
+              <div class="command-meta"><span>LINUX / MACOS</span><button type="button" class="copy-button" data-copy-target="install-posix" aria-describedby="copy-status">Copy</button></div>
+              <code id="install-posix">curl -fsSL https://github.com/lumenikoly/docu-docu/releases/latest/download/install.sh | sh</code>
+            </div>
+            <div class="install-command">
+              <div class="command-meta"><span>WINDOWS POWERSHELL</span><button type="button" class="copy-button" data-copy-target="install-powershell" aria-describedby="copy-status">Copy</button></div>
+              <code id="install-powershell">irm https://github.com/lumenikoly/docu-docu/releases/latest/download/install.ps1 | iex</code>
+            </div>
+            <p class="copy-status" id="copy-status" role="status" aria-live="polite"></p>
+          </div>
+        </article>
+      </section>
+
+      <section class="capabilities" id="capabilities" aria-labelledby="capabilities-title">
+        <div class="section-heading reveal reveal-rise">
+          <h2 id="capabilities-title">ONE MODEL. EVERY VIEW.</h2>
+          <p>Eight ways one repository-backed Markdown model becomes useful to people, agents, and CI.</p>
+        </div>
+        <div class="capability-ledger">
+          <article class="capability-row capability-green reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">01</span>
+            <h3>VALIDATE</h3>
+            <p>Catch broken structure, relationships, routes, contracts, and verification links before they reach the portal or CI.</p>
+            <code>docu-docu check ./docs</code>
+          </article>
+          <article class="capability-row capability-blue reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">02</span>
+            <h3>PUBLISH</h3>
+            <p>Turn the same Markdown model into a searchable static portal with diagrams, traceability, themes, and no backend.</p>
+            <code>docu-docu build ./docs</code>
+          </article>
+          <article class="capability-row capability-gray reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">03</span>
+            <h3>EDIT</h3>
+            <p>Work live in the browser with safe previews, precise diagnostics, conflict-aware saves, and instant rebuilds.</p>
+            <code>/_docu-docu/editor/</code>
+          </article>
+          <article class="capability-row capability-violet reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">04</span>
+            <h3>REVIEW</h3>
+            <p>See what Git changed at source, rendered, and semantic levels—including diagrams, APIs, assets, and task impact.</p>
+            <code>/changes/</code>
+          </article>
+          <article class="capability-row capability-blue reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">05</span>
+            <h3>MAP</h3>
+            <p>Generate a navigable product map from documented screens, states, transitions, and use cases.</p>
+            <code>screens/SC-*.md</code>
+          </article>
+          <article class="capability-row capability-blue reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">06</span>
+            <h3>PLAY</h3>
+            <p>Walk a use case screen by screen, including actions, errors, history, and accessible hotspots.</p>
+            <code>use-cases/UC-*.html#play</code>
+          </article>
+          <article class="capability-row capability-violet reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">07</span>
+            <h3>CONTEXT</h3>
+            <p>Give an agent only the requirements, rules, dependencies, and verification that belong to one task.</p>
+            <code>docu-docu task context TASK-ID ./docs</code>
+          </article>
+          <article class="capability-row capability-gray reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">08</span>
+            <h3>REFRESH</h3>
+            <p>Use the installed AI skill to reconcile documentation with the whole repository or only the current Git diff against HEAD.</p>
+            <code>$docu-docu refresh diff</code>
+          </article>
+        </div>
+      </section>
+
+      <section class="getting-started reveal reveal-wipe" id="getting-started" aria-labelledby="getting-started-title">
+        <div class="section-heading">
+          <h2 id="getting-started-title">FROM REPOSITORY TO WORKSPACE.</h2>
+          <p>An AI-skill establishes the documentation; the Go CLI turns it into a live local workspace.</p>
+        </div>
+        <ol class="start-flow">
+          <li>
+            <span class="start-number" aria-hidden="true">01</span>
+            <h3>INIT</h3>
+            <code>$docu-docu init</code>
+            <p>The installed AI-skill analyzes the repository and creates the initial documentation.</p>
+          </li>
+          <li>
+            <span class="start-number" aria-hidden="true">02</span>
+            <h3>SOURCE</h3>
+            <code>docs/**/*.md</code>
+            <p>Editable Markdown remains the source of truth.</p>
+          </li>
+          <li>
+            <span class="start-number" aria-hidden="true">03</span>
+            <h3>SERVE</h3>
+            <code>docu-docu serve ./docs</code>
+            <p>The Go CLI builds the portal, watches files, and refreshes the model.</p>
+          </li>
+          <li>
+            <span class="start-number" aria-hidden="true">04</span>
+            <h3>EXPLORE</h3>
+            <code>Portal · Editor · Changes · Screen Map · API Docs</code>
+            <p>One local UI brings every view together.</p>
+          </li>
+          <li>
+            <span class="start-number" aria-hidden="true">05</span>
+            <h3>VIBE</h3>
+            <code>docu-docu task context TASK-ID ./docs</code>
+            <p>The coding agent loads the task's scope, rules, dependencies, related documents, and verification before implementation.</p>
+          </li>
+        </ol>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div>
+        <a class="wordmark" href="#top">DOCU-DOCU</a>
+        <p>Verifiable Markdown documentation and static HTTP portals.</p>
+      </div>
+      <nav aria-label="Project links">
+        <a href="./project-docs/">Documentation</a>
+        <a href="https://github.com/lumenikoly/docu-docu">GitHub</a>
+        <a href="https://github.com/lumenikoly/docu-docu#readme">README</a>
+        <a href="https://github.com/lumenikoly/docu-docu/releases">Releases</a>
+        <a href="https://github.com/lumenikoly/docu-docu/blob/main/LICENSE">License</a>
+      </nav>
+    </footer>
+  </body>
+</html>

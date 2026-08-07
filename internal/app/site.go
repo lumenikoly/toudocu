@@ -97,6 +97,13 @@ func renderOpenAPIContractButton(model *Model, document *Document) string {
 	return ""
 }
 
+func renderRoadmapAddButton(model *Model, document *Document) string {
+	if !model.serveMode || document == nil || document.Type != "roadmap" {
+		return ""
+	}
+	return `<button class="document-context-button roadmap-add-button" type="button" data-roadmap-add>Добавить результат</button><span class="visually-hidden" data-roadmap-add-status role="status" aria-live="polite"></span>`
+}
+
 func metricCard(label string, value any, detail string) string {
 	out := fmt.Sprintf(`<div class="metric-card"><div class="metric-label">%s</div><div class="metric-value">%s</div>`, escapeHTML(label), escapeHTML(value))
 	if detail != "" {
@@ -703,7 +710,7 @@ func renderDocumentPage(model *Model, document *Document) string {
 	if document.Type == "risks" {
 		progressLabel = "Выполнение мер снижения"
 	}
-	content := breadcrumbs(model, document.OutputPath, document.Title) + `<header class="page-header"><div class="page-kicker">` + statusChip + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + issues + `</div><h1>` + escapeHTML(document.Title) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` + renderMetadata(document) + renderRiskStatus(model, document) + renderProgress(document.TaskStats, progressLabel) + controls + `<div class="page-actions">` + renderDocumentContextButton(model, document) + renderOpenAPIContractButton(model, document) + `<button class="collapse-all-button" type="button" data-collapse-all data-collapse-state="expanded" aria-expanded="true"><span class="collapse-all-icon" aria-hidden="true"><span class="collapse-icon collapse-icon-up">↑</span><span class="collapse-icon collapse-icon-down">↓</span></span><span data-collapse-label>Свернуть разделы</span></button></div></header>` + computedStatus + `<article class="doc-content">` + body + `</article>` + screenConnections + renderRelated(model, document)
+	content := breadcrumbs(model, document.OutputPath, document.Title) + `<header class="page-header"><div class="page-kicker">` + statusChip + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + issues + `</div><h1>` + escapeHTML(document.Title) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` + renderMetadata(document) + renderRiskStatus(model, document) + renderProgress(document.TaskStats, progressLabel) + controls + `<div class="page-actions">` + renderRoadmapAddButton(model, document) + renderDocumentContextButton(model, document) + renderOpenAPIContractButton(model, document) + `<button class="collapse-all-button" type="button" data-collapse-all data-collapse-state="expanded" aria-expanded="true"><span class="collapse-all-icon" aria-hidden="true"><span class="collapse-icon collapse-icon-up">↑</span><span class="collapse-icon collapse-icon-down">↓</span></span><span data-collapse-label>Свернуть разделы</span></button></div></header>` + computedStatus + `<article class="doc-content">` + body + `</article>` + screenConnections + renderRelated(model, document)
 	content += flowConnections
 	return pageShell(model, document.OutputPath, document.Title, document.Description, content, renderTOC(document))
 }

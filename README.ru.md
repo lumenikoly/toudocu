@@ -2,6 +2,11 @@
 
 [English](README.md) | **Русский**
 
+[![CI](https://github.com/lumenikoly/docu-docu/actions/workflows/test.yml/badge.svg)](https://github.com/lumenikoly/docu-docu/actions/workflows/test.yml)
+[![Docs contract](https://github.com/lumenikoly/docu-docu/actions/workflows/docs.yml/badge.svg)](https://github.com/lumenikoly/docu-docu/actions/workflows/docs.yml)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/lumenikoly/docu-docu)](https://go.dev/)
+[![License](https://img.shields.io/github/license/lumenikoly/docu-docu)](LICENSE)
+
 **Инструмент для проверяемой Markdown-документации и статических HTTP-порталов.**
 
 **Docu-docu** помогает поддерживать документацию вместе с кодом, находить несоответствия и собирать удобные статические порталы для чтения.

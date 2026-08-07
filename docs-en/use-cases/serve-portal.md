@@ -9,7 +9,7 @@
 - Start screen: SC-SITE-HOME
 - Terminal screens: SC-SITE-DOCUMENT, SC-SITE-API-DOCS
 - Allow cycle: Yes
-- Last updated: 2026-08-05
+- Last updated: 2026-08-06
 
 The developer views and edits documentation via a local HTTP server
 and receives an updated model and portal after saving or external changes.
@@ -35,26 +35,29 @@ and receives an updated model and portal after saving or external changes.
 5. If the developer navigates to `/_docu-docu/api-docs/`, they select the Editor
    or Changes contract, expand an operation, and optionally execute a safe
    `GET`/`HEAD`; the scenario ends at `SC-SITE-API-DOCS`.
-6. Otherwise, the developer opens `/_docu-docu/editor/`; the Editor receives a
+6. Otherwise, on the roadmap page the developer may choose an existing stage,
+   review the suggested `DLV-ROADMAP-NNN`, change the ID, and add a one-line
+   deliverable. Docu-docu performs a CAS insertion and returns the page to the stage.
+7. Or the developer opens `/_docu-docu/editor/`; the Editor receives a
    revision, a safe file list, and the shared template registry.
-7. The developer opens the source, changes the text, checks the Markdown preview
+8. The developer opens the source, changes the text, checks the Markdown preview
    and positional diagnostics, and saves it.
-8. Docu-docu compares the SHA-256 digest, atomically replaces the file, and synchronously
+9. Docu-docu compares the SHA-256 digest, atomically replaces the file, and synchronously
    rebuilds model, HTML, search and diagnostics.
-9. When transitioning between canonical HTML documents, the portal can prefetch the
+10. When transitioning between canonical HTML documents, the portal can prefetch the
    target page, check the current revision and replace the document layout without
    rebuild. Back/Forward, anchors, scroll and keyboard focus continue to work.
-10. Browser polling receives a new revision: the normal page is reloaded,
+11. Browser polling receives a new revision: the normal page is reloaded,
    a clean editor updates, while a dirty editor retains its text and shows a
    conflict.
-11. HTTP navigation returns the last successful snapshot and does not start a rebuild.
+12. HTTP navigation returns the last successful snapshot and does not start a rebuild.
    Watcher stabilizes external changes and rebuilds only the changed
    documentation root; a manual canonical-portal rebuild shows the scope
    “model, HTML, and search”, progress, and the result before reloading.
-12. If `serve` is launched from canonical root with `translations.<locale>`, header
+13. If `serve` is launched from canonical root with `translations.<locale>`, header
    offers locale tags. The corresponding Markdown opens in the selected
    locale, while a missing page leads to that locale's homepage.
-13. The developer stops the server with `Ctrl+C`.
+14. The developer stops the server with `Ctrl+C`.
 
 ## Error scenarios
 
@@ -63,6 +66,9 @@ and receives an updated model and portal after saving or external changes.
 - stale digest returns `409 stale_digest`; explicit overwrite is repeated with
   current digest and `confirmOverwrite: true`, and the request without confirmation and
   second external conflict get `409` again;
+- a stale roadmap digest does not permit overwrite: the dialog retains the ID,
+  text, and selected stage, refreshes the stages/digest/suggestion, and requires
+  another explicit submission;
 - when a dirty file is deleted externally, the editor retains the buffer and offers to download
   it without showing inapplicable load/overwrite actions;
 - malformed, oversized, cross-origin, and unsafe-path requests receive a JSON
@@ -94,6 +100,7 @@ The rules are defined in the module document:
 - [BR-SITE-003](../modules/site.md#br-site-003-dev-server-does-not-expose-source-repository) - the dev server does not expose the source repository.
 - [BR-SITE-007](../modules/site.md#br-site-007-build-and-serve-have-different-capabilities) - build remains static read-only, serve provides a live workspace.
 - [BR-SITE-010](../modules/site.md#br-site-010-soft-navigation-limited-to-canonical-serve-portal) - soft transitions do not change offline/file and locale semantics.
+- [BR-SITE-014](../modules/site.md#br-site-014-roadmap-changes-use-only-a-constrained-operation) - serve adds only a new `DLV-*` with CAS and does not make the browser parse Markdown.
 
 ## Implementation
 
@@ -112,6 +119,8 @@ The rules are defined in the module document:
 - path, symlink, body/content limits, same-origin guards and CAS conflicts;
 - Markdown preview, JSON/YAML diagnostics and raw `text/plain`;
 - desktop/mobile keyboard flow without losing dirty text;
+- roadmap happy path, changed suggested ID, progress, CAS preservation,
+  keyboard/Escape/focus behavior, and mobile layout;
 - manual rebuild from the workspace panel with visible scope, progress, result, and
   subsequent page reload;
 - inaccessibility of the button outside `serve` and handling of manual rebuild errors;
