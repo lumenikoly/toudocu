@@ -1,28 +1,53 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-07T11:10:00Z",
+  "generatedAt": "2026-08-07T14:04:51Z",
   "title": "Design System: Docu-docu",
   "extensions": {
     "colorMeta": {
-      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#000000", "tonalRamp": ["#000000", "#1c1c1c", "#2c2c2c", "#555555", "#8b8b8b", "#9b9b9b", "#d7d7d7", "#f5f5f5"] },
+      "canvas": { "role": "neutral", "displayName": "Parchment", "canonical": "#f5e6ca", "tonalRamp": ["#302714", "#554523", "#7d6839", "#a58d57", "#c8b47b", "#e2d2a5", "#f5e6ca", "#fff9ed"] },
+      "white": { "role": "neutral", "displayName": "White", "canonical": "#ffffff", "tonalRamp": ["#262626", "#464646", "#686868", "#8c8c8c", "#b3b3b3", "#d9d9d9", "#f2f2f2", "#ffffff"] },
+      "ink": { "role": "primary", "displayName": "Cobalt Ink", "canonical": "#0047ab", "tonalRamp": ["#00132f", "#00245a", "#003783", "#0047ab", "#3a6fc2", "#7799d7", "#b4c6ea", "#edf3ff"] },
+      "muted": { "role": "primary", "displayName": "Muted Cobalt", "canonical": "#315a92", "tonalRamp": ["#101d31", "#1b3454", "#284a77", "#315a92", "#6380a9", "#94a8c2", "#c7d1de", "#f0f4f8"] },
+      "hover-ink": { "role": "primary", "displayName": "Hover Cobalt", "canonical": "#003a8c", "tonalRamp": ["#000f25", "#001e49", "#002d6c", "#003a8c", "#4369a8", "#7d95c4", "#b8c5df", "#eef3fb"] },
+      "quiet-label": { "role": "primary", "displayName": "Quiet Label", "canonical": "#315a92", "tonalRamp": ["#101d31", "#1b3454", "#284a77", "#315a92", "#6380a9", "#94a8c2", "#c7d1de", "#f0f4f8"] },
+      "line": { "role": "neutral", "displayName": "Rule Beige", "canonical": "#d9c8a9", "tonalRamp": ["#30291d", "#554936", "#796b50", "#9e8e6c", "#bfae89", "#d9c8a9", "#eadfc9", "#fbf7ee"] },
+      "internal-rule": { "role": "neutral", "displayName": "Internal Rule", "canonical": "#d7d7d7", "tonalRamp": ["#292929", "#4a4a4a", "#6d6d6d", "#919191", "#b5b5b5", "#d7d7d7", "#e8e8e8", "#f8f8f8"] },
+      "soft-gray": { "role": "neutral", "displayName": "Soft Gray", "canonical": "#f5f5f5", "tonalRamp": ["#292929", "#4b4b4b", "#707070", "#969696", "#bdbdbd", "#dddddd", "#f5f5f5", "#ffffff"] },
       "verified-green": { "role": "tertiary", "displayName": "Verified Green", "canonical": "#e1fdc7", "tonalRamp": ["#174b18", "#2e6d28", "#4d913f", "#72b85c", "#9cda83", "#c2efa7", "#e1fdc7", "#f5ffec"] },
+      "verified-ink": { "role": "tertiary", "displayName": "Verified Ink", "canonical": "#174b18", "tonalRamp": ["#071807", "#0e2e0f", "#174b18", "#347336", "#619d62", "#93c594", "#c5e6c5", "#f0faf0"] },
       "portal-blue": { "role": "secondary", "displayName": "Portal Blue", "canonical": "#e1f5fe", "tonalRamp": ["#143b4f", "#285b73", "#467f99", "#70a6bf", "#9bcae0", "#c2e5f2", "#e1f5fe", "#f5fcff"] },
-      "context-violet": { "role": "secondary", "displayName": "Context Violet", "canonical": "#e8eaf6", "tonalRamp": ["#292c49", "#44486b", "#666b91", "#8e93b7", "#b5b9d7", "#d4d7ea", "#e8eaf6", "#f8f8fc"] }
+      "context-violet": { "role": "secondary", "displayName": "Context Violet", "canonical": "#e8eaf6", "tonalRamp": ["#292c49", "#44486b", "#666b91", "#8e93b7", "#b5b9d7", "#d4d7ea", "#e8eaf6", "#f8f8fc"] },
+      "focus-indigo": { "role": "primary", "displayName": "Focus Indigo", "canonical": "#002d72", "tonalRamp": ["#000c20", "#00183d", "#00265f", "#002d72", "#405c94", "#7889b4", "#b3bdd6", "#edf0f8"] }
     },
     "typographyMeta": {
-      "display": { "displayName": "Variant Display", "purpose": "Three-line hero proposition." },
-      "headline": { "displayName": "Card Proposition", "purpose": "Uppercase evidence headings." },
+      "display": { "displayName": "Cobalt Display", "purpose": "Three-line hero proposition." },
+      "headline": { "displayName": "Evidence Headline", "purpose": "Uppercase feature and workflow propositions." },
       "body": { "displayName": "Factual Body", "purpose": "Short repository-backed explanations." },
-      "label": { "displayName": "System Label", "purpose": "Commands, audience labels, and statuses." }
+      "label": { "displayName": "System Label", "purpose": "Commands, audience labels, evidence routes, and statuses." },
+      "wordmark": { "displayName": "Wordmark", "purpose": "Compact Docu-docu brand signature." },
+      "action": { "displayName": "Action", "purpose": "Pill controls and copy actions." },
+      "hero-body": { "displayName": "Hero Body", "purpose": "Large supporting statements in the first viewport." },
+      "supporting": { "displayName": "Supporting Body", "purpose": "Secondary section and flow explanations." },
+      "compact": { "displayName": "Compact", "purpose": "Dense interface metadata." },
+      "terminal": { "displayName": "Terminal", "purpose": "Command-line narrative and output." },
+      "code": { "displayName": "Code", "purpose": "Commands and evidence routes." },
+      "footer": { "displayName": "Footer", "purpose": "Low-priority project description." },
+      "footer-link": { "displayName": "Footer Link", "purpose": "Compact project navigation." },
+      "mobile-label": { "displayName": "Mobile Label", "purpose": "Small labels at narrow viewports." },
+      "mobile-display": { "displayName": "Mobile Display", "purpose": "Hero typography at narrow viewports." },
+      "mobile-body": { "displayName": "Mobile Body", "purpose": "Readable body copy at narrow viewports." },
+      "mobile-headline": { "displayName": "Mobile Headline", "purpose": "Feature propositions at narrow viewports." }
     },
     "shadows": [
-      { "name": "terminal", "value": "0 8px 30px rgba(0,0,0,.08)", "purpose": "Place the command panel on the white hero." },
-      { "name": "ui-inset", "value": "0 12px 40px rgba(0,0,0,.08)", "purpose": "Lift real UI evidence inside a colored block." }
+      { "name": "terminal", "value": "0 8px 30px rgba(0,0,0,.08)", "purpose": "Place the command panel above the parchment canvas." },
+      { "name": "ui-inset", "value": "0 12px 40px rgba(0,0,0,.08)", "purpose": "Lift real UI evidence inside a colored field." },
+      { "name": "install-command", "value": "0 8px 26px rgba(0,0,0,.05)", "purpose": "Separate install commands from the neutral installation field." }
     ],
     "motion": [
-      { "name": "entrance-ease", "value": "cubic-bezier(.16,1,.3,1)", "purpose": "Hero stagger and bounded section reveals." },
+      { "name": "entrance-ease", "value": "cubic-bezier(.16,1,.3,1)", "purpose": "Hero stagger, bounded section reveals, and capability background shifts." },
       { "name": "maximum-shift", "value": "24px", "purpose": "Maximum entrance displacement." },
-      { "name": "control-duration", "value": "160ms", "purpose": "Pill hover and press feedback." }
+      { "name": "control-duration", "value": "160ms", "purpose": "Pill hover and press feedback." },
+      { "name": "field-duration", "value": "220ms", "purpose": "Capability-row background feedback." }
     ],
     "breakpoints": [
       { "name": "stack", "value": "980px" },
@@ -34,49 +59,79 @@
       "name": "Primary Pill",
       "kind": "button",
       "refersTo": "pill-primary",
-      "description": "Black capsule primary action.",
+      "description": "Cobalt capsule primary action.",
       "html": "<button class=\"ds-pill-primary\">INSTALL CLI</button>",
-      "css": ".ds-pill-primary { min-height:42px; border:0; border-radius:999px; padding:0 22px; background:#000; color:#fff; font:800 .86rem ui-sans-serif,sans-serif; transition:background-color 160ms,transform 160ms; } .ds-pill-primary:hover{background:#2c2c2c}.ds-pill-primary:active{transform:scale(.96)}.ds-pill-primary:focus-visible{outline:3px solid #3346c4;outline-offset:4px}"
+      "css": ".ds-pill-primary{min-height:42px;border:0;border-radius:999px;padding:0 22px;background:#0047ab;color:#fff;font:800 .86rem ui-sans-serif,sans-serif;transition:background-color 160ms,transform 160ms}.ds-pill-primary:hover{background:#003a8c}.ds-pill-primary:active{transform:scale(.96)}.ds-pill-primary:focus-visible{outline:3px solid #002d72;outline-offset:4px}"
     },
     {
       "name": "Outlined Pill",
       "kind": "button",
-      "description": "White secondary action with black inset outline.",
+      "description": "Parchment secondary action with a cobalt inset outline.",
       "html": "<button class=\"ds-pill-outline\">VIEW SOURCE</button>",
-      "css": ".ds-pill-outline { min-height:42px; border:0; border-radius:999px; padding:0 22px; background:#fff; color:#000; box-shadow:inset 0 0 0 1.5px #000; font:800 .86rem ui-sans-serif,sans-serif; transition:background-color 160ms,transform 160ms; }.ds-pill-outline:hover{background:#f5f5f5}.ds-pill-outline:active{transform:scale(.96)}.ds-pill-outline:focus-visible{outline:3px solid #3346c4;outline-offset:4px}"
+      "css": ".ds-pill-outline{min-height:42px;border:0;border-radius:999px;padding:0 22px;background:#f5e6ca;color:#0047ab;box-shadow:inset 0 0 0 1.5px #0047ab;font:800 .86rem ui-sans-serif,sans-serif;transition:background-color 160ms,transform 160ms}.ds-pill-outline:hover{background:#f5f5f5}.ds-pill-outline:active{transform:scale(.96)}.ds-pill-outline:focus-visible{outline:3px solid #002d72;outline-offset:4px}"
     },
     {
       "name": "Feature Block",
       "kind": "card",
       "refersTo": "feature-card",
-      "description": "Large rounded evidence field.",
+      "description": "Large rounded evidence field with one factual proposition.",
       "html": "<section class=\"ds-feature\"><small>VERIFICATION 01</small><h2>MARKDOWN BECOMES A MODEL.</h2><p>Validate typed documents and relationships locally or in CI.</p></section>",
-      "css": ".ds-feature{max-width:540px;min-height:360px;border-radius:24px;padding:42px;background:#e1fdc7;color:#000;font-family:ui-sans-serif,sans-serif}.ds-feature small{font:700 .72rem ui-monospace,monospace;letter-spacing:.06em}.ds-feature h2{max-width:13ch;margin:20px 0;font-size:3rem;line-height:.96;letter-spacing:-.035em}.ds-feature p{max-width:46ch}"
+      "css": ".ds-feature{max-width:540px;min-height:360px;border-radius:24px;padding:42px;background:#e1fdc7;color:#0047ab;font-family:ui-sans-serif,sans-serif}.ds-feature small{font:700 .72rem ui-monospace,monospace;letter-spacing:.06em}.ds-feature h2{max-width:13ch;margin:20px 0;font-size:3rem;line-height:.96;letter-spacing:-.035em}.ds-feature p{max-width:46ch}"
+    },
+    {
+      "name": "Capability Row",
+      "kind": "custom",
+      "description": "Cardless full-width product capability with a numbered evidence route.",
+      "html": "<article class=\"ds-capability\"><small>01</small><h3>EDITOR</h3><p>Write, preview, resolve diagnostics, then save atomically.</p><code>/_docu-docu/editor/</code></article>",
+      "css": ".ds-capability{display:grid;grid-template-columns:50px 180px minmax(240px,1fr) 220px;align-items:center;gap:28px;padding:30px 40px;border-top:1px solid rgba(0,71,171,.25);background:#e1fdc7;color:#0047ab;font-family:ui-sans-serif,sans-serif;transition:background-color 220ms cubic-bezier(.16,1,.3,1)}.ds-capability:hover{background:#fff}.ds-capability small,.ds-capability code{font:700 .72rem ui-monospace,monospace;letter-spacing:.06em}.ds-capability h3{margin:0;font-size:3rem;line-height:.94;letter-spacing:-.035em}.ds-capability p{margin:0}.ds-capability:focus-within{outline:3px solid #002d72;outline-offset:-3px}"
     },
     {
       "name": "UI Inset",
       "kind": "card",
       "description": "White screenshot frame inside a colored evidence block.",
       "html": "<figure class=\"ds-inset\"><header>SCREEN MAP <span>VERIFIED VIEW</span></header><div>REAL PRODUCT UI</div></figure>",
-      "css": ".ds-inset{overflow:hidden;border-radius:12px;background:#fff;box-shadow:0 12px 40px rgba(0,0,0,.08);font-family:ui-sans-serif,sans-serif}.ds-inset header{min-height:48px;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;font-size:.78rem;font-weight:800}.ds-inset header span{border-radius:999px;padding:5px 9px;background:#e1fdc7;color:#174b18;font:700 .72rem ui-monospace,monospace}.ds-inset div{display:grid;aspect-ratio:16/9;place-items:center;background:#f5f5f5;font:700 .72rem ui-monospace,monospace}"
+      "css": ".ds-inset{overflow:hidden;border-radius:12px;background:#fff;color:#0047ab;box-shadow:0 12px 40px rgba(0,0,0,.08);font-family:ui-sans-serif,sans-serif}.ds-inset header{min-height:48px;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;font-size:.78rem;font-weight:800}.ds-inset header span{border-radius:999px;padding:5px 9px;background:#e1fdc7;color:#174b18;font:700 .72rem ui-monospace,monospace}.ds-inset div{display:grid;aspect-ratio:16/9;place-items:center;background:#f5f5f5;font:700 .72rem ui-monospace,monospace}"
     },
     {
       "name": "Command Panel",
       "kind": "custom",
-      "description": "Soft white terminal with an explicit verified row.",
-      "html": "<div class=\"ds-command\"><code>$ docu-docu check ./docs --strict</code><strong>✓ Validates structure, links, and relationships.</strong></div>",
-      "css": ".ds-command{overflow:hidden;border-radius:12px;padding:20px 24px;background:#fff;color:#000;box-shadow:0 8px 30px rgba(0,0,0,.08);font:400 .82rem ui-monospace,monospace}.ds-command code,.ds-command strong{display:block;padding:3px 0}.ds-command strong{margin:3px -24px;padding:3px 24px;background:#e1fdc7;color:#174b18}"
+      "description": "Soft white terminal with explicit error and verified rows.",
+      "html": "<div class=\"ds-command\"><code>$ docu-docu task context TASK-001 ./docs</code><strong>✓ Task context loaded.</strong></div>",
+      "css": ".ds-command{overflow:hidden;border-radius:12px;padding:20px 24px;background:#fff;color:#0047ab;box-shadow:0 8px 30px rgba(0,0,0,.08);font:400 .82rem ui-monospace,monospace}.ds-command code,.ds-command strong{display:block;padding:3px 0}.ds-command strong{margin:3px -24px;padding:3px 24px;background:#e1fdc7;color:#174b18}"
+    },
+    {
+      "name": "Workspace Flow",
+      "kind": "custom",
+      "description": "Four-step repository-to-workspace sequence connected by a structural line.",
+      "html": "<ol class=\"ds-flow\"><li><small>01</small><strong>INIT</strong><code>$docu-docu init</code></li><li><small>02</small><strong>SOURCE</strong><code>docs/**/*.md</code></li><li><small>03</small><strong>SERVE</strong><code>docu-docu serve ./docs</code></li><li><small>04</small><strong>EXPLORE</strong><code>Portal · Editor · Changes</code></li></ol>",
+      "css": ".ds-flow{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;margin:0;padding:46px 0 0;list-style:none;color:#0047ab;font-family:ui-sans-serif,sans-serif}.ds-flow:before{content:'';position:absolute;top:9px;right:0;left:0;height:1px;background:#0047ab}.ds-flow li{display:grid;gap:10px}.ds-flow small,.ds-flow code{font:700 .72rem ui-monospace,monospace}.ds-flow strong{font-size:1.5rem}.ds-flow:focus-within{outline:3px solid #002d72;outline-offset:4px}"
     }
   ],
   "narrative": {
     "northStar": "The Variant Engineering Board",
-    "overview": "A white engineering presentation board with oversized black type, capsule actions, large softly colored evidence blocks, and real product UI insets.",
-    "keyCharacteristics": ["Open white hero", "Three-line black proposition", "Pill actions", "12-column colored board", "Real UI insets"],
-    "rules": [
-      { "name": "The Field Color Rule", "body": "Color owns a complete evidence block; do not scatter decorative accents across the canvas.", "section": "colors" },
-      { "name": "The Scale Does the Selling Rule", "body": "Keep language factual and create energy through size and line breaks.", "section": "typography" }
+    "overview": "Docu-docu uses the direct, high-energy composition of the approved Variant reference: a parchment canvas, enormous cobalt statements, precise mono captions, capsule actions, and large softly colored blocks. The page feels like an engineering presentation board rather than a dark developer console or a generic SaaS dashboard.\n\nReal product UI sits inside soft white insets and replaces invented diagrams. Public claims stay factual and repository-backed; the expressive scale comes from typography, spacing, and block color rather than hype.",
+    "keyCharacteristics": [
+      "Open parchment first view with a large left-anchored proposition.",
+      "Cobalt capsule CTAs and thin outlined secondary actions.",
+      "A 12-column board of 24px-radius feature blocks.",
+      "Pale green, blue, violet, and neutral gray as full card fields.",
+      "Real UI screenshots inside white 12px-radius insets."
     ],
-    "dos": ["Do match the approved Variant composition.", "Do use oversized black statements on white.", "Do replace placeholders with real evidence."],
-    "donts": ["Don't use the rejected dark split-screen hero.", "Don't replace rounded blocks with sharp editorial rows.", "Don't invent output or capabilities."]
+    "rules": [
+      { "name": "The Field Color Rule", "body": "Color owns a complete evidence block; do not scatter small decorative accents across the parchment canvas.", "section": "colors" },
+      { "name": "The Scale Does the Selling Rule", "body": "Keep language factual; create energy through size and line breaks.", "section": "typography" }
+    ],
+    "dos": [
+      "Do match the approved Variant composition before inventing a new layout.",
+      "Do use three-line oversized cobalt statements on open parchment space.",
+      "Do let one soft color own each large evidence block.",
+      "Do replace placeholder mockups with real Docu-docu screenshots and commands."
+    ],
+    "donts": [
+      "Don't turn the hero into a dark split-screen poster.",
+      "Don't replace the rounded board with sharp editorial rows.",
+      "Don't invent validation output or product capabilities.",
+      "Don't add CDN, webfont, analytics, or runtime dependencies."
+    ]
   }
 }

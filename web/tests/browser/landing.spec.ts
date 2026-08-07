@@ -77,7 +77,26 @@ test("landing loads from the GitHub Pages mount without missing or external asse
     await expect(page.locator("h1")).toContainText("CODE ON VIBES.");
     await expect(page.locator("h1")).toContainText("DOCUMENT WITH");
     await expect(page.locator("h1")).toContainText("PROOF.");
-    await expect(page.locator("#proof, #workflow, #install")).toHaveCount(3);
+    await expect(page.locator("#proof, #workflow, #install, #capabilities, #getting-started")).toHaveCount(5);
+    const capabilityRows = page.locator("#capabilities .capability-row");
+    await expect(capabilityRows).toHaveCount(8);
+    await expect(page.locator("#capabilities .capability-number")).toHaveText(["01", "02", "03", "04", "05", "06", "07", "08"]);
+    await expect(page.locator("#capabilities h3")).toHaveText(["VALIDATE", "PUBLISH", "EDIT", "REVIEW", "MAP", "PLAY", "CONTEXT", "REFRESH"]);
+    await expect(page.locator("#capabilities .capability-row code")).toHaveText([
+      "docu-docu check ./docs",
+      "docu-docu build ./docs",
+      "/_docu-docu/editor/",
+      "/changes/",
+      "screens/SC-*.md",
+      "use-cases/UC-*.html#play",
+      "docu-docu task context TASK-ID ./docs",
+      "$docu-docu refresh diff",
+    ]);
+    await expect(page.locator("#getting-started .start-flow > li")).toHaveCount(5);
+    await expect(page.locator("#getting-started")).toContainText("$docu-docu init");
+    await expect(page.locator("#getting-started")).toContainText("docu-docu serve ./docs");
+    await expect(page.locator("#getting-started")).toContainText("VIBE");
+    await expect(page.locator("#getting-started")).toContainText("docu-docu task context TASK-ID ./docs");
     await expect(page.locator("img")).toHaveCount(3);
     await expect(page.locator("img:not([alt]), img[alt='']")).toHaveCount(0);
     await expect(page.locator('.header-actions a[href="#install"]')).toHaveText("Install CLI");
@@ -120,10 +139,10 @@ test("both install commands copy and the non-Clipboard fallback remains usable",
   }
 });
 
-test("desktop and mobile layouts are keyboard accessible and do not overflow", async ({ browser }) => {
+test("responsive layouts are keyboard accessible and do not overflow", async ({ browser }) => {
   const hosted = await serveLanding();
   try {
-    for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
+    for (const viewport of [{ width: 1440, height: 900 }, { width: 768, height: 1024 }, { width: 390, height: 844 }]) {
       const page = await browser.newPage({ viewport });
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.goto(hosted.origin);
@@ -132,6 +151,10 @@ test("desktop and mobile layouts are keyboard accessible and do not overflow", a
       await expect(page.locator("#proof .feature-card h2").first()).toBeVisible();
       await expect(page.locator("#workflow h2")).toBeVisible();
       await expect(page.locator("#install h2")).toBeVisible();
+      await expect(page.locator("#capabilities h2")).toBeVisible();
+      await expect(page.locator("#getting-started h2")).toBeVisible();
+      const flowDirection = await page.locator(".start-flow").evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(" ").length);
+      expect(flowDirection).toBe(viewport.width <= 700 ? 1 : 5);
       await page.keyboard.press("Tab");
       await expect(page.locator(".skip-link")).toBeFocused();
       await expect(page.locator(".skip-link")).toBeVisible();
@@ -162,6 +185,8 @@ test("core content remains visible when JavaScript is disabled", async ({ browse
     await expect(page.locator("#proof .feature-card h2").first()).toBeVisible();
     await expect(page.locator("#workflow h2")).toBeVisible();
     await expect(page.locator("#install h2")).toBeVisible();
+    await expect(page.locator("#capabilities h2")).toBeVisible();
+    await expect(page.locator("#getting-started h2")).toBeVisible();
     await expectNoOverflow(page);
   } finally {
     await context.close();

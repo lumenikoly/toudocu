@@ -15,11 +15,11 @@ Documentation authors, developers, testers, and coding agents need to understand
 
 ## Proof and content
 
-The surface uses the real Screen Map, generated project home, and Git-backed Changes workspace. It states only repository-confirmed capabilities and exact commands: `check`, `build`, `serve`, plus the README's POSIX and PowerShell installers. Public anchors are `#proof`, `#workflow`, and `#install`.
+The surface uses the real Screen Map, generated project home, and Git-backed Changes workspace. It states only repository-confirmed capabilities and exact commands: `check`, `build`, `serve`, plus the README's POSIX and PowerShell installers. A full-width capability ledger presents eight outcomes from one repository-backed Markdown model: validation, publishing, live editing, Git review, product mapping, playable use cases, task-scoped agent context, and AI-skill refresh. It is followed by the onboarding path from the `$docu-docu init` AI-skill workflow to the `docu-docu serve ./docs` Go CLI command and local workspace. Public anchors are `#proof`, `#workflow`, `#install`, `#capabilities`, and `#getting-started`.
 
 ## Chosen direction
 
-A literal implementation of the approved Variant reference: open parchment first viewport, oversized three-line cobalt proposition, outlined and cobalt capsule actions, a soft command panel, then a 12-column board of pale green, blue, gray, and violet rounded blocks. Real Screen Map, portal home, and Changes screenshots replace the reference's placeholder mockups. The memorable moment is the transition from the sparse parchment hero into the dense evidence board.
+A literal implementation of the approved Variant reference: open parchment first viewport, oversized three-line cobalt proposition, outlined and cobalt capsule actions, a soft command panel, then a 12-column board of pale green, blue, gray, and violet rounded blocks. Real Screen Map, portal home, and Changes screenshots replace the reference's placeholder mockups. After the install block, cardless full-width feature rows and a horizontal-to-vertical onboarding line extend the same visual system without adding imagery. The memorable moment is the transition from the sparse parchment hero into the dense evidence board.
 
 ## Constraints
 

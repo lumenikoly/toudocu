@@ -3,6 +3,24 @@ import { readFile, readdir } from "node:fs/promises";
 import { test } from "node:test";
 
 const generated = new URL("../../internal/site/assets/generated/", import.meta.url);
+const trackedPortal = new URL("../../project-docs/", import.meta.url);
+
+test("tracked project portal stays static and read-only", async () => {
+  const pages = ["index.html", "reference/configuration.html"];
+  for (const page of pages) {
+    const source = await readFile(new URL(page, trackedPortal), "utf8");
+    assert.equal(source.includes('"runtime":"static"'), true, `${page} is not a static runtime`);
+    assert.equal(source.includes('"runtime":"serve"'), false, `${page} leaked serve runtime`);
+    assert.equal(source.includes("data-server-rebuild"), false, `${page} leaked rebuild control`);
+    assert.equal(source.includes('href="/_docu-docu/editor/'), false, `${page} leaked editor action`);
+    assert.equal(source.includes('href="/changes/'), false, `${page} leaked changes action`);
+  }
+
+  const assets = new Set(await readdir(new URL("assets/", trackedPortal)));
+  for (const forbidden of ["serve.js", "serve.css", "editor.js", "editor.css", "changes.js", "changes.css", "codemirror.js", "api-docs.js"]) {
+    assert.equal(assets.has(forbidden), false, `${forbidden} leaked into tracked static portal`);
+  }
+});
 
 test("manifest separates static and serve assets", async () => {
   const manifest = JSON.parse(await readFile(new URL("manifest.json", generated), "utf8"));

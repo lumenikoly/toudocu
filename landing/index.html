@@ -135,6 +135,102 @@
           </div>
         </article>
       </section>
+
+      <section class="capabilities" id="capabilities" aria-labelledby="capabilities-title">
+        <div class="section-heading reveal reveal-rise">
+          <h2 id="capabilities-title">ONE MODEL. EVERY VIEW.</h2>
+          <p>Eight ways one repository-backed Markdown model becomes useful to people, agents, and CI.</p>
+        </div>
+        <div class="capability-ledger">
+          <article class="capability-row capability-green reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">01</span>
+            <h3>VALIDATE</h3>
+            <p>Catch broken structure, relationships, routes, contracts, and verification links before they reach the portal or CI.</p>
+            <code>docu-docu check ./docs</code>
+          </article>
+          <article class="capability-row capability-blue reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">02</span>
+            <h3>PUBLISH</h3>
+            <p>Turn the same Markdown model into a searchable static portal with diagrams, traceability, themes, and no backend.</p>
+            <code>docu-docu build ./docs</code>
+          </article>
+          <article class="capability-row capability-gray reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">03</span>
+            <h3>EDIT</h3>
+            <p>Work live in the browser with safe previews, precise diagnostics, conflict-aware saves, and instant rebuilds.</p>
+            <code>/_docu-docu/editor/</code>
+          </article>
+          <article class="capability-row capability-violet reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">04</span>
+            <h3>REVIEW</h3>
+            <p>See what Git changed at source, rendered, and semantic levels—including diagrams, APIs, assets, and task impact.</p>
+            <code>/changes/</code>
+          </article>
+          <article class="capability-row capability-blue reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">05</span>
+            <h3>MAP</h3>
+            <p>Generate a navigable product map from documented screens, states, transitions, and use cases.</p>
+            <code>screens/SC-*.md</code>
+          </article>
+          <article class="capability-row capability-blue reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">06</span>
+            <h3>PLAY</h3>
+            <p>Walk a use case screen by screen, including actions, errors, history, and accessible hotspots.</p>
+            <code>use-cases/UC-*.html#play</code>
+          </article>
+          <article class="capability-row capability-violet reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">07</span>
+            <h3>CONTEXT</h3>
+            <p>Give an agent only the requirements, rules, dependencies, and verification that belong to one task.</p>
+            <code>docu-docu task context TASK-ID ./docs</code>
+          </article>
+          <article class="capability-row capability-gray reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">08</span>
+            <h3>REFRESH</h3>
+            <p>Use the installed AI skill to reconcile documentation with the whole repository or only the current Git diff against HEAD.</p>
+            <code>$docu-docu refresh diff</code>
+          </article>
+        </div>
+      </section>
+
+      <section class="getting-started reveal reveal-wipe" id="getting-started" aria-labelledby="getting-started-title">
+        <div class="section-heading">
+          <h2 id="getting-started-title">FROM REPOSITORY TO WORKSPACE.</h2>
+          <p>An AI-skill establishes the documentation; the Go CLI turns it into a live local workspace.</p>
+        </div>
+        <ol class="start-flow">
+          <li>
+            <span class="start-number" aria-hidden="true">01</span>
+            <h3>INIT</h3>
+            <code>$docu-docu init</code>
+            <p>The installed AI-skill analyzes the repository and creates the initial documentation.</p>
+          </li>
+          <li>
+            <span class="start-number" aria-hidden="true">02</span>
+            <h3>SOURCE</h3>
+            <code>docs/**/*.md</code>
+            <p>Editable Markdown remains the source of truth.</p>
+          </li>
+          <li>
+            <span class="start-number" aria-hidden="true">03</span>
+            <h3>SERVE</h3>
+            <code>docu-docu serve ./docs</code>
+            <p>The Go CLI builds the portal, watches files, and refreshes the model.</p>
+          </li>
+          <li>
+            <span class="start-number" aria-hidden="true">04</span>
+            <h3>EXPLORE</h3>
+            <code>Portal · Editor · Changes · Screen Map · API Docs</code>
+            <p>One local UI brings every view together.</p>
+          </li>
+          <li>
+            <span class="start-number" aria-hidden="true">05</span>
+            <h3>VIBE</h3>
+            <code>docu-docu task context TASK-ID ./docs</code>
+            <p>The coding agent loads the task's scope, rules, dependencies, related documents, and verification before implementation.</p>
+          </li>
+        </ol>
+      </section>
     </main>
 
     <footer class="site-footer">
