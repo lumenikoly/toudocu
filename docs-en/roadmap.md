@@ -27,4 +27,6 @@ is derived from their use-case documents.
 - Status: In progress
 - Owner: Docu-docu Team
 
+- [x] `UC-AGENT-01` The user installs and maintains the embedded AI skill.
+- [x] `DLV-ROADMAP-001` The user adds a new deliverable to an existing roadmap stage through canonical serve.
 - [ ] `DLV-RELEASE-02` The next stable release is prepared and published.

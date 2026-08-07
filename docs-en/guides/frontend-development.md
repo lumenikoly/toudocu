@@ -32,7 +32,8 @@ forbidden. After changing frontend source, commit the rebuilt
 `appearance.js` is available in both static and serve runtimes and is loaded as
 a normal blocking script before CSS so the saved theme applies in the first
 frame. `portal.js` is available in both static and serve runtimes. `serve.js`,
-`editor.js`, `changes.js`, CodeMirror, and Swagger UI are serve-only. Project
+`editor.js`, `changes.js`, the roadmap dialog, CodeMirror, and Swagger UI are
+serve-only. Project
 logic, classification, path guards, semantic diff, and verification must not be
 moved to TypeScript.
 

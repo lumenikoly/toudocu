@@ -34,6 +34,7 @@ for `changes` and `serve`; static `build` does not depend on Git.
 | Markdown | Parse CommonMark/GFM into a private AST, normalize structure, and render content safely | [MOD-MARKDOWN](../modules/markdown.md), [ADR-005](../decisions/ADR-005.md) |
 | Project model | Classify documents, validate OpenAPI, resolve relationships, and produce diagnostics | [MOD-MODEL](../modules/model.md) |
 | Site | Create a backend-independent static HTTP portal or canonical serve workspace with editor, changes, and offline API docs | [MOD-SITE](../modules/site.md) |
+| Skill bundle and installer | Validate the embedded package, resolve the host target, classify managed state, and execute the lifecycle atomically | [MOD-CLI](../modules/cli.md), [guide](../guides/skill-installation.md) |
 
 The static generator and serve variant are separated. Serve keeps separate
 runtime snapshots for the canonical root and configured translation roots: HTTP
@@ -50,3 +51,10 @@ validation gate. Concrete operation sequences remain in
 [FLOW-DOCS-BUILD](../flows/FLOW-DOCS-BUILD.md),
 [FLOW-DOCS-SERVE](../flows/FLOW-DOCS-SERVE.md), and
 [FLOW-TASK-WORKFLOW](../flows/FLOW-TASK-WORKFLOW.md).
+
+The skill lifecycle forms a separate short CLI branch and does not build the
+document model: `skills` returns a validated immutable bundle,
+`internal/skillinstall` performs registry/detection, read-only planning, and a
+filesystem transaction, while `internal/app` is responsible only for arguments,
+TTY selection, and text output. The public `RunCLI` signature does not change;
+stdin/TTY are available only to the internal `Main`.

@@ -5,7 +5,8 @@
 - Module: MOD-SITE
 - Status: Implemented
 - Route: `/_docu-docu/api-docs/`
-- Last updated: 2026-08-05
+- Preview: `../assets/screens/site-api-docs.png`
+- Last updated: 2026-08-06
 
 A serve-only catalog of the wire-level Editor and Changes API contracts. The
 user selects an OpenAPI source, expands operations, and may execute only safe

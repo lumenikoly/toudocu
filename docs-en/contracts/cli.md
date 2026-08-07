@@ -3,7 +3,7 @@
 - Identifier: CON-CLI-V1
 - Status: Completed
 - Owner: Docu-docu Team
-- Last updated: 2026-08-05
+- Last updated: 2026-08-06
 
 This document defines CLI commands, side effects, exit codes, and versioned JSON
 results. `docu-docu COMMAND --help` shows the exact flag syntax.
@@ -24,11 +24,40 @@ results. `docu-docu COMMAND --help` shows the exact flag syntax.
 | `task verify --dry-run` | Shows the task verification plan | No |
 | `task verify --run` | Runs commands explicitly recorded in the task | Yes, within the effects of the repository commands themselves |
 | `task archive`, `task restore` | Moves a completed task to the archive or back | Moves one file without overwriting |
+| `skill install`, `skill update`, `skill uninstall` | Manages the embedded offline skill package | Writes only to the selected project/user target |
+| `skill status` | Shows the target and skill package state | No |
 | `version` | Prints the version | No |
 
 A path without a command name does not start an implicit build. There are no
 top-level `init` and `refresh` commands: the similarly named `$docu-docu`
 workflows belong to the AI skill, not the Go CLI.
+
+## Skill lifecycle
+
+```text
+docu-docu skill install|status|update|uninstall
+  [--agent auto|codex|claude-code|copilot|all]
+  [--scope project|user]
+  [--repository-root DIR]
+```
+
+The defaults are `--agent auto` and `--scope project`. `--repository-root` is
+available only for project scope. `auto` selects the only detected host; when
+the choice is ambiguous, an interactive terminal prompts for it, while a
+non-TTY returns `SKILL_AGENT_REQUIRED`. `all` plans every unique absolute target
+before writing and then processes them independently.
+
+The CLI distinguishes `not-installed`, `installed`, `outdated`,
+`newer-than-bundle`, `modified`, `unmanaged`, `invalid-manifest`, and
+`unsafe-path`. `status` always remains read-only. Mutating operations do not
+replace unmanaged, modified, invalid, newer, or unsafe targets. JSON output,
+`--dry-run`, and `--force` are not supported.
+
+Success or an allowed no-op returns `0`; a conflict, one target failure, or a
+partial result returns `1`. Diagnostics use stable short codes including
+`SKILL_AGENT_REQUIRED`, `SKILL_LOCAL_CHANGES`, `SKILL_UNMANAGED`,
+`SKILL_MANIFEST_INVALID`, `SKILL_PATH_UNSAFE`, `SKILL_DOWNGRADE_BLOCKED`,
+`SKILL_TARGET_CHANGED`, and `SKILL_RESTORE_FAILED`.
 
 ## General rules
 
@@ -74,6 +103,7 @@ or `blocked`.
   and `4` for an internal error.
 - `serve`: an initial build or listener error ends the command with `1`; a later
   rebuild error does not stop the server.
+- `skill`: a conflict or partial failure returns `1`; status and no-op return `0`.
 
 ## Detailed rules
 
@@ -81,3 +111,4 @@ or `blocked`.
 - [Viewing changes](../guides/documentation-changes.md)
 - [Document types](../reference/document-types.md)
 - [Configuration](../reference/configuration.md)
+- [Installing the AI skill](../guides/skill-installation.md)

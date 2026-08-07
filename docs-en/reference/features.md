@@ -34,6 +34,7 @@ Docu-docu comes as a single Go binary with no external runtime dependencies.
 | Task changes | `docu-docu task changes TASK-ID ./docs` | task-scoped change report and impact diagnostics |
 | Archive a task | `docu-docu task archive TASK-ID ./docs` | move a terminal task to its yearly archive |
 | Restore a task | `docu-docu task restore TASK-ID ./docs` | return a task from its yearly archive |
+| AI-skill lifecycle | `docu-docu skill install|status|update|uninstall` | text state of the managed offline package |
 | Version | `docu-docu version` | generator version |
 
 The build requires an explicit `docu-docu build ./docs`; the path without a command is rejected.
@@ -41,6 +42,10 @@ There is no separate top-level command `init`: the minimal project is created by
 `docs/index.md` and `docs/architecture/overview.md`; `task init` creates only
 work item. Parameters and exit codes
 defined in [CLI contract](../contracts/cli.md).
+
+The skill lifecycle is not part of the public Go facade and does not use JSON
+output. Targets, states, and safe manual conflict resolution are described in
+the [skill installation guide](../guides/skill-installation.md).
 
 The `changes` commands support `--status`, `--module`, `--type`, and
 `--permanent-only` filters. The last keeps only permanent documentation and

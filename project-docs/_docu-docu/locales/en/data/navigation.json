@@ -180,6 +180,11 @@
     "url": "guides/screens.html"
   },
   {
+    "title": "Installing the Docu-docu AI skill",
+    "kind": "document",
+    "url": "guides/skill-installation.html"
+  },
+  {
     "title": "Checking Docu-docu changes",
     "kind": "document",
     "url": "guides/testing.html"
@@ -340,6 +345,12 @@
     "url": "use-cases/UC-TASK-01.html"
   },
   {
+    "id": "UC-AGENT-01",
+    "title": "UC-AGENT-01: Install the Docu-docu AI skill",
+    "kind": "use-case",
+    "url": "use-cases/UC-AGENT-01.html"
+  },
+  {
     "id": "UC-DOCS-05",
     "title": "UC-DOCS-05: View documentation changes",
     "kind": "use-case",
@@ -440,6 +451,18 @@
     "title": "TASK-SITE-003: Separate the Go Core from the Portal Frontend Layer",
     "kind": "task",
     "url": "work/TASK-SITE-003.html"
+  },
+  {
+    "id": "TASK-SITE-004",
+    "title": "TASK-SITE-004: Add a roadmap deliverable through serve",
+    "kind": "task",
+    "url": "work/TASK-SITE-004.html"
+  },
+  {
+    "id": "TASK-SKILL-001",
+    "title": "TASK-SKILL-001: Add embedded Docu-docu skill installation",
+    "kind": "task",
+    "url": "work/TASK-SKILL-001.html"
   },
   {
     "title": "Changelog",

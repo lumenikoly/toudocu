@@ -4,9 +4,9 @@
     "name": "Docu-docu",
     "version": "0.0.1"
   },
-  "generatedAt": "2026-08-06T20:34:17.864499495Z",
+  "generatedAt": "2026-08-07T12:01:10.138416957Z",
   "sourceDirectory": "docs-en",
-  "staleDays": 90,
+  "staleDays": 0,
   "project": {
     "title": "Docu-docu",
     "description": "Docu-docu is a dependency-free Go CLI with a public Go facade for verifiable project documentation in structured Markdown and a backend-independent HTML portal for ordinary HTTP(S) static hosting.",
@@ -33,21 +33,21 @@
       "effectiveCompleted": false,
       "completionSource": "roadmap-checkbox",
       "document": "roadmap.md",
-      "line": 30
+      "line": 32
     }
   },
   "stats": {
-    "documents": 80,
-    "totalTasks": 14,
-    "completedTasks": 13,
+    "documents": 84,
+    "totalTasks": 16,
+    "completedTasks": 15,
     "remainingTasks": 1,
-    "taskProgress": 93,
-    "documentsComplete": 14,
+    "taskProgress": 94,
+    "documentsComplete": 16,
     "documentsInProgress": 2,
     "documentsNotStarted": 0,
-    "documentsWithoutTasks": 64,
+    "documentsWithoutTasks": 66,
     "staleDocuments": 0,
-    "documentsWithoutDescription": 14,
+    "documentsWithoutDescription": 16,
     "documentsWithoutStatus": 0,
     "brokenLinks": 0,
     "warnings": 0,
@@ -56,9 +56,9 @@
     "moduleStatuses": {
       "done": 5
     },
-    "useCases": 9,
+    "useCases": 10,
     "useCaseStatuses": {
-      "done": 9
+      "done": 10
     },
     "screens": 7,
     "screensDone": 7,
@@ -100,7 +100,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-06T16:51:18.852141506Z",
+      "updatedAt": "2026-08-07T11:38:04.010232059Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -157,12 +157,12 @@
         "recognized": true
       },
       "taskStats": {
-        "total": 14,
-        "completed": 13,
+        "total": 16,
+        "completed": 15,
         "remaining": 1,
-        "percent": 93
+        "percent": 94
       },
-      "updatedAt": "2026-08-06T16:54:10.709348859Z",
+      "updatedAt": "2026-08-07T11:38:04.012047923Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -539,7 +539,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-06T16:53:23.519953255Z",
+      "updatedAt": "2026-08-07T11:36:58.328638949Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -593,6 +593,22 @@
           "href": "../modules/site.html"
         },
         {
+          "destination": "../modules/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/cli.md",
+          "href": "../modules/cli.html"
+        },
+        {
+          "destination": "../guides/skill-installation.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/skill-installation.md",
+          "href": "../guides/skill-installation.html"
+        },
+        {
           "destination": "../flows/FLOW-DOCS-CHECK.md",
           "broken": false,
           "blocked": false,
@@ -636,6 +652,7 @@
         "decisions/ADR-005.md",
         "modules/model.md",
         "modules/site.md",
+        "guides/skill-installation.md",
         "flows/FLOW-DOCS-CHECK.md",
         "flows/FLOW-DOCS-BUILD.md",
         "flows/FLOW-DOCS-SERVE.md",
@@ -649,7 +666,7 @@
       "type": "architecture",
       "sectionType": "architecture",
       "title": "Docu-docu System Boundary",
-      "description": "Docu-docu is limited to one local process that reads documentation and the repository, builds a validated model, and emits diagnostics or derived representations. Embedding Go code invokes the same model and operation facade without a separate process. In serve, the process accepts constrained editor/changes requests, serves an offline OpenAPI UI, and atomically saves the selected workspace file. The user, library consumer, agent, CI, and browser remain interacting parties outside this boundary. The release installer also remains outside: it is a separate bootstrap that uses the network only before the Go runtime starts.",
+      "description": "Docu-docu is limited to one local process that reads documentation and the repository, builds a validated model, and emits diagnostics or derived representations. Embedding Go code invokes the same model and operation facade without a separate process. In serve, the process accepts constrained editor/changes requests, serves an offline OpenAPI UI, and atomically saves the selected workspace file. The user, library consumer, agent, CI, and browser remain interacting parties outside this boundary. The release installer also remains outside: it is a separate bootstrap that uses the network only before the Go runtime starts. Inside the runtime, the skill command reads the embedded package and modifies the selected project/user target within strict limits; it neither downloads nor executes skill content.",
       "metadata": {
         "architectureQuestion": "Where is the Docu-docu system boundary and who interacts with it?",
         "documentType": "Architecture"
@@ -666,7 +683,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-06T16:53:23.520953262Z",
+      "updatedAt": "2026-08-07T11:36:58.329638958Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -710,6 +727,14 @@
           "targetKind": "document",
           "target": "guides/installation.md",
           "href": "../guides/installation.html"
+        },
+        {
+          "destination": "../guides/skill-installation.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/skill-installation.md",
+          "href": "../guides/skill-installation.html"
         }
       ],
       "backlinks": [
@@ -720,7 +745,8 @@
         "reference/features.md",
         "decisions/001-dependency-free.md",
         "decisions/ADR-002.md",
-        "guides/installation.md"
+        "guides/installation.md",
+        "guides/skill-installation.md"
       ]
     },
     {
@@ -747,7 +773,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-06T16:49:19.300364148Z",
+      "updatedAt": "2026-08-07T11:36:58.330638967Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -885,7 +911,7 @@
         "id": "CON-CLI-V1",
         "owner": "Docu-docu Team",
         "status": "Completed",
-        "updated": "2026-08-05"
+        "updated": "2026-08-06"
       },
       "status": {
         "kind": "done",
@@ -899,7 +925,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T00:00:00Z",
+      "updatedAt": "2026-08-06T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -935,6 +961,14 @@
           "targetKind": "document",
           "target": "reference/configuration.md",
           "href": "../reference/configuration.html"
+        },
+        {
+          "destination": "../guides/skill-installation.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/skill-installation.md",
+          "href": "../guides/skill-installation.html"
         }
       ],
       "backlinks": [
@@ -954,6 +988,7 @@
         "use-cases/serve-portal.md",
         "use-cases/task-verify.md",
         "use-cases/task-workflow.md",
+        "use-cases/UC-AGENT-01.md",
         "use-cases/UC-TASK-03.md",
         "use-cases/UC-TASK-04.md"
       ],
@@ -961,7 +996,8 @@
         "guides/work-items.md",
         "guides/documentation-changes.md",
         "reference/document-types.md",
-        "reference/configuration.md"
+        "reference/configuration.md",
+        "guides/skill-installation.md"
       ]
     },
     {
@@ -976,7 +1012,7 @@
         "id": "CON-EDITOR-HTTP-V1",
         "owner": "Docu-docu Team",
         "status": "Completed",
-        "updated": "2026-08-05"
+        "updated": "2026-08-06"
       },
       "status": {
         "kind": "done",
@@ -990,7 +1026,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T00:00:00Z",
+      "updatedAt": "2026-08-06T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1514,7 +1550,7 @@
       "metadata": {
         "id": "FLOW-DOCS-SERVE",
         "module": "MOD-SITE",
-        "updated": "2026-08-05",
+        "updated": "2026-08-06",
         "useCase": "UC-DOCS-03"
       },
       "status": {
@@ -1529,7 +1565,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T00:00:00Z",
+      "updatedAt": "2026-08-06T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1876,7 +1912,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-06T16:48:49.439170191Z",
+      "updatedAt": "2026-08-07T11:38:04.008232041Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -1965,7 +2001,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-06T16:49:00.753243669Z",
+      "updatedAt": "2026-08-07T11:38:04.008232041Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2108,6 +2144,41 @@
     },
     {
       "id": "",
+      "sourcePath": "guides/skill-installation.md",
+      "outputPath": "guides/skill-installation.html",
+      "type": "guide",
+      "sectionType": "guides",
+      "title": "Installing the Docu-docu AI skill",
+      "description": "This guide explains how to install the docu-docu skill embedded in the binary, inspect its state, and safely update or remove a managed copy. These operations use no network, marketplace, shell, or external package manager.",
+      "metadata": {},
+      "status": {
+        "kind": "neutral",
+        "symbol": "•",
+        "label": "Не указан",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-07T11:40:03.015481012Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [
+        "architecture/runtime-components.md",
+        "architecture/system-boundary.md",
+        "contracts/cli.md",
+        "reference/features.md",
+        "use-cases/UC-AGENT-01.md"
+      ],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
       "sourcePath": "guides/testing.md",
       "outputPath": "guides/testing.html",
       "type": "guide",
@@ -2200,7 +2271,7 @@
         "id": "MOD-CLI",
         "owner": "Docu-docu Team",
         "status": "Completed",
-        "updated": "2026-08-05"
+        "updated": "2026-08-06"
       },
       "status": {
         "kind": "done",
@@ -2214,7 +2285,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T00:00:00Z",
+      "updatedAt": "2026-08-06T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -2276,6 +2347,14 @@
           "href": "../use-cases/UC-DOCS-03.html"
         },
         {
+          "destination": "../use-cases/UC-AGENT-01.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "use-cases/UC-AGENT-01.md",
+          "href": "../use-cases/UC-AGENT-01.html"
+        },
+        {
           "destination": "../flows/FLOW-DOCS-CHECK.md",
           "broken": false,
           "blocked": false,
@@ -2309,6 +2388,7 @@
         "use-cases/serve-portal.md",
         "use-cases/task-verify.md",
         "use-cases/task-workflow.md",
+        "use-cases/UC-AGENT-01.md",
         "use-cases/UC-TASK-03.md",
         "use-cases/UC-TASK-04.md"
       ],
@@ -2320,6 +2400,7 @@
         "use-cases/UC-TASK-04.md",
         "use-cases/check-documentation.md",
         "use-cases/serve-portal.md",
+        "use-cases/UC-AGENT-01.md",
         "flows/FLOW-DOCS-CHECK.md",
         "flows/FLOW-DOCS-SERVE.md",
         "flows/FLOW-TASK-WORKFLOW.md"
@@ -2569,7 +2650,7 @@
         "id": "MOD-SITE",
         "owner": "Docu-docu Team",
         "status": "Completed",
-        "updated": "2026-08-05"
+        "updated": "2026-08-06"
       },
       "status": {
         "kind": "done",
@@ -2583,7 +2664,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T00:00:00Z",
+      "updatedAt": "2026-08-06T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -3201,7 +3282,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-06T16:54:51.690722868Z",
+      "updatedAt": "2026-08-07T11:38:36.835528256Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -3229,6 +3310,14 @@
           "targetKind": "document",
           "target": "contracts/cli.md",
           "href": "../contracts/cli.html"
+        },
+        {
+          "destination": "../guides/skill-installation.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/skill-installation.md",
+          "href": "../guides/skill-installation.html"
         },
         {
           "destination": "../guides/agent-workflows.md",
@@ -3304,6 +3393,7 @@
       "relatedDocuments": [
         "reference/api.md",
         "contracts/cli.md",
+        "guides/skill-installation.md",
         "guides/agent-workflows.md",
         "reference/document-types.md",
         "guides/quality-runbooks.md",
@@ -3323,10 +3413,11 @@
       "metadata": {
         "id": "SC-CHANGES-WORKSPACE",
         "module": "MOD-CHANGES",
+        "preview": "../assets/screens/changes-workspace.png",
         "route": "/changes/",
         "status": "Implemented",
         "type": "Screen",
-        "updated": "2026-08-05"
+        "updated": "2026-08-06"
       },
       "status": {
         "kind": "done",
@@ -3340,7 +3431,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T00:00:00Z",
+      "updatedAt": "2026-08-06T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -3359,10 +3450,11 @@
       "metadata": {
         "id": "SC-SITE-API-DOCS",
         "module": "MOD-SITE",
+        "preview": "../assets/screens/site-api-docs.png",
         "route": "/_docu-docu/api-docs/",
         "status": "Implemented",
         "type": "Screen",
-        "updated": "2026-08-05"
+        "updated": "2026-08-06"
       },
       "status": {
         "kind": "done",
@@ -3376,7 +3468,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T00:00:00Z",
+      "updatedAt": "2026-08-06T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -3393,10 +3485,11 @@
       "type": "screen",
       "sectionType": "screens",
       "title": "SC-SITE-DOCUMENT: Document Page",
-      "description": "The canonical portal representation of a selected Markdown document. The document and generated output determine the exact URL, so no shared route pattern is deliberately declared here. For risks.md, the page also presents a clear text summary of statuses, the open count, and mitigation progress; risk statuses and mitigation checklists are displayed separately.",
+      "description": "The canonical portal representation of a selected Markdown document. The document and generated output determine the exact URL, so no shared route pattern is deliberately declared here. For risks.md, the page also presents a clear text summary of statuses, the open count, and mitigation progress; risk statuses and mitigation checklists are displayed separately. For roadmap.md, canonical serve also adds an accessible dialog for creating one unfinished DLV-* in an existing stage. The dialog is a state of this page, not a separate screen or navigation transition; static and locale views do not contain it.",
       "metadata": {
         "id": "SC-SITE-DOCUMENT",
         "module": "MOD-SITE",
+        "preview": "../assets/screens/site-document.png",
         "status": "Implemented",
         "type": "Page",
         "updated": "2026-08-06"
@@ -3432,9 +3525,10 @@
       "metadata": {
         "id": "SC-SITE-EDITOR",
         "module": "MOD-SITE",
+        "preview": "../assets/screens/site-editor.png",
         "status": "Implemented",
         "type": "Screen",
-        "updated": "2026-08-05"
+        "updated": "2026-08-06"
       },
       "status": {
         "kind": "done",
@@ -3448,7 +3542,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T00:00:00Z",
+      "updatedAt": "2026-08-06T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -3467,10 +3561,11 @@
       "metadata": {
         "id": "SC-SITE-HOME",
         "module": "MOD-SITE",
+        "preview": "../assets/screens/site-home.png",
         "route": "/",
         "status": "Implemented",
         "type": "Page",
-        "updated": "2026-08-05"
+        "updated": "2026-08-06"
       },
       "status": {
         "kind": "done",
@@ -3484,7 +3579,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T00:00:00Z",
+      "updatedAt": "2026-08-06T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -3503,10 +3598,11 @@
       "metadata": {
         "id": "SC-SITE-SCREEN-MAP",
         "module": "MOD-SITE",
+        "preview": "../assets/screens/site-screen-map.png",
         "route": "/screens/index.html",
         "status": "Implemented",
         "type": "Page",
-        "updated": "2026-08-05"
+        "updated": "2026-08-06"
       },
       "status": {
         "kind": "done",
@@ -3520,7 +3616,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T00:00:00Z",
+      "updatedAt": "2026-08-06T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -3539,9 +3635,10 @@
       "metadata": {
         "id": "SC-SITE-USE-CASE",
         "module": "MOD-SITE",
+        "preview": "../assets/screens/site-use-case.png",
         "status": "Implemented",
         "type": "Page",
-        "updated": "2026-08-05"
+        "updated": "2026-08-06"
       },
       "status": {
         "kind": "done",
@@ -3555,7 +3652,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T00:00:00Z",
+      "updatedAt": "2026-08-06T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -3914,7 +4011,7 @@
         "startScreen": "SC-SITE-HOME",
         "status": "Completed",
         "terminalScreens": "SC-SITE-DOCUMENT, SC-SITE-API-DOCS",
-        "updated": "2026-08-05"
+        "updated": "2026-08-06"
       },
       "status": {
         "kind": "done",
@@ -3928,7 +4025,7 @@
         "remaining": 0,
         "percent": null
       },
-      "updatedAt": "2026-08-05T00:00:00Z",
+      "updatedAt": "2026-08-06T00:00:00Z",
       "stale": false,
       "warnings": 0,
       "errors": 0,
@@ -3956,6 +4053,14 @@
           "targetKind": "document",
           "target": "modules/site.md",
           "href": "../modules/site.html#br-site-010-soft-navigation-limited-to-canonical-serve-portal"
+        },
+        {
+          "destination": "../modules/site.md#br-site-014-roadmap-changes-use-only-a-constrained-operation",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/site.md",
+          "href": "../modules/site.html#br-site-014-roadmap-changes-use-only-a-constrained-operation"
         },
         {
           "destination": "../flows/FLOW-DOCS-SERVE.md",
@@ -4233,6 +4338,89 @@
         "modules/model.md",
         "contracts/cli.md",
         "guides/work-items.md"
+      ]
+    },
+    {
+      "id": "UC-AGENT-01",
+      "sourcePath": "use-cases/UC-AGENT-01.md",
+      "outputPath": "use-cases/UC-AGENT-01.html",
+      "type": "use-case",
+      "sectionType": "use-cases",
+      "title": "UC-AGENT-01: Install the Docu-docu AI skill",
+      "description": "The user installs the embedded offline docu-docu skill package in project or user scope for a supported AI host and can safely inspect, update, or remove the managed copy.",
+      "metadata": {
+        "actor": "Docu-docu user",
+        "id": "UC-AGENT-01",
+        "module": "MOD-CLI",
+        "priority": "High",
+        "status": "Completed",
+        "updated": "2026-08-06"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Completed",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 0,
+        "completed": 0,
+        "remaining": 0,
+        "percent": null
+      },
+      "updatedAt": "2026-08-06T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [
+        {
+          "destination": "../modules/cli.md#br-cli-008-a-managed-skill-does-not-overwrite-user-changes",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/cli.md",
+          "href": "../modules/cli.html#br-cli-008-a-managed-skill-does-not-overwrite-user-changes"
+        },
+        {
+          "destination": "../modules/cli.md#br-cli-009-the-skill-lifecycle-works-offline",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/cli.md",
+          "href": "../modules/cli.html#br-cli-009-the-skill-lifecycle-works-offline"
+        },
+        {
+          "destination": "../modules/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "modules/cli.md",
+          "href": "../modules/cli.html"
+        },
+        {
+          "destination": "../guides/skill-installation.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "guides/skill-installation.md",
+          "href": "../guides/skill-installation.html"
+        },
+        {
+          "destination": "../contracts/cli.md",
+          "broken": false,
+          "blocked": false,
+          "targetKind": "document",
+          "target": "contracts/cli.md",
+          "href": "../contracts/cli.html"
+        }
+      ],
+      "backlinks": [
+        "modules/cli.md"
+      ],
+      "relatedDocuments": [
+        "modules/cli.md",
+        "guides/skill-installation.md",
+        "contracts/cli.md"
       ]
     },
     {
@@ -5061,6 +5249,84 @@
       "links": [],
       "backlinks": [],
       "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "work/TASK-SITE-004.md",
+      "outputPath": "work/TASK-SITE-004.html",
+      "type": "work",
+      "sectionType": "work",
+      "title": "TASK-SITE-004: Add a roadmap deliverable through serve",
+      "description": "",
+      "metadata": {
+        "flow": "FLOW-DOCS-SERVE",
+        "module": "MOD-SITE",
+        "owner": "Docu-docu Team",
+        "priority": "Medium",
+        "screens": "SC-SITE-DOCUMENT",
+        "standards": "STD-GO-001, STD-DOCS-001",
+        "status": "Done",
+        "type": "Feature",
+        "updated": "2026-08-06",
+        "useCase": "UC-DOCS-03"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Done",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 11,
+        "completed": 11,
+        "remaining": 0,
+        "percent": 100
+      },
+      "updatedAt": "2026-08-06T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
+    },
+    {
+      "id": "",
+      "sourcePath": "work/TASK-SKILL-001.md",
+      "outputPath": "work/TASK-SKILL-001.html",
+      "type": "work",
+      "sectionType": "work",
+      "title": "TASK-SKILL-001: Add embedded Docu-docu skill installation",
+      "description": "",
+      "metadata": {
+        "module": "MOD-CLI",
+        "owner": "Docu-docu Team",
+        "priority": "High",
+        "standards": "STD-GO-001, STD-DOCS-001",
+        "status": "Done",
+        "type": "Feature",
+        "updated": "2026-08-06",
+        "useCase": "UC-AGENT-01"
+      },
+      "status": {
+        "kind": "done",
+        "symbol": "✓",
+        "label": "Done",
+        "recognized": true
+      },
+      "taskStats": {
+        "total": 12,
+        "completed": 12,
+        "remaining": 0,
+        "percent": 100
+      },
+      "updatedAt": "2026-08-06T00:00:00Z",
+      "stale": false,
+      "warnings": 0,
+      "errors": 0,
+      "links": [],
+      "backlinks": [],
+      "relatedDocuments": []
     }
   ],
   "roadmap": [
@@ -5294,12 +5560,39 @@
       },
       "plannedDate": "",
       "taskStats": {
-        "total": 1,
-        "completed": 0,
+        "total": 3,
+        "completed": 2,
         "remaining": 1,
-        "percent": 0
+        "percent": 67
       },
       "items": [
+        {
+          "id": "UC-AGENT-01",
+          "text": "UC-AGENT-01 The user installs and maintains the embedded AI skill.",
+          "kind": "use-case",
+          "declaredCompleted": true,
+          "effectiveCompleted": true,
+          "completionSource": "use-case-status",
+          "targetDocument": "use-cases/UC-AGENT-01.md",
+          "targetStatus": {
+            "kind": "done",
+            "symbol": "✓",
+            "label": "Completed",
+            "recognized": true
+          },
+          "document": "roadmap.md",
+          "line": 30
+        },
+        {
+          "id": "DLV-ROADMAP-001",
+          "text": "DLV-ROADMAP-001 The user adds a new deliverable to an existing roadmap stage through canonical serve.",
+          "kind": "deliverable",
+          "declaredCompleted": true,
+          "effectiveCompleted": true,
+          "completionSource": "roadmap-checkbox",
+          "document": "roadmap.md",
+          "line": 31
+        },
         {
           "id": "DLV-RELEASE-02",
           "text": "DLV-RELEASE-02 The next stable release is prepared and published.",
@@ -5308,7 +5601,7 @@
           "effectiveCompleted": false,
           "completionSource": "roadmap-checkbox",
           "document": "roadmap.md",
-          "line": 30
+          "line": 32
         }
       ],
       "document": "roadmap.md",
@@ -5394,6 +5687,7 @@
         "document": "modules/cli.md",
         "repositoryPaths": [],
         "useCaseIds": [
+          "UC-AGENT-01",
           "UC-TASK-01",
           "UC-TASK-02",
           "UC-TASK-03",
@@ -5407,7 +5701,10 @@
           "BR-CLI-004",
           "BR-CLI-005",
           "BR-CLI-006",
-          "BR-CLI-007"
+          "BR-CLI-007",
+          "BR-CLI-008",
+          "BR-CLI-009",
+          "BR-CLI-010"
         ]
       },
       {
@@ -5514,7 +5811,8 @@
           "BR-SITE-010",
           "BR-SITE-011",
           "BR-SITE-012",
-          "BR-SITE-013"
+          "BR-SITE-013",
+          "BR-SITE-014"
         ]
       }
     ],
@@ -5612,7 +5910,8 @@
         "businessRuleIds": [
           "BR-SITE-003",
           "BR-SITE-007",
-          "BR-SITE-010"
+          "BR-SITE-010",
+          "BR-SITE-014"
         ],
         "flowIds": [
           "FLOW-DOCS-SERVE"
@@ -5672,6 +5971,27 @@
         "flowIds": [
           "FLOW-TASK-WORKFLOW"
         ],
+        "screenIds": [],
+        "terminalScreens": [],
+        "allowCycle": false
+      },
+      {
+        "id": "UC-AGENT-01",
+        "title": "UC-AGENT-01: Install the Docu-docu AI skill",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Completed",
+          "recognized": true
+        },
+        "moduleId": "MOD-CLI",
+        "document": "use-cases/UC-AGENT-01.md",
+        "repositoryPaths": [],
+        "businessRuleIds": [
+          "BR-CLI-008",
+          "BR-CLI-009"
+        ],
+        "flowIds": [],
         "screenIds": [],
         "terminalScreens": [],
         "allowCycle": false
@@ -5837,7 +6157,7 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-001-task-context-does-not-execute-commands",
-        "line": 34
+        "line": 39
       },
       {
         "id": "BR-CLI-002",
@@ -5845,7 +6165,7 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-002-checks-are-only-run-explicitly",
-        "line": 39
+        "line": 44
       },
       {
         "id": "BR-CLI-003",
@@ -5853,7 +6173,7 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-003-timeout-terminates-process-tree",
-        "line": 44
+        "line": 49
       },
       {
         "id": "BR-CLI-004",
@@ -5861,7 +6181,7 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-004-docu-docu-does-not-interpret-user-request",
-        "line": 49
+        "line": 54
       },
       {
         "id": "BR-CLI-005",
@@ -5869,7 +6189,7 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-005-browser-and-cli-use-the-same-scaffold-registry",
-        "line": 55
+        "line": 60
       },
       {
         "id": "BR-CLI-006",
@@ -5877,7 +6197,7 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-006-a-translation-root-is-not-a-work-context",
-        "line": 61
+        "line": 66
       },
       {
         "id": "BR-CLI-007",
@@ -5885,7 +6205,31 @@
         "moduleId": "MOD-CLI",
         "document": "modules/cli.md",
         "anchor": "br-cli-007-archiving-does-not-change-the-task-contract",
-        "line": 70
+        "line": 75
+      },
+      {
+        "id": "BR-CLI-008",
+        "title": "A managed skill does not overwrite user changes",
+        "moduleId": "MOD-CLI",
+        "document": "modules/cli.md",
+        "anchor": "br-cli-008-a-managed-skill-does-not-overwrite-user-changes",
+        "line": 81
+      },
+      {
+        "id": "BR-CLI-009",
+        "title": "The skill lifecycle works offline",
+        "moduleId": "MOD-CLI",
+        "document": "modules/cli.md",
+        "anchor": "br-cli-009-the-skill-lifecycle-works-offline",
+        "line": 88
+      },
+      {
+        "id": "BR-CLI-010",
+        "title": "Multi-target operations are planned before writing",
+        "moduleId": "MOD-CLI",
+        "document": "modules/cli.md",
+        "anchor": "br-cli-010-multi-target-operations-are-planned-before-writing",
+        "line": 94
       },
       {
         "id": "BR-MD-001",
@@ -6094,6 +6438,14 @@
         "document": "modules/site.md",
         "anchor": "br-site-013-go-explicitly-defines-frontend-capabilities",
         "line": 159
+      },
+      {
+        "id": "BR-SITE-014",
+        "title": "Roadmap changes use only a constrained operation",
+        "moduleId": "MOD-SITE",
+        "document": "modules/site.md",
+        "anchor": "br-site-014-roadmap-changes-use-only-a-constrained-operation",
+        "line": 168
       }
     ],
     "workItems": [
@@ -9963,6 +10315,454 @@
         "documentationPaths": [
           "CHANGELOG.md"
         ]
+      },
+      {
+        "id": "TASK-SITE-004",
+        "title": "Add a roadmap deliverable through serve",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Done",
+          "recognized": true
+        },
+        "type": "Feature",
+        "archived": false,
+        "priority": "Medium",
+        "updated": "2026-08-06",
+        "owner": "Docu-docu Team",
+        "moduleId": "MOD-SITE",
+        "useCaseId": "UC-DOCS-03",
+        "flowId": "FLOW-DOCS-SERVE",
+        "screenIds": [
+          "SC-SITE-DOCUMENT"
+        ],
+        "transitionIds": [],
+        "standardIds": [
+          "STD-GO-001",
+          "STD-DOCS-001"
+        ],
+        "runbookIds": [],
+        "dependsOn": [],
+        "document": "work/TASK-SITE-004.md",
+        "anchor": "task-site-004-add-a-roadmap-deliverable-through-serve",
+        "criteria": [
+          {
+            "line": 51,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-01 GET returns revision, path, digest, the suggested next DLV-ROADMAP-NNN, and existing stages with anchor, title, status, and item count; a missing roadmap has a stable error.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
+          },
+          {
+            "line": 54,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-02 POST accepts only same-origin JSON with action roadmap-add, normalizes a valid unique DLV-*, and rejects unknown fields, empty or multiline text, a second roadmap ID, duplicate, missing stage, and stale digest with stable errors.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
+          },
+          {
+            "line": 57,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-03 A successful write preserves line endings and surrounding Markdown, inserts the deliverable after the final checklist item or before the next H2 of an empty stage, uses atomic replace, and rebuilds synchronously.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
+          },
+          {
+            "line": 60,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-04 The dialog supports keyboard/Escape/focus, server-provided stages, an editable suggested ID, loading/error/success states, and mobile width; on conflict it preserves the form and refreshes stages, digest, and suggestion.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
+          },
+          {
+            "line": 63,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-05 Static builds and locale portals contain no button, endpoint, or serve-only code; the generic Editor and public schemas remain intact.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
+          },
+          {
+            "line": 65,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-06 Editor OpenAPI, behavioral contract, local serve guide, FLOW-DOCS-SERVE, MOD-SITE, UC-DOCS-03, SC-SITE-DOCUMENT, and the roadmap agree and pass semantic review and ordinary/strict structural checks.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
+          }
+        ],
+        "verificationMatrix": [
+          {
+            "criterionId": "AC-01",
+            "criterion": "GET returns revision, path, digest, the suggested next DLV-ROADMAP-NNN, and existing stages with anchor, title, status, and item count; a missing roadmap has a stable error.",
+            "completed": true,
+            "commands": [
+              "go test ./internal/app -run TestEditorRoadmap"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-02",
+            "criterion": "POST accepts only same-origin JSON with action roadmap-add, normalizes a valid unique DLV-*, and rejects unknown fields, empty or multiline text, a second roadmap ID, duplicate, missing stage, and stale digest with stable errors.",
+            "completed": true,
+            "commands": [
+              "go test ./internal/app -run TestEditorRoadmap"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-03",
+            "criterion": "A successful write preserves line endings and surrounding Markdown, inserts the deliverable after the final checklist item or before the next H2 of an empty stage, uses atomic replace, and rebuilds synchronously.",
+            "completed": true,
+            "commands": [
+              "go test ./internal/app -run TestEditorRoadmap"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-04",
+            "criterion": "The dialog supports keyboard/Escape/focus, server-provided stages, an editable suggested ID, loading/error/success states, and mobile width; on conflict it preserves the form and refreshes stages, digest, and suggestion.",
+            "completed": true,
+            "commands": [
+              "npm --prefix web run typecheck \u0026\u0026 npm --prefix web run test:browser"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-05",
+            "criterion": "Static builds and locale portals contain no button, endpoint, or serve-only code; the generic Editor and public schemas remain intact.",
+            "completed": true,
+            "commands": [
+              "go test ./internal/app -run 'TestRoadmapAddControlIsServeOnly|TestDocumentationServerLocalePortalsAreReadOnlyAndMatched' \u0026\u0026 npm --prefix web test"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-06",
+            "criterion": "Editor OpenAPI, behavioral contract, local serve guide, FLOW-DOCS-SERVE, MOD-SITE, UC-DOCS-03, SC-SITE-DOCUMENT, and the roadmap agree and pass semantic review and ordinary/strict structural checks.",
+            "completed": true,
+            "commands": [
+              "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          }
+        ],
+        "checks": [
+          {
+            "target": "AC-01",
+            "commands": [
+              "go test ./internal/app -run TestEditorRoadmap"
+            ],
+            "line": 78
+          },
+          {
+            "target": "AC-02",
+            "commands": [
+              "go test ./internal/app -run TestEditorRoadmap"
+            ],
+            "line": 79
+          },
+          {
+            "target": "AC-03",
+            "commands": [
+              "go test ./internal/app -run TestEditorRoadmap"
+            ],
+            "line": 80
+          },
+          {
+            "target": "AC-04",
+            "commands": [
+              "npm --prefix web run typecheck \u0026\u0026 npm --prefix web run test:browser"
+            ],
+            "line": 81
+          },
+          {
+            "target": "AC-05",
+            "commands": [
+              "go test ./internal/app -run 'TestRoadmapAddControlIsServeOnly|TestDocumentationServerLocalePortalsAreReadOnlyAndMatched' \u0026\u0026 npm --prefix web test"
+            ],
+            "line": 82
+          },
+          {
+            "target": "AC-06",
+            "commands": [
+              "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
+            ],
+            "line": 83
+          },
+          {
+            "target": "ALL",
+            "commands": [
+              "make check \u0026\u0026 make browser-test"
+            ],
+            "line": 84
+          },
+          {
+            "target": "DOCS",
+            "commands": [
+              "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
+            ],
+            "line": 85
+          },
+          {
+            "target": "QUALITY",
+            "commands": [
+              "make check"
+            ],
+            "line": 86
+          }
+        ],
+        "repositoryPaths": [
+          "docs/contracts/",
+          "docs/flows/",
+          "docs/guides/",
+          "docs/modules/",
+          "docs/roadmap.md",
+          "docs/screens/",
+          "docs/use-cases/",
+          "internal/app/",
+          "internal/site/assets/generated/",
+          "web/src/",
+          "web/tests/"
+        ],
+        "result": "On the roadmap.md page in canonical docu-docu serve, the user adds a new unfinished DLV-* to an existing stage through an accessible dialog without editing Markdown manually. Static builds and translation portals remain read-only.",
+        "behaviorChange": "Before The roadmap displays computed progress, but a new deliverable can be added only through the general editor or an external Markdown change. After A serve-only action obtains current stages, digest, and the suggested DLV-ROADMAP-NNN, validates a one-line deliverable on the server, atomically inserts the checklist item in the selected H2 stage, and synchronously rebuilds the portal. A CAS conflict does not overwrite the file and preserves entered form values.",
+        "before": "The roadmap displays computed progress, but a new deliverable can be added only through the general editor or an external Markdown change.",
+        "after": "A serve-only action obtains current stages, digest, and the suggested DLV-ROADMAP-NNN, validates a one-line deliverable on the server, atomically inserts the checklist item in the selected H2 stage, and synchronously rebuilds the portal. A CAS conflict does not overwrite the file and preserves entered form values.",
+        "outOfScope": "creating stages, UC-*, or CON-*, and automatically creating TASK-*; editing, completing, or deleting existing roadmap items; changing ProjectReport, bootstrap schema, or the public Go API; write capabilities in static builds, translation portals, or direct translation serve.",
+        "plan": "Add roadmap server state, validation, guarded POST, and atomic CAS insertion. Add the serve-only dialog and reinitialize it after soft navigation. Cover backend, frontend, and browser behavior, including conflict and mobile. Update canonical documentation sources and complete semantic gates. Run full repository verification and complete the roadmap item.",
+        "documentationImpact": "Editor OpenAPI and its behavioral contract, FLOW-DOCS-SERVE, the local-workflow guide, MOD-SITE, UC-DOCS-03, SC-SITE-DOCUMENT, and the roadmap are updated. No new screen or transition is created: the dialog is a state of the roadmap page.",
+        "documentationPaths": []
+      },
+      {
+        "id": "TASK-SKILL-001",
+        "title": "Add embedded Docu-docu skill installation",
+        "status": {
+          "kind": "done",
+          "symbol": "✓",
+          "label": "Done",
+          "recognized": true
+        },
+        "type": "Feature",
+        "archived": false,
+        "priority": "High",
+        "updated": "2026-08-06",
+        "owner": "Docu-docu Team",
+        "moduleId": "MOD-CLI",
+        "useCaseId": "UC-AGENT-01",
+        "screenIds": [],
+        "transitionIds": [],
+        "standardIds": [
+          "STD-GO-001",
+          "STD-DOCS-001"
+        ],
+        "runbookIds": [],
+        "dependsOn": [],
+        "document": "work/TASK-SKILL-001.md",
+        "anchor": "task-skill-001-add-embedded-docu-docu-skill-installation",
+        "criteria": [
+          {
+            "line": 48,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-01 The binary embeds the full current skills/docu-docu package as skill docu-docu version 0.0.1, validating metadata, paths, collisions, and 2 MiB/10 MiB limits.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
+          },
+          {
+            "line": 51,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-02 Registry, detection, target resolution, semver, manifest, checksums, and planner cover all eight public states.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
+          },
+          {
+            "line": 53,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-03 Project/user install, no-op, update, status, uninstall, interactive choice, non-TTY ambiguity, and --agent all have behavioral tests for text output and exit codes.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
+          },
+          {
+            "line": 56,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-04 Unmanaged/modified/newer/unsafe targets, traversal, symlinks, hostile manifests, target swaps, and publish/restore failures cannot overwrite user data or launch a shell/network operation.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
+          },
+          {
+            "line": 59,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-05 README, CLI contract, MOD-CLI, system/runtime/trust boundaries, and the guide describe the implemented lifecycle without duplicating sources.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
+          },
+          {
+            "line": 61,
+            "indent": 0,
+            "completed": true,
+            "text": "AC-06 gofmt, vet, ordinary/race tests, module verification, strict canonical docs check, and five CGO-disabled cross-build targets pass.",
+            "headingId": "acceptance-criteria",
+            "headingTitle": "Acceptance criteria"
+          }
+        ],
+        "verificationMatrix": [
+          {
+            "criterionId": "AC-01",
+            "criterion": "The binary embeds the full current skills/docu-docu package as skill docu-docu version 0.0.1, validating metadata, paths, collisions, and 2 MiB/10 MiB limits.",
+            "completed": true,
+            "commands": [
+              "go test ./skills"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-02",
+            "criterion": "Registry, detection, target resolution, semver, manifest, checksums, and planner cover all eight public states.",
+            "completed": true,
+            "commands": [
+              "go test ./internal/skillinstall"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-03",
+            "criterion": "Project/user install, no-op, update, status, uninstall, interactive choice, non-TTY ambiguity, and --agent all have behavioral tests for text output and exit codes.",
+            "completed": true,
+            "commands": [
+              "go test ./internal/app -run TestSkillCLI"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-04",
+            "criterion": "Unmanaged/modified/newer/unsafe targets, traversal, symlinks, hostile manifests, target swaps, and publish/restore failures cannot overwrite user data or launch a shell/network operation.",
+            "completed": true,
+            "commands": [
+              "go test ./internal/skillinstall -run 'Test(Unsafe|Boundary|Modified|Symlink|Mode|Publish|Atomic|InstallDoesNotExecute|StageRejectsTraversal)'"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-05",
+            "criterion": "README, CLI contract, MOD-CLI, system/runtime/trust boundaries, and the guide describe the implemented lifecycle without duplicating sources.",
+            "completed": true,
+            "commands": [
+              "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          },
+          {
+            "criterionId": "AC-06",
+            "criterion": "gofmt, vet, ordinary/race tests, module verification, strict canonical docs check, and five CGO-disabled cross-build targets pass.",
+            "completed": true,
+            "commands": [
+              "make check \u0026\u0026 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ./cmd/docu-docu \u0026\u0026 CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ./cmd/docu-docu \u0026\u0026 CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build ./cmd/docu-docu \u0026\u0026 CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build ./cmd/docu-docu \u0026\u0026 CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./cmd/docu-docu \u0026\u0026 CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go test -c -o /tmp/docu-docu-skillinstall-darwin.test ./internal/skillinstall \u0026\u0026 CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go test -c -o /tmp/docu-docu-skillinstall-windows.test.exe ./internal/skillinstall"
+            ],
+            "transitions": [],
+            "verificationReferences": []
+          }
+        ],
+        "checks": [
+          {
+            "target": "AC-01",
+            "commands": [
+              "go test ./skills"
+            ],
+            "line": 74
+          },
+          {
+            "target": "AC-02",
+            "commands": [
+              "go test ./internal/skillinstall"
+            ],
+            "line": 75
+          },
+          {
+            "target": "AC-03",
+            "commands": [
+              "go test ./internal/app -run TestSkillCLI"
+            ],
+            "line": 76
+          },
+          {
+            "target": "AC-04",
+            "commands": [
+              "go test ./internal/skillinstall -run 'Test(Unsafe|Boundary|Modified|Symlink|Mode|Publish|Atomic|InstallDoesNotExecute|StageRejectsTraversal)'"
+            ],
+            "line": 77
+          },
+          {
+            "target": "AC-05",
+            "commands": [
+              "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
+            ],
+            "line": 78
+          },
+          {
+            "target": "AC-06",
+            "commands": [
+              "make check \u0026\u0026 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ./cmd/docu-docu \u0026\u0026 CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ./cmd/docu-docu \u0026\u0026 CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build ./cmd/docu-docu \u0026\u0026 CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build ./cmd/docu-docu \u0026\u0026 CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./cmd/docu-docu \u0026\u0026 CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go test -c -o /tmp/docu-docu-skillinstall-darwin.test ./internal/skillinstall \u0026\u0026 CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go test -c -o /tmp/docu-docu-skillinstall-windows.test.exe ./internal/skillinstall"
+            ],
+            "line": 79
+          },
+          {
+            "target": "ALL",
+            "commands": [
+              "go test ./..."
+            ],
+            "line": 80
+          },
+          {
+            "target": "DOCS",
+            "commands": [
+              "go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0"
+            ],
+            "line": 81
+          },
+          {
+            "target": "QUALITY",
+            "commands": [
+              "make check"
+            ],
+            "line": 82
+          }
+        ],
+        "repositoryPaths": [
+          "docs/",
+          "internal/app/",
+          "internal/skillinstall/",
+          "project-docs/",
+          "README.md",
+          "skills/"
+        ],
+        "result": "The version 0.0.1 binary contains the canonical docu-docu skill and provides a safe offline lifecycle for Codex, Claude Code, and Copilot in project/user scope.",
+        "behaviorChange": "Before The CLI is installed separately, and users manually place the skill in the chosen AI host directory without verifiable ownership or an update lifecycle. After The docu-docu skill install|status|update|uninstall commands resolve the target, classify the existing copy using the manifest/checksums, and change only an unchanged managed package through atomic publication and rollback.",
+        "before": "The CLI is installed separately, and users manually place the skill in the chosen AI host directory without verifiable ownership or an update lifecycle.",
+        "after": "The docu-docu skill install|status|update|uninstall commands resolve the target, classify the existing copy using the manifest/checksums, and change only an unchanged managed package through atomic publication and rollback.",
+        "outOfScope": "--force, --dry-run, JSON output, or a new public Go API; marketplace support or downloading the skill from the network; changing translation root docs-en; executing scripts from the embedded bundle.",
+        "plan": "Embed and validate the canonical skill package. Implement the registry, planner, manifest, and safe executor. Connect the commands to the CLI without expanding the public facade. Add unit, lifecycle, CLI, and security tests. Update canonical documentation sources. Complete semantic review and the full verification cycle.",
+        "documentationImpact": "The UC and guide are added; README, roadmap, CLI contract, MOD-CLI, feature reference, and existing architecture answers are updated. After semantic and structural gates, only the canonical part of the tracked portal is rebuilt.",
+        "documentationPaths": []
       }
     ]
   },
@@ -9975,10 +10775,12 @@
       "type": "screen",
       "status": "implemented",
       "route": "/changes/",
-      "updated": "2026-08-05",
+      "preview": "assets/screens/changes-workspace.png",
+      "updated": "2026-08-06",
       "states": [
         {
-          "id": "DEFAULT"
+          "id": "DEFAULT",
+          "preview": "assets/screens/changes-workspace.png"
         }
       ],
       "incomingTransitions": [
@@ -10002,10 +10804,12 @@
       "type": "screen",
       "status": "implemented",
       "route": "/_docu-docu/api-docs/",
-      "updated": "2026-08-05",
+      "preview": "assets/screens/site-api-docs.png",
+      "updated": "2026-08-06",
       "states": [
         {
-          "id": "DEFAULT"
+          "id": "DEFAULT",
+          "preview": "assets/screens/site-api-docs.png"
         }
       ],
       "incomingTransitions": [
@@ -10024,14 +10828,16 @@
     {
       "id": "SC-SITE-DOCUMENT",
       "title": "Document Page",
-      "description": "The canonical portal representation of a selected Markdown document. The document and generated output determine the exact URL, so no shared route pattern is deliberately declared here. For risks.md, the page also presents a clear text summary of statuses, the open count, and mitigation progress; risk statuses and mitigation checklists are displayed separately.",
+      "description": "The canonical portal representation of a selected Markdown document. The document and generated output determine the exact URL, so no shared route pattern is deliberately declared here. For risks.md, the page also presents a clear text summary of statuses, the open count, and mitigation progress; risk statuses and mitigation checklists are displayed separately. For roadmap.md, canonical serve also adds an accessible dialog for creating one unfinished DLV-* in an existing stage. The dialog is a state of this page, not a separate screen or navigation transition; static and locale views do not contain it.",
       "module": "MOD-SITE",
       "type": "page",
       "status": "implemented",
+      "preview": "assets/screens/site-document.png",
       "updated": "2026-08-06",
       "states": [
         {
-          "id": "DEFAULT"
+          "id": "DEFAULT",
+          "preview": "assets/screens/site-document.png"
         }
       ],
       "incomingTransitions": [
@@ -10042,7 +10848,8 @@
         "UC-DOCS-03"
       ],
       "workItems": [
-        "TASK-SITE-003"
+        "TASK-SITE-003",
+        "TASK-SITE-004"
       ],
       "contracts": [],
       "document": "screens/SC-SITE-DOCUMENT.md"
@@ -10054,10 +10861,12 @@
       "module": "MOD-SITE",
       "type": "screen",
       "status": "implemented",
-      "updated": "2026-08-05",
+      "preview": "assets/screens/site-editor.png",
+      "updated": "2026-08-06",
       "states": [
         {
-          "id": "DEFAULT"
+          "id": "DEFAULT",
+          "preview": "assets/screens/site-editor.png"
         }
       ],
       "incomingTransitions": [
@@ -10083,10 +10892,12 @@
       "type": "page",
       "status": "implemented",
       "route": "/",
-      "updated": "2026-08-05",
+      "preview": "assets/screens/site-home.png",
+      "updated": "2026-08-06",
       "states": [
         {
-          "id": "DEFAULT"
+          "id": "DEFAULT",
+          "preview": "assets/screens/site-home.png"
         }
       ],
       "incomingTransitions": [
@@ -10117,10 +10928,12 @@
       "type": "page",
       "status": "implemented",
       "route": "/screens/index.html",
-      "updated": "2026-08-05",
+      "preview": "assets/screens/site-screen-map.png",
+      "updated": "2026-08-06",
       "states": [
         {
-          "id": "DEFAULT"
+          "id": "DEFAULT",
+          "preview": "assets/screens/site-screen-map.png"
         }
       ],
       "incomingTransitions": [
@@ -10143,10 +10956,12 @@
       "module": "MOD-SITE",
       "type": "page",
       "status": "implemented",
-      "updated": "2026-08-05",
+      "preview": "assets/screens/site-use-case.png",
+      "updated": "2026-08-06",
       "states": [
         {
-          "id": "DEFAULT"
+          "id": "DEFAULT",
+          "preview": "assets/screens/site-use-case.png"
         }
       ],
       "incomingTransitions": [],
@@ -10173,7 +10988,7 @@
       "condition": "Always",
       "type": "return",
       "document": "screens/SC-SITE-EDITOR.md",
-      "line": 30
+      "line": 31
     },
     {
       "id": "TR-SITE-001",
@@ -10184,7 +10999,7 @@
       "condition": "A document is selected",
       "type": "navigation",
       "document": "screens/SC-SITE-HOME.md",
-      "line": 17
+      "line": 18
     },
     {
       "id": "TR-SITE-002",
@@ -10195,7 +11010,7 @@
       "condition": "The portal is running through serve",
       "type": "navigation",
       "document": "screens/SC-SITE-HOME.md",
-      "line": 18
+      "line": 19
     },
     {
       "id": "TR-SITE-005",
@@ -10206,7 +11021,7 @@
       "condition": "The portal is running through serve",
       "type": "navigation",
       "document": "screens/SC-SITE-HOME.md",
-      "line": 19
+      "line": 20
     },
     {
       "id": "TR-SITE-006",
@@ -10217,7 +11032,7 @@
       "condition": "The canonical portal is running through serve",
       "type": "navigation",
       "document": "screens/SC-SITE-HOME.md",
-      "line": 20
+      "line": 21
     },
     {
       "id": "TR-SITE-004",
@@ -10228,7 +11043,7 @@
       "condition": "Always",
       "type": "navigation",
       "document": "screens/SC-SITE-USE-CASE.md",
-      "line": 17
+      "line": 18
     }
   ],
   "playableFlows": [

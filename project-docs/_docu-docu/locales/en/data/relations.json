@@ -2,6 +2,7 @@
   {
     "id": "MOD-CLI",
     "useCases": [
+      "UC-AGENT-01",
       "UC-TASK-01",
       "UC-TASK-02",
       "UC-TASK-03",
@@ -15,7 +16,10 @@
       "BR-CLI-004",
       "BR-CLI-005",
       "BR-CLI-006",
-      "BR-CLI-007"
+      "BR-CLI-007",
+      "BR-CLI-008",
+      "BR-CLI-009",
+      "BR-CLI-010"
     ]
   },
   {
@@ -86,7 +90,8 @@
       "BR-SITE-010",
       "BR-SITE-011",
       "BR-SITE-012",
-      "BR-SITE-013"
+      "BR-SITE-013",
+      "BR-SITE-014"
     ]
   }
 ]

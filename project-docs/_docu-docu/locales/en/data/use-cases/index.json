@@ -77,6 +77,15 @@
     "terminalScreens": []
   },
   {
+    "id": "UC-AGENT-01",
+    "title": "UC-AGENT-01: Install the Docu-docu AI skill",
+    "status": "done",
+    "module": "MOD-CLI",
+    "flows": [],
+    "screens": [],
+    "terminalScreens": []
+  },
+  {
     "id": "UC-DOCS-05",
     "title": "UC-DOCS-05: View documentation changes",
     "status": "done",

@@ -4,9 +4,9 @@
     "name": "Docu-docu",
     "version": "0.0.1"
   },
-  "generatedAt": "2026-08-06T20:34:17.512036309Z",
+  "generatedAt": "2026-08-07T12:01:09.820579055Z",
   "sourceDirectory": "docs",
-  "staleDays": 90,
+  "staleDays": 0,
   "project": {
     "title": "Docu-docu",
     "description": "Docu-docu — dependency-free CLI на Go с публичным Go-фасадом для проверяемой проектной документации в структурированном Markdown и backend-independent HTML-портала для обычного HTTP(S) static hosting.",

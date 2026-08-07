@@ -3,7 +3,7 @@
 - Identifier: MOD-SITE
 - Status: Completed
 - Owner: Docu-docu Team
-- Last updated: 2026-08-05
+- Last updated: 2026-08-06
 
 The module produces backend-independent HTML pages, navigation, static JSON
 resources, and a typed `report.json` from the completed project model.
@@ -165,6 +165,15 @@ capabilities. Static runtime always disables `editor`, `changes`, `rebuild`, and
 remain same-origin. The frontend ignores unknown fields, but explicitly shows
 an error when bootstrap is missing or its schema version is unsupported.
 
+### BR-SITE-014: Roadmap changes use only a constrained operation
+
+Canonical `serve` adds an action only on the `roadmap.md` page and only for a
+new unfinished `DLV-*` in an existing H2 stage. Go returns the stages, validates
+the ID and text with the same one-roadmap-ID rule, performs digest CAS, and
+applies a targeted atomic insertion while preserving line endings. The frontend
+does not parse Markdown or decide whether a write is allowed. `build`, locale
+portals, and direct translation serve remain read-only.
+
 ## Invariants
 
 - the source `index.md` is displayed by the dashboard rather than a duplicate
@@ -211,6 +220,9 @@ an error when bootstrap is missing or its schema version is unsupported.
   used or a diagram approaches the viewport;
 - Screen Map and playable flow are reinitialized for the new layout; when the
   DOM is replaced, the previous page lifecycle cancels listeners and observers;
+- the serve-only roadmap dialog is reinitialized after soft navigation,
+  preserves fields on a CAS conflict, and does not block page reading when the
+  API fails;
 - a service-output conflict receives a separate safe path;
 - `ProjectReport` and HTML are built from the same model;
 - generated files do not become a source of truth.
