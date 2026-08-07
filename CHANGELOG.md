@@ -52,7 +52,8 @@
   и traceability; все публичные JSON-отчёты используют schema v1.
 - Skill `docu-docu` добавляет явные agent-workflow для инициализации,
   проверки актуальности исходной документации и перевода locale tree.
-- Релиз собирается для пяти платформ с единым quality gate, checksums, лицензией
+- Релиз собирается для шести комбинаций OS/architecture, включая Windows ARM64,
+  с единым quality gate, checksums, лицензией
   Apache-2.0 и notices для встроенных сторонних компонентов.
 - POSIX- и PowerShell-installers автоматически выбирают релизный
   бинарник, проверяют SHA-256 и без `sudo` устанавливают или

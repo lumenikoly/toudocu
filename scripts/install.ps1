@@ -29,11 +29,12 @@ try {
     } else {
         $env:PROCESSOR_ARCHITECTURE
     }
-    if ($Architecture -ne "AMD64") {
-        Fail "unsupported Windows architecture: $Architecture; only AMD64 is published"
+    $Asset = switch ($Architecture) {
+        "AMD64" { "docu-docu-windows-amd64.exe"; break }
+        "ARM64" { "docu-docu-windows-arm64.exe"; break }
+        default { Fail "unsupported Windows architecture: $Architecture; only AMD64 and ARM64 are published" }
     }
 
-    $Asset = "docu-docu-windows-amd64.exe"
     $ReleaseUrl = if ($Version -eq "latest") {
         "https://github.com/$Repository/releases/latest/download"
     } else {

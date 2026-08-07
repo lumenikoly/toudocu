@@ -41,10 +41,10 @@ func newWindowsInstallerFixture(t *testing.T, binaries map[string][]byte) *windo
 			if fixture.badChecksum {
 				digest = strings.Repeat("0", 64)
 			}
-			fmt.Fprintf(response, "%s  docu-docu-windows-amd64.exe\n", digest)
+			fmt.Fprintf(response, "%s  docu-docu-windows-amd64.exe\n%s  docu-docu-windows-arm64.exe\n", digest, digest)
 			return
 		}
-		if file != "docu-docu-windows-amd64.exe" {
+		if file != "docu-docu-windows-amd64.exe" && file != "docu-docu-windows-arm64.exe" {
 			http.NotFound(response, request)
 			return
 		}
@@ -76,17 +76,17 @@ func TestInstallerPlatformContract(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, expected := range []string{"docu-docu-windows-amd64.exe", "PROCESSOR_ARCHITEW6432", "only AMD64 is published"} {
+	for _, expected := range []string{"docu-docu-windows-amd64.exe", "docu-docu-windows-arm64.exe", "PROCESSOR_ARCHITEW6432", "only AMD64 and ARM64 are published"} {
 		if !strings.Contains(string(content), expected) {
 			t.Errorf("PowerShell installer missing %q", expected)
 		}
 	}
 	output, err := runPowerShellInstaller(t, "http://127.0.0.1:1", map[string]string{
-		"PROCESSOR_ARCHITECTURE": "ARM64",
+		"PROCESSOR_ARCHITECTURE": "x86",
 		"DOCU_DOCU_INSTALL_DIR":  filepath.Join(t.TempDir(), "bin"),
 	})
-	if err == nil || !strings.Contains(output, "unsupported Windows architecture: ARM64; only AMD64 is published") {
-		t.Fatalf("ARM64 rejection: err=%v output=%q", err, output)
+	if err == nil || !strings.Contains(output, "unsupported Windows architecture: x86; only AMD64 and ARM64 are published") {
+		t.Fatalf("x86 rejection: err=%v output=%q", err, output)
 	}
 }
 
@@ -120,6 +120,21 @@ func TestInstallerSelectionAndPathContract(t *testing.T) {
 	}
 	if !windowsContainsString(fixture.paths(), "/releases/download/0.0.1/checksums.txt") {
 		t.Fatalf("pinned URL not used: %v", fixture.paths())
+	}
+
+	arm64Dir := filepath.Join(t.TempDir(), "bin")
+	output, err = runPowerShellInstaller(t, fixture.server.URL, map[string]string{
+		"DOCU_DOCU_INSTALL_DIR":    arm64Dir,
+		"DOCU_DOCU_NO_MODIFY_PATH": "1",
+		"DOCU_DOCU_VERSION":        "0.0.1",
+		"PROCESSOR_ARCHITECTURE":   "AMD64",
+		"PROCESSOR_ARCHITEW6432":   "ARM64",
+	})
+	if err != nil {
+		t.Fatalf("ARM64 install: %v\n%s", err, output)
+	}
+	if !windowsContainsString(fixture.paths(), "/releases/download/0.0.1/docu-docu-windows-arm64.exe") {
+		t.Fatalf("ARM64 asset not used: %v", fixture.paths())
 	}
 
 	script := string(content)
@@ -221,7 +236,6 @@ func runPowerShellInstaller(t *testing.T, serverURL string, overrides map[string
 	if _, err := exec.LookPath(shell); err != nil {
 		shell = "powershell"
 	}
-	command := exec.Command(shell, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", scriptPath)
 	values := map[string]string{
 		"OS":                       "Windows_NT",
 		"PROCESSOR_ARCHITECTURE":   "AMD64",
@@ -232,47 +246,12 @@ func runPowerShellInstaller(t *testing.T, serverURL string, overrides map[string
 	for key, value := range overrides {
 		values[key] = value
 	}
-	command.Env = os.Environ()
 	for key, value := range values {
-		command.Env = setWindowsEnvironmentValue(command.Env, key, value)
+		t.Setenv(key, value)
 	}
+	command := exec.Command(shell, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", scriptPath)
 	output, err := command.CombinedOutput()
 	return string(output), err
-}
-
-func setWindowsEnvironmentValue(environment []string, key, value string) []string {
-	prefix := key + "="
-	filtered := environment[:0]
-	for _, entry := range environment {
-		name, _, found := strings.Cut(entry, "=")
-		if found && strings.EqualFold(name, key) {
-			continue
-		}
-		filtered = append(filtered, entry)
-	}
-	return append(filtered, prefix+value)
-}
-
-func TestSetWindowsEnvironmentValue(t *testing.T) {
-	environment := []string{
-		"Path=C:\\Windows",
-		"processor_architecture=ARM64",
-		"PROCESSOR_ARCHITECTURE=",
-	}
-	updated := setWindowsEnvironmentValue(environment, "PROCESSOR_ARCHITECTURE", "AMD64")
-	architectureValues := 0
-	for _, entry := range updated {
-		name, value, found := strings.Cut(entry, "=")
-		if found && strings.EqualFold(name, "PROCESSOR_ARCHITECTURE") {
-			architectureValues++
-			if value != "AMD64" {
-				t.Fatalf("architecture = %q, want AMD64", value)
-			}
-		}
-	}
-	if architectureValues != 1 {
-		t.Fatalf("architecture entries = %d, want 1: %v", architectureValues, updated)
-	}
 }
 
 func windowsContainsString(values []string, target string) bool {

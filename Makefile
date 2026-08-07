@@ -66,6 +66,7 @@ release: check
 	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o $(DIST)/docu-docu-darwin-amd64 $(CMD)
 	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags="-s -w" -o $(DIST)/docu-docu-darwin-arm64 $(CMD)
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o $(DIST)/docu-docu-windows-amd64.exe $(CMD)
+	CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -trimpath -ldflags="-s -w" -o $(DIST)/docu-docu-windows-arm64.exe $(CMD)
 	cp LICENSE $(DIST)/
 	{ cat THIRD_PARTY_NOTICES.md; printf '\n\n# Embedded browser asset notices\n'; cat internal/site/assets/generated/mermaid.LICENSE.txt; printf '\n\n'; cat internal/site/assets/generated/codemirror.LICENSE.txt; printf '\n\n'; cat internal/site/assets/generated/swagger-ui.LICENSE.txt; printf '\n\n'; cat internal/site/assets/generated/swagger-ui-bundle.LICENSE.txt; printf '\n\n'; cat internal/site/assets/generated/swagger-ui-standalone-preset.LICENSE.txt; } > $(DIST)/THIRD_PARTY_NOTICES.md
 	cp internal/site/assets/generated/codemirror.checksums.txt $(DIST)/CODEMIRROR-CHECKSUMS.txt

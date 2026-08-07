@@ -13,7 +13,7 @@ func TestInstallerReleaseBundleContract(t *testing.T) {
 	for _, expected := range []string{
 		"docu-docu-linux-amd64", "docu-docu-linux-arm64",
 		"docu-docu-darwin-amd64", "docu-docu-darwin-arm64",
-		"docu-docu-windows-amd64.exe",
+		"docu-docu-windows-amd64.exe", "docu-docu-windows-arm64.exe",
 		"cp scripts/install.sh scripts/install.ps1 $(DIST)/",
 		"sha256sum * > checksums.txt",
 	} {
@@ -45,7 +45,7 @@ func TestInstallerDocumentationContract(t *testing.T) {
 	for _, expected := range []string{
 		"docu-docu-linux-amd64", "docu-docu-linux-arm64",
 		"docu-docu-darwin-amd64", "docu-docu-darwin-arm64",
-		"docu-docu-windows-amd64.exe", "Windows ARM64",
+		"docu-docu-windows-amd64.exe", "docu-docu-windows-arm64.exe", "Windows ARM64",
 		"DOCU_DOCU_VERSION", "DOCU_DOCU_INSTALL_DIR", "DOCU_DOCU_NO_MODIFY_PATH",
 		"~/.local/bin/docu-docu", "%LOCALAPPDATA%\\Programs\\docu-docu\\docu-docu.exe",
 		"checksum", "один trust root", "curl | sh", "irm | iex",
@@ -102,7 +102,7 @@ func TestInstallerScriptContract(t *testing.T) {
 	for _, expected := range []string{
 		"DOCU_DOCU_VERSION", "DOCU_DOCU_INSTALL_DIR", "DOCU_DOCU_NO_MODIFY_PATH",
 		"releases/latest/download", "checksums.txt", "SHA-256", "Get-FileHash",
-		"SetEnvironmentVariable(\"Path\"", "docu-docu-windows-amd64.exe",
+		"SetEnvironmentVariable(\"Path\"", "docu-docu-windows-amd64.exe", "docu-docu-windows-arm64.exe",
 	} {
 		if !strings.Contains(powerShell, expected) {
 			t.Errorf("install.ps1 missing %q", expected)
