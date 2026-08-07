@@ -7,6 +7,19 @@ on:
         description: Release version (for example, 0.0.2)
         required: true
         type: string
+      channel:
+        description: Release channel
+        required: true
+        default: stable
+        type: choice
+        options:
+          - stable
+          - rc
+      rc_number:
+        description: RC number (used only for the rc channel)
+        required: true
+        default: '1'
+        type: string
 
 concurrency:
   group: release
@@ -34,6 +47,8 @@ jobs:
         shell: bash
         env:
           VERSION: ${{ inputs.version }}
+          CHANNEL: ${{ inputs.channel }}
+          RC_NUMBER: ${{ inputs.rc_number }}
         run: |
           set -euo pipefail
 
@@ -44,6 +59,19 @@ jobs:
           if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "Release version must use X.Y.Z format, got $VERSION" >&2
             exit 1
+          fi
+          if [[ "$CHANNEL" != "stable" && "$CHANNEL" != "rc" ]]; then
+            echo "Release channel must be stable or rc, got $CHANNEL" >&2
+            exit 1
+          fi
+          if [[ "$CHANNEL" == "rc" ]]; then
+            if [[ ! "$RC_NUMBER" =~ ^[1-9][0-9]*$ ]]; then
+              echo "RC number must be a positive integer, got $RC_NUMBER" >&2
+              exit 1
+            fi
+            release_version="$VERSION-rc.$RC_NUMBER"
+          else
+            release_version="$VERSION"
           fi
 
           actual_version="$(go run ./cmd/docu-docu version)"
@@ -67,8 +95,8 @@ jobs:
             exit 1
           fi
 
-          if git ls-remote --exit-code --tags origin "refs/tags/$VERSION" >/dev/null 2>&1; then
-            echo "Tag $VERSION already exists" >&2
+          if git ls-remote --exit-code --tags origin "refs/tags/$release_version" >/dev/null 2>&1; then
+            echo "Tag $release_version already exists" >&2
             exit 1
           fi
       - run: make release
@@ -105,14 +133,23 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.version }}
+          CHANNEL: ${{ inputs.channel }}
+          RC_NUMBER: ${{ inputs.rc_number }}
         run: |
           set -euo pipefail
-          if git ls-remote --exit-code --tags origin "refs/tags/$VERSION" >/dev/null 2>&1; then
-            echo "Tag $VERSION already exists" >&2
+          release_version="$VERSION"
+          release_flags=()
+          if [[ "$CHANNEL" == "rc" ]]; then
+            release_version="$VERSION-rc.$RC_NUMBER"
+            release_flags+=(--prerelease)
+          fi
+          if git ls-remote --exit-code --tags origin "refs/tags/$release_version" >/dev/null 2>&1; then
+            echo "Tag $release_version already exists" >&2
             exit 1
           fi
-          gh release create "$VERSION" dist/* \
+          gh release create "$release_version" dist/* \
             --target "$GITHUB_SHA" \
-            --title "$VERSION" \
+            --title "$release_version" \
             --notes-file release-notes.md \
+            "${release_flags[@]}" \
             --fail-on-no-commits

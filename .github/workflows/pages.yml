@@ -38,16 +38,23 @@ jobs:
             --clean \
             --strict \
             --stale-days 0
+          go run ./cmd/docu-docu build ./docs-en \
+            --output "${RUNNER_TEMP}/docu-docu-pages/project-docs/en" \
+            --repository-root . \
+            --clean \
+            --strict \
+            --stale-days 0
       - name: Add landing page
         run: |
           mkdir -p "${RUNNER_TEMP}/docu-docu-pages/assets"
           cp landing/index.html landing/favicon.svg landing/styles.css landing/script.js \
             "${RUNNER_TEMP}/docu-docu-pages/"
+          cp -a landing/ru landing/en "${RUNNER_TEMP}/docu-docu-pages/"
           cp -a landing/assets/. "${RUNNER_TEMP}/docu-docu-pages/assets/"
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ${{ runner.temp }}/docu-docu-pages
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

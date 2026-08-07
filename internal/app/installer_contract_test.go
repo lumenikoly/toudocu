@@ -29,6 +29,15 @@ func TestInstallerReleaseBundleContract(t *testing.T) {
 	}
 }
 
+func TestReleaseWorkflowRCContract(t *testing.T) {
+	workflow := readInstallerContractFile(t, filepath.Join("..", "..", ".github", "workflows", "release.yml"))
+	for _, expected := range []string{"channel:", "rc_number:", `release_version="$VERSION-rc.$RC_NUMBER"`, "--prerelease"} {
+		if !strings.Contains(workflow, expected) {
+			t.Errorf("release workflow RC contract missing %q", expected)
+		}
+	}
+}
+
 func TestInstallerDocumentationContract(t *testing.T) {
 	root := filepath.Join("..", "..")
 	canonicalCommands := []string{

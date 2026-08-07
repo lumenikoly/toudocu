@@ -96,7 +96,7 @@ func TestInstallerSelectionAndPathContract(t *testing.T) {
 		t.Fatal(err)
 	}
 	binary := buildWindowsInstallerFixtureBinary(t, "0.0.1")
-	fixture := newWindowsInstallerFixture(t, map[string][]byte{"latest": binary, "0.0.1": binary})
+	fixture := newWindowsInstallerFixture(t, map[string][]byte{"latest": binary, "0.0.1": binary, "0.0.1-rc.2": binary})
 	installDir := filepath.Join(t.TempDir(), "bin")
 	output, err := runPowerShellInstaller(t, fixture.server.URL, map[string]string{
 		"DOCU_DOCU_INSTALL_DIR":    installDir,
@@ -127,6 +127,19 @@ func TestInstallerSelectionAndPathContract(t *testing.T) {
 	}
 	if !windowsContainsString(fixture.paths(), "/releases/download/0.0.1/"+expectedAsset) {
 		t.Fatalf("runtime asset %s not used for pinned install: %v", expectedAsset, fixture.paths())
+	}
+
+	rcDir := filepath.Join(t.TempDir(), "bin")
+	output, err = runPowerShellInstaller(t, fixture.server.URL, map[string]string{
+		"DOCU_DOCU_INSTALL_DIR":    rcDir,
+		"DOCU_DOCU_NO_MODIFY_PATH": "1",
+		"DOCU_DOCU_VERSION":        "0.0.1-rc.2",
+	})
+	if err != nil {
+		t.Fatalf("rc install: %v\n%s", err, output)
+	}
+	if !windowsContainsString(fixture.paths(), "/releases/download/0.0.1-rc.2/"+expectedAsset) {
+		t.Fatalf("runtime asset %s not used for rc: %v", expectedAsset, fixture.paths())
 	}
 
 	arm64Dir := filepath.Join(t.TempDir(), "bin")

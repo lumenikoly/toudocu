@@ -17,8 +17,8 @@ try {
     if ($env:OS -ne "Windows_NT") {
         Fail "unsupported operating system; use install.sh on Linux or macOS"
     }
-    if ($Version -ne "latest" -and $Version -notmatch '^\d+\.\d+\.\d+$') {
-        Fail "DOCU_DOCU_VERSION must be latest or X.Y.Z"
+    if ($Version -ne "latest" -and $Version -notmatch '^\d+\.\d+\.\d+(-rc\.[1-9]\d*)?$') {
+        Fail "DOCU_DOCU_VERSION must be latest, X.Y.Z, or X.Y.Z-rc.N"
     }
     if ($NoModifyPath -ne "0" -and $NoModifyPath -ne "1") {
         Fail "DOCU_DOCU_NO_MODIFY_PATH must be 0 or 1"
@@ -65,8 +65,9 @@ try {
     if ($LASTEXITCODE -ne 0 -or $DownloadedVersion -notmatch '^\d+\.\d+\.\d+$') {
         Fail "the downloaded binary cannot report a valid version"
     }
-    if ($Version -ne "latest" -and $DownloadedVersion -ne $Version) {
-        Fail "the downloaded binary reported $DownloadedVersion, expected $Version"
+    $ExpectedVersion = $Version -replace '-rc\.\d+$', ''
+    if ($Version -ne "latest" -and $DownloadedVersion -ne $ExpectedVersion) {
+        Fail "the downloaded binary reported $DownloadedVersion, expected $ExpectedVersion"
     }
 
     [void](New-Item -ItemType Directory -Force -Path $InstallDir)

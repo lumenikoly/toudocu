@@ -1,5 +1,16 @@
 document.documentElement.classList.add("js");
 
+const localePreferenceKey = "docu-docu-landing-locale";
+document.querySelectorAll("[data-locale-choice]").forEach((link) => {
+  link.addEventListener("click", () => {
+    const locale = link.dataset.localeChoice;
+    if (locale !== "ru" && locale !== "en") return;
+    try {
+      localStorage.setItem(localePreferenceKey, locale);
+    } catch {}
+  });
+});
+
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const heroStages = [...document.querySelectorAll(".hero-stage")];
 
@@ -39,6 +50,10 @@ function fallbackCopy(text) {
 }
 
 const status = document.querySelector("#copy-status");
+const copyDefault = document.body.dataset.copyDefault ?? "Copy";
+const copySuccess = document.body.dataset.copySuccess ?? "Copied";
+const copyStatusTemplate = document.body.dataset.copyStatusTemplate ?? "{platform} command copied.";
+const copyError = document.body.dataset.copyError ?? "Copy is unavailable. Select the command and copy it manually.";
 document.querySelectorAll("[data-copy-target]").forEach((button) => {
   button.addEventListener("click", async () => {
     const target = document.getElementById(button.dataset.copyTarget);
@@ -50,14 +65,15 @@ document.querySelectorAll("[data-copy-target]").forEach((button) => {
         fallbackCopy(text);
       }
       document.querySelectorAll("[data-copy-target]").forEach((item) => {
-        item.textContent = "Copy";
+        item.textContent = copyDefault;
         delete item.dataset.state;
       });
-      button.textContent = "Copied";
+      button.textContent = copySuccess;
       button.dataset.state = "copied";
-      status.textContent = `${button.closest(".install-command").querySelector(".command-meta span").textContent} command copied.`;
+      const platform = button.closest(".install-command").querySelector(".command-meta span").textContent;
+      status.textContent = copyStatusTemplate.replace("{platform}", platform);
     } catch {
-      status.textContent = "Copy is unavailable. Select the command and copy it manually.";
+      status.textContent = copyError;
     }
   });
 });

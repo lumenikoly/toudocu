@@ -13,10 +13,24 @@ GitHub Pages, S3-compatible storage или корпоративный серве
 являются частью результата.
 
 Generated portal не хранится в Git. Workflow GitHub Pages на каждом push в
-`main` строго собирает canonical `docs/` во временный artifact, добавляет
-landing в его корень и публикует artifact официальными Pages actions. Поэтому
-landing доступен в корне сайта, а документация — по-прежнему по относительному
-пути `project-docs/`. Demo-документация в Pages artifact не входит.
+`main` строго собирает canonical `docs/` во временный artifact, затем собирает
+английский translation root `docs-en/` во вложенный каталог и добавляет landing
+в корень artifact. Родительский output `project-docs/` всегда очищается и
+собирается первым: иначе его последующая очистка удалила бы уже собранный
+`project-docs/en/`. Demo-документация в Pages artifact не входит.
+
+Публичная структура artifact:
+
+- `/` — locale gateway;
+- `/ru/` и `/en/` — русская и английская версии landing;
+- `/project-docs/` — портал из canonical `docs/`;
+- `/project-docs/en/` — портал из `docs-en/`.
+
+Locale gateway учитывает только сохранённый явным переключателем ключ
+`docu-docu-landing-locale`, затем основную локаль браузера. `ru` и `ru-*`
+открывают `/ru/`, остальные и неизвестные значения — `/en/`. Определение языка
+происходит только в `/`: прямой locale URL всегда сохраняет выбранный в URL
+язык, а при отключённом JavaScript корень показывает обе ссылки.
 
 Портал использует относительные document links и переданные Go относительные
 asset/data bases, поэтому один output можно разместить в корне host либо во
@@ -40,9 +54,11 @@ Static output является потенциально публичным ар�
 4. Проверьте поиск, тему и Mermaid fallback.
 5. Повторите smoke во вложенном URL-пути.
 
-Для локальной совместной проверки landing и canonical portal сначала выполните
-`make docs`, затем `make landing-serve`. Сервер использует игнорируемый
-`build/project-docs/` и сохраняет публичный переход `/project-docs/`.
+Для локальной совместной проверки landing и обоих порталов сначала выполните
+`make docs`, затем `make landing-serve`. Первая команда в правильном порядке
+собирает `docs/` в игнорируемый `build/project-docs/` и `docs-en/` в
+`build/project-docs/en/`. Сервер сохраняет те же публичные маршруты `/ru/`,
+`/en/`, `/project-docs/` и `/project-docs/en/`, что и Pages artifact.
 
 ## Связанные документы
 

@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Docu-docu превращает Markdown-документацию в проверяемую модель и независимый от backend статический портал.">
+    <meta name="theme-color" content="#F5E6CA">
+    <title>Docu-docu — Код по вайбу. Документация по фактам.</title>
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+    <link rel="alternate" hreflang="ru" href="./">
+    <link rel="alternate" hreflang="en" href="../en/">
+    <link rel="stylesheet" href="../styles.css">
+    <script src="../script.js" defer></script>
+  </head>
+  <body data-copy-default="Копировать" data-copy-success="Скопировано" data-copy-status-template="{platform}: команда скопирована." data-copy-error="Копирование недоступно. Выделите команду и скопируйте её вручную.">
+    <a class="skip-link" href="#main">К содержимому</a>
+
+    <header class="site-header">
+      <a class="wordmark" href="#top" aria-label="Главная Docu-docu">DOCU-DOCU</a>
+      <nav class="header-actions" aria-label="Основная навигация">
+        <a class="pill pill-outline header-source-link" href="https://github.com/lumenikoly/docu-docu" target="_blank" rel="noreferrer">Исходный код</a>
+        <a class="pill pill-outline locale-switch" href="../en/" lang="en" hreflang="en" data-locale-choice="en" aria-label="Switch to English">EN</a>
+        <a class="pill pill-outline" href="../project-docs/" aria-label="Открыть документацию на русском языке">Docs</a>
+        <a class="pill pill-black" href="#install" aria-label="Установить CLI Docu-docu"><span class="desktop-label">Установить CLI</span><span class="mobile-label" aria-hidden="true">CLI</span></a>
+      </nav>
+    </header>
+
+    <main id="main" tabindex="-1">
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow hero-stage">MARKDOWN НА ВХОДЕ / ПРОВЕРЕННАЯ МОДЕЛЬ НА ВЫХОДЕ</p>
+          <h1 id="hero-title" class="hero-stage">КОД — ПО ВАЙБУ.<br>ДОКУМЕНТЫ —<br>ПО ФАКТАМ.</h1>
+        </div>
+
+        <div class="terminal hero-stage" aria-label="Пример контекста задачи для агента">
+          <div class="terminal-line"><span aria-hidden="true">$</span><code>cursor-agent &quot;Refactor the payment gateway to use the new provider&quot;</code></div>
+          <div class="terminal-line"><span aria-hidden="true">→</span><span>Анализ... Запущена вайб-кодинг сессия.</span></div>
+          <div class="terminal-line"><span aria-hidden="true">→</span><span>Изменено 14 файлов. Проект собран.</span></div>
+          <div class="terminal-line terminal-error"><span aria-hidden="true"></span><span>Panic: runtime error: invalid memory address or nil pointer dereference</span></div>
+          <div class="terminal-line terminal-note"><span aria-hidden="true"></span><span>// О нет. Агент пропустил обязательный контракт ProviderConfig.</span></div>
+          <div class="terminal-line"><span aria-hidden="true">$</span><code>docu-docu task context TASK-PAYMENTS-001 ./docs --format json</code></div>
+          <div class="terminal-line terminal-highlight"><span aria-hidden="true">✓</span><span>Контекст задачи загружен: контракт ProviderConfig и шаги проверки.</span></div>
+          <div class="terminal-line terminal-note"><span aria-hidden="true"></span><span>Агент обновлён. Соответствие архитектуре: 100%.</span></div>
+        </div>
+      </section>
+
+      <section class="landing-grid" id="proof" aria-labelledby="proof-title">
+        <h2 class="visually-hidden" id="proof-title">Что подтверждает Docu-docu</h2>
+
+        <div class="audience-row reveal reveal-rise">
+          <article class="audience-item">
+            <p class="section-label">ДЛЯ ИНЖЕНЕРОВ</p>
+            <p>Следуйте архитектуре, требованиям и контексту реализации, не покидая репозиторий.</p>
+          </article>
+          <article class="audience-item">
+            <p class="section-label">ДЛЯ АВТОРОВ ДОКУМЕНТАЦИИ</p>
+            <p>Проверяйте структуру и связи, а затем публикуйте ту же модель как статический портал.</p>
+          </article>
+          <article class="audience-item">
+            <p class="section-label">ДЛЯ АГЕНТОВ</p>
+            <p>Запрашивайте точный контекст задачи и Git-backed изменения вместо сканирования неразмеченного архива.</p>
+          </article>
+        </div>
+
+        <article class="feature-card card-green reveal reveal-rise">
+          <div class="card-copy">
+            <p class="section-label">ПРОВЕРКА 01</p>
+            <h2>MARKDOWN СТАНОВИТСЯ МОДЕЛЬЮ.</h2>
+            <p>Проверяйте типизированные документы, ссылки, переходы, контракты и связи локально или в CI.</p>
+          </div>
+          <figure class="ui-inset">
+            <div class="ui-inset-header"><span>Карта экранов</span><span class="status-chip">ПРОВЕРЕННЫЙ ВИД</span></div>
+            <img src="../assets/ru/site-screen-map.png" width="1440" height="900" alt="Карта экранов Docu-docu с документированными экранами и переходами между ними.">
+          </figure>
+        </article>
+
+        <article class="feature-card card-blue reveal reveal-rise">
+          <div class="card-copy">
+            <p class="section-label">СТАТИЧЕСКИЙ РЕЗУЛЬТАТ</p>
+            <h2>ПОРТАЛ РАБОТАЕТ БЕЗ BACKEND.</h2>
+            <p>Создавайте read-only HTTP-портал без базы данных, CDN, npm runtime и серверного процесса после сборки.</p>
+          </div>
+          <figure class="ui-inset">
+            <div class="ui-inset-header"><span>Главная проекта</span><span class="neutral-chip">STATIC HTML</span></div>
+            <img src="../assets/ru/site-home.png" width="1440" height="900" alt="Главная сгенерированного портала Docu-docu со статусом проекта и навигацией по документации.">
+          </figure>
+        </article>
+
+        <article class="workflow-card reveal reveal-wipe" id="workflow" aria-labelledby="workflow-title">
+          <div class="workflow-intro">
+            <p class="section-label">ДЕТЕРМИНИРОВАННЫЙ PIPELINE</p>
+            <h2 id="workflow-title">ПРОВЕРИТЬ. СОБРАТЬ. ЗАПУСТИТЬ.</h2>
+            <p>Три явные команды работают с одной моделью документации из репозитория.</p>
+          </div>
+          <ol class="workflow-steps">
+            <li><span class="step-name">CHECK</span><code>docu-docu check ./docs --strict</code></li>
+            <li><span class="step-name">BUILD</span><code>docu-docu build ./docs --output ./site --clean</code></li>
+            <li><span class="step-name">SERVE</span><code>docu-docu serve ./docs</code></li>
+          </ol>
+        </article>
+
+        <article class="feature-card card-violet reveal reveal-rise">
+          <div class="card-copy">
+            <p class="section-label">КОНТЕКСТ ИЗ GIT</p>
+            <h2>ИЗМЕНЕНИЯ ОСТАЮТСЯ РЯДОМ С ФАКТАМИ.</h2>
+            <p>Просматривайте затронутую документацию и запрашивайте точный контекст задачи из того же состояния репозитория.</p>
+          </div>
+          <figure class="ui-inset">
+            <div class="ui-inset-header"><span>Просмотр изменений</span><span class="neutral-chip">WORKING TREE</span></div>
+            <img src="../assets/ru/changes-workspace.png" width="1440" height="900" alt="Workspace изменений со сравнением Git-ревизий и списком затронутых файлов документации.">
+          </figure>
+        </article>
+
+        <article class="install-card reveal reveal-rise" id="install" aria-labelledby="install-title">
+          <div class="card-copy">
+            <p class="section-label">УСТАНОВКА CLI</p>
+            <h2 id="install-title">ОДИН BINARY. НИКАКОЙ СВИТЫ RUNTIME.</h2>
+            <p>Installer определяет платформу, проверяет SHA-256 и устанавливает или обновляет Docu-docu в пользовательском каталоге.</p>
+          </div>
+          <div class="install-commands">
+            <div class="install-command">
+              <div class="command-meta"><span>LINUX / MACOS</span><button type="button" class="copy-button" data-copy-target="install-posix" aria-describedby="copy-status">Копировать</button></div>
+              <code id="install-posix">curl -fsSL https://github.com/lumenikoly/docu-docu/releases/latest/download/install.sh | sh</code>
+            </div>
+            <div class="install-command">
+              <div class="command-meta"><span>WINDOWS POWERSHELL</span><button type="button" class="copy-button" data-copy-target="install-powershell" aria-describedby="copy-status">Копировать</button></div>
+              <code id="install-powershell">irm https://github.com/lumenikoly/docu-docu/releases/latest/download/install.ps1 | iex</code>
+            </div>
+            <p class="copy-status" id="copy-status" role="status" aria-live="polite"></p>
+          </div>
+        </article>
+      </section>
+
+      <section class="capabilities" id="capabilities" aria-labelledby="capabilities-title">
+        <div class="section-heading reveal reveal-rise">
+          <h2 id="capabilities-title">ОДНА МОДЕЛЬ. ВСЕ ВИДЫ.</h2>
+          <p>Восемь способов превратить Markdown-модель из репозитория в пользу для людей, агентов и CI.</p>
+        </div>
+        <div class="capability-ledger">
+          <article class="capability-row capability-green reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">01</span><h3>ПРОВЕРЯЙТЕ</h3>
+            <p>Находите ошибки структуры, связей, маршрутов, контрактов и verification links до публикации портала или запуска CI.</p><code>docu-docu check ./docs</code>
+          </article>
+          <article class="capability-row capability-blue reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">02</span><h3>ПУБЛИКУЙТЕ</h3>
+            <p>Превращайте ту же Markdown-модель в поисковый статический портал с диаграммами, traceability, темами и без backend.</p><code>docu-docu build ./docs</code>
+          </article>
+          <article class="capability-row capability-gray reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">03</span><h3>РЕДАКТИРУЙТЕ</h3>
+            <p>Работайте в браузере с безопасным preview, точными diagnostics, сохранением с учётом конфликтов и мгновенной пересборкой.</p><code>/_docu-docu/editor/</code>
+          </article>
+          <article class="capability-row capability-violet reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">04</span><h3>СРАВНИВАЙТЕ</h3>
+            <p>Смотрите Git-изменения на уровне исходника, rendered и semantic diff — включая диаграммы, API, assets и влияние на задачи.</p><code>/changes/</code>
+          </article>
+          <article class="capability-row capability-blue reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">05</span><h3>СТРОЙТЕ КАРТУ</h3>
+            <p>Создавайте навигационную карту продукта из документированных экранов, состояний, переходов и use cases.</p><code>screens/SC-*.md</code>
+          </article>
+          <article class="capability-row capability-blue reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">06</span><h3>ПРОХОДИТЕ СЦЕНАРИИ</h3>
+            <p>Проходите use case экран за экраном с действиями, ошибками, историей и доступными hotspots.</p><code>use-cases/UC-*.html#play</code>
+          </article>
+          <article class="capability-row capability-violet reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">07</span><h3>ДАВАЙТЕ КОНТЕКСТ</h3>
+            <p>Передавайте агенту только требования, правила, зависимости и проверки, относящиеся к одной задаче.</p><code>docu-docu task context TASK-ID ./docs</code>
+          </article>
+          <article class="capability-row capability-gray reveal reveal-rise">
+            <span class="capability-number" aria-hidden="true">08</span><h3>ОБНОВЛЯЙТЕ</h3>
+            <p>Используйте установленный AI skill, чтобы сверить документацию со всем репозиторием или только текущим Git diff относительно HEAD.</p><code>$docu-docu refresh diff</code>
+          </article>
+        </div>
+      </section>
+
+      <section class="getting-started reveal reveal-wipe" id="getting-started" aria-labelledby="getting-started-title">
+        <div class="section-heading">
+          <h2 id="getting-started-title">ИЗ РЕПОЗИТОРИЯ В WORKSPACE.</h2>
+          <p>AI skill создаёт документацию, а Go CLI превращает её в живой локальный workspace.</p>
+        </div>
+        <ol class="start-flow">
+          <li><span class="start-number" aria-hidden="true">01</span><h3>INIT</h3><code>$docu-docu init</code><p>Установленный AI skill анализирует репозиторий и создаёт исходную документацию.</p></li>
+          <li><span class="start-number" aria-hidden="true">02</span><h3>SOURCE</h3><code>docs/**/*.md</code><p>Редактируемый Markdown остаётся источником истины.</p></li>
+          <li><span class="start-number" aria-hidden="true">03</span><h3>SERVE</h3><code>docu-docu serve ./docs</code><p>Go CLI собирает портал, следит за файлами и обновляет модель.</p></li>
+          <li><span class="start-number" aria-hidden="true">04</span><h3>EXPLORE</h3><code>Портал · Редактор · Изменения · Карта экранов · API Docs</code><p>Один локальный интерфейс объединяет все представления.</p></li>
+          <li><span class="start-number" aria-hidden="true">05</span><h3>VIBE</h3><code>docu-docu task context TASK-ID ./docs</code><p>До реализации coding agent загружает scope задачи, правила, зависимости, связанные документы и проверки.</p></li>
+        </ol>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div><a class="wordmark" href="#top">DOCU-DOCU</a><p>Проверяемая Markdown-документация и статические HTTP-порталы.</p></div>
+      <nav aria-label="Ссылки проекта">
+        <a href="../project-docs/">Документация</a>
+        <a href="https://github.com/lumenikoly/docu-docu">GitHub</a>
+        <a href="https://github.com/lumenikoly/docu-docu#readme">README</a>
+        <a href="https://github.com/lumenikoly/docu-docu/releases">Релизы</a>
+        <a href="https://github.com/lumenikoly/docu-docu/blob/main/LICENSE">Лицензия</a>
+      </nav>
+    </footer>
+  </body>
+</html>

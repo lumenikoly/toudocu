@@ -54,8 +54,19 @@ irm https://github.com/lumenikoly/docu-docu/releases/latest/download/install.ps1
 Remove-Item Env:DOCU_DOCU_VERSION
 ```
 
-Допускается только формат `X.Y.Z` без префикса `v`. Явная версия
-разрешает как закрепление, так и намеренный downgrade.
+Допускаются форматы `X.Y.Z` и `X.Y.Z-rc.N` без префикса `v`. Явная версия
+разрешает закрепление, намеренный downgrade и установку release candidate.
+RC не выбирается через `latest`, поэтому его тег указывается явно:
+
+```sh
+curl -fsSL https://github.com/lumenikoly/docu-docu/releases/download/0.0.1-rc.1/install.sh \
+  | DOCU_DOCU_VERSION=0.0.1-rc.1 sh
+```
+
+В GitHub Actions RC публикуется через workflow `release`: выберите ветку
+`main`, channel `rc`, базовую version `0.0.1` и положительный rc_number.
+Workflow создаст prerelease с тегом `0.0.1-rc.N`; stable channel продолжает
+создавать обычный релиз `X.Y.Z`.
 
 ## Каталог и PATH
 

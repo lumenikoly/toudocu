@@ -108,6 +108,18 @@ func TestInstallerSelectionAndPathContract(t *testing.T) {
 	if !containsExactString(pinned.paths(), "/releases/download/0.0.1/checksums.txt") {
 		t.Fatalf("pinned URL not used: %v", pinned.paths())
 	}
+
+	rc := newVersionedPlatformInstallerFixture(t, map[string]string{"0.0.1-rc.2": "0.0.1"}, "docu-docu-linux-amd64")
+	rcOutput, err := runPOSIXInstaller(t, rc.server.URL, "Linux", "x86_64", map[string]string{
+		"DOCU_DOCU_VERSION":     "0.0.1-rc.2",
+		"DOCU_DOCU_INSTALL_DIR": filepath.Join(t.TempDir(), "bin"),
+	})
+	if err != nil {
+		t.Fatalf("rc install failed: %v\n%s", err, rcOutput)
+	}
+	if !containsExactString(rc.paths(), "/releases/download/0.0.1-rc.2/checksums.txt") {
+		t.Fatalf("rc URL not used: %v", rc.paths())
+	}
 	if _, err := os.Stat(filepath.Join(customHome, ".bashrc")); !os.IsNotExist(err) {
 		t.Fatalf("custom install changed profile: %v", err)
 	}
@@ -120,7 +132,7 @@ func TestInstallerSelectionAndPathContract(t *testing.T) {
 		"DOCU_DOCU_VERSION":     "v0.0.1",
 		"DOCU_DOCU_INSTALL_DIR": filepath.Join(t.TempDir(), "bin"),
 	})
-	if err == nil || !strings.Contains(output, "latest or X.Y.Z") || len(invalid.paths()) != 0 {
+	if err == nil || !strings.Contains(output, "X.Y.Z-rc.N") || len(invalid.paths()) != 0 {
 		t.Fatalf("invalid version: err=%v output=%q requests=%v", err, output, invalid.paths())
 	}
 }

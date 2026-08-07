@@ -70,6 +70,7 @@ h1, h2, h3 { text-wrap: balance; }
   text-decoration: none;
 }
 .header-actions { display: flex; align-items: center; gap: 10px; }
+.mobile-label { display: none; }
 .pill {
   min-height: 42px;
   display: inline-flex;
@@ -88,6 +89,7 @@ h1, h2, h3 { text-wrap: balance; }
 .pill-outline:hover { background: var(--gray); }
 .pill-black { background: var(--ink); color: var(--white); }
 .pill-black:hover { background: #003a8c; }
+.locale-switch { min-width: 52px; padding-inline: 16px; }
 
 .hero {
   min-height: calc(100svh - 86px);
@@ -378,8 +380,13 @@ h1 {
 @media (max-width: 700px) {
   html { scroll-behavior: auto; }
   .site-header { min-height: 72px; padding: 14px 20px; }
+  .site-header .wordmark { font-size: 1.05rem; }
+  .header-actions { gap: 6px; }
   .header-source-link { display: none; }
-  .pill { min-height: 42px; padding: 0 18px; }
+  .pill { min-height: 42px; padding: 0 14px; }
+  .locale-switch { min-width: 48px; padding-inline: 12px; }
+  .desktop-label { display: none; }
+  .mobile-label { display: inline; }
   .hero { min-height: calc(100svh - 72px); gap: 32px; padding: 58px 20px 44px; }
   .eyebrow { font-size: .62rem; }
   h1 { max-width: 13ch; font-size: clamp(2.7rem, 11vw, 3.35rem); }
@@ -404,6 +411,7 @@ h1 {
   .capabilities { padding-top: 78px; }
   .section-heading { grid-template-columns: 1fr; gap: 24px; padding: 0 20px 38px; }
   .section-heading h2 { font-size: clamp(2.7rem, 11vw, 3.35rem); }
+  html[lang="ru"] .section-heading h2 { font-size: clamp(2.25rem, 12vw, 3rem); }
   .capability-row { grid-template-columns: 42px minmax(0, 1fr); gap: 12px 18px; padding: 28px 20px; }
   .capability-number { grid-row: 1 / span 3; align-self: start; padding-top: 8px; }
   .capability-row h3 { font-size: 2.15rem; }
