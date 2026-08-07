@@ -5,7 +5,8 @@
 - Модуль: MOD-SITE
 - Статус: Реализован
 - Маршрут: `/_docu-docu/api-docs/`
-- Последнее обновление: 2026-08-05
+- Превью: `../assets/screens/site-api-docs.png`
+- Последнее обновление: 2026-08-06
 
 Serve-only каталог wire-level контрактов Editor и Changes API. Пользователь
 выбирает OpenAPI source, раскрывает operations и может выполнить только

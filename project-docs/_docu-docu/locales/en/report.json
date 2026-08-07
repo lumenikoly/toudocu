@@ -4,7 +4,7 @@
     "name": "Docu-docu",
     "version": "0.0.1"
   },
-  "generatedAt": "2026-08-06T16:56:36.627318399Z",
+  "generatedAt": "2026-08-06T20:34:17.864499495Z",
   "sourceDirectory": "docs-en",
   "staleDays": 90,
   "project": {
@@ -37,7 +37,7 @@
     }
   },
   "stats": {
-    "documents": 81,
+    "documents": 80,
     "totalTasks": 14,
     "completedTasks": 13,
     "remainingTasks": 1,
@@ -45,7 +45,7 @@
     "documentsComplete": 14,
     "documentsInProgress": 2,
     "documentsNotStarted": 0,
-    "documentsWithoutTasks": 65,
+    "documentsWithoutTasks": 64,
     "staleDocuments": 0,
     "documentsWithoutDescription": 14,
     "documentsWithoutStatus": 0,
@@ -940,7 +940,6 @@
       "backlinks": [
         "architecture/system-boundary.md",
         "architecture/trust-boundaries.md",
-        "contracts/go-api.md",
         "flows/FLOW-DOCS-BUILD.md",
         "flows/FLOW-DOCS-SERVE.md",
         "flows/FLOW-TASK-WORKFLOW.md",
@@ -1051,59 +1050,6 @@
         "modules/site.md",
         "use-cases/serve-portal.md",
         "architecture/trust-boundaries.md"
-      ]
-    },
-    {
-      "id": "CON-GO-API-V1",
-      "sourcePath": "contracts/go-api.md",
-      "outputPath": "contracts/go-api.html",
-      "type": "contract",
-      "sectionType": "contracts",
-      "title": "Go API contract Docu-docu v1",
-      "description": "The contract describes the exported facade of the root Go package. He is needed developers who embed model, rendering or Docu-docu reports without launch a separate process.",
-      "metadata": {
-        "id": "CON-GO-API-V1",
-        "owner": "Docu-docu Team",
-        "status": "Completed",
-        "updated": "2026-08-05"
-      },
-      "status": {
-        "kind": "done",
-        "symbol": "✓",
-        "label": "Completed",
-        "recognized": true
-      },
-      "taskStats": {
-        "total": 0,
-        "completed": 0,
-        "remaining": 0,
-        "percent": null
-      },
-      "updatedAt": "2026-08-05T00:00:00Z",
-      "stale": false,
-      "warnings": 0,
-      "errors": 0,
-      "links": [
-        {
-          "destination": "cli.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "contracts/cli.md",
-          "href": "cli.html"
-        },
-        {
-          "destination": "cli.md",
-          "broken": false,
-          "blocked": false,
-          "targetKind": "document",
-          "target": "contracts/cli.md",
-          "href": "cli.html"
-        }
-      ],
-      "backlinks": [],
-      "relatedDocuments": [
-        "contracts/cli.md"
       ]
     },
     {

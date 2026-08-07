@@ -34,6 +34,8 @@ Docu-docu строит единую модель из Markdown, проверяе
 - подготовка, архивирование и восстановление проверяемых рабочих задач;
 - выполнение явно объявленных проверок выбранной задачи;
 - полный и HEAD-diff refresh актуальности через устанавливаемый AI-skill;
+- offline install/status/update/uninstall встроенного AI-skill для Codex,
+  Claude Code и Copilot;
 - versioned JSON schema для проекта, task context и task workflow;
 - публичный Go API для встраивания модели, генератора и типизированных отчётов;
 - работа одним бинарником без внешних runtime-зависимостей; закреплённые

@@ -3,7 +3,7 @@
 - Идентификатор: CON-CLI-V1
 - Статус: Готово
 - Владелец: Команда Docu-docu
-- Последнее обновление: 2026-08-05
+- Последнее обновление: 2026-08-06
 
 Документ фиксирует команды, побочные эффекты, exit codes и версионируемые
 JSON-результаты CLI. Конкретный синтаксис флагов показывает
@@ -25,11 +25,40 @@ JSON-результаты CLI. Конкретный синтаксис флаг�
 | `task verify --dry-run` | Показывает план проверок задачи | Нет |
 | `task verify --run` | Выполняет команды, явно записанные в задаче | Да, в пределах самих команд репозитория |
 | `task archive`, `task restore` | Перемещает завершённую задачу в архив или обратно | Перемещает один файл без перезаписи |
+| `skill install`, `skill update`, `skill uninstall` | Управляет встроенным offline skill package | Пишет только в выбранный project/user target |
+| `skill status` | Показывает target и состояние skill package | Нет |
 | `version` | Печатает версию | Нет |
 
 Путь без имени команды не запускает неявную сборку. Команд верхнего уровня
 `init` и `refresh` нет: одноимённые `$docu-docu` workflows принадлежат AI-skill,
 а не Go CLI.
+
+## Skill lifecycle
+
+```text
+docu-docu skill install|status|update|uninstall
+  [--agent auto|codex|claude-code|copilot|all]
+  [--scope project|user]
+  [--repository-root DIR]
+```
+
+По умолчанию используются `--agent auto` и `--scope project`.
+`--repository-root` доступен только для project scope. `auto` выбирает
+единственный обнаруженный host; при неоднозначности интерактивный terminal
+предлагает выбор, а non-TTY возвращает `SKILL_AGENT_REQUIRED`. `all` планирует
+все уникальные абсолютные targets до записи и затем обрабатывает их независимо.
+
+CLI различает состояния `not-installed`, `installed`, `outdated`,
+`newer-than-bundle`, `modified`, `unmanaged`, `invalid-manifest` и
+`unsafe-path`. `status` всегда остаётся read-only. Изменяющие операции не
+заменяют unmanaged, modified, invalid, newer или unsafe target. Форматы JSON,
+`--dry-run` и `--force` не поддерживаются.
+
+Успех или допустимый no-op возвращает `0`; конфликт, ошибка одного target или
+частичный результат — `1`. Диагностика использует стабильные краткие коды,
+включая `SKILL_AGENT_REQUIRED`, `SKILL_LOCAL_CHANGES`, `SKILL_UNMANAGED`,
+`SKILL_MANIFEST_INVALID`, `SKILL_PATH_UNSAFE`, `SKILL_DOWNGRADE_BLOCKED`,
+`SKILL_TARGET_CHANGED` и `SKILL_RESTORE_FAILED`.
 
 ## Общие правила
 
@@ -76,6 +105,7 @@ JSON-результаты CLI. Конкретный синтаксис флаг�
   `4` при внутренней ошибке;
 - `serve`: первоначальная ошибка сборки или listener завершает команду с `1`;
   ошибка последующей пересборки не останавливает сервер.
+- `skill`: конфликт или частичная ошибка возвращает `1`; status и no-op — `0`.
 
 ## Подробные правила
 
@@ -83,3 +113,4 @@ JSON-результаты CLI. Конкретный синтаксис флаг�
 - [Просмотр изменений](../guides/documentation-changes.md)
 - [Виды документов](../reference/document-types.md)
 - [Настройка](../reference/configuration.md)
+- [Установка AI-skill](../guides/skill-installation.md)

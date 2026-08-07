@@ -182,8 +182,10 @@ func TestDocumentationServerDoesNotExposeSourceOrPartialBuild(t *testing.T) {
 func TestDocumentationServerLocalePortalsAreReadOnlyAndMatched(t *testing.T) {
 	options, docs := serveTestOptions(t)
 	writeTestFile(t, docs, "guide.md", "# Canonical guide\n\nCanonical text.\n")
+	writeTestFile(t, docs, "roadmap.md", "# Roadmap\n\n## Next\n\n- [ ] `DLV-NEXT-001` Next.\n")
 	writeTestFile(t, filepath.Join(filepath.Dir(docs), "i18n", "en"), "index.md", "# English home\n\nHome.\n")
 	writeTestFile(t, filepath.Join(filepath.Dir(docs), "i18n", "en"), "guide.md", "# English guide\n\nEnglish text.\n")
+	writeTestFile(t, filepath.Join(filepath.Dir(docs), "i18n", "en"), "roadmap.md", "# Roadmap\n\n## Next\n\n- [ ] `DLV-NEXT-001` Next.\n")
 	writeTestFile(t, filepath.Dir(docs), ".docu-docu/config.yml", `project:
   locale: ru
   sections:
@@ -233,6 +235,13 @@ translations:
 	for _, forbidden := range []string{"data-server-rebuild", "/_docu-docu/editor/", "/changes/"} {
 		if strings.Contains(locale.Body.String(), forbidden) {
 			t.Fatalf("locale leaked canonical control %q", forbidden)
+		}
+	}
+	localeRoadmap := httptest.NewRecorder()
+	handler.ServeHTTP(localeRoadmap, httptest.NewRequest(http.MethodGet, "/_docu-docu/locales/en/roadmap.html", nil))
+	for _, forbidden := range []string{"data-roadmap-add", "Добавить результат", "/_docu-docu/api/editor/roadmap"} {
+		if strings.Contains(localeRoadmap.Body.String(), forbidden) {
+			t.Fatalf("locale roadmap leaked canonical control %q", forbidden)
 		}
 	}
 	for _, target := range []string{"/_docu-docu/locales/en/_docu-docu/api/editor/file", "/_docu-docu/locales/en/../editor/"} {

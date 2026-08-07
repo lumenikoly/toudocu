@@ -6,6 +6,22 @@ export const serveRuntimeMessages: Record<string, string> = {
   "core.serve-runtime.005": "Пересборка завершена: {0} документов, {1} страниц. Страница обновляется.",
   "core.serve-runtime.006": "Повторить",
   "core.serve-runtime.007": "Пересборка не выполнена: {0}. Исправьте причину и повторите.",
+  "features.roadmap.001": "Добавить результат",
+  "features.roadmap.002": "Этап roadmap",
+  "features.roadmap.003": "Формулировка результата",
+  "features.roadmap.004": "Например: Подготовлен установочный пакет.",
+  "features.roadmap.005": "Идентификатор",
+  "features.roadmap.006": "Предложение сервера: {0}",
+  "features.roadmap.007": "Отмена",
+  "features.roadmap.008": "Добавить",
+  "features.roadmap.009": "Загрузка этапов…",
+  "features.roadmap.010": "Сохранение…",
+  "features.roadmap.011": "Результат {0} добавлен. Roadmap обновляется.",
+  "features.roadmap.012": "Roadmap изменился снаружи. Проверьте обновлённые этапы и повторите сохранение; введённые данные сохранены.",
+  "features.roadmap.013": "Не удалось загрузить roadmap: {0}",
+  "features.roadmap.014": "Не удалось добавить результат: {0}",
+  "features.roadmap.015": "В этапе {0} уже {1} элементов",
+  "features.roadmap.016": "Закрыть",
 };
 
 export const portalMessages: Record<string, string> = {

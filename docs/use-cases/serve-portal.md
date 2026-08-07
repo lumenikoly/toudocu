@@ -9,7 +9,7 @@
 - Начальный экран: SC-SITE-HOME
 - Конечные экраны: SC-SITE-DOCUMENT, SC-SITE-API-DOCS
 - Разрешить цикл: Да
-- Последнее обновление: 2026-08-05
+- Последнее обновление: 2026-08-06
 
 Разработчик просматривает и редактирует документацию через локальный HTTP-сервер
 и получает обновлённую модель и портал после сохранения или внешнего изменения.
@@ -35,26 +35,29 @@
 5. Если разработчик переходит в `/_docu-docu/api-docs/`, он выбирает Editor или
    Changes contract, раскрывает operation и при необходимости выполняет
    безопасный `GET`/`HEAD`; сценарий завершается на `SC-SITE-API-DOCS`.
-6. Иначе разработчик открывает `/_docu-docu/editor/`; Editor получает revision,
+6. Иначе на странице roadmap разработчик может выбрать существующий этап,
+   проверить предложенный `DLV-ROADMAP-NNN`, изменить ID и добавить однострочный
+   результат. Docu-docu выполняет CAS insertion и возвращает страницу к этапу.
+7. Или разработчик открывает `/_docu-docu/editor/`; Editor получает revision,
    безопасный список файлов и общий реестр шаблонов.
-7. Разработчик открывает исходник, меняет текст, проверяет Markdown preview и
+8. Разработчик открывает исходник, меняет текст, проверяет Markdown preview и
    positional diagnostics и сохраняет его.
-8. Docu-docu сравнивает SHA-256 digest, атомарно заменяет файл и синхронно
+9. Docu-docu сравнивает SHA-256 digest, атомарно заменяет файл и синхронно
    перестраивает модель, HTML, поиск и diagnostics.
-9. При переходе между canonical HTML-документами portal может заранее получить
+10. При переходе между canonical HTML-документами portal может заранее получить
    целевую страницу, проверить текущую revision и заменить document layout без
    rebuild. Back/Forward, anchors, scroll и keyboard focus продолжают работать.
-10. Browser polling получает новую revision: обычная страница перезагружается,
+11. Browser polling получает новую revision: обычная страница перезагружается,
    чистый editor обновляется, а dirty editor сохраняет текст и показывает
    конфликт.
-11. HTTP-навигация отдаёт последний успешный snapshot и не запускает rebuild.
+12. HTTP-навигация отдаёт последний успешный snapshot и не запускает rebuild.
    Watcher стабилизирует внешние изменения и перестраивает только изменившийся
    documentation root; ручная пересборка canonical portal показывает область
    «модель, HTML и поиск», progress и итог перед перезагрузкой.
-12. Если `serve` запущен из canonical root с `translations.<locale>`, header
+13. Если `serve` запущен из canonical root с `translations.<locale>`, header
    предлагает locale tags. Соответствующий Markdown открывается в выбранном
    locale, а отсутствующая страница — на его homepage.
-13. Разработчик останавливает сервер сочетанием `Ctrl+C`.
+14. Разработчик останавливает сервер сочетанием `Ctrl+C`.
 
 ## Ошибочные сценарии
 
@@ -63,6 +66,8 @@
 - stale digest возвращает `409 stale_digest`; явное overwrite повторяется с
   актуальным digest и `confirmOverwrite: true`, а запрос без подтверждения и
   второй внешний конфликт снова получают `409`;
+- stale roadmap digest не допускает overwrite: диалог сохраняет ID, текст и
+  выбранный этап, обновляет этапы/digest/подсказку и требует повторного submit;
 - при внешнем удалении dirty-файла редактор сохраняет буфер и предлагает скачать
   его, не показывая неприменимые load/overwrite действия;
 - malformed, oversized, cross-origin и unsafe-path запросы получают JSON error
@@ -93,6 +98,7 @@ editor, changes, workspace, API docs или canonical API.
 - [BR-SITE-003](../modules/site.md#br-site-003-dev-сервер-не-раскрывает-исходный-репозиторий) — dev-сервер не раскрывает исходный репозиторий.
 - [BR-SITE-007](../modules/site.md#br-site-007-build-и-serve-имеют-разные-возможности) — build остаётся static read-only, serve предоставляет live workspace.
 - [BR-SITE-010](../modules/site.md#br-site-010-мягкая-навигация-ограничена-canonical-serve-portal) — мягкие переходы не меняют offline/file и locale semantics.
+- [BR-SITE-014](../modules/site.md#br-site-014-roadmap-изменяется-только-ограниченной-операцией) — serve добавляет только новый `DLV-*` с CAS, не передавая разбор Markdown браузеру.
 
 ## Реализация
 
@@ -111,6 +117,8 @@ editor, changes, workspace, API docs или canonical API.
 - path, symlink, body/content limits, same-origin guards и CAS conflicts;
 - Markdown preview, JSON/YAML diagnostics и raw `text/plain`;
 - desktop/mobile keyboard flow без потери dirty текста;
+- roadmap happy path, изменённый предложенный ID, прогресс, CAS preservation,
+  keyboard/Escape/focus и mobile layout;
 - ручная пересборка из workspace-панели с видимой областью, progress, итогом и
   последующей перезагрузкой страницы;
 - недоступность кнопки вне `serve` и обработка ошибки ручной пересборки;

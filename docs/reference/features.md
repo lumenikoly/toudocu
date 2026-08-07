@@ -34,6 +34,7 @@ Docu-docu поставляется одним Go-бинарником без в�
 | Изменения задачи | `docu-docu task changes TASK-ID ./docs` | task-scoped change report и impact diagnostics |
 | Архивирование задачи | `docu-docu task archive TASK-ID ./docs` | перемещение терминальной задачи в годовой архив |
 | Восстановление задачи | `docu-docu task restore TASK-ID ./docs` | возврат задачи из годового архива |
+| Lifecycle AI-skill | `docu-docu skill install|status|update|uninstall` | text-состояние managed offline package |
 | Версия | `docu-docu version` | версия генератора |
 
 Сборка требует явного `docu-docu build ./docs`; путь без команды отклоняется.
@@ -41,6 +42,10 @@ Docu-docu поставляется одним Go-бинарником без в�
 `docs/index.md` и `docs/architecture/overview.md`; `task init` создаёт только
 work item. Параметры и exit codes
 определены в [CLI-контракте](../contracts/cli.md).
+
+Skill lifecycle не входит в публичный Go-фасад и не использует JSON output.
+Targets, состояния и безопасное ручное разрешение конфликтов описывает
+[руководство установки skill](../guides/skill-installation.md).
 
 Команды `changes` поддерживают фильтры `--status`, `--module`, `--type` и
 `--permanent-only`. Последний оставляет только постоянную документацию и

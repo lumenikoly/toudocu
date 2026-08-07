@@ -180,6 +180,11 @@
     "url": "guides/screens.html"
   },
   {
+    "title": "Установка AI-skill Docu-docu",
+    "kind": "document",
+    "url": "guides/skill-installation.html"
+  },
+  {
     "title": "Проверка изменений Docu-docu",
     "kind": "document",
     "url": "guides/testing.html"
@@ -340,6 +345,12 @@
     "url": "use-cases/UC-TASK-01.html"
   },
   {
+    "id": "UC-AGENT-01",
+    "title": "UC-AGENT-01: Установить AI-skill Docu-docu",
+    "kind": "use-case",
+    "url": "use-cases/UC-AGENT-01.html"
+  },
+  {
     "id": "UC-DOCS-05",
     "title": "UC-DOCS-05: Просматривать изменения документации",
     "kind": "use-case",
@@ -440,6 +451,18 @@
     "title": "TASK-SITE-003: Разделить Go-ядро и frontend-слой портала",
     "kind": "task",
     "url": "work/TASK-SITE-003.html"
+  },
+  {
+    "id": "TASK-SITE-004",
+    "title": "TASK-SITE-004: Добавление результата roadmap через serve",
+    "kind": "task",
+    "url": "work/TASK-SITE-004.html"
+  },
+  {
+    "id": "TASK-SKILL-001",
+    "title": "TASK-SKILL-001: Добавить встроенную установку skill Docu-docu",
+    "kind": "task",
+    "url": "work/TASK-SKILL-001.html"
   },
   {
     "title": "Changelog",

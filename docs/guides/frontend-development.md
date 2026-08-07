@@ -33,7 +33,7 @@ manifest и assets детерминированы: timestamps и random values �
 `appearance.js` доступен в static и serve runtime и подключается обычным
 блокирующим script до CSS, чтобы сохранённая тема действовала уже в первом
 кадре. `portal.js` доступен в static и serve runtime. `serve.js`, `editor.js`,
-`changes.js`, CodeMirror и Swagger UI являются serve-only. Project logic,
+`changes.js`, roadmap dialog, CodeMirror и Swagger UI являются serve-only. Project logic,
 classification, path guards, semantic diff и verification нельзя переносить в
 TypeScript.
 

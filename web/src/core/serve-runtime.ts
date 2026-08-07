@@ -25,6 +25,8 @@ registerMessages(serveRuntimeMessages);
                 return;
             const next: any = response.headers.get('ETag') || '';
             if (etag && next && next !== etag) {
+                if (document.querySelector('[data-roadmap-dialog][open]'))
+                    return;
                 window.location.reload();
                 return;
             }

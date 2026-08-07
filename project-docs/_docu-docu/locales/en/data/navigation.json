@@ -80,11 +80,6 @@
     "url": "contracts/editor-http.html"
   },
   {
-    "title": "Go API contract Docu-docu v1",
-    "kind": "document",
-    "url": "contracts/go-api.html"
-  },
-  {
     "title": "ADR-001: Dependency-free Go CLI",
     "kind": "document",
     "url": "decisions/001-dependency-free.html"

@@ -28,6 +28,7 @@ func PrintHelp(w io.Writer) {
   search      Найти документы в исходном Markdown
   scaffold    Создать один типизированный документ
   task        Операции жизненного цикла work item
+  skill       Установить встроенный AI-skill для поддерживаемого host
   version     Показать версию
 
 Для справки по применимым параметрам и побочным эффектам:
@@ -150,7 +151,15 @@ TYPE: Feature, Bug, Maintenance, Documentation или Research.
 Использование:
   docu-docu task changes TASK-ID [docs-dir] [--base REV|--branch-base REF]
                        [--target working-tree|index|HEAD|REV]
-                       [--format text|json|markdown] [-o FILE]`,
+		               [--format text|json|markdown] [-o FILE]`,
+		"skill": `Управляет встроенным offline-пакетом AI-skill Docu-docu.
+
+Использование:
+  docu-docu skill install|status|update|uninstall
+                  [--agent auto|codex|claude-code|copilot|all]
+                  [--scope project|user] [--repository-root DIR]
+
+--repository-root доступен только для project scope. status ничего не изменяет.`,
 		"version": "Показывает версию Docu-docu без побочных эффектов.\n\nИспользование:\n  docu-docu version",
 	}
 	if text, ok := help[topic]; ok {
@@ -775,6 +784,9 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 		PrintHelp(stdout)
 		return 0
 	}
+	if argv[0] == "skill" {
+		return runSkillCLI(argv, strings.NewReader(""), stdout, stderr, false)
+	}
 	options, help, version, err := ParseArguments(argv)
 	if err != nil {
 		fmt.Fprintln(stderr, "Ошибка:", err)
@@ -980,4 +992,9 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	return 0
 }
 
-func Main() { os.Exit(RunCLI(os.Args[1:], os.Stdout, os.Stderr)) }
+func Main() {
+	if len(os.Args) > 1 && os.Args[1] == "skill" && !skillHelpRequested(os.Args[2:]) {
+		os.Exit(runSkillCLI(os.Args[1:], os.Stdin, os.Stdout, os.Stderr, stdioInteractive(os.Stdin, os.Stdout)))
+	}
+	os.Exit(RunCLI(os.Args[1:], os.Stdout, os.Stderr))
+}
