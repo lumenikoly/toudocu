@@ -157,8 +157,9 @@ h1 {
 .audience-item:first-child { padding-left: 0; }
 .audience-item:last-child { padding-right: 0; }
 .audience-item + .audience-item { border-left: 1px solid var(--line); }
+.audience-item .section-label { font-size: .76rem; }
 .section-label { margin-bottom: 14px; color: rgba(0,71,171,.68); }
-.audience-item p:last-child { max-width: 42ch; margin-bottom: 0; font-size: .92rem; text-wrap: pretty; }
+.audience-item p:last-child { max-width: 42ch; margin-bottom: 0; font-size: 1.02rem; text-wrap: pretty; }
 
 .feature-card, .workflow-card, .install-card {
   min-width: 0;
@@ -267,7 +268,7 @@ h1 {
 @media (max-width: 700px) {
   html { scroll-behavior: auto; }
   .site-header { min-height: 72px; padding: 14px 20px; }
-  .header-actions .pill-outline { display: none; }
+  .header-source-link { display: none; }
   .pill { min-height: 42px; padding: 0 18px; }
   .hero { min-height: calc(100svh - 72px); gap: 32px; padding: 58px 20px 44px; }
   .eyebrow { font-size: .62rem; }

@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'landing/**'
+      - 'project-docs/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -28,10 +29,15 @@ jobs:
         uses: actions/checkout@v6
       - name: Configure Pages
         uses: actions/configure-pages@v6
-      - name: Upload landing artifact
+      - name: Prepare Pages artifact
+        run: |
+          mkdir -p "${RUNNER_TEMP}/docu-docu-pages/project-docs"
+          cp -a landing/. "${RUNNER_TEMP}/docu-docu-pages/"
+          cp -a project-docs/. "${RUNNER_TEMP}/docu-docu-pages/project-docs/"
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: landing
+          path: ${{ runner.temp }}/docu-docu-pages
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

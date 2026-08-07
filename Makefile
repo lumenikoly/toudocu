@@ -5,7 +5,7 @@ DOCU_DOCU := go run $(CMD)
 DOCS_DIR := docs
 DEMO_DOCS_DIR := example/docs
 
-.PHONY: fmt fmt-check vet test web web-check browser-test check build docs docs-serve demo demo-serve clean release
+.PHONY: fmt fmt-check vet test web web-check browser-test check build docs docs-serve landing-serve demo demo-serve clean release
 
 fmt:
 	gofmt -w .
@@ -47,6 +47,9 @@ docs:
 
 docs-serve:
 	$(DOCU_DOCU) serve ./$(DOCS_DIR)
+
+landing-serve:
+	node landing/dev-server.mjs
 
 demo:
 	rm -rf example/site
