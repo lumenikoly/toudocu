@@ -44,6 +44,7 @@ build:
 
 docs:
 	$(DOCU_DOCU) build ./$(DOCS_DIR) --output ./build/project-docs --repository-root . --clean
+	$(DOCU_DOCU) build ./docs-en --output ./build/project-docs/en --repository-root . --clean
 
 docs-serve:
 	$(DOCU_DOCU) serve ./$(DOCS_DIR)

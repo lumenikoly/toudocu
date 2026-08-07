@@ -68,5 +68,8 @@ server.listen(port, "127.0.0.1", () => {
   const address = server.address();
   const boundPort = typeof address === "object" && address ? address.port : port;
   console.log(`Docu-docu landing: http://127.0.0.1:${boundPort}/`);
-  console.log(`Static documentation: http://127.0.0.1:${boundPort}/project-docs/`);
+  console.log(`Russian landing: http://127.0.0.1:${boundPort}/ru/`);
+  console.log(`English landing: http://127.0.0.1:${boundPort}/en/`);
+  console.log(`Russian documentation: http://127.0.0.1:${boundPort}/project-docs/`);
+  console.log(`English documentation: http://127.0.0.1:${boundPort}/project-docs/en/`);
 });
