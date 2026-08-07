@@ -7,6 +7,8 @@
   --gray: #f5f5f5;
   --green: #e1fdc7;
   --green-ink: #174b18;
+  --error: #fde8e7;
+  --error-ink: #7a1f1b;
   --blue: #e1f5fe;
   --violet: #e8eaf6;
   --focus: #002d72;
@@ -133,6 +135,7 @@ h1 {
 .terminal-line { display: grid; grid-template-columns: 18px 1fr; gap: 8px; min-width: 0; padding: 3px 0; }
 .terminal-line code, .terminal-line span:last-child { overflow-wrap: anywhere; }
 .terminal-highlight { margin: 3px -24px; padding: 3px 24px; background: var(--green); color: var(--green-ink); font-weight: 700; }
+.terminal-error { margin: 3px -24px; padding: 3px 24px; background: var(--error); color: var(--error-ink); font-weight: 700; }
 .terminal-note { color: var(--muted); }
 
 .landing-grid {

@@ -34,13 +34,17 @@
         <div class="hero-copy">
           <p class="eyebrow hero-stage">MARKDOWN IN / VERIFIED MODEL OUT</p>
           <h1 id="hero-title" class="hero-stage">CODE ON VIBES.<br />DOCUMENT WITH<br />PROOF.</h1>
-          <p class="hero-summary hero-stage">Docu-docu checks structured Markdown, resolves its relationships, and builds a static portal for people and agents.</p>
         </div>
 
-        <div class="terminal hero-stage" aria-label="Docu-docu strict validation command">
-          <div class="terminal-line"><span aria-hidden="true">$</span><code>docu-docu check ./docs --strict</code></div>
-          <div class="terminal-line terminal-highlight"><span aria-hidden="true">✓</span><span>Validates structure, links, relationships, and recognized OpenAPI contracts.</span></div>
-          <div class="terminal-line terminal-note"><span aria-hidden="true">→</span><span>Runs locally and in CI without a service dependency.</span></div>
+        <div class="terminal hero-stage" aria-label="Agent task-context example">
+          <div class="terminal-line"><span aria-hidden="true">$</span><code>cursor-agent &quot;Refactor the payment gateway to use the new provider&quot;</code></div>
+          <div class="terminal-line"><span aria-hidden="true">→</span><span>Thinking... Vibe coding session initiated.</span></div>
+          <div class="terminal-line"><span aria-hidden="true">→</span><span>Modified 14 files. Built project.</span></div>
+          <div class="terminal-line terminal-error"><span aria-hidden="true"></span><span>Panic: runtime error: invalid memory address or nil pointer dereference</span></div>
+          <div class="terminal-line terminal-note"><span aria-hidden="true"></span><span>// Oh no. The agent missed the required ProviderConfig contract.</span></div>
+          <div class="terminal-line"><span aria-hidden="true">$</span><code>docu-docu task context TASK-PAYMENTS-001 ./docs --format json</code></div>
+          <div class="terminal-line terminal-highlight"><span aria-hidden="true">✓</span><span>Task context loaded: the ProviderConfig contract and verification steps.</span></div>
+          <div class="terminal-line terminal-note"><span aria-hidden="true"></span><span>Agent updated. Architecture alignment: 100%.</span></div>
         </div>
       </section>
 
