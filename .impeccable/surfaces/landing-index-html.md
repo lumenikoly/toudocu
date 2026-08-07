@@ -19,7 +19,7 @@ The surface uses the real Screen Map, generated project home, and Git-backed Cha
 
 ## Chosen direction
 
-A literal implementation of the approved Variant reference: open white first viewport, oversized three-line black proposition, outlined and black capsule actions, a soft command panel, then a 12-column board of pale green, blue, gray, and violet rounded blocks. Real Screen Map, portal home, and Changes screenshots replace the reference's placeholder mockups. The memorable moment is the transition from the sparse white hero into the dense evidence board.
+A literal implementation of the approved Variant reference: open parchment first viewport, oversized three-line cobalt proposition, outlined and cobalt capsule actions, a soft command panel, then a 12-column board of pale green, blue, gray, and violet rounded blocks. Real Screen Map, portal home, and Changes screenshots replace the reference's placeholder mockups. The memorable moment is the transition from the sparse parchment hero into the dense evidence board.
 
 ## Constraints
 

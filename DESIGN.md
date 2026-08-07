@@ -2,19 +2,20 @@
 name: Docu-docu
 description: A high-contrast engineering board for verifiable documentation tooling.
 colors:
+  canvas: "#f5e6ca"
   white: "#ffffff"
-  ink: "#000000"
-  muted: "#666666"
-  hover-ink: "#2c2c2c"
-  quiet-label: "#8b8b8b"
-  line: "#e0e0e0"
+  ink: "#0047ab"
+  muted: "#315a92"
+  hover-ink: "#003a8c"
+  quiet-label: "#315a92"
+  line: "#d9c8a9"
   internal-rule: "#d7d7d7"
   soft-gray: "#f5f5f5"
   verified-green: "#e1fdc7"
   verified-ink: "#174b18"
   portal-blue: "#e1f5fe"
   context-violet: "#e8eaf6"
-  focus-indigo: "#3346c4"
+  focus-indigo: "#002d72"
 typography:
   display:
     fontFamily: "ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif"
@@ -139,33 +140,34 @@ components:
 
 **Creative North Star: "The Variant Engineering Board"**
 
-Docu-docu uses the direct, high-energy composition of the approved Variant reference: a white canvas, enormous black statements, precise mono captions, capsule actions, and large softly colored blocks. The page feels like an engineering presentation board rather than a dark developer console or a generic SaaS dashboard.
+Docu-docu uses the direct, high-energy composition of the approved Variant reference: a parchment canvas, enormous cobalt statements, precise mono captions, capsule actions, and large softly colored blocks. The page feels like an engineering presentation board rather than a dark developer console or a generic SaaS dashboard.
 
 Real product UI sits inside soft white insets and replaces invented diagrams. Public claims stay factual and repository-backed; the expressive scale comes from typography, spacing, and block color rather than hype.
 
 **Key Characteristics:**
 
-- Open white first view with a large left-anchored proposition.
-- Black capsule CTAs and thin outlined secondary actions.
+- Open parchment first view with a large left-anchored proposition.
+- Cobalt capsule CTAs and thin outlined secondary actions.
 - A 12-column board of 24px-radius feature blocks.
 - Pale green, blue, violet, and neutral gray as full card fields.
 - Real UI screenshots inside white 12px-radius insets.
 
 ## Colors
 
-White and black dominate. Soft color identifies the kind of evidence carried by a whole region.
+Parchment and cobalt dominate. Soft color identifies the kind of evidence carried by a whole region.
 
-- **White** (`#ffffff`): page canvas and UI insets.
-- **Ink** (`#000000`): statements, controls, and primary copy.
-- **Muted** (`#666666`): secondary text.
-- **Rule Gray** (`#e0e0e0`): structural dividers.
+- **Parchment** (`#f5e6ca`): page canvas.
+- **White** (`#ffffff`): UI insets.
+- **Ink** (`#0047ab`): statements, controls, and primary copy.
+- **Muted** (`#315a92`): secondary text.
+- **Rule Beige** (`#d9c8a9`): structural dividers.
 - **Soft Gray** (`#f5f5f5`): workflow and installation fields.
 - **Verified Green** (`#e1fdc7`) with **Verified Ink** (`#174b18`): validation evidence and explicit success.
 - **Portal Blue** (`#e1f5fe`): static portal evidence.
 - **Context Violet** (`#e8eaf6`): Git-backed context and change inspection.
-- **Focus Indigo** (`#3346c4`): keyboard focus only.
+- **Focus Indigo** (`#002d72`): keyboard focus only.
 
-**The Field Color Rule.** Color owns a complete evidence block; do not scatter small decorative accents across the white canvas.
+**The Field Color Rule.** Color owns a complete evidence block; do not scatter small decorative accents across the parchment canvas.
 
 ## Typography
 
@@ -196,7 +198,7 @@ Feature blocks use 24px radii, reduced to 20px on mobile. UI insets and command 
 
 ### Pill actions
 
-Primary actions are black/white capsules at least 42px high. Secondary actions use a 1.5px black inset outline on white. Press feedback scales to `0.96`; focus uses a 3px indigo outline with 4px offset.
+Primary actions are cobalt/white capsules at least 42px high. Secondary actions use a 1.5px cobalt inset outline on parchment. Press feedback scales to `0.96`; focus uses a 3px indigo outline with 4px offset.
 
 ### Feature cards
 
@@ -215,7 +217,7 @@ Commands use monospace, white surfaces, 12px radii, and restrained shadows. Veri
 ### Do:
 
 - **Do** match the approved Variant composition before inventing a new layout.
-- **Do** use three-line oversized black statements on open white space.
+- **Do** use three-line oversized cobalt statements on open parchment space.
 - **Do** let one soft color own each large evidence block.
 - **Do** replace placeholder mockups with real Docu-docu screenshots and commands.
 
