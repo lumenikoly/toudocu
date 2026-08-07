@@ -232,12 +232,47 @@ func runPowerShellInstaller(t *testing.T, serverURL string, overrides map[string
 	for key, value := range overrides {
 		values[key] = value
 	}
+	command.Env = os.Environ()
 	for key, value := range values {
-		command.Env = append(command.Env, key+"="+value)
+		command.Env = setWindowsEnvironmentValue(command.Env, key, value)
 	}
-	command.Env = append(os.Environ(), command.Env...)
 	output, err := command.CombinedOutput()
 	return string(output), err
+}
+
+func setWindowsEnvironmentValue(environment []string, key, value string) []string {
+	prefix := key + "="
+	filtered := environment[:0]
+	for _, entry := range environment {
+		name, _, found := strings.Cut(entry, "=")
+		if found && strings.EqualFold(name, key) {
+			continue
+		}
+		filtered = append(filtered, entry)
+	}
+	return append(filtered, prefix+value)
+}
+
+func TestSetWindowsEnvironmentValue(t *testing.T) {
+	environment := []string{
+		"Path=C:\\Windows",
+		"processor_architecture=ARM64",
+		"PROCESSOR_ARCHITECTURE=",
+	}
+	updated := setWindowsEnvironmentValue(environment, "PROCESSOR_ARCHITECTURE", "AMD64")
+	architectureValues := 0
+	for _, entry := range updated {
+		name, value, found := strings.Cut(entry, "=")
+		if found && strings.EqualFold(name, "PROCESSOR_ARCHITECTURE") {
+			architectureValues++
+			if value != "AMD64" {
+				t.Fatalf("architecture = %q, want AMD64", value)
+			}
+		}
+	}
+	if architectureValues != 1 {
+		t.Fatalf("architecture entries = %d, want 1: %v", architectureValues, updated)
+	}
 }
 
 func windowsContainsString(values []string, target string) bool {
