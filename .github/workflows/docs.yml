@@ -1,0 +1,22 @@
+name: Docs contract
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: 'stable'
+          cache: true
+      - name: Verify documentation contract
+        run: go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0

@@ -2,6 +2,11 @@
 
 **English** | [Русский](README.ru.md)
 
+[![CI](https://github.com/lumenikoly/docu-docu/actions/workflows/test.yml/badge.svg)](https://github.com/lumenikoly/docu-docu/actions/workflows/test.yml)
+[![Docs contract](https://github.com/lumenikoly/docu-docu/actions/workflows/docs.yml/badge.svg)](https://github.com/lumenikoly/docu-docu/actions/workflows/docs.yml)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/lumenikoly/docu-docu)](https://go.dev/)
+[![License](https://img.shields.io/github/license/lumenikoly/docu-docu)](LICENSE)
+
 **A tool for verifiable Markdown documentation and static HTTP portals.**
 
 **Docu-docu** helps keep documentation aligned with the codebase, find inconsistencies, and build clean static portals for reading.
