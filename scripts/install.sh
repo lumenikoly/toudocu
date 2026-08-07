@@ -33,8 +33,8 @@ trap cleanup EXIT HUP INT TERM
 case "$version" in
     latest) ;;
     *)
-        printf '%s\n' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' ||
-            fail "DOCU_DOCU_VERSION must be latest or X.Y.Z"
+        printf '%s\n' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-rc\.[1-9][0-9]*)?$' ||
+            fail "DOCU_DOCU_VERSION must be latest, X.Y.Z, or X.Y.Z-rc.N"
         ;;
 esac
 
@@ -100,8 +100,9 @@ downloaded_version=$("$downloaded" version 2>/dev/null | tr -d '\r\n') ||
     fail "the downloaded binary cannot report its version"
 printf '%s\n' "$downloaded_version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' ||
     fail "the downloaded binary reported an invalid version: $downloaded_version"
-if [ "$version" != "latest" ] && [ "$downloaded_version" != "$version" ]; then
-    fail "the downloaded binary reported $downloaded_version, expected $version"
+expected_version=${version%%-rc.*}
+if [ "$version" != "latest" ] && [ "$downloaded_version" != "$expected_version" ]; then
+    fail "the downloaded binary reported $downloaded_version, expected $expected_version"
 fi
 
 mkdir -p "$install_dir" || fail "cannot create install directory: $install_dir"

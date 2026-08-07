@@ -52,9 +52,9 @@ jobs:
           cp -a landing/ru landing/en "${RUNNER_TEMP}/docu-docu-pages/"
           cp -a landing/assets/. "${RUNNER_TEMP}/docu-docu-pages/assets/"
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ${{ runner.temp }}/docu-docu-pages
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

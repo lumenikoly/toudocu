@@ -2,6 +2,8 @@
 
 ## 0.0.1
 
+- Release workflow поддерживает stable и RC-каналы: RC публикуется как GitHub
+  prerelease с тегом `X.Y.Z-rc.N` и устанавливается по явно выбранной версии.
 - Markdown полностью переведён на закреплённый Goldmark `v1.8.5`: один
   CommonMark/GFM AST обслуживает model, validation, portal, editor и changes.
   Включены только tables, task lists, strikethrough и literal autolinks.
