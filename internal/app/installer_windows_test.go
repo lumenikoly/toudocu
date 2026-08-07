@@ -233,8 +233,9 @@ func runPowerShellInstaller(t *testing.T, serverURL string, overrides map[string
 		values[key] = value
 	}
 	for key, value := range values {
-		t.Setenv(key, value)
+		command.Env = append(command.Env, key+"="+value)
 	}
+	command.Env = append(os.Environ(), command.Env...)
 	output, err := command.CombinedOutput()
 	return string(output), err
 }

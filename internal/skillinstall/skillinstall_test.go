@@ -159,9 +159,11 @@ func TestSymlinkInsideManagedCopyIsModified(t *testing.T) {
 func TestModeChangeIsModified(t *testing.T) {
 	target, bundle := testTarget(t)
 	installForTest(t, target, bundle)
-	if err := os.Chmod(filepath.Join(target.Path, "SKILL.md"), 0o600); err != nil {
+	skillPath := filepath.Join(target.Path, "SKILL.md")
+	if err := os.Chmod(skillPath, 0o444); err != nil {
 		t.Fatal(err)
 	}
+	t.Cleanup(func() { _ = os.Chmod(skillPath, 0o644) })
 	if state := Inspect(target, bundle).State; state != Modified {
 		t.Fatalf("mode change state=%s", state)
 	}
@@ -302,7 +304,7 @@ func TestInstallDoesNotExecuteBundledContent(t *testing.T) {
 	if _, err := os.Stat(sentinel); !os.IsNotExist(err) {
 		t.Fatal("bundled script was executed")
 	}
-	if info, err := os.Stat(filepath.Join(target.Path, "scripts", "run.sh")); err != nil || info.Mode().Perm() != 0o755 {
+	if info, err := os.Stat(filepath.Join(target.Path, "scripts", "run.sh")); err != nil || !modeMatches(info.Mode(), 0o755) {
 		t.Fatal("bundled script was not installed as inert executable content")
 	}
 }
