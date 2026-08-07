@@ -24,14 +24,13 @@ try {
         Fail "DOCU_DOCU_NO_MODIFY_PATH must be 0 or 1"
     }
 
-    $Architecture = if ($env:PROCESSOR_ARCHITEW6432) {
-        $env:PROCESSOR_ARCHITEW6432
-    } else {
-        $env:PROCESSOR_ARCHITECTURE
+    $Architecture = [Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()
+    if ($Architecture -eq "X64" -and $env:PROCESSOR_ARCHITEW6432 -eq "ARM64") {
+        $Architecture = "Arm64"
     }
     $Asset = switch ($Architecture) {
-        "AMD64" { "docu-docu-windows-amd64.exe"; break }
-        "ARM64" { "docu-docu-windows-arm64.exe"; break }
+        "X64" { "docu-docu-windows-amd64.exe"; break }
+        "Arm64" { "docu-docu-windows-arm64.exe"; break }
         default { Fail "unsupported Windows architecture: $Architecture; only AMD64 and ARM64 are published" }
     }
 
