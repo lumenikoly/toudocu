@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-07T11:10:00Z",
+  "title": "Design System: Docu-docu",
+  "extensions": {
+    "colorMeta": {
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#000000", "tonalRamp": ["#000000", "#1c1c1c", "#2c2c2c", "#555555", "#8b8b8b", "#9b9b9b", "#d7d7d7", "#f5f5f5"] },
+      "verified-green": { "role": "tertiary", "displayName": "Verified Green", "canonical": "#e1fdc7", "tonalRamp": ["#174b18", "#2e6d28", "#4d913f", "#72b85c", "#9cda83", "#c2efa7", "#e1fdc7", "#f5ffec"] },
+      "portal-blue": { "role": "secondary", "displayName": "Portal Blue", "canonical": "#e1f5fe", "tonalRamp": ["#143b4f", "#285b73", "#467f99", "#70a6bf", "#9bcae0", "#c2e5f2", "#e1f5fe", "#f5fcff"] },
+      "context-violet": { "role": "secondary", "displayName": "Context Violet", "canonical": "#e8eaf6", "tonalRamp": ["#292c49", "#44486b", "#666b91", "#8e93b7", "#b5b9d7", "#d4d7ea", "#e8eaf6", "#f8f8fc"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Variant Display", "purpose": "Three-line hero proposition." },
+      "headline": { "displayName": "Card Proposition", "purpose": "Uppercase evidence headings." },
+      "body": { "displayName": "Factual Body", "purpose": "Short repository-backed explanations." },
+      "label": { "displayName": "System Label", "purpose": "Commands, audience labels, and statuses." }
+    },
+    "shadows": [
+      { "name": "terminal", "value": "0 8px 30px rgba(0,0,0,.08)", "purpose": "Place the command panel on the white hero." },
+      { "name": "ui-inset", "value": "0 12px 40px rgba(0,0,0,.08)", "purpose": "Lift real UI evidence inside a colored block." }
+    ],
+    "motion": [
+      { "name": "entrance-ease", "value": "cubic-bezier(.16,1,.3,1)", "purpose": "Hero stagger and bounded section reveals." },
+      { "name": "maximum-shift", "value": "24px", "purpose": "Maximum entrance displacement." },
+      { "name": "control-duration", "value": "160ms", "purpose": "Pill hover and press feedback." }
+    ],
+    "breakpoints": [
+      { "name": "stack", "value": "980px" },
+      { "name": "mobile", "value": "700px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Pill",
+      "kind": "button",
+      "refersTo": "pill-primary",
+      "description": "Black capsule primary action.",
+      "html": "<button class=\"ds-pill-primary\">INSTALL CLI</button>",
+      "css": ".ds-pill-primary { min-height:42px; border:0; border-radius:999px; padding:0 22px; background:#000; color:#fff; font:800 .86rem ui-sans-serif,sans-serif; transition:background-color 160ms,transform 160ms; } .ds-pill-primary:hover{background:#2c2c2c}.ds-pill-primary:active{transform:scale(.96)}.ds-pill-primary:focus-visible{outline:3px solid #3346c4;outline-offset:4px}"
+    },
+    {
+      "name": "Outlined Pill",
+      "kind": "button",
+      "description": "White secondary action with black inset outline.",
+      "html": "<button class=\"ds-pill-outline\">VIEW SOURCE</button>",
+      "css": ".ds-pill-outline { min-height:42px; border:0; border-radius:999px; padding:0 22px; background:#fff; color:#000; box-shadow:inset 0 0 0 1.5px #000; font:800 .86rem ui-sans-serif,sans-serif; transition:background-color 160ms,transform 160ms; }.ds-pill-outline:hover{background:#f5f5f5}.ds-pill-outline:active{transform:scale(.96)}.ds-pill-outline:focus-visible{outline:3px solid #3346c4;outline-offset:4px}"
+    },
+    {
+      "name": "Feature Block",
+      "kind": "card",
+      "refersTo": "feature-card",
+      "description": "Large rounded evidence field.",
+      "html": "<section class=\"ds-feature\"><small>VERIFICATION 01</small><h2>MARKDOWN BECOMES A MODEL.</h2><p>Validate typed documents and relationships locally or in CI.</p></section>",
+      "css": ".ds-feature{max-width:540px;min-height:360px;border-radius:24px;padding:42px;background:#e1fdc7;color:#000;font-family:ui-sans-serif,sans-serif}.ds-feature small{font:700 .72rem ui-monospace,monospace;letter-spacing:.06em}.ds-feature h2{max-width:13ch;margin:20px 0;font-size:3rem;line-height:.96;letter-spacing:-.035em}.ds-feature p{max-width:46ch}"
+    },
+    {
+      "name": "UI Inset",
+      "kind": "card",
+      "description": "White screenshot frame inside a colored evidence block.",
+      "html": "<figure class=\"ds-inset\"><header>SCREEN MAP <span>VERIFIED VIEW</span></header><div>REAL PRODUCT UI</div></figure>",
+      "css": ".ds-inset{overflow:hidden;border-radius:12px;background:#fff;box-shadow:0 12px 40px rgba(0,0,0,.08);font-family:ui-sans-serif,sans-serif}.ds-inset header{min-height:48px;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;font-size:.78rem;font-weight:800}.ds-inset header span{border-radius:999px;padding:5px 9px;background:#e1fdc7;color:#174b18;font:700 .72rem ui-monospace,monospace}.ds-inset div{display:grid;aspect-ratio:16/9;place-items:center;background:#f5f5f5;font:700 .72rem ui-monospace,monospace}"
+    },
+    {
+      "name": "Command Panel",
+      "kind": "custom",
+      "description": "Soft white terminal with an explicit verified row.",
+      "html": "<div class=\"ds-command\"><code>$ docu-docu check ./docs --strict</code><strong>✓ Validates structure, links, and relationships.</strong></div>",
+      "css": ".ds-command{overflow:hidden;border-radius:12px;padding:20px 24px;background:#fff;color:#000;box-shadow:0 8px 30px rgba(0,0,0,.08);font:400 .82rem ui-monospace,monospace}.ds-command code,.ds-command strong{display:block;padding:3px 0}.ds-command strong{margin:3px -24px;padding:3px 24px;background:#e1fdc7;color:#174b18}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Variant Engineering Board",
+    "overview": "A white engineering presentation board with oversized black type, capsule actions, large softly colored evidence blocks, and real product UI insets.",
+    "keyCharacteristics": ["Open white hero", "Three-line black proposition", "Pill actions", "12-column colored board", "Real UI insets"],
+    "rules": [
+      { "name": "The Field Color Rule", "body": "Color owns a complete evidence block; do not scatter decorative accents across the canvas.", "section": "colors" },
+      { "name": "The Scale Does the Selling Rule", "body": "Keep language factual and create energy through size and line breaks.", "section": "typography" }
+    ],
+    "dos": ["Do match the approved Variant composition.", "Do use oversized black statements on white.", "Do replace placeholders with real evidence."],
+    "donts": ["Don't use the rejected dark split-screen hero.", "Don't replace rounded blocks with sharp editorial rows.", "Don't invent output or capabilities."]
+  }
+}

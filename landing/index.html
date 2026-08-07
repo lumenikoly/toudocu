@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Docu-docu turns Markdown documentation into a verified model and a backend-independent static portal.">
+    <meta name="theme-color" content="#ffffff">
+    <title>Docu-docu — Code on vibes. Document with proof.</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./script.js" defer></script>
+  </head>
+  <body>
+    <!--
+      THESIS: Reproduce the Variant engineering landing grammar exactly, replacing invented claims with real Docu-docu proof.
+      OWN-WORLD: White canvas, oversized black sans type, pale green/blue/violet/gray rounded blocks, pill actions, and soft white UI insets.
+      STORY: Understand the verified Markdown model, inspect its real portal surfaces, follow CHECK → BUILD → SERVE, then install the CLI.
+      FIRST VIEWPORT: Compact brand/actions above a left-anchored three-line headline, factual summary, and a wide command panel on open white space.
+      FORM: Brief-pinned Variant composition; reference selected directly; seed key VARIANT-D16FF949.
+      FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+    -->
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <a class="wordmark" href="#top" aria-label="Docu-docu home">DOCU-DOCU</a>
+      <nav class="header-actions" aria-label="Primary navigation">
+        <a class="pill pill-outline" href="https://github.com/lumenikoly/docu-docu" target="_blank" rel="noreferrer">View source</a>
+        <a class="pill pill-black" href="#install">Install CLI</a>
+      </nav>
+    </header>
+
+    <main id="main" tabindex="-1">
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow hero-stage">MARKDOWN IN / VERIFIED MODEL OUT</p>
+          <h1 id="hero-title" class="hero-stage">CODE ON VIBES.<br />DOCUMENT WITH<br />PROOF.</h1>
+          <p class="hero-summary hero-stage">Docu-docu checks structured Markdown, resolves its relationships, and builds a static portal for people and agents.</p>
+        </div>
+
+        <div class="terminal hero-stage" aria-label="Docu-docu strict validation command">
+          <div class="terminal-line"><span aria-hidden="true">$</span><code>docu-docu check ./docs --strict</code></div>
+          <div class="terminal-line terminal-highlight"><span aria-hidden="true">✓</span><span>Validates structure, links, relationships, and recognized OpenAPI contracts.</span></div>
+          <div class="terminal-line terminal-note"><span aria-hidden="true">→</span><span>Runs locally and in CI without a service dependency.</span></div>
+        </div>
+      </section>
+
+      <section class="landing-grid" id="proof" aria-labelledby="proof-title">
+        <h2 class="visually-hidden" id="proof-title">What Docu-docu proves</h2>
+
+        <div class="audience-row reveal reveal-rise">
+          <article class="audience-item">
+            <p class="section-label">FOR ENGINEERS</p>
+            <p>Follow architecture, requirements, and implementation context without leaving the repository.</p>
+          </article>
+          <article class="audience-item">
+            <p class="section-label">FOR DOCUMENTATION AUTHORS</p>
+            <p>Check structure and relationships before publishing the same model as a static portal.</p>
+          </article>
+          <article class="audience-item">
+            <p class="section-label">FOR AGENTS</p>
+            <p>Request focused task context and Git-backed changes instead of scanning an undifferentiated archive.</p>
+          </article>
+        </div>
+
+        <article class="feature-card card-green reveal reveal-rise">
+          <div class="card-copy">
+            <p class="section-label">VERIFICATION 01</p>
+            <h2>MARKDOWN BECOMES A MODEL.</h2>
+            <p>Validate typed documents, links, transitions, contracts, and relationships locally or in CI.</p>
+          </div>
+          <figure class="ui-inset">
+            <div class="ui-inset-header"><span>Screen Map</span><span class="status-chip">VERIFIED VIEW</span></div>
+            <img src="./assets/site-screen-map.png" width="1440" height="900" alt="Docu-docu Screen Map showing documented screens and the transitions between them.">
+          </figure>
+        </article>
+
+        <article class="feature-card card-blue reveal reveal-rise">
+          <div class="card-copy">
+            <p class="section-label">STATIC OUTPUT</p>
+            <h2>THE PORTAL SHIPS WITHOUT A BACKEND.</h2>
+            <p>Generate a read-only HTTP portal with no database, CDN, npm runtime, or server process after build.</p>
+          </div>
+          <figure class="ui-inset">
+            <div class="ui-inset-header"><span>Project Home</span><span class="neutral-chip">STATIC HTML</span></div>
+            <img src="./assets/site-home.png" width="1440" height="900" alt="Generated Docu-docu portal home showing project status and documentation navigation.">
+          </figure>
+        </article>
+
+        <article class="workflow-card reveal reveal-wipe" id="workflow" aria-labelledby="workflow-title">
+          <div class="workflow-intro">
+            <p class="section-label">DETERMINISTIC PIPELINE</p>
+            <h2 id="workflow-title">CHECK. BUILD. SERVE.</h2>
+            <p>Three explicit commands operate on one repository-backed documentation model.</p>
+          </div>
+          <ol class="workflow-steps">
+            <li><span class="step-name">CHECK</span><code>docu-docu check ./docs --strict</code></li>
+            <li><span class="step-name">BUILD</span><code>docu-docu build ./docs --output ./site --clean</code></li>
+            <li><span class="step-name">SERVE</span><code>docu-docu serve ./docs</code></li>
+          </ol>
+        </article>
+
+        <article class="feature-card card-violet reveal reveal-rise">
+          <div class="card-copy">
+            <p class="section-label">GIT-BACKED CONTEXT</p>
+            <h2>CHANGES STAY CLOSE TO THE EVIDENCE.</h2>
+            <p>Review affected documentation and request focused task context from the same repository state.</p>
+          </div>
+          <figure class="ui-inset">
+            <div class="ui-inset-header"><span>Changes Workspace</span><span class="neutral-chip">WORKING TREE</span></div>
+            <img src="./assets/changes-workspace.png" width="1440" height="900" alt="Changes workspace comparing Git revisions and listing affected documentation files.">
+          </figure>
+        </article>
+
+        <article class="install-card reveal reveal-rise" id="install" aria-labelledby="install-title">
+          <div class="card-copy">
+            <p class="section-label">INSTALL THE CLI</p>
+            <h2 id="install-title">ONE BINARY. NO RUNTIME ENTOURAGE.</h2>
+            <p>The installer selects your platform, verifies SHA-256, and installs or updates Docu-docu in your user directory.</p>
+          </div>
+          <div class="install-commands">
+            <div class="install-command">
+              <div class="command-meta"><span>LINUX / MACOS</span><button type="button" class="copy-button" data-copy-target="install-posix" aria-describedby="copy-status">Copy</button></div>
+              <code id="install-posix">curl -fsSL https://github.com/lumenikoly/docu-docu/releases/latest/download/install.sh | sh</code>
+            </div>
+            <div class="install-command">
+              <div class="command-meta"><span>WINDOWS POWERSHELL</span><button type="button" class="copy-button" data-copy-target="install-powershell" aria-describedby="copy-status">Copy</button></div>
+              <code id="install-powershell">irm https://github.com/lumenikoly/docu-docu/releases/latest/download/install.ps1 | iex</code>
+            </div>
+            <p class="copy-status" id="copy-status" role="status" aria-live="polite"></p>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div>
+        <a class="wordmark" href="#top">DOCU-DOCU</a>
+        <p>Verifiable Markdown documentation and static HTTP portals.</p>
+      </div>
+      <nav aria-label="Project links">
+        <a href="https://github.com/lumenikoly/docu-docu">GitHub</a>
+        <a href="https://github.com/lumenikoly/docu-docu#readme">README</a>
+        <a href="https://github.com/lumenikoly/docu-docu/releases">Releases</a>
+        <a href="https://github.com/lumenikoly/docu-docu/blob/main/LICENSE">License</a>
+      </nav>
+    </footer>
+  </body>
+</html>
