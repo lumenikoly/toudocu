@@ -126,8 +126,9 @@ h1 {
   font-size: clamp(5.4rem, 7.25vw, 6.5rem);
   font-weight: 900;
   letter-spacing: -0.04em;
-  line-height: .9;
+  line-height: .94;
 }
+html[lang="ru"] .hero-line { white-space: nowrap; }
 .hero-summary {
   max-width: 610px;
   margin-bottom: 0;
@@ -380,6 +381,7 @@ h1 {
 .js .reveal.is-visible { opacity: 1; transform: translate(0); clip-path: inset(0); transition-property: opacity, transform, clip-path; transition-duration: 650ms; transition-timing-function: cubic-bezier(.16,1,.3,1); }
 
 @media (max-width: 980px) {
+  html[lang="ru"] .hero h1 { font-size: clamp(2.7rem, 8.5vw, 5.4rem); }
   .feature-card, .install-card { grid-column: 1 / -1; min-height: 620px; }
   .workflow-card { grid-template-columns: 1fr; }
   .capability-row { grid-template-columns: 56px minmax(150px, .55fr) minmax(240px, 1fr) minmax(160px, .65fr); gap: 20px; }
@@ -401,6 +403,8 @@ h1 {
   .hero { min-height: calc(100svh - 72px); gap: 32px; padding: 58px 20px 44px; }
   .eyebrow { font-size: .62rem; }
   h1 { max-width: 13ch; font-size: clamp(2.7rem, 11vw, 3.35rem); }
+  html[lang="ru"] .hero h1 { font-size: clamp(2.7rem, 11vw, 3.35rem); }
+  html[lang="ru"] .hero-line { white-space: normal; }
   .hero-summary { font-size: 1.05rem; }
   .terminal { padding: 17px 18px; font-size: .7rem; }
   .terminal-highlight { margin-inline: -18px; padding-inline: 18px; }
