@@ -83,7 +83,7 @@ task-local validation gate; правила разрешения описаны �
 
 POSIX- и PowerShell-installers выполняются до Go CLI с правами текущего
 пользователя. Они загружают точно выбранный binary и `checksums.txt` из
-одного HTTPS GitHub Release, требуют ровно одину matching SHA-256 запись и
+одного HTTPS GitHub Release, требуют ровно одну matching SHA-256 запись и
 проверяют version до замены. Binary и checksum имеют один trust root:
 эта проверка обнаруживает повреждение, но не заменяет независимую подпись.
 

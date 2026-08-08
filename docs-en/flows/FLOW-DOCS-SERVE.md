@@ -3,7 +3,7 @@
 - Identifier: FLOW-DOCS-SERVE
 - Scenario: UC-DOCS-03
 - Module: MOD-SITE
-- Last updated: 2026-08-06
+- Last updated: 2026-08-08
 
 The diagram visualizes the lifecycle of the `serve` command. Network
 restrictions, error scenarios, and postconditions are defined by
@@ -19,7 +19,14 @@ flowchart TD
     Built -->|Yes| Listen["Listen on the specified address"]
     Listen --> Watch["Start the workspace watcher"]
     Watch --> Request["Receive an HTTP request, browser action or external change"]
-    Request --> Locale{"Locale route?"}
+    Request --> Version{"Version status?"}
+    Version -->|Yes| Enabled{"Enabled and canonical?"}
+    Enabled -->|No| NotFound["Return 404 without an external request"]
+    NotFound --> Request
+    Enabled -->|Yes| Latest["Request the latest stable release once, with timeout and size limit"]
+    Latest --> Notice["Return cached status; show a notice for a newer version"]
+    Notice --> Request
+    Version -->|No| Locale{"Locale route?"}
     Locale -->|Yes| LocaleSnapshot["Serve a read-only locale snapshot"]
     LocaleSnapshot --> Request
     Locale -->|No| APIDocs{"API docs?"}
@@ -67,6 +74,9 @@ flowchart TD
 - Ordinary routes serve output; the editor API is limited to workspace files
   inside docs root and provides no access to the rest of the repository.
 - Loopback is used by default; access through `0.0.0.0` is enabled explicitly.
+- The version check contacts only the fixed GitHub release endpoint, is cached
+  for the process, can be disabled with `--no-update-check`, and does not
+  interfere with serving the snapshot when it fails.
 - A manual rebuild updates the model, HTML, and search but neither closes the
   listener nor changes its address.
 - HTTP navigation never starts a rebuild. With configured translations, the

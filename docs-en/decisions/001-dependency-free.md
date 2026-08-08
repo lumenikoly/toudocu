@@ -4,7 +4,7 @@
 - Status: Accepted
 - Date: 2026-07-25
 - Author: Docu-docu Team
-- Last updated: 2026-08-06
+- Last updated: 2026-08-08
 
 Docu-docu is delivered as a single Go binary and requires no runtime
 dependencies. Pure-Go exceptions for external Go modules are recorded in
@@ -24,6 +24,9 @@ a pure-Go engine hidden behind the project's own model as specified in
 [ADR-005](ADR-005.md). Browser-only libraries are allowed as pinned vendored
 assets when they require no runtime, network, or external files and are covered
 by a license and security process.
+The narrow optional exception for fetching latest stable release metadata in
+canonical `serve` is defined in [ADR-006](ADR-006.md): it downloads neither
+code nor runtime dependencies and can be disabled with a flag.
 
 A new external dependency is allowed only after an ADR demonstrates that its
 value outweighs its impact on delivery, attack surface, and maintenance.
@@ -31,7 +34,7 @@ value outweighs its impact on delivery, attack surface, and maintenance.
 ## Reasons
 
 - One reproducible artifact for every supported platform.
-- No package installation or network access during operation.
+- No package installation or mandatory network access during operation.
 - Full control over escaping and local links.
 - Simple deployment into an existing repository.
 

@@ -8,7 +8,9 @@ repository, builds a validated model, and emits diagnostics or derived
 representations. Embedding Go code invokes the same model and operation facade
 without a separate process. In `serve`, the process accepts constrained
 editor/changes requests, serves an offline OpenAPI UI, and atomically saves the
-selected workspace file. The user, library consumer, agent, CI, and browser
+selected workspace file. Canonical `serve` may also fetch latest stable release
+metadata once from a fixed GitHub API; this is the running portal's only network
+egress and can be disabled with a flag. The user, library consumer, agent, CI, and browser
 remain interacting parties outside this boundary. The release installer also
 remains outside: it is a separate bootstrap that uses the network only before
 the Go runtime starts. Inside the runtime, the `skill` command reads the
@@ -34,7 +36,10 @@ for dependency-free delivery is recorded in
   targets.
 - A browser reads the backend-independent portal on HTTP(S) static hosting;
   through canonical `serve`, it also reads the revision, editor/changes API,
-  and OpenAPI UI and explicitly saves an allowed source file.
+  and OpenAPI UI and explicitly saves an allowed source file; it receives
+  version status only from the same origin.
+- The GitHub Releases API provides untrusted latest stable release metadata
+  only to the canonical serve runtime.
 - The shell and child processes are available only to an explicit
   `task verify --run`.
 - The AI-skill host filesystem is changed only through explicit `skill install`,

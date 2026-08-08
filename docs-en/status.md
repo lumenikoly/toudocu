@@ -4,7 +4,7 @@
 - Stage: Preparing stable release 0.0.1
 - Version: 0.0.1
 - Owner: Docu-docu Team
-- Last updated: 2026-08-06
+- Last updated: 2026-08-07
 
 Version `0.0.1` is being prepared for stable release together with verifiable
 POSIX and PowerShell installers, a release workflow, checksums, and installation
@@ -35,7 +35,7 @@ roadmap and displayed automatically in HTML.
 Source code and embedded assets ship as one binary without external runtime
 dependencies. Pinned pure-Go Goldmark and OpenAPI YAML dependencies are linked
 into the binary. Formatting, ordinary and race tests, vet, module checks, strict
-checks of both documentation roots, and five cross-builds run through one
+checks of both documentation roots, and six cross-builds run through one
 `make check` / `make release` workflow. The release bundle includes two
 installer assets; they select the appropriate binary and verify its SHA-256
 before replacing the file in the user's installation directory.

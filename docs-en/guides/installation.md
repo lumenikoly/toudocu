@@ -31,9 +31,11 @@ installer replaces the old file only after all checks succeed.
 | macOS | Intel | `docu-docu-darwin-amd64` |
 | macOS | Apple silicon | `docu-docu-darwin-arm64` |
 | Windows | AMD64 / x86-64 | `docu-docu-windows-amd64.exe` |
+| Windows | ARM64 | `docu-docu-windows-arm64.exe` |
 
-Windows ARM64 and other combinations not listed above fail before downloading.
-The installer does not rely on x64 emulation on Windows ARM64.
+On Windows ARM64, the installer selects the native ARM64 binary, including
+when running from an emulated x64 process. Other unlisted combinations fail
+before downloading.
 
 ## Select a version
 
@@ -52,8 +54,20 @@ irm https://github.com/lumenikoly/docu-docu/releases/latest/download/install.ps1
 Remove-Item Env:DOCU_DOCU_VERSION
 ```
 
-Only the `X.Y.Z` format without the `v` prefix is accepted. An explicit version
-allows both pinning and an intentional downgrade.
+The accepted formats are `X.Y.Z` and `X.Y.Z-rc.N`, without a `v` prefix. An
+explicit version allows pinning, an intentional downgrade, and installation of
+a release candidate. RC builds are not selected through `latest`, so their tag
+is specified explicitly:
+
+```sh
+curl -fsSL https://github.com/lumenikoly/docu-docu/releases/download/0.0.1-rc.1/install.sh \
+  | DOCU_DOCU_VERSION=0.0.1-rc.1 sh
+```
+
+In GitHub Actions, an RC is published through the `release` workflow: select
+branch `main`, channel `rc`, base version `0.0.1`, and a positive `rc_number`.
+The workflow creates a prerelease tagged `0.0.1-rc.N`; the stable channel
+continues to create an ordinary `X.Y.Z` release.
 
 ## Directory and PATH
 

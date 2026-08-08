@@ -3,7 +3,7 @@
 - Identifier: CON-CLI-V1
 - Status: Completed
 - Owner: Docu-docu Team
-- Last updated: 2026-08-06
+- Last updated: 2026-08-08
 
 This document defines CLI commands, side effects, exit codes, and versioned JSON
 results. `docu-docu COMMAND --help` shows the exact flag syntax.
@@ -64,6 +64,10 @@ partial result returns `1`. Diagnostics use stable short codes including
 - The input directory is specified explicitly; by default, the server listens
   on `127.0.0.1:8080` without TLS or authentication.
 - `--host 0.0.0.0` exposes `serve` to a trusted local network.
+- By default, canonical `serve` checks the latest stable release once per
+  process and may show a link in the portal UI. `--no-update-check` disables
+  the capability, endpoint, and external request; the flag is invalid for all
+  other commands.
 - `build` remains static and read-only. Editor, Swagger UI, and server-only
   scripts are not included in the result; the OpenAPI files themselves are
   copied. The existing `serve` provides a local browser runtime; there is no

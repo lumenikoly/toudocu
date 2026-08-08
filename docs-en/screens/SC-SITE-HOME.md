@@ -6,10 +6,18 @@
 - Status: Implemented
 - Route: `/`
 - Preview: `../assets/screens/site-home.png`
-- Last updated: 2026-08-06
+- Last updated: 2026-08-08
 
-The main entry point to the built documentation: it shows project status and
-links to documents, the local editor, the changes viewer, and the HTTP API.
+The main entry point to the built documentation is presented as a project
+passport: a cover with title, description, and metadata is followed by one
+status line, three to five recommended routes, and the complete, permanently
+visible `index.md` overview. The status line selects its destination in this
+order: `status.md` → nearest deliverable document → work catalog → risks. The
+cover description is not repeated in the overview, while context actions and
+serve actions sit in its header. The home page links to documents, the local
+editor, the changes viewer, and the HTTP API. In canonical `serve`, a compact,
+non-blocking suggestion to open a newer official Docu-docu release may appear
+below the header; it can be dismissed for that version.
 
 ## Transitions
 

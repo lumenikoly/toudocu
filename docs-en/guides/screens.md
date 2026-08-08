@@ -51,9 +51,9 @@ a selected scenario are embedded in its canonical
 
 ID, type, module, and status are required. Supported types are Screen, Page,
 Modal window, Panel, External page, and System state. `DEFAULT` exists
-implicitly. A transition without a use case is global and participates in all
-reachable playable scenarios. `Parent screen` defines the sitemap, not user-flow
-order.
+implicitly. Every transition references one existing `UC-*`; global
+transitions without a use case are unsupported. `Parent screen` defines the
+sitemap, not user-flow order.
 
 A transition requires an ID, action, condition, and result. State, error,
 message, contract, and type may also be specified:
@@ -84,9 +84,8 @@ A screen scenario defines:
 - Разрешить цикл: Да
 ```
 
-Docu-docu adds transitions for the selected `UC-*` plus global transitions,
-then calculates reachable screens, dead ends, cycles, and paths to terminal
-screens.
+Docu-docu adds transitions for the selected `UC-*`, then calculates reachable
+screens, dead ends, cycles, and paths to terminal screens.
 
 A reachable nonterminal screen must have an outgoing transition. A cycle with
 no exit is an error unless the use case explicitly contains
@@ -128,7 +127,7 @@ Mouse and touch controls:
 ## Step-by-step playback
 
 The viewer starts at the use case's start screen. Available actions come from
-transitions for the selected scenario plus global transitions. Each step stores
+transitions for the selected scenario. Each step stores
 the previous screen and state in page memory.
 
 - `Back` restores the previous step;
