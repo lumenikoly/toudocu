@@ -54,8 +54,8 @@ func TestArchivedTasksAreFilteredFromDefaultPortalSurfaces(t *testing.T) {
 		t.Fatal("dashboard focus bounds are missing")
 	}
 	focus := dashboard[focusStart:focusEnd]
-	if strings.Contains(focus, "Active portal task") || strings.Contains(focus, "Archived portal task") || !strings.Contains(focus, "Активная работа") {
-		t.Fatalf("dashboard must summarize active work without listing task names")
+	if strings.Contains(focus, "Active portal task") || strings.Contains(focus, "Archived portal task") || !strings.Contains(focus, "Ближайший результат") {
+		t.Fatalf("dashboard must keep focus compact without listing task names")
 	}
 }
 
@@ -987,8 +987,8 @@ func TestRiskPageExplainsRiskStatusesAndMitigationProgress(t *testing.T) {
 		t.Fatal("risk page must not present mitigation tasks as document readiness")
 	}
 	dashboard := renderDashboard(model)
-	if !strings.Contains(dashboard, "Незакрытые риски") || !strings.Contains(dashboard, ">2</strong>") {
-		t.Fatalf("dashboard must expose the matching unresolved-risk count: %s", dashboard)
+	if strings.Contains(dashboard, "Незакрытые риски") || strings.Contains(dashboard, ">2</strong>") {
+		t.Fatal("dashboard must not repeat detailed risk counters")
 	}
 }
 
@@ -999,7 +999,7 @@ func TestPortalSimplifiedNavigationAndAccessibleHeadings(t *testing.T) {
 	if count := strings.Count(dashboard, `class="recommended-entry"`); count < 3 || count > 5 {
 		t.Fatalf("recommended entry count = %d", count)
 	}
-	for _, expected := range []string{"Текущий фокус", "Следующий результат", "Активная работа", "Блокеры", "Незакрытые риски", "С чего начать", "Подробный обзор", "Матрица трассируемости"} {
+	for _, expected := range []string{"Текущий фокус", "Ближайший результат", "С чего начать", "Обзор проекта", "Матрица трассируемости"} {
 		if !strings.Contains(dashboard+renderTraceabilityPage(model, "traceability.html"), expected) {
 			t.Fatalf("portal missing %q", expected)
 		}
@@ -1055,12 +1055,9 @@ func TestDashboardFocusFallbacksAndAlwaysVisibleOverview(t *testing.T) {
 	model := buildFixture(t, docs)
 	html := renderDashboard(model)
 	for _, expected := range []string{
-		`class="focus-result-link" href="use-cases/UC-AUTH-01.html"`,
+		`class="dashboard-section dashboard-focus" aria-label="Текущий фокус: UC-AUTH-01 · Пользователь входит." href="status.html"`,
 		`class="recommended-entry" href="architecture/overview.html"`,
-		`class="focus-signal focus-signal-work" href="status.html"`,
-		`class="focus-signal focus-signal-blockers" href="status.html"`,
-		`class="focus-signal focus-signal-risks" href="risks.html"`,
-		"Нет блокеров",
+		"Ближайший результат",
 	} {
 		if !strings.Contains(html, expected) {
 			t.Fatalf("dashboard focus missing %q", expected)
@@ -1079,20 +1076,31 @@ func TestDashboardFocusFallbacksAndAlwaysVisibleOverview(t *testing.T) {
 	html = renderDashboard(model)
 	for _, expected := range []string{
 		"Следующий результат не определён.",
-		`class="focus-signal focus-signal-work" href="work/index.html"`,
-		"Нет незакрытых рисков",
+		`href="work/index.html"`,
 	} {
 		if !strings.Contains(html, expected) {
 			t.Fatalf("dashboard fallback missing %q", expected)
 		}
 	}
-	if strings.Contains(html, `class="focus-signal focus-signal-risks" href=`) {
-		t.Fatal("dashboard must not link to a missing risks page")
+	focusStart := strings.Index(html, `class="dashboard-section dashboard-focus"`)
+	if focusStart >= 0 {
+		focusEnd := strings.Index(html[focusStart:], `</a>`)
+		if focusEnd > 0 && strings.Contains(html[focusStart:focusStart+focusEnd], `href="risks.html"`) {
+			t.Fatal("dashboard must not link to a missing risks page")
+		}
 	}
 
 	if !strings.Contains(html, `<section class="dashboard-section dashboard-overview" data-dashboard-overview`) ||
 		strings.Contains(html, `<details class="dashboard-section dashboard-overview"`) {
 		t.Fatal("dashboard overview must remain permanently visible without a disclosure control")
+	}
+	headingEnd := strings.Index(html, `</div><div class="dashboard-overview-body">`)
+	if headingEnd < 0 || !strings.Contains(html[:headingEnd], `data-copy-document-context`) {
+		t.Fatal("dashboard context actions must stay in the overview heading")
+	}
+	mainStart := strings.Index(html, `<main id="main-content"`)
+	if mainStart < 0 || strings.Count(html[mainStart:], model.Project.Description) != 1 {
+		t.Fatal("project description must appear once in the cover and not repeat in the overview")
 	}
 }
 
@@ -1590,7 +1598,7 @@ func TestComputedStatusIsSummarizedOnDashboardAndDetailedOnStatusPage(t *testing
 		t.Fatal(err)
 	}
 	dashboard := string(dashboardData)
-	for _, part := range []string{"Текущий фокус", "Активная работа", "Блокеры", "UC-AUTH-01"} {
+	for _, part := range []string{"Текущий фокус", "Ближайший результат", "UC-AUTH-01"} {
 		if !strings.Contains(dashboard, part) {
 			t.Fatalf("index.html missing %q", part)
 		}
