@@ -97,6 +97,19 @@ async function installClipboardProbe(context: BrowserContext): Promise<void> {
   });
 }
 
+test("localized headers identify the beta release", async ({ page }) => {
+  const hosted = await serveLanding();
+  try {
+    for (const locale of ["en", "ru"]) {
+      await page.goto(`${hosted.origin}${locale}/`);
+      await expect(page.locator(".site-header .wordmark .beta-badge")).toHaveText("BETA");
+      await expect(page.locator(".site-footer .beta-badge")).toHaveCount(0);
+    }
+  } finally {
+    await closeServer(hosted.server);
+  }
+});
+
 test("locale gateway uses only the browser primary locale", async ({ browser }) => {
   const hosted = await serveLanding();
   try {

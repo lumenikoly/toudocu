@@ -69,6 +69,17 @@ h1, h2, h3 { text-wrap: balance; }
   letter-spacing: -0.035em;
   text-decoration: none;
 }
+.site-header .wordmark { display: inline-flex; align-items: center; gap: 8px; }
+.beta-badge {
+  padding: 3px 7px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: .62rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: .06em;
+}
 .header-actions { display: flex; align-items: center; gap: 10px; }
 .mobile-label { display: none; }
 .pill {
