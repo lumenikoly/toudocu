@@ -4,6 +4,10 @@ This reference helps choose a document by purpose. Docu-docu classifies a
 document by its file location. Semantic selection starts with the question the
 source must answer; only some machine-readable entity types require stable IDs.
 
+Exact identifier rules, allowed relationship directions and requirements, and
+derived representations are collected in the
+[document and relationship model](document-model.md).
+
 ## Quick selection
 
 | Need to record | Use |

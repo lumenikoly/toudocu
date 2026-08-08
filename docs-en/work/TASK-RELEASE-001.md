@@ -6,7 +6,7 @@
 - Module: MOD-CLI
 - Standards: STD-GO-001, STD-DOCS-001
 - Owner: Docu-docu Team
-- Last updated: 2026-08-03
+- Last updated: 2026-08-07
 
 ## Result
 
@@ -41,7 +41,7 @@ are consistent, but the tag and post fail.
   `assets/search-index.js` regardless of the order in which the metadata map is traversed.
 - [x] `AC-03` Single local command checks formatting, Go code,
   race detector, modules and both documentation root.
-- [x] `AC-04` The local release bundle contains five target binaries,
+- [x] `AC-04` The local release bundle contains six target binaries,
   notices, licenses and verifiable `checksums.txt`.
 - [x] `AC-05` The original documentation and both monitored portals are consistent with
   behavior of the release without prematurely marking the publication.

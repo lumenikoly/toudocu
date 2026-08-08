@@ -56,7 +56,7 @@ test("portal bundle has no server-only endpoint", async () => {
   const staticBundles = ["portal.js", "screen-map.js", "playable-flow.js"];
   for (const name of staticBundles) {
     const source = await readFile(new URL(name, generated), "utf8");
-    for (const forbidden of ["/_docu-docu/api/editor", "/_docu-docu/api/changes", "/__docu-docu/rebuild", "localhost"]) {
+    for (const forbidden of ["/_docu-docu/api/editor", "/_docu-docu/api/changes", "/_docu-docu/api/version", "/__docu-docu/rebuild", "localhost"]) {
       assert.equal(source.includes(forbidden), false, `${forbidden} leaked into ${name}`);
     }
   }

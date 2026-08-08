@@ -260,6 +260,6 @@ func renderFlowConnections(model *Model, document *Document) string {
 	if flow == nil {
 		return ""
 	}
-	return `<section class="dashboard-section flow-connections"><h2>Связанные пользовательские сценарии</h2>` +
+	return `<section class="dashboard-section dashboard-support-panel flow-connections"><h2>Связанные пользовательские сценарии</h2>` +
 		processRelations(document.OutputPath, model, flow.UseCaseIDs, "use-case") + `</section>`
 }

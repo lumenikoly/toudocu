@@ -156,7 +156,7 @@ and blocks over 50,000 UTF-8 bytes are rejected.
 
 ## Offline portal
 
-`build` creates document and catalog pages, dashboard, health report,
+`build` creates document and catalog pages, a project-passport home page, health report,
 search and `report.json`. The interface provides:
 
 - hierarchical navigation: the active group is expanded, the rest are by default

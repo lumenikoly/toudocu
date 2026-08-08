@@ -21,6 +21,7 @@ can also stop an operation that does not directly use that setting.
 | task timeout | `10m` |
 | serve host | `127.0.0.1` |
 | serve port | `8080` |
+| serve update check | enabled; disabled by `--no-update-check` |
 | screen map | enabled if `screens/SC-*.md` is present |
 | site theme | `classic` |
 | color scheme | `system` |
@@ -54,8 +55,9 @@ accents `indigo`, `blue`, `teal`, `green`, `amber`, `rose`, `violet`; density
 `compact` or `comfortable`; width `narrow` (760 px), `standard` (920 px) or
 `wide` (1120 px).
 
-`--title` takes precedence over `site.title`, then the header is used
-`index.md` and directory name. Footer only accepts escaped text and
+`--title` takes precedence over `site.title`, followed by the `index.md` title
+and directory name. By default, the Docu-docu name in the footer links to the
+landing page. `footer.text` and `footer.url` replace it with escaped text and an
 optional HTTPS URL.
 
 In the portal header there are drop-down lists of topics (`classic`, `paper`, `terminal`) and
@@ -158,6 +160,12 @@ Canonical `serve` publishes discovered OpenAPI contracts at
 `/_docu-docu/api-docs/` without separate configuration. Static build copies the
 specs but not Swagger UI; translation mounts and direct translation serve
 publish neither the UI nor its link.
+
+Canonical `serve` also checks the latest stable release on the browser's first
+request and may show a non-blocking update suggestion. The result is cached
+until the process stops. For a self-contained run, use
+`docu-docu serve --no-update-check ./docs`; static and translation portals
+never enable this check.
 
 Workspace includes the usual `.md`, `.yaml`, `.yml` and `.json` inside docs root and
 excludes hidden, configured excludes, output subtree and symlink paths. JSON body

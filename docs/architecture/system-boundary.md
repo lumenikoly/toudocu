@@ -8,7 +8,9 @@ Docu-docu ограничен одним локальным процессом, �
 представления. Встраивающий Go-код вызывает тот же фасад модели и операций без
 отдельного процесса. В `serve` процесс принимает ограниченные editor/changes
 запросы, отдаёт offline OpenAPI UI и атомарно сохраняет выбранный
-workspace-файл. Пользователь, библиотечный
+workspace-файл. Canonical `serve` также может один раз получить метаданные
+latest stable release из фиксированного GitHub API; это единственный сетевой
+выход работающего портала и он отключается флагом. Пользователь, библиотечный
 потребитель, агент, CI и браузер остаются взаимодействующими сторонами за этой
 границей. Release installer также остаётся снаружи: это отдельный bootstrap,
 который использует сеть только до запуска Go runtime. Внутри runtime команда
@@ -34,7 +36,9 @@ target; она не загружает и не исполняет содержи
   repository targets;
 - браузер читает backend-independent портал на HTTP(S) static hosting; через canonical `serve` он
   также читает revision, editor/changes API и OpenAPI UI и явно сохраняет
-  разрешённый исходник;
+  разрешённый исходник; status версии он получает только same-origin;
+- GitHub Releases API предоставляет недоверенные метаданные latest stable
+  release только canonical serve runtime;
 - shell и дочерние процессы доступны только явному `task verify --run`.
 - filesystem host AI-skill получает изменения только через явные
   `skill install`, `update` или `uninstall`; `status` остаётся read-only.

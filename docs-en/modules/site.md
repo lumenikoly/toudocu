@@ -3,7 +3,7 @@
 - Identifier: MOD-SITE
 - Status: Completed
 - Owner: Docu-docu Team
-- Last updated: 2026-08-06
+- Last updated: 2026-08-08
 
 The module produces backend-independent HTML pages, navigation, static JSON
 resources, and a typed `report.json` from the completed project model.
@@ -174,6 +174,17 @@ applies a targeted atomic insertion while preserving line endings. The frontend
 does not parse Markdown or decide whether a write is allowed. `build`, locale
 portals, and direct translation serve remain read-only.
 
+### BR-SITE-015: Version check does not affect portal availability
+
+Only canonical `serve` enables the version-check capability. On the first
+same-origin request, Go fetches latest stable release metadata once from a
+fixed GitHub endpoint, applies a timeout and response-size limit, and caches
+the result until the process stops. A newer version is shown as a non-blocking
+suggestion to open the official release; dismissal applies only to that
+version. Every failure remains silent. `--no-update-check`, static builds,
+locale mounts, and direct translation serves keep the capability disabled, the
+endpoint unavailable, and perform no check.
+
 ## Invariants
 
 - the source `index.md` is displayed by the dashboard rather than a duplicate
@@ -181,10 +192,10 @@ portals, and direct translation serve remain read-only.
   more than five recommended entry points, and the substantive content of
   `index.md` in order, without repeating its H1 or structural metadata inside
   the always-visible detailed overview;
-- current focus exists only when there is a roadmap, work items, or risks, links
-  the next result to its target document, and states the number of active tasks,
-  blockers, and open risks in text, including zero states; detailed items remain
-  on the status page and in catalogs;
+- the current-status line exists only when status, roadmap, work items, or risks
+  exist, names the status and nearest deliverable, and selects one destination
+  in this order: `status.md` → deliverable document → work catalog → risks;
+  counters and detailed items remain on the status page and in catalogs;
 - pages for source Markdown documents, including the dashboard and canonical
   use case, allow the title and safe source path to be copied; dashboard actions
   sit inside the always-visible overview, where `serve` also exposes editor,
@@ -223,6 +234,8 @@ portals, and direct translation serve remain read-only.
 - the serve-only roadmap dialog is reinitialized after soft navigation,
   preserves fields on a CAS conflict, and does not block page reading when the
   API fails;
+- the update notice persists across soft navigation, is not shown again for a
+  dismissed version, and never blocks the main content;
 - a service-output conflict receives a separate safe path;
 - `ProjectReport` and HTML are built from the same model;
 - generated files do not become a source of truth.

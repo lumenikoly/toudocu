@@ -57,6 +57,14 @@ Canonical API docs загружает только embedded Swagger UI и same-o
 проверенные specs. CSP запрещает внешние script/style/connect targets, а
 browser Try it out ограничен `GET`/`HEAD`; UI не ослабляет guards самих APIs.
 
+Проверка версии существует только в canonical `serve` и обращается к
+фиксированному HTTPS GitHub Releases API без credentials. Сервер ограничивает
+ожидание и размер ответа, запрещает redirects, принимает только stable tag
+`X.Y.Z`, сам строит официальный release URL и кеширует status. Browser видит только same-origin
+endpoint; remote body не становится HTML, executable code или URL общего
+назначения. `--no-update-check` выключает capability и делает endpoint
+недоступным, а static и translation portals не создают эту границу.
+
 ## Граница исполнения
 
 Documentation Changes запускает установленный `git` напрямую argument array с
@@ -75,7 +83,7 @@ task-local validation gate; правила разрешения описаны �
 
 POSIX- и PowerShell-installers выполняются до Go CLI с правами текущего
 пользователя. Они загружают точно выбранный binary и `checksums.txt` из
-одного HTTPS GitHub Release, требуют ровно одину matching SHA-256 запись и
+одного HTTPS GitHub Release, требуют ровно одну matching SHA-256 запись и
 проверяют version до замены. Binary и checksum имеют один trust root:
 эта проверка обнаруживает повреждение, но не заменяет независимую подпись.
 

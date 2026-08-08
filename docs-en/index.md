@@ -18,28 +18,34 @@ people as HTML and to automation as JSON ProjectReport schema v1.
 
 ## Main features
 
-- a minimal start with `docs/index.md` and the required
-  `docs/architecture/overview.md` map;
-- question-oriented detailed architecture documents;
-- strict structural and link validation;
-- Git-backed review of source-documentation changes;
-- derived roadmap and active-work status;
-- separate `UC-*` and `FLOW-*` catalogs with bidirectional relationships;
-- optional `STD-*` standards, `RB-*` runbooks, and managed custom sections;
-- locally shipped Mermaid diagrams and typed `FLOW-*` processes;
-- a typed `SC-*` catalog, interactive map, and playable scenarios;
-- traceability `UC → SC → TR → TASK → AC → verification`;
-- safe static HTML with search, themes, and responsive navigation;
-- compact read-only task context for an LLM agent;
-- preparation, archiving, and restoration of verifiable work items;
-- execution of explicitly declared checks for the selected task;
-- full and HEAD-diff currency refresh through the installable AI skill;
-- offline install/status/update/uninstall of the embedded AI skill for Codex,
-  Claude Code, and Copilot;
-- versioned JSON schemas for the project, task context, and task workflow;
-- a public Go API for embedding the model, generator, and typed reports;
-- operation as one binary without external runtime dependencies; pinned Go
-  modules are linked into the binary.
+Docu-docu turns Markdown next to the code into a connected, verifiable
+documentation system.
+
+- **One project portal.** Search, navigation, the architecture map, user
+  scenarios, and current work status live in one coherent interface.
+- **A verifiable document model.** Validation checks links, stable identifiers,
+  document structure, and explicitly declared relationships.
+- **End-to-end traceability.** A use case and screen connect to a task,
+  acceptance criterion, and command that verifies the result.
+- **Semantic change review.** The Git-backed workspace shows source, rendered,
+  and semantic documentation diffs before publication.
+- **Task context for an AI agent.** A compact read-only package contains only
+  the requirements, rules, screens, dependencies, and checks related to the
+  selected task.
+- **Embedded documentation AI skill.** An offline package connects Docu-docu to
+  Codex, Claude Code, and Copilot and adds explicit workflows for initialization,
+  full or diff currency refresh, and translation. The CLI installs, checks,
+  updates, and removes a managed copy without network access and never
+  overwrites user changes. Start with the
+  [installation guide](guides/skill-installation.md), then use the
+  [agent-workflow guide](guides/agent-workflows.md) for ordinary CLI, portal,
+  task, and documentation scenarios.
+- **Verifiable work items.** A work item combines scope, acceptance criteria,
+  and verification commands; Docu-docu checks readiness, executes explicitly
+  authorized commands, and records the result.
+- **Self-contained publication.** One Go binary creates a static portal without
+  a CDN, database, npm, or external runtime for local viewing or ordinary
+  static hosting.
 
 ## Target audience
 

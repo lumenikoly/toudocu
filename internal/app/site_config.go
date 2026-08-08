@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+const defaultFooterURL = "https://lumenikoly.github.io/docu-docu/"
+
 // FooterConfig configures the escaped footer text and its optional HTTPS link.
 type FooterConfig struct {
 	Text string
@@ -76,6 +78,7 @@ func defaultSiteConfig() SiteConfig {
 		ContentWidth: "standard",
 		Footer: FooterConfig{
 			Text: "Сгенерировано Docu-docu " + Version,
+			URL:  defaultFooterURL,
 		},
 		Hero:    HeroConfig{Enabled: true},
 		Changes: ChangesConfig{RenameSimilarity: 60, IncludeTaskArtifacts: true, IncludeAssets: true, SemanticDiff: true, RenderedDiff: true, MaxSourceDiffBytes: 2 * 1024 * 1024, MaxRenderedFileBytes: 1024 * 1024},
@@ -237,6 +240,11 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 			allowedScalars["translations."+parts[1]+".sections."+string(spec.Type)] = true
 		}
 		_ = scalar
+	}
+	if _, hasCustomText := values["site.footer.text"]; hasCustomText {
+		if _, hasCustomURL := values["site.footer.url"]; !hasCustomURL {
+			config.Footer.URL = ""
+		}
 	}
 	for key, scalar := range values {
 		if scalar.value == "" && allowedMaps[key] {

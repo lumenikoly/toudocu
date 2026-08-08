@@ -66,12 +66,15 @@ func PrintCommandHelp(w io.Writer, topic string) {
 Использование:
   docu-docu serve [docs-dir] [-o DIR] [--host ADDRESS] [--port N]
                 [--open] [--strict] [--exclude PATHS] [--stale-days N]
-                [--repository-root DIR] [--screen-map|--no-screen-map] [-t TITLE]
+                [--repository-root DIR] [--screen-map|--no-screen-map]
+                [--no-update-check] [-t TITLE]
 
 Пример:
   docu-docu serve ./docs --host 127.0.0.1 --port 8080
 
-Побочные эффекты: записывает output, запускает HTTP; browser save изменяет workspace.`,
+Побочные эффекты: записывает output, запускает HTTP; browser save изменяет workspace.
+При первом открытии canonical-портала один раз проверяет latest stable GitHub Release;
+--no-update-check отключает этот outbound-запрос.`,
 		"changes": `Строит read-only Git-backed отчёт об изменениях документации.
 
 Использование:
@@ -562,6 +565,8 @@ parseOptions:
 			}
 			screenMapOption = "off"
 			options.NoScreenMap = true
+		case arg == "--no-update-check":
+			options.NoUpdateCheck = true
 		case strings.HasPrefix(arg, "-"):
 			return options, false, false, fmt.Errorf("неизвестный параметр: %s", arg)
 		default:
@@ -617,6 +622,9 @@ parseOptions:
 	}
 	if screenMapOption != "" && options.Command != "build" && options.Command != "serve" {
 		return options, false, false, fmt.Errorf("--screen-map и --no-screen-map доступны только для build и serve")
+	}
+	if options.NoUpdateCheck && options.Command != "serve" {
+		return options, false, false, fmt.Errorf("--no-update-check доступен только для serve")
 	}
 	if options.Command == "task-ready" || options.Command == "task-context" || options.Command == "task-verify" || options.Command == "task-changes" ||
 		options.Command == "task-archive" || options.Command == "task-restore" {

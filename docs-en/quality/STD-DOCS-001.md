@@ -3,8 +3,8 @@
 - Identifier: STD-DOCS-001
 - Status: Active
 - Owner: Docu-docu Team
-- Scope: Source documentation, skill templates, and tracked portals
-- Last updated: 2026-08-05
+- Scope: Source documentation, skill templates, and generated portals
+- Last updated: 2026-08-07
 
 This standard separates confirmed sources from local or generated views.
 Markdown remains the source of the document model; explicitly recognized
@@ -15,9 +15,10 @@ OpenAPI may own only the HTTP wire contract.
 1. Global scope is defined by `roadmap.md`; the state of an explicitly linked
    `UC-*` comes from its use case. Other local checklists are not aggregated.
 2. Generated `build/`, `dist/`, `example/site/`, `project-docs/`, and
-   `example/project-docs/` are not edited as sources of truth.
-3. Tracked portals are rebuilt from Markdown after semantic review and a
-   structural check.
+   `example/project-docs/` are local or CI artifacts, are not tracked by Git,
+   and are not edited as sources of truth.
+3. Published portals are rebuilt from Markdown in CI after semantic review and
+   a structural check; local checks use ignored or temporary output.
 4. A typed document is created only for confirmed semantics; an unknown owner,
    date, status, or procedure is not invented merely to remove a warning.
 5. Explicitly linked standards and runbooks are read together with task

@@ -50,8 +50,12 @@ func TestMissingProjectConfigurationUsesEnglishAndWarning(t *testing.T) {
 	if modelDirectoryLabel(model, "architecture") != "Architecture" {
 		t.Fatal("English fallback is missing")
 	}
-	if !strings.Contains(pageShell(model, "index.html", "x", "", "", ""), `<html lang="en"`) {
+	page := pageShell(model, "index.html", "x", "", "", "")
+	if !strings.Contains(page, `<html lang="en"`) {
 		t.Fatal("missing locale must render en")
+	}
+	if !strings.Contains(renderDashboard(model), `<span class="beta-badge">Beta</span>`) {
+		t.Fatal("portal header must identify the beta release stage")
 	}
 	if model.Stats.Warnings < 2 {
 		t.Fatalf("missing configuration warnings: %#v", model.Issues)

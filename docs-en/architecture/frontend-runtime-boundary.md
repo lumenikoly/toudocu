@@ -55,8 +55,11 @@ capability are absent.
 
 `serve` uses the same renderer and `portal.js`, but Go explicitly adds
 capabilities and separate `serve.js`, `editor.js`, and `changes.js` assets. The
-API remains same-origin, and Go supplies the endpoint URL. The frontend does not
-infer the mode from the URL or incidental DOM markers.
+API remains same-origin, and Go supplies the endpoint URLs. The `updateCheck`
+capability allows the frontend to request only the server-computed version
+endpoint; a response is accepted only with an official release URL, and a
+dismissal is stored for the specific version. The frontend does not infer the
+mode from the URL or incidental DOM markers.
 
 Opening HTML directly via `file://` is not an architectural or product
 contract. The existing `docu-docu serve` command provides a local browser
@@ -79,6 +82,8 @@ runtime; no new preview command is needed.
 - The asset manifest is deterministic; filenames contain no timestamps or
   random data.
 - A failure in one interactive component does not hide the main content.
+- A failed or disabled version check does not change the main content or cause
+  the browser to request an external origin.
 - Browser input remains untrusted; Go makes all security decisions.
 
 ## Related documents

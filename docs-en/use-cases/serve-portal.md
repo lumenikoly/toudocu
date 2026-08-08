@@ -9,7 +9,7 @@
 - Start screen: SC-SITE-HOME
 - Terminal screens: SC-SITE-DOCUMENT, SC-SITE-API-DOCS
 - Allow cycle: Yes
-- Last updated: 2026-08-06
+- Last updated: 2026-08-08
 
 The developer views and edits documentation via a local HTTP server
 and receives an updated model and portal after saving or external changes.
@@ -19,6 +19,7 @@ and receives an updated model and portal after saving or external changes.
 - project-documentation directory;
 - output directory;
 - server address and port;
+- optional `--no-update-check` for a fully self-contained run;
 - regular `.md`, `.yaml`, `.yml`, and `.json` files inside the documentation directory.
 
 ## Preconditions
@@ -32,37 +33,42 @@ and receives an updated model and portal after saving or external changes.
 2. Docu-docu builds the portal in the output directory.
 3. Docu-docu starts an HTTP server on `127.0.0.1:8080` and reports the address.
 4. The developer opens the portal in a browser.
-5. If the developer navigates to `/_docu-docu/api-docs/`, they select the Editor
+5. The portal requests same-origin version status. If a stable release is
+   newer, a suggestion to open the official release appears below the header;
+   the developer may dismiss it for that version.
+6. If the developer navigates to `/_docu-docu/api-docs/`, they select the Editor
    or Changes contract, expand an operation, and optionally execute a safe
    `GET`/`HEAD`; the scenario ends at `SC-SITE-API-DOCS`.
-6. Otherwise, on the roadmap page the developer may choose an existing stage,
+7. Otherwise, on the roadmap page the developer may choose an existing stage,
    review the suggested `DLV-ROADMAP-NNN`, change the ID, and add a one-line
    deliverable. Docu-docu performs a CAS insertion and returns the page to the stage.
-7. Or the developer opens `/_docu-docu/editor/`; the Editor receives a
+8. Or the developer opens `/_docu-docu/editor/`; the Editor receives a
    revision, a safe file list, and the shared template registry.
-8. The developer opens the source, changes the text, checks the Markdown preview
+9. The developer opens the source, changes the text, checks the Markdown preview
    and positional diagnostics, and saves it.
-9. Docu-docu compares the SHA-256 digest, atomically replaces the file, and synchronously
+10. Docu-docu compares the SHA-256 digest, atomically replaces the file, and synchronously
    rebuilds model, HTML, search and diagnostics.
-10. When transitioning between canonical HTML documents, the portal can prefetch the
+11. When transitioning between canonical HTML documents, the portal can prefetch the
    target page, check the current revision and replace the document layout without
    rebuild. Back/Forward, anchors, scroll and keyboard focus continue to work.
-11. Browser polling receives a new revision: the normal page is reloaded,
+12. Browser polling receives a new revision: the normal page is reloaded,
    a clean editor updates, while a dirty editor retains its text and shows a
    conflict.
-12. HTTP navigation returns the last successful snapshot and does not start a rebuild.
+13. HTTP navigation returns the last successful snapshot and does not start a rebuild.
    Watcher stabilizes external changes and rebuilds only the changed
    documentation root; a manual canonical-portal rebuild shows the scope
    “model, HTML, and search”, progress, and the result before reloading.
-13. If `serve` is launched from canonical root with `translations.<locale>`, header
+14. If `serve` is launched from canonical root with `translations.<locale>`, header
    offers locale tags. The corresponding Markdown opens in the selected
    locale, while a missing page leads to that locale's homepage.
-14. The developer stops the server with `Ctrl+C`.
+15. The developer stops the server with `Ctrl+C`.
 
 ## Error scenarios
 
 - at step 2, a reading or generation error does not leave the server running;
 - in step 3, a busy or unavailable port terminates the command with the code `1`;
+- a timeout, malformed or oversized GitHub response, or development version
+  shows no update suggestion and does not affect other features;
 - stale digest returns `409 stale_digest`; explicit overwrite is repeated with
   current digest and `confirmOverwrite: true`, and the request without confirmation and
   second external conflict get `409` again;
@@ -101,6 +107,7 @@ The rules are defined in the module document:
 - [BR-SITE-007](../modules/site.md#br-site-007-build-and-serve-have-different-capabilities) - build remains static read-only, serve provides a live workspace.
 - [BR-SITE-010](../modules/site.md#br-site-010-soft-navigation-limited-to-canonical-serve-portal) - soft transitions do not change offline/file and locale semantics.
 - [BR-SITE-014](../modules/site.md#br-site-014-roadmap-changes-use-only-a-constrained-operation) - serve adds only a new `DLV-*` with CAS and does not make the browser parse Markdown.
+- [BR-SITE-015](../modules/site.md#br-site-015-version-check-does-not-affect-portal-availability) - the update notice exists only in canonical serve and degrades without an error.
 
 ## Implementation
 
@@ -132,3 +139,5 @@ The rules are defined in the module document:
 - full navigation for editor, changes, locale and external links, as well as
   fallback for network error and revision mismatch;
 - absence of eager search index and Mermaid requests on a regular page.
+- update notice, per-version dismissal, `--no-update-check`, silent failure,
+  and absence of the endpoint/capability in static and translation portals.

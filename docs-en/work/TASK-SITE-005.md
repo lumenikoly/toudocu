@@ -1,0 +1,97 @@
+# TASK-SITE-005: Show an Available Update in the Serve Portal
+
+- Status: Done
+- Type: Feature
+- Priority: Normal
+- Module: MOD-SITE
+- Use case: UC-DOCS-03
+- Flow: FLOW-DOCS-SERVE
+- Screens: SC-SITE-HOME
+- Standards: STD-GO-001, STD-DOCS-001
+- Owner: Docu-docu Team
+- Last updated: 2026-08-08
+
+## Result
+
+Canonical `docu-docu serve` checks the latest stable GitHub Release without
+blocking and shows a compact suggestion to open the official release when it
+is newer than the current binary. Static builds, locale portals, and the binary
+itself remain self-contained.
+
+## Behavior change
+
+### Before
+
+The user learns about a new release only outside Docu-docu or by opening GitHub
+Releases manually.
+
+### After
+
+When the canonical serve portal is opened for the first time, the browser
+asynchronously requests a same-origin version endpoint. Go compares the stable
+release once per process and returns a safe typed state. The banner can be
+dismissed for the specific latest version; `--no-update-check` disables the
+outbound request completely.
+
+## Scope
+
+- `internal/app/`, `internal/site/`, and `api.go` — CLI option, checker,
+  endpoint, and bootstrap.
+- `web/src/`, `web/tests/`, and `internal/site/assets/generated/` — serve-only
+  banner, styles, localization, build, and browser tests.
+- `docs/` — work item, ADR, CLI/HTTP contracts, architecture, module, use case,
+  flow, screen, and references.
+
+## Out of scope
+
+- Self-update, running an installer, or replacing the binary from the browser.
+- Checking release candidates, plugins, or other repositories.
+- Outbound requests from static builds, locale portals, or direct translation
+  serves.
+- Changing the `docs-en` translation root.
+
+## Acceptance criteria
+
+- [x] `AC-01` `serve --no-update-check` disables the update capability,
+  endpoint, and outbound request; other commands reject the flag.
+- [x] `AC-02` `GET|HEAD /_docu-docu/api/version` returns schema v1,
+  `no-store`/`nosniff`, the current version, and `up-to-date`,
+  `update-available`, or `unavailable`; other methods receive `405`.
+- [x] `AC-03` The checker limits timeout and response size, accepts only stable
+  `X.Y.Z`, constructs a link only for the official repository, and caches one
+  result per process without blocking the main server mutex.
+- [x] `AC-04` The serve-only banner shows current/latest versions, opens the
+  official release, is keyboard- and mobile-accessible, preserves dismissal
+  for the latest version, and is hidden for errors or an up-to-date version.
+- [x] `AC-05` Static output, locale portals, and direct translation serves have
+  no update endpoint/capability or server-only UI; bootstrap remains schema v1.
+- [x] `AC-06` ADR, CLI/OpenAPI contracts, architecture, MOD-SITE, UC-DOCS-03,
+  FLOW-DOCS-SERVE, SC-SITE-HOME, and references agree and passed independent
+  semantic review and structural gates.
+
+## Plan
+
+- [x] Add the CLI option, update checker, HTTP route, and bootstrap capability.
+- [x] Add an accessible serve-only banner and dismissal lifecycle.
+- [x] Cover backend, frontend, static isolation, and browser behavior.
+- [x] Update canonical documentation sources and complete semantic gates.
+- [x] Rebuild frontend assets and complete repository verification.
+
+## Verification
+
+- `AC-01` → `go test ./internal/app -run 'TestParseUpdateCheckFlag|TestVersionEndpointDisabled'`
+- `AC-02` → `go test ./internal/app -run TestVersionEndpoint`
+- `AC-03` → `go test ./internal/app -run TestUpdateChecker`
+- `AC-04` → `npm --prefix web run typecheck && npm --prefix web run test:browser`
+- `AC-05` → `go test ./internal/app ./internal/site && npm --prefix web test`
+- `AC-06` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
+- `ALL` → `go test ./... && go test -race ./... && npm --prefix web test && npm --prefix web run test:browser`
+- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
+- `QUALITY` → `go vet ./... && go mod verify && npm --prefix web run typecheck`
+
+## Documentation impact
+
+Adds an ADR for the narrow opt-out network exception. Updates the Editor
+OpenAPI/behavior contract, CLI contract/help, architecture boundaries,
+MOD-SITE, UC-DOCS-03, FLOW-DOCS-SERVE, SC-SITE-HOME, and capability reference.
+No new screen is created: the banner is a state of the existing portal shell.

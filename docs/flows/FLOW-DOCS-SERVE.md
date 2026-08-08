@@ -3,7 +3,7 @@
 - Идентификатор: FLOW-DOCS-SERVE
 - Сценарий: UC-DOCS-03
 - Модуль: MOD-SITE
-- Последнее обновление: 2026-08-06
+- Последнее обновление: 2026-08-08
 
 Схема визуализирует жизненный цикл команды `serve`. Сетевые ограничения,
 ошибочные сценарии и постусловия определяет
@@ -19,7 +19,14 @@ flowchart TD
     Built -->|Да| Listen["Слушать указанный адрес"]
     Listen --> Watch["Запустить watcher workspace"]
     Watch --> Request["Получить HTTP-запрос, browser action или внешнее изменение"]
-    Request --> Locale{"Locale route?"}
+    Request --> Version{"Version status?"}
+    Version -->|Да| Enabled{"Проверка включена и canonical?"}
+    Enabled -->|Нет| NotFound["Вернуть 404 без внешнего запроса"]
+    NotFound --> Request
+    Enabled -->|Да| Latest["Один раз запросить latest stable release с timeout и limit"]
+    Latest --> Notice["Вернуть cached status; при новой версии показать notice"]
+    Notice --> Request
+    Version -->|Нет| Locale{"Locale route?"}
     Locale -->|Да| LocaleSnapshot["Отдать read-only locale snapshot"]
     LocaleSnapshot --> Request
     Locale -->|Нет| APIDocs{"API docs?"}
@@ -67,6 +74,9 @@ flowchart TD
 - Обычные маршруты раздают output; editor API ограничен workspace-файлами внутри
   docs root и не предоставляет доступ к остальному репозиторию.
 - По умолчанию используется loopback; доступ через `0.0.0.0` включается явно.
+- Проверка версии обращается только к фиксированному GitHub release endpoint,
+  кешируется на процесс, отключается `--no-update-check` и при ошибке не мешает
+  отдаче snapshot.
 - Ручная пересборка обновляет модель, HTML и поиск, но не закрывает listener и не
   меняет его адрес.
 - HTTP navigation никогда не запускает rebuild. При configured translations

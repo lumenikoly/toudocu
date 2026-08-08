@@ -9,7 +9,7 @@
 - Начальный экран: SC-SITE-HOME
 - Конечные экраны: SC-SITE-DOCUMENT, SC-SITE-API-DOCS
 - Разрешить цикл: Да
-- Последнее обновление: 2026-08-06
+- Последнее обновление: 2026-08-08
 
 Разработчик просматривает и редактирует документацию через локальный HTTP-сервер
 и получает обновлённую модель и портал после сохранения или внешнего изменения.
@@ -19,6 +19,7 @@
 - каталог проектной документации;
 - выходной каталог;
 - адрес и порт сервера;
+- необязательный `--no-update-check` для полностью автономного запуска;
 - обычные `.md`, `.yaml`, `.yml` и `.json` внутри каталога документации.
 
 ## Предусловия
@@ -32,37 +33,42 @@
 2. Docu-docu собирает портал в выходной каталог.
 3. Docu-docu запускает HTTP-сервер на `127.0.0.1:8080` и сообщает адрес.
 4. Разработчик открывает портал в браузере.
-5. Если разработчик переходит в `/_docu-docu/api-docs/`, он выбирает Editor или
+5. Portal запрашивает same-origin status версии. Если stable release новее,
+   под header появляется предложение открыть официальный релиз; разработчик
+   может скрыть его для этой версии.
+6. Если разработчик переходит в `/_docu-docu/api-docs/`, он выбирает Editor или
    Changes contract, раскрывает operation и при необходимости выполняет
    безопасный `GET`/`HEAD`; сценарий завершается на `SC-SITE-API-DOCS`.
-6. Иначе на странице roadmap разработчик может выбрать существующий этап,
+7. Иначе на странице roadmap разработчик может выбрать существующий этап,
    проверить предложенный `DLV-ROADMAP-NNN`, изменить ID и добавить однострочный
    результат. Docu-docu выполняет CAS insertion и возвращает страницу к этапу.
-7. Или разработчик открывает `/_docu-docu/editor/`; Editor получает revision,
+8. Или разработчик открывает `/_docu-docu/editor/`; Editor получает revision,
    безопасный список файлов и общий реестр шаблонов.
-8. Разработчик открывает исходник, меняет текст, проверяет Markdown preview и
+9. Разработчик открывает исходник, меняет текст, проверяет Markdown preview и
    positional diagnostics и сохраняет его.
-9. Docu-docu сравнивает SHA-256 digest, атомарно заменяет файл и синхронно
+10. Docu-docu сравнивает SHA-256 digest, атомарно заменяет файл и синхронно
    перестраивает модель, HTML, поиск и diagnostics.
-10. При переходе между canonical HTML-документами portal может заранее получить
+11. При переходе между canonical HTML-документами portal может заранее получить
    целевую страницу, проверить текущую revision и заменить document layout без
    rebuild. Back/Forward, anchors, scroll и keyboard focus продолжают работать.
-11. Browser polling получает новую revision: обычная страница перезагружается,
+12. Browser polling получает новую revision: обычная страница перезагружается,
    чистый editor обновляется, а dirty editor сохраняет текст и показывает
    конфликт.
-12. HTTP-навигация отдаёт последний успешный snapshot и не запускает rebuild.
+13. HTTP-навигация отдаёт последний успешный snapshot и не запускает rebuild.
    Watcher стабилизирует внешние изменения и перестраивает только изменившийся
    documentation root; ручная пересборка canonical portal показывает область
    «модель, HTML и поиск», progress и итог перед перезагрузкой.
-13. Если `serve` запущен из canonical root с `translations.<locale>`, header
+14. Если `serve` запущен из canonical root с `translations.<locale>`, header
    предлагает locale tags. Соответствующий Markdown открывается в выбранном
    locale, а отсутствующая страница — на его homepage.
-14. Разработчик останавливает сервер сочетанием `Ctrl+C`.
+15. Разработчик останавливает сервер сочетанием `Ctrl+C`.
 
 ## Ошибочные сценарии
 
 - на шаге 2 ошибка чтения или генерации не оставляет работающий сервер;
 - на шаге 3 занятый или недоступный порт завершает команду с кодом `1`;
+- timeout, malformed/oversized GitHub response или development version не
+  показывают предложение обновить и не влияют на остальные функции;
 - stale digest возвращает `409 stale_digest`; явное overwrite повторяется с
   актуальным digest и `confirmOverwrite: true`, а запрос без подтверждения и
   второй внешний конфликт снова получают `409`;
@@ -99,6 +105,7 @@ editor, changes, workspace, API docs или canonical API.
 - [BR-SITE-007](../modules/site.md#br-site-007-build-и-serve-имеют-разные-возможности) — build остаётся static read-only, serve предоставляет live workspace.
 - [BR-SITE-010](../modules/site.md#br-site-010-мягкая-навигация-ограничена-canonical-serve-portal) — мягкие переходы не меняют offline/file и locale semantics.
 - [BR-SITE-014](../modules/site.md#br-site-014-roadmap-изменяется-только-ограниченной-операцией) — serve добавляет только новый `DLV-*` с CAS, не передавая разбор Markdown браузеру.
+- [BR-SITE-015](../modules/site.md#br-site-015-проверка-версии-не-влияет-на-доступность-портала) — update notice существует только в canonical serve и деградирует без ошибки.
 
 ## Реализация
 
@@ -130,3 +137,5 @@ editor, changes, workspace, API docs или canonical API.
 - полная навигация для editor, changes, locale и external links, а также
   fallback при network error и revision mismatch;
 - отсутствие eager-запросов search index и Mermaid на обычной странице.
+- update notice, dismiss для конкретной версии, `--no-update-check`, silent
+  failure и отсутствие endpoint/capability в static и translation portals.

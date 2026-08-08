@@ -48,8 +48,24 @@ func TestSiteConfigDefaultsAndMissingFile(t *testing.T) {
 		config.Density != "comfortable" || config.ContentWidth != "standard" || !config.Hero.Enabled {
 		t.Fatalf("defaults: %#v", config)
 	}
-	if model.Project.Title != "Index title" || config.Footer.Text != "Сгенерировано Docu-docu "+Version {
+	if model.Project.Title != "Index title" || config.Footer.Text != "Сгенерировано Docu-docu "+Version || config.Footer.URL != defaultFooterURL {
 		t.Fatalf("default title/footer: %#v / %#v", model.Project, config.Footer)
+	}
+	if got := renderFooter(config.Footer); got != `Сгенерировано <a href="https://lumenikoly.github.io/docu-docu/" rel="noopener noreferrer">Docu-docu</a> `+Version {
+		t.Fatalf("rendered default footer: %q", got)
+	}
+}
+
+func TestCustomFooterTextDoesNotInheritDefaultLink(t *testing.T) {
+	config, err := parseSiteConfig([]byte("site:\n  footer:\n    text: Custom footer\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if config.Footer.URL != "" {
+		t.Fatalf("custom text inherited default footer URL: %q", config.Footer.URL)
+	}
+	if got := renderFooter(config.Footer); got != "Custom footer" {
+		t.Fatalf("rendered custom footer: %q", got)
 	}
 }
 

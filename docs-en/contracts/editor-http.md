@@ -3,14 +3,15 @@
 - Identifier: CON-EDITOR-HTTP-V1
 - Status: Completed
 - Owner: Docu-docu Team
-- Last updated: 2026-08-06
+- Last updated: 2026-08-08
 
 [OpenAPI 3.1.0](editor.openapi.yaml) contains routes, parameters, response codes,
 and data schemas. In canonical `serve`, this page also provides a button for
 opening the specification in Swagger UI.
 
-This document describes editor guarantees that a single HTTP schema cannot
-express: the workspace boundary, write protection, and rebuild behavior.
+This document describes guarantees of canonical portal services that a single
+HTTP schema cannot express: the workspace boundary, write protection, rebuild
+behavior, and checking whether a new Docu-docu version is available.
 
 ## Availability
 
@@ -23,6 +24,24 @@ endpoint from the page URL.
 The editor sees only allowed `.md`, `.yaml`, `.yml`, and `.json` files inside
 the documentation root. OpenAPI files are validated by the same validator used
 by `docu-docu check`.
+
+## Version check
+
+By default, canonical `serve` publishes the read-only
+`/_docu-docu/api/version` endpoint. On the first request, the process contacts
+the project's fixed GitHub Releases API once, accepts only a stable release
+with an exact `X.Y.Z` version, limits the request to three seconds and the
+response body to 64 KiB, rejects redirects, and then caches the result until
+the process exits. An arbitrary external address from the response is not
+used: the server constructs the link to the official release page itself.
+
+The browser contacts only the same-origin endpoint. When a newer version is
+available, it shows a non-blocking suggestion to open the release; dismissal
+is remembered for that version. A network error, invalid response, or
+development version produces `status: unavailable` and does not interfere with
+reading the portal. `--no-update-check` disables the capability and endpoint.
+Static builds, locale mounts, and direct translation serves contain no version
+check and make no external requests.
 
 ## Writing a file
 

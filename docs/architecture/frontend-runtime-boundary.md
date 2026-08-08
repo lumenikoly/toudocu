@@ -55,8 +55,10 @@ resources. Editor client, rebuild client, server API URL и возможност
 
 `serve` использует тот же renderer и `portal.js`, но Go явно добавляет
 capabilities и отдельные `serve.js`, `editor.js` и `changes.js`. API остаётся
-same-origin, а URL endpoint передаёт Go. Frontend не выводит режим из URL или
-случайных DOM-маркеров.
+same-origin, а URL endpoints передаёт Go. Capability `updateCheck` разрешает
+frontend запросить только server-computed version endpoint; ответ принимается
+лишь с официальным release URL, а dismiss хранится для конкретной версии.
+Frontend не выводит режим из URL или случайных DOM-маркеров.
 
 Прямое открытие HTML через `file://` не является архитектурным или продуктовым
 контрактом. Локальный browser runtime предоставляет существующая команда
@@ -74,6 +76,8 @@ same-origin, а URL endpoint передаёт Go. Frontend не выводит �
 - Портал работает в корне host и во вложенном URL-пути без обязательного `baseURL`.
 - Asset manifest детерминирован; filenames не содержат timestamps или random data.
 - Ошибка отдельного интерактивного компонента не скрывает основной content.
+- Ошибка или отключение проверки версии не меняет основной content и не
+  вызывает browser-запрос к внешнему origin.
 - Browser input остаётся недоверенным; все security decisions выполняет Go.
 
 ## Связанные документы

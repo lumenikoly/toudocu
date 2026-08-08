@@ -61,6 +61,15 @@ specs. CSP prohibits external script/style/connect targets, and browser Try it
 out is limited to `GET`/`HEAD`; the UI does not weaken the guards of the APIs
 themselves.
 
+The version check exists only in canonical `serve` and contacts a fixed HTTPS
+GitHub Releases API without credentials. The server limits response time and
+size, rejects redirects, accepts only a stable `X.Y.Z` tag, constructs the
+official release URL itself, and caches the status. The browser sees only a
+same-origin endpoint; the remote body never becomes HTML, executable code, or
+a general-purpose URL. `--no-update-check` disables the capability and makes
+the endpoint unavailable, while static and translation portals do not create
+this boundary.
+
 ## Execution boundary
 
 Documentation Changes invokes the installed `git` directly as an argument

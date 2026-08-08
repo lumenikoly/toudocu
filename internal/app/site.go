@@ -429,10 +429,7 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 	if logo := brandingOutput(model, "logo"); logo != "" {
 		brandMark = `<img class="brand-logo" src="` + escapeAttr(relativeURL(current, logo)) + `" alt="">`
 	}
-	footer := escapeHTML(config.Footer.Text)
-	if config.Footer.URL != "" {
-		footer = `<a href="` + escapeAttr(config.Footer.URL) + `" rel="noopener noreferrer">` + footer + `</a>`
-	}
+	footer := renderFooter(config.Footer)
 	themeLabel, themeIndicator := siteThemePresentation(config.Theme)
 	schemeLabel := colorSchemeLabel(config.ColorScheme)
 	themeSelect := `<label class="header-select site-theme-select"><span class="header-select-visual" aria-hidden="true"><span class="site-theme-indicator" data-site-theme-indicator>` + escapeHTML(themeIndicator) + `</span><span data-site-theme-label>` + escapeHTML(themeLabel) + `</span></span><select data-site-theme-select aria-label="Тема оформления">` + selectOptions(config.Theme, []selectOption{{"classic", "Классика"}, {"paper", "Бумага"}, {"terminal", "Терминал"}}) + `</select></label>`
@@ -456,7 +453,11 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 	if model.serveMode {
 		runtime = frontend.RuntimeServe
 		capabilities.Editor, capabilities.Changes, capabilities.Rebuild, capabilities.TaskWorkspace = true, true, true, true
+		capabilities.UpdateCheck = model.updateCheckEnabled
 		endpoints = &frontend.Endpoints{Editor: editorAPIBase, Changes: changesAPIBase, Rebuild: rebuildEndpoint}
+		if capabilities.UpdateCheck {
+			endpoints.Version = versionEndpoint
+		}
 	}
 	bootstrap, err := frontend.MarshalBootstrap(frontend.PageBootstrap{
 		SchemaVersion: 1,
@@ -488,6 +489,17 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 		panic(err)
 	}
 	return rendered
+}
+
+func renderFooter(config FooterConfig) string {
+	if config.Text == "Сгенерировано Docu-docu "+Version && config.URL == defaultFooterURL {
+		return `Сгенерировано <a href="` + escapeAttr(config.URL) + `" rel="noopener noreferrer">Docu-docu</a> ` + escapeHTML(Version)
+	}
+	footer := escapeHTML(config.Text)
+	if config.URL != "" {
+		footer = `<a href="` + escapeAttr(config.URL) + `" rel="noopener noreferrer">` + footer + `</a>`
+	}
+	return footer
 }
 
 func renderLanguageSelect(targets []LanguageTarget) string {
@@ -622,7 +634,7 @@ func renderRelated(model *Model, document *Document) string {
 	if b.Len() == 0 {
 		return ""
 	}
-	return `<section class="dashboard-section"><h2>Связанные документы</h2><ul class="related-list">` + b.String() + `</ul></section>`
+	return `<section class="dashboard-section dashboard-support-panel"><h2>Связанные документы</h2><ul class="related-list">` + b.String() + `</ul></section>`
 }
 
 func renderRiskStatus(model *Model, document *Document) string {
@@ -855,7 +867,7 @@ func renderComputedStatus(model *Model, current string) string {
 		nextHTML = `<div class="card-kicker">` + renderStatusChip(status) + `</div><p><a href="` + escapeAttr(href) + `"><strong>` + escapeHTML(next.ID) + `</strong></a> — ` + escapeHTML(text) + `</p>`
 	}
 
-	return `<section class="dashboard-section"><div class="section-heading"><div><h2>Вычисляемое состояние</h2><p>Формируется из активных work items и эффективного состояния roadmap.</p></div></div><h3>Сейчас в работе</h3>` + activeHTML + `<h3>Блокеры</h3>` + blockersHTML + `<h3>Следующий результат</h3>` + nextHTML + `</section>`
+	return `<section class="dashboard-section dashboard-support-panel"><div class="section-heading"><div><h2>Вычисляемое состояние</h2><p>Формируется из активных work items и эффективного состояния roadmap.</p></div></div><h3>Сейчас в работе</h3>` + activeHTML + `<h3>Блокеры</h3>` + blockersHTML + `<h3>Следующий результат</h3>` + nextHTML + `</section>`
 }
 
 func renderRecommendedEntries(model *Model) string {
@@ -907,11 +919,13 @@ func renderRecommendedEntries(model *Model) string {
 func renderDashboardFocus(model *Model) string {
 	roadmap := model.DocByPath["roadmap.md"]
 	risksDocument := model.DocByPath["risks.md"]
-	if roadmap == nil && len(model.Knowledge.WorkItems) == 0 && risksDocument == nil {
+	statusDocument := model.Project.StatusDocument
+	if statusDocument == nil && roadmap == nil && len(model.Knowledge.WorkItems) == 0 && risksDocument == nil {
 		return ""
 	}
 
-	nextResult := `<p class="focus-empty">Следующий результат не определён.</p>`
+	nextLabel := "Следующий результат не определён."
+	nextHref := ""
 	if next := model.CurrentStatus.NextResult; next != nil {
 		target := next.TargetDocument
 		if target == "" {
@@ -925,13 +939,14 @@ func renderDashboardFocus(model *Model) string {
 		if text == "" {
 			text = next.ID
 		}
-		nextResult = `<a class="focus-result-link" href="` + escapeAttr(href) + `"><span class="focus-result-id">` + escapeHTML(next.ID) + `</span><strong>` + escapeHTML(text) + `</strong><span aria-hidden="true">→</span></a>`
+		nextLabel = strings.TrimSpace(next.ID + " · " + text)
+		if href != "#" {
+			nextHref = href
+		}
 	}
 
 	workTarget := ""
-	if model.Project.StatusDocument != nil {
-		workTarget = model.Project.StatusDocument.OutputPath
-	} else if len(model.Knowledge.WorkItems) > 0 {
+	if len(model.Knowledge.WorkItems) > 0 {
 		workTarget = "work/index.html"
 	}
 	workHref := ""
@@ -942,47 +957,54 @@ func renderDashboardFocus(model *Model) string {
 	if risksDocument != nil {
 		riskHref = relativeURL("index.html", risksDocument.OutputPath)
 	}
-	activeCount := len(model.CurrentStatus.ActiveWork)
-	blockerCount := len(model.CurrentStatus.Blockers)
-	openRiskCount := model.Stats.OpenRisks
-
-	signal := func(className, href, label, emptyLabel string, count int) string {
-		state := fmt.Sprintf("%d", count)
-		if count == 0 {
-			state = emptyLabel
-		}
-		content := `<span class="focus-signal-label">` + escapeHTML(label) + `</span><strong>` + escapeHTML(state) + `</strong>`
-		if href == "" {
-			return `<div class="focus-signal ` + className + `">` + content + `</div>`
-		}
-		return `<a class="focus-signal ` + className + `" href="` + escapeAttr(href) + `">` + content + `</a>`
+	target := ""
+	if statusDocument != nil {
+		target = relativeURL("index.html", statusDocument.OutputPath)
+	} else if nextHref != "" {
+		target = nextHref
+	} else if workHref != "" {
+		target = workHref
+	} else {
+		target = riskHref
 	}
+	statusLabel := strings.TrimSpace(model.Project.Status.Label)
+	if statusLabel == "" {
+		statusLabel = "Состояние проекта"
+	}
+	content := `<span class="focus-status">` + escapeHTML(statusLabel) + `</span><span class="focus-result"><span>Ближайший результат</span><strong>` + escapeHTML(nextLabel) + `</strong></span><span class="focus-arrow" aria-hidden="true">→</span>`
+	if target == "" {
+		return `<div class="dashboard-section dashboard-focus" aria-label="Текущий фокус">` + content + `</div>`
+	}
+	return `<a class="dashboard-section dashboard-focus" aria-label="Текущий фокус: ` + escapeAttr(nextLabel) + `" href="` + escapeAttr(target) + `">` + content + `</a>`
+}
 
-	return `<section class="dashboard-section dashboard-focus" aria-labelledby="dashboard-focus-title"><div class="section-heading"><div><h2 id="dashboard-focus-title">Текущий фокус</h2><p>Ближайший результат и сигналы, требующие внимания.</p></div></div><div class="focus-layout"><div class="focus-result"><span class="focus-eyebrow">Следующий результат</span>` + nextResult + `</div><div class="focus-signals" aria-label="Сводка текущего состояния">` +
-		signal("focus-signal-work", workHref, "Активная работа", "Нет активных задач", activeCount) +
-		signal("focus-signal-blockers", workHref, "Блокеры", "Нет блокеров", blockerCount) +
-		signal("focus-signal-risks", riskHref, "Незакрытые риски", "Нет незакрытых рисков", openRiskCount) +
-		`</div></div></section>`
+func dashboardOverviewBody(model *Model, document *Document) string {
+	body := strings.TrimSpace(renderDocumentMarkdown(document, linkResolverFor(model, document), nil))
+	description := strings.TrimSpace(document.Description)
+	if description == "" {
+		return body
+	}
+	prefix := `<p>` + escapeHTML(description) + `</p>`
+	if strings.HasPrefix(body, prefix) {
+		return strings.TrimSpace(strings.TrimPrefix(body, prefix))
+	}
+	return body
 }
 
 func renderDashboard(model *Model) string {
-	status := ""
-	if model.Project.OverviewDocument != nil && model.Project.OverviewDocument.Metadata["status"] != "" ||
-		model.Project.StatusDocument != nil && model.Project.StatusDocument.Metadata["status"] != "" {
-		status = `<div class="page-kicker">` + renderStatusChip(model.Project.Status) + `</div>`
-	}
 	meta := ""
 	if values := nonEmpty([]string{model.Project.Stage, model.Project.Version, model.Project.Owner, model.Project.Updated}); len(values) > 0 {
 		meta = `<div class="hero-meta">` + escapeHTML(strings.Join(values, " · ")) + `</div>`
 	}
 	overview := ""
 	if document := model.Project.OverviewDocument; document != nil {
-		body := renderDocumentMarkdown(document, linkResolverFor(model, document), nil)
+		body := dashboardOverviewBody(model, document)
 		if body != "" {
-			overview = `<section class="dashboard-section dashboard-overview" data-dashboard-overview aria-labelledby="dashboard-overview-title"><div class="dashboard-overview-heading"><div><h2 id="dashboard-overview-title">Подробный обзор</h2><small>Полное содержание index.md</small></div></div><div class="dashboard-overview-body"><div class="page-actions dashboard-page-actions">` + renderDocumentContextButton(model, document) + `</div><article class="doc-content">` + body + `</article></div></section>`
+			overview = `<section class="dashboard-section dashboard-overview" data-dashboard-overview aria-labelledby="dashboard-overview-title"><div class="dashboard-overview-heading"><div><h2 id="dashboard-overview-title">Обзор проекта</h2><small>Полное содержание index.md</small></div><div class="page-actions dashboard-page-actions">` + renderDocumentContextButton(model, document) + `</div></div><div class="dashboard-overview-body"><article class="doc-content">` + body + `</article></div></section>`
 		}
 	}
-	hero := `<header class="page-header dashboard-about">` + status + `<h1>` + escapeHTML(model.Project.Title) + `</h1><p class="page-lead">` + escapeHTML(model.Project.Description) + `</p>` + meta + `</header>`
+	title := `<div class="dashboard-title"><h1>` + escapeHTML(model.Project.Title) + `</h1><span class="beta-badge">Beta</span></div>`
+	hero := `<header class="page-header dashboard-about">` + title + `<p class="page-lead">` + escapeHTML(model.Project.Description) + `</p>` + meta + `</header>`
 	if model.SiteConfig.Hero.Enabled {
 		heroLogo := ""
 		if logo := brandingOutput(model, "logo"); logo != "" {
@@ -994,7 +1016,7 @@ func renderDashboard(model *Model) string {
 			heroClass += " has-image"
 			heroImage = `<div class="hero-media"><img src="` + escapeAttr(image) + `" alt=""></div>`
 		}
-		hero = `<header class="` + heroClass + ` dashboard-about"><div class="hero-copy">` + heroLogo + status + `<h1>` + escapeHTML(model.Project.Title) + `</h1><p class="hero-description">` + escapeHTML(model.Project.Description) + `</p>` + meta + `</div>` + heroImage + `</header>`
+		hero = `<header class="` + heroClass + ` dashboard-about"><div class="hero-copy">` + heroLogo + title + `<p class="hero-description">` + escapeHTML(model.Project.Description) + `</p>` + meta + `</div>` + heroImage + `</header>`
 	}
 	content := hero + renderDashboardFocus(model) + renderRecommendedEntries(model) + overview
 	return pageShell(model, "index.html", model.Project.Title, model.Project.Description, content, "")

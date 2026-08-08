@@ -74,3 +74,28 @@ created last. Update and uninstall atomically move the old target to a unique
 backup and recheck the snapshot. If publication fails, the previous copy is
 restored; if rollback is impossible, the CLI preserves the backup and prints
 its path with code `SKILL_RESTORE_FAILED`.
+
+## After installation
+
+`docu-docu skill ...` commands manage the lifecycle of the installed copy. To
+work with your project, invoke the skill in a prompt to the AI agent:
+
+```text
+$docu-docu check the project documentation and explain the problems found
+$docu-docu prepare read-only context for TASK-AREA-001
+$docu-docu update the specified guide from the current CLI contract
+```
+
+Special modifying workflows are also invoked through prompts and only
+explicitly:
+
+```text
+$docu-docu init
+$docu-docu refresh
+$docu-docu refresh diff
+$docu-docu translate en --all-stale
+```
+
+Everyday scenarios, the distinction between shell commands and agent calls,
+and permission boundaries are described in the
+[AI skill usage guide](agent-workflows.md).
