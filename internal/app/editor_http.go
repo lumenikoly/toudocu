@@ -36,6 +36,7 @@ var editorRouteRegistry = []apiRoute{
 
 var editorServiceRouteRegistry = []apiRoute{
 	{Path: rebuildEndpoint, Methods: []string{http.MethodPost}, Handler: (*documentationServer).serveRebuild},
+	{Path: versionEndpoint, Methods: []string{http.MethodGet, http.MethodHead}, Handler: (*documentationServer).serveVersion},
 }
 
 type editorErrorEnvelope struct {

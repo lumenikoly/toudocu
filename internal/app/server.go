@@ -68,6 +68,7 @@ type documentationServer struct {
 	portals             map[string]*ServePortalState
 	configDigest        string
 	translationReadOnly bool
+	updateChecker       *updateChecker
 }
 
 func newDocumentationServer(options Options, stderr io.Writer) (*documentationServer, *Model, GenerateResult, error) {
@@ -75,7 +76,7 @@ func newDocumentationServer(options Options, stderr io.Writer) (*documentationSe
 	if err != nil {
 		return nil, nil, GenerateResult{}, err
 	}
-	s := &documentationServer{options: options, stderr: stderr, workspace: workspace, overwrites: map[string]string{}, changesCache: map[string]*ChangeSetReport{}, portals: map[string]*ServePortalState{}}
+	s := &documentationServer{options: options, stderr: stderr, workspace: workspace, overwrites: map[string]string{}, changesCache: map[string]*ChangeSetReport{}, portals: map[string]*ServePortalState{}, updateChecker: newUpdateChecker()}
 	if err := s.rebuildRegistry(); err != nil {
 		return nil, nil, GenerateResult{}, err
 	}
@@ -260,8 +261,10 @@ func (s *documentationServer) generatePortal(state *ServePortalState, canonical 
 		return GenerateResult{}, err
 	}
 	state.model.serveRevision = ""
+	state.model.updateCheckEnabled = false
 	if canonical {
 		state.model.serveRevision = revision
+		state.model.updateCheckEnabled = !s.options.NoUpdateCheck
 	}
 	next := state.Portal.OutputDirectory + ".next"
 	_ = os.RemoveAll(next)
@@ -367,6 +370,14 @@ func (s *documentationServer) currentConfigDigest() string {
 
 func (s *documentationServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
+	if r.URL.Path == versionEndpoint {
+		if s.translationReadOnly || s.options.NoUpdateCheck {
+			http.NotFound(w, r)
+			return
+		}
+		s.serveVersion(w, r)
+		return
+	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if strings.HasPrefix(r.URL.Path, localeMountBase) {

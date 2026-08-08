@@ -253,6 +253,7 @@ Local mode provides:
 * automatic rebuilds;
 * validation previews;
 * Git change browsing;
+* a non-blocking notice when a newer stable Docu-docu release is available;
 * offline OpenAPI documentation at `/_docu-docu/api-docs/` with safe
   `GET`/`HEAD` Try it out.
 
@@ -263,6 +264,10 @@ By default, the server listens on:
 ```
 
 The local server does not provide TLS or built-in authentication. Do not expose it to an external network without additional protection.
+
+The release check is performed at most once per server process and never
+updates the binary. Use `docu-docu serve --no-update-check ./docs` to disable
+the network request and UI notice.
 
 The API documentation uses vendored Swagger UI 5.32.12 and same-origin specs;
 it never loads a CDN. Static builds copy the OpenAPI files but omit the UI.

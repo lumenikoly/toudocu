@@ -128,8 +128,20 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
   await new Promise<void>((resolveClose) => portServer.close(() => resolveClose()));
   const child: ChildProcess = spawn("go", ["run", "./cmd/docu-docu", "serve", join(fixture, "docs"), "--repository-root", fixture, "-o", join(fixture, "site"), "--host", "127.0.0.1", "--port", String(port)], { cwd: repo, stdio: "pipe" });
   const origin = `http://127.0.0.1:${port}`;
+  let latestVersion = "0.0.2";
   try {
     await waitForHTTP(origin);
+    await page.route("**/_docu-docu/api/version", (route) => route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        schemaVersion: 1,
+        currentVersion: "0.0.1",
+        status: "update-available",
+        latestVersion,
+        releaseURL: `https://github.com/lumenikoly/docu-docu/releases/tag/${latestVersion}`,
+      }),
+    }));
     await page.route("**/assets/*.js", async (route) => {
       if (!route.request().url().endsWith("/appearance.js")) await new Promise((resolveDelay) => setTimeout(resolveDelay, 250));
       await route.continue();
@@ -150,6 +162,11 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await page.goto(origin);
     await expect.poll(() => page.evaluate(() => (window as any).__docuDocuFirstFrame)).toEqual({ siteTheme: "paper", colorScheme: "dark", theme: "dark", accent: "violet" });
     await expect(page.locator("[data-server-rebuild]")).toBeVisible();
+    const updateNotice = page.locator("[data-update-notice]");
+    await expect(updateNotice).toContainText("Доступна Docu-docu 0.0.2");
+    await expect(updateNotice).toContainText("У вас 0.0.1");
+    await expect(updateNotice.locator("a")).toHaveAttribute("href", "https://github.com/lumenikoly/docu-docu/releases/tag/0.0.2");
+    await expect(updateNotice.locator("a")).toHaveAttribute("rel", "noopener noreferrer");
     const portalFonts: Record<string, Record<string, string>> = {};
     for (const siteTheme of ["classic", "paper", "terminal"]) {
       await page.locator("[data-site-theme-select]").selectOption(siteTheme);
@@ -169,11 +186,19 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     }
     await page.locator('main a.recommended-entry[href="architecture/overview.html"]').click();
     await page.waitForURL("**/architecture/overview.html");
+    await expect(updateNotice).toBeVisible();
     await expect.poll(() => page.evaluate(() => window.DocuDocuPage?.page.path)).toBe("architecture/overview.html");
     await expect.poll(() => page.evaluate(() => window.DocuDocuPage?.portal.dataBase)).toBe("../data/");
     await page.locator("[data-global-search]").fill("Core");
     await expect(page.locator("[data-search-results]")).not.toBeEmpty();
     await page.goto(origin);
+    await updateNotice.getByRole("button", { name: "Скрыть уведомление о версии 0.0.2" }).click();
+    await expect(updateNotice).toHaveCount(0);
+    await page.reload();
+    await expect(page.locator("[data-update-notice]")).toHaveCount(0);
+    latestVersion = "0.0.3";
+    await page.reload();
+    await expect(page.locator("[data-update-notice]")).toContainText("Доступна Docu-docu 0.0.3");
     await page.locator("[data-server-rebuild]").click();
     await expect(page.locator("[data-server-rebuild]")).not.toHaveClass(/is-rebuilding/);
 
@@ -190,6 +215,9 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     const roadmapDialog = page.locator("[data-roadmap-dialog]");
     await expect(roadmapDialog.locator('input[name="id"]')).toHaveValue("DLV-ROADMAP-001");
     await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.locator("[data-update-notice]")).toBeInViewport();
+    await expect(page.locator("[data-update-notice] a")).toBeVisible();
+    await expect(page.locator("[data-update-notice] button")).toBeVisible();
     await expect(roadmapDialog).toBeInViewport();
     await expect(roadmapDialog.locator('input[name="text"]')).toBeVisible();
     await page.setViewportSize({ width: 1280, height: 720 });

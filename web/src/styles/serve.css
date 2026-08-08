@@ -10,6 +10,43 @@
 .server-rebuild.is-rebuilding .server-rebuild-icon { animation: server-rebuild-spin 800ms linear infinite; }
 .server-rebuild.has-error { border-color: var(--danger); color: var(--danger); }
 .server-rebuild.has-success { border-color: var(--success); color: var(--success); }
+.update-notice {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 8px 20px;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 24%, var(--border));
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-family: var(--font-interface);
+}
+.update-notice-copy { display: flex; align-items: baseline; gap: 9px; min-width: 0; }
+.update-notice-copy strong { font-size: 14px; font-weight: 760; font-variant-numeric: tabular-nums; }
+.update-notice-copy span { color: var(--text); font-size: 13px; font-variant-numeric: tabular-nums; }
+.update-notice-actions { display: flex; align-items: center; gap: 7px; }
+.update-notice-actions :is(a, button) {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--border));
+  border-radius: 8px;
+  padding: 5px 11px;
+  background: transparent;
+  color: var(--accent-strong);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+}
+.update-notice-actions a { border-color: var(--accent); background: var(--accent); color: var(--surface); }
+.update-notice-actions :is(a, button):hover { filter: brightness(.96); }
+.update-notice-actions :is(a, button):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.update-notice-actions :is(a, button):active { transform: scale(.96); }
 .document-context-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .roadmap-add-button { border-color: var(--accent); background: var(--accent); color: var(--surface); font-weight: 700; }
 .roadmap-add-button:hover { filter: brightness(.96); }
@@ -39,9 +76,16 @@
   .server-rebuild.is-rebuilding .server-rebuild-icon { animation: none; }
 }
 @media (max-width: 560px) {
+  .update-notice { align-items: stretch; justify-content: flex-start; gap: 10px; padding: 11px 12px; }
+  .update-notice-copy { flex: 1; display: grid; gap: 1px; align-content: center; }
+  .update-notice-actions { flex: 0 0 auto; }
+  .update-notice-actions :is(a, button) { min-height: 40px; padding-inline: 10px; }
   .ui-dialog[data-roadmap-dialog] { width: calc(100vw - 20px); margin: auto; }
   .roadmap-dialog-form { width: auto; padding: 20px 16px; }
   .roadmap-dialog-actions { display: grid; grid-template-columns: 1fr 1fr; }
+}
+@media print {
+  .update-notice { display: none; }
 }
 .is-soft-navigating::before {
   content: "";

@@ -57,6 +57,14 @@ Canonical API docs загружает только embedded Swagger UI и same-o
 проверенные specs. CSP запрещает внешние script/style/connect targets, а
 browser Try it out ограничен `GET`/`HEAD`; UI не ослабляет guards самих APIs.
 
+Проверка версии существует только в canonical `serve` и обращается к
+фиксированному HTTPS GitHub Releases API без credentials. Сервер ограничивает
+ожидание и размер ответа, запрещает redirects, принимает только stable tag
+`X.Y.Z`, сам строит официальный release URL и кеширует status. Browser видит только same-origin
+endpoint; remote body не становится HTML, executable code или URL общего
+назначения. `--no-update-check` выключает capability и делает endpoint
+недоступным, а static и translation portals не создают эту границу.
+
 ## Граница исполнения
 
 Documentation Changes запускает установленный `git` напрямую argument array с

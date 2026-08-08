@@ -43,6 +43,7 @@ type Capabilities struct {
 	Changes       bool `json:"changes"`
 	Rebuild       bool `json:"rebuild"`
 	TaskWorkspace bool `json:"taskWorkspace"`
+	UpdateCheck   bool `json:"updateCheck"`
 }
 
 type Endpoints struct {
@@ -50,6 +51,7 @@ type Endpoints struct {
 	EditorWorkspace string `json:"editorWorkspace,omitempty"`
 	Changes         string `json:"changes,omitempty"`
 	Rebuild         string `json:"rebuild,omitempty"`
+	Version         string `json:"version,omitempty"`
 }
 
 type PageBootstrap struct {
@@ -98,7 +100,7 @@ func (bootstrap PageBootstrap) Validate() error {
 		return fmt.Errorf("static bootstrap must not contain endpoints")
 	}
 	if bootstrap.Endpoints != nil {
-		for _, endpoint := range []string{bootstrap.Endpoints.Editor, bootstrap.Endpoints.EditorWorkspace, bootstrap.Endpoints.Changes, bootstrap.Endpoints.Rebuild} {
+		for _, endpoint := range []string{bootstrap.Endpoints.Editor, bootstrap.Endpoints.EditorWorkspace, bootstrap.Endpoints.Changes, bootstrap.Endpoints.Rebuild, bootstrap.Endpoints.Version} {
 			if endpoint != "" && (!strings.HasPrefix(endpoint, "/") || strings.HasPrefix(endpoint, "//")) {
 				return fmt.Errorf("serve endpoint must be same-origin")
 			}

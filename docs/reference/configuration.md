@@ -21,6 +21,7 @@ changes` — секцию `changes`; `task init` и `scaffold` — `project.loca
 | task timeout | `10m` |
 | serve host | `127.0.0.1` |
 | serve port | `8080` |
+| serve update check | включена; `--no-update-check` отключает |
 | screen map | включена при наличии `screens/SC-*.md` |
 | site theme | `classic` |
 | color scheme | `system` |
@@ -158,6 +159,12 @@ HTTP-сервером, editor markup, API URL, CodeMirror и server-only scripts
 Canonical `serve` без отдельной настройки публикует найденные OpenAPI contracts
 через `/_docu-docu/api-docs/`. Static build копирует specs, но не Swagger UI;
 translation mounts и direct translation serve не публикуют ни UI, ни ссылку.
+
+Canonical `serve` также по первому запросу browser проверяет latest stable
+release и при необходимости показывает неблокирующее предложение обновиться.
+Результат кешируется до остановки процесса. Для автономного запуска используйте
+`docu-docu serve --no-update-check ./docs`; static и translation portals эту
+проверку никогда не включают.
 
 Workspace включает обычные `.md`, `.yaml`, `.yml` и `.json` внутри docs root и
 исключает hidden, configured excludes, output subtree и symlink paths. JSON body

@@ -456,7 +456,11 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 	if model.serveMode {
 		runtime = frontend.RuntimeServe
 		capabilities.Editor, capabilities.Changes, capabilities.Rebuild, capabilities.TaskWorkspace = true, true, true, true
+		capabilities.UpdateCheck = model.updateCheckEnabled
 		endpoints = &frontend.Endpoints{Editor: editorAPIBase, Changes: changesAPIBase, Rebuild: rebuildEndpoint}
+		if capabilities.UpdateCheck {
+			endpoints.Version = versionEndpoint
+		}
 	}
 	bootstrap, err := frontend.MarshalBootstrap(frontend.PageBootstrap{
 		SchemaVersion: 1,
