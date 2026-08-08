@@ -995,7 +995,8 @@ func renderDashboard(model *Model) string {
 			overview = `<section class="dashboard-section dashboard-overview" data-dashboard-overview aria-labelledby="dashboard-overview-title"><div class="dashboard-overview-heading"><div><h2 id="dashboard-overview-title">Обзор проекта</h2><small>Полное содержание index.md</small></div><div class="page-actions dashboard-page-actions">` + renderDocumentContextButton(model, document) + `</div></div><div class="dashboard-overview-body"><article class="doc-content">` + body + `</article></div></section>`
 		}
 	}
-	hero := `<header class="page-header dashboard-about"><h1>` + escapeHTML(model.Project.Title) + `</h1><p class="page-lead">` + escapeHTML(model.Project.Description) + `</p>` + meta + `</header>`
+	title := `<div class="dashboard-title"><h1>` + escapeHTML(model.Project.Title) + `</h1><span class="beta-badge">Beta</span></div>`
+	hero := `<header class="page-header dashboard-about">` + title + `<p class="page-lead">` + escapeHTML(model.Project.Description) + `</p>` + meta + `</header>`
 	if model.SiteConfig.Hero.Enabled {
 		heroLogo := ""
 		if logo := brandingOutput(model, "logo"); logo != "" {
@@ -1007,7 +1008,7 @@ func renderDashboard(model *Model) string {
 			heroClass += " has-image"
 			heroImage = `<div class="hero-media"><img src="` + escapeAttr(image) + `" alt=""></div>`
 		}
-		hero = `<header class="` + heroClass + ` dashboard-about"><div class="hero-copy">` + heroLogo + `<h1>` + escapeHTML(model.Project.Title) + `</h1><p class="hero-description">` + escapeHTML(model.Project.Description) + `</p>` + meta + `</div>` + heroImage + `</header>`
+		hero = `<header class="` + heroClass + ` dashboard-about"><div class="hero-copy">` + heroLogo + title + `<p class="hero-description">` + escapeHTML(model.Project.Description) + `</p>` + meta + `</div>` + heroImage + `</header>`
 	}
 	content := hero + renderDashboardFocus(model) + renderRecommendedEntries(model) + overview
 	return pageShell(model, "index.html", model.Project.Title, model.Project.Description, content, "")
