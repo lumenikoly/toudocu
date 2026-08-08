@@ -1615,6 +1615,9 @@ func TestComputedStatusIsSummarizedOnDashboardAndDetailedOnStatusPage(t *testing
 			t.Fatalf("status.html missing %q", part)
 		}
 	}
+	if !strings.Contains(string(statusData), `class="dashboard-section dashboard-support-panel"`) {
+		t.Fatal("status computed state must render as a support panel")
+	}
 }
 
 func TestVerificationMatrixIsReported(t *testing.T) {

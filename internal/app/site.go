@@ -626,7 +626,7 @@ func renderRelated(model *Model, document *Document) string {
 	if b.Len() == 0 {
 		return ""
 	}
-	return `<section class="dashboard-section"><h2>Связанные документы</h2><ul class="related-list">` + b.String() + `</ul></section>`
+	return `<section class="dashboard-section dashboard-support-panel"><h2>Связанные документы</h2><ul class="related-list">` + b.String() + `</ul></section>`
 }
 
 func renderRiskStatus(model *Model, document *Document) string {
@@ -859,7 +859,7 @@ func renderComputedStatus(model *Model, current string) string {
 		nextHTML = `<div class="card-kicker">` + renderStatusChip(status) + `</div><p><a href="` + escapeAttr(href) + `"><strong>` + escapeHTML(next.ID) + `</strong></a> — ` + escapeHTML(text) + `</p>`
 	}
 
-	return `<section class="dashboard-section"><div class="section-heading"><div><h2>Вычисляемое состояние</h2><p>Формируется из активных work items и эффективного состояния roadmap.</p></div></div><h3>Сейчас в работе</h3>` + activeHTML + `<h3>Блокеры</h3>` + blockersHTML + `<h3>Следующий результат</h3>` + nextHTML + `</section>`
+	return `<section class="dashboard-section dashboard-support-panel"><div class="section-heading"><div><h2>Вычисляемое состояние</h2><p>Формируется из активных work items и эффективного состояния roadmap.</p></div></div><h3>Сейчас в работе</h3>` + activeHTML + `<h3>Блокеры</h3>` + blockersHTML + `<h3>Следующий результат</h3>` + nextHTML + `</section>`
 }
 
 func renderRecommendedEntries(model *Model) string {

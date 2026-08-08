@@ -460,7 +460,7 @@ func renderScreenConnections(model *Model, document *Document) string {
 		}
 		return `<div class="data-table"><table><thead><tr>` + headers + `</tr></thead><tbody>` + body + `</tbody></table></div>`
 	}
-	return `<section class="dashboard-section screen-connections"><div class="section-heading"><div><h2>Вычисленные связи</h2><p>Переходы извлечены из документов исходных экранов.</p></div>` +
+	return `<section class="dashboard-section dashboard-support-panel screen-connections"><div class="section-heading"><div><h2>Вычисленные связи</h2><p>Переходы извлечены из документов исходных экранов.</p></div>` +
 		`<a href="` + escapeAttr(relativeURL(document.OutputPath, screenMapTarget(model))+"#screen="+id) + `">Открыть в каталоге →</a></div>` +
 		`<h3>Входящие</h3>` + table(`<th>Откуда</th><th>Переход</th><th>Тип</th>`, incoming.String()) +
 		`<h3>Исходящие</h3>` + table(`<th>Переход</th><th>Куда</th><th>Тип</th>`, outgoing.String()) + `</section>`
