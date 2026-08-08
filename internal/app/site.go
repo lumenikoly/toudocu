@@ -429,10 +429,7 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 	if logo := brandingOutput(model, "logo"); logo != "" {
 		brandMark = `<img class="brand-logo" src="` + escapeAttr(relativeURL(current, logo)) + `" alt="">`
 	}
-	footer := escapeHTML(config.Footer.Text)
-	if config.Footer.URL != "" {
-		footer = `<a href="` + escapeAttr(config.Footer.URL) + `" rel="noopener noreferrer">` + footer + `</a>`
-	}
+	footer := renderFooter(config.Footer)
 	themeLabel, themeIndicator := siteThemePresentation(config.Theme)
 	schemeLabel := colorSchemeLabel(config.ColorScheme)
 	themeSelect := `<label class="header-select site-theme-select"><span class="header-select-visual" aria-hidden="true"><span class="site-theme-indicator" data-site-theme-indicator>` + escapeHTML(themeIndicator) + `</span><span data-site-theme-label>` + escapeHTML(themeLabel) + `</span></span><select data-site-theme-select aria-label="Тема оформления">` + selectOptions(config.Theme, []selectOption{{"classic", "Классика"}, {"paper", "Бумага"}, {"terminal", "Терминал"}}) + `</select></label>`
@@ -492,6 +489,17 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 		panic(err)
 	}
 	return rendered
+}
+
+func renderFooter(config FooterConfig) string {
+	if config.Text == "Сгенерировано Docu-docu "+Version && config.URL == defaultFooterURL {
+		return `Сгенерировано <a href="` + escapeAttr(config.URL) + `" rel="noopener noreferrer">Docu-docu</a> ` + escapeHTML(Version)
+	}
+	footer := escapeHTML(config.Text)
+	if config.URL != "" {
+		footer = `<a href="` + escapeAttr(config.URL) + `" rel="noopener noreferrer">` + footer + `</a>`
+	}
+	return footer
 }
 
 func renderLanguageSelect(targets []LanguageTarget) string {

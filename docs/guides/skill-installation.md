@@ -76,3 +76,27 @@ manifest проверяется как metadata schema v1; перестанов�
 уникальный backup и повторно сверяют snapshot. При ошибке публикации прежняя
 копия возвращается; если rollback невозможен, CLI сохраняет backup и печатает
 его путь с кодом `SKILL_RESTORE_FAILED`.
+
+## После установки
+
+Команды `docu-docu skill ...` управляют lifecycle установленной копии. Для
+работы со своим проектом вызовите skill уже в prompt AI-агенту:
+
+```text
+$docu-docu проверь документацию проекта и объясни найденные проблемы
+$docu-docu подготовь read-only контекст TASK-AREA-001
+$docu-docu обнови указанный guide по текущему CLI-контракту
+```
+
+Специальные изменяющие workflow также вызываются через prompt и только явно:
+
+```text
+$docu-docu init
+$docu-docu refresh
+$docu-docu refresh diff
+$docu-docu translate en --all-stale
+```
+
+Обычные сценарии, различие между shell-командами и agent-вызовами, а также
+границы разрешений описаны в
+[руководстве по использованию AI-skill](agent-workflows.md).
