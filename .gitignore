@@ -11,3 +11,5 @@
 *.test
 .DS_Store
 .tmp
+/.impeccable/
+.impeccable
