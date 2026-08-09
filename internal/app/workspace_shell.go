@@ -106,6 +106,12 @@ func workspacePageBootstrap(model *Model, pagePath, assetBase string, capabiliti
 	if locale == "" {
 		locale = "en"
 	}
+	endpoints := &frontend.Endpoints{
+		Editor: editorAPIBase, EditorWorkspace: editorUIPath, Changes: changesAPIBase, Rebuild: rebuildEndpoint,
+	}
+	if capabilities.Review {
+		endpoints.Review = reviewAPIBase
+	}
 	bootstrap, err := frontend.MarshalBootstrap(frontend.PageBootstrap{
 		SchemaVersion: 1,
 		Runtime:       frontend.RuntimeServe,
@@ -116,9 +122,7 @@ func workspacePageBootstrap(model *Model, pagePath, assetBase string, capabiliti
 			Accent: model.SiteConfig.Accent, Density: model.SiteConfig.Density, ContentWidth: model.SiteConfig.ContentWidth,
 		},
 		Capabilities: capabilities,
-		Endpoints: &frontend.Endpoints{
-			Editor: editorAPIBase, EditorWorkspace: editorUIPath, Changes: changesAPIBase, Rebuild: rebuildEndpoint,
-		},
+		Endpoints:    endpoints,
 	})
 	if err != nil {
 		panic(err)

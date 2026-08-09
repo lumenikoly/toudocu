@@ -18,6 +18,8 @@ JSON-результаты CLI. Конкретный синтаксис флаг�
 | `serve` | Запускает локальный портал, watcher, Editor и Changes API | Меняет canonical docs только по явному save, create или roadmap add в редакторе |
 | `search` | Ищет по актуальной модели | Нет |
 | `changes`, `changes file` | Сравнивает Git revisions, index и working tree | Нет, кроме явно указанного `-o` |
+| `changes feedback pending` | Возвращает oldest local review snapshot для агента | Нет |
+| `changes feedback respond` | Атомарно добавляет полный agent response в local review state | Да, только user-state вне repository; Git и Markdown не меняет |
 | `task changes` | Показывает изменения и влияние на выбранную задачу | Нет, кроме явно указанного `-o` |
 | `task init` | Создаёт черновик `TASK-*` или `BUG-*` | Создаёт один новый файл без перезаписи |
 | `scaffold` | Создаёт типизированный документ | Создаёт один новый файл без перезаписи |
@@ -101,6 +103,12 @@ CLI различает состояния `not-installed`, `installed`, `outdate
   соответствующим workflow.
 - `ChangeSetReport` — отдельная схема отчёта об изменениях и не входит в
   `ProjectReport`.
+- `changes feedback pending --json` возвращает schema-v1 envelope с revision,
+  state digest и `feedback`; пустая очередь содержит `feedback: null` и exit
+  code `0`.
+- `changes feedback respond --input response.json --json` принимает review ID,
+  feedback ID/digest, expected revision/digest и полный набор item results.
+  Успех возвращает `accepted: true` и новую пару revision/digest.
 
 Пустые коллекции сериализуются как `[]`; номера строк начинаются с единицы.
 Новые необязательные поля могут добавляться без смены версии схемы.
@@ -108,6 +116,25 @@ CLI различает состояния `not-installed`, `installed`, `outdate
 `task verify` записывает для каждой команды exit code, время, длительность,
 ограниченные stdout/stderr и связанные targets. Итоговый статус — `passed`,
 `failed` или `blocked`.
+
+## Agent feedback
+
+```text
+docu-docu changes feedback pending [--repository-root DIR] --json
+docu-docu changes feedback respond --input response.json \
+  [--repository-root DIR] [--json]
+```
+
+Без `--repository-root` Git определяет enclosing repository от cwd. Явный путь
+обязан быть canonical Git top-level. `pending` выдаёт batches FIFO по одному и
+повторяет oldest до успешного полного response. `respond` отклоняет неизвестные
+IDs, digest/revision conflict, missing или duplicate items, outcome вне
+`fixed|notFixed|needsClarification`, oversized text/response и unsafe
+`changedPaths`. Ни одна команда не запускает агента, LLM, shell или Git write.
+
+Стабильные diagnostics включают `REVIEW_INVALID_RESPONSE`,
+`REVIEW_MESSAGE_TOO_LARGE`, `REVIEW_STATE_BUSY`, `REVIEW_CONFLICT`,
+`REVIEW_UNSAFE_PATH`, `REVIEW_STATE_CORRUPTED` и связанные `REVIEW_*` коды.
 
 ## Exit codes
 

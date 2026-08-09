@@ -284,12 +284,32 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
 
     await page.route("**/_docu-docu/api/changes?**", async (route) => {
       const response = await route.fetch();
+      if (response.status() === 304) {
+        await route.fulfill({ response });
+        return;
+      }
       const report = await response.json();
       for (const change of report.changes ?? []) {
         if (change.path.endsWith("notes.md")) {
           change.semanticDiffAvailable = false;
           change.semanticChanges = [];
           change.diagnostics = [...(change.diagnostics ?? []), { severity: "warning", code: "semantic-unavailable", message: "semantic unavailable" }];
+        }
+      }
+      await route.fulfill({ response, json: report });
+    });
+    await page.route("**/_docu-docu/api/changes/review/repository/changes?**", async (route) => {
+      const response = await route.fetch();
+      if (response.status() === 304) {
+        await route.fulfill({ response });
+        return;
+      }
+      const report = await response.json();
+      for (const file of report.files ?? []) {
+        if (file.path.endsWith("notes.md") && file.documentation) {
+          file.documentation.semanticDiffAvailable = false;
+          file.documentation.semanticChanges = [];
+          file.documentation.diagnostics = [...(file.documentation.diagnostics ?? []), { severity: "warning", code: "semantic-unavailable", message: "semantic unavailable" }];
         }
       }
       await route.fulfill({ response, json: report });
@@ -348,6 +368,133 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     });
     await page.goto(`${origin}/_docu-docu/editor/?disabled=1`);
     await expect(page.locator('[data-ui-state="capability-unavailable"]')).toContainText("Редактор недоступен");
+  } finally {
+    child.kill("SIGTERM");
+    await new Promise<void>((resolveExit) => child.once("exit", () => resolveExit()));
+  }
+});
+
+test("Changes review hands three outcomes to the local agent CLI without auto-resolve", async ({ page }) => {
+  const fixture = mkdtempSync(join(tmpdir(), "docu-docu-review-browser-"));
+  const stateRoot = mkdtempSync(join(tmpdir(), "docu-docu-review-state-"));
+  cpSync(join(repo, "example", "docs"), join(fixture, "docs"), { recursive: true });
+  cpSync(join(repo, "example", ".docu-docu"), join(fixture, ".docu-docu"), { recursive: true });
+  writeFileSync(join(fixture, "server.go"), "package review\n\nfunc Server() string { return \"old\" }\n");
+  writeFileSync(join(fixture, "path.go"), "package review\n\nfunc Path() string { return \"old\" }\n");
+  writeFileSync(join(fixture, "legacy.go"), "package review\n\nfunc Legacy() bool { return true }\n");
+  run("git", ["init", "-q"], fixture);
+  run("git", ["config", "user.email", "review@example.invalid"], fixture);
+  run("git", ["config", "user.name", "Review Browser"], fixture);
+  run("git", ["add", "."], fixture);
+  run("git", ["commit", "-qm", "baseline"], fixture);
+  writeFileSync(join(fixture, "server.go"), "package review\n\nfunc Server() string { return \"current\" }\n");
+  writeFileSync(join(fixture, "path.go"), "package review\n\nfunc Path() string { return \"candidate\" }\n");
+  run("git", ["rm", "-q", "legacy.go"], fixture);
+
+  const portServer = createServer();
+  await new Promise<void>((resolveListen) => portServer.listen(0, "127.0.0.1", resolveListen));
+  const address = portServer.address();
+  if (!address || typeof address === "string") throw new Error("failed to reserve review port");
+  const port = address.port;
+  await new Promise<void>((resolveClose) => portServer.close(() => resolveClose()));
+  const environment = { ...process.env, DOCU_DOCU_STATE_HOME: stateRoot };
+  const child = spawn("go", ["run", "./cmd/docu-docu", "serve", join(fixture, "docs"), "--repository-root", fixture, "-o", join(fixture, "site"), "--host", "127.0.0.1", "--port", String(port), "--no-update-check"], { cwd: repo, env: environment, stdio: "pipe" });
+  const origin = `http://127.0.0.1:${port}`;
+  const feedbackCLI = (args: string[]) => {
+    const result = spawnSync("go", ["run", "./cmd/docu-docu", "changes", "feedback", ...args, "--repository-root", fixture, "--json"], { cwd: repo, env: environment, encoding: "utf8" });
+    if (result.status !== 0) throw new Error(`feedback CLI failed\n${result.stdout}\n${result.stderr}`);
+    return JSON.parse(result.stdout);
+  };
+  try {
+    await waitForHTTP(origin);
+    await page.goto(`${origin}/changes/`);
+    await expect(page.getByRole("heading", { name: "Изменения", exact: true })).toBeVisible();
+    await expect(page.locator('[data-file-list] [data-path="server.go"]')).toBeVisible();
+
+    for (const path of ["server.go", "path.go"]) {
+      await page.locator(`[data-file-list] [data-path="${path}"]`).click();
+      await expect(page.locator('.changes-detail-header p')).toContainText(path);
+      await page.locator('[data-tab="source"]').click();
+      await page.locator('[data-detail] [data-file-comment]').click();
+      const composer = page.locator('[data-review-composer]');
+      await expect(composer).toBeVisible();
+      await composer.locator('[data-review-type]').selectOption(path === "server.go" ? "issue" : "suggestion");
+      await composer.locator('[data-review-message]').fill(path === "server.go" ? "Проверь контракт Server." : "Уточни выбор path.");
+      await composer.locator('button[type="submit"]').click();
+      await expect(composer).not.toBeVisible();
+    }
+
+    await page.locator('[data-file-list] [data-path="legacy.go"]').click();
+    await expect(page.locator('.changes-detail-header p')).toContainText("legacy.go");
+    await page.locator('[data-tab="source"]').click();
+    await page.locator('[data-review-side="old"] .diff-comment').first().click();
+    const composer = page.locator('[data-review-composer]');
+    await composer.locator('[data-review-type]').selectOption("question");
+    await composer.locator('[data-review-message]').fill("Legacy точно можно удалить?");
+    await composer.locator('button[type="submit"]').click();
+
+    await expect(page.locator('[data-open-discussion-count]')).toHaveText("3");
+    await expect(page.locator('[data-unsent-count]')).toHaveText("3");
+    await page.locator('[data-send-feedback]').click();
+    await expect(page.locator('[data-unsent-count]')).toHaveText("0");
+
+    const pending = feedbackCLI(["pending"]);
+    expect(pending.feedback.items).toHaveLength(3);
+    writeFileSync(join(fixture, "path.go"), "package review\n\nfunc Path() string { return \"fixed\" }\n");
+    writeFileSync(join(fixture, "server_test.go"), "package review\n\nimport \"testing\"\n\nfunc TestPath(t *testing.T) { if Path() == \"\" { t.Fatal(\"empty\") } }\n");
+    const results = pending.feedback.items.map((item: any) => {
+      if (item.target.path === "path.go") return { itemId: item.id, outcome: "fixed", message: "Path исправлен и покрыт тестом.", changedPaths: ["path.go", "server_test.go"] };
+      if (item.target.path === "legacy.go") return { itemId: item.id, outcome: "notFixed", message: "Удаление оставлено как в working tree.", changedPaths: ["legacy.go"] };
+      return { itemId: item.id, outcome: "needsClarification", message: "Нужно уточнить ожидаемый контракт Server.", changedPaths: [] };
+    });
+    const responsePath = join(mkdtempSync(join(tmpdir(), "docu-docu-review-response-")), "response.json");
+    writeFileSync(responsePath, JSON.stringify({
+      schemaVersion: 1,
+      reviewId: pending.feedback.reviewId,
+      feedbackId: pending.feedback.id,
+      feedbackDigest: pending.feedback.feedbackDigest,
+      expectedRevision: pending.revision,
+      expectedStateDigest: pending.stateDigest,
+      results,
+    }));
+    feedbackCLI(["respond", "--input", responsePath]);
+
+    await expect(page.locator('[data-discussion-list]')).toContainText("Исправлено");
+    await expect(page.locator('[data-discussion-list]')).toContainText("Не исправлено");
+    await expect(page.locator('[data-discussion-list]')).toContainText("Нужно уточнение");
+    await expect(page.locator('[data-open-discussion-count]')).toHaveText("3");
+
+    const legacyThread = page.locator('.review-thread').filter({ hasText: "legacy.go" });
+    await legacyThread.getByRole("button", { name: "Посмотреть исправление" }).click();
+    await expect(page.locator('.diff-line.review-placement-highlight')).toBeVisible();
+
+    const pathThread = page.locator('.review-thread').filter({ hasText: "path.go" });
+    await pathThread.getByRole("button", { name: "Ответить" }).click();
+    await composer.locator('[data-review-message]').fill("Повторно проверь только этот path.");
+    await composer.locator('button[type="submit"]').click();
+    await expect(page.locator('[data-unsent-count]')).toHaveText("1");
+    await page.locator('[data-send-feedback]').click();
+    const repeated = feedbackCLI(["pending"]);
+    expect(repeated.feedback.items).toHaveLength(1);
+    expect(repeated.feedback.items[0].target.path).toBe("path.go");
+
+    await page.locator('[data-discussions-close]').click();
+    await page.setViewportSize({ width: 390, height: 844 });
+    const filesToggle = page.locator('[data-mobile-files]');
+    await filesToggle.click();
+    await expect(page.locator('[data-files-panel]')).toHaveAttribute("role", "dialog");
+    await expect(page.locator('[data-files-panel]')).toHaveAttribute("aria-modal", "true");
+    await page.keyboard.press("Escape");
+    await expect(filesToggle).toBeFocused();
+    const discussionsToggle = page.locator('[data-discussions-toggle]');
+    await discussionsToggle.click();
+    await expect(page.locator('[data-discussions-panel]')).toHaveAttribute("role", "dialog");
+    await page.keyboard.press("Escape");
+    await expect(discussionsToggle).toBeFocused();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+    await expect(page.locator('[data-discussions-panel]')).toHaveAttribute("hidden", "");
+    expect(await page.evaluate(() => window.DocuDocuPage?.capabilities.review)).toBe(true);
+    expect((await page.locator('script#docu-docu-page').textContent())?.includes("reviewId")).toBe(false);
   } finally {
     child.kill("SIGTERM");
     await new Promise<void>((resolveExit) => child.once("exit", () => resolveExit()));

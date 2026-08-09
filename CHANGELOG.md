@@ -2,6 +2,14 @@
 
 ## 0.0.1
 
+- Canonical Changes workspace получил repository-wide local review:
+  персистентные anchored discussions, changed/linked files, FIFO feedback
+  snapshots и agent responses через `changes feedback pending|respond`. UI и
+  CLI не запускают агента и не меняют Git; static и translation runtimes review
+  capability не получают.
+- Serve-only CodeMirror bundle закрепляет Go 6.0.1, Java 6.0.2 и
+  JavaScript/TypeScript 6.2.5 language packages; остальные UTF-8 files
+  сохраняют plain-text selection fallback.
 - `changes`, `changes file` и `task changes` получили явные
   `--include-assets` и `--translation-input`: первый переопределяет фильтр
   assets, второй формирует полный reader-facing вход для translation workflow.

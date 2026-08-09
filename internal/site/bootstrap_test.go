@@ -23,7 +23,7 @@ func TestWorkspaceTemplatesRenderSemanticContent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(changes, "Изменения документации") {
+	if !strings.Contains(changes, ">Изменения<") || !strings.Contains(changes, "data-discussions-panel") {
 		t.Fatalf("changes body missing: %s", changes)
 	}
 	editor, err := RenderEditor(view)

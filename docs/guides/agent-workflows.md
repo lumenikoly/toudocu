@@ -2,7 +2,8 @@
 
 Руководство объясняет, как вызывать установленный skill из AI-агента для
 повседневной работы с CLI, порталом, work items и исходной документацией, а
-также когда выбирать специальные workflow `init`, `refresh` и `translate`.
+также когда выбирать специальные workflow `init`, `refresh`, `translate` и
+`feedback`.
 
 ## Два разных интерфейса
 
@@ -24,6 +25,7 @@ $docu-docu проверь исходную документацию и объя�
 $docu-docu собери локальный портал в установленный проектом output
 $docu-docu подготовь контекст TASK-AREA-001
 $docu-docu обнови руководство по установке по текущему CLI-контракту
+$docu-docu feedback
 ```
 
 Сам CLI предоставляет `check`, `build`, `serve`, `search` и `task ...`, но не
@@ -66,6 +68,7 @@ policy и output. Если соглашений нет, fallback — `./docs` и
 | `$docu-docu refresh diff` | Явный вызов diff refresh |
 | `$docu-docu translate <locale> ...` | Явный запрос перевода и выбранная целевая локаль |
 | `$docu-docu translate diff` | Явный вызов перевода текущего diff во все настроенные целевые локали |
+| `$docu-docu feedback` | Явный запрос обработать локальные comments из Changes; разрешает только обоснованные изменения и релевантные проверки |
 | `task verify --run` | Явная просьба выполнить или проверить задачу в доверенном репозитории |
 
 Отсутствующие файлы, первое использование skill, обычная правка документации
@@ -160,6 +163,21 @@ task-local validation gate разрешён режим `--run`. Report сохр�
 неподтверждённый текст — добавить только ради чистого отчёта.
 
 ## Специальные workflow
+
+### Feedback из Changes
+
+`$docu-docu feedback` получает oldest local snapshot командой
+`changes feedback pending --json`. Агент проверяет target/anchor и текущий Git
+diff, трактует `issue`, `suggestion`, `question` и `praise` по их смыслу,
+изменяет только обоснованные места и запускает минимальные релевантные проверки.
+
+Для каждого item возвращается ровно один outcome:
+`fixed`, `notFixed` или `needsClarification`, пояснение и только относящиеся к
+нему safe repository-relative `changedPaths`. `respond` принимает весь batch
+атомарно по feedback digest и review revision/state digest. При конфликте агент
+заново получает pending и пересматривает batch, а не подменяет CAS. После успеха
+workflow последовательно обрабатывает следующий FIFO batch до пустой очереди.
+Ни transport CLI, ни Changes UI не запускают агента и не resolve threads.
 
 ### Инициализация
 

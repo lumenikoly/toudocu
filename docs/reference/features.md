@@ -24,6 +24,8 @@ Docu-docu поставляется одним Go-бинарником без в�
 | Сборка портала | `docu-docu build ./docs` | автономный HTML и `report.json` |
 | Локальный workspace | `docu-docu serve ./docs` | view/edit, editor API, watcher и live rebuild |
 | Просмотр изменений | `docu-docu changes ./docs` | text, Markdown или `ChangeSetReport` v1 |
+| Получение review feedback | `docu-docu changes feedback pending --json` | oldest schema-v1 snapshot или `feedback: null` |
+| Ответ на review feedback | `docu-docu changes feedback respond --input response.json` | атомарно принятые agent messages |
 | Изменение одного файла | `docu-docu changes file PATH ./docs` | detail выбранного изменённого path |
 | Поиск документов | `docu-docu search "query" ./docs` | `SearchReport` по свежим Markdown |
 | Создание задачи | `docu-docu task init ./docs --area AREA --title TITLE --type TYPE` | новый Draft и `TaskInitReport` |
@@ -46,6 +48,24 @@ Docu-docu поставляется одним Go-бинарником без в�
 Skill lifecycle не входит в публичный Go-фасад и не использует JSON output.
 Targets, состояния и безопасное ручное разрешение конфликтов описывает
 [руководство установки skill](../guides/skill-installation.md).
+
+## Локальное review изменений
+
+Canonical Changes workspace строит отдельную repository-wide проекцию поверх
+того же read-only Git adapter. Существующие documentation tabs сохраняются, а
+Go/Java/JavaScript/TypeScript и plain-text viewers дают единый selection
+contract для локальных comments. Discussions переживают restart и HEAD change,
+anchors получают explicit current, stale или deleted placement.
+
+«Отправить агенту» создаёт immutable FIFO snapshot, но не запускает LLM.
+Установленный `$docu-docu feedback` workflow получает pending batch через CLI,
+вносит только обоснованные изменения, выполняет релевантные проверки и
+возвращает полный structured response. Static и translation runtimes review
+capability не получают; commit/index targets остаются read-only.
+
+Подробности: [MOD-REVIEW](../modules/MOD-REVIEW.md),
+[UC-REVIEW-01](../use-cases/UC-REVIEW-01.md) и
+[Changes HTTP API](../contracts/changes-http.md).
 
 Команды `changes` поддерживают фильтры `--status`, `--module`, `--type` и
 `--permanent-only`. Последний оставляет только постоянную документацию и

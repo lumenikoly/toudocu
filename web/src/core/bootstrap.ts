@@ -33,11 +33,12 @@ export interface PageBootstrap {
     diagrams: boolean;
     editor: boolean;
     changes: boolean;
+    review: boolean;
     rebuild: boolean;
     taskWorkspace: boolean;
     updateCheck: boolean;
   };
-  endpoints?: Partial<Record<"editor" | "changes" | "rebuild" | "version", string>>;
+  endpoints?: Partial<Record<"editor" | "changes" | "review" | "rebuild" | "version", string>>;
 }
 
 export type BootstrapResult =

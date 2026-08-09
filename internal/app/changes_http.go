@@ -24,6 +24,11 @@ var changesRouteRegistry = []apiRoute{
 	{Path: changesAPIBase + "/screen-map", Methods: []string{http.MethodGet}, Handler: (*documentationServer).serveChangesScreenMap},
 }
 
+func allChangesRouteRegistry() []apiRoute {
+	routes := append([]apiRoute{}, changesRouteRegistry...)
+	return append(routes, reviewRouteRegistry...)
+}
+
 func changesOptionsFromRequest(base Options, request *http.Request) Options {
 	options := base
 	query := request.URL.Query()
@@ -140,6 +145,10 @@ func matchAPIRoute(registry []apiRoute, request *http.Request) (*apiRoute, bool)
 }
 
 func (s *documentationServer) serveChangesAPI(w http.ResponseWriter, request *http.Request) {
+	if request.URL.Path == reviewAPIBase || strings.HasPrefix(request.URL.Path, reviewAPIBase+"/") {
+		s.serveReviewAPI(w, request)
+		return
+	}
 	route, methodAllowed := matchAPIRoute(changesRouteRegistry, request)
 	if route == nil {
 		writeChangesDiagnostic(w, http.StatusNotFound, "route_not_found", "Changes API route не найден")

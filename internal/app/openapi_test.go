@@ -123,7 +123,7 @@ func TestOpenAPIContracts(t *testing.T) {
 
 func TestOpenAPIContractParity(t *testing.T) {
 	editorRoutes := append(append([]apiRoute{}, editorRouteRegistry...), editorServiceRouteRegistry...)
-	for _, route := range append(append([]apiRoute{}, editorRoutes...), changesRouteRegistry...) {
+	for _, route := range append(append([]apiRoute{}, editorRoutes...), allChangesRouteRegistry()...) {
 		if route.Handler == nil {
 			t.Fatalf("route %s has no handler", route.Path)
 		}
@@ -131,7 +131,7 @@ func TestOpenAPIContractParity(t *testing.T) {
 	if got, want := registryOperations(editorRoutes), readContractOperations(t, "editor.openapi.yaml"); !reflect.DeepEqual(got, want) {
 		t.Fatalf("editor registry/spec mismatch\nregistry=%#v\nspec=%#v", got, want)
 	}
-	if got, want := registryOperations(changesRouteRegistry), readContractOperations(t, "changes.openapi.yaml"); !reflect.DeepEqual(got, want) {
+	if got, want := registryOperations(allChangesRouteRegistry()), readContractOperations(t, "changes.openapi.yaml"); !reflect.DeepEqual(got, want) {
 		t.Fatalf("changes registry/spec mismatch\nregistry=%#v\nspec=%#v", got, want)
 	}
 }

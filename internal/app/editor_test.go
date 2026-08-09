@@ -65,7 +65,7 @@ func TestStaticSiteExcludesEditor(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, forbidden := range []string{"/_docu-docu/editor", "/_docu-docu/api/version", "/changes/", "editor.js", "changes.js", "serve.js", "serve-navigation.js", "data-server-rebuild", "data-roadmap-add", "docu-docu-revision", `"updateCheck":true`} {
+	for _, forbidden := range []string{"/_docu-docu/editor", "/_docu-docu/api/version", "/changes/", "editor.js", "changes.js", "serve.js", "serve-navigation.js", "data-server-rebuild", "data-roadmap-add", "docu-docu-revision", `"updateCheck":true`, `"review":true`} {
 		if strings.Contains(string(page), forbidden) {
 			t.Fatalf("static page contains %q", forbidden)
 		}
@@ -94,7 +94,7 @@ func TestServeSiteIncludesEditor(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, expected := range []string{"/_docu-docu/editor/", "/_docu-docu/api/version", `"updateCheck":true`, "/changes/", "assets/serve.js", "data-docu-docu-serve-navigation", "data-server-rebuild", `aria-label="Открыть редактор"`, `aria-label="Пересобрать документацию"`, `meta name="docu-docu-revision" content="` + server.revision + `"`} {
+	for _, expected := range []string{"/_docu-docu/editor/", "/_docu-docu/api/version", `"updateCheck":true`, `"review":true`, "/_docu-docu/api/changes/review", "/changes/", "assets/serve.js", "data-docu-docu-serve-navigation", "data-server-rebuild", `aria-label="Открыть редактор"`, `aria-label="Пересобрать документацию"`, `meta name="docu-docu-revision" content="` + server.revision + `"`} {
 		if !strings.Contains(string(page), expected) {
 			t.Fatalf("serve page missing %q", expected)
 		}

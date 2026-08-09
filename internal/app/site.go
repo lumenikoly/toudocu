@@ -453,8 +453,12 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 	if model.serveMode {
 		runtime = frontend.RuntimeServe
 		capabilities.Editor, capabilities.Changes, capabilities.Rebuild, capabilities.TaskWorkspace = true, true, true, true
+		capabilities.Review = model.translationLocale == ""
 		capabilities.UpdateCheck = model.updateCheckEnabled
 		endpoints = &frontend.Endpoints{Editor: editorAPIBase, Changes: changesAPIBase, Rebuild: rebuildEndpoint}
+		if capabilities.Review {
+			endpoints.Review = reviewAPIBase
+		}
 		if capabilities.UpdateCheck {
 			endpoints.Version = versionEndpoint
 		}

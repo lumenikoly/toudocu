@@ -41,6 +41,14 @@ symlink/reparse component блокируются. SHA-256 CAS и atomic replace 
 случайной потери параллельного изменения. Намеренная privileged local race по
 замене каталога находится вне threat model доверенной рабочей копии.
 
+Review repository projection принимает только canonical repository-relative
+POSIX path. Absolute, traversal, percent-encoded и `.git` paths, non-regular
+files и любой symlink/reparse component отклоняются. Go ограничивает
+комментируемый UTF-8 snapshot 2 MiB, не сохраняет NUL/binary input и размещает
+state в platform user-state каталоге с POSIX modes `0700`/`0600`. Corrupted
+state не перезаписывается автоматически; concurrent server/CLI writers
+согласуются lock и CAS.
+
 ## HTTP-граница serve
 
 Editor write требует JSON content type, точный action header и same-origin
@@ -48,6 +56,9 @@ browser context, не выдаёт CORS и ограничивает body/content
 от cross-origin browser страницы, но не аутентифицируют прямой HTTP-клиент.
 Поэтому явный non-loopback listener включает доступных клиентов локальной сети
 в trust boundary; CLI сохраняет предупреждение об отсутствии TLS и авторизации.
+Review mutations используют те же три HTTP guards и expected revision/digest.
+Они доступны только canonical `serve` и только при `target=working-tree`;
+commit/index comparisons остаются read-only.
 Locale routes ограничены `/_docu-docu/locales/<locale>/` и отдают только
 сгенерированные read-only snapshots. Они не перенаправляют к editor, changes,
 workspace, API docs или canonical API; target URLs вычисляет сервер из разрешённых
@@ -73,6 +84,12 @@ Hooks, shell, fetch, checkout и изменение index не выполняю�
 валидируется, blob читается из object database, HTTP path должен совпасть с
 элементом change set внутри documentation roots. Старый Markdown проходит ту
 же sanitization policy и не получает editor или network privileges.
+
+Repository Review использует тот же execution boundary для всего repository:
+tracked и untracked non-ignored inventory, local refs/blobs и diff без hooks,
+textconv, external diff, shell, fetch или Git writes. Feedback CLI читает и
+атомарно обновляет только local review state; он не запускает агента, LLM или
+команды repository.
 
 Обычные `check`, `build`, `serve`, editor API, `search`, readiness и context не запускают
 команды из Markdown. Исполнение появляется только в `task verify --run` после

@@ -101,7 +101,7 @@ test("localized headers identify the beta release", async ({ page }) => {
   const hosted = await serveLanding();
   try {
     for (const locale of ["en", "ru"]) {
-      await page.goto(`${hosted.origin}${locale}/`);
+      await page.goto(`${hosted.origin}${locale}/`, { waitUntil: "domcontentloaded" });
       await expect(page.locator(".site-header .wordmark .beta-badge")).toHaveText("BETA");
       await expect(page.locator(".site-footer .beta-badge")).toHaveCount(0);
     }

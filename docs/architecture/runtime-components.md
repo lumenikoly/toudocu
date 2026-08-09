@@ -26,6 +26,13 @@ source, rendered, semantic, OpenAPI и task engines деградируют не�
 URL state при invalidation. Компоненты активны для `changes` и `serve`;
 статический `build` от Git не зависит.
 
+`RepositoryReviewService` переиспользует read-only Git adapter с областью всего
+repository, не меняя `ChangeSetReport`. `ReviewService` владеет discussions,
+FIFO feedback и re-anchoring, а `ReviewStore` применяет revision/digest CAS,
+межпроцессный lock и atomic replace в user-state. HTTP и agent CLI вызывают
+одни application services. Capability `review` выдаётся только canonical
+`serve`; static и translation runtimes этого компонента не монтируют.
+
 | Граница | Ответственность | Источник подробностей |
 |---|---|---|
 | CLI | Разобрать команду, нормализовать пути и выбрать операцию | [MOD-CLI](../modules/cli.md) |
@@ -33,6 +40,7 @@ URL state при invalidation. Компоненты активны для `chang
 | Markdown | Разобрать CommonMark/GFM в закрытый AST, нормализовать структуру и безопасно отрендерить содержимое | [MOD-MARKDOWN](../modules/markdown.md), [ADR-005](../decisions/ADR-005.md) |
 | Project model | Классифицировать документы, проверить OpenAPI, разрешить связи и сформировать diagnostics | [MOD-MODEL](../modules/model.md) |
 | Site | Создать backend-independent static HTTP portal или canonical serve workspace с editor, changes и offline API docs | [MOD-SITE](../modules/site.md) |
+| Review | Построить repository projection, сохранить локальные discussions и передать immutable FIFO feedback skill | [MOD-REVIEW](../modules/MOD-REVIEW.md) |
 | Skill bundle и installer | Проверить embedded package, разрешить host target, классифицировать managed state и атомарно выполнить lifecycle | [MOD-CLI](../modules/cli.md), [руководство](../guides/skill-installation.md) |
 
 Статический generator и serve-вариант разделены. Serve хранит отдельные
@@ -49,7 +57,8 @@ gate. Конкретные последовательности операций
 [FLOW-DOCS-CHECK](../flows/FLOW-DOCS-CHECK.md),
 [FLOW-DOCS-BUILD](../flows/FLOW-DOCS-BUILD.md) и
 [FLOW-DOCS-SERVE](../flows/FLOW-DOCS-SERVE.md),
-[FLOW-TASK-WORKFLOW](../flows/FLOW-TASK-WORKFLOW.md).
+[FLOW-TASK-WORKFLOW](../flows/FLOW-TASK-WORKFLOW.md) и
+[FLOW-REVIEW-FEEDBACK](../flows/FLOW-REVIEW-FEEDBACK.md).
 
 Skill lifecycle образует отдельную короткую ветвь CLI и не строит document
 model: `skills` возвращает проверенный immutable bundle,

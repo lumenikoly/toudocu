@@ -3,27 +3,27 @@
   "assets": {
     "api-docs.js": {
       "file": "api-docs.js",
-      "sha256": "c59072b2642135d8b34236ccd8aa9e1b0308a9c8ab88d4eb965923ebad5f3cd5"
+      "sha256": "1e69c8f697e5ff63ba94772914f20748dc1507631e930b5e0a652fbfdce6117e"
     },
     "appearance.js": {
       "file": "appearance.js",
-      "sha256": "a57cf2dfa1cb7c8064f12fe1cd794ed62294ac9cd63375d0fe1d5d62cf52c457"
+      "sha256": "75d37643345d36582973393b7266ff81a3f97cb8acdb680597a07f4382178391"
     },
     "changes.css": {
       "file": "changes.css",
-      "sha256": "7c14c42826ef9effc87b583537d553890fcc4a12a03403e10d4782a73503231d"
+      "sha256": "74f6fa4a04657f427ea96bf2915be439dbd1bc82cefd1513d653b3eb9b35891d"
     },
     "changes.js": {
       "file": "changes.js",
-      "sha256": "be298456a52265b14ff093c28a22bf3d66438f8520588edcf507a19812a68ad4"
+      "sha256": "f9c924609b8bac3dd8eade9ff73f1baf611e54e31e21955a91917b130ff2fe03"
     },
     "codemirror.checksums.txt": {
       "file": "codemirror.checksums.txt",
-      "sha256": "899a1e256ce0942e837e36d99e7ba010b8ea0be5fc3aea97ee051d517a493fba"
+      "sha256": "680e7432a6a7c8b77330c9bdc7b273f31f63b370defc861a36f9fce4922c5345"
     },
     "codemirror.js": {
       "file": "codemirror.js",
-      "sha256": "da26db86ae0cc278144ce186cfd7d993973ddd4026ef3cd4439860d12ef85b58"
+      "sha256": "f2ccee3e1a8d9ab12784e299910e993d1855219354335374a193354fc523a12f"
     },
     "codemirror.LICENSE.txt": {
       "file": "codemirror.LICENSE.txt",
@@ -35,7 +35,7 @@
     },
     "editor.js": {
       "file": "editor.js",
-      "sha256": "d71ee6b98b8d35e729dd7ede9d40edf91b475c1610efd60cfdfedb151b7336a1"
+      "sha256": "8dab2e21c51084d11b904509080803de02aeefd42772a3f90a6291b7b55edd11"
     },
     "favicon.svg": {
       "file": "favicon.svg",
@@ -55,7 +55,7 @@
     },
     "playable-flow.js": {
       "file": "playable-flow.js",
-      "sha256": "d18eae9c5e1b65dd7dde1079ec438b4766636471e2b6972e82f1aac3e0095837"
+      "sha256": "67044b87deb9f3a58c633688607329c08ff43fc8dcd2d730f5ff0805e6a42eb0"
     },
     "portal.css": {
       "file": "portal.css",
@@ -63,7 +63,7 @@
     },
     "portal.js": {
       "file": "portal.js",
-      "sha256": "35d8a605df2790d5b40af738681d8a9f2ec736b727ac81bb5656cbec6d96254f"
+      "sha256": "2633d44e0e32909a56205f709a96e15188bcf830da96b97d77e790a61c6c9e1d"
     },
     "screen-map.css": {
       "file": "screen-map.css",
@@ -71,7 +71,7 @@
     },
     "screen-map.js": {
       "file": "screen-map.js",
-      "sha256": "ceea16cc8fbd6be6360d3e428b8b717f50426b747051a4695115edd1ba267cbd"
+      "sha256": "8fc9430c1ab9a03e7816afecc1abd2c05c0dc89178521a9fe5b4cd7a9bad7bcd"
     },
     "serve.css": {
       "file": "serve.css",
@@ -79,7 +79,7 @@
     },
     "serve.js": {
       "file": "serve.js",
-      "sha256": "72799d360678b5c810c53c9c8c81fbbcfe471b8caf95f01d4954d987314a03c1"
+      "sha256": "e0079da9db3fad70f2f5ad039905b6ad7178fa1bbed6bb7137c01e3472fbf0a1"
     },
     "swagger-ui-bundle.js": {
       "file": "swagger-ui-bundle.js",

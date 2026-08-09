@@ -39,6 +39,10 @@ Frontend реализует представление и progressive enhancemen
 кадра. Он не
 разбирает Markdown, не классифицирует документы, не разрешает связи, не
 вычисляет readiness или diff и не принимает решений о допустимости записи.
+Для repository review browser передаёт только нормализованный selection
+contract. Проверку Unicode-координат, извлечение selected text/context,
+safe-path policy и текущее anchor placement выполняет Go; DOM и browser payload
+не являются источником anchor-данных.
 
 Исходники находятся в `web/`, проверяются TypeScript strict mode и собираются
 esbuild. Производные assets находятся в `internal/site/assets/generated/`,
@@ -79,6 +83,8 @@ Frontend не выводит режим из URL или случайных DOM-�
 - Ошибка или отключение проверки версии не меняет основной content и не
   вызывает browser-запрос к внешнему origin.
 - Browser input остаётся недоверенным; все security decisions выполняет Go.
+- Capability `review` выдаётся только canonical `serve`; static и translation
+  runtimes не получают endpoint или write controls.
 
 ## Связанные документы
 

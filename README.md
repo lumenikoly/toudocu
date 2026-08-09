@@ -18,6 +18,7 @@
 * **Documentation validation** — structure, links, and relationships can be checked locally and in CI.
 * **Static HTTP portal** — the generated website needs no backend and can be published on ordinary static hosting.
 * **Local mode** — an editor, automatic rebuilds, and Git change browsing.
+* **Local review** — anchored discussions and an explicit FIFO handoff to an installed AI skill, without a hosted review service.
 * **Minimal infrastructure** — no database, npm, CDN, or separate runtime.
 
 All documentation is stored in the repository as regular Markdown files.
@@ -185,6 +186,19 @@ $docu-docu refresh diff
 The skill starts with the current Git changes and reviews the related documentation.
 
 This mode is useful before a commit or pull request.
+
+### Process local Changes feedback
+
+Create comments in the canonical `docu-docu serve` Changes workspace, choose
+“Send to agent”, then ask the installed skill:
+
+```text
+$docu-docu feedback
+```
+
+The skill receives pending snapshots through the local CLI, applies only
+justified repository changes, runs relevant checks, and returns one structured
+result per comment. Neither the UI nor the CLI starts an agent or writes Git.
 
 ### Update a translation
 

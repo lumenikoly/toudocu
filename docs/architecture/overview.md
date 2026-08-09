@@ -31,3 +31,4 @@ release metadata отключается флагом, не загружает к
 - [Где проходят границы доверия?](trust-boundaries.md)
 - [Как изолируются ошибки документации и запускаемых проверок?](failure-isolation.md)
 - [Как Git-состояния превращаются в согласованный change set документации?](documentation-changes.md)
+- [Как review discussion сохраняет связь с меняющимся содержимым repository?](review-anchoring.md)

@@ -869,7 +869,7 @@ func TestChangesUIAndMethodContract(t *testing.T) {
 	server, _ := changesHTTPServer(t)
 	page := httptest.NewRecorder()
 	server.ServeHTTP(page, httptest.NewRequest(http.MethodGet, changesUIPath, nil))
-	for _, marker := range []string{"Изменения документации", "data-file-list", "data-branch-base", "data-target-revision", "/assets/changes.js", "/assets/codemirror.js"} {
+	for _, marker := range []string{">Изменения<", "data-file-list", "data-discussions-panel", "data-review-composer", "data-branch-base", "data-target-revision", "/assets/changes.js", "/assets/codemirror.js"} {
 		if !strings.Contains(page.Body.String(), marker) {
 			t.Fatalf("changes UI missing %q", marker)
 		}

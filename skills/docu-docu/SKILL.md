@@ -20,13 +20,16 @@ or review references only when the request meets their conditions below.
 | `$docu-docu refresh diff` | [references/refresh.md](references/refresh.md) | May | Only when the user explicitly invokes `$docu-docu refresh diff` |
 | `$docu-docu translate <locale>` | [references/translate.md](references/translate.md) | Yes | Only for an explicit translate request and selected target locale |
 | `$docu-docu translate diff` | [references/translate.md](references/translate.md) | Yes | Only when explicitly invoked; selects every configured target locale |
+| `$docu-docu feedback` | [references/feedback.md](references/feedback.md) | May | Explicitly process local Changes feedback; writes only evidence-backed code/docs and the structured response |
 | CLI, portal, task, or ordinary documentation work | [references/workflows.md](references/workflows.md) | Depends on request | Follow the user's requested mutation; `task verify --run` needs an explicit verification request |
 
-Init, refresh, refresh diff, translate, and translate diff are agent workflows.
+Init, refresh, refresh diff, translate, translate diff, and feedback are agent workflows.
 They are not Docu-docu Go CLI commands. Never infer initialization from missing
 files, first use, or an ordinary documentation request.
 Neither refresh form is a Docu-docu
 Go CLI command or an initialization request.
+Feedback uses the real `docu-docu changes feedback` CLI transport but never
+starts an agent or LLM itself.
 
 Load these references conditionally:
 

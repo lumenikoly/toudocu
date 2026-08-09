@@ -332,6 +332,36 @@ func TestDocuDocuRefreshContract(t *testing.T) {
 	}
 }
 
+func TestDocuDocuFeedbackContract(t *testing.T) {
+	skill := readDocuDocuFile(t, "SKILL.md")
+	for _, expected := range []string{
+		"`$docu-docu feedback`",
+		"[references/feedback.md](references/feedback.md)",
+		"never\nstarts an agent or LLM",
+	} {
+		if !containsNormalized(skill, expected) {
+			t.Errorf("SKILL.md does not define feedback contract %q", expected)
+		}
+	}
+	feedback := readDocuDocuFile(t, filepath.Join("references", "feedback.md"))
+	for _, expected := range []string{
+		"changes feedback pending",
+		"`feedback` is `null`",
+		"one result for each item",
+		"`fixed`",
+		"`notFixed`",
+		"`needsClarification`",
+		"changes feedback respond",
+		"Do not retry a conflict",
+		"until `feedback: null`",
+		"never resolve discussions automatically",
+	} {
+		if !containsNormalized(feedback, expected) {
+			t.Errorf("feedback reference does not contain %q", expected)
+		}
+	}
+}
+
 func TestDocuDocuCompactOperationRouter(t *testing.T) {
 	skill := readDocuDocuFile(t, "SKILL.md")
 	for _, expected := range []string{
@@ -339,6 +369,7 @@ func TestDocuDocuCompactOperationRouter(t *testing.T) {
 		"[references/init.md](references/init.md)",
 		"[references/refresh.md](references/refresh.md)",
 		"[references/translate.md](references/translate.md)",
+		"[references/feedback.md](references/feedback.md)",
 		"$docu-docu translate diff",
 		"[references/workflows.md](references/workflows.md)",
 		"[references/semantic-gate.md](references/semantic-gate.md)",
