@@ -474,6 +474,7 @@ test("Changes review hands three outcomes to the local agent CLI without auto-re
     await composer.locator('button[type="submit"]').click();
     await expect(page.locator('[data-unsent-count]')).toHaveText("1");
     await page.locator('[data-send-feedback]').click();
+    await expect(page.locator('[data-unsent-count]')).toHaveText("0");
     const repeated = feedbackCLI(["pending"]);
     expect(repeated.feedback.items).toHaveLength(1);
     expect(repeated.feedback.items[0].target.path).toBe("path.go");
