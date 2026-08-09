@@ -9,7 +9,7 @@
 - Переходы: TR-SITE-001, TR-SITE-002, TR-SITE-003
 - Стандарты: STD-GO-001, STD-DOCS-001
 - Владелец: Команда Toudocu
-- Последнее обновление: 2026-08-05
+- Последнее обновление: 2026-08-09
 
 ## Результат
 
@@ -50,7 +50,7 @@ live rebuild после записи и watcher внешних изменени�
   `docs/architecture/trust-boundaries.md`, `docs/architecture/system-boundary.md`
   и `docs/architecture/failure-isolation.md`;
 - `docs/reference/features.md`, `docs/reference/configuration.md`;
-- `project-docs/` и `example/project-docs/` только через пересборку.
+- `project-docs/` только через пересборку.
 
 ## Не входит в задачу
 

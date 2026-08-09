@@ -426,8 +426,6 @@ $toudocu translate diff
 | Проверить документацию            | `toudocu check ./docs`                                         | `make check`             |
 | Собрать портал                    | `toudocu build ./docs --output ./site --clean`                 | `make docs`              |
 | Запустить локальный портал        | `toudocu serve ./docs`                                         | `make docs-serve`        |
-| Собрать демонстрационный портал   | `toudocu build ./example/docs --output ./example/site --clean` | `make demo`              |
-| Запустить демонстрационный портал | `toudocu serve ./example/docs`                                 | `make demo-serve`        |
 | Найти документ                    | `toudocu search "запрос" ./docs`                               | —                        |
 | Посмотреть изменения              | `toudocu changes ./docs`                                       | —                        |
 | Создать шаблон                    | `toudocu scaffold module MOD-PAYMENTS ./docs --title "Payments"` | —                      |

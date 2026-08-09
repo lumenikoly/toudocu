@@ -17,7 +17,7 @@ Generated portal не хранится в Git. Workflow GitHub Pages на каж
 английский translation root `docs-en/` во вложенный каталог и добавляет landing
 в корень artifact. Родительский output `project-docs/` всегда очищается и
 собирается первым: иначе его последующая очистка удалила бы уже собранный
-`project-docs/en/`. Demo-документация в Pages artifact не входит.
+`project-docs/en/`.
 
 Публичная структура artifact:
 

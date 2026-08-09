@@ -46,7 +46,7 @@ Wire-контракты дублируются в Markdown, OpenAPI-файлы �
 - TLS, authentication, CORS или внешняя загрузка `$ref`;
 - Swagger UI в static build, locale mounts или при прямом serve translation root;
 - изменение успешных Editor payloads и media types raw/rendered Changes content;
-- изменение translation roots и generated example portals.
+- изменение translation roots и generated portals.
 
 ## Критерии приёмки
 

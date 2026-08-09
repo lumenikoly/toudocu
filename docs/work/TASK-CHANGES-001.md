@@ -9,7 +9,7 @@
 - Переходы: TR-SITE-005
 - Стандарты: STD-GO-001, STD-DOCS-001
 - Владелец: Команда Toudocu
-- Последнее обновление: 2026-08-05
+- Последнее обновление: 2026-08-09
 
 ## Результат
 
@@ -38,7 +38,7 @@
 - `go.mod`, `go.sum`, `THIRD_PARTY_NOTICES.md`;
 - тесты в `internal/app/`;
 - `docs/`, `README.md`, `CHANGELOG.md`;
-- `project-docs/`, `example/project-docs/` только через пересборку.
+- `project-docs/` только через пересборку.
 
 ## Не входит в задачу
 

@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
-import { cpSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer, type Server } from "node:http";
 import { tmpdir } from "node:os";
 import { dirname, extname, join, normalize, resolve, sep } from "node:path";
@@ -67,13 +67,13 @@ async function exerciseStaticPortal(page: Page, origin: string): Promise<void> {
   await expect(page.locator("script#toudocu-page")).toHaveCount(1);
   await expect(page.locator("[data-server-rebuild], [data-roadmap-add], a[href^='/_toudocu/editor'], a[href='/changes/']")).toHaveCount(0);
   await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior)).toBe("auto");
-  await page.locator("[data-global-search]").fill("Core");
+  await page.locator("[data-global-search]").fill("Toudocu");
   await expect(page.locator("[data-search-results]")).not.toBeEmpty();
   await page.locator("[data-color-scheme-select]").selectOption("dark");
   await expect(page.locator("html")).toHaveAttribute("data-color-scheme", "dark");
-  await page.goto(`${origin}use-cases/UC-CORE-01.html`);
-  await expect(page.locator("main article.doc-content").first()).toContainText("Пользователь");
-  await expect.poll(() => page.locator("script#toudocu-page").textContent()).toContain("UC-CORE-01");
+  await page.goto(`${origin}use-cases/UC-DOCS-01.html`);
+  await expect(page.locator("main article.doc-content").first()).toContainText("Разработчик");
+  await expect.poll(() => page.locator("script#toudocu-page").textContent()).toContain("UC-DOCS-01");
   const tabs = page.locator("[data-usecase-tab]");
   await expect(tabs).toHaveCount(4);
   await tabs.nth(1).click();
@@ -81,20 +81,21 @@ async function exerciseStaticPortal(page: Page, origin: string): Promise<void> {
   await tabs.nth(1).press("ArrowRight");
   await expect(tabs.nth(2)).toHaveAttribute("aria-selected", "true");
   await expect(tabs.nth(2)).toBeFocused();
-  await page.goto(`${origin}flows/FLOW-CORE-REQUEST.html`);
+  await page.goto(`${origin}flows/FLOW-DOCS-BUILD.html`);
   await expect(page.locator("[data-mermaid-diagram] svg").first()).toBeVisible();
   await expect.poll(() => responses.some((url) => url.endsWith("/assets/portal.css"))).toBe(true);
   await expect.poll(() => responses.some((url) => url.endsWith("/assets/portal.js"))).toBe(true);
   await page.goto(`${origin}notes.html`);
   await expect(page.locator("[data-mermaid-error]")).toBeVisible();
   await page.goto(`${origin}risks.html`);
-  await expect(page.locator(".risk-status")).toContainText("Незакрытых рисков: 1 из 1");
-  await expect(page.locator(".risk-status-explanations")).toContainText("Открыт — требует решения.");
+  await expect(page.locator(".risk-status")).toContainText("Незакрытых рисков: 2 из 3");
+  await expect(page.locator(".risk-status-explanations")).toContainText("Снижается — меры выполняются, риск ещё не закрыт.");
 }
 
 test("static portal works over HTTP at root and nested paths", async ({ browser }) => {
   const fixture = mkdtempSync(join(tmpdir(), "toudocu-static-"));
-  cpSync(join(repo, "example", "docs"), join(fixture, "docs"), { recursive: true });
+  cpSync(join(repo, "docs"), join(fixture, "docs"), { recursive: true });
+  cpSync(join(repo, ".toudocu"), join(fixture, ".toudocu"), { recursive: true });
   const output = join(fixture, "site");
   run("go", ["run", "./cmd/toudocu", "build", join(fixture, "docs"), "--repository-root", fixture, "-o", output, "--clean"]);
   const notesPage = join(output, "notes.html");
@@ -113,8 +114,8 @@ test("static portal works over HTTP at root and nested paths", async ({ browser 
 
 test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }) => {
   const fixture = mkdtempSync(join(tmpdir(), "toudocu-serve-"));
-  cpSync(join(repo, "example", "docs"), join(fixture, "docs"), { recursive: true });
-  cpSync(join(repo, "example", ".toudocu"), join(fixture, ".toudocu"), { recursive: true });
+  cpSync(join(repo, "docs"), join(fixture, "docs"), { recursive: true });
+  cpSync(join(repo, ".toudocu"), join(fixture, ".toudocu"), { recursive: true });
   run("git", ["init", "-q"], fixture);
   run("git", ["config", "user.email", "browser@example.invalid"], fixture);
   run("git", ["config", "user.name", "Browser Test"], fixture);
@@ -189,7 +190,7 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await expect(updateNotice).toBeVisible();
     await expect.poll(() => page.evaluate(() => window.ToudocuPage?.page.path)).toBe("architecture/overview.html");
     await expect.poll(() => page.evaluate(() => window.ToudocuPage?.portal.dataBase)).toBe("../data/");
-    await page.locator("[data-global-search]").fill("Core");
+    await page.locator("[data-global-search]").fill("Toudocu");
     await expect(page.locator("[data-search-results]")).not.toBeEmpty();
     await page.goto(origin);
     await updateNotice.getByRole("button", { name: "Скрыть уведомление о версии 0.0.2" }).click();
@@ -213,7 +214,7 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await expect(roadmapTrigger).toBeFocused();
     await roadmapTrigger.click();
     const roadmapDialog = page.locator("[data-roadmap-dialog]");
-    await expect(roadmapDialog.locator('input[name="id"]')).toHaveValue("DLV-ROADMAP-001");
+    await expect(roadmapDialog.locator('input[name="id"]')).toHaveValue("DLV-ROADMAP-002");
     await page.setViewportSize({ width: 390, height: 844 });
     await expect(page.locator("[data-update-notice]")).toBeInViewport();
     await expect(page.locator("[data-update-notice] a")).toBeVisible();
@@ -221,7 +222,6 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await expect(roadmapDialog).toBeInViewport();
     await expect(roadmapDialog.locator('input[name="text"]')).toBeVisible();
     await page.setViewportSize({ width: 1280, height: 720 });
-    await roadmapDialog.locator('select[name="stageAnchor"]').selectOption("mvp");
     await roadmapDialog.locator('input[name="id"]').fill("DLV-BROWSER-001");
     await roadmapDialog.locator('input[name="text"]').fill("Browser value survives conflict.");
     writeFileSync(roadmapPath, `${readFileSync(roadmapPath, "utf8")}\n## Browser stage\n\n- Status: Planned\n\n- [ ] \`DLV-ROADMAP-007\` External result.\n`);
@@ -237,7 +237,7 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await expect(roadmapDialog.locator("[data-state='success']")).toContainText("DLV-BROWSER-001");
     await page.waitForURL("**/roadmap.html#browser-stage");
     await expect(page.locator("#browser-stage").locator("xpath=..")).toContainText("DLV-BROWSER-001");
-    await expect(page.locator(".progress-label")).toContainText("из 6");
+    await expect(page.locator(".progress-label")).toContainText("из 19");
 
     await page.goto(`${origin}/_toudocu/editor/`);
     await expect.poll(() => page.evaluate(() => (window as any).__toudocuFirstFrame)).toEqual({ siteTheme: "paper", colorScheme: "dark", theme: "dark", accent: "violet" });
@@ -377,8 +377,11 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
 test("Changes review hands three outcomes to the local agent CLI without auto-resolve", async ({ page }) => {
   const fixture = mkdtempSync(join(tmpdir(), "toudocu-review-browser-"));
   const stateRoot = mkdtempSync(join(tmpdir(), "toudocu-review-state-"));
-  cpSync(join(repo, "example", "docs"), join(fixture, "docs"), { recursive: true });
-  cpSync(join(repo, "example", ".toudocu"), join(fixture, ".toudocu"), { recursive: true });
+  mkdirSync(join(fixture, "docs", "architecture"), { recursive: true });
+  mkdirSync(join(fixture, ".toudocu"));
+  writeFileSync(join(fixture, ".toudocu", "config.yml"), "project:\n  locale: ru\n");
+  writeFileSync(join(fixture, "docs", "index.md"), "# Review\n");
+  writeFileSync(join(fixture, "docs", "architecture", "overview.md"), "# Architecture\n\n- Тип документа: Architecture Overview\n");
   writeFileSync(join(fixture, "server.go"), "package review\n\nfunc Server() string { return \"old\" }\n");
   writeFileSync(join(fixture, "path.go"), "package review\n\nfunc Path() string { return \"old\" }\n");
   writeFileSync(join(fixture, "legacy.go"), "package review\n\nfunc Legacy() bool { return true }\n");

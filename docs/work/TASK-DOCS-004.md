@@ -6,7 +6,7 @@
 - Модуль: MOD-MODEL
 - Стандарты: STD-GO-001, STD-DOCS-001
 - Владелец: Команда Toudocu
-- Последнее обновление: 2026-07-31
+- Последнее обновление: 2026-08-09
 
 ## Результат
 
@@ -39,7 +39,6 @@ workflow для систематического ревью актуальнос
 - `AGENTS.md`;
 - `docs/`;
 - `project-docs/`;
-- `example/project-docs/`.
 
 ## Не входит в задачу
 
@@ -83,13 +82,13 @@ workflow для систематического ревью актуальнос
 - `AC-05` → `go test ./... -run 'TestUseToudocuRefresh|TestUseToudocuMetadata|TestUseToudocuProjectGuidanceTemplates'`
 - `AC-06` → `go test ./... -run 'TestCLIArguments|TestUseToudocuRefresh'`
 - `ALL` → `go test -count=1 ./...`
-- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0 && go run ./cmd/toudocu check ./example/docs --repository-root ./example --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `go test ./... -run 'TestUseToudocu'`
 
 ## Влияние на документацию
 
 Обновляются публичный workflow skill, RU/EN managed guidance, README,
-changelog, self-documentation, корневой `AGENTS.md` и оба tracked portal.
+changelog, self-documentation, корневой `AGENTS.md` и tracked portal.
 
 ## Обоснование отсутствия сценария
 

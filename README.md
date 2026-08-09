@@ -462,8 +462,6 @@ The main documentation remains the operational source of truth, while translatio
 | Validate documentation     | `toudocu check ./docs`                                           | `make check`                  |
 | Build the portal           | `toudocu build ./docs --output ./site --clean`                   | `make docs`                   |
 | Start the local portal     | `toudocu serve ./docs`                                           | `make docs-serve`             |
-| Build the demo portal      | `toudocu build ./example/docs --output ./example/site --clean`   | `make demo`                   |
-| Start the demo portal      | `toudocu serve ./example/docs`                                   | `make demo-serve`             |
 | Find a document            | `toudocu search "query" ./docs`                                  | —                             |
 | Browse changes             | `toudocu changes ./docs`                                         | —                             |
 | Create a scaffold          | `toudocu scaffold module MOD-PAYMENTS ./docs --title "Payments"` | —                             |

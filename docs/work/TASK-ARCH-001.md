@@ -7,7 +7,7 @@
 - Сценарий: UC-DOCS-02
 - Стандарты: STD-GO-001, STD-DOCS-001
 - Владелец: Команда Toudocu
-- Последнее обновление: 2026-07-31
+- Последнее обновление: 2026-08-09
 
 ## Результат
 
@@ -40,9 +40,7 @@ RU/EN-шаблоны, безопасный init и semantic gate `ARCH001`–`AR
 - `skill_templates_test.go`;
 - `skills/toudocu/`;
 - `docs/`;
-- `example/docs/`;
 - `project-docs/`;
-- `example/project-docs/`;
 - `README.md`;
 - `CHANGELOG.md`;
 - `AGENTS.md`.
@@ -70,8 +68,8 @@ RU/EN-шаблоны, безопасный init и semantic gate `ARCH001`–`AR
   останавливает init без автоматической миграции.
 - [x] `AC-05` Managed guidance и semantic gate синхронно задают границы типов,
   прямую карту overview и коды `ARCH001`–`ARCH013`.
-- [x] `AC-06` Архитектура Toudocu и Service Desk разделена на подтверждённые
-  вопросно-ориентированные документы, а оба портала пересобраны только из
+- [x] `AC-06` Архитектура Toudocu разделена на подтверждённые
+  вопросно-ориентированные документы, а портал пересобран только из
   исходного Markdown после независимого review.
 
 ## План
@@ -79,7 +77,7 @@ RU/EN-шаблоны, безопасный init и semantic gate `ARCH001`–`AR
 - [x] Добавить metadata aliases и структурные architecture diagnostics.
 - [x] Расширить behavioral и schema contract tests.
 - [x] Обновить templates, init workflow, managed guidance и semantic gate.
-- [x] Мигрировать документацию Toudocu и демонстрационного Service Desk.
+- [x] Мигрировать документацию Toudocu.
 - [x] Выполнить независимый semantic review и устранить замечания.
 - [x] Пройти полный Go/Toudocu verification и пересобрать portals.
 
@@ -90,13 +88,13 @@ RU/EN-шаблоны, безопасный init и semantic gate `ARCH001`–`AR
 - `AC-03` → `go test ./... -run 'TestArchitectureSchemaContract'`
 - `AC-04` → `go test ./... -run 'TestUseToudocuArchitecture|TestUseToudocuInitContract'`
 - `AC-05` → `go test ./... -run 'TestUseToudocuArchitecture'`
-- `AC-06` → `go run ./cmd/toudocu build ./docs --output ./project-docs --repository-root . --clean --strict --stale-days 0 && go run ./cmd/toudocu build ./example/docs --output ./example/project-docs --repository-root ./example --clean --strict --stale-days 0`
+- `AC-06` → `go run ./cmd/toudocu build ./docs --output ./project-docs --repository-root . --clean --strict --stale-days 0`
 - `ALL` → `go test -count=1 ./...`
-- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0 && go run ./cmd/toudocu check ./example/docs --repository-root ./example --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `go test ./... -run 'TestArchitectureContract|TestArchitectureSchemaContract|TestUseToudocuArchitecture'`
 
 ## Влияние на документацию
 
 Обновляются публичный архитектурный контракт, skill init и guidance,
-самодокументация Toudocu, демонстрационный Service Desk, README, CLI/reference,
+самодокументация Toudocu, README, CLI/reference,
 модель, use case, changelog, стандарт документации и отслеживаемые portals.

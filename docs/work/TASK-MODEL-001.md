@@ -7,7 +7,7 @@
 - Переходы: TR-SITE-004
 - Стандарты: STD-GO-001, STD-DOCS-001
 - Владелец: Команда Toudocu
-- Последнее обновление: 2026-08-05
+- Последнее обновление: 2026-08-09
 
 ## Результат
 
@@ -51,8 +51,6 @@ directory и маршрутом отдельных документов, а ег
 - [x] `AC-06` Каталог FLOW существует только как `processes/index.html`, его
   label берётся из `project.sections.flows`, а FLOW-страница активирует этот
   раздел навигации.
-- [x] `AC-07` Демо-проект задаёт полные локализованные `project.locale` и
-  `project.sections` и проходит строгую документационную проверку без warning.
 
 ## Проверка
 
@@ -63,9 +61,8 @@ directory и маршрутом отдельных документов, а ег
 - `AC-04` → `go test ./... -run TestMissingProjectConfigurationUsesEnglishAndWarning`
 - `AC-05` → `go vet ./... && go test ./... && go test -race ./...`
 - `AC-06` → `go test ./... -run TestScreenPortalAndReportV1`
-- `AC-07` → `go run ./cmd/toudocu check ./example/docs --repository-root ./example --strict --stale-days 0`
 - `ALL` → `go vet ./... && go test ./... && go test -race ./...`
-- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0 && go run ./cmd/toudocu check ./example/docs --repository-root ./example --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `go test ./...`
 
 ## План
@@ -74,7 +71,6 @@ directory и маршрутом отдельных документов, а ег
 - [x] Перевести модель, JSON и навигацию на registry.
 - [x] Зафиксировать поведение тестами и обновить документацию.
 - [x] Удалить legacy-каталог `flows/index.html` и пересобрать порталы.
-- [x] Добавить полную project-конфигурацию демонстрационного портала.
 
 ## Влияние на документацию
 
