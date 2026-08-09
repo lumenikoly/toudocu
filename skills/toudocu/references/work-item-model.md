@@ -1,4 +1,4 @@
-# Docu-docu work-item model
+# Toudocu work-item model
 
 Use this reference only for `TASK-*` or `BUG-*` contracts and lifecycle work.
 Apply the general [document model](document-model.md) and

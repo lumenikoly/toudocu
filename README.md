@@ -1,15 +1,15 @@
-# Docu-docu
+# Toudocu
 
 **English** | [Русский](README.ru.md)
 
-[![CI](https://github.com/lumenikoly/docu-docu/actions/workflows/test.yml/badge.svg)](https://github.com/lumenikoly/docu-docu/actions/workflows/test.yml)
-[![Docs contract](https://github.com/lumenikoly/docu-docu/actions/workflows/docs.yml/badge.svg)](https://github.com/lumenikoly/docu-docu/actions/workflows/docs.yml)
-[![Go Version](https://img.shields.io/github/go-mod/go-version/lumenikoly/docu-docu)](https://go.dev/)
-[![License](https://img.shields.io/github/license/lumenikoly/docu-docu)](LICENSE)
+[![CI](https://github.com/lumenikoly/toudocu/actions/workflows/test.yml/badge.svg)](https://github.com/lumenikoly/toudocu/actions/workflows/test.yml)
+[![Docs contract](https://github.com/lumenikoly/toudocu/actions/workflows/docs.yml/badge.svg)](https://github.com/lumenikoly/toudocu/actions/workflows/docs.yml)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/lumenikoly/toudocu)](https://go.dev/)
+[![License](https://img.shields.io/github/license/lumenikoly/toudocu)](LICENSE)
 
 **A tool for verifiable Markdown documentation and static HTTP portals.**
 
-**Docu-docu** helps keep documentation aligned with the codebase, find inconsistencies, and build clean static portals for reading.
+**Toudocu** helps keep documentation aligned with the codebase, find inconsistencies, and build clean static portals for reading.
 
 ### Key features
 
@@ -32,37 +32,37 @@ All documentation is stored in the repository as regular Markdown files.
 Linux and macOS:
 
 ```bash
-curl -fsSL https://github.com/lumenikoly/docu-docu/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/lumenikoly/toudocu/releases/latest/download/install.sh | sh
 ```
 
 Windows PowerShell:
 
 ```powershell
-irm https://github.com/lumenikoly/docu-docu/releases/latest/download/install.ps1 | iex
+irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 | iex
 ```
 
 The installer selects the platform, verifies SHA-256, and installs the binary
 in the current user's directory. Running the same command again updates
-Docu-docu.
+Toudocu.
 
 Verify the installation:
 
 ```bash
-docu-docu --help
+toudocu --help
 ```
 
 You can also build the binary from source:
 
 ```bash
-git clone https://github.com/lumenikoly/docu-docu.git
-cd docu-docu
+git clone https://github.com/lumenikoly/toudocu.git
+cd toudocu
 make build
 ```
 
 After the build, the binary will be available in the repository root:
 
 ```bash
-./docu-docu --help
+./toudocu --help
 ```
 
 For the platform matrix, version pinning, directories, and verification scope,
@@ -73,16 +73,16 @@ see the [installation guide](docs/guides/installation.md).
 Install the offline skill package embedded in the CLI for the detected AI host:
 
 ```bash
-docu-docu skill install
+toudocu skill install
 ```
 
 For non-interactive environments, or when several hosts are detected, select
 one explicitly:
 
 ```bash
-docu-docu skill install --agent codex
-docu-docu skill install --agent claude-code --scope user
-docu-docu skill status --agent all
+toudocu skill install --agent codex
+toudocu skill install --agent claude-code --scope user
+toudocu skill status --agent all
 ```
 
 Supported hosts are Codex, Claude Code, and Copilot. Project scope is the
@@ -96,7 +96,7 @@ conflict handling.
 After installation, it will be available as:
 
 ```text
-$docu-docu
+$toudocu
 ```
 
 The skill uses the installed CLI to validate and build documentation, while the skill itself is responsible for analyzing the repository and updating Markdown files.
@@ -108,7 +108,7 @@ The CLI can also be used without the skill.
 Run the skill from the root of your repository:
 
 ```text
-$docu-docu init
+$toudocu init
 ```
 
 The skill will analyze the project and create the initial documentation structure.
@@ -116,13 +116,13 @@ The skill will analyze the project and create the initial documentation structur
 ### 4. Validate the documentation
 
 ```bash
-docu-docu check ./docs
+toudocu check ./docs
 ```
 
 ### 5. Start the local portal
 
 ```bash
-docu-docu serve ./docs
+toudocu serve ./docs
 ```
 
 By default, the portal will be available at:
@@ -136,13 +136,13 @@ Local mode includes an editor, file watching, and automatic rebuilds.
 ### 6. Build a backend-independent static portal
 
 ```bash
-docu-docu build ./docs \
+toudocu build ./docs \
   --output ./site \
   --clean
 ```
 
 Publish the generated directory with any HTTP(S) static host. For local work,
-use the existing `docu-docu serve` command; opening `index.html` through
+use the existing `toudocu serve` command; opening `index.html` through
 `file://` is not a supported contract.
 
 ```text
@@ -155,12 +155,12 @@ https://docs.example.com/project/
 
 Skills let you work with documentation through regular requests to an AI agent.
 
-They analyze the repository, locate related documents, and use Docu-docu to validate the result.
+They analyze the repository, locate related documents, and use Toudocu to validate the result.
 
 ### Create documentation
 
 ```text
-$docu-docu init
+$toudocu init
 ```
 
 The skill analyzes the repository and creates the initial documentation structure.
@@ -170,7 +170,7 @@ It works both for new projects and existing repositories without established doc
 ### Review documentation against the project
 
 ```text
-$docu-docu refresh
+$toudocu refresh
 ```
 
 The skill checks the documentation against the current repository state and updates affected sections.
@@ -180,7 +180,7 @@ This is useful after major changes, refactoring, or the introduction of new comp
 ### Review current changes
 
 ```text
-$docu-docu refresh diff
+$toudocu refresh diff
 ```
 
 The skill starts with the current Git changes and reviews the related documentation.
@@ -189,11 +189,11 @@ This mode is useful before a commit or pull request.
 
 ### Process local Changes feedback
 
-Create comments in the canonical `docu-docu serve` Changes workspace, choose
+Create comments in the canonical `toudocu serve` Changes workspace, choose
 “Send to agent”, then ask the installed skill:
 
 ```text
-$docu-docu feedback
+$toudocu feedback
 ```
 
 The skill receives pending snapshots through the local CLI, applies only
@@ -203,7 +203,7 @@ result per comment. Neither the UI nor the CLI starts an agent or writes Git.
 ### Update a translation
 
 ```text
-$docu-docu translate en --all-stale
+$toudocu translate en --all-stale
 ```
 
 The skill updates a complete read-only language mirror while keeping the main documentation as the operational source of truth. It requires a locale and exactly one selection mode: `--task`, `--base`, or `--all-stale`.
@@ -211,7 +211,7 @@ The skill updates a complete read-only language mirror while keeping the main do
 To translate the current staged, unstaged, and untracked diff relative to `HEAD` into every configured language, use:
 
 ```text
-$docu-docu translate diff
+$toudocu translate diff
 ```
 
 ---
@@ -219,10 +219,10 @@ $docu-docu translate diff
 ## Documentation validation
 
 ```bash
-docu-docu check ./docs
+toudocu check ./docs
 ```
 
-Docu-docu validates:
+Toudocu validates:
 
 * directory and document structure;
 * internal and external links;
@@ -239,7 +239,7 @@ Validation can be run locally or added to CI.
 ## Static HTTP portal
 
 ```bash
-docu-docu build ./docs \
+toudocu build ./docs \
   --output ./site \
   --clean
 ```
@@ -247,13 +247,13 @@ docu-docu build ./docs \
 The generated portal:
 
 * runs on ordinary HTTP(S) static hosting, including a nested URL path;
-* does not require Docu-docu or another backend after generation;
+* does not require Toudocu or another backend after generation;
 * does not use a database;
 * does not load resources from a CDN;
 * does not require Node.js or npm;
 * works well as a CI artifact or on static hosting.
 
-The portal is read-only. For local viewing, use `docu-docu serve`; direct
+The portal is read-only. For local viewing, use `toudocu serve`; direct
 double-click opening of `index.html` is not a supported contract.
 
 ---
@@ -261,7 +261,7 @@ double-click opening of `index.html` is not a supported contract.
 ## Local portal and editor
 
 ```bash
-docu-docu serve ./docs
+toudocu serve ./docs
 ```
 
 Local mode provides:
@@ -273,8 +273,8 @@ Local mode provides:
 * automatic rebuilds;
 * validation previews;
 * Git change browsing;
-* a non-blocking notice when a newer stable Docu-docu release is available;
-* offline OpenAPI documentation at `/_docu-docu/api-docs/` with safe
+* a non-blocking notice when a newer stable Toudocu release is available;
+* offline OpenAPI documentation at `/_toudocu/api-docs/` with safe
   `GET`/`HEAD` Try it out.
 
 By default, the server listens on:
@@ -286,7 +286,7 @@ By default, the server listens on:
 The local server does not provide TLS or built-in authentication. Do not expose it to an external network without additional protection.
 
 The release check is performed at most once per server process and never
-updates the binary. Use `docu-docu serve --no-update-check ./docs` to disable
+updates the binary. Use `toudocu serve --no-update-check ./docs` to disable
 the network request and UI notice.
 
 The API documentation uses vendored Swagger UI 5.32.12 and same-origin specs;
@@ -297,7 +297,7 @@ it never loads a CDN. Static builds copy the OpenAPI files but omit the UI.
 ## Search
 
 ```bash
-docu-docu search "authentication" ./docs
+toudocu search "authentication" ./docs
 ```
 
 Search works directly with the source Markdown files and helps you quickly find existing documentation before creating a new document.
@@ -307,31 +307,31 @@ Search works directly with the source Markdown files and helps you quickly find 
 ## Change browsing
 
 ```bash
-docu-docu changes ./docs
+toudocu changes ./docs
 ```
 
-Docu-docu uses Git to show documentation changes between branches, commits, and the current working state.
+Toudocu uses Git to show documentation changes between branches, commits, and the current working state.
 
 For example, compare the documentation with the main branch:
 
 ```bash
-docu-docu changes ./docs \
+toudocu changes ./docs \
   --base main \
   --target working-tree
 ```
 
-Docu-docu does not run `commit`, `checkout`, `add`, or `fetch`, and it does not modify repository state.
+Toudocu does not run `commit`, `checkout`, `add`, or `fetch`, and it does not modify repository state.
 
 ---
 
 ## Document scaffolds
 
-Docu-docu can create scaffolds for new documents.
+Toudocu can create scaffolds for new documents.
 
 For example:
 
 ```bash
-docu-docu scaffold module MOD-PAYMENTS ./docs \
+toudocu scaffold module MOD-PAYMENTS ./docs \
   --title "Payments"
 ```
 
@@ -356,7 +356,7 @@ docs/
 
 Additional sections can be introduced as the project grows.
 
-Docu-docu can be used to document:
+Toudocu can be used to document:
 
 * architecture;
 * components;
@@ -374,7 +374,7 @@ Mermaid can be used for diagrams.
 
 ## Supported Markdown
 
-Docu-docu uses Goldmark `v1.8.5` as one CommonMark AST engine and enables only:
+Toudocu uses Goldmark `v1.8.5` as one CommonMark AST engine and enables only:
 
 * headings, paragraphs, emphasis, and blockquotes;
 * links and safe local raster images;
@@ -392,7 +392,7 @@ documented in the [safe Markdown module](docs/modules/markdown.md).
 
 ## Portal configuration
 
-The optional `.docu-docu/config.yml` file configures the appearance and behavior of the portal.
+The optional `.toudocu/config.yml` file configures the appearance and behavior of the portal.
 
 Example:
 
@@ -432,7 +432,7 @@ terminal
 
 ## Translations
 
-The main project language is configured in `.docu-docu/config.yml`:
+The main project language is configured in `.toudocu/config.yml`:
 
 ```yaml
 project:
@@ -442,13 +442,13 @@ project:
 To update a separate language version, use:
 
 ```text
-$docu-docu translate en --all-stale
+$toudocu translate en --all-stale
 ```
 
 To update every configured translation with the current diff relative to `HEAD`, use:
 
 ```text
-$docu-docu translate diff
+$toudocu translate diff
 ```
 
 The main documentation remains the operational source of truth, while translations are stored as complete read-only mirrors. Each translation has a complete `translations.<locale>` profile with an independent root and built-in section names; this repository provides English in `docs-en/` alongside canonical Russian `docs/`. Task commands, scaffolding, and editor writes are rejected on translation roots.
@@ -457,24 +457,24 @@ The main documentation remains the operational source of truth, while translatio
 
 ## Main commands
 
-| Task                       | CLI                                                                | From the Docu-docu repository |
+| Task                       | CLI                                                                | From the Toudocu repository |
 | -------------------------- | ------------------------------------------------------------------ | ----------------------------- |
-| Validate documentation     | `docu-docu check ./docs`                                           | `make check`                  |
-| Build the portal           | `docu-docu build ./docs --output ./site --clean`                   | `make docs`                   |
-| Start the local portal     | `docu-docu serve ./docs`                                           | `make docs-serve`             |
-| Build the demo portal      | `docu-docu build ./example/docs --output ./example/site --clean`   | `make demo`                   |
-| Start the demo portal      | `docu-docu serve ./example/docs`                                   | `make demo-serve`             |
-| Find a document            | `docu-docu search "query" ./docs`                                  | —                             |
-| Browse changes             | `docu-docu changes ./docs`                                         | —                             |
-| Create a scaffold          | `docu-docu scaffold module MOD-PAYMENTS ./docs --title "Payments"` | —                             |
-| Build the binary           | `go build -o docu-docu ./cmd/docu-docu`                            | `make build`                  |
+| Validate documentation     | `toudocu check ./docs`                                           | `make check`                  |
+| Build the portal           | `toudocu build ./docs --output ./site --clean`                   | `make docs`                   |
+| Start the local portal     | `toudocu serve ./docs`                                           | `make docs-serve`             |
+| Build the demo portal      | `toudocu build ./example/docs --output ./example/site --clean`   | `make demo`                   |
+| Start the demo portal      | `toudocu serve ./example/docs`                                   | `make demo-serve`             |
+| Find a document            | `toudocu search "query" ./docs`                                  | —                             |
+| Browse changes             | `toudocu changes ./docs`                                         | —                             |
+| Create a scaffold          | `toudocu scaffold module MOD-PAYMENTS ./docs --title "Payments"` | —                             |
+| Build the binary           | `go build -o toudocu ./cmd/toudocu`                            | `make build`                  |
 | Run tests                  | `go test ./...`                                                    | `make test`                   |
 | Build release binaries     | manually                                                           | `make release`                |
 | Remove generated artifacts | manually                                                           | `make clean`                  |
 
-The `make` commands are intended for developing Docu-docu from its source repository.
+The `make` commands are intended for developing Toudocu from its source repository.
 
-Users of a released binary should run `docu-docu` commands directly.
+Users of a released binary should run `toudocu` commands directly.
 
 ---
 
@@ -482,7 +482,7 @@ Users of a released binary should run `docu-docu` commands directly.
 
 The root package provides a typed facade over the model, generator, reports, and
 individual CLI operations. The current module path is the local
-`docu-docu`; a canonical remote Go module has not been published yet, so
+`toudocu`; a canonical remote Go module has not been published yet, so
 external consumers should not depend on this import path.
 
 The exported declarations and package documentation in `api.go` define the
@@ -556,18 +556,18 @@ make clean
 ## Help
 
 ```bash
-docu-docu --help
-docu-docu check --help
-docu-docu build --help
-docu-docu serve --help
-docu-docu search --help
-docu-docu changes --help
-docu-docu scaffold --help
+toudocu --help
+toudocu check --help
+toudocu build --help
+toudocu serve --help
+toudocu search --help
+toudocu changes --help
+toudocu scaffold --help
 ```
 
 Detailed documentation:
 
-* [Docu-docu features](docs/reference/features.md)
+* [Toudocu features](docs/reference/features.md)
 * [Configuration](docs/reference/configuration.md)
 * [CLI commands](docs/contracts/cli.md)
 * [Agent workflows](docs/guides/agent-workflows.md)

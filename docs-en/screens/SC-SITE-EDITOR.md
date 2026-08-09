@@ -10,7 +10,7 @@
 The source-documentation workspace in `serve` mode: file selection, preview,
 diagnostics, creation, and protected saving.
 
-The editor's exact route is `/_docu-docu/editor/`.
+The editor's exact route is `/_toudocu/editor/`.
 
 ## Shell and states
 

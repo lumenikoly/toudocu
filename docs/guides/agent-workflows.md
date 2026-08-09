@@ -1,4 +1,4 @@
-# Использование AI-skill Docu-docu
+# Использование AI-skill Toudocu
 
 Руководство объясняет, как вызывать установленный skill из AI-агента для
 повседневной работы с CLI, порталом, work items и исходной документацией, а
@@ -7,31 +7,31 @@
 
 ## Два разных интерфейса
 
-Команды `docu-docu skill ...` выполняются в shell и управляют только
+Команды `toudocu skill ...` выполняются в shell и управляют только
 установленной копией skill:
 
 ```bash
-docu-docu skill install
-docu-docu skill status --agent all
-docu-docu skill update --agent codex
-docu-docu skill uninstall --agent codex
+toudocu skill install
+toudocu skill status --agent all
+toudocu skill update --agent codex
+toudocu skill uninstall --agent codex
 ```
 
-Вызовы `$docu-docu ...` пишутся в prompt AI-агенту. Это инструкции агенту,
+Вызовы `$toudocu ...` пишутся в prompt AI-агенту. Это инструкции агенту,
 а не подкоманды Go CLI:
 
 ```text
-$docu-docu проверь исходную документацию и объясни diagnostics
-$docu-docu собери локальный портал в установленный проектом output
-$docu-docu подготовь контекст TASK-AREA-001
-$docu-docu обнови руководство по установке по текущему CLI-контракту
-$docu-docu feedback
+$toudocu проверь исходную документацию и объясни diagnostics
+$toudocu собери локальный портал в установленный проектом output
+$toudocu подготовь контекст TASK-AREA-001
+$toudocu обнови руководство по установке по текущему CLI-контракту
+$toudocu feedback
 ```
 
 Сам CLI предоставляет `check`, `build`, `serve`, `search` и `task ...`, но не
 имеет команд `init`, `refresh` или `translate`. Для работы внутри исходного
-репозитория Docu-docu агент использует `go run ./cmd/docu-docu`; в других
-проектах — установленный `docu-docu` из `PATH`.
+репозитория Toudocu агент использует `go run ./cmd/toudocu`; в других
+проектах — установленный `toudocu` из `PATH`.
 
 ## Что можно поручить skill
 
@@ -63,12 +63,12 @@ policy и output. Если соглашений нет, fallback — `./docs` и
 
 | Действие | Необходимое разрешение |
 |---|---|
-| `$docu-docu init` | Явный вызов init или однозначная просьба выполнить именно этот workflow |
-| `$docu-docu refresh` | Явный вызов полного refresh |
-| `$docu-docu refresh diff` | Явный вызов diff refresh |
-| `$docu-docu translate <locale> ...` | Явный запрос перевода и выбранная целевая локаль |
-| `$docu-docu translate diff` | Явный вызов перевода текущего diff во все настроенные целевые локали |
-| `$docu-docu feedback` | Явный запрос обработать локальные comments из Changes; разрешает только обоснованные изменения и релевантные проверки |
+| `$toudocu init` | Явный вызов init или однозначная просьба выполнить именно этот workflow |
+| `$toudocu refresh` | Явный вызов полного refresh |
+| `$toudocu refresh diff` | Явный вызов diff refresh |
+| `$toudocu translate <locale> ...` | Явный запрос перевода и выбранная целевая локаль |
+| `$toudocu translate diff` | Явный вызов перевода текущего diff во все настроенные целевые локали |
+| `$toudocu feedback` | Явный запрос обработать локальные comments из Changes; разрешает только обоснованные изменения и релевантные проверки |
 | `task verify --run` | Явная просьба выполнить или проверить задачу в доверенном репозитории |
 
 Отсутствующие файлы, первое использование skill, обычная правка документации
@@ -90,9 +90,9 @@ verification и handoff. Небольшая правка или обычный p
 человеком — text output:
 
 ```bash
-docu-docu check ./docs --repository-root . --format json
-docu-docu check ./docs --repository-root .
-docu-docu search "verification" ./docs --format json
+toudocu check ./docs --repository-root . --format json
+toudocu check ./docs --repository-root .
+toudocu search "verification" ./docs --format json
 ```
 
 Обычный `check` падает на errors и сообщает warnings. `--strict` дополнительно
@@ -124,7 +124,7 @@ bind требует отдельного явного запроса и дове
 Для существующей Ready+ задачи агент начинает с компактного read-only контекста:
 
 ```bash
-docu-docu task context TASK-AREA-001 ./docs \
+toudocu task context TASK-AREA-001 ./docs \
   --repository-root . \
   --format json
 ```
@@ -132,7 +132,7 @@ docu-docu task context TASK-AREA-001 ./docs \
 Перед исполнением разрешённой проверки он сначала показывает dry run:
 
 ```bash
-docu-docu task verify TASK-AREA-001 ./docs --dry-run \
+toudocu task verify TASK-AREA-001 ./docs --dry-run \
   --repository-root . \
   --format json
 ```
@@ -166,7 +166,7 @@ task-local validation gate разрешён режим `--run`. Report сохр�
 
 ### Feedback из Changes
 
-`$docu-docu feedback` получает oldest local snapshot командой
+`$toudocu feedback` получает oldest local snapshot командой
 `changes feedback pending --json`. Агент проверяет target/anchor и текущий Git
 diff, трактует `issue`, `suggestion`, `question` и `praise` по их смыслу,
 изменяет только обоснованные места и запускает минимальные релевантные проверки.
@@ -181,11 +181,11 @@ workflow последовательно обрабатывает следующ�
 
 ### Инициализация
 
-`$docu-docu init` используется только по явному запросу. Workflow проверяет
+`$toudocu init` используется только по явному запросу. Workflow проверяет
 repository instructions, существующую документацию, конфигурацию и managed
 markers в корневом `AGENTS.md`. Наличие только одного marker из пары, дубликат,
 обратный порядок или вложенность блокируют запись. Отдельно workflow
-останавливается, если unmanaged-инструкция конфликтует с Docu-docu trigger или
+останавливается, если unmanaged-инструкция конфликтует с Toudocu trigger или
 политикой создания задач. Любой legacy Markdown внутри `architecture/`, кроме
 единственного структурно корректного overview, также блокирует автоматическую
 миграцию.
@@ -209,7 +209,7 @@ map, а не копируется из шаблона. При отсутстви
 
 ### Полная актуализация
 
-`$docu-docu refresh` сопоставляет каждый Markdown-документ canonical root с
+`$toudocu refresh` сопоставляет каждый Markdown-документ canonical root с
 актуальными repository evidence: кодом, тестами, публичными интерфейсами,
 schemas, configuration, CI, решениями и подтверждёнными требованиями. Каждый
 документ классифицируется как current, needs update, unverifiable, obsolete,
@@ -223,7 +223,7 @@ Refresh не выполняет init, не устанавливает managed gu
 
 ### Актуализация текущего diff
 
-`$docu-docu refresh diff` требует Git worktree и валидный `HEAD`. Начальный
+`$toudocu refresh diff` требует Git worktree и валидный `HEAD`. Начальный
 change set строится из:
 
 ```bash
@@ -241,21 +241,21 @@ caches, vendored artifacts и translation roots исключаются. Если
 
 ### Перевод
 
-`$docu-docu translate <locale>` требует configured target profile и ровно один
+`$toudocu translate <locale>` требует configured target profile и ровно один
 режим:
 
 ```text
-$docu-docu translate <locale> --task TASK-ID
-$docu-docu translate <locale> --base REF
-$docu-docu translate <locale> --all-stale
+$toudocu translate <locale> --task TASK-ID
+$toudocu translate <locale> --base REF
+$toudocu translate <locale> --all-stale
 ```
 
-`$docu-docu translate diff` не принимает locale или дополнительные режимы. Он
+`$toudocu translate diff` не принимает locale или дополнительные режимы. Он
 требует Git worktree и валидный `HEAD`, один раз строит change set staged,
 unstaged и untracked canonical-файлов через:
 
 ```bash
-docu-docu changes ./docs --base HEAD --target working-tree \
+toudocu changes ./docs --base HEAD --target working-tree \
   --translation-input --format json
 ```
 
@@ -291,8 +291,8 @@ context. Настроенные translation roots, включая перевед
 исключаются из этих операций и не добавляются в ignore-файлы.
 
 Выбранный translation root читается только при явном
-`$docu-docu translate <locale>` или явной просьбе проверить, найти, собрать,
-запустить либо изучить эту локаль. Явный `$docu-docu translate diff` разрешает
+`$toudocu translate <locale>` или явной просьбе проверить, найти, собрать,
+запустить либо изучить эту локаль. Явный `$toudocu translate diff` разрешает
 последовательно открыть все настроенные roots. В каждый момент доступ
 ограничивается одной locale и минимальной source/target-парой; для parity
 сначала сравниваются relative paths, source digests и structural reports.

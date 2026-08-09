@@ -5,7 +5,7 @@
 - Приоритет: Высокий
 - Модуль: MOD-MODEL
 - Стандарты: STD-GO-001, STD-DOCS-001
-- Владелец: Команда Docu-docu
+- Владелец: Команда Toudocu
 - Последнее обновление: 2026-07-31
 
 ## Результат
@@ -23,14 +23,14 @@ workflow для систематического ревью актуальнос
 
 ### Станет
 
-`$docu-docu refresh` проверяет весь проект, а `$docu-docu refresh diff`
+`$toudocu refresh` проверяет весь проект, а `$toudocu refresh diff`
 проверяет staged, unstaged и untracked изменения относительно `HEAD` и
 зависимую документацию. Оба режима могут обновлять, удалять и переименовывать
 документы при однозначной доказательной базе.
 
 ## Область изменения
 
-- `skills/docu-docu/`;
+- `skills/toudocu/`;
 - `internal/app/cli.go`;
 - `skill_templates_test.go`;
 - `integration_test.go`;
@@ -43,7 +43,7 @@ workflow для систематического ревью актуальнос
 
 ## Не входит в задачу
 
-- новая Go-команда `docu-docu refresh`;
+- новая Go-команда `toudocu refresh`;
 - отдельный read-only refresh workflow;
 - merge-base или сравнение с default branch;
 - изменение кода ради согласования с документацией;
@@ -51,7 +51,7 @@ workflow для систематического ревью актуальнос
 
 ## Критерии приёмки
 
-- [x] `AC-01` Skill маршрутизирует `$docu-docu refresh` и `$docu-docu
+- [x] `AC-01` Skill маршрутизирует `$toudocu refresh` и `$toudocu
   refresh diff` в отдельный workflow, не ослабляя эксклюзивность init.
 - [x] `AC-02` Полный режим проверяет всю документацию, а diff-режим использует
   `HEAD`, включает staged, unstaged и untracked файлы и расширяет охват через
@@ -63,7 +63,7 @@ workflow для систематического ревью актуальнос
   tracked portals; generated output не редактируется как источник.
 - [x] `AC-05` RU/EN guidance, metadata и пользовательская документация
   синхронно описывают обе команды как skill-level workflows.
-- [x] `AC-06` Go CLI по-прежнему отклоняет `docu-docu refresh`, а полный цикл
+- [x] `AC-06` Go CLI по-прежнему отклоняет `toudocu refresh`, а полный цикл
   тестов и строгой проверки завершается без warnings/errors.
 
 ## План
@@ -76,15 +76,15 @@ workflow для систематического ревью актуальнос
 
 ## Проверка
 
-- `AC-01` → `go test ./... -run 'TestUseDocu-docuRefresh'`
-- `AC-02` → `go test ./... -run 'TestUseDocu-docuRefresh'`
-- `AC-03` → `go test ./... -run 'TestUseDocu-docuRefresh'`
-- `AC-04` → `go test ./... -run 'TestUseDocu-docuRefresh'`
-- `AC-05` → `go test ./... -run 'TestUseDocu-docuRefresh|TestUseDocu-docuMetadata|TestUseDocu-docuProjectGuidanceTemplates'`
-- `AC-06` → `go test ./... -run 'TestCLIArguments|TestUseDocu-docuRefresh'`
+- `AC-01` → `go test ./... -run 'TestUseToudocuRefresh'`
+- `AC-02` → `go test ./... -run 'TestUseToudocuRefresh'`
+- `AC-03` → `go test ./... -run 'TestUseToudocuRefresh'`
+- `AC-04` → `go test ./... -run 'TestUseToudocuRefresh'`
+- `AC-05` → `go test ./... -run 'TestUseToudocuRefresh|TestUseToudocuMetadata|TestUseToudocuProjectGuidanceTemplates'`
+- `AC-06` → `go test ./... -run 'TestCLIArguments|TestUseToudocuRefresh'`
 - `ALL` → `go test -count=1 ./...`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0 && go run ./cmd/docu-docu check ./example/docs --repository-root ./example --strict --stale-days 0`
-- `QUALITY` → `go test ./... -run 'TestUseDocu-docu'`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0 && go run ./cmd/toudocu check ./example/docs --repository-root ./example --strict --stale-days 0`
+- `QUALITY` → `go test ./... -run 'TestUseToudocu'`
 
 ## Влияние на документацию
 

@@ -3,7 +3,7 @@
 Для локального browser runtime используется существующая команда:
 
 ```bash
-docu-docu serve ./docs
+toudocu serve ./docs
 ```
 
 Она строит ту же Go project model и тот же базовый портал, затем добавляет live
@@ -13,7 +13,7 @@ capabilities и обращается только к same-origin endpoints те�
 По умолчанию listener доступен на `http://127.0.0.1:8080`. `--host 0.0.0.0`
 расширяет trust boundary на локальную сеть; встроенных TLS и authentication нет.
 
-Отдельной команды preview нет. Для публикации выполните `docu-docu build` и
+Отдельной команды preview нет. Для публикации выполните `toudocu build` и
 разместите output на [static HTTP hosting](deployment.md).
 
 На странице `roadmap.html` canonical portal кнопка «Добавить результат»

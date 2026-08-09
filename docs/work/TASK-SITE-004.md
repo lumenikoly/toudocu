@@ -8,12 +8,12 @@
 - Процесс: FLOW-DOCS-SERVE
 - Экраны: SC-SITE-DOCUMENT
 - Стандарты: STD-GO-001, STD-DOCS-001
-- Владелец: Команда Docu-docu
+- Владелец: Команда Toudocu
 - Последнее обновление: 2026-08-06
 
 ## Результат
 
-На странице `roadmap.md` в canonical `docu-docu serve` пользователь добавляет
+На странице `roadmap.md` в canonical `toudocu serve` пользователь добавляет
 новый незавершённый `DLV-*` в существующий этап через доступный диалог, не
 редактируя Markdown вручную. Static build и translation portals остаются
 read-only.
@@ -83,9 +83,9 @@ CAS-конфликт не перезаписывает файл и сохран�
 - `AC-03` → `go test ./internal/app -run TestEditorRoadmap`
 - `AC-04` → `npm --prefix web run typecheck && npm --prefix web run test:browser`
 - `AC-05` → `go test ./internal/app -run 'TestRoadmapAddControlIsServeOnly|TestDocumentationServerLocalePortalsAreReadOnlyAndMatched' && npm --prefix web test`
-- `AC-06` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
+- `AC-06` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `ALL` → `make check && make browser-test`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `make check`
 
 ## Влияние на документацию

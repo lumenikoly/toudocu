@@ -6,7 +6,7 @@ export const serveRuntimeMessages: Record<string, string> = {
   "core.serve-runtime.005": "Пересборка завершена: {0} документов, {1} страниц. Страница обновляется.",
   "core.serve-runtime.006": "Повторить",
   "core.serve-runtime.007": "Пересборка не выполнена: {0}. Исправьте причину и повторите.",
-  "core.serve-runtime.008": "Доступна Docu-docu {0}",
+  "core.serve-runtime.008": "Доступна Toudocu {0}",
   "core.serve-runtime.009": "У вас {0}",
   "core.serve-runtime.010": "Открыть релиз",
   "core.serve-runtime.011": "Скрыть",
@@ -111,7 +111,7 @@ export const apiDocsMessages: Record<string, string> = {
 
 export const editorMessages: Record<string, string> = {
   "features.editor.index.001": "Редактор недоступен в этом runtime.",
-  "features.editor.index.002": "{0}Редактор — Docu-docu",
+  "features.editor.index.002": "{0}Редактор — Toudocu",
   "features.editor.index.003": "Корень",
   "features.editor.index.004": "Файл удалён с диска. Текст сохранён в редакторе: скачайте его или восстановите файл снаружи.",
   "features.editor.index.005": "Ваш текст сохранён в редакторе. Сравните версии или подтвердите перезапись.",
@@ -259,7 +259,7 @@ export const changesMessages: Record<string, string> = {
   "features.changes.index.118": "Указанные агентом пути не входят в актуальный Git diff; открыт anchor.",
   "features.changes.index.119": "<p>Совпадений нет.</p>",
   "features.changes.index.120": "Агенту подготовлено комментариев: {0}. {1}",
-  "features.changes.index.121": "Обработай комментарии из Docu-docu Changes",
+  "features.changes.index.121": "Обработай комментарии из Toudocu Changes",
   "features.changes.index.122": "Фраза скопирована.",
   "features.changes.index.123": "Файл изменился. Текст сохранён; повторно выберите anchor.",
   "features.changes.index.124": "Проблема",

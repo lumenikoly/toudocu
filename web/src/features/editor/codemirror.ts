@@ -63,7 +63,7 @@ function highlightReviewRange(view: any, start: any, end: any) {
     view.dispatch({ selection: { anchor, head }, scrollIntoView: true });
     view.focus();
 }
-window.DocuDocuCodeMirror = {
+window.ToudocuCodeMirror = {
     createMerge({ parent, before, after, language, onSelect }: any) {
         const themeA: any = new Compartment();
         const themeB: any = new Compartment();

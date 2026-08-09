@@ -1,14 +1,14 @@
 openapi: 3.1.0
 info:
-  title: Docu-docu Editor HTTP API
+  title: Toudocu Editor HTTP API
   version: "1"
   description: Wire-level contract for canonical serve-only portal services.
 servers:
   - url: /
 paths:
-  /_docu-docu/api/version:
+  /_toudocu/api/version:
     get:
-      operationId: getDocuDocuVersionStatus
+      operationId: getToudocuVersionStatus
       summary: Compare the running version with the latest stable release
       responses:
         "200":
@@ -21,19 +21,19 @@ paths:
               schema: {$ref: "#/components/schemas/VersionResponse"}
               examples:
                 updateAvailable:
-                  value: {schemaVersion: 1, currentVersion: 0.8.0, status: update-available, latestVersion: 0.9.0, releaseURL: "https://github.com/lumenikoly/docu-docu/releases/tag/0.9.0"}
+                  value: {schemaVersion: 1, currentVersion: 0.8.0, status: update-available, latestVersion: 0.9.0, releaseURL: "https://github.com/lumenikoly/toudocu/releases/tag/0.9.0"}
                 unavailable:
                   value: {schemaVersion: 1, currentVersion: dev, status: unavailable}
         "404": {description: Version check is disabled or the served root is a translation}
         "405": {$ref: "#/components/responses/MethodNotAllowed"}
     head:
-      operationId: headDocuDocuVersionStatus
+      operationId: headToudocuVersionStatus
       summary: Check availability of the cached version status without a response body
       responses:
         "200": {description: Version status is available, headers: {Cache-Control: {$ref: "#/components/headers/NoStore"}, X-Content-Type-Options: {$ref: "#/components/headers/NoSniff"}}}
         "404": {description: Version check is disabled or the served root is a translation}
         "405": {$ref: "#/components/responses/MethodNotAllowed"}
-  /_docu-docu/api/editor/files:
+  /_toudocu/api/editor/files:
     get:
       operationId: listEditorFiles
       summary: List editable documentation sources and templates
@@ -52,7 +52,7 @@ paths:
         "304": {description: Workspace revision has not changed, headers: {ETag: {schema: {type: string}}, Cache-Control: {$ref: "#/components/headers/NoStore"}}}
         "405": {$ref: "#/components/responses/MethodNotAllowed"}
         "500": {$ref: "#/components/responses/EditorError"}
-  /_docu-docu/api/editor/file:
+  /_toudocu/api/editor/file:
     get:
       operationId: getEditorFile
       summary: Read a documentation source
@@ -100,7 +100,7 @@ paths:
         "413": {$ref: "#/components/responses/EditorError"}
         "415": {$ref: "#/components/responses/EditorError"}
         "500": {$ref: "#/components/responses/EditorError"}
-  /_docu-docu/api/editor/roadmap:
+  /_toudocu/api/editor/roadmap:
     get:
       operationId: getEditorRoadmap
       summary: Read canonical roadmap state and the next suggested deliverable ID
@@ -109,7 +109,7 @@ paths:
         "404": {$ref: "#/components/responses/RoadmapNotFound"}
         "405": {$ref: "#/components/responses/MethodNotAllowed"}
         "500": {$ref: "#/components/responses/EditorError"}
-  /_docu-docu/api/editor/roadmap/items:
+  /_toudocu/api/editor/roadmap/items:
     post:
       operationId: addEditorRoadmapItem
       summary: Add one unfinished deliverable to an existing roadmap stage
@@ -133,7 +133,7 @@ paths:
         "413": {$ref: "#/components/responses/EditorError"}
         "415": {$ref: "#/components/responses/EditorError"}
         "500": {$ref: "#/components/responses/EditorError"}
-  /_docu-docu/api/editor/preview:
+  /_toudocu/api/editor/preview:
     post:
       operationId: previewEditorSource
       summary: Render an in-memory Markdown source
@@ -151,7 +151,7 @@ paths:
         "413": {$ref: "#/components/responses/EditorError"}
         "415": {$ref: "#/components/responses/EditorError"}
         "500": {$ref: "#/components/responses/EditorError"}
-  /_docu-docu/api/editor/validate:
+  /_toudocu/api/editor/validate:
     post:
       operationId: validateEditorSource
       summary: Validate an in-memory documentation source
@@ -169,7 +169,7 @@ paths:
         "413": {$ref: "#/components/responses/EditorError"}
         "415": {$ref: "#/components/responses/EditorError"}
         "500": {$ref: "#/components/responses/EditorError"}
-  /_docu-docu/api/editor/create:
+  /_toudocu/api/editor/create:
     post:
       operationId: createEditorSource
       summary: Create a typed source from the shared scaffold registry
@@ -192,7 +192,7 @@ paths:
         "413": {$ref: "#/components/responses/EditorError"}
         "415": {$ref: "#/components/responses/EditorError"}
         "500": {$ref: "#/components/responses/EditorError"}
-  /__docu-docu/rebuild:
+  /__toudocu/rebuild:
     post:
       operationId: rebuildDocumentationPortal
       summary: Manually rebuild the canonical serve portal
@@ -216,12 +216,12 @@ components:
   parameters:
     PathQuery: {name: path, in: query, required: true, schema: {type: string, minLength: 1}, example: modules/site.md}
     IfNoneMatch: {name: If-None-Match, in: header, schema: {type: string}, description: Quoted workspace revision returned as ETag}
-    SaveAction: {name: X-Docu-docu-Action, in: header, required: true, schema: {type: string, const: save}}
-    PreviewAction: {name: X-Docu-docu-Action, in: header, required: true, schema: {type: string, const: preview}}
-    ValidateAction: {name: X-Docu-docu-Action, in: header, required: true, schema: {type: string, const: validate}}
-    CreateAction: {name: X-Docu-docu-Action, in: header, required: true, schema: {type: string, const: create}}
-    RoadmapAddAction: {name: X-Docu-docu-Action, in: header, required: true, schema: {type: string, const: roadmap-add}}
-    RebuildAction: {name: X-Docu-docu-Action, in: header, required: true, schema: {type: string, const: rebuild}}
+    SaveAction: {name: X-Toudocu-Action, in: header, required: true, schema: {type: string, const: save}}
+    PreviewAction: {name: X-Toudocu-Action, in: header, required: true, schema: {type: string, const: preview}}
+    ValidateAction: {name: X-Toudocu-Action, in: header, required: true, schema: {type: string, const: validate}}
+    CreateAction: {name: X-Toudocu-Action, in: header, required: true, schema: {type: string, const: create}}
+    RoadmapAddAction: {name: X-Toudocu-Action, in: header, required: true, schema: {type: string, const: roadmap-add}}
+    RebuildAction: {name: X-Toudocu-Action, in: header, required: true, schema: {type: string, const: rebuild}}
     Origin: {name: Origin, in: header, schema: {type: string, format: uri}}
     FetchSite: {name: Sec-Fetch-Site, in: header, schema: {type: string, const: same-origin}}
   requestBodies:
@@ -272,7 +272,7 @@ components:
         currentVersion: {type: string, minLength: 1}
         status: {type: string, enum: [up-to-date, update-available, unavailable]}
         latestVersion: {type: string, pattern: '^[0-9]+\.[0-9]+\.[0-9]+$'}
-        releaseURL: {type: string, format: uri, pattern: '^https://github\.com/lumenikoly/docu-docu/releases/tag/[0-9]+\.[0-9]+\.[0-9]+$'}
+        releaseURL: {type: string, format: uri, pattern: '^https://github\.com/lumenikoly/toudocu/releases/tag/[0-9]+\.[0-9]+\.[0-9]+$'}
     Diagnostic:
       type: object
       additionalProperties: false

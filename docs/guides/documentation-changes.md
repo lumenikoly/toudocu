@@ -1,6 +1,6 @@
 # Просмотр изменений документации
 
-Docu-docu использует Git как единственный источник старой и новой версии. Он не
+Toudocu использует Git как единственный источник старой и новой версии. Он не
 создаёт snapshots, не выполняет fetch и не изменяет history, refs, index или
 working tree. Раздел доступен только в `serve` по адресу `/changes/`; обычный
 `build` остаётся автономным представлением текущей документации и не требует
@@ -12,10 +12,10 @@ Git history.
 untracked-файлы. Также доступны `HEAD → index`, revision → revision, revision →
 working-tree и `merge-base(base-ref, HEAD) → working-tree` через
 `--branch-base`. Base, target, resolved commit, branch и dirty state всегда
-видимы. Docu-docu не загружает remote refs и не угадывает неоднозначную базу.
+видимы. Toudocu не загружает remote refs и не угадывает неоднозначную базу.
 
 Git revisions разрешаются от enclosing Git top-level. Для вложенного проекта
-`--repository-root` отдельно выбирает его `.docu-docu/config.yml`; относительные
+`--repository-root` отдельно выбирает его `.toudocu/config.yml`; относительные
 `changes.exclude` интерпретируются от этого project root.
 
 ## Три уровня diff
@@ -59,15 +59,15 @@ view.
 ## CLI и CI
 
 ```bash
-docu-docu changes ./docs --format text
-docu-docu changes ./docs --base main --target working-tree --format json
-docu-docu changes ./docs --branch-base main --format markdown
-docu-docu changes ./docs --status modified --module MOD-AUTH --type use-case
-docu-docu changes ./docs --include-assets --format json
-docu-docu changes ./docs --translation-input --format json
-docu-docu changes ./docs --permanent-only --format json
-docu-docu changes file docs/modules/MOD-AUTH.md --base HEAD --target index
-docu-docu task changes TASK-AUTH-015 ./docs --format json
+toudocu changes ./docs --format text
+toudocu changes ./docs --base main --target working-tree --format json
+toudocu changes ./docs --branch-base main --format markdown
+toudocu changes ./docs --status modified --module MOD-AUTH --type use-case
+toudocu changes ./docs --include-assets --format json
+toudocu changes ./docs --translation-input --format json
+toudocu changes ./docs --permanent-only --format json
+toudocu changes file docs/modules/MOD-AUTH.md --base HEAD --target index
+toudocu task changes TASK-AUTH-015 ./docs --format json
 ```
 
 CLI-фильтры применяются к уже построенному change set:
@@ -87,7 +87,7 @@ CLI-фильтры применяются к уже построенному cha
 Exit code `1` означает построенный отчёт с error, `2` — неверный диапазон, `3`
 — Git недоступен/не найден, `4` — внутренняя ошибка.
 
-Workflow `$docu-docu translate` использует этот report только как входные
+Workflow `$toudocu translate` использует этот report только как входные
 данные: skill-параметр `--task` вызывает канонический `task changes` до
 `working-tree`, а `--base` —
 `<base> → working-tree`. Публичный флаг `--translation-input` формирует полный

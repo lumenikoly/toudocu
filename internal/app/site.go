@@ -1,7 +1,6 @@
-package docudocu
+package toudocu
 
 import (
-	frontend "docu-docu/internal/site"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -11,6 +10,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	frontend "toudocu/internal/site"
 )
 
 const Version = "0.0.1"
@@ -73,9 +73,9 @@ func renderDocumentContextButton(model *Model, document *Document) string {
 	}
 	encoded := url.QueryEscape(document.SourcePath)
 	return `<div class="document-context-actions">` + copyButton +
-		`<a class="document-context-button" href="/_docu-docu/editor/?path=` + escapeAttr(encoded) + `">Редактировать</a>` +
+		`<a class="document-context-button" href="/_toudocu/editor/?path=` + escapeAttr(encoded) + `">Редактировать</a>` +
 		`<a class="document-context-button" href="` + escapeAttr(changesDocumentURL(documentContextPath(model, document))) + `">Показать изменения</a>` +
-		`<a class="document-context-button" href="/_docu-docu/api/editor/file?raw=1&amp;path=` + escapeAttr(encoded) + `" target="_blank" rel="noopener">Открыть исходник</a></div>`
+		`<a class="document-context-button" href="/_toudocu/api/editor/file?raw=1&amp;path=` + escapeAttr(encoded) + `" target="_blank" rel="noopener">Открыть исходник</a></div>`
 }
 
 func renderOpenAPIContractButton(model *Model, document *Document) string {
@@ -295,7 +295,7 @@ func renderNavigation(model *Model, current string) string {
 	if model.serveMode {
 		fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link" href="/changes/"><span>Изменения</span></a></li>`)
 		if len(model.openAPIContracts) > 0 {
-			fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link" href="/_docu-docu/api-docs/"><span>HTTP API</span></a></li>`)
+			fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link" href="/_toudocu/api-docs/"><span>HTTP API</span></a></li>`)
 		}
 	}
 	if len(model.Knowledge.Screens) > 0 {
@@ -496,8 +496,8 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 }
 
 func renderFooter(config FooterConfig) string {
-	if config.Text == "Сгенерировано Docu-docu "+Version && config.URL == defaultFooterURL {
-		return `Сгенерировано <a href="` + escapeAttr(config.URL) + `" rel="noopener noreferrer">Docu-docu</a> ` + escapeHTML(Version)
+	if config.Text == "Сгенерировано Toudocu "+Version && config.URL == defaultFooterURL {
+		return `Сгенерировано <a href="` + escapeAttr(config.URL) + `" rel="noopener noreferrer">Toudocu</a> ` + escapeHTML(Version)
 	}
 	footer := escapeHTML(config.Text)
 	if config.URL != "" {
@@ -1205,7 +1205,7 @@ func BuildReport(model *Model) ProjectReport {
 		})
 	}
 	return ProjectReport{
-		SchemaVersion: 1, Generator: GeneratorInfo{Name: "Docu-docu", Version: Version},
+		SchemaVersion: 1, Generator: GeneratorInfo{Name: "Toudocu", Version: Version},
 		GeneratedAt: model.GeneratedAt, SourceDirectory: pathBase(model.RootDirectory),
 		StaleDays: model.StaleDays, Project: project, CurrentStatus: model.CurrentStatus,
 		Stats: model.Stats, Documents: documents, Roadmap: roadmap, Risks: risks,

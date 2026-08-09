@@ -1,4 +1,4 @@
-# TASK-SKILL-001: Добавить встроенную установку skill Docu-docu
+# TASK-SKILL-001: Добавить встроенную установку skill Toudocu
 
 - Статус: Выполнено
 - Тип: Feature
@@ -6,12 +6,12 @@
 - Модуль: MOD-CLI
 - Сценарий: UC-AGENT-01
 - Стандарты: STD-GO-001, STD-DOCS-001
-- Владелец: Команда Docu-docu
+- Владелец: Команда Toudocu
 - Последнее обновление: 2026-08-06
 
 ## Результат
 
-Binary версии `0.0.1` содержит канонический skill `docu-docu` и предоставляет
+Binary версии `0.0.1` содержит канонический skill `toudocu` и предоставляет
 безопасный offline lifecycle для Codex, Claude Code и Copilot в project/user
 scope.
 
@@ -24,7 +24,7 @@ CLI устанавливается отдельно, а пользователь
 
 ### Станет
 
-Команды `docu-docu skill install|status|update|uninstall` разрешают target,
+Команды `toudocu skill install|status|update|uninstall` разрешают target,
 классифицируют существующую копию по manifest/checksums и изменяют только
 неизменённый managed package с атомарной публикацией и rollback.
 
@@ -46,8 +46,8 @@ CLI устанавливается отдельно, а пользователь
 
 ## Критерии приёмки
 
-- [x] `AC-01` Binary встраивает полный текущий package `skills/docu-docu` как
-  skill `docu-docu` версии `0.0.1` с проверкой metadata, paths, collisions и
+- [x] `AC-01` Binary встраивает полный текущий package `skills/toudocu` как
+  skill `toudocu` версии `0.0.1` с проверкой metadata, paths, collisions и
   лимитов 2 MiB/10 MiB.
 - [x] `AC-02` Registry, detection, target resolution, semver, manifest,
   checksums и planner покрывают все восемь публичных состояний.
@@ -77,10 +77,10 @@ CLI устанавливается отдельно, а пользователь
 - `AC-02` → `go test ./internal/skillinstall`
 - `AC-03` → `go test ./internal/app -run TestSkillCLI`
 - `AC-04` → `go test ./internal/skillinstall -run 'Test(Unsafe|Boundary|Modified|Symlink|Mode|Publish|Atomic|InstallDoesNotExecute|StageRejectsTraversal)'`
-- `AC-05` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
-- `AC-06` → `make check && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ./cmd/docu-docu && CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ./cmd/docu-docu && CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build ./cmd/docu-docu && CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build ./cmd/docu-docu && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./cmd/docu-docu && CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go test -c -o /tmp/docu-docu-skillinstall-darwin.test ./internal/skillinstall && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go test -c -o /tmp/docu-docu-skillinstall-windows.test.exe ./internal/skillinstall`
+- `AC-05` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
+- `AC-06` → `make check && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ./cmd/toudocu && CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ./cmd/toudocu && CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build ./cmd/toudocu && CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build ./cmd/toudocu && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./cmd/toudocu && CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go test -c -o /tmp/toudocu-skillinstall-darwin.test ./internal/skillinstall && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go test -c -o /tmp/toudocu-skillinstall-windows.test.exe ./internal/skillinstall`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `make check`
 
 ## Влияние на документацию

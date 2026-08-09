@@ -27,8 +27,8 @@
 
 ## Основной сценарий
 
-1. Разработчик открывает `/changes` или запускает `docu-docu changes`.
-2. Docu-docu разрешает и показывает base/target без изменения Git.
+1. Разработчик открывает `/changes` или запускает `toudocu changes`.
+2. Toudocu разрешает и показывает base/target без изменения Git.
 3. Пользователь получает сводку permanent и work artifacts.
 4. Пользователь фильтрует документы и открывает source, rendered, semantic или
    специализированный diff.

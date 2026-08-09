@@ -1,12 +1,12 @@
 openapi: 3.1.0
 info:
-  title: Docu-docu Documentation Changes HTTP API
+  title: Toudocu Documentation Changes HTTP API
   version: "1"
   description: Wire-level contract for documentation changes and canonical-serve local repository review; static and translation runtimes do not expose review capability.
 servers:
   - url: /
 paths:
-  /_docu-docu/api/changes:
+  /_toudocu/api/changes:
     get:
       operationId: getChangesSummary
       summary: Build a filtered documentation change-set report
@@ -55,7 +55,7 @@ paths:
         "405": {$ref: "#/components/responses/MethodNotAllowed"}
         "503": {$ref: "#/components/responses/ChangesError"}
         "500": {$ref: "#/components/responses/ChangesError"}
-  /_docu-docu/api/changes/file:
+  /_toudocu/api/changes/file:
     get:
       operationId: getChangedFile
       summary: Read one documentation change with source diff hunks
@@ -82,7 +82,7 @@ paths:
         "405": {$ref: "#/components/responses/MethodNotAllowed"}
         "503": {$ref: "#/components/responses/ChangesError"}
         "500": {$ref: "#/components/responses/ChangesError"}
-  /_docu-docu/api/changes/task:
+  /_toudocu/api/changes/task:
     get:
       operationId: getChangedTaskImpact
       summary: Read task impact for a selected TASK or BUG
@@ -107,7 +107,7 @@ paths:
         "405": {$ref: "#/components/responses/MethodNotAllowed"}
         "503": {$ref: "#/components/responses/ChangesError"}
         "500": {$ref: "#/components/responses/ChangesError"}
-  /_docu-docu/api/changes/content:
+  /_toudocu/api/changes/content:
     get:
       operationId: getChangedContent
       summary: Read raw content from one comparison side
@@ -131,7 +131,7 @@ paths:
         "413": {$ref: "#/components/responses/ChangesError"}
         "503": {$ref: "#/components/responses/ChangesError"}
         "500": {$ref: "#/components/responses/ChangesError"}
-  /_docu-docu/api/changes/render:
+  /_toudocu/api/changes/render:
     get:
       operationId: getRenderedChangedContent
       summary: Render Markdown from one comparison side
@@ -156,7 +156,7 @@ paths:
         "415": {$ref: "#/components/responses/ChangesError"}
         "503": {$ref: "#/components/responses/ChangesError"}
         "500": {$ref: "#/components/responses/ChangesError"}
-  /_docu-docu/api/changes/screen-map:
+  /_toudocu/api/changes/screen-map:
     get:
       operationId: getChangedScreenMap
       summary: Read screen and transition overlay schema v1
@@ -175,7 +175,7 @@ paths:
         "405": {$ref: "#/components/responses/MethodNotAllowed"}
         "503": {$ref: "#/components/responses/ChangesError"}
         "500": {$ref: "#/components/responses/ChangesError"}
-  /_docu-docu/api/changes/review/repository/changes:
+  /_toudocu/api/changes/review/repository/changes:
     get:
       operationId: getRepositoryReviewChanges
       summary: Read repository-wide comparison metadata
@@ -185,7 +185,7 @@ paths:
         "304": {description: Repository revision ETag matches}
         "405": {$ref: "#/components/responses/MethodNotAllowed"}
         "503": {$ref: "#/components/responses/ReviewError"}
-  /_docu-docu/api/changes/review/repository/files:
+  /_toudocu/api/changes/review/repository/files:
     get:
       operationId: getRepositoryReviewFiles
       summary: Search tracked and untracked non-ignored paths by path or name
@@ -197,7 +197,7 @@ paths:
         "400": {$ref: "#/components/responses/ReviewError"}
         "405": {$ref: "#/components/responses/MethodNotAllowed"}
         "503": {$ref: "#/components/responses/ReviewError"}
-  /_docu-docu/api/changes/review/repository/file:
+  /_toudocu/api/changes/review/repository/file:
     get:
       operationId: getRepositoryReviewFile
       summary: Lazily read current and before UTF-8 content, patch and hunks
@@ -209,7 +209,7 @@ paths:
         "413": {$ref: "#/components/responses/ReviewError"}
         "415": {$ref: "#/components/responses/ReviewError"}
         "503": {$ref: "#/components/responses/ReviewError"}
-  /_docu-docu/api/changes/review/discussions:
+  /_toudocu/api/changes/review/discussions:
     get:
       operationId: getReviewDiscussions
       summary: Read the persistent review state with current placements
@@ -229,7 +229,7 @@ paths:
         "409": {$ref: "#/components/responses/ReviewError"}
         "413": {$ref: "#/components/responses/ReviewError"}
         "415": {$ref: "#/components/responses/ReviewError"}
-  /_docu-docu/api/changes/review/discussions/{id}:
+  /_toudocu/api/changes/review/discussions/{id}:
     patch:
       operationId: updateReviewDiscussion
       summary: Reply, edit or delete one unsent message, resolve, or reopen
@@ -245,7 +245,7 @@ paths:
         "409": {$ref: "#/components/responses/ReviewError"}
         "413": {$ref: "#/components/responses/ReviewError"}
         "415": {$ref: "#/components/responses/ReviewError"}
-  /_docu-docu/api/changes/review/feedback:
+  /_toudocu/api/changes/review/feedback:
     post:
       operationId: createReviewFeedback
       summary: Snapshot all unsent messages from open discussions
@@ -256,14 +256,14 @@ paths:
         "403": {$ref: "#/components/responses/ReviewError"}
         "409": {$ref: "#/components/responses/ReviewError"}
         "415": {$ref: "#/components/responses/ReviewError"}
-  /_docu-docu/api/changes/review/feedback/pending:
+  /_toudocu/api/changes/review/feedback/pending:
     get:
       operationId: getPendingReviewFeedback
       summary: Read the oldest uncompleted feedback snapshot without mutation
       responses:
         "200": {description: FIFO pending envelope; feedback is null when empty, content: {application/json: {schema: {$ref: "#/components/schemas/PendingFeedbackEnvelope"}, example: {schemaVersion: 1, revision: 0, stateDigest: abc123, feedback: null}}}}
         "500": {$ref: "#/components/responses/ReviewError"}
-  /_docu-docu/api/changes/review/feedback/{id}/response:
+  /_toudocu/api/changes/review/feedback/{id}/response:
     post:
       operationId: respondToReviewFeedback
       summary: Atomically accept one complete agent response
@@ -279,7 +279,7 @@ paths:
         "409": {$ref: "#/components/responses/ReviewError"}
         "413": {$ref: "#/components/responses/ReviewError"}
         "415": {$ref: "#/components/responses/ReviewError"}
-  /_docu-docu/api/changes/review/cleanup:
+  /_toudocu/api/changes/review/cleanup:
     post:
       operationId: cleanupReview
       summary: Remove resolved discussions or confirm complete history cleanup
@@ -308,11 +308,11 @@ components:
     Path: {name: path, in: query, required: true, schema: {type: string, minLength: 1}, example: docs/index.md}
     Side: {name: side, in: query, required: true, schema: {type: string, enum: [before, after]}}
     ReviewID: {name: id, in: path, required: true, schema: {type: string, minLength: 26, maxLength: 26}, example: 01ARZ3NDEKTSV4RRFFQ69G5FAV}
-    CreateDiscussionAction: {name: X-Docu-docu-Action, in: header, required: true, schema: {type: string, const: review-discussion-create}}
-    UpdateDiscussionAction: {name: X-Docu-docu-Action, in: header, required: true, schema: {type: string, const: review-discussion-update}}
-    CreateFeedbackAction: {name: X-Docu-docu-Action, in: header, required: true, schema: {type: string, const: review-feedback-create}}
-    RespondFeedbackAction: {name: X-Docu-docu-Action, in: header, required: true, schema: {type: string, const: review-feedback-response}}
-    CleanupReviewAction: {name: X-Docu-docu-Action, in: header, required: true, schema: {type: string, const: review-cleanup}}
+    CreateDiscussionAction: {name: X-Toudocu-Action, in: header, required: true, schema: {type: string, const: review-discussion-create}}
+    UpdateDiscussionAction: {name: X-Toudocu-Action, in: header, required: true, schema: {type: string, const: review-discussion-update}}
+    CreateFeedbackAction: {name: X-Toudocu-Action, in: header, required: true, schema: {type: string, const: review-feedback-create}}
+    RespondFeedbackAction: {name: X-Toudocu-Action, in: header, required: true, schema: {type: string, const: review-feedback-response}}
+    CleanupReviewAction: {name: X-Toudocu-Action, in: header, required: true, schema: {type: string, const: review-cleanup}}
   responses:
     ChangesError:
       description: Changes API error

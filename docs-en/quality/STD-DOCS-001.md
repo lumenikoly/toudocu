@@ -2,7 +2,7 @@
 
 - Identifier: STD-DOCS-001
 - Status: Active
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Scope: Source documentation, skill templates, and generated portals
 - Last updated: 2026-08-07
 
@@ -31,7 +31,7 @@ OpenAPI may own only the HTTP wire contract.
 8. FLOW, CONTRACT, REFERENCE, RUNBOOK, ADR, and MODULE details remain in their
    corresponding sources of truth, while the semantic gate checks architectural
    form and meaning under `ARCH001`–`ARCH013`.
-9. `$docu-docu refresh` and `$docu-docu refresh diff` update source
+9. `$toudocu refresh` and `$toudocu refresh diff` update source
    documentation only from current repository evidence; dates change together
    with content or relationships, and `Last verified` requires an actual
    runbook verification.
@@ -47,7 +47,7 @@ OpenAPI may own only the HTTP wire contract.
 
 ## Automated checks
 
-- `go run ./cmd/docu-docu check ./docs --strict --stale-days 0`;
+- `go run ./cmd/toudocu check ./docs --strict --stale-days 0`;
 - template-integrity and public JSON-schema tests;
 - tests for links, stable IDs, task context, and portal navigation.
 

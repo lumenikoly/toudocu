@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"fmt"
@@ -8,12 +8,12 @@ import (
 	"testing"
 )
 
-func TestDocuDocuFlowAndScreenTemplates(t *testing.T) {
+func TestToudocuFlowAndScreenTemplates(t *testing.T) {
 	for _, language := range []string{"ru", "en"} {
 		t.Run(language, func(t *testing.T) {
 			root := t.TempDir()
 			docs := filepath.Join(root, "docs")
-			writeTestFile(t, docs, "index.md", "# Template fixture\n\nDocu-docu skill template fixture.\n")
+			writeTestFile(t, docs, "index.md", "# Template fixture\n\nToudocu skill template fixture.\n")
 			writeArchitectureOverview(t, docs, "")
 			writeTestFile(t, docs, "modules/core.md", `# Core
 
@@ -86,7 +86,7 @@ The user can continue from the start screen.
 				"{{PLAN_STEP}}":                     "Implement the documented transition.",
 				"{{ACCEPTANCE_COMMAND}}":            "go test ./...",
 				"{{ALL_COMMAND}}":                   "go test ./...",
-				"{{DOCS_COMMAND}}":                  "go run ./cmd/docu-docu check ./docs",
+				"{{DOCS_COMMAND}}":                  "go run ./cmd/toudocu check ./docs",
 				"{{DOCUMENTATION_IMPACT}}":          "Update the screen map.",
 			}
 			if language == "en" {
@@ -160,7 +160,7 @@ Terminal screen.
 	}
 }
 
-func TestDocuDocuTemplatesDoNotInventSemanticStructure(t *testing.T) {
+func TestToudocuTemplatesDoNotInventSemanticStructure(t *testing.T) {
 	for _, language := range []string{"ru", "en"} {
 		screen := readSkillTemplate(t, language, "screen.md")
 		for _, placeholder := range []string{"{{STATE_ROWS}}", "{{TRANSITION_ROWS}}"} {
@@ -193,8 +193,8 @@ func TestDocuDocuTemplatesDoNotInventSemanticStructure(t *testing.T) {
 	}
 }
 
-func TestDocuDocuWorkItemReferenceAllowsCriteriaAndPlanChecklists(t *testing.T) {
-	content, err := os.ReadFile(repositoryPath("skills", "docu-docu", "references", "work-item-model.md"))
+func TestToudocuWorkItemReferenceAllowsCriteriaAndPlanChecklists(t *testing.T) {
+	content, err := os.ReadFile(repositoryPath("skills", "toudocu", "references", "work-item-model.md"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -207,7 +207,7 @@ func TestDocuDocuWorkItemReferenceAllowsCriteriaAndPlanChecklists(t *testing.T) 
 	}
 }
 
-func TestDocuDocuOptionalRelationshipPlaceholders(t *testing.T) {
+func TestToudocuOptionalRelationshipPlaceholders(t *testing.T) {
 	for _, language := range []string{"ru", "en"} {
 		for _, templateName := range []string{"work-ready-feature.md", "work-ready-technical.md", "work-draft.md"} {
 			content := readSkillTemplate(t, language, templateName)
@@ -235,25 +235,25 @@ func TestDocuDocuOptionalRelationshipPlaceholders(t *testing.T) {
 	}
 }
 
-func TestDocuDocuInitContract(t *testing.T) {
-	skill := readDocuDocuFile(t, "SKILL.md")
+func TestToudocuInitContract(t *testing.T) {
+	skill := readToudocuFile(t, "SKILL.md")
 	for _, expected := range []string{
-		"explicitly invokes `$docu-docu init`",
+		"explicitly invokes `$toudocu init`",
 		"[references/init.md](references/init.md)",
 		"Never infer initialization",
-		"Docu-docu Go CLI command",
+		"Toudocu Go CLI command",
 	} {
 		if !strings.Contains(skill, expected) {
 			t.Errorf("SKILL.md does not define explicit init contract %q", expected)
 		}
 	}
 
-	initReference := readDocuDocuFile(t, filepath.Join("references", "init.md"))
+	initReference := readToudocuFile(t, filepath.Join("references", "init.md"))
 	for _, expected := range []string{
 		"Do not infer initialization",
 		"Preflight before changing files",
-		"<!-- docu-docu:project-guidance:start -->",
-		"<!-- docu-docu:project-guidance:end -->",
+		"<!-- toudocu:project-guidance:start -->",
+		"<!-- toudocu:project-guidance:end -->",
 		"duplicated",
 		"reversed",
 		"conflicting",
@@ -267,7 +267,7 @@ func TestDocuDocuInitContract(t *testing.T) {
 		"without removing\n   existing `site`, `changes`, or `translations` settings",
 		"as legacy\n   architecture",
 		"stop without migrating or rewriting",
-		"ordinary project-wide Docu-docu check",
+		"ordinary project-wide Toudocu check",
 		"Do not create a `TASK-*` merely because init is running",
 	} {
 		if !containsNormalized(initReference, expected) {
@@ -276,23 +276,23 @@ func TestDocuDocuInitContract(t *testing.T) {
 	}
 }
 
-func TestDocuDocuRefreshContract(t *testing.T) {
-	skill := readDocuDocuFile(t, "SKILL.md")
+func TestToudocuRefreshContract(t *testing.T) {
+	skill := readToudocuFile(t, "SKILL.md")
 	for _, expected := range []string{
-		"explicitly invokes `$docu-docu refresh`",
-		"`$docu-docu refresh diff`",
+		"explicitly invokes `$toudocu refresh`",
+		"`$toudocu refresh diff`",
 		"[references/refresh.md](references/refresh.md)",
-		"Neither refresh form is a Docu-docu\nGo CLI command or an initialization request",
+		"Neither refresh form is a Toudocu\nGo CLI command or an initialization request",
 	} {
 		if !strings.Contains(skill, expected) {
 			t.Errorf("SKILL.md does not define refresh contract %q", expected)
 		}
 	}
 
-	refresh := readDocuDocuFile(t, filepath.Join("references", "refresh.md"))
+	refresh := readToudocuFile(t, filepath.Join("references", "refresh.md"))
 	for _, expected := range []string{
-		"`$docu-docu refresh`",
-		"`$docu-docu refresh diff`",
+		"`$toudocu refresh`",
+		"`$toudocu refresh diff`",
 		"inventory every source Markdown document",
 		"`git diff --name-only HEAD --`",
 		"`git ls-files --others --exclude-standard`",
@@ -317,14 +317,14 @@ func TestDocuDocuRefreshContract(t *testing.T) {
 		}
 	}
 
-	initReference := readDocuDocuFile(t, filepath.Join("references", "init.md"))
-	if strings.Contains(initReference, "$docu-docu refresh") {
+	initReference := readToudocuFile(t, filepath.Join("references", "init.md"))
+	if strings.Contains(initReference, "$toudocu refresh") {
 		t.Fatal("init reference must not route refresh")
 	}
 
 	for _, language := range []string{"ru", "en"} {
-		guidance := readDocuDocuFile(t, filepath.Join("assets", "project-guidance", language+".md"))
-		for _, expected := range []string{"$docu-docu refresh", "$docu-docu refresh diff", "HEAD"} {
+		guidance := readToudocuFile(t, filepath.Join("assets", "project-guidance", language+".md"))
+		for _, expected := range []string{"$toudocu refresh", "$toudocu refresh diff", "HEAD"} {
 			if !strings.Contains(guidance, expected) {
 				t.Errorf("%s guidance does not contain %q", language, expected)
 			}
@@ -332,10 +332,10 @@ func TestDocuDocuRefreshContract(t *testing.T) {
 	}
 }
 
-func TestDocuDocuFeedbackContract(t *testing.T) {
-	skill := readDocuDocuFile(t, "SKILL.md")
+func TestToudocuFeedbackContract(t *testing.T) {
+	skill := readToudocuFile(t, "SKILL.md")
 	for _, expected := range []string{
-		"`$docu-docu feedback`",
+		"`$toudocu feedback`",
 		"[references/feedback.md](references/feedback.md)",
 		"never\nstarts an agent or LLM",
 	} {
@@ -343,7 +343,7 @@ func TestDocuDocuFeedbackContract(t *testing.T) {
 			t.Errorf("SKILL.md does not define feedback contract %q", expected)
 		}
 	}
-	feedback := readDocuDocuFile(t, filepath.Join("references", "feedback.md"))
+	feedback := readToudocuFile(t, filepath.Join("references", "feedback.md"))
 	for _, expected := range []string{
 		"changes feedback pending",
 		"`feedback` is `null`",
@@ -362,15 +362,15 @@ func TestDocuDocuFeedbackContract(t *testing.T) {
 	}
 }
 
-func TestDocuDocuCompactOperationRouter(t *testing.T) {
-	skill := readDocuDocuFile(t, "SKILL.md")
+func TestToudocuCompactOperationRouter(t *testing.T) {
+	skill := readToudocuFile(t, "SKILL.md")
 	for _, expected := range []string{
 		"| Operation | Reference | Changes files? | Confirmation / authority |",
 		"[references/init.md](references/init.md)",
 		"[references/refresh.md](references/refresh.md)",
 		"[references/translate.md](references/translate.md)",
 		"[references/feedback.md](references/feedback.md)",
-		"$docu-docu translate diff",
+		"$toudocu translate diff",
 		"[references/workflows.md](references/workflows.md)",
 		"[references/semantic-gate.md](references/semantic-gate.md)",
 		"[references/architecture-gate.md](references/architecture-gate.md)",
@@ -388,7 +388,7 @@ func TestDocuDocuCompactOperationRouter(t *testing.T) {
 	}
 }
 
-func TestDocuDocuArchitectureTemplates(t *testing.T) {
+func TestToudocuArchitectureTemplates(t *testing.T) {
 	for _, language := range []string{"ru", "en"} {
 		t.Run(language, func(t *testing.T) {
 			overview := readSkillTemplate(t, language, "architecture-overview.md")
@@ -403,7 +403,7 @@ func TestDocuDocuArchitectureTemplates(t *testing.T) {
 					t.Errorf("%s architecture detail does not contain %q", language, expected)
 				}
 			}
-			if _, err := os.Stat(repositoryPath("skills", "docu-docu", "assets", "templates", language, "architecture.md")); !os.IsNotExist(err) {
+			if _, err := os.Stat(repositoryPath("skills", "toudocu", "assets", "templates", language, "architecture.md")); !os.IsNotExist(err) {
 				t.Errorf("%s monolithic architecture template still exists: %v", language, err)
 			}
 
@@ -439,9 +439,9 @@ func TestDocuDocuArchitectureTemplates(t *testing.T) {
 	}
 }
 
-func TestDocuDocuArchitectureGuidanceAndSemanticGate(t *testing.T) {
+func TestToudocuArchitectureGuidanceAndSemanticGate(t *testing.T) {
 	for _, language := range []string{"ru", "en"} {
-		guidance := readDocuDocuFile(t, filepath.Join("assets", "project-guidance", language+".md"))
+		guidance := readToudocuFile(t, filepath.Join("assets", "project-guidance", language+".md"))
 		for _, expected := range []string{"architecture/overview.md", "FLOW-*", "CONTRACT", "REFERENCE", "RUNBOOK", "ADR", "MODULE"} {
 			if !strings.Contains(guidance, expected) {
 				t.Errorf("%s architecture guidance does not contain %q", language, expected)
@@ -449,7 +449,7 @@ func TestDocuDocuArchitectureGuidanceAndSemanticGate(t *testing.T) {
 		}
 	}
 
-	gate := readDocuDocuFile(t, filepath.Join("references", "architecture-gate.md"))
+	gate := readToudocuFile(t, filepath.Join("references", "architecture-gate.md"))
 	for i := 1; i <= 13; i++ {
 		code := fmt.Sprintf("ARCH%03d", i)
 		if strings.Count(gate, code) == 0 {
@@ -468,12 +468,12 @@ func TestDocuDocuArchitectureGuidanceAndSemanticGate(t *testing.T) {
 	}
 }
 
-func TestDocuDocuProjectGuidanceTemplates(t *testing.T) {
-	const startMarker = "<!-- docu-docu:project-guidance:start -->"
-	const endMarker = "<!-- docu-docu:project-guidance:end -->"
+func TestToudocuProjectGuidanceTemplates(t *testing.T) {
+	const startMarker = "<!-- toudocu:project-guidance:start -->"
+	const endMarker = "<!-- toudocu:project-guidance:end -->"
 
 	for _, language := range []string{"ru", "en"} {
-		content := readDocuDocuFile(t, filepath.Join("assets", "project-guidance", language+".md"))
+		content := readToudocuFile(t, filepath.Join("assets", "project-guidance", language+".md"))
 		if strings.Count(content, startMarker) != 1 || strings.Count(content, endMarker) != 1 {
 			t.Errorf("%s guidance must contain each managed marker exactly once", language)
 		}
@@ -484,15 +484,15 @@ func TestDocuDocuProjectGuidanceTemplates(t *testing.T) {
 		if !strings.HasPrefix(trimmed, startMarker) || !strings.HasSuffix(trimmed, endMarker) {
 			t.Errorf("%s guidance contains content outside the managed block", language)
 		}
-		for _, expected := range []string{"$docu-docu", "TASK-*", "$docu-docu init"} {
+		for _, expected := range []string{"$toudocu", "TASK-*", "$toudocu init"} {
 			if !strings.Contains(content, expected) {
 				t.Errorf("%s guidance does not contain %q", language, expected)
 			}
 		}
 	}
 
-	ru := readDocuDocuFile(t, filepath.Join("assets", "project-guidance", "ru.md"))
-	en := readDocuDocuFile(t, filepath.Join("assets", "project-guidance", "en.md"))
+	ru := readToudocuFile(t, filepath.Join("assets", "project-guidance", "ru.md"))
+	en := readToudocuFile(t, filepath.Join("assets", "project-guidance", "en.md"))
 	if !strings.Contains(ru, "Не создавайте задачу для каждого prompt") {
 		t.Error("Russian guidance does not prevent per-prompt task creation")
 	}
@@ -501,12 +501,12 @@ func TestDocuDocuProjectGuidanceTemplates(t *testing.T) {
 	}
 }
 
-func TestDocuDocuTranslationContextIsolation(t *testing.T) {
-	skill := readDocuDocuFile(t, "SKILL.md")
-	workflows := readDocuDocuFile(t, filepath.Join("references", "workflows.md"))
-	refresh := readDocuDocuFile(t, filepath.Join("references", "refresh.md"))
-	translate := readDocuDocuFile(t, filepath.Join("references", "translate.md"))
-	initReference := readDocuDocuFile(t, filepath.Join("references", "init.md"))
+func TestToudocuTranslationContextIsolation(t *testing.T) {
+	skill := readToudocuFile(t, "SKILL.md")
+	workflows := readToudocuFile(t, filepath.Join("references", "workflows.md"))
+	refresh := readToudocuFile(t, filepath.Join("references", "refresh.md"))
+	translate := readToudocuFile(t, filepath.Join("references", "translate.md"))
+	initReference := readToudocuFile(t, filepath.Join("references", "init.md"))
 
 	for name, content := range map[string]string{
 		"SKILL.md":     skill,
@@ -524,7 +524,7 @@ func TestDocuDocuTranslationContextIsolation(t *testing.T) {
 		"only documentation and backlog source",
 		"implementation analysis",
 		"including translated work items",
-		"explicit `$docu-docu translate",
+		"explicit `$toudocu translate",
 		"check, find, build, run, or inspect",
 		"source digests, and structural reports",
 		"Do not add translation roots to `.gitignore`",
@@ -555,7 +555,7 @@ func TestDocuDocuTranslationContextIsolation(t *testing.T) {
 		"`documents[].type` and `documents[].status.kind`",
 		"`effectiveCompleted`, `completionSource`",
 		"TRANSLATION_SEMANTIC_MISMATCH",
-		"$docu-docu translate diff",
+		"$toudocu translate diff",
 		"every configured translation profile",
 		"--base HEAD --target working-tree",
 		"staged, unstaged, and untracked canonical changes",
@@ -576,11 +576,11 @@ func TestDocuDocuTranslationContextIsolation(t *testing.T) {
 	}
 
 	guidanceCases := map[string][]string{
-		"ru": {"единственным документационным и\n  backlog-источником", "translation roots из поиска по репозиторию", "явном `$docu-docu translate <locale>`", "проверить, найти, собрать, запустить или изучить", "$docu-docu translate diff", "все настроенные\n  translation roots по одному", "source/target-парой", "пути, хеши и\n  структурные отчёты", "Не добавляйте translation roots в ignore-файлы"},
-		"en": {"only documentation and backlog\n  source", "translation\n  roots remain valid implementation evidence", "explicit `$docu-docu translate", "check, find, build, run, or inspect", "$docu-docu translate diff", "all configured\n  translation roots one at a time", "source/target pair", "paths, hashes, and\n  structural reports", "Do not add translation roots to ignore files"},
+		"ru": {"единственным документационным и\n  backlog-источником", "translation roots из поиска по репозиторию", "явном `$toudocu translate <locale>`", "проверить, найти, собрать, запустить или изучить", "$toudocu translate diff", "все настроенные\n  translation roots по одному", "source/target-парой", "пути, хеши и\n  структурные отчёты", "Не добавляйте translation roots в ignore-файлы"},
+		"en": {"only documentation and backlog\n  source", "translation\n  roots remain valid implementation evidence", "explicit `$toudocu translate", "check, find, build, run, or inspect", "$toudocu translate diff", "all configured\n  translation roots one at a time", "source/target pair", "paths, hashes, and\n  structural reports", "Do not add translation roots to ignore files"},
 	}
 	for language, expectedValues := range guidanceCases {
-		guidance := readDocuDocuFile(t, filepath.Join("assets", "project-guidance", language+".md"))
+		guidance := readToudocuFile(t, filepath.Join("assets", "project-guidance", language+".md"))
 		for _, expected := range expectedValues {
 			if !containsNormalized(guidance, expected) {
 				t.Errorf("%s guidance does not contain translation isolation scenario %q", language, expected)
@@ -589,24 +589,24 @@ func TestDocuDocuTranslationContextIsolation(t *testing.T) {
 	}
 }
 
-func TestDocuDocuInstructionConsistency(t *testing.T) {
-	skill := readDocuDocuFile(t, "SKILL.md")
-	initReference := readDocuDocuFile(t, filepath.Join("references", "init.md"))
-	translate := readDocuDocuFile(t, filepath.Join("references", "translate.md"))
-	workflows := readDocuDocuFile(t, filepath.Join("references", "workflows.md"))
-	documentModel := readDocuDocuFile(t, filepath.Join("references", "document-model.md"))
+func TestToudocuInstructionConsistency(t *testing.T) {
+	skill := readToudocuFile(t, "SKILL.md")
+	initReference := readToudocuFile(t, filepath.Join("references", "init.md"))
+	translate := readToudocuFile(t, filepath.Join("references", "translate.md"))
+	workflows := readToudocuFile(t, filepath.Join("references", "workflows.md"))
+	documentModel := readToudocuFile(t, filepath.Join("references", "document-model.md"))
 
 	for name, content := range map[string]string{
 		"SKILL.md": skill, "init.md": initReference, "translate.md": translate, "workflows.md": workflows,
 	} {
-		for _, forbidden := range []string{"docu-docu check ./docs", "docu-docu changes ./docs", "docu-docu task context TASK-AREA-001 ./docs"} {
+		for _, forbidden := range []string{"toudocu check ./docs", "toudocu changes ./docs", "toudocu task context TASK-AREA-001 ./docs"} {
 			if strings.Contains(content, forbidden) {
 				t.Errorf("%s hardcodes the fallback documentation root in an executable instruction: %q", name, forbidden)
 			}
 		}
 	}
 	for _, language := range []string{"ru", "en"} {
-		guidance := readDocuDocuFile(t, filepath.Join("assets", "project-guidance", language+".md"))
+		guidance := readToudocuFile(t, filepath.Join("assets", "project-guidance", language+".md"))
 		if strings.Contains(guidance, "docs/architecture/overview.md") {
 			t.Errorf("%s guidance hardcodes the fallback documentation root", language)
 		}
@@ -637,9 +637,9 @@ func TestDocuDocuInstructionConsistency(t *testing.T) {
 	}
 }
 
-func TestDocuDocuTaskCreationThreshold(t *testing.T) {
-	skill := readDocuDocuFile(t, "SKILL.md")
-	workflows := readDocuDocuFile(t, filepath.Join("references", "workflows.md"))
+func TestToudocuTaskCreationThreshold(t *testing.T) {
+	skill := readToudocuFile(t, "SKILL.md")
+	workflows := readToudocuFile(t, filepath.Join("references", "workflows.md"))
 	for name, content := range map[string]string{"SKILL.md": skill, "workflows.md": workflows} {
 		for _, expected := range []string{"explicitly requires", "substantial", "Do not create"} {
 			if !strings.Contains(content, expected) {
@@ -657,12 +657,12 @@ func TestDocuDocuTaskCreationThreshold(t *testing.T) {
 	}
 }
 
-func TestDocuDocuMetadata(t *testing.T) {
-	metadata := readDocuDocuFile(t, filepath.Join("agents", "openai.yaml"))
+func TestToudocuMetadata(t *testing.T) {
+	metadata := readToudocuFile(t, filepath.Join("agents", "openai.yaml"))
 	for _, expected := range []string{
-		`display_name: "Docu-docu"`,
-		`short_description: "Set up, update, and validate Docu-docu documentation"`,
-		`default_prompt: "Use $docu-docu init to explicitly set up Docu-docu for this project."`,
+		`display_name: "Toudocu"`,
+		`short_description: "Set up, update, and validate Toudocu documentation"`,
+		`default_prompt: "Use $toudocu init to explicitly set up Toudocu for this project."`,
 	} {
 		if !strings.Contains(metadata, expected) {
 			t.Errorf("openai.yaml does not contain %q", expected)
@@ -682,9 +682,9 @@ func writeSkillTemplate(t *testing.T, docs, language, templateName, destination 
 	writeTestFile(t, docs, destination, rendered)
 }
 
-func readDocuDocuFile(t *testing.T, relativePath string) string {
+func readToudocuFile(t *testing.T, relativePath string) string {
 	t.Helper()
-	content, err := os.ReadFile(repositoryPath("skills", "docu-docu", relativePath))
+	content, err := os.ReadFile(repositoryPath("skills", "toudocu", relativePath))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -693,7 +693,7 @@ func readDocuDocuFile(t *testing.T, relativePath string) string {
 
 func readSkillTemplate(t *testing.T, language, templateName string) string {
 	t.Helper()
-	templatePath := repositoryPath("skills", "docu-docu", "assets", "templates", language, templateName)
+	templatePath := repositoryPath("skills", "toudocu", "assets", "templates", language, templateName)
 	content, err := os.ReadFile(templatePath)
 	if err != nil {
 		t.Fatal(err)

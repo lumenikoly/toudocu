@@ -5,12 +5,12 @@
 - Priority: High
 - Module: MOD-MODEL
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-07-31
 
 ## Result
 
-The user explicitly connects Docu-docu to the project via `$docu-docu init`;
+The user explicitly connects Toudocu to the project via `$toudocu init`;
 skill creates minimal documentation when necessary and safely
 sets limited usage rules for `AGENTS.md`.
 
@@ -23,14 +23,14 @@ create `TASK-*` for each new request.
 
 ### After
 
-Only explicit `$docu-docu init` performs preflight, creates the missing one
+Only explicit `$toudocu init` performs preflight, creates the missing one
 `docs/index.md`, sets the `AGENTS.md` managed block and runs
 structural check. Regular calls do not change project instructions, but new ones
 `TASK-*` are created only for essential work.
 
 ## Scope
 
-- `skills/docu-docu/`;
+- `skills/toudocu/`;
 - `skill_templates_test.go`;
 - `README.md`;
 - `CHANGELOG.md`;
@@ -39,14 +39,14 @@ structural check. Regular calls do not change project instructions, but new ones
 
 ## Out of scope
 
-- new Go CLI command `docu-docu init`;
+- new Go CLI command `toudocu init`;
 - automatic change of `AGENTS.md` when skill is implicitly triggered;
 - external runtime or dependency for Markdown merging;
 - creation of complete starter pack documentation.
 
 ## Acceptance criteria
 
-- [x] `AC-01` Skill treats `$docu-docu init` as the only explicit
+- [x] `AC-01` Skill treats `$toudocu init` as the only explicit
   onboarding call with read-only preflight, minimal `index.md`,
   controlled by the `AGENTS.md` block and the final check.
 - [x] `AC-02` Russian and English blocks use the same stable
@@ -64,17 +64,17 @@ structural check. Regular calls do not change project instructions, but new ones
 
 ## Verification
 
-- `AC-01` → `go test ./... -run TestUseDocu-docuInitContract`
-- `AC-02` → `go test ./... -run TestUseDocu-docuProjectGuidanceTemplates`
-- `AC-03` → `go test ./... -run TestUseDocu-docuTaskCreationThreshold`
-- `AC-04` → `go test ./... -run TestUseDocu-docuMetadata`
+- `AC-01` → `go test ./... -run TestUseToudocuInitContract`
+- `AC-02` → `go test ./... -run TestUseToudocuProjectGuidanceTemplates`
+- `AC-03` → `go test ./... -run TestUseToudocuTaskCreationThreshold`
+- `AC-04` → `go test ./... -run TestUseToudocuMetadata`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --strict --stale-days 0`
-- `QUALITY` → `go test ./... -run 'TestUseDocu-docu'`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --strict --stale-days 0`
+- `QUALITY` → `go test ./... -run 'TestUseToudocu'`
 
 ## Documentation impact
 
-Updated `skills/docu-docu/`, `README.md`, `CHANGELOG.md`,
+Updated `skills/toudocu/`, `README.md`, `CHANGELOG.md`,
 `docs/guides/work-items.md` and `skill_templates_test.go`. Public Go API, CLI
 and JSON schema do not change; generated portals cannot be edited.
 

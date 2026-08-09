@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"crypto/rand"
@@ -33,7 +33,7 @@ func openReviewStore(repositoryRoot string) (*reviewStore, error) {
 		return nil, err
 	}
 	hash := sha256.Sum256([]byte(filepath.Clean(g.root)))
-	directory := filepath.Join(root, "docu-docu", "reviews", hex.EncodeToString(hash[:]))
+	directory := filepath.Join(root, "toudocu", "reviews", hex.EncodeToString(hash[:]))
 	return &reviewStore{
 		repositoryRoot: g.root, directory: directory, statePath: filepath.Join(directory, "state.json"),
 		lockPath: filepath.Join(directory, "state.lock"), snapshotsPath: filepath.Join(directory, "snapshots"),
@@ -41,7 +41,7 @@ func openReviewStore(repositoryRoot string) (*reviewStore, error) {
 }
 
 func reviewUserStateRoot() (string, error) {
-	if override := strings.TrimSpace(os.Getenv("DOCU_DOCU_STATE_HOME")); override != "" {
+	if override := strings.TrimSpace(os.Getenv("TOUDOCU_STATE_HOME")); override != "" {
 		return filepath.Abs(override)
 	}
 	switch runtime.GOOS {

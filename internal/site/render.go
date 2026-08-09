@@ -33,7 +33,7 @@ var shellTemplate = template.Must(template.New("page-shell").Parse(`<!doctype ht
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-{{if .Revision}}  <meta name="docu-docu-revision" content="{{.Revision}}">
+{{if .Revision}}  <meta name="toudocu-revision" content="{{.Revision}}">
 {{end}}
   <meta name="description" content="{{.Description}}">
   <title>{{.Title}}</title>
@@ -43,9 +43,9 @@ var shellTemplate = template.Must(template.New("page-shell").Parse(`<!doctype ht
 {{with .ExtraStyles}}  {{.}}
 {{end}}{{if .ServeCSS}}  <link rel="stylesheet" href="{{.ServeCSS}}">
 {{end}}
-  <script id="docu-docu-page" type="application/json">{{.Bootstrap}}</script>
+  <script id="toudocu-page" type="application/json">{{.Bootstrap}}</script>
   <script type="module" src="{{.PortalJS}}"></script>
-{{if .ServeJS}}  <script type="module" src="{{.ServeJS}}" data-docu-docu-serve-navigation></script>
+{{if .ServeJS}}  <script type="module" src="{{.ServeJS}}" data-toudocu-serve-navigation></script>
 {{end}}
 </head>
 <body data-root-prefix="{{.RootPrefix}}" data-task-filter="all">

@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"context"
@@ -18,8 +18,8 @@ import (
 	"time"
 )
 
-const rebuildEndpoint = "/__docu-docu/rebuild"
-const localeMountBase = "/_docu-docu/locales/"
+const rebuildEndpoint = "/__toudocu/rebuild"
+const localeMountBase = "/_toudocu/locales/"
 
 // LanguageTarget is a server-computed navigation target for one portal locale.
 type LanguageTarget struct {
@@ -123,7 +123,7 @@ func (s *documentationServer) rebuildRegistry() error {
 		state := &ServePortalState{Locale: locale, BaseURL: localeMountBase + locale + "/", Status: portalUnavailable, options: s.options}
 		if rootErr == nil {
 			state.Root = root
-			state.Portal.OutputDirectory = filepath.Join(s.options.OutputDirectory, "_docu-docu", "locales", locale)
+			state.Portal.OutputDirectory = filepath.Join(s.options.OutputDirectory, "_toudocu", "locales", locale)
 			state.options.InputDirectory = root
 			state.options.OutputDirectory = state.Portal.OutputDirectory
 			state.options.Clean = false
@@ -360,7 +360,7 @@ func (s *documentationServer) workspaceRevision(model *Model) (string, error) {
 }
 
 func (s *documentationServer) currentConfigDigest() string {
-	data, err := os.ReadFile(filepath.Join(s.options.RepositoryRoot, ".docu-docu", "config.yml"))
+	data, err := os.ReadFile(filepath.Join(s.options.RepositoryRoot, ".toudocu", "config.yml"))
 	if err != nil {
 		return "missing"
 	}
@@ -427,7 +427,7 @@ func (s *documentationServer) serveRebuild(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
 		return
 	}
-	if r.Header.Get("X-Docu-docu-Action") != "rebuild" {
+	if r.Header.Get("X-Toudocu-Action") != "rebuild" {
 		http.Error(w, "Запрос на пересборку отклонён", http.StatusForbidden)
 		return
 	}

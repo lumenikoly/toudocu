@@ -2,7 +2,7 @@
 
 - Идентификатор: STD-DOCS-001
 - Статус: Действует
-- Владелец: Команда Docu-docu
+- Владелец: Команда Toudocu
 - Область: Исходная документация, шаблоны skill и generated portals
 - Последнее обновление: 2026-08-07
 
@@ -33,7 +33,7 @@
 8. Подробности FLOW, CONTRACT, REFERENCE, RUNBOOK, ADR и MODULE остаются в
    соответствующих источниках истины, а semantic gate проверяет архитектурную
    форму и смысл по `ARCH001`–`ARCH013`.
-9. `$docu-docu refresh` и `$docu-docu refresh diff` обновляют исходную
+9. `$toudocu refresh` и `$toudocu refresh diff` обновляют исходную
    документацию только по текущим repository evidence; даты меняются вместе с
    содержанием или связями, а `Last verified` требует фактической проверки
    runbook.
@@ -48,7 +48,7 @@
 
 ## Автоматические проверки
 
-- `go run ./cmd/docu-docu check ./docs --strict --stale-days 0`;
+- `go run ./cmd/toudocu check ./docs --strict --stale-days 0`;
 - тесты целостности шаблонов и публичного JSON schema;
 - тесты ссылок, стабильных ID, task context и портальной навигации.
 

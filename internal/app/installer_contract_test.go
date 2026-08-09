@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"os"
@@ -11,9 +11,9 @@ func TestInstallerReleaseBundleContract(t *testing.T) {
 	root := filepath.Join("..", "..")
 	makefile := readInstallerContractFile(t, filepath.Join(root, "Makefile"))
 	for _, expected := range []string{
-		"docu-docu-linux-amd64", "docu-docu-linux-arm64",
-		"docu-docu-darwin-amd64", "docu-docu-darwin-arm64",
-		"docu-docu-windows-amd64.exe", "docu-docu-windows-arm64.exe",
+		"toudocu-linux-amd64", "toudocu-linux-arm64",
+		"toudocu-darwin-amd64", "toudocu-darwin-arm64",
+		"toudocu-windows-amd64.exe", "toudocu-windows-arm64.exe",
 		"cp scripts/install.sh scripts/install.ps1 $(DIST)/",
 		"sha256sum * > checksums.txt",
 	} {
@@ -41,8 +41,8 @@ func TestReleaseWorkflowRCContract(t *testing.T) {
 func TestInstallerDocumentationContract(t *testing.T) {
 	root := filepath.Join("..", "..")
 	canonicalCommands := []string{
-		"curl -fsSL https://github.com/lumenikoly/docu-docu/releases/latest/download/install.sh | sh",
-		"irm https://github.com/lumenikoly/docu-docu/releases/latest/download/install.ps1 | iex",
+		"curl -fsSL https://github.com/lumenikoly/toudocu/releases/latest/download/install.sh | sh",
+		"irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 | iex",
 	}
 	readme := readInstallerContractFile(t, filepath.Join(root, "README.md"))
 	guide := readInstallerContractFile(t, filepath.Join(root, "docs", "guides", "installation.md"))
@@ -52,11 +52,11 @@ func TestInstallerDocumentationContract(t *testing.T) {
 		}
 	}
 	for _, expected := range []string{
-		"docu-docu-linux-amd64", "docu-docu-linux-arm64",
-		"docu-docu-darwin-amd64", "docu-docu-darwin-arm64",
-		"docu-docu-windows-amd64.exe", "docu-docu-windows-arm64.exe", "Windows ARM64",
-		"DOCU_DOCU_VERSION", "DOCU_DOCU_INSTALL_DIR", "DOCU_DOCU_NO_MODIFY_PATH",
-		"~/.local/bin/docu-docu", "%LOCALAPPDATA%\\Programs\\docu-docu\\docu-docu.exe",
+		"toudocu-linux-amd64", "toudocu-linux-arm64",
+		"toudocu-darwin-amd64", "toudocu-darwin-arm64",
+		"toudocu-windows-amd64.exe", "toudocu-windows-arm64.exe", "Windows ARM64",
+		"TOUDOCU_VERSION", "TOUDOCU_INSTALL_DIR", "TOUDOCU_NO_MODIFY_PATH",
+		"~/.local/bin/toudocu", "%LOCALAPPDATA%\\Programs\\toudocu\\toudocu.exe",
 		"checksum", "один trust root", "curl | sh", "irm | iex",
 	} {
 		if !strings.Contains(guide, expected) {
@@ -101,7 +101,7 @@ func TestInstallerScriptContract(t *testing.T) {
 	posix := readInstallerContractFile(t, filepath.Join(root, "install.sh"))
 	powerShell := readInstallerContractFile(t, filepath.Join(root, "install.ps1"))
 	for _, expected := range []string{
-		"DOCU_DOCU_VERSION", "DOCU_DOCU_INSTALL_DIR", "DOCU_DOCU_NO_MODIFY_PATH",
+		"TOUDOCU_VERSION", "TOUDOCU_INSTALL_DIR", "TOUDOCU_NO_MODIFY_PATH",
 		"releases/latest/download", "checksums.txt", "SHA-256", ".bashrc", ".zshrc", "conf.d",
 	} {
 		if !strings.Contains(posix, expected) {
@@ -109,9 +109,9 @@ func TestInstallerScriptContract(t *testing.T) {
 		}
 	}
 	for _, expected := range []string{
-		"DOCU_DOCU_VERSION", "DOCU_DOCU_INSTALL_DIR", "DOCU_DOCU_NO_MODIFY_PATH",
+		"TOUDOCU_VERSION", "TOUDOCU_INSTALL_DIR", "TOUDOCU_NO_MODIFY_PATH",
 		"releases/latest/download", "checksums.txt", "SHA-256", "Get-FileHash",
-		"SetEnvironmentVariable(\"Path\"", "docu-docu-windows-amd64.exe", "docu-docu-windows-arm64.exe",
+		"SetEnvironmentVariable(\"Path\"", "toudocu-windows-amd64.exe", "toudocu-windows-arm64.exe",
 	} {
 		if !strings.Contains(powerShell, expected) {
 			t.Errorf("install.ps1 missing %q", expected)

@@ -19,4 +19,4 @@ jobs:
           go-version: 'stable'
           cache: true
       - name: Verify documentation contract
-        run: go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0
+        run: go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0

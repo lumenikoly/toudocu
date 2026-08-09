@@ -1,7 +1,7 @@
 import { registerMessages, text } from "../../core/locale";
 import { playableFlowMessages } from "../../core/messages.ru";
 registerMessages(playableFlowMessages);
-window.DocuDocuInitializePlayableFlow = (scope: any, signal: any) => {
+window.ToudocuInitializePlayableFlow = (scope: any, signal: any) => {
     'use strict';
     scope = scope || document;
     const root: any = scope.querySelector('[data-playable-flow]');

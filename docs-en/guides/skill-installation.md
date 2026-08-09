@@ -1,6 +1,6 @@
-# Installing the Docu-docu AI skill
+# Installing the Toudocu AI skill
 
-This guide explains how to install the `docu-docu` skill embedded in the
+This guide explains how to install the `toudocu` skill embedded in the
 binary, inspect its state, and safely update or remove a managed copy. These
 operations use no network, marketplace, shell, or external package manager.
 
@@ -9,7 +9,7 @@ operations use no network, marketplace, shell, or external package manager.
 From the project root, run:
 
 ```bash
-docu-docu skill install
+toudocu skill install
 ```
 
 `--agent auto` is the default. If exactly one host is detected, the CLI selects
@@ -17,19 +17,19 @@ it. With no signals or several signals, an interactive terminal prompts for a
 choice; a non-TTY requires an explicit `--agent`.
 
 ```bash
-docu-docu skill install --agent codex
-docu-docu skill status --agent all
-docu-docu skill update --agent claude-code --scope user
-docu-docu skill uninstall --agent copilot
+toudocu skill install --agent codex
+toudocu skill status --agent all
+toudocu skill update --agent claude-code --scope user
+toudocu skill uninstall --agent copilot
 ```
 
 ## Targets
 
 | Host | Project scope | User scope |
 |---|---|---|
-| Codex | `.agents/skills/docu-docu` | `~/.agents/skills/docu-docu` |
-| Claude Code | `.claude/skills/docu-docu` | `~/.claude/skills/docu-docu` |
-| Copilot | `.github/skills/docu-docu` | `~/.copilot/skills/docu-docu` |
+| Codex | `.agents/skills/toudocu` | `~/.agents/skills/toudocu` |
+| Claude Code | `.claude/skills/toudocu` | `~/.claude/skills/toudocu` |
+| Copilot | `.github/skills/toudocu` | `~/.copilot/skills/toudocu` |
 
 The project root is selected in this order: explicit `--repository-root`, the
 nearest parent containing `.git`, then the current directory. User scope uses
@@ -56,12 +56,12 @@ newer, or unsafe copy.
 
 The CLI intentionally provides no `--force`. First preserve the local changes
 you need or manually move the conflicting directory, then retry the operation.
-The repository-local `.agents/skills/docu-docu` symlink used while developing
+The repository-local `.agents/skills/toudocu` symlink used while developing
 this project is classified as `unsafe-path` and remains untouched.
 
 ## Managed manifest and atomicity
 
-An installed copy contains `.docu-docu-skill.json` schema v1 with skill and CLI
+An installed copy contains `.toudocu-skill.json` schema v1 with skill and CLI
 versions, agent/scope, the bundle checksum, and the SHA-256 of every bundled
 file. Any extra, removed, or changed bundled file, changed expected permissions
 (exact POSIX bits; writable/read-only semantics on Windows), or symlink/reparse
@@ -77,23 +77,23 @@ its path with code `SKILL_RESTORE_FAILED`.
 
 ## After installation
 
-`docu-docu skill ...` commands manage the lifecycle of the installed copy. To
+`toudocu skill ...` commands manage the lifecycle of the installed copy. To
 work with your project, invoke the skill in a prompt to the AI agent:
 
 ```text
-$docu-docu check the project documentation and explain the problems found
-$docu-docu prepare read-only context for TASK-AREA-001
-$docu-docu update the specified guide from the current CLI contract
+$toudocu check the project documentation and explain the problems found
+$toudocu prepare read-only context for TASK-AREA-001
+$toudocu update the specified guide from the current CLI contract
 ```
 
 Special modifying workflows are also invoked through prompts and only
 explicitly:
 
 ```text
-$docu-docu init
-$docu-docu refresh
-$docu-docu refresh diff
-$docu-docu translate en --all-stale
+$toudocu init
+$toudocu refresh
+$toudocu refresh diff
+$toudocu translate en --all-stale
 ```
 
 Everyday scenarios, the distinction between shell commands and agent calls,

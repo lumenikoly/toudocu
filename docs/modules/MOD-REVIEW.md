@@ -2,7 +2,7 @@
 
 - Идентификатор: MOD-REVIEW
 - Статус: Готово
-- Владелец: Команда Docu-docu
+- Владелец: Команда Toudocu
 - Последнее обновление: 2026-08-09
 
 Модуль владеет локальными discussion threads поверх repository-wide Git
@@ -22,7 +22,7 @@ AI-skill. Он не запускает агента и не вызывает LLM
   persistence, re-anchoring, HTTP и CLI;
 - `web/src/features/changes/` и `web/src/styles/changes.css` — review UI в
   существующем Changes workspace;
-- `skills/docu-docu/` — agent-side FIFO feedback workflow.
+- `skills/toudocu/` — agent-side FIFO feedback workflow.
 
 ## Границы
 
@@ -66,8 +66,8 @@ unsent human message. После передачи message и feedback snapshot
 ## Стабильные интерфейсы
 
 - internal schema-v1 review DTO, не экспортируемые через `api.go`;
-- `/_docu-docu/api/changes/review/` в canonical `serve`;
-- `docu-docu changes feedback pending|respond`;
+- `/_toudocu/api/changes/review/` в canonical `serve`;
+- `toudocu changes feedback pending|respond`;
 - [Changes HTTP contract](../contracts/changes-http.md);
 - [FLOW-REVIEW-FEEDBACK](../flows/FLOW-REVIEW-FEEDBACK.md);
 - [Перенос review anchors](../architecture/review-anchoring.md);

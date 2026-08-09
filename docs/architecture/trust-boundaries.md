@@ -1,4 +1,4 @@
-# Границы доверия Docu-docu
+# Границы доверия Toudocu
 
 - Тип документа: Architecture
 - Архитектурный вопрос: Где проходят границы доверия?
@@ -59,7 +59,7 @@ browser context, не выдаёт CORS и ограничивает body/content
 Review mutations используют те же три HTTP guards и expected revision/digest.
 Они доступны только canonical `serve` и только при `target=working-tree`;
 commit/index comparisons остаются read-only.
-Locale routes ограничены `/_docu-docu/locales/<locale>/` и отдают только
+Locale routes ограничены `/_toudocu/locales/<locale>/` и отдают только
 сгенерированные read-only snapshots. Они не перенаправляют к editor, changes,
 workspace, API docs или canonical API; target URLs вычисляет сервер из разрешённых
 profiles и mounts.
@@ -105,7 +105,7 @@ POSIX- и PowerShell-installers выполняются до Go CLI с права
 эта проверка обнаруживает повреждение, но не заменяет независимую подпись.
 
 Установка не получает `sudo`: по умолчанию запись ограничена user
-install dir и одной idempotent `PATH` entry. Явный `DOCU_DOCU_INSTALL_DIR`
+install dir и одной idempotent `PATH` entry. Явный `TOUDOCU_INSTALL_DIR`
 может указать любой доступный для записи каталог и не меняет profile. Загрузка,
 проверка и staging завершаются до замены; ошибка не повреждает уже
 установленный binary. Прямые `curl | sh` и `irm | iex` осознанно добавляют

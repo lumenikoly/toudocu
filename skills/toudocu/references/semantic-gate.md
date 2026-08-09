@@ -1,6 +1,6 @@
 # Semantic gate
 
-Use this gate before creating or changing any document. Docu-docu validates the
+Use this gate before creating or changing any document. Toudocu validates the
 structure and explicit promises of a document; it does not prove that the
 document is useful, necessary, or true.
 
@@ -31,7 +31,7 @@ Return `PASS` only when every answer is supported:
 - Which evidence supports its important claims?
 - Does it duplicate, contradict, or improperly absorb another document type?
 - Can every entity, relationship, section, and status be explained without
-  referring to a template or Docu-docu diagnostic?
+  referring to a template or Toudocu diagnostic?
 - Are uncertainty, exclusions, and intentionally absent sections honest?
 - Can a reader find the main understanding quickly without reconstructing raw
   implementation details?
@@ -54,7 +54,7 @@ change needs the author review but not an independent review.
 
 Use another agent or a human reviewer. Give the reviewer the draft and the raw
 product or repository evidence, without the author's desired verdict or a
-Docu-docu result presented as proof of quality. The reviewer returns `PASS` or
+Toudocu result presented as proof of quality. The reviewer returns `PASS` or
 `NEEDS_REWORK` with concrete reasons. If an independent reviewer is required
 but unavailable, report the gate as pending and do not declare the document
 complete.

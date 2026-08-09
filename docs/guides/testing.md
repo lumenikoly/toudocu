@@ -1,4 +1,4 @@
-# Проверка изменений Docu-docu
+# Проверка изменений Toudocu
 
 Руководство задаёт единый локальный и CI-цикл для кода и собственной
 документации проекта.
@@ -9,7 +9,7 @@
 gofmt -w .
 go vet ./...
 go test ./...
-go run ./cmd/docu-docu check ./docs --strict --stale-days 0
+go run ./cmd/toudocu check ./docs --strict --stale-days 0
 ```
 
 ## Полная проверка
@@ -24,7 +24,7 @@ npm test
 npm run build
 npm run test:browser
 cd ..
-go run ./cmd/docu-docu build ./docs \
+go run ./cmd/toudocu build ./docs \
   --output ./build/project-docs \
   --repository-root . \
   --clean \
@@ -35,8 +35,8 @@ go run ./cmd/docu-docu build ./docs \
 Для проверки Windows-специфичного process management из Unix:
 
 ```bash
-GOOS=windows GOARCH=amd64 go test -c -o /tmp/docu-docu-windows.test .
-GOOS=windows GOARCH=amd64 go build -o /tmp/docu-docu-windows.exe ./cmd/docu-docu
+GOOS=windows GOARCH=amd64 go test -c -o /tmp/toudocu-windows.test .
+GOOS=windows GOARCH=amd64 go build -o /tmp/toudocu-windows.exe ./cmd/toudocu
 ```
 
 ## Правила тестов
@@ -54,8 +54,8 @@ GOOS=windows GOARCH=amd64 go build -o /tmp/docu-docu-windows.exe ./cmd/docu-docu
 ## Проверка документационной задачи
 
 ```bash
-go run ./cmd/docu-docu task context TASK-DOCS-001 ./docs --format json
-go run ./cmd/docu-docu task verify TASK-DOCS-001 ./docs --dry-run --format json
+go run ./cmd/toudocu task context TASK-DOCS-001 ./docs --format json
+go run ./cmd/toudocu task verify TASK-DOCS-001 ./docs --dry-run --format json
 ```
 
 `task verify --run` запускает команды из документа и должен использоваться только для
@@ -67,7 +67,7 @@ go run ./cmd/docu-docu task verify TASK-DOCS-001 ./docs --dry-run --format json
 
 1. форматирование не создаёт diff;
 2. vet, обычные и race-тесты проходят;
-3. `docu-docu check ./docs --strict` не содержит warnings и errors;
+3. `toudocu check ./docs --strict` не содержит warnings и errors;
 4. пример и минимальный проект с `index.md` и architecture overview остаются
    валидными;
 5. поведение и публичные контракты отражены в документации.

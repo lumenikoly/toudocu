@@ -1,6 +1,6 @@
 # Third-party notices
 
-Docu-docu is licensed under Apache-2.0. The components below are separately
+Toudocu is licensed under Apache-2.0. The components below are separately
 licensed and retain their own copyright and license notices. Release packaging
 generates one complete `THIRD_PARTY_NOTICES.md` by combining this inventory with
 the notices of the embedded browser assets.
@@ -34,7 +34,7 @@ IIFE bundle and is not a Go or end-user runtime dependency.
 - License: Apache-2.0 and MIT
 
 The package parses OpenAPI YAML for deterministic semantic comparison. It is
-linked into the Docu-docu binary and does not execute input or require a runtime
+linked into the Toudocu binary and does not execute input or require a runtime
 service. Its source distribution contains MIT-licensed libyaml-derived files
 and Apache-2.0-licensed remaining files; its copyright notices are retained in
 the module source and this attribution accompanies the binary release.
@@ -75,7 +75,7 @@ SOFTWARE.
 - License: MIT
 
 Goldmark parses CommonMark and the enabled GFM extensions into the internal
-Markdown AST. It is linked into the Docu-docu binary and requires no runtime
+Markdown AST. It is linked into the Toudocu binary and requires no runtime
 service, network access or CGO.
 
 Copyright (c) 2019 Yusuke Inuzuka

@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"bytes"
@@ -61,7 +61,7 @@ func TestSkillCLIInstallStatusConflictAndUninstall(t *testing.T) {
 	if code, out, _ := run("status", "--agent", "codex", "--repository-root", root); code != 0 || !strings.Contains(out, "codex: installed") {
 		t.Fatalf("status: %d %q", code, out)
 	}
-	target := filepath.Join(root, ".agents", "skills", "docu-docu")
+	target := filepath.Join(root, ".agents", "skills", "toudocu")
 	if err := os.WriteFile(filepath.Join(target, "local.txt"), []byte("keep"), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -87,7 +87,7 @@ func TestSkillCLINoopUpdateAndUninstall(t *testing.T) {
 	if code, out, errOut := run("install"); code != 0 || !strings.Contains(out, "installed -> installed") || errOut != "" {
 		t.Fatalf("no-op: %d %q %q", code, out, errOut)
 	}
-	manifestPath := filepath.Join(root, ".agents", "skills", "docu-docu", ".docu-docu-skill.json")
+	manifestPath := filepath.Join(root, ".agents", "skills", "toudocu", ".toudocu-skill.json")
 	data, err := os.ReadFile(manifestPath)
 	if err != nil {
 		t.Fatal(err)
@@ -120,8 +120,8 @@ func TestSkillCLIAllAndInteractiveSelection(t *testing.T) {
 	if code != 0 || stderr.Len() != 0 || strings.Count(stdout.String(), "target:") != 3 {
 		t.Fatalf("all: %d %q %q", code, stdout.String(), stderr.String())
 	}
-	for _, path := range []string{".agents/skills/docu-docu", ".claude/skills/docu-docu", ".github/skills/docu-docu"} {
-		if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(path), ".docu-docu-skill.json")); err != nil {
+	for _, path := range []string{".agents/skills/toudocu", ".claude/skills/toudocu", ".github/skills/toudocu"} {
+		if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(path), ".toudocu-skill.json")); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -138,7 +138,7 @@ func TestSkillCLIAllAndInteractiveSelection(t *testing.T) {
 func TestSkillCLIAllContinuesAfterConflict(t *testing.T) {
 	isolatedSkillCLI(t)
 	root := t.TempDir()
-	unmanaged := filepath.Join(root, ".agents", "skills", "docu-docu")
+	unmanaged := filepath.Join(root, ".agents", "skills", "toudocu")
 	if err := os.MkdirAll(unmanaged, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -150,8 +150,8 @@ func TestSkillCLIAllContinuesAfterConflict(t *testing.T) {
 	if code != 1 || !strings.Contains(stderr.String(), "SKILL_UNMANAGED") {
 		t.Fatalf("partial result: %d %q %q", code, stdout.String(), stderr.String())
 	}
-	for _, path := range []string{".claude/skills/docu-docu", ".github/skills/docu-docu"} {
-		if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(path), ".docu-docu-skill.json")); err != nil {
+	for _, path := range []string{".claude/skills/toudocu", ".github/skills/toudocu"} {
+		if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(path), ".toudocu-skill.json")); err != nil {
 			t.Fatalf("remaining target was not installed: %v", err)
 		}
 	}
@@ -167,7 +167,7 @@ func TestSkillCLIUserScopeAndArguments(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("user install: %d %q", code, stderr.String())
 	}
-	if _, err := os.Stat(filepath.Join(home, ".copilot", "skills", "docu-docu", ".docu-docu-skill.json")); err != nil {
+	if _, err := os.Stat(filepath.Join(home, ".copilot", "skills", "toudocu", ".toudocu-skill.json")); err != nil {
 		t.Fatal(err)
 	}
 	stdout.Reset()

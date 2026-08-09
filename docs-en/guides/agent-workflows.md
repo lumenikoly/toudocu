@@ -1,4 +1,4 @@
-# Using the Docu-docu AI Skill
+# Using the Toudocu AI Skill
 
 This guide explains how to invoke the installed skill from an AI agent for
 everyday CLI, portal, work-item, and source-documentation work, and when to use
@@ -6,30 +6,30 @@ the special `init`, `refresh`, and `translate` workflows.
 
 ## Two different interfaces
 
-`docu-docu skill ...` commands run in a shell and manage only the installed
+`toudocu skill ...` commands run in a shell and manage only the installed
 skill copy:
 
 ```bash
-docu-docu skill install
-docu-docu skill status --agent all
-docu-docu skill update --agent codex
-docu-docu skill uninstall --agent codex
+toudocu skill install
+toudocu skill status --agent all
+toudocu skill update --agent codex
+toudocu skill uninstall --agent codex
 ```
 
-`$docu-docu ...` calls are written in a prompt to the AI agent. They are agent
+`$toudocu ...` calls are written in a prompt to the AI agent. They are agent
 instructions, not Go CLI subcommands:
 
 ```text
-$docu-docu check the source documentation and explain the diagnostics
-$docu-docu build the local portal in the output configured by the project
-$docu-docu prepare context for TASK-AREA-001
-$docu-docu update the installation guide from the current CLI contract
+$toudocu check the source documentation and explain the diagnostics
+$toudocu build the local portal in the output configured by the project
+$toudocu prepare context for TASK-AREA-001
+$toudocu update the installation guide from the current CLI contract
 ```
 
 The CLI provides `check`, `build`, `serve`, `search`, and `task ...`, but has no
-`init`, `refresh`, or `translate` commands. Inside the Docu-docu source
-repository, the agent uses `go run ./cmd/docu-docu`; in other projects it uses
-the installed `docu-docu` from `PATH`.
+`init`, `refresh`, or `translate` commands. Inside the Toudocu source
+repository, the agent uses `go run ./cmd/toudocu`; in other projects it uses
+the installed `toudocu` from `PATH`.
 
 ## What to delegate to the skill
 
@@ -58,10 +58,10 @@ requests:
 
 | Action | Required authority |
 |---|---|
-| `$docu-docu init` | Explicit init call or unambiguous request for that workflow |
-| `$docu-docu refresh` | Explicit full refresh call |
-| `$docu-docu refresh diff` | Explicit diff refresh call |
-| `$docu-docu translate <locale> ...` | Explicit translation request and target locale |
+| `$toudocu init` | Explicit init call or unambiguous request for that workflow |
+| `$toudocu refresh` | Explicit full refresh call |
+| `$toudocu refresh diff` | Explicit diff refresh call |
+| `$toudocu translate <locale> ...` | Explicit translation request and target locale |
 | `task verify --run` | Explicit request to verify or execute the task in a trusted repository |
 
 Missing files, first skill use, ordinary documentation edits, or `check` do not
@@ -81,9 +81,9 @@ handoff. A small edit or ordinary prompt does not require a `TASK-*`.
 Prefer JSON for diagnosis and text output for human confirmation:
 
 ```bash
-docu-docu check ./docs --repository-root . --format json
-docu-docu check ./docs --repository-root .
-docu-docu search "verification" ./docs --format json
+toudocu check ./docs --repository-root . --format json
+toudocu check ./docs --repository-root .
+toudocu search "verification" ./docs --format json
 ```
 
 Ordinary `check` fails on errors and reports warnings. `--strict` additionally
@@ -108,7 +108,7 @@ verification, or required by project policy.
 Start an existing Ready+ item with compact read-only context:
 
 ```bash
-docu-docu task context TASK-AREA-001 ./docs \
+toudocu task context TASK-AREA-001 ./docs \
   --repository-root . \
   --format json
 ```
@@ -116,7 +116,7 @@ docu-docu task context TASK-AREA-001 ./docs \
 Inspect the dry run before authorized execution:
 
 ```bash
-docu-docu task verify TASK-AREA-001 ./docs --dry-run \
+toudocu task verify TASK-AREA-001 ./docs --dry-run \
   --repository-root . \
   --format json
 ```
@@ -148,10 +148,10 @@ or add unsupported prose merely to obtain a clean report.
 
 ### Initialization
 
-Use `$docu-docu init` only on explicit request. It checks repository
+Use `$toudocu init` only on explicit request. It checks repository
 instructions, existing documentation, configuration, and managed markers in
 the root `AGENTS.md`. A single marker, duplicates, reversed order, or nesting
-blocks writes. An unmanaged instruction conflicting with the Docu-docu trigger
+blocks writes. An unmanaged instruction conflicting with the Toudocu trigger
 or task-creation policy also blocks. Any legacy Markdown under `architecture/`,
 apart from one structurally valid overview, blocks automatic migration.
 
@@ -163,7 +163,7 @@ because files are missing.
 
 ### Full refresh
 
-`$docu-docu refresh` compares every Markdown document in the canonical root
+`$toudocu refresh` compares every Markdown document in the canonical root
 with current repository evidence: code, tests, public interfaces, schemas,
 configuration, CI, decisions, and confirmed requirements. It classifies each
 document as current, needs update, unverifiable, obsolete, duplicated, or
@@ -177,7 +177,7 @@ documentation tree. Dates change only with content or relationships; runbook
 
 ### Current diff refresh
 
-`$docu-docu refresh diff` requires a Git worktree and valid `HEAD`. Its initial
+`$toudocu refresh diff` requires a Git worktree and valid `HEAD`. Its initial
 change set is:
 
 ```bash
@@ -194,13 +194,13 @@ a full refresh instead of silently broadening scope.
 
 ### Translation
 
-`$docu-docu translate <locale>` requires a configured target profile and
+`$toudocu translate <locale>` requires a configured target profile and
 exactly one mode:
 
 ```text
-$docu-docu translate <locale> --task TASK-ID
-$docu-docu translate <locale> --base REF
-$docu-docu translate <locale> --all-stale
+$toudocu translate <locale> --task TASK-ID
+$toudocu translate <locale> --base REF
+$toudocu translate <locale> --all-stale
 ```
 
 The configured translation root mirrors the canonical reader-facing file set.
@@ -223,7 +223,7 @@ Configured translation roots, including translated work items, are excluded
 and are not added to ignore files.
 
 A selected translation root is read only for explicit
-`$docu-docu translate <locale>` or an explicit request to check, find, build,
+`$toudocu translate <locale>` or an explicit request to check, find, build,
 run, or inspect that locale. Access is limited to the selected locale and
 minimal source/target pair; parity discovery starts with relative paths, source
 digests, and structural reports.

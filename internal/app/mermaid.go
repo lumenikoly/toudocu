@@ -1,10 +1,10 @@
-package docudocu
+package toudocu
 
 import (
 	"fmt"
 	"strings"
 
-	markdowncore "docu-docu/internal/markdown"
+	markdowncore "toudocu/internal/markdown"
 )
 
 const mermaidMaxBytes = markdowncore.MermaidMaxBytes

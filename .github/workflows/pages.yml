@@ -32,29 +32,29 @@ jobs:
         uses: actions/configure-pages@v6
       - name: Build documentation
         run: |
-          go run ./cmd/docu-docu build ./docs \
-            --output "${RUNNER_TEMP}/docu-docu-pages/project-docs" \
+          go run ./cmd/toudocu build ./docs \
+            --output "${RUNNER_TEMP}/toudocu-pages/project-docs" \
             --repository-root . \
             --clean \
             --strict \
             --stale-days 0
-          go run ./cmd/docu-docu build ./docs-en \
-            --output "${RUNNER_TEMP}/docu-docu-pages/project-docs/en" \
+          go run ./cmd/toudocu build ./docs-en \
+            --output "${RUNNER_TEMP}/toudocu-pages/project-docs/en" \
             --repository-root . \
             --clean \
             --strict \
             --stale-days 0
       - name: Add landing page
         run: |
-          mkdir -p "${RUNNER_TEMP}/docu-docu-pages/assets"
+          mkdir -p "${RUNNER_TEMP}/toudocu-pages/assets"
           cp landing/index.html landing/favicon.svg landing/styles.css landing/script.js \
-            "${RUNNER_TEMP}/docu-docu-pages/"
-          cp -a landing/ru landing/en "${RUNNER_TEMP}/docu-docu-pages/"
-          cp -a landing/assets/. "${RUNNER_TEMP}/docu-docu-pages/assets/"
+            "${RUNNER_TEMP}/toudocu-pages/"
+          cp -a landing/ru landing/en "${RUNNER_TEMP}/toudocu-pages/"
+          cp -a landing/assets/. "${RUNNER_TEMP}/toudocu-pages/assets/"
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: ${{ runner.temp }}/docu-docu-pages
+          path: ${{ runner.temp }}/toudocu-pages
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5

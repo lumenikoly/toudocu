@@ -19,19 +19,19 @@
 
 ## Предусловия
 
-- Docu-docu доступен для запуска;
+- Toudocu доступен для запуска;
 - исполнитель имеет права чтения документации и репозитория.
 
 ## Основной сценарий
 
 1. Исполнитель вызывает
-   `docu-docu task context TASK-ID ./docs --format json`.
-2. Docu-docu находит ровно одну задачу с указанным ID.
-3. Docu-docu проверяет, что задача имеет статус Ready, In Progress, Blocked или
+   `toudocu task context TASK-ID ./docs --format json`.
+2. Toudocu находит ровно одну задачу с указанным ID.
+3. Toudocu проверяет, что задача имеет статус Ready, In Progress, Blocked или
    Done.
-4. Docu-docu собирает полный task contract, фиксированные разделы связанных
+4. Toudocu собирает полный task contract, фиксированные разделы связанных
    сущностей, documentation-impact документы, business rules и diagnostics.
-5. Docu-docu возвращает `TaskContextReport` schema v1 с `requiredReads`.
+5. Toudocu возвращает `TaskContextReport` schema v1 с `requiredReads`.
 6. Исполнитель использует результат, область изменений и ограничения задачи
    для планирования работы.
 

@@ -1,4 +1,4 @@
-# Docu-docu workflows
+# Toudocu workflows
 
 Use this reference when invoking the CLI, interpreting diagnostics, building a
 portal, or working with `TASK-*`.
@@ -8,20 +8,20 @@ portal, or working with `TASK-*`.
 Before choosing flags:
 
 1. search repository instructions, CI, scripts, and documentation for existing
-   Docu-docu commands;
+   Toudocu commands;
 2. reuse the existing documentation directory, repository root, excludes,
    stale policy, output directory, and strict policy;
 3. in a monorepo, choose the narrowest repository root that contains both the
    documentation and every referenced code or task-scope path;
 4. fall back to `./docs` and its parent only when no convention exists.
 
-Use `docu-docu` from `PATH`. In the Docu-docu source repository, substitute
-`go run ./cmd/docu-docu`. The Go CLI has no `init` command. The explicit
-`$docu-docu init` prompt follows [init.md](init.md); other document creation
+Use `toudocu` from `PATH`. In the Toudocu source repository, substitute
+`go run ./cmd/toudocu`. The Go CLI has no `init` command. The explicit
+`$toudocu init` prompt follows [init.md](init.md); other document creation
 uses the bundled templates.
 
-The Go CLI also has no `refresh` command. Explicit `$docu-docu refresh` and
-`$docu-docu refresh diff` prompts follow [refresh.md](refresh.md). The first
+The Go CLI also has no `refresh` command. Explicit `$toudocu refresh` and
+`$toudocu refresh diff` prompts follow [refresh.md](refresh.md). The first
 reviews all source documentation; the second scopes evidence from the current
 worktree relative to `HEAD` and includes affected documentation.
 
@@ -42,7 +42,7 @@ For every documentation change, use this sequence:
 3. draft only evidence-backed content;
 4. complete the author review from [semantic-gate.md](semantic-gate.md);
 5. obtain independent semantic review when the change is risk-bearing;
-6. run Docu-docu as the structural gate.
+6. run Toudocu as the structural gate.
 
 An initial read-only `check` may be used during discovery. Its diagnostics are
 evidence about the declared structure, not instructions to invent content.
@@ -71,8 +71,8 @@ structural check both pass.
 Prefer JSON for agent diagnosis and text for human confirmation:
 
 ```bash
-docu-docu check <docs-root> --repository-root <repository-root> --format json
-docu-docu check <docs-root> --repository-root <repository-root>
+toudocu check <docs-root> --repository-root <repository-root> --format json
+toudocu check <docs-root> --repository-root <repository-root>
 ```
 
 The ordinary check fails on errors and reports warnings. `--strict` additionally
@@ -119,7 +119,7 @@ Do not let the template select the entities or topology. In a flow template,
 replace `OPTIONAL_USE_CASES_METADATA` with the complete `Scenario` metadata line
 containing one or more `UC-*`, or with an empty value for an architectural
 flow. Replace `RELATED_DOCUMENT_LINKS` with one or more links to those use cases
-or to the relevant architecture document. Docu-docu derives reverse `UC ↔ FLOW`
+or to the relevant architecture document. Toudocu derives reverse `UC ↔ FLOW`
 relationships from the `Scenario` list. Whole-section placeholders such as
 `FLOW_DIAGRAM` and `TRANSITION_ROWS` must be replaced with content derived from
 product or repository evidence.
@@ -136,7 +136,7 @@ read-only `task ready`. For implementation of an existing Ready+ task, start
 with:
 
 ```bash
-docu-docu task context TASK-AREA-001 <docs-root> \
+toudocu task context TASK-AREA-001 <docs-root> \
   --repository-root <repository-root> \
   --format json
 ```
@@ -160,9 +160,9 @@ checkboxes track implementation steps and need neither.
 Keep active task files in `work/`. Archive a terminal task only through:
 
 ```bash
-docu-docu task archive TASK-AREA-001 <docs-root> \
+toudocu task archive TASK-AREA-001 <docs-root> \
   --repository-root <repository-root> --format json
-docu-docu task restore TASK-AREA-001 <docs-root> \
+toudocu task restore TASK-AREA-001 <docs-root> \
   --repository-root <repository-root> --format json
 ```
 
@@ -174,11 +174,11 @@ work items that still participate in dependencies or traceability.
 Run:
 
 ```bash
-docu-docu task verify TASK-AREA-001 <docs-root> --dry-run \
+toudocu task verify TASK-AREA-001 <docs-root> --dry-run \
   --repository-root <repository-root> \
   --format json
 
-docu-docu task verify TASK-AREA-001 <docs-root> --run \
+toudocu task verify TASK-AREA-001 <docs-root> --run \
   --repository-root <repository-root> \
   --format json \
   --report <report-path-outside-docs-root> \

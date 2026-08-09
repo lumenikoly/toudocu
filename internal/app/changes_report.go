@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"encoding/json"
@@ -195,7 +195,7 @@ func outputChangesReport(options Options, report *ChangeSetReport, stdout io.Wri
 	if err := os.MkdirAll(directory, 0o755); err != nil {
 		return err
 	}
-	temporary, err := os.CreateTemp(directory, ".docu-docu-changes-*")
+	temporary, err := os.CreateTemp(directory, ".toudocu-changes-*")
 	if err != nil {
 		return err
 	}

@@ -1,12 +1,12 @@
-# Docu-docu CLI v1
+# Toudocu CLI v1
 
 - Identifier: CON-CLI-V1
 - Status: Completed
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-08-08
 
 This document defines CLI commands, side effects, exit codes, and versioned JSON
-results. `docu-docu COMMAND --help` shows the exact flag syntax.
+results. `toudocu COMMAND --help` shows the exact flag syntax.
 
 ## Commands
 
@@ -29,13 +29,13 @@ results. `docu-docu COMMAND --help` shows the exact flag syntax.
 | `version` | Prints the version | No |
 
 A path without a command name does not start an implicit build. There are no
-top-level `init` and `refresh` commands: the similarly named `$docu-docu`
+top-level `init` and `refresh` commands: the similarly named `$toudocu`
 workflows belong to the AI skill, not the Go CLI.
 
 ## Skill lifecycle
 
 ```text
-docu-docu skill install|status|update|uninstall
+toudocu skill install|status|update|uninstall
   [--agent auto|codex|claude-code|copilot|all]
   [--scope project|user]
   [--repository-root DIR]

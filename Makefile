@@ -1,7 +1,7 @@
-BINARY := docu-docu
-CMD := ./cmd/docu-docu
+BINARY := toudocu
+CMD := ./cmd/toudocu
 DIST := dist
-DOCU_DOCU := go run $(CMD)
+TOUDOCU := go run $(CMD)
 DOCS_DIR := docs
 DEMO_DOCS_DIR := example/docs
 
@@ -36,38 +36,38 @@ browser-test:
 
 check: fmt-check test web-check
 	go mod verify
-	$(DOCU_DOCU) check ./$(DOCS_DIR) --repository-root . --strict --stale-days 0
-	$(DOCU_DOCU) check ./$(DEMO_DOCS_DIR) --repository-root ./example --strict --stale-days 0
+	$(TOUDOCU) check ./$(DOCS_DIR) --repository-root . --strict --stale-days 0
+	$(TOUDOCU) check ./$(DEMO_DOCS_DIR) --repository-root ./example --strict --stale-days 0
 
 build:
 	CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o $(BINARY) $(CMD)
 
 docs:
-	$(DOCU_DOCU) build ./$(DOCS_DIR) --output ./build/project-docs --repository-root . --clean
-	$(DOCU_DOCU) build ./docs-en --output ./build/project-docs/en --repository-root . --clean
+	$(TOUDOCU) build ./$(DOCS_DIR) --output ./build/project-docs --repository-root . --clean
+	$(TOUDOCU) build ./docs-en --output ./build/project-docs/en --repository-root . --clean
 
 docs-serve:
-	$(DOCU_DOCU) serve ./$(DOCS_DIR)
+	$(TOUDOCU) serve ./$(DOCS_DIR)
 
 landing-serve:
 	node landing/dev-server.mjs
 
 demo:
 	rm -rf example/site
-	$(DOCU_DOCU) build ./$(DEMO_DOCS_DIR) --output ./example/site --clean --stale-days 0
+	$(TOUDOCU) build ./$(DEMO_DOCS_DIR) --output ./example/site --clean --stale-days 0
 
 demo-serve:
-	$(DOCU_DOCU) serve ./$(DEMO_DOCS_DIR)
+	$(TOUDOCU) serve ./$(DEMO_DOCS_DIR)
 
 release: check
 	rm -rf $(DIST)
 	mkdir -p $(DIST)
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o $(DIST)/docu-docu-linux-amd64 $(CMD)
-	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath -ldflags="-s -w" -o $(DIST)/docu-docu-linux-arm64 $(CMD)
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o $(DIST)/docu-docu-darwin-amd64 $(CMD)
-	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags="-s -w" -o $(DIST)/docu-docu-darwin-arm64 $(CMD)
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o $(DIST)/docu-docu-windows-amd64.exe $(CMD)
-	CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -trimpath -ldflags="-s -w" -o $(DIST)/docu-docu-windows-arm64.exe $(CMD)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o $(DIST)/toudocu-linux-amd64 $(CMD)
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath -ldflags="-s -w" -o $(DIST)/toudocu-linux-arm64 $(CMD)
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o $(DIST)/toudocu-darwin-amd64 $(CMD)
+	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags="-s -w" -o $(DIST)/toudocu-darwin-arm64 $(CMD)
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o $(DIST)/toudocu-windows-amd64.exe $(CMD)
+	CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -trimpath -ldflags="-s -w" -o $(DIST)/toudocu-windows-arm64.exe $(CMD)
 	cp LICENSE $(DIST)/
 	{ cat THIRD_PARTY_NOTICES.md; printf '\n\n# Embedded browser asset notices\n'; cat internal/site/assets/generated/mermaid.LICENSE.txt; printf '\n\n'; cat internal/site/assets/generated/codemirror.LICENSE.txt; printf '\n\n'; cat internal/site/assets/generated/swagger-ui.LICENSE.txt; printf '\n\n'; cat internal/site/assets/generated/swagger-ui-bundle.LICENSE.txt; printf '\n\n'; cat internal/site/assets/generated/swagger-ui-standalone-preset.LICENSE.txt; } > $(DIST)/THIRD_PARTY_NOTICES.md
 	cp internal/site/assets/generated/codemirror.checksums.txt $(DIST)/CODEMIRROR-CHECKSUMS.txt

@@ -4,7 +4,7 @@
 - Тип: Экран
 - Модуль: MOD-SITE
 - Статус: Реализован
-- Маршрут: `/_docu-docu/api-docs/`
+- Маршрут: `/_toudocu/api-docs/`
 - Превью: `../assets/screens/site-api-docs.png`
 - Последнее обновление: 2026-08-06
 

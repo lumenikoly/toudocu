@@ -1,18 +1,18 @@
-package docudocu_test
+package toudocu_test
 
 import (
 	"os"
 	"strings"
 	"testing"
 
-	"docu-docu"
+	"toudocu"
 )
 
 func TestPublicAPIFacadeDelegatesToInternalImplementation(t *testing.T) {
-	if docudocu.Version != "0.0.1" {
-		t.Fatalf("Version = %q, want 0.0.1", docudocu.Version)
+	if toudocu.Version != "0.0.1" {
+		t.Fatalf("Version = %q, want 0.0.1", toudocu.Version)
 	}
-	if actual := docudocu.ClassifyDocument("architecture/overview.md"); actual != "architecture" {
+	if actual := toudocu.ClassifyDocument("architecture/overview.md"); actual != "architecture" {
 		t.Fatalf("ClassifyDocument() = %q, want architecture", actual)
 	}
 }

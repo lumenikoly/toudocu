@@ -1,13 +1,13 @@
 # Карта экранов и проигрываемые пользовательские сценарии
 
-Docu-docu строит карту, каталог, пошаговые сценарии и traceability из документов
+Toudocu строит карту, каталог, пошаговые сценарии и traceability из документов
 `screens/SC-*.md`. Отдельный `screens/map.md` не используется.
 
 Страницу карты можно явно включить или отключить:
 
 ```bash
-docu-docu build ./docs --screen-map
-docu-docu build ./docs --no-screen-map
+toudocu build ./docs --screen-map
+toudocu build ./docs --no-screen-map
 ```
 
 При отключённой общей карте каталог, страницы use cases с пошаговым режимом и
@@ -83,7 +83,7 @@ docu-docu build ./docs --no-screen-map
 - Разрешить цикл: Да
 ```
 
-Docu-docu добавляет переходы выбранного `UC-*`, вычисляет достижимые экраны,
+Toudocu добавляет переходы выбранного `UC-*`, вычисляет достижимые экраны,
 тупики, циклы и пути к terminal screens.
 
 Неконечный достижимый экран должен иметь выход. Цикл без выхода считается
@@ -96,7 +96,7 @@ Docu-docu добавляет переходы выбранного `UC-*`, вы�
 old-side ghost elements — красный пунктир и `removed`. Состояние не передаётся
 только цветом. Filters module/use case/status/changed-only применяются к
 объединённой old/new модели; выбор элемента открывает semantic diff. JSON
-доступен через `/_docu-docu/api/changes/screen-map`.
+доступен через `/_toudocu/api/changes/screen-map`.
 
 Карточка показывает preview или placeholder, ID, название, маршрут, статус,
 модуль и количество входящих и исходящих переходов. Доступны:

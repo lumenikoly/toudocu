@@ -5,7 +5,7 @@
 - Priority: Medium
 - Module: MOD-SITE
 - Use case: UC-DOCS-01
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-07-30
 
 ## Result
@@ -73,7 +73,7 @@ lines:
 - `AC-03` → `go test ./... -run 'TestDocumentContext'`
 - `AC-04` → `go test ./... -run 'TestDocumentContext'`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root .`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root .`
 
 ## Documentation impact
 

@@ -1,6 +1,6 @@
-# Docu-docu
+# Toudocu
 
-Docu-docu is a dependency-free Go CLI with a public Go facade for verifiable
+Toudocu is a dependency-free Go CLI with a public Go facade for verifiable
 project documentation in structured Markdown and a backend-independent HTML
 portal for ordinary HTTP(S) static hosting.
 
@@ -12,13 +12,13 @@ require manual synchronization.
 
 ## Solution
 
-Docu-docu builds a unified model from Markdown, checks stable identifiers,
+Toudocu builds a unified model from Markdown, checks stable identifiers,
 links, business rules, the roadmap, and work items, then provides the result to
 people as HTML and to automation as JSON ProjectReport schema v1.
 
 ## Main features
 
-Docu-docu turns Markdown next to the code into a connected, verifiable
+Toudocu turns Markdown next to the code into a connected, verifiable
 documentation system.
 
 - **One project portal.** Search, navigation, the architecture map, user
@@ -32,7 +32,7 @@ documentation system.
 - **Task context for an AI agent.** A compact read-only package contains only
   the requirements, rules, screens, dependencies, and checks related to the
   selected task.
-- **Embedded documentation AI skill.** An offline package connects Docu-docu to
+- **Embedded documentation AI skill.** An offline package connects Toudocu to
   Codex, Claude Code, and Copilot and adds explicit workflows for initialization,
   full or diff currency refresh, and translation. The CLI installs, checks,
   updates, and removes a managed copy without network access and never
@@ -41,7 +41,7 @@ documentation system.
   [agent-workflow guide](guides/agent-workflows.md) for ordinary CLI, portal,
   task, and documentation scenarios.
 - **Verifiable work items.** A work item combines scope, acceptance criteria,
-  and verification commands; Docu-docu checks readiness, executes explicitly
+  and verification commands; Toudocu checks readiness, executes explicitly
   authorized commands, and records the result.
 - **Self-contained publication.** One Go binary creates a static portal without
   a CDN, database, npm, or external runtime for local viewing or ordinary
@@ -53,7 +53,7 @@ documentation system.
 - teams that maintain documentation next to code;
 - LLM agents that need bounded, machine-readable context;
 - CI systems that verify the documentation contract;
-- Go developers embedding Docu-docu from the source module.
+- Go developers embedding Toudocu from the source module.
 
 ## Limitations
 

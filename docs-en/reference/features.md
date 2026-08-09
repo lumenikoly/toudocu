@@ -1,6 +1,6 @@
 # Catalog of features
 
-The page lists the implemented features of Docu-docu and indicates where
+The page lists the implemented features of Toudocu and indicates where
 their detailed contract is recorded. Markdown files remain the source of truth:
 JSON and `build` output do not store a separate model or edit sources; only
 `serve` adds explicit write operations in the canonical workspace.
@@ -15,29 +15,29 @@ and the [interactive Screen Map](../screens/).
 - In `serve`: unified/CodeMirror merge/rendered/semantic diff, OpenAPI,
   Mermaid, assets, screen-map overlay and task impact.
 
-Docu-docu comes as a single Go binary with no external runtime dependencies.
+Toudocu comes as a single Go binary with no external runtime dependencies.
 
 | Opportunity | Team | Result |
 |---|---|---|
-| Project review | `docu-docu check ./docs` | diagnostics or `ProjectReport` |
-| Strict inspection | `docu-docu check ./docs --strict` | warning also gives exit code `1` |
-| Portal assembly | `docu-docu build ./docs` | standalone HTML and `report.json` |
-| Local workspace | `docu-docu serve ./docs` | view/edit, editor API, watcher and live rebuild |
-| View changes | `docu-docu changes ./docs` | text, Markdown, or `ChangeSetReport` v1 |
-| Change to one file | `docu-docu changes file PATH ./docs` | details for the selected changed path |
-| Document search | `docu-docu search "query" ./docs` | `SearchReport` by fresh Markdown |
-| Create a task | `docu-docu task init ./docs --area AREA --title TITLE --type TYPE` | new Draft and `TaskInitReport` |
-| Creating an Entity | `docu-docu scaffold module|use-case|flow|screen|decision|standard|runbook ID ./docs --title TITLE` | atomic scaffold and `ScaffoldReport` |
-| Readiness check | `docu-docu task ready TASK-ID ./docs` | read-only `TaskReadyReport` |
-| Task context | `docu-docu task context TASK-ID ./docs` | read-only `TaskContextReport` |
-| Checking the task | `docu-docu task verify TASK-ID ./docs --dry-run|--run` | plan or execute commands and `TaskVerifyReport` |
-| Task changes | `docu-docu task changes TASK-ID ./docs` | task-scoped change report and impact diagnostics |
-| Archive a task | `docu-docu task archive TASK-ID ./docs` | move a terminal task to its yearly archive |
-| Restore a task | `docu-docu task restore TASK-ID ./docs` | return a task from its yearly archive |
-| AI-skill lifecycle | `docu-docu skill install|status|update|uninstall` | text state of the managed offline package |
-| Version | `docu-docu version` | generator version |
+| Project review | `toudocu check ./docs` | diagnostics or `ProjectReport` |
+| Strict inspection | `toudocu check ./docs --strict` | warning also gives exit code `1` |
+| Portal assembly | `toudocu build ./docs` | standalone HTML and `report.json` |
+| Local workspace | `toudocu serve ./docs` | view/edit, editor API, watcher and live rebuild |
+| View changes | `toudocu changes ./docs` | text, Markdown, or `ChangeSetReport` v1 |
+| Change to one file | `toudocu changes file PATH ./docs` | details for the selected changed path |
+| Document search | `toudocu search "query" ./docs` | `SearchReport` by fresh Markdown |
+| Create a task | `toudocu task init ./docs --area AREA --title TITLE --type TYPE` | new Draft and `TaskInitReport` |
+| Creating an Entity | `toudocu scaffold module|use-case|flow|screen|decision|standard|runbook ID ./docs --title TITLE` | atomic scaffold and `ScaffoldReport` |
+| Readiness check | `toudocu task ready TASK-ID ./docs` | read-only `TaskReadyReport` |
+| Task context | `toudocu task context TASK-ID ./docs` | read-only `TaskContextReport` |
+| Checking the task | `toudocu task verify TASK-ID ./docs --dry-run|--run` | plan or execute commands and `TaskVerifyReport` |
+| Task changes | `toudocu task changes TASK-ID ./docs` | task-scoped change report and impact diagnostics |
+| Archive a task | `toudocu task archive TASK-ID ./docs` | move a terminal task to its yearly archive |
+| Restore a task | `toudocu task restore TASK-ID ./docs` | return a task from its yearly archive |
+| AI-skill lifecycle | `toudocu skill install|status|update|uninstall` | text state of the managed offline package |
+| Version | `toudocu version` | generator version |
 
-The build requires an explicit `docu-docu build ./docs`; the path without a command is rejected.
+The build requires an explicit `toudocu build ./docs`; the path without a command is rejected.
 There is no separate top-level command `init`: the minimal project is created by files
 `docs/index.md` and `docs/architecture/overview.md`; `task init` creates only
 work item. Parameters and exit codes
@@ -53,7 +53,7 @@ excludes work artifacts, contracts, and assets.
 
 ## Public Go API
 
-The root package `docu-docu` exports a typed façade over the CLI,
+The root package `toudocu` exports a typed façade over the CLI,
 document model, Markdown renderer, portal generator, search, task
 workflow and Git-backed changes. Direct calls return models and reports without
 mandatory serialization or launching a separate process.
@@ -66,16 +66,16 @@ are claimed before module publication.
 
 ## Skill workflows update
 
-The set `docu-docu` provides modifying agent workflows,
+The set `toudocu` provides modifying agent workflows,
 which are not included in the Go CLI: `init`, `refresh`, `refresh diff` and `translate`.
 
-- `$docu-docu refresh` checks the entire set of source Markdown documents against
+- `$toudocu refresh` checks the entire set of source Markdown documents against
   current code, tests, public interfaces, schemas, configuration, CI,
   requirements and solutions;
-- `$docu-docu refresh diff` starts with staged, unstaged and untracked files
+- `$toudocu refresh diff` starts with staged, unstaged and untracked files
   relative to `HEAD` and adds dependent documents by reference, stable ID,
   task relationships and changed public behavior;
-- `$docu-docu translate <locale> --all-stale` maintains full reader-facing
+- `$toudocu translate <locale> --all-stale` maintains full reader-facing
   Markdown parity, including work items, notes, and ideas. The locale root
   remains read-only and is never used for task workflow or editor writes.
   During ordinary work, the agent excludes all translation roots from search,
@@ -107,7 +107,7 @@ The unified table of purposes, boundaries, and selection rules is in the
 Minimal documentation contains `index.md` and a map
 `architecture/overview.md` with type `Architecture Overview`. Everyone is different
 `architecture/**/*.md` answers one non-empty architectural question and
-must be directly specified in overview. As needed Docu-docu
+must be directly specified in overview. As needed Toudocu
 recognizes:
 
 - `status.md`, `roadmap.md`, `risks.md`, `ideas.md` and `notes.md`;
@@ -189,7 +189,7 @@ static JSON resources from output.
 sources, path/dirty/save toolbar, CodeMirror, Editor/Preview/Split and
 positional diagnostics. Markdown preview uses the existing safe renderer;
 JSON receives syntax and hotspots diagnostics, while arbitrary YAML only receives
-accessible Docu-docu diagnostics without a fictitious general schema. The
+accessible Toudocu diagnostics without a fictitious general schema. The
 exception is `contracts/**/*.openapi.{yaml,yml,json}`: these files receive
 OpenAPI 3.0/3.1 root, operation, operationId, path-parameter, and internal
 `$ref` validation with line/column positions; external references are not loaded.
@@ -205,7 +205,7 @@ registry. The Editor API wire contract is in
 [OpenAPI](../contracts/editor.openapi.yaml), while write guarantees and the
 workspace boundary are in the [behavioral description](../contracts/editor-http.md).
 
-Canonical `serve` also publishes `/_docu-docu/api-docs/`: vendored Swagger UI
+Canonical `serve` also publishes `/_toudocu/api-docs/`: vendored Swagger UI
 5.32.12 switches between Editor and Changes specs, uses no CDN, and permits Try
 it out only for `GET`/`HEAD`. Static and translation portals do not receive it.
 
@@ -349,7 +349,7 @@ The contract evolves directly into v1 without a parallel version of the schema.
 
 ## Restrictions
 
-Docu-docu is not a web-based CMS, collaborative editor, or runtime
+Toudocu is not a web-based CMS, collaborative editor, or runtime
 product. Live workspace exists only inside the `serve` process, does not store
 server base, does not execute step viewer API requests and does not import
 interfaces from Figma or frontend code.

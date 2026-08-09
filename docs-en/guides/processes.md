@@ -64,7 +64,7 @@ sequenceDiagram
 ```
 ````
 
-The `Scenario` field supports multiple `UC-*` values. Docu-docu builds both
+The `Scenario` field supports multiple `UC-*` values. Toudocu builds both
 sides of the relationship: a process shows related use cases, and each use case
 shows related processes. Mermaid remains a representation; requirements and
 criteria are not extracted from diagram text. Architecture documents retain the
@@ -89,7 +89,7 @@ scenario.
 ## Stable URLs and JSON
 
 Source Markdown filenames do not define the public URL. When a safe stable ID
-is present, Docu-docu creates:
+is present, Toudocu creates:
 
 ```text
 /processes/index.html
@@ -108,5 +108,5 @@ contains `flowIds`. Screen branches remain in top-level `playableFlows[]`.
 A screen-graph error does not block the source use case or process catalog. A
 diagnostic is shown in place of the map or playback. An error in one Mermaid
 diagram shows its source without disrupting other pages. The entire interface
-remains read-only and works on HTTP(S) static hosting without a Docu-docu
+remains read-only and works on HTTP(S) static hosting without a Toudocu
 backend.

@@ -1,10 +1,10 @@
 # Publishing the static portal
 
-`docu-docu build` creates read-only output that requires no Docu-docu backend,
+`toudocu build` creates read-only output that requires no Toudocu backend,
 Node.js, database, or CDN after generation.
 
 ```bash
-docu-docu build ./docs --output ./site --clean
+toudocu build ./docs --output ./site --clean
 ```
 
 Upload the entire `site/` directory to ordinary HTTP(S) static hosting: nginx,
@@ -27,7 +27,7 @@ The public artifact structure is:
 - `/project-docs/` — the portal built from canonical `docs/`;
 - `/project-docs/en/` — the portal built from `docs-en/`.
 
-The locale gateway first honors the `docu-docu-landing-locale` key saved only by
+The locale gateway first honors the `toudocu-landing-locale` key saved only by
 an explicit language switch, then checks the browser's primary locale. `ru` and
 `ru-*` open `/ru/`; every other or unknown value opens `/en/`. Language detection
 runs only at `/`: a direct locale URL always keeps the language selected by its
@@ -42,7 +42,7 @@ Static output is a potentially public artifact. The generator does not include
 absolute filesystem paths, server configuration, editor metadata, credentials,
 or data outside the permitted documentation model.
 
-For local viewing, use `docu-docu serve` and the
+For local viewing, use `toudocu serve` and the
 [local workflow](local-workflow.md).
 Opening `index.html` directly by double-clicking is not a supported publishing
 or verification method.

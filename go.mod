@@ -1,4 +1,4 @@
-module docu-docu
+module toudocu
 
 go 1.22
 

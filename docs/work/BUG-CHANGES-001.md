@@ -8,7 +8,7 @@
 - Регрессия: Нет
 - Модуль: MOD-CHANGES
 - Сценарий: UC-DOCS-05
-- Владелец: Команда Docu-docu
+- Владелец: Команда Toudocu
 - Стандарты: STD-GO-001, STD-DOCS-001
 - Последнее обновление: 2026-08-09
 
@@ -70,8 +70,8 @@ Porcelain v2 record после NUL-разделения повторно раз�
 - `AC-01` → `go test ./internal/app -run TestStatusStatesPreservePathsWithSpaces`
 - `AC-02` → `go test ./internal/app -run TestStatusStatesPreservePathsWithSpaces`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
-- `QUALITY` → `make fmt-check && go vet ./... && go test -race ./... && go mod verify && for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64; do GOOS=${target%/*} GOARCH=${target#*/} CGO_ENABLED=0 go build -trimpath -o /dev/null ./cmd/docu-docu || exit 1; done`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
+- `QUALITY` → `make fmt-check && go vet ./... && go test -race ./... && go mod verify && for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64; do GOOS=${target%/*} GOARCH=${target#*/} CGO_ENABLED=0 go build -trimpath -o /dev/null ./cmd/toudocu || exit 1; done`
 
 ## Регрессионный тест
 

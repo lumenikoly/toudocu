@@ -1,6 +1,6 @@
 //go:build windows
 
-package docudocu
+package toudocu
 
 import (
 	"crypto/sha256"
@@ -42,10 +42,10 @@ func newWindowsInstallerFixture(t *testing.T, binaries map[string][]byte) *windo
 			if fixture.badChecksum {
 				digest = strings.Repeat("0", 64)
 			}
-			fmt.Fprintf(response, "%s  docu-docu-windows-amd64.exe\n%s  docu-docu-windows-arm64.exe\n", digest, digest)
+			fmt.Fprintf(response, "%s  toudocu-windows-amd64.exe\n%s  toudocu-windows-arm64.exe\n", digest, digest)
 			return
 		}
-		if file != "docu-docu-windows-amd64.exe" && file != "docu-docu-windows-arm64.exe" {
+		if file != "toudocu-windows-amd64.exe" && file != "toudocu-windows-arm64.exe" {
 			http.NotFound(response, request)
 			return
 		}
@@ -77,13 +77,13 @@ func TestInstallerPlatformContract(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, expected := range []string{"RuntimeInformation]::OSArchitecture", "docu-docu-windows-amd64.exe", "docu-docu-windows-arm64.exe", "PROCESSOR_ARCHITEW6432", "only AMD64 and ARM64 are published"} {
+	for _, expected := range []string{"RuntimeInformation]::OSArchitecture", "toudocu-windows-amd64.exe", "toudocu-windows-arm64.exe", "PROCESSOR_ARCHITEW6432", "only AMD64 and ARM64 are published"} {
 		if !strings.Contains(string(content), expected) {
 			t.Errorf("PowerShell installer missing %q", expected)
 		}
 	}
 	output, err := runPowerShellInstallerWithArchitecture(t, "http://127.0.0.1:1", map[string]string{
-		"DOCU_DOCU_INSTALL_DIR": filepath.Join(t.TempDir(), "bin"),
+		"TOUDOCU_INSTALL_DIR": filepath.Join(t.TempDir(), "bin"),
 	}, "X86")
 	if err == nil || !strings.Contains(output, "unsupported Windows architecture: X86; only AMD64 and ARM64 are published") {
 		t.Fatalf("x86 rejection: err=%v output=%q", err, output)
@@ -99,8 +99,8 @@ func TestInstallerSelectionAndPathContract(t *testing.T) {
 	fixture := newWindowsInstallerFixture(t, map[string][]byte{"latest": binary, "0.0.1": binary, "0.0.1-rc.2": binary})
 	installDir := filepath.Join(t.TempDir(), "bin")
 	output, err := runPowerShellInstaller(t, fixture.server.URL, map[string]string{
-		"DOCU_DOCU_INSTALL_DIR":    installDir,
-		"DOCU_DOCU_NO_MODIFY_PATH": "1",
+		"TOUDOCU_INSTALL_DIR":    installDir,
+		"TOUDOCU_NO_MODIFY_PATH": "1",
 	})
 	if err != nil {
 		t.Fatalf("latest install: %v\n%s", err, output)
@@ -115,9 +115,9 @@ func TestInstallerSelectionAndPathContract(t *testing.T) {
 
 	pinnedDir := filepath.Join(t.TempDir(), "bin")
 	output, err = runPowerShellInstaller(t, fixture.server.URL, map[string]string{
-		"DOCU_DOCU_INSTALL_DIR":    pinnedDir,
-		"DOCU_DOCU_NO_MODIFY_PATH": "1",
-		"DOCU_DOCU_VERSION":        "0.0.1",
+		"TOUDOCU_INSTALL_DIR":    pinnedDir,
+		"TOUDOCU_NO_MODIFY_PATH": "1",
+		"TOUDOCU_VERSION":        "0.0.1",
 	})
 	if err != nil {
 		t.Fatalf("pinned install: %v\n%s", err, output)
@@ -131,9 +131,9 @@ func TestInstallerSelectionAndPathContract(t *testing.T) {
 
 	rcDir := filepath.Join(t.TempDir(), "bin")
 	output, err = runPowerShellInstaller(t, fixture.server.URL, map[string]string{
-		"DOCU_DOCU_INSTALL_DIR":    rcDir,
-		"DOCU_DOCU_NO_MODIFY_PATH": "1",
-		"DOCU_DOCU_VERSION":        "0.0.1-rc.2",
+		"TOUDOCU_INSTALL_DIR":    rcDir,
+		"TOUDOCU_NO_MODIFY_PATH": "1",
+		"TOUDOCU_VERSION":        "0.0.1-rc.2",
 	})
 	if err != nil {
 		t.Fatalf("rc install: %v\n%s", err, output)
@@ -144,19 +144,19 @@ func TestInstallerSelectionAndPathContract(t *testing.T) {
 
 	arm64Dir := filepath.Join(t.TempDir(), "bin")
 	output, err = runPowerShellInstallerWithArchitecture(t, fixture.server.URL, map[string]string{
-		"DOCU_DOCU_INSTALL_DIR":    arm64Dir,
-		"DOCU_DOCU_NO_MODIFY_PATH": "1",
-		"DOCU_DOCU_VERSION":        "0.0.1",
+		"TOUDOCU_INSTALL_DIR":    arm64Dir,
+		"TOUDOCU_NO_MODIFY_PATH": "1",
+		"TOUDOCU_VERSION":        "0.0.1",
 	}, "Arm64")
 	if err != nil {
 		t.Fatalf("ARM64 install: %v\n%s", err, output)
 	}
-	if !windowsContainsString(fixture.paths(), "/releases/download/0.0.1/docu-docu-windows-arm64.exe") {
+	if !windowsContainsString(fixture.paths(), "/releases/download/0.0.1/toudocu-windows-arm64.exe") {
 		t.Fatalf("ARM64 asset not used: %v", fixture.paths())
 	}
 
 	script := string(content)
-	for _, expected := range []string{"LocalApplicationData", "Programs\\docu-docu", "SetEnvironmentVariable(\"Path\"", "DOCU_DOCU_NO_MODIFY_PATH"} {
+	for _, expected := range []string{"LocalApplicationData", "Programs\\toudocu", "SetEnvironmentVariable(\"Path\"", "TOUDOCU_NO_MODIFY_PATH"} {
 		if !strings.Contains(script, expected) {
 			t.Errorf("PowerShell PATH contract missing %q", expected)
 		}
@@ -171,14 +171,14 @@ func TestInstallerIntegrityAndReplacement(t *testing.T) {
 	if err := os.MkdirAll(installDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	target := filepath.Join(installDir, "docu-docu.exe")
+	target := filepath.Join(installDir, "toudocu.exe")
 	if err := os.WriteFile(target, []byte("previous"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	output, err := runPowerShellInstaller(t, fixture.server.URL, map[string]string{
-		"DOCU_DOCU_INSTALL_DIR":    installDir,
-		"DOCU_DOCU_NO_MODIFY_PATH": "1",
-		"DOCU_DOCU_VERSION":        "0.0.1",
+		"TOUDOCU_INSTALL_DIR":    installDir,
+		"TOUDOCU_NO_MODIFY_PATH": "1",
+		"TOUDOCU_VERSION":        "0.0.1",
 	})
 	if err == nil || !strings.Contains(output, "SHA-256 mismatch") {
 		t.Fatalf("checksum mismatch: err=%v output=%q", err, output)
@@ -197,9 +197,9 @@ func TestInstallerRepeatUpgradeDowngradeAndPath(t *testing.T) {
 	run := func(version string) string {
 		t.Helper()
 		output, err := runPowerShellInstaller(t, fixture.server.URL, map[string]string{
-			"DOCU_DOCU_INSTALL_DIR":    installDir,
-			"DOCU_DOCU_NO_MODIFY_PATH": "1",
-			"DOCU_DOCU_VERSION":        version,
+			"TOUDOCU_INSTALL_DIR":    installDir,
+			"TOUDOCU_NO_MODIFY_PATH": "1",
+			"TOUDOCU_VERSION":        version,
 		})
 		if err != nil {
 			t.Fatalf("install %s: %v\n%s", version, err, output)
@@ -212,7 +212,7 @@ func TestInstallerRepeatUpgradeDowngradeAndPath(t *testing.T) {
 	}
 	run("2.0.0")
 	run("1.0.0")
-	target := filepath.Join(installDir, "docu-docu.exe")
+	target := filepath.Join(installDir, "toudocu.exe")
 	output, err := exec.Command(target, "version").CombinedOutput()
 	if err != nil || strings.TrimSpace(string(output)) != "1.0.0" {
 		t.Fatalf("downgraded version: err=%v output=%q", err, output)
@@ -267,12 +267,12 @@ func runPowerShellInstallerWithArchitecture(t *testing.T, serverURL string, over
 		shell = "powershell"
 	}
 	values := map[string]string{
-		"DOCU_DOCU_VERSION":        "",
-		"DOCU_DOCU_NO_MODIFY_PATH": "1",
+		"TOUDOCU_VERSION":        "",
+		"TOUDOCU_NO_MODIFY_PATH": "1",
 	}
 	for key, value := range overrides {
-		if !strings.HasPrefix(key, "DOCU_DOCU_") {
-			t.Fatalf("installer override %q is not DOCU_DOCU_*", key)
+		if !strings.HasPrefix(key, "TOUDOCU_") {
+			t.Fatalf("installer override %q is not TOUDOCU_*", key)
 		}
 		values[key] = value
 	}
@@ -288,7 +288,7 @@ func windowsInstallerAssetForRuntime(t *testing.T) string {
 	t.Helper()
 	switch runtime.GOARCH {
 	case "amd64", "arm64":
-		return "docu-docu-windows-" + runtime.GOARCH + ".exe"
+		return "toudocu-windows-" + runtime.GOARCH + ".exe"
 	default:
 		t.Fatalf("unsupported Windows test architecture %q", runtime.GOARCH)
 		return ""

@@ -8,7 +8,7 @@
 - Screens: SC-SITE-HOME, SC-SITE-API-DOCS
 - Transitions: TR-SITE-006
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-08-05
 
 ## Result
@@ -53,7 +53,7 @@ in the vendored Swagger UI. Static and translation portals do not receive the UI
 - [x] `AC-02` `check` and editor diagnostics recognize `contracts/**/*.openapi.{yaml,yml,json}` and produce stable positional diagnostics for syntax/root/operation/operationId/path-parameter/internal-ref errors without network resolution.
 - [x] `AC-03` Declarative route registries correspond bidirectionally to OpenAPI paths and methods.
 - [x] `AC-04` Changes permits HEAD only for summary and returns a schema-v1 diagnostic envelope for every API error; successful content/render media types are preserved.
-- [x] `AC-05` Canonical `serve` provides `GET|HEAD /_docu-docu/api-docs/`, a two-spec selector, same-origin assets, CSP/no-store/nosniff, and Try it out only for GET/HEAD.
+- [x] `AC-05` Canonical `serve` provides `GET|HEAD /_toudocu/api-docs/`, a two-spec selector, same-origin assets, CSP/no-store/nosniff, and Try it out only for GET/HEAD.
 - [x] `AC-06` Swagger UI 5.32.12, its license, and checksums are vendored; runtime/CI and external-network dependencies are absent.
 - [x] `AC-07` A static build copies OpenAPI specs but not Swagger UI assets/navigation; translation portals and direct translation serve contain no UI.
 - [x] `AC-08` Markdown companions and related ADR/standard/module/use-case/flow/screen/architecture/reference/README/changelog sources are consistent without changing translation roots.
@@ -77,11 +77,11 @@ in the vendored Swagger UI. Static and translation portals do not receive the UI
 - `AC-05` → `go test ./... -run 'TestAPIDocsUI'`
 - `AC-06` → `go test ./... -run 'TestSwaggerUIVendoredAssets'`
 - `AC-07` → `go test ./... -run 'TestStaticSiteExcludesAPIDocs|TestTranslationServeExcludesAPIDocs'`
-- `AC-08` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
+- `AC-08` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `AC-09` → `go vet ./... && go test ./... && go test -race ./... && make check`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root .`
-- `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/docu-docu check ./docs --strict --stale-days 0 && make check`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root .`
+- `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/toudocu check ./docs --strict --stale-days 0 && make check`
 
 ## Documentation impact
 

@@ -1,4 +1,4 @@
-# Docu-docu flow and screen model
+# Toudocu flow and screen model
 
 Use this reference only for `FLOW-*`, `SC-*`, `TR-*`, screen states, or
 `screens/hotspots.json`. Apply the general [document model](document-model.md)
@@ -8,12 +8,12 @@ and [semantic gate](semantic-gate.md) first when the operation changes sources.
 
 Use one `FLOW-*` document for one significant scenario, branch, error path, or
 service interaction. For a product flow, list one or more existing `UC-*`
-values in the `Scenario` field; Docu-docu creates the reverse relationship on
+values in the `Scenario` field; Toudocu creates the reverse relationship on
 every listed use case. For a genuinely architectural flow, omit `Scenario` and
 link an architecture document instead. Put concrete request sequences in
 `flows/`; keep component, boundary, and dependency overviews in architecture,
 and leave simple endpoint operations in API contracts. Mermaid node labels and
-edges are visualization only: Docu-docu does not derive relationships from them.
+edges are visualization only: Toudocu does not derive relationships from them.
 Derive the diagram from the scenario; do not retrofit meaning onto a generic
 start-to-finish graph.
 
@@ -58,7 +58,7 @@ internal component states as screens. Every transition must represent a
 meaningful user action. Put the detailed behavior of one scenario in a
 `FLOW-*` document instead of duplicating it in the product-wide map.
 
-Do not maintain a separate Mermaid source or `screens/map.md`. Docu-docu derives
+Do not maintain a separate Mermaid source or `screens/map.md`. Toudocu derives
 the catalog, SVG map, and playable flows from the screen documents.
 
 Use cases and tasks can select screens with:

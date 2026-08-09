@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"io"
@@ -78,7 +78,7 @@ Changing the session lifetime.
 
 - ` + "`AC-01`" + ` -> ` + "`go test ./...`" + `
 - ` + "`ALL`" + ` -> ` + "`go test ./...`" + `
-- ` + "`DOCS`" + ` -> ` + "`go run ./cmd/docu-docu check ./docs --strict`" + `
+- ` + "`DOCS`" + ` -> ` + "`go run ./cmd/toudocu check ./docs --strict`" + `
 
 ## Documentation impact
 

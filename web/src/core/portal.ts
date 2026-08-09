@@ -12,7 +12,7 @@ registerMessages(portalMessages);
         .replace(/[^\p{L}\p{N}]+/gu, ' ')
         .trim();
     const rootPrefix: any = () => document.body.dataset.rootPrefix || '';
-    const pageContract: any = () => window.DocuDocuPage || null;
+    const pageContract: any = () => window.ToudocuPage || null;
     const assetBase: any = () => pageContract()?.portal?.assetBase || `${rootPrefix()}assets/`;
     const dataBase: any = () => pageContract()?.portal?.dataBase || `${rootPrefix()}data/`;
     const scriptLoads: any = new Map();
@@ -679,7 +679,7 @@ registerMessages(portalMessages);
             };
             renderQueue = renderQueue.then(render, render);
         };
-        document.addEventListener('docu-docu:themechange', () => {
+        document.addEventListener('toudocu:themechange', () => {
             if (started)
                 scheduleRender();
         }, { signal });
@@ -732,7 +732,7 @@ registerMessages(portalMessages);
                     panel.hidden = panel.id !== targetID;
                 });
                 const activePanel: any = panels.find((panel: any) => panel.id === targetID);
-                activePanel?.dispatchEvent(new CustomEvent('docu-docu:panelshown', { bubbles: true }));
+                activePanel?.dispatchEvent(new CustomEvent('toudocu:panelshown', { bubbles: true }));
                 if (updateHistory && window.location.hash !== `#${targetID}`) {
                     window.history.pushState(null, '', `#${targetID}`);
                 }
@@ -781,19 +781,19 @@ registerMessages(portalMessages);
         if ($('[data-screen-map]')) {
             await loadScript('screen-map.js').catch(() => { });
             if (!signal.aborted)
-                window.DocuDocuInitializeScreenMap?.(document, signal);
+                window.ToudocuInitializeScreenMap?.(document, signal);
         }
         if ($('[data-playable-flow]')) {
             await loadScript('playable-flow.js').catch(() => { });
             if (!signal.aborted)
-                window.DocuDocuInitializePlayableFlow?.(document, signal);
+                window.ToudocuInitializePlayableFlow?.(document, signal);
         }
     }
     let pageController: any = new AbortController();
     initializeGlobalSearch();
     initializePrint();
     initializePage(pageController.signal);
-    document.addEventListener('docu-docu:pagechange', () => {
+    document.addEventListener('toudocu:pagechange', () => {
         pageController.abort();
         pageController = new AbortController();
         initializePage(pageController.signal);

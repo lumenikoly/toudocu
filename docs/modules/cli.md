@@ -2,10 +2,10 @@
 
 - Идентификатор: MOD-CLI
 - Статус: Готово
-- Владелец: Команда Docu-docu
+- Владелец: Команда Toudocu
 - Последнее обновление: 2026-08-09
 
-Модуль предоставляет команды Docu-docu и детерминированный workflow от поиска и
+Модуль предоставляет команды Toudocu и детерминированный workflow от поиска и
 каркаса задачи до контекста и управляемого выполнения объявленных проверок.
 
 ## Назначение
@@ -15,7 +15,7 @@
 
 ## Расположение в коде
 
-- публичный фасад и entrypoint: `api.go`, `cmd/docu-docu/main.go`;
+- публичный фасад и entrypoint: `api.go`, `cmd/toudocu/main.go`;
 - CLI и локальный HTTP-сервер: `internal/app/cli.go`, `internal/app/server.go`;
 - read-only контекст и readiness: `internal/app/task_context.go`, `internal/app/task_ready.go`;
 - search и каркасы: `internal/app/search.go`, `internal/app/scaffold.go`;
@@ -29,8 +29,8 @@
 
 CLI не интерпретирует пользовательский запрос. `task ready` и `task context`
 только читают данные, а `task verify --run` запускает команды после локального
-validation gate. Prompt-workflows `$docu-docu init`, `$docu-docu refresh`
-и `$docu-docu refresh diff` находятся за границей Go CLI.
+validation gate. Prompt-workflows `$toudocu init`, `$toudocu refresh`
+и `$toudocu refresh diff` находятся за границей Go CLI.
 Команда `skill` управляет только файлами embedded package и не исполняет его
 содержимое; lifecycle намеренно не добавлен в публичный Go-фасад.
 
@@ -52,9 +52,9 @@ validation gate. Prompt-workflows `$docu-docu init`, `$docu-docu refresh`
 При превышении timeout завершается не только shell, но и созданные им дочерние
 процессы; отчёт получает статус `timed_out`.
 
-### BR-CLI-004: Docu-docu не интерпретирует пользовательский запрос
+### BR-CLI-004: Toudocu не интерпретирует пользовательский запрос
 
-Docu-docu создаёт нейтральные каркасы и проверяет структуру. Выбор сущностей,
+Toudocu создаёт нейтральные каркасы и проверяет структуру. Выбор сущностей,
 формулировка требований, изменение статуса и подтверждение критериев остаются
 ответственностью исполнителя.
 
@@ -104,7 +104,7 @@ targets. Выполнение каждого target независимо про�
 - команды выполняются последовательно даже после ошибки;
 - каждая команда запускается из repository root;
 - stdout и stderr ограничены последним 1 MiB каждого потока;
-- сборка требует явного `docu-docu build`; путь без команды отклоняется;
+- сборка требует явного `toudocu build`; путь без команды отклоняется;
 - зарезервированные skill-level имена `init` и `refresh` отклоняются как
   неизвестные команды Go CLI;
 - task workflow и создание сущностей никогда не используют configured

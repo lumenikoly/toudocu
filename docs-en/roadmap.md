@@ -1,12 +1,12 @@
 # Roadmap
 
-The roadmap defines Docu-docu's product scope; the state of linked `UC-*` items
+The roadmap defines Toudocu's product scope; the state of linked `UC-*` items
 is derived from their use-case documents.
 
 ## Implemented
 
 - Status: Completed
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 
 - [x] `UC-DOCS-01` The user builds a standalone documentation portal.
 - [x] `UC-DOCS-02` The user checks documentation structure and relationships.
@@ -25,7 +25,7 @@ is derived from their use-case documents.
 ## Next release
 
 - Status: In progress
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 
 - [x] `UC-AGENT-01` The user installs and maintains the embedded AI skill.
 - [x] `DLV-ROADMAP-001` The user adds a new deliverable to an existing roadmap stage through canonical serve.

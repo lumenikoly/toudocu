@@ -1,13 +1,13 @@
 # Risks
 
-Current technical and operational risks for Docu-docu.
+Current technical and operational risks for Toudocu.
 
 ## RISK-01: Changes to the Markdown dialect or engine
 
 - Status: Mitigating
 - Probability: Low
 - Impact: Medium
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 
 Goldmark provides a single CommonMark/GFM AST, but an update to the version or
 extension set can change normalization, source ranges, and canonical HTML.
@@ -27,7 +27,7 @@ extension set can change normalization, source ranges, and canonical HTML.
 - Owner: Repository user
 
 Commands in the work-item verification section are executed through the system
-shell and have the permissions of the user who launched Docu-docu.
+shell and have the permissions of the user who launched Toudocu.
 
 ### Risk mitigation plan
 
@@ -40,7 +40,7 @@ shell and have the permissions of the user who launched Docu-docu.
 - Status: Mitigating
 - Probability: Low
 - Impact: High
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 
 An incorrect `--clean` implementation could damage data outside the generation
 directory.

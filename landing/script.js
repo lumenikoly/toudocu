@@ -1,6 +1,6 @@
 document.documentElement.classList.add("js");
 
-const localePreferenceKey = "docu-docu-landing-locale";
+const localePreferenceKey = "toudocu-landing-locale";
 document.querySelectorAll("[data-locale-choice]").forEach((link) => {
   link.addEventListener("click", () => {
     const locale = link.dataset.localeChoice;

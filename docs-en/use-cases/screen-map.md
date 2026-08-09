@@ -29,7 +29,7 @@ standalone portal.
 ## Main scenario
 
 1. The developer runs `check` or `build`.
-2. Docu-docu builds one graph from the screen documents and validates links,
+2. Toudocu builds one graph from the screen documents and validates links,
    states, reachability, dead ends, and cycles.
 3. The portal creates a catalog, a DOM map with SVG connections, and a
    step-by-step playback tab on the use-case page.

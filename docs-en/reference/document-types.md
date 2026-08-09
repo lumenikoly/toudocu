@@ -1,6 +1,6 @@
-# Docu-docu document types
+# Toudocu document types
 
-This reference helps choose a document by purpose. Docu-docu classifies a
+This reference helps choose a document by purpose. Toudocu classifies a
 document by its file location. Semantic selection starts with the question the
 source must answer; only some machine-readable entity types require stable IDs.
 
@@ -84,10 +84,10 @@ formats remain in [contracts](../contracts/cli.md), not duplicated here.
 | **Work item** — `work/TASK-*.md` | Defines authorized scope, result, acceptance criteria, and verification | For substantial work that needs a verifiable contract and agent or CI handoff | Every small request, a general roadmap, or an existing-feature description |
 | **Defect** — `work/BUG-*.md` | Records an observable discrepancy and reproduction evidence; adds cause and regression verification when ready | When behavior truly differs from what is expected | Ideas, research work, or an unconfirmed bug hypothesis |
 | **Custom section** — unknown top-level directory | Gives the project its own document group without new built-in semantics | When no built-in section expresses a durable domain | Disguising an existing built-in type |
-| **Ordinary Markdown** — any other safe path | Communicates useful knowledge without a typed contract | When text, links, and basic validation suffice | Declaring machine relationships that Docu-docu must validate |
+| **Ordinary Markdown** — any other safe path | Communicates useful knowledge without a typed contract | When text, links, and basic validation suffice | Declaring machine relationships that Toudocu must validate |
 
 Active work items live in `work/`; completed and cancelled items may be moved by
-a Docu-docu command to `work/archive/YYYY/`. The full contract is in the
+a Toudocu command to `work/archive/YYYY/`. The full contract is in the
 [work-items guide](../guides/work-items.md).
 
 ### Document type and task type are different

@@ -1,31 +1,31 @@
 # Documentation refresh
 
-Use this workflow only when the user explicitly invokes `$docu-docu refresh`
-or `$docu-docu refresh diff`. Both forms review documentation currency and
-apply evidence-backed updates. They are skill workflows, not Docu-docu Go CLI
+Use this workflow only when the user explicitly invokes `$toudocu refresh`
+or `$toudocu refresh diff`. Both forms review documentation currency and
+apply evidence-backed updates. They are skill workflows, not Toudocu Go CLI
 commands.
 
 Refresh never performs initialization. Do not create a new documentation tree,
-install or update managed `AGENTS.md` guidance, or infer `$docu-docu init`
+install or update managed `AGENTS.md` guidance, or infer `$toudocu init`
 from missing files. If no established documentation exists, stop and recommend
 explicit init.
 
 ## Establish the review boundary
 
 1. Read repository instructions, standards, runbooks, CI, task contracts, and
-   documented Docu-docu commands. Resolve the repository root, documentation
+   documented Toudocu commands. Resolve the repository root, documentation
    directory, language, strict policy, and tracked portal convention.
    Use only the canonical documentation root. Exclude every configured
    translation root from repository search, inventory, semantic review,
    implementation evidence, and task context.
-2. Resolve Docu-docu as described in `SKILL.md` and run the existing ordinary
+2. Resolve Toudocu as described in `SKILL.md` and run the existing ordinary
    project check with JSON output. Diagnostics describe structural state; they
    are not evidence that a claim is current or useful.
-3. For `$docu-docu refresh`, inventory every source Markdown document in the
+3. For `$toudocu refresh`, inventory every source Markdown document in the
    canonical documentation root and the current repository evidence relevant to
    it: code, tests, public interfaces, schemas, configuration, CI, requirements,
    ADRs, and confirmed user input. Never inventory a configured translation root.
-4. For `$docu-docu refresh diff`, require a Git worktree with a valid `HEAD`.
+4. For `$toudocu refresh diff`, require a Git worktree with a valid `HEAD`.
    Determine changed tracked paths from `git diff --name-only HEAD --` and
    untracked paths from `git ls-files --others --exclude-standard`. This includes
    staged and unstaged tracked changes. Do not compare with a merge-base or
@@ -49,7 +49,7 @@ For every document in scope:
 2. Compare behavioral claims, interfaces, boundaries, statuses, relationships,
    examples, commands, and paths with current evidence.
 3. Classify it as current, needs update, unverifiable, obsolete, duplicated, or
-   misplaced. A Docu-docu warning alone is not evidence for adding content.
+   misplaced. A Toudocu warning alone is not evidence for adding content.
 4. Distinguish documentation drift from an implementation or product conflict.
    Refresh updates documentation to established current truth; it does not
    change code to make a document true. Report ambiguous conflicts as unresolved
@@ -84,7 +84,7 @@ For every document in scope:
 1. Complete the author semantic review for every changed source document.
 2. Obtain independent semantic review wherever `semantic-gate.md` requires it.
    Give the reviewer updated drafts and raw evidence, not a desired verdict or a
-   green Docu-docu result. Resolve `NEEDS_REWORK` before continuing.
+   green Toudocu result. Resolve `NEEDS_REWORK` before continuing.
 3. Run the ordinary project-wide check. Run strict validation only when project
    policy requires it. Fix errors at their sources and report any supported
    warnings left intentionally unresolved.

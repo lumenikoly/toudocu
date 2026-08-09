@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"os"
@@ -42,7 +42,7 @@ func TestStaticHTTPDocumentationContract(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, required := range []string{"HTTP(S) static hosting", "вложенном пути", "docu-docu serve"} {
+	for _, required := range []string{"HTTP(S) static hosting", "вложенном пути", "toudocu serve"} {
 		if !strings.Contains(string(deployment), required) {
 			t.Fatalf("deployment guide misses %q", required)
 		}

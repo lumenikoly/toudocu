@@ -4,14 +4,14 @@
 - Тип: Maintenance
 - Модуль: MOD-CLI
 - Стандарты: STD-GO-001, STD-DOCS-001
-- Владелец: Команда Docu-docu
+- Владелец: Команда Toudocu
 - Последнее обновление: 2026-08-07
 
 ## Результат
 
 Release bundle и workflow `0.0.1` готовы к публикации POSIX- и
 PowerShell-bootstrap: пользователь одной командой устанавливает или обновляет
-Docu-docu, а bootstrap сам
+Toudocu, а bootstrap сам
 выбирает поддерживаемый OS/architecture artifact и проверяет SHA-256
 до замены файла.
 
@@ -26,15 +26,15 @@ Docu-docu, а bootstrap сам
 
 POSIX- и PowerShell-команды скачивают подходящий artifact и
 `checksums.txt`, проверяют целостность и без `sudo` атомарно
-устанавливают его в `~/.local/bin/docu-docu` или
-`%LOCALAPPDATA%\Programs\docu-docu\docu-docu.exe`. Канонические команды:
+устанавливают его в `~/.local/bin/toudocu` или
+`%LOCALAPPDATA%\Programs\toudocu\toudocu.exe`. Канонические команды:
 
 ```sh
-curl -fsSL https://github.com/lumenikoly/docu-docu/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/lumenikoly/toudocu/releases/latest/download/install.sh | sh
 ```
 
 ```powershell
-irm https://github.com/lumenikoly/docu-docu/releases/latest/download/install.ps1 | iex
+irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 | iex
 ```
 
 Оба `install.*` входят в release assets версии `0.0.1`.
@@ -68,9 +68,9 @@ irm https://github.com/lumenikoly/docu-docu/releases/latest/download/install.ps1
   Linux, macOS и Windows artifacts, а неподдерживаемую
   платформу отклоняет до загрузки.
 - [x] `AC-02` По умолчанию выбирается latest stable release;
-  `DOCU_DOCU_VERSION=X.Y.Z` закрепляет версию и разрешает downgrade,
-  `DOCU_DOCU_INSTALL_DIR` выбирает нестандартный каталог, а
-  `DOCU_DOCU_NO_MODIFY_PATH=1` запрещает изменение `PATH`.
+  `TOUDOCU_VERSION=X.Y.Z` закрепляет версию и разрешает downgrade,
+  `TOUDOCU_INSTALL_DIR` выбирает нестандартный каталог, а
+  `TOUDOCU_NO_MODIFY_PATH=1` запрещает изменение `PATH`.
 - [x] `AC-03` Бинарник заменяется только после точной проверки
   release checksum и версии; download, checksum и filesystem failure
   не повреждают уже установленную версию, а совпадающий checksum
@@ -98,11 +98,11 @@ irm https://github.com/lumenikoly/docu-docu/releases/latest/download/install.ps1
 - `AC-01` → `go test ./internal/app -run TestInstallerPlatformContract`
 - `AC-02` → `go test ./internal/app -run TestInstallerSelectionAndPathContract`
 - `AC-03` → `go test ./internal/app -run TestInstallerIntegrityAndReplacement`
-- `AC-04` → `make release && cd dist && sha256sum -c checksums.txt && test "$(wc -l < checksums.txt)" -eq 12 && for file in docu-docu-linux-amd64 docu-docu-linux-arm64 docu-docu-darwin-amd64 docu-docu-darwin-arm64 docu-docu-windows-amd64.exe docu-docu-windows-arm64.exe install.sh install.ps1 LICENSE THIRD_PARTY_NOTICES.md CODEMIRROR-CHECKSUMS.txt SWAGGER-UI-CHECKSUMS.txt; do awk -v file="$file" '$2 == file { found=1 } END { exit !found }' checksums.txt || exit 1; done`
-- `AC-05` → `go test ./internal/app -run TestInstallerDocumentationContract && go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
+- `AC-04` → `make release && cd dist && sha256sum -c checksums.txt && test "$(wc -l < checksums.txt)" -eq 12 && for file in toudocu-linux-amd64 toudocu-linux-arm64 toudocu-darwin-amd64 toudocu-darwin-arm64 toudocu-windows-amd64.exe toudocu-windows-arm64.exe install.sh install.ps1 LICENSE THIRD_PARTY_NOTICES.md CODEMIRROR-CHECKSUMS.txt SWAGGER-UI-CHECKSUMS.txt; do awk -v file="$file" '$2 == file { found=1 } END { exit !found }' checksums.txt || exit 1; done`
+- `AC-05` → `go test ./internal/app -run TestInstallerDocumentationContract && go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `AC-06` → `go test ./internal/app -run TestInstallerRepeatUpgradeDowngradeAndPath`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `make check`
 
 ## Влияние на документацию

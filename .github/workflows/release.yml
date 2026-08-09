@@ -74,7 +74,7 @@ jobs:
             release_version="$VERSION"
           fi
 
-          actual_version="$(go run ./cmd/docu-docu version)"
+          actual_version="$(go run ./cmd/toudocu version)"
           if [[ "$actual_version" != "$VERSION" ]]; then
             echo "CLI version $actual_version does not match release version $VERSION" >&2
             exit 1

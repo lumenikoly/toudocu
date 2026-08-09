@@ -16,7 +16,7 @@ order: `status.md` → nearest deliverable document → work catalog → risks. 
 cover description is not repeated in the overview, while context actions and
 serve actions sit in its header. The home page links to documents, the local
 editor, the changes viewer, and the HTTP API. In canonical `serve`, a compact,
-non-blocking suggestion to open a newer official Docu-docu release may appear
+non-blocking suggestion to open a newer official Toudocu release may appear
 below the header; it can be dismissed for that version.
 
 ## Transitions

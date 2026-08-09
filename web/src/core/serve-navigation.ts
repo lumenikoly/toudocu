@@ -2,7 +2,7 @@ import { parseBootstrap } from "./bootstrap";
 
 (() => {
     'use strict';
-    const revisionSelector: any = 'meta[name="docu-docu-revision"]';
+    const revisionSelector: any = 'meta[name="toudocu-revision"]';
     const cache: any = new Map();
     const maxCacheEntries: any = 8;
     let prefetchTimer: any = 0;
@@ -24,7 +24,7 @@ import { parseBootstrap } from "./bootstrap";
         const url: any = new URL(link.href, window.location.href);
         if (url.origin !== window.location.origin || !/^https?:$/.test(url.protocol))
             return false;
-        if (url.pathname.startsWith('/_docu-docu/') || url.pathname.startsWith('/changes/') || url.pathname.startsWith('/api/'))
+        if (url.pathname.startsWith('/_toudocu/') || url.pathname.startsWith('/changes/') || url.pathname.startsWith('/api/'))
             return false;
         if (/^\/[a-z]{2}(?:-[A-Z]{2})?\//.test(url.pathname))
             return false;
@@ -51,7 +51,7 @@ import { parseBootstrap } from "./bootstrap";
                 throw new Error(`HTTP ${response.status}`);
             const parsed: any = new DOMParser().parseFromString(await response.text(), 'text/html');
                 const revision: any = (parsed.querySelector(revisionSelector) as HTMLMetaElement | null)?.content || '';
-                if (!revision || !parsed.querySelector('[data-docu-docu-serve-navigation]') || !parsed.querySelector('.site-layout') || !parsed.querySelector('#docu-docu-page')) {
+                if (!revision || !parsed.querySelector('[data-toudocu-serve-navigation]') || !parsed.querySelector('.site-layout') || !parsed.querySelector('#toudocu-page')) {
                 throw new Error('not a canonical serve page');
             }
             if (revision !== currentRevision()) {
@@ -88,8 +88,8 @@ import { parseBootstrap } from "./bootstrap";
         });
     }
     function syncBootstrap(nextDocument: any) {
-        const next: any = nextDocument.querySelector('#docu-docu-page');
-        const current: any = document.querySelector('#docu-docu-page');
+        const next: any = nextDocument.querySelector('#toudocu-page');
+        const current: any = document.querySelector('#toudocu-page');
         if (!next?.textContent || !current)
             throw new Error('page bootstrap unavailable');
         let raw: any;
@@ -103,7 +103,7 @@ import { parseBootstrap } from "./bootstrap";
         if (!parsed.ok || parsed.value.runtime !== 'serve')
             throw new Error(parsed.ok ? 'unexpected page runtime' : parsed.reason);
         current.textContent = next.textContent;
-        window.DocuDocuPage = parsed.value;
+        window.ToudocuPage = parsed.value;
     }
     function scrollToTarget(url: any, restoreScroll: any) {
         if (url.hash) {
@@ -149,8 +149,8 @@ import { parseBootstrap } from "./bootstrap";
             syncPageStyles(nextDocument, url);
             document.body.classList.remove('sidebar-open');
             if (historyMode === 'push')
-                history.pushState({ docuDocu: true, scrollX: 0, scrollY: 0 }, '', url);
-            document.dispatchEvent(new CustomEvent('docu-docu:pagechange', { detail: { url: url.href } }));
+                history.pushState({ toudocu: true, scrollX: 0, scrollY: 0 }, '', url);
+            document.dispatchEvent(new CustomEvent('toudocu:pagechange', { detail: { url: url.href } }));
             scrollToTarget(url, restoreScroll);
             const main: any = document.querySelector('main');
             if (historyMode !== 'pop' && main) {
@@ -173,7 +173,7 @@ import { parseBootstrap } from "./bootstrap";
             return;
         prefetchTimer = window.setTimeout(() => { fetchPage(link.href).catch(() => { }); }, 80);
     }
-    history.replaceState({ ...(history.state || {}), docuDocu: true, scrollX: window.scrollX, scrollY: window.scrollY }, '');
+    history.replaceState({ ...(history.state || {}), toudocu: true, scrollX: window.scrollX, scrollY: window.scrollY }, '');
     history.scrollRestoration = 'manual';
     let scrollFrame: any = 0;
     window.addEventListener('scroll', () => {
@@ -183,7 +183,7 @@ import { parseBootstrap } from "./bootstrap";
             scrollFrame = 0;
             history.replaceState({
                 ...(history.state || {}),
-                docuDocu: true,
+                toudocu: true,
                 scrollX: window.scrollX,
                 scrollY: window.scrollY,
             }, '');
@@ -197,7 +197,7 @@ import { parseBootstrap } from "./bootstrap";
         if (canonicalURL(target) === canonicalURL(window.location.href))
             return;
         event.preventDefault();
-        history.replaceState({ ...(history.state || {}), docuDocu: true, scrollX: window.scrollX, scrollY: window.scrollY }, '');
+        history.replaceState({ ...(history.state || {}), toudocu: true, scrollX: window.scrollX, scrollY: window.scrollY }, '');
         navigate(target);
     });
     document.addEventListener('pointerover', (event: any) => schedulePrefetch(event.target.closest('a[href]')));
@@ -205,7 +205,7 @@ import { parseBootstrap } from "./bootstrap";
     window.addEventListener('popstate', (event: any) => {
         navigate(window.location.href, {
             historyMode: 'pop',
-            restoreScroll: event.state?.docuDocu ? { x: event.state.scrollX, y: event.state.scrollY } : null,
+            restoreScroll: event.state?.toudocu ? { x: event.state.scrollX, y: event.state.scrollY } : null,
         });
     });
 })();

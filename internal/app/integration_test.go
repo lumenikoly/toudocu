@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"crypto/sha256"
@@ -1128,7 +1128,7 @@ func TestGenerateMermaidSiteAssetsAndMarkup(t *testing.T) {
 		t.Fatal(err)
 	}
 	html := string(htmlBytes)
-	for _, part := range []string{`data-mermaid-diagram`, `class="mermaid-source"`, `../assets/portal.js`, `id="docu-docu-page"`, "Показать исходный код"} {
+	for _, part := range []string{`data-mermaid-diagram`, `class="mermaid-source"`, `../assets/portal.js`, `id="toudocu-page"`, "Показать исходный код"} {
 		if !strings.Contains(html, part) {
 			t.Fatalf("Mermaid page missing %q: %s", part, html)
 		}
@@ -1304,7 +1304,7 @@ func TestContextualHelp(t *testing.T) {
 		{[]string{"task", "--help"}, []string{"init|ready|context|verify|archive|restore|changes"}, []string{"требуется TASK-ID"}},
 		{[]string{"task", "verify", "--help"}, []string{"--dry-run не выполняет команды", "--report в любом режиме записывает JSON-файл"}, []string{"--include-assets", "--translation-input"}},
 		{[]string{"task", "changes", "--help"}, []string{"единственный task-scoped", "TASK-ID", "--translation-input"}, []string{"--task"}},
-		{[]string{"scaffold", "--help"}, []string{".docu-docu/config.yml", "fallback — en"}, []string{"--host"}},
+		{[]string{"scaffold", "--help"}, []string{".toudocu/config.yml", "fallback — en"}, []string{"--host"}},
 		{[]string{"changes", "file", "--help"}, []string{"одного изменённого пути", "PATH", "--translation-input"}, []string{"--task"}},
 	}
 	for _, test := range tests {
@@ -1451,7 +1451,7 @@ func TestWorkItemPlanChecklistAllowed(t *testing.T) {
 			"AC-01": "go test ./...",
 			"AC-02": "go test ./...",
 			"ALL":   "go test ./...",
-			"DOCS":  "go run ./cmd/docu-docu check ./docs --strict",
+			"DOCS":  "go run ./cmd/toudocu check ./docs --strict",
 		}, ""),
 		"## План\n\n1. Подготовить команды.\n2. Выполнить проверки.\n3. Сформировать отчёт и обновить документацию.",
 		"## План\n\n- [x] Выполненный шаг.\n- [ ] Следующий шаг.",

@@ -3,7 +3,7 @@ import { changesMessages } from "../../core/messages.ru";
 registerMessages(changesMessages);
 (() => {
     'use strict';
-    const page: any = window.DocuDocuPage;
+    const page: any = window.ToudocuPage;
     const API: any = page?.runtime === 'serve' && page.capabilities?.changes ? page.endpoints?.changes : '';
     const REVIEW: any = page?.runtime === 'serve' && page.capabilities?.review ? page.endpoints?.review : '';
     const EDITOR_WORKSPACE: any = page?.runtime === 'serve' && page.capabilities?.editor ? page.endpoints?.editorWorkspace : '';
@@ -24,7 +24,7 @@ registerMessages(changesMessages);
         elements.detail.innerHTML = text("features.changes.index.001");
         return;
     }
-    document.addEventListener('docu-docu:themechange', async (event: any) => {
+    document.addEventListener('toudocu:themechange', async (event: any) => {
         state.merge?.setTheme?.(event.detail.theme);
         if (state.selected && (state.tab === 'mermaid' || state.tab === 'rendered'))
             await renderDetail();
@@ -273,8 +273,8 @@ registerMessages(changesMessages);
             state.merge = null;
             host.replaceChildren();
             if (!change.sourceDiffHunks?.length) {
-                if (change._current !== undefined && window.DocuDocuCodeMirror?.createViewer) {
-                    state.merge = window.DocuDocuCodeMirror.createViewer({ parent: host, doc: change._current || '', language: change.language || languageFor(change.path), onSelect: (selection: any) => selection && openComposer({ type: 'fileRange', path: change.path, start: selection.start, end: selection.end }, host) });
+                if (change._current !== undefined && window.ToudocuCodeMirror?.createViewer) {
+                    state.merge = window.ToudocuCodeMirror.createViewer({ parent: host, doc: change._current || '', language: change.language || languageFor(change.path), onSelect: (selection: any) => selection && openComposer({ type: 'fileRange', path: change.path, start: selection.start, end: selection.end }, host) });
                 }
                 else {
                     const pre: any = document.createElement('pre');
@@ -315,8 +315,8 @@ registerMessages(changesMessages);
             try {
                 const [before, after]: any = await Promise.all([fetchSide(change, 'before'), fetchSide(change, 'after')]);
                 host.replaceChildren();
-                if (window.DocuDocuCodeMirror?.createMerge)
-                    state.merge = window.DocuDocuCodeMirror.createMerge({ parent: host, before, after, language: change.language || languageFor(change.path), onSelect: (selection: any) => selection && openComposer({ type: 'diff', path: change.path, side: selection.side, start: selection.start, end: selection.end }, host) });
+                if (window.ToudocuCodeMirror?.createMerge)
+                    state.merge = window.ToudocuCodeMirror.createMerge({ parent: host, before, after, language: change.language || languageFor(change.path), onSelect: (selection: any) => selection && openComposer({ type: 'diff', path: change.path, side: selection.side, start: selection.start, end: selection.end }, host) });
                 else {
                     host.innerHTML = `<div class="source-columns"><pre>${escapeHTML(before)}</pre><pre>${escapeHTML(after)}</pre></div>`;
                 }
@@ -487,7 +487,7 @@ registerMessages(changesMessages);
     }
     function reviewGuard() { return { expectedRevision: state.review?.revision || 0, expectedStateDigest: state.review?.stateDigest || '' }; }
     async function reviewMutation(endpoint: any, action: any, method: any, body: any) {
-        const response: any = await fetch(`${REVIEW}${endpoint}`, { method, headers: { 'Content-Type': 'application/json', 'X-Docu-docu-Action': action }, body: JSON.stringify(body) });
+        const response: any = await fetch(`${REVIEW}${endpoint}`, { method, headers: { 'Content-Type': 'application/json', 'X-Toudocu-Action': action }, body: JSON.stringify(body) });
         const data: any = await response.json();
         if (!response.ok)
             throw new Error(data.diagnostics?.[0]?.message || `HTTP ${response.status}`);

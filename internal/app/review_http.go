@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"encoding/json"
@@ -262,8 +262,8 @@ func requireReviewJSONAction(w http.ResponseWriter, request *http.Request, actio
 		writeReviewError(w, &reviewFailure{Code: "REVIEW_INVALID_CONTENT_TYPE", Status: http.StatusUnsupportedMediaType, Message: "требуется Content-Type application/json"})
 		return false
 	}
-	if request.Header.Get("X-Docu-docu-Action") != action {
-		writeReviewError(w, &reviewFailure{Code: "REVIEW_ACTION_FORBIDDEN", Status: http.StatusForbidden, Message: "неверный X-Docu-docu-Action"})
+	if request.Header.Get("X-Toudocu-Action") != action {
+		writeReviewError(w, &reviewFailure{Code: "REVIEW_ACTION_FORBIDDEN", Status: http.StatusForbidden, Message: "неверный X-Toudocu-Action"})
 		return false
 	}
 	if !editorOriginAllowed(request) {

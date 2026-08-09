@@ -23,7 +23,7 @@ sequenceDiagram
     Developer->>Browser: Отправить агенту · N
     Browser->>Review: Snapshot всех unsent open messages
     Review->>Store: Добавить immutable FIFO batch
-    Agent->>Skill: $docu-docu feedback
+    Agent->>Skill: $toudocu feedback
     Skill->>Review: changes feedback pending --json
     Review-->>Skill: Oldest pending batch
     Skill->>Agent: Проверенные targets и comment semantics

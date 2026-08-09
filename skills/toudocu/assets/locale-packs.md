@@ -1,7 +1,7 @@
 # Built-in section locale packs
 
-Use these complete maps when `$docu-docu init` creates project configuration
-or `$docu-docu refresh` repairs a missing built-in map. For a valid locale
+Use these complete maps when `$toudocu init` creates project configuration
+or `$toudocu refresh` repairs a missing built-in map. For a valid locale
 other than `en` or `ru`, keep an explicit project-provided map instead.
 
 ```yaml

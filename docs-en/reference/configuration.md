@@ -1,7 +1,7 @@
 # Configuration reference
 
 The CLI works without a configuration file. Optional
-`<repository-root>/.docu-docu/config.yml` is parsed and validated in full when
+`<repository-root>/.toudocu/config.yml` is parsed and validated in full when
 loaded, including configured branding assets. After shared validation, `build`,
 `check`, and `serve` use project/site configuration; `changes` and `task
 changes` use the `changes` section; and `task init` and `scaffold` use
@@ -56,7 +56,7 @@ accents `indigo`, `blue`, `teal`, `green`, `amber`, `rose`, `violet`; density
 `wide` (1120 px).
 
 `--title` takes precedence over `site.title`, followed by the `index.md` title
-and directory name. By default, the Docu-docu name in the footer links to the
+and directory name. By default, the Toudocu name in the footer links to the
 landing page. `footer.text` and `footer.url` replace it with escaped text and an
 optional HTTPS URL.
 
@@ -64,7 +64,7 @@ In the portal header there are drop-down lists of topics (`classic`, `paper`, `t
 color scheme (`system`, `light`, `dark`). The selection is saved locally in
 browser; The configuration values ​​remain initial for the new visitor.
 
-Logo, favicon and hero must be regular files inside `.docu-docu/assets/`;
+Logo, favicon and hero must be regular files inside `.toudocu/assets/`;
 absolute paths, traversals, symlinks and missing files are rejected. SVG
 is included as a file and is not embedded in HTML.
 
@@ -83,7 +83,7 @@ are not supported. There are no Custom CSS, web fonts or theme plugins.
 The path must point to the actual root of the repository. For the current project:
 
 ```bash
-go run ./cmd/docu-docu check ./docs --repository-root . --strict
+go run ./cmd/toudocu check ./docs --repository-root . --strict
 ```
 
 ## Repository URL and ref
@@ -157,14 +157,14 @@ retain their existing semantics; `--no-open` and `--edit` do not exist. A
 API URL, CodeMirror, or server-only scripts.
 
 Canonical `serve` publishes discovered OpenAPI contracts at
-`/_docu-docu/api-docs/` without separate configuration. Static build copies the
+`/_toudocu/api-docs/` without separate configuration. Static build copies the
 specs but not Swagger UI; translation mounts and direct translation serve
 publish neither the UI nor its link.
 
 Canonical `serve` also checks the latest stable release on the browser's first
 request and may show a non-blocking update suggestion. The result is cached
 until the process stops. For a self-contained run, use
-`docu-docu serve --no-update-check ./docs`; static and translation portals
+`toudocu serve --no-update-check ./docs`; static and translation portals
 never enable this check.
 
 Workspace includes the usual `.md`, `.yaml`, `.yml` and `.json` inside docs root and
@@ -175,7 +175,7 @@ trusted local network.
 
 ## Locale and built-in sections
 
-`.docu-docu/config.yml` can only contain `project`; `site` and `changes`
+`.toudocu/config.yml` can only contain `project`; `site` and `changes`
 remain independent optional sections. `project.locale` accepts
 normalized BCP-47-style tag (for example, `ru`, `en-GB`, `pt-BR`, `sr-Latn`).
 `project.sections` specifies the names of all built-in sections and is
@@ -213,7 +213,7 @@ explicit `--lang` always takes precedence.
 ## Separate roots of translations
 
 `translations` describes independent portals for workflow
-`$docu-docu translate`; This is not a new Go CLI command. Canonical `docs/`
+`$toudocu translate`; This is not a new Go CLI command. Canonical `docs/`
 remains the only source for ordinary documentation, implementation, and task
 context. Configured translation roots are excluded from repository search,
 inventory, semantic review, and implementation analysis during ordinary work. A
@@ -248,7 +248,7 @@ and does not receive diagnostics of an incomplete other profile. A translation
 root permits `check`, `build`, `search`, ordinary `changes`, and read-only
 `serve`. Task commands, `scaffold`, and editor writes are rejected with
 `TRANSLATION_ROOT_READ_ONLY`. An agent reads only the selected translation root
-for an explicit `$docu-docu translate <locale>` or an explicit request to check,
+for an explicit `$toudocu translate <locale>` or an explicit request to check,
 find, build, run, or inspect that locale. It handles one necessary source/target
 pair at a time and starts parity checks with paths, manifest source hashes, and
 structural reports. Translation roots are not added to `.gitignore` or global
@@ -256,7 +256,7 @@ ignore files.
 
 ## Mermaid
 
-Mermaid does not have custom CLI settings. Docu-docu secures:
+Mermaid does not have custom CLI settings. Toudocu secures:
 
 - types `flowchart`, `stateDiagram-v2`, `sequenceDiagram`;
 - maximum 50,000 UTF-8 bytes per block;

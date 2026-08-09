@@ -5,7 +5,7 @@ import { diagnosticsForEditor, editorResponseIsCurrent } from "./state";
 registerMessages(editorMessages);
 (() => {
     'use strict';
-    const page: any = window.DocuDocuPage;
+    const page: any = window.ToudocuPage;
     const API: any = page?.runtime === 'serve' && page.capabilities?.editor ? page.endpoints?.editor : '';
     const $: any = (selector: any, root: any = document) => root.querySelector(selector);
     const state: any = {
@@ -48,7 +48,7 @@ registerMessages(editorMessages);
     function actionOptions(action: any, body: any, method: any = 'POST') {
         return {
             method,
-            headers: { 'Content-Type': 'application/json', 'X-Docu-docu-Action': action, Accept: 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-Toudocu-Action': action, Accept: 'application/json' },
             body: JSON.stringify(body),
         };
     }
@@ -86,15 +86,15 @@ registerMessages(editorMessages);
         state.editor = null;
         elements.host.replaceChildren();
         elements.fallback.hidden = true;
-        if (window.DocuDocuCodeMirror) {
-            state.editor = window.DocuDocuCodeMirror.create({ parent: elements.host, doc: content, language, onChange: onEditorChange });
+        if (window.ToudocuCodeMirror) {
+            state.editor = window.ToudocuCodeMirror.create({ parent: elements.host, doc: content, language, onChange: onEditorChange });
         }
         else {
             elements.fallback.hidden = false;
             elements.fallback.value = content;
         }
     }
-    document.addEventListener('docu-docu:themechange', (event: any) => {
+    document.addEventListener('toudocu:themechange', (event: any) => {
         state.editor?.setTheme?.(event.detail.theme);
     });
     function renderTree() {

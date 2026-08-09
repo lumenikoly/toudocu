@@ -3,8 +3,8 @@
 Use only for one of these explicit requests:
 
 ```text
-$docu-docu translate <locale> (--task <TASK-ID> | --base <ref> | --all-stale)
-$docu-docu translate diff
+$toudocu translate <locale> (--task <TASK-ID> | --base <ref> | --all-stale)
+$toudocu translate diff
 ```
 
 The locale form requires exactly one selection mode. Normalize the locale,
@@ -27,14 +27,14 @@ completes a profile. A missing root or title is
 `TRANSLATION_PROFILE_INCOMPLETE`; obtain an explicit configuration update in a
 separate request before translating.
 
-Build the source change set with `docu-docu task changes <TASK-ID> <docs-root>
+Build the source change set with `toudocu task changes <TASK-ID> <docs-root>
 --repository-root <repository-root> --target working-tree --translation-input
---format json`, or `docu-docu changes <docs-root> --repository-root
+--format json`, or `toudocu changes <docs-root> --repository-root
 <repository-root> --base <ref> --target working-tree --translation-input
 --format json`. For translate diff, build it once with:
 
 ```bash
-docu-docu changes <docs-root> --repository-root <repository-root> \
+toudocu changes <docs-root> --repository-root <repository-root> \
   --base HEAD --target working-tree --translation-input --format json
 ```
 
@@ -75,7 +75,7 @@ For parity discovery, compare relative paths, manifest source digests, and
 structural reports before opening content; then open only the selected
 source/target pair needed for the current translation or repair.
 
-Maintain `.docu-docu/translations/<locale>.json` as a map of canonical relative
+Maintain `.toudocu/translations/<locale>.json` as a map of canonical relative
 paths to SHA-256 source digests. Before writing it, run strict JSON checks for
 both the canonical and target roots. For matching relative paths, compare
 `documents[].type` and `documents[].status.kind`; also compare
@@ -88,7 +88,7 @@ Do not write or update the manifest until this semantic comparison passes and
 one final:
 
 ```bash
-docu-docu check <target-root> --repository-root <repository-root> --strict
+toudocu check <target-root> --repository-root <repository-root> --strict
 ```
 
 passes. If it fails, leave translated file edits in the worktree, leave the

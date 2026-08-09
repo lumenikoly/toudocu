@@ -7,7 +7,7 @@
 - Сценарий: UC-REVIEW-01
 - Экраны: SC-CHANGES-WORKSPACE
 - Стандарты: STD-GO-001, STD-DOCS-001
-- Владелец: Команда Docu-docu
+- Владелец: Команда Toudocu
 - Последнее обновление: 2026-08-09
 
 ## Результат
@@ -35,7 +35,7 @@ Go-фасад, static и translation runtimes сохраняют прежнюю
 
 - `internal/app/`, `internal/site/`, `cmd/` и `api.go`;
 - `web/` и generated frontend assets в `internal/site/assets/generated/`;
-- `skills/docu-docu/`;
+- `skills/toudocu/`;
 - `docs/`, `README.md`, `CHANGELOG.md` и `THIRD_PARTY_NOTICES.md`;
 - Go, frontend и browser tests.
 
@@ -75,7 +75,7 @@ Go-фасад, static и translation runtimes сохраняют прежнюю
 - [x] `AC-09` Экран «Изменения» сохраняет прежние tabs,
   добавляет changed/linked files, доступные comment entry points,
   responsive discussions panel/drawers, watcher banner и focus flow.
-- [x] `AC-10` Bundled skill обрабатывает `$docu-docu feedback`,
+- [x] `AC-10` Bundled skill обрабатывает `$toudocu feedback`,
   проверяет targets, изменяет только обоснованные места,
   запускает релевантные checks и отправляет full response.
 - [x] `AC-11` Regression tests доказывают неизменность
@@ -102,10 +102,10 @@ Go-фасад, static и translation runtimes сохраняют прежнюю
 - `AC-07` → `go test ./internal/app -run 'TestReviewHTTPAndCLI'`
 - `AC-08` → `go test ./internal/app -run 'TestReviewStoreDiscussionFeedbackResponseAndReanchor'`
 - `AC-09` → `npm --prefix web test && make browser-test`
-- `AC-10` → `go test ./internal/app -run 'TestDocuDocuFeedbackContract'`
+- `AC-10` → `go test ./internal/app -run 'TestToudocuFeedbackContract'`
 - `AC-11` → `go test ./internal/app -run 'TestStaticSiteExcludesChanges|TestTranslation|TestChangesCLI'`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `make check`
 
 ## Влияние на документацию

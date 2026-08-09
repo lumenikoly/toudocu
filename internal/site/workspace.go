@@ -35,7 +35,7 @@ var workspaceShell = template.Must(template.New("workspace-shell").Parse(`<!doct
   <link rel="icon" href="{{.Favicon}}">
   {{if .AppearanceJS}}<script src="{{.AppearanceJS}}"></script>{{end}}
   {{range .Styles}}<link rel="stylesheet" href="{{.}}">{{end}}
-  <script id="docu-docu-page" type="application/json">{{.Bootstrap}}</script>
+  <script id="toudocu-page" type="application/json">{{.Bootstrap}}</script>
   {{range .Scripts}}<script {{if .Module}}type="module"{{else}}defer{{end}} src="{{.URL}}"></script>{{end}}
 </head>
 {{.Body}}

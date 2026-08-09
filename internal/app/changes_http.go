@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"crypto/sha256"
@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	changesAPIBase = "/_docu-docu/api/changes"
+	changesAPIBase = "/_toudocu/api/changes"
 	changesUIPath  = "/changes/"
 )
 

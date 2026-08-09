@@ -63,9 +63,9 @@ async function exerciseStaticPortal(page: Page, origin: string): Promise<void> {
   page.on("response", (response) => responses.push(response.url()));
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(`${origin}index.html`);
-  await expect(page.locator("main")).toContainText("Docu-docu");
-  await expect(page.locator("script#docu-docu-page")).toHaveCount(1);
-  await expect(page.locator("[data-server-rebuild], [data-roadmap-add], a[href^='/_docu-docu/editor'], a[href='/changes/']")).toHaveCount(0);
+  await expect(page.locator("main")).toContainText("Toudocu");
+  await expect(page.locator("script#toudocu-page")).toHaveCount(1);
+  await expect(page.locator("[data-server-rebuild], [data-roadmap-add], a[href^='/_toudocu/editor'], a[href='/changes/']")).toHaveCount(0);
   await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior)).toBe("auto");
   await page.locator("[data-global-search]").fill("Core");
   await expect(page.locator("[data-search-results]")).not.toBeEmpty();
@@ -73,7 +73,7 @@ async function exerciseStaticPortal(page: Page, origin: string): Promise<void> {
   await expect(page.locator("html")).toHaveAttribute("data-color-scheme", "dark");
   await page.goto(`${origin}use-cases/UC-CORE-01.html`);
   await expect(page.locator("main article.doc-content").first()).toContainText("Пользователь");
-  await expect.poll(() => page.locator("script#docu-docu-page").textContent()).toContain("UC-CORE-01");
+  await expect.poll(() => page.locator("script#toudocu-page").textContent()).toContain("UC-CORE-01");
   const tabs = page.locator("[data-usecase-tab]");
   await expect(tabs).toHaveCount(4);
   await tabs.nth(1).click();
@@ -93,10 +93,10 @@ async function exerciseStaticPortal(page: Page, origin: string): Promise<void> {
 }
 
 test("static portal works over HTTP at root and nested paths", async ({ browser }) => {
-  const fixture = mkdtempSync(join(tmpdir(), "docu-docu-static-"));
+  const fixture = mkdtempSync(join(tmpdir(), "toudocu-static-"));
   cpSync(join(repo, "example", "docs"), join(fixture, "docs"), { recursive: true });
   const output = join(fixture, "site");
-  run("go", ["run", "./cmd/docu-docu", "build", join(fixture, "docs"), "--repository-root", fixture, "-o", output, "--clean"]);
+  run("go", ["run", "./cmd/toudocu", "build", join(fixture, "docs"), "--repository-root", fixture, "-o", output, "--clean"]);
   const notesPage = join(output, "notes.html");
   writeFileSync(notesPage, readFileSync(notesPage, "utf8").replace("</article>", '<figure data-mermaid-container><pre class="mermaid" data-mermaid-diagram>graph TD\nbroken[</pre><p data-mermaid-error hidden>Не удалось отобразить диаграмму.</p></figure></article>'));
   for (const mount of ["/", "/docs/"]) {
@@ -112,9 +112,9 @@ test("static portal works over HTTP at root and nested paths", async ({ browser 
 });
 
 test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }) => {
-  const fixture = mkdtempSync(join(tmpdir(), "docu-docu-serve-"));
+  const fixture = mkdtempSync(join(tmpdir(), "toudocu-serve-"));
   cpSync(join(repo, "example", "docs"), join(fixture, "docs"), { recursive: true });
-  cpSync(join(repo, "example", ".docu-docu"), join(fixture, ".docu-docu"), { recursive: true });
+  cpSync(join(repo, "example", ".toudocu"), join(fixture, ".toudocu"), { recursive: true });
   run("git", ["init", "-q"], fixture);
   run("git", ["config", "user.email", "browser@example.invalid"], fixture);
   run("git", ["config", "user.name", "Browser Test"], fixture);
@@ -126,12 +126,12 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
   if (!address || typeof address === "string") throw new Error("failed to reserve port");
   const port = address.port;
   await new Promise<void>((resolveClose) => portServer.close(() => resolveClose()));
-  const child: ChildProcess = spawn("go", ["run", "./cmd/docu-docu", "serve", join(fixture, "docs"), "--repository-root", fixture, "-o", join(fixture, "site"), "--host", "127.0.0.1", "--port", String(port)], { cwd: repo, stdio: "pipe" });
+  const child: ChildProcess = spawn("go", ["run", "./cmd/toudocu", "serve", join(fixture, "docs"), "--repository-root", fixture, "-o", join(fixture, "site"), "--host", "127.0.0.1", "--port", String(port)], { cwd: repo, stdio: "pipe" });
   const origin = `http://127.0.0.1:${port}`;
   let latestVersion = "0.0.2";
   try {
     await waitForHTTP(origin);
-    await page.route("**/_docu-docu/api/version", (route) => route.fulfill({
+    await page.route("**/_toudocu/api/version", (route) => route.fulfill({
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({
@@ -139,7 +139,7 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
         currentVersion: "0.0.1",
         status: "update-available",
         latestVersion,
-        releaseURL: `https://github.com/lumenikoly/docu-docu/releases/tag/${latestVersion}`,
+        releaseURL: `https://github.com/lumenikoly/toudocu/releases/tag/${latestVersion}`,
       }),
     }));
     await page.route("**/assets/*.js", async (route) => {
@@ -147,11 +147,11 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
       await route.continue();
     });
     await page.addInitScript(() => {
-      localStorage.setItem("docu-docu-site-theme", "paper");
-      localStorage.setItem("docu-docu-color-scheme", "dark");
-      localStorage.setItem("docu-docu-accent", "violet");
+      localStorage.setItem("toudocu-site-theme", "paper");
+      localStorage.setItem("toudocu-color-scheme", "dark");
+      localStorage.setItem("toudocu-accent", "violet");
       requestAnimationFrame(() => {
-        (window as any).__docuDocuFirstFrame = {
+        (window as any).__toudocuFirstFrame = {
           siteTheme: document.documentElement.dataset.siteTheme,
           colorScheme: document.documentElement.dataset.colorScheme,
           theme: document.documentElement.dataset.theme,
@@ -160,12 +160,12 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
       });
     });
     await page.goto(origin);
-    await expect.poll(() => page.evaluate(() => (window as any).__docuDocuFirstFrame)).toEqual({ siteTheme: "paper", colorScheme: "dark", theme: "dark", accent: "violet" });
+    await expect.poll(() => page.evaluate(() => (window as any).__toudocuFirstFrame)).toEqual({ siteTheme: "paper", colorScheme: "dark", theme: "dark", accent: "violet" });
     await expect(page.locator("[data-server-rebuild]")).toBeVisible();
     const updateNotice = page.locator("[data-update-notice]");
-    await expect(updateNotice).toContainText("Доступна Docu-docu 0.0.2");
+    await expect(updateNotice).toContainText("Доступна Toudocu 0.0.2");
     await expect(updateNotice).toContainText("У вас 0.0.1");
-    await expect(updateNotice.locator("a")).toHaveAttribute("href", "https://github.com/lumenikoly/docu-docu/releases/tag/0.0.2");
+    await expect(updateNotice.locator("a")).toHaveAttribute("href", "https://github.com/lumenikoly/toudocu/releases/tag/0.0.2");
     await expect(updateNotice.locator("a")).toHaveAttribute("rel", "noopener noreferrer");
     const portalFonts: Record<string, Record<string, string>> = {};
     for (const siteTheme of ["classic", "paper", "terminal"]) {
@@ -187,8 +187,8 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await page.locator('main a.recommended-entry[href="architecture/overview.html"]').click();
     await page.waitForURL("**/architecture/overview.html");
     await expect(updateNotice).toBeVisible();
-    await expect.poll(() => page.evaluate(() => window.DocuDocuPage?.page.path)).toBe("architecture/overview.html");
-    await expect.poll(() => page.evaluate(() => window.DocuDocuPage?.portal.dataBase)).toBe("../data/");
+    await expect.poll(() => page.evaluate(() => window.ToudocuPage?.page.path)).toBe("architecture/overview.html");
+    await expect.poll(() => page.evaluate(() => window.ToudocuPage?.portal.dataBase)).toBe("../data/");
     await page.locator("[data-global-search]").fill("Core");
     await expect(page.locator("[data-search-results]")).not.toBeEmpty();
     await page.goto(origin);
@@ -198,7 +198,7 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await expect(page.locator("[data-update-notice]")).toHaveCount(0);
     latestVersion = "0.0.3";
     await page.reload();
-    await expect(page.locator("[data-update-notice]")).toContainText("Доступна Docu-docu 0.0.3");
+    await expect(page.locator("[data-update-notice]")).toContainText("Доступна Toudocu 0.0.3");
     await page.locator("[data-server-rebuild]").click();
     await expect(page.locator("[data-server-rebuild]")).not.toHaveClass(/is-rebuilding/);
 
@@ -239,8 +239,8 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await expect(page.locator("#browser-stage").locator("xpath=..")).toContainText("DLV-BROWSER-001");
     await expect(page.locator(".progress-label")).toContainText("из 6");
 
-    await page.goto(`${origin}/_docu-docu/editor/`);
-    await expect.poll(() => page.evaluate(() => (window as any).__docuDocuFirstFrame)).toEqual({ siteTheme: "paper", colorScheme: "dark", theme: "dark", accent: "violet" });
+    await page.goto(`${origin}/_toudocu/editor/`);
+    await expect.poll(() => page.evaluate(() => (window as any).__toudocuFirstFrame)).toEqual({ siteTheme: "paper", colorScheme: "dark", theme: "dark", accent: "violet" });
     await page.locator("[data-create-open]").click();
     await expect(page.locator("[data-create-dialog]")).toBeVisible();
     await page.locator("[data-create-dialog]").press("Escape");
@@ -282,7 +282,7 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await page.locator("[data-save]").click();
     await expect(page.locator("[data-conflict]")).toBeVisible();
 
-    await page.route("**/_docu-docu/api/changes?**", async (route) => {
+    await page.route("**/_toudocu/api/changes?**", async (route) => {
       const response = await route.fetch();
       if (response.status() === 304) {
         await route.fulfill({ response });
@@ -298,7 +298,7 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
       }
       await route.fulfill({ response, json: report });
     });
-    await page.route("**/_docu-docu/api/changes/review/repository/changes?**", async (route) => {
+    await page.route("**/_toudocu/api/changes/review/repository/changes?**", async (route) => {
       const response = await route.fetch();
       if (response.status() === 304) {
         await route.fulfill({ response });
@@ -314,9 +314,9 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
       }
       await route.fulfill({ response, json: report });
     });
-    await page.route("**/_docu-docu/api/changes/render?**", (route) => route.fulfill({ status: 503, body: "render unavailable" }));
+    await page.route("**/_toudocu/api/changes/render?**", (route) => route.fulfill({ status: 503, body: "render unavailable" }));
     await page.goto(`${origin}/changes/`);
-    await expect.poll(() => page.evaluate(() => (window as any).__docuDocuFirstFrame)).toEqual({ siteTheme: "paper", colorScheme: "dark", theme: "dark", accent: "violet" });
+    await expect.poll(() => page.evaluate(() => (window as any).__toudocuFirstFrame)).toEqual({ siteTheme: "paper", colorScheme: "dark", theme: "dark", accent: "violet" });
     await expect(page.locator("[data-file-list]")).toBeVisible();
     await expect(page.locator("body")).toContainText("notes.md");
     await page.locator('[data-file-list] [data-path$="notes.md"]').click();
@@ -334,8 +334,8 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     try {
       await fallbackPage.emulateMedia({ colorScheme: "dark" });
       await fallbackPage.addInitScript(() => {
-        localStorage.setItem("docu-docu-site-theme", "invalid-theme");
-        localStorage.setItem("docu-docu-color-scheme", "system");
+        localStorage.setItem("toudocu-site-theme", "invalid-theme");
+        localStorage.setItem("toudocu-color-scheme", "system");
       });
       await fallbackPage.goto(origin);
       await expect(fallbackPage.locator("html")).toHaveAttribute("data-site-theme", "classic");
@@ -352,7 +352,7 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
       await privatePage.addInitScript(() => {
         Object.defineProperty(window, "localStorage", { configurable: true, get() { throw new Error("storage unavailable"); } });
       });
-      await privatePage.goto(`${origin}/_docu-docu/editor/`);
+      await privatePage.goto(`${origin}/_toudocu/editor/`);
       await expect(privatePage.locator("html")).toHaveAttribute("data-site-theme", "classic");
       await expect(privatePage.locator("html")).toHaveAttribute("data-color-scheme", "system");
       await expect(privatePage.locator("html")).toHaveAttribute("data-theme", "dark");
@@ -361,12 +361,12 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
       await privateContext.close();
     }
 
-    await page.route("**/_docu-docu/editor/?disabled=1", async (route) => {
+    await page.route("**/_toudocu/editor/?disabled=1", async (route) => {
       const response = await route.fetch();
       const body = (await response.text()).replace('"editor":true', '"editor":false');
       await route.fulfill({ response, body });
     });
-    await page.goto(`${origin}/_docu-docu/editor/?disabled=1`);
+    await page.goto(`${origin}/_toudocu/editor/?disabled=1`);
     await expect(page.locator('[data-ui-state="capability-unavailable"]')).toContainText("Редактор недоступен");
   } finally {
     child.kill("SIGTERM");
@@ -375,10 +375,10 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
 });
 
 test("Changes review hands three outcomes to the local agent CLI without auto-resolve", async ({ page }) => {
-  const fixture = mkdtempSync(join(tmpdir(), "docu-docu-review-browser-"));
-  const stateRoot = mkdtempSync(join(tmpdir(), "docu-docu-review-state-"));
+  const fixture = mkdtempSync(join(tmpdir(), "toudocu-review-browser-"));
+  const stateRoot = mkdtempSync(join(tmpdir(), "toudocu-review-state-"));
   cpSync(join(repo, "example", "docs"), join(fixture, "docs"), { recursive: true });
-  cpSync(join(repo, "example", ".docu-docu"), join(fixture, ".docu-docu"), { recursive: true });
+  cpSync(join(repo, "example", ".toudocu"), join(fixture, ".toudocu"), { recursive: true });
   writeFileSync(join(fixture, "server.go"), "package review\n\nfunc Server() string { return \"old\" }\n");
   writeFileSync(join(fixture, "path.go"), "package review\n\nfunc Path() string { return \"old\" }\n");
   writeFileSync(join(fixture, "legacy.go"), "package review\n\nfunc Legacy() bool { return true }\n");
@@ -397,11 +397,11 @@ test("Changes review hands three outcomes to the local agent CLI without auto-re
   if (!address || typeof address === "string") throw new Error("failed to reserve review port");
   const port = address.port;
   await new Promise<void>((resolveClose) => portServer.close(() => resolveClose()));
-  const environment = { ...process.env, DOCU_DOCU_STATE_HOME: stateRoot };
-  const child = spawn("go", ["run", "./cmd/docu-docu", "serve", join(fixture, "docs"), "--repository-root", fixture, "-o", join(fixture, "site"), "--host", "127.0.0.1", "--port", String(port), "--no-update-check"], { cwd: repo, env: environment, stdio: "pipe" });
+  const environment = { ...process.env, TOUDOCU_STATE_HOME: stateRoot };
+  const child = spawn("go", ["run", "./cmd/toudocu", "serve", join(fixture, "docs"), "--repository-root", fixture, "-o", join(fixture, "site"), "--host", "127.0.0.1", "--port", String(port), "--no-update-check"], { cwd: repo, env: environment, stdio: "pipe" });
   const origin = `http://127.0.0.1:${port}`;
   const feedbackCLI = (args: string[]) => {
-    const result = spawnSync("go", ["run", "./cmd/docu-docu", "changes", "feedback", ...args, "--repository-root", fixture, "--json"], { cwd: repo, env: environment, encoding: "utf8" });
+    const result = spawnSync("go", ["run", "./cmd/toudocu", "changes", "feedback", ...args, "--repository-root", fixture, "--json"], { cwd: repo, env: environment, encoding: "utf8" });
     if (result.status !== 0) throw new Error(`feedback CLI failed\n${result.stdout}\n${result.stderr}`);
     return JSON.parse(result.stdout);
   };
@@ -447,7 +447,7 @@ test("Changes review hands three outcomes to the local agent CLI without auto-re
       if (item.target.path === "legacy.go") return { itemId: item.id, outcome: "notFixed", message: "Удаление оставлено как в working tree.", changedPaths: ["legacy.go"] };
       return { itemId: item.id, outcome: "needsClarification", message: "Нужно уточнить ожидаемый контракт Server.", changedPaths: [] };
     });
-    const responsePath = join(mkdtempSync(join(tmpdir(), "docu-docu-review-response-")), "response.json");
+    const responsePath = join(mkdtempSync(join(tmpdir(), "toudocu-review-response-")), "response.json");
     writeFileSync(responsePath, JSON.stringify({
       schemaVersion: 1,
       reviewId: pending.feedback.reviewId,
@@ -493,8 +493,8 @@ test("Changes review hands three outcomes to the local agent CLI without auto-re
     await expect(discussionsToggle).toBeFocused();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
     await expect(page.locator('[data-discussions-panel]')).toHaveAttribute("hidden", "");
-    expect(await page.evaluate(() => window.DocuDocuPage?.capabilities.review)).toBe(true);
-    expect((await page.locator('script#docu-docu-page').textContent())?.includes("reviewId")).toBe(false);
+    expect(await page.evaluate(() => window.ToudocuPage?.capabilities.review)).toBe(true);
+    expect((await page.locator('script#toudocu-page').textContent())?.includes("reviewId")).toBe(false);
   } finally {
     child.kill("SIGTERM");
     await new Promise<void>((resolveExit) => child.once("exit", () => resolveExit()));

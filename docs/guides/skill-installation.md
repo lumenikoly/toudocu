@@ -1,6 +1,6 @@
-# Установка AI-skill Docu-docu
+# Установка AI-skill Toudocu
 
-Руководство помогает установить встроенный в binary skill `docu-docu`,
+Руководство помогает установить встроенный в binary skill `toudocu`,
 проверить его состояние, безопасно обновить или удалить managed-копию. Операции
 не используют сеть, marketplace, shell или внешние package managers.
 
@@ -9,7 +9,7 @@
 Из корня проекта выполните:
 
 ```bash
-docu-docu skill install
+toudocu skill install
 ```
 
 `--agent auto` используется по умолчанию. Если обнаружен ровно один host, CLI
@@ -17,19 +17,19 @@ docu-docu skill install
 предлагает выбор; non-TTY требует явный `--agent`.
 
 ```bash
-docu-docu skill install --agent codex
-docu-docu skill status --agent all
-docu-docu skill update --agent claude-code --scope user
-docu-docu skill uninstall --agent copilot
+toudocu skill install --agent codex
+toudocu skill status --agent all
+toudocu skill update --agent claude-code --scope user
+toudocu skill uninstall --agent copilot
 ```
 
 ## Targets
 
 | Host | Project scope | User scope |
 |---|---|---|
-| Codex | `.agents/skills/docu-docu` | `~/.agents/skills/docu-docu` |
-| Claude Code | `.claude/skills/docu-docu` | `~/.claude/skills/docu-docu` |
-| Copilot | `.github/skills/docu-docu` | `~/.copilot/skills/docu-docu` |
+| Codex | `.agents/skills/toudocu` | `~/.agents/skills/toudocu` |
+| Claude Code | `.claude/skills/toudocu` | `~/.claude/skills/toudocu` |
+| Copilot | `.github/skills/toudocu` | `~/.copilot/skills/toudocu` |
 
 Project root выбирается в порядке: явный `--repository-root`, ближайший
 родитель с `.git`, текущий каталог. Для user scope используется home текущего
@@ -57,13 +57,13 @@ target не останавливает остальные. Успех и доп�
 
 CLI намеренно не предоставляет `--force`. Сначала сохраните нужные локальные
 изменения или вручную переместите конфликтующий каталог, затем повторите
-операцию. Repo-local symlink `.agents/skills/docu-docu`, используемый при
+операцию. Repo-local symlink `.agents/skills/toudocu`, используемый при
 разработке этого проекта, классифицируется как `unsafe-path` и остаётся
 нетронутым.
 
 ## Managed manifest и атомарность
 
-Установленная копия содержит `.docu-docu-skill.json` schema v1 с версиями skill
+Установленная копия содержит `.toudocu-skill.json` schema v1 с версиями skill
 и CLI, agent/scope, checksum bundle и SHA-256 каждого bundled-файла. Любой
 дополнительный, удалённый или изменённый bundled-файл, изменение ожидаемых
 permissions (точные POSIX bits; writable/read-only semantics на Windows) и
@@ -79,23 +79,23 @@ manifest проверяется как metadata schema v1; перестанов�
 
 ## После установки
 
-Команды `docu-docu skill ...` управляют lifecycle установленной копии. Для
+Команды `toudocu skill ...` управляют lifecycle установленной копии. Для
 работы со своим проектом вызовите skill уже в prompt AI-агенту:
 
 ```text
-$docu-docu проверь документацию проекта и объясни найденные проблемы
-$docu-docu подготовь read-only контекст TASK-AREA-001
-$docu-docu обнови указанный guide по текущему CLI-контракту
+$toudocu проверь документацию проекта и объясни найденные проблемы
+$toudocu подготовь read-only контекст TASK-AREA-001
+$toudocu обнови указанный guide по текущему CLI-контракту
 ```
 
 Специальные изменяющие workflow также вызываются через prompt и только явно:
 
 ```text
-$docu-docu init
-$docu-docu refresh
-$docu-docu refresh diff
-$docu-docu translate en --all-stale
-$docu-docu translate diff
+$toudocu init
+$toudocu refresh
+$toudocu refresh diff
+$toudocu translate en --all-stale
+$toudocu translate diff
 ```
 
 Обычные сценарии, различие между shell-командами и agent-вызовами, а также

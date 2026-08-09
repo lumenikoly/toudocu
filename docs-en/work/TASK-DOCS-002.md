@@ -6,12 +6,12 @@
 - Module: MOD-MODEL
 - Use case: UC-DOCS-02
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-07-31
 
 ## Result
 
-Docu-docu supports optional `STD-*` standards, operational
+Toudocu supports optional `STD-*` standards, operational
 procedures `RB-*`, user top-level sections, their task connections,
 schema-v1 collections, scaffolds and stand-alone portal catalogs.
 
@@ -42,7 +42,7 @@ only transfers the explicitly bound `STD-*` and `RB-*`.
 - `internal/app/task_verify.go`;
 - `internal/app/site.go`;
 - `quality_test.go`;
-- `skills/docu-docu/`;
+- `skills/toudocu/`;
 - `docs/`;
 - `AGENTS.md`.
 
@@ -78,9 +78,9 @@ only transfers the explicitly bound `STD-*` and `RB-*`.
 - `AC-03` → `go test ./... -run 'TestQualityTaskContextAndConditionalVerification|TestQualityDanglingReferencesAndAdditiveJSON'`
 - `AC-04` → `go test ./... -run TestStandardAndRunbookScaffoldsAndCatalogs`
 - `AC-05` → `go test ./... -run TestStandardAndRunbookScaffoldsAndCatalogs`
-- `AC-06` → `go run ./cmd/docu-docu check ./docs --strict --stale-days 0`
+- `AC-06` → `go run ./cmd/toudocu check ./docs --strict --stale-days 0`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --strict --stale-days 0`
 - `QUALITY` → `go test ./... -run 'TestStandardsRunbooks|TestQualityTask|TestStandardAndRunbook|TestTypedKnowledge'`
 
 ## Documentation impact
@@ -88,7 +88,7 @@ only transfers the explicitly bound `STD-*` and `RB-*`.
 Updated `README.md`, `CHANGELOG.md`, `docs/index.md`, `docs/modules/model.md`,
 `docs/use-cases/check-documentation.md`, `docs/contracts/cli.md`,
 `docs/reference/features.md`, `docs/guides/work-items.md` and
-`skills/docu-docu/SKILL.md`; added guide
+`skills/toudocu/SKILL.md`; added guide
 `docs/guides/quality-runbooks.md`, original section `docs/quality/`, updated
 reference skill model and eight RU/EN skill templates standards, runbooks and their
 manifest. The generated portals remain derived from Markdown.

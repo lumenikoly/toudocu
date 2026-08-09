@@ -2,7 +2,7 @@
 
 - Идентификатор: CON-CHANGES-HTTP-V1
 - Статус: Готово
-- Владелец: Команда Docu-docu
+- Владелец: Команда Toudocu
 - Последнее обновление: 2026-08-05
 
 [OpenAPI 3.1.0](changes.openapi.yaml) содержит маршруты, параметры, коды ответа
@@ -55,7 +55,7 @@ root. Абсолютные пути, `..`, обратная косая черт�
 
 ## Repository review и local state
 
-`/_docu-docu/api/changes/review/` строит отдельную repository-wide проекцию
+`/_toudocu/api/changes/review/` строит отдельную repository-wide проекцию
 tracked и untracked non-ignored files. Она переиспользует read-only Git adapter,
 но не меняет `ChangeSetReport`, обычный CLI `changes` или публичный Go-фасад.
 Полные before/current bytes и patch загружаются лениво. UTF-8/NUL, binary,
@@ -63,7 +63,7 @@ tracked и untracked non-ignored files. Она переиспользует read
 получают существующее enrichment.
 
 Discussion state находится в platform user-state вне repository. Каждая
-mutation требует JSON, точный `X-Docu-docu-Action`, same-origin browser context,
+mutation требует JSON, точный `X-Toudocu-Action`, same-origin browser context,
 expected revision и state digest. Межпроцессный lock и CAS дают `409`, busy
 store — отдельный `REVIEW_STATE_BUSY`, oversized input — `413`, binary — `415`,
 unsafe path/symlink — `403`, неизвестный ID — `404`, недоступный Git — `503`,

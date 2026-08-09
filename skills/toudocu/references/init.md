@@ -1,14 +1,14 @@
 # Explicit project initialization
 
-Use this workflow only when the user explicitly invokes `$docu-docu init` or
+Use this workflow only when the user explicitly invokes `$toudocu init` or
 unambiguously asks to run the skill's init workflow. Do not infer initialization
 from a missing `AGENTS.md` block, an ordinary documentation request, a check, or
-another implicit skill trigger. The Docu-docu Go CLI has no `init` command.
+another implicit skill trigger. The Toudocu Go CLI has no `init` command.
 
 ## Preflight before changing files
 
 1. Read the applicable repository instructions, documentation conventions, CI
-   commands, and existing Docu-docu configuration.
+   commands, and existing Toudocu configuration.
 2. Resolve the narrowest repository root that contains the documentation and
    every referenced scope path. Reuse the established documentation directory;
    otherwise use `<repository-root>/docs`.
@@ -24,14 +24,14 @@ another implicit skill trigger. The Docu-docu Go CLI has no `init` command.
 4. Inspect the repository-root `AGENTS.md` for these exact markers:
 
    ```text
-   <!-- docu-docu:project-guidance:start -->
-   <!-- docu-docu:project-guidance:end -->
+   <!-- toudocu:project-guidance:start -->
+   <!-- toudocu:project-guidance:end -->
    ```
 
    Continue only when both markers are absent or each occurs exactly once in
    the correct order. Stop before writing when a marker is missing, duplicated,
    reversed, or nested. Also stop when an unmanaged instruction establishes a
-   conflicting Docu-docu trigger or task-creation policy; show the conflict and
+   conflicting Toudocu trigger or task-creation policy; show the conflict and
    request user direction.
 5. Inspect `<docs-root>/architecture/` before validation. If it contains
    Markdown other than a structurally valid `architecture/overview.md`, treat
@@ -39,7 +39,7 @@ another implicit skill trigger. The Docu-docu Go CLI has no `init` command.
    output, show its diagnostics, and stop without migrating or rewriting those
    files.
 6. If the documentation directory already contains Markdown, run its ordinary
-   read-only Docu-docu check with JSON output. Errors block initialization, with
+   read-only Toudocu check with JSON output. Errors block initialization, with
    one narrow exception: when `architecture/` contains no Markdown,
    `missing-architecture-overview` may be the only error and is the expected
    condition repaired by init. Warnings remain visible. Under established
@@ -70,7 +70,7 @@ another implicit skill trigger. The Docu-docu Go CLI has no `init` command.
    unless repository evidence supports it. Do not create detailed architecture
    documents, typed entities, owners, statuses, or relationships without
    evidence.
-4. Create or complete `<repository-root>/.docu-docu/config.yml` without removing
+4. Create or complete `<repository-root>/.toudocu/config.yml` without removing
    existing `site`, `changes`, or `translations` settings. Set the resolved
    `project.locale` and write the already resolved 12 `project.sections`
    titles. Do not rewrite existing H1 headings.
@@ -99,7 +99,7 @@ initialization completed atomically.
 2. Confirm that `<docs-root>/index.md` and
    `<docs-root>/architecture/overview.md` exist and that
    overview has document type `Architecture Overview`.
-3. Run the ordinary project-wide Docu-docu check. Run an additional strict check
+3. Run the ordinary project-wide Toudocu check. Run an additional strict check
    only when strict validation is project policy.
 4. Report the resolved repository root, documentation directory, project
    locale, asset language, created or updated files, errors, and remaining

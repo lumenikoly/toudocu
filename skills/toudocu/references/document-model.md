@@ -1,7 +1,7 @@
-# Docu-docu document model
+# Toudocu document model
 
 Use this reference when deciding whether a document should remain free-form or
-participate in Docu-docu's typed knowledge model.
+participate in Toudocu's typed knowledge model.
 
 ## Validation boundary
 
@@ -80,7 +80,7 @@ When opting into a typed entity:
 - update all references together when identity genuinely changes;
 - use relative Markdown links that remain inside repository root.
 
-For a `UC-*` roadmap item, Docu-docu derives effective completion from the linked
+For a `UC-*` roadmap item, Toudocu derives effective completion from the linked
 use-case status. `CON-*` and `DLV-*` retain their roadmap checkbox state. Other
 checklists do not contribute to global progress.
 
@@ -94,7 +94,7 @@ The flow and screen templates participate in the separate
 decision, and consequences. Work-item schemas are defined in
 [work-item-model.md](work-item-model.md).
 
-Docu-docu reports missing recommended sections as warnings. Use these sections
+Toudocu reports missing recommended sections as warnings. Use these sections
 when they add information; do not create empty or speculative prose. If the
 project does not need typed semantics, use the generic `document.md` template
 outside the reserved typed paths.

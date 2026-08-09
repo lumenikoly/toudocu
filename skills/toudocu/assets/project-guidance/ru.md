@@ -1,7 +1,7 @@
-<!-- docu-docu:project-guidance:start -->
-## Docu-docu
+<!-- toudocu:project-guidance:start -->
+## Toudocu
 
-- Используйте `$docu-docu`, когда запрос явно относится к Docu-docu или когда
+- Используйте `$toudocu`, когда запрос явно относится к Toudocu или когда
   изменение затрагивает документированное поведение, CLI/API/schema/config,
   архитектуру, безопасность, use cases, flows, screens, roadmap или task
   contract.
@@ -12,15 +12,15 @@
   roots остаются допустимыми implementation evidence. Исключайте настроенные
   translation roots из поиска по репозиторию, инвентаризации, semantic review,
   анализа реализации и task context, включая переведённые work items. Читайте
-  только выбранный translation root при явном `$docu-docu translate <locale>`
+  только выбранный translation root при явном `$toudocu translate <locale>`
   или явном запросе проверить, найти, собрать, запустить или изучить конкретную
-  локаль. При явном `$docu-docu translate diff` обрабатывайте все настроенные
+  локаль. При явном `$toudocu translate diff` обрабатывайте все настроенные
   translation roots по одному. При переводе и проверке паритета ограничивайтесь
   необходимой source/target-парой и сначала используйте пути, хеши и
   структурные отчёты. Полная проверка или сборка явно выбранной локали может
   читать весь выбранный root. Не добавляйте translation roots в ignore-файлы.
-- Используйте `$docu-docu refresh` для полного evidence-based ревью и
-  обновления исходной документации. Используйте `$docu-docu refresh diff`
+- Используйте `$toudocu refresh` для полного evidence-based ревью и
+  обновления исходной документации. Используйте `$toudocu refresh diff`
   для staged, unstaged и untracked изменений относительно `HEAD` и зависимых
   документов. Это изменяющие workflow skill, а не команды Go CLI и не init.
 - Создавайте новый `TASK-*` только по явному запросу или правилу проекта либо
@@ -39,5 +39,5 @@
   API или формат данных (`CONTRACT`), справочные факты (`REFERENCE`),
   эксплуатационную процедуру (`RUNBOOK`), причину решения (`ADR`) или локальную
   границу владения и правил (`MODULE`).
-- Обновляйте этот управляемый блок только явным вызовом `$docu-docu init`.
-<!-- docu-docu:project-guidance:end -->
+- Обновляйте этот управляемый блок только явным вызовом `$toudocu init`.
+<!-- toudocu:project-guidance:end -->

@@ -1,10 +1,10 @@
-package docudocu
+package toudocu
 
 import (
-	frontend "docu-docu/internal/site"
 	"html/template"
 	"io"
 	"net/http"
+	frontend "toudocu/internal/site"
 )
 
 func (s *documentationServer) serveChangesUI(w http.ResponseWriter, request *http.Request) {

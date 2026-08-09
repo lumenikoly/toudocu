@@ -8,12 +8,12 @@
 - Процесс: FLOW-DOCS-BUILD
 - Экраны: SC-SITE-HOME, SC-SITE-DOCUMENT, SC-SITE-USE-CASE, SC-SITE-SCREEN-MAP, SC-SITE-EDITOR, SC-CHANGES-WORKSPACE
 - Стандарты: STD-GO-001, STD-DOCS-001
-- Владелец: Команда Docu-docu
+- Владелец: Команда Toudocu
 - Последнее обновление: 2026-08-06
 
 ## Результат
 
-Пользователь получает один автономный Go-бинарник Docu-docu: `build` создаёт
+Пользователь получает один автономный Go-бинарник Toudocu: `build` создаёт
 read-only multi-page портал для обычного HTTP(S) static hosting без работающего
 backend, а существующий `serve` добавляет локальный editor/changes/rebuild
 runtime. Go остаётся единственным источником проектной модели и доверенной
@@ -44,7 +44,7 @@ assets сохраняются в репозитории и встраивают�
 renderer и базовый frontend, явно добавляя capability-gated server bundles и
 same-origin endpoints. `file://` удаляется из поддерживаемого и проверяемого
 продуктового контракта, а локальная работа документируется через
-`docu-docu serve`.
+`toudocu serve`.
 
 Не требуется сохранять текущую внутреннюю раскладку пакетов, Go-функций,
 HTML-фрагментов, DOM hooks, глобальных browser API и имён прежних assets.
@@ -59,7 +59,7 @@ schemas. Новая команда `preview` не появляется.
 - новый изолированный site-слой в internal/site/ и необходимые изменения в
   `internal/app/` для переноса renderer, view models, static data, routes,
   bootstrap, serve runtime и удаления старой UI-генерации;
-- `api.go`, `cmd/docu-docu/` и другие существующие Go integration points только
+- `api.go`, `cmd/toudocu/` и другие существующие Go integration points только
   в объёме подключения нового site-слоя без переноса project logic в browser;
 - `internal/site/assets/generated/`, manifest и `go:embed`; прежние
   frontend assets, root package files,
@@ -137,7 +137,7 @@ schemas. Новая команда `preview` не появляется.
   готовые browser assets через `go:embed`; TypeScript source и `node_modules` не
   входят в бинарник, а CI завершается ошибкой при расхождении generated assets
   и frontend source.
-- [x] `AC-07` `docu-docu build` создаёт backend-independent read-only MPA со
+- [x] `AC-07` `toudocu build` создаёт backend-independent read-only MPA со
   всеми HTML, CSS, JavaScript, JSON и локальными assets; output не содержит
   editor/rebuild clients, server-only markup, API URLs, localhost, внешние
   runtime-запросы, write actions или task-command execution.
@@ -149,7 +149,7 @@ schemas. Новая команда `preview` не появляется.
   JSON создаются из той же Go Project Model как производные данные, загружаются
   относительным `fetch` и не содержат secrets, environment, absolute paths,
   editor digests или repository context вне разрешённой documentation model.
-- [x] `AC-10` `docu-docu serve` использует тот же renderer и `portal.js`, но
+- [x] `AC-10` `toudocu serve` использует тот же renderer и `portal.js`, но
   Go явно включает `serve`, `editor`, `changes`, `rebuild` и `taskWorkspace`
   capabilities и только нужные bundles; endpoints приходят из Go bootstrap,
   остаются same-origin и не вычисляются frontend из URL или filesystem paths.
@@ -251,11 +251,11 @@ schemas. Новая команда `preview` не появляется.
 - `AC-16` → `go test ./...`
 - `AC-17` → `make browser-test`
 - `AC-18` → `make browser-test`
-- `AC-19` → `go test ./... -run 'TestFileProtocolPublicContract|TestStaticHTTPDocumentationContract' && go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
-- `AC-20` → `make check && make web-check && make browser-test && go run ./cmd/docu-docu build ./docs --repository-root . --clean`
+- `AC-19` → `go test ./... -run 'TestFileProtocolPublicContract|TestStaticHTTPDocumentationContract' && go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
+- `AC-20` → `make check && make web-check && make browser-test && go run ./cmd/toudocu build ./docs --repository-root . --clean`
 - `ALL` → `make check && make web-check && make browser-test && make build`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
-- `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
+- `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 
 ## Влияние на документацию
 

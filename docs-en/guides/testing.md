@@ -1,4 +1,4 @@
-# Checking Docu-docu changes
+# Checking Toudocu changes
 
 This guide defines a single local and CI cycle for the project's code and its
 own documentation.
@@ -9,7 +9,7 @@ own documentation.
 gofmt -w .
 go vet ./...
 go test ./...
-go run ./cmd/docu-docu check ./docs --strict --stale-days 0
+go run ./cmd/toudocu check ./docs --strict --stale-days 0
 ```
 
 ## Full check
@@ -24,7 +24,7 @@ npm test
 npm run build
 npm run test:browser
 cd ..
-go run ./cmd/docu-docu build ./docs \
+go run ./cmd/toudocu build ./docs \
   --output ./build/project-docs \
   --repository-root . \
   --clean \
@@ -35,8 +35,8 @@ go run ./cmd/docu-docu build ./docs \
 To check Windows-specific process management from Unix:
 
 ```bash
-GOOS=windows GOARCH=amd64 go test -c -o /tmp/docu-docu-windows.test .
-GOOS=windows GOARCH=amd64 go build -o /tmp/docu-docu-windows.exe ./cmd/docu-docu
+GOOS=windows GOARCH=amd64 go test -c -o /tmp/toudocu-windows.test .
+GOOS=windows GOARCH=amd64 go build -o /tmp/toudocu-windows.exe ./cmd/toudocu
 ```
 
 ## Test rules
@@ -55,8 +55,8 @@ GOOS=windows GOARCH=amd64 go build -o /tmp/docu-docu-windows.exe ./cmd/docu-docu
 ## Checking a documentation task
 
 ```bash
-go run ./cmd/docu-docu task context TASK-DOCS-001 ./docs --format json
-go run ./cmd/docu-docu task verify TASK-DOCS-001 ./docs --dry-run --format json
+go run ./cmd/toudocu task context TASK-DOCS-001 ./docs --format json
+go run ./cmd/toudocu task verify TASK-DOCS-001 ./docs --dry-run --format json
 ```
 
 `task verify --run` executes commands from the document and must be used only
@@ -68,7 +68,7 @@ A change is ready when:
 
 1. formatting produces no diff;
 2. vet, ordinary tests, and race tests pass;
-3. `docu-docu check ./docs --strict` contains no warnings or errors;
+3. `toudocu check ./docs --strict` contains no warnings or errors;
 4. the example and a minimal project with `index.md` and an architecture
    overview remain valid;
 5. behavior and public contracts are reflected in the documentation.

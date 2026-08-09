@@ -1,6 +1,6 @@
 //go:build !windows
 
-package docudocu
+package toudocu
 
 import "os"
 

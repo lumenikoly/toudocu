@@ -8,12 +8,12 @@
 - Flow: FLOW-DOCS-SERVE
 - Screens: SC-SITE-DOCUMENT
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-08-06
 
 ## Result
 
-On the `roadmap.md` page in canonical `docu-docu serve`, the user adds a new
+On the `roadmap.md` page in canonical `toudocu serve`, the user adds a new
 unfinished `DLV-*` to an existing stage through an accessible dialog without
 editing Markdown manually. Static builds and translation portals remain read-only.
 
@@ -81,9 +81,9 @@ the portal. A CAS conflict does not overwrite the file and preserves entered for
 - `AC-03` → `go test ./internal/app -run TestEditorRoadmap`
 - `AC-04` → `npm --prefix web run typecheck && npm --prefix web run test:browser`
 - `AC-05` → `go test ./internal/app -run 'TestRoadmapAddControlIsServeOnly|TestDocumentationServerLocalePortalsAreReadOnlyAndMatched' && npm --prefix web test`
-- `AC-06` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
+- `AC-06` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `ALL` → `make check && make browser-test`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `make check`
 
 ## Documentation impact

@@ -13,7 +13,7 @@ determines the conditions for successful completion
 
 ```mermaid
 flowchart TD
-    Start["docu-docu check"] --> Resolve["Check login and repository root"]
+    Start["toudocu check"] --> Resolve["Check login and repository root"]
     Resolve --> Read["Read Markdown without following symlinks"]
     Read --> Parse["Parse structure, metadata, links and Mermaid"]
     Parse --> Validate["Check ID, connections, roadmap and work items"]

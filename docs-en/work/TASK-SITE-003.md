@@ -8,12 +8,12 @@
 - Flow: FLOW-DOCS-BUILD
 - Screens: SC-SITE-HOME, SC-SITE-DOCUMENT, SC-SITE-USE-CASE, SC-SITE-SCREEN-MAP, SC-SITE-EDITOR, SC-CHANGES-WORKSPACE
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-08-06
 
 ## Result
 
-The user receives one self-contained Docu-docu Go binary: `build` creates a
+The user receives one self-contained Toudocu Go binary: `build` creates a
 read-only multi-page portal for ordinary HTTP(S) static hosting without a
 running backend, while the existing `serve` adds a local
 editor/changes/rebuild runtime. Go remains the sole source of the project model
@@ -45,7 +45,7 @@ and embedded through `go:embed`; Node.js is needed only by frontend developers.
 root or nested HTTP(S) path. `serve` uses the same renderer and base frontend,
 explicitly adding capability-gated server bundles and same-origin endpoints.
 `file://` is removed from the supported and tested product contract, while
-local use is documented through `docu-docu serve`.
+local use is documented through `toudocu serve`.
 
 The current internal arrangement of packages, Go functions, HTML fragments,
 DOM hooks, global browser APIs, and legacy asset names does not need to be
@@ -60,7 +60,7 @@ existing JSON schemas. No new `preview` command is introduced.
 - A new isolated site layer in `internal/site/` and the necessary changes in
   `internal/app/` to move the renderer, view models, static data, routes,
   bootstrap, and serve runtime and remove legacy UI generation.
-- `api.go`, `cmd/docu-docu/`, and other existing Go integration points only as
+- `api.go`, `cmd/toudocu/`, and other existing Go integration points only as
   needed to connect the new site layer, without moving project logic into the
   browser.
 - `internal/site/assets/generated/`, its manifest, and `go:embed`; legacy
@@ -142,7 +142,7 @@ existing JSON schemas. No new `preview` command is introduced.
   ready-made browser assets through `go:embed`; TypeScript source and
   `node_modules` are not included in the binary, and CI fails when generated
   assets diverge from frontend source.
-- [x] `AC-07` `docu-docu build` creates a backend-independent read-only MPA with
+- [x] `AC-07` `toudocu build` creates a backend-independent read-only MPA with
   all HTML, CSS, JavaScript, JSON, and local assets; output contains no
   editor/rebuild clients, server-only markup, API URLs, localhost, external
   runtime requests, write actions, or task-command execution.
@@ -155,7 +155,7 @@ existing JSON schemas. No new `preview` command is introduced.
   Project Model as derived data, loaded with relative `fetch`, and contain no
   secrets, environment data, absolute paths, editor digests, or repository
   context outside the allowed documentation model.
-- [x] `AC-10` `docu-docu serve` uses the same renderer and `portal.js`, while Go
+- [x] `AC-10` `toudocu serve` uses the same renderer and `portal.js`, while Go
   explicitly enables the `serve`, `editor`, `changes`, `rebuild`, and
   `taskWorkspace` capabilities and only the required bundles; endpoints come
   from Go bootstrap, remain same-origin, and are not derived by the frontend
@@ -262,11 +262,11 @@ existing JSON schemas. No new `preview` command is introduced.
 - `AC-16` → `go test ./...`
 - `AC-17` → `make browser-test`
 - `AC-18` → `make browser-test`
-- `AC-19` → `go test ./... -run 'TestFileProtocolPublicContract|TestStaticHTTPDocumentationContract' && go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
-- `AC-20` → `make check && make web-check && make browser-test && go run ./cmd/docu-docu build ./docs --repository-root . --clean`
+- `AC-19` → `go test ./... -run 'TestFileProtocolPublicContract|TestStaticHTTPDocumentationContract' && go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
+- `AC-20` → `make check && make web-check && make browser-test && go run ./cmd/toudocu build ./docs --repository-root . --clean`
 - `ALL` → `make check && make web-check && make browser-test && make build`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
-- `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
+- `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 
 ## Documentation impact
 

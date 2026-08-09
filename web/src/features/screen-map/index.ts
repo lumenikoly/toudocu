@@ -1,7 +1,7 @@
 import { registerMessages, text } from "../../core/locale";
 import { screenMapMessages } from "../../core/messages.ru";
 registerMessages(screenMapMessages);
-window.DocuDocuInitializeScreenMap = (scope: any, signal: any) => {
+window.ToudocuInitializeScreenMap = (scope: any, signal: any) => {
     'use strict';
     scope = scope || document;
     const workspace: any = scope.querySelector('[data-screen-map]');
@@ -43,7 +43,7 @@ window.DocuDocuInitializeScreenMap = (scope: any, signal: any) => {
     const statusSelect: any = workspace.querySelector('[data-map-status]');
     const search: any = workspace.querySelector('[data-map-search]');
     const changesToggle: any = workspace.querySelector('[data-map-changes]');
-    const page: any = window.DocuDocuPage;
+    const page: any = window.ToudocuPage;
     const changesAPI: any = page?.runtime === 'serve' && page.capabilities?.changes ? page.endpoints?.changes : '';
     if (changesToggle && !changesAPI)
         changesToggle.hidden = true;
@@ -933,7 +933,7 @@ window.DocuDocuInitializeScreenMap = (scope: any, signal: any) => {
         render({ fit: true });
     });
     changeStatusSelect?.addEventListener('change', () => render({ fit: true }));
-    document.addEventListener('docu-docu:panelshown', (event: any) => {
+    document.addEventListener('toudocu:panelshown', (event: any) => {
         if (event.target?.contains(workspace)) {
             window.requestAnimationFrame(() => render({ fit: true }));
         }

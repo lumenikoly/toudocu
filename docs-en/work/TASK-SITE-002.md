@@ -8,14 +8,14 @@
 - Flow: FLOW-DOCS-SERVE
 - Transitions: TR-SITE-001, TR-SITE-002, TR-SITE-003
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-08-05
 
 ## Result
 
-`docu-docu serve` provides a local live workspace in which a user safely edits
+`toudocu serve` provides a local live workspace in which a user safely edits
 and creates source documents and sees previews and diagnostics, while the portal
-synchronously updates the model, HTML, and search. `docu-docu build` remains a
+synchronously updates the model, HTML, and search. `toudocu build` remains a
 self-contained read-only portal for `file://`.
 
 ## Behavior change
@@ -85,7 +85,7 @@ generation receives no editor markup, server-only scripts, or API links.
   returns `409` again.
 - [x] `AC-06` Markdown diagnostics are built from the complete model with an
   in-memory overlay; JSON receives syntax and hotspot diagnostics, while YAML
-  receives only available Docu-docu diagnostics; diagnostics do not block save.
+  receives only available Toudocu diagnostics; diagnostics do not block save.
 - [x] `AC-07` Save/create synchronously update the model, HTML, search, and
   revision; a watcher with a 750 ms interval and 200 ms stabilization notices
   external changes.
@@ -106,7 +106,7 @@ generation receives no editor markup, server-only scripts, or API links.
 - [x] `AC-13` All editor JSON responses have `schemaVersion: 1`, `no-store`, and
   one error envelope; malformed input, unknown fields, trailing JSON, a body
   larger than 3 MiB, and content larger than 2 MiB are rejected.
-- [x] `AC-14` A write requires JSON content type, `X-Docu-docu-Action`, and
+- [x] `AC-14` A write requires JSON content type, `X-Toudocu-Action`, and
   same-origin/`Sec-Fetch-Site`; the API returns no CORS headers and cannot invoke
   commands. With an explicit non-loopback listener, the operator includes local
   network clients in the trust boundary: browser guards protect against
@@ -121,7 +121,7 @@ generation receives no editor markup, server-only scripts, or API links.
 - [x] `AC-17` The documentation records the
   `build = static read-only`, `serve = view/edit/live rebuild` boundary;
   backend, race, static-negative, cross-build, browser desktop/mobile QA,
-  semantic review, and strict Docu-docu checks pass.
+  semantic review, and strict Toudocu checks pass.
 
 ## Plan
 
@@ -155,10 +155,10 @@ generation receives no editor markup, server-only scripts, or API links.
 - `AC-14` → `go test ./... -run 'TestEditorWriteGuards|TestEditorCannotExecuteCommands'`
 - `AC-15` → `go test ./... -run 'TestEditorAPIContract'`
 - `AC-16` → `go test ./... -run 'TestEditorVendoredAssets'`
-- `AC-17` → `go test ./... && go test -race ./... && go run ./cmd/docu-docu check ./docs --strict --stale-days 0 && GOOS=windows GOARCH=amd64 go test -c -o /tmp/docu-docu-editor-windows.test . && GOOS=darwin GOARCH=amd64 go build -o /tmp/docu-docu-editor-darwin ./cmd/docu-docu && GOOS=linux GOARCH=amd64 go build -o /tmp/docu-docu-editor-linux ./cmd/docu-docu && test -s build/editor-qa/report.md && test -s build/editor-qa/semantic-review.txt`
+- `AC-17` → `go test ./... && go test -race ./... && go run ./cmd/toudocu check ./docs --strict --stale-days 0 && GOOS=windows GOARCH=amd64 go test -c -o /tmp/toudocu-editor-windows.test . && GOOS=darwin GOARCH=amd64 go build -o /tmp/toudocu-editor-darwin ./cmd/toudocu && GOOS=linux GOARCH=amd64 go build -o /tmp/toudocu-editor-linux ./cmd/toudocu && test -s build/editor-qa/report.md && test -s build/editor-qa/semantic-review.txt`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root .`
-- `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/docu-docu check ./docs --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root .`
+- `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/toudocu check ./docs --strict --stale-days 0`
 
 ## Documentation impact
 

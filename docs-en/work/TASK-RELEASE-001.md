@@ -5,7 +5,7 @@
 - Priority: High
 - Module: MOD-CLI
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-08-07
 
 ## Result
@@ -31,7 +31,7 @@ are consistent, but the tag and post fail.
 - setting up or reading GitHub remote;
 - push, GitHub Actions and GitHub Release publication;
 - changing the set or signatures of CLI commands, Go API exports and JSON structure
-  schema v1; only the value of the existing `docu-docu.Version` constant changes.
+  schema v1; only the value of the existing `toudocu.Version` constant changes.
 
 ## Acceptance criteria
 
@@ -57,13 +57,13 @@ are consistent, but the tag and post fail.
 
 ## Verification
 
-- `AC-01` → `go run ./cmd/docu-docu version && test "$(go run ./cmd/docu-docu version)" = "0.0.1"`
+- `AC-01` → `go run ./cmd/toudocu version && test "$(go run ./cmd/toudocu version)" = "0.0.1"`
 - `AC-02` → `go test ./internal/app -run TestSearchIndexMetadataOrderIsDeterministic`
 - `AC-03` → `make check`
 - `AC-04` → `make release && cd dist && sha256sum -c checksums.txt`
-- `AC-05` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
+- `AC-05` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `make check`
 
 ## Documentation impact

@@ -1,7 +1,7 @@
 # Process local Changes feedback
 
-Use this workflow only for an explicit `$docu-docu feedback` request or the
-copied prompt “Обработай комментарии из Docu-docu Changes”. It authorizes
+Use this workflow only for an explicit `$toudocu feedback` request or the
+copied prompt “Обработай комментарии из Toudocu Changes”. It authorizes
 evidence-backed repository edits needed to address the supplied feedback and
 relevant verification; it does not authorize unrelated cleanup, Git writes,
 publishing, network services, or destructive actions.
@@ -12,10 +12,10 @@ Resolve the canonical Git repository root from the current working directory
 unless the user supplies it, then run:
 
 ```bash
-docu-docu changes feedback pending --repository-root <root> --json
+toudocu changes feedback pending --repository-root <root> --json
 ```
 
-Inside the Docu-docu source repository use `go run ./cmd/docu-docu` in place of
+Inside the Toudocu source repository use `go run ./cmd/toudocu` in place of
 the installed executable. If `feedback` is `null`, report that no pending local
 feedback exists and stop successfully. Never invent or recover IDs from the UI.
 
@@ -61,7 +61,7 @@ unchanged `reviewId`, `feedbackId`, `feedbackDigest`, `revision` and
 in a regular non-symlink temporary JSON file outside tracked sources, then run:
 
 ```bash
-docu-docu changes feedback respond --input <response.json> \
+toudocu changes feedback respond --input <response.json> \
   --repository-root <root> --json
 ```
 

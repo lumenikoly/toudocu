@@ -1,6 +1,6 @@
 # Work tasks
 
-Docu-docu stores each work item in a separate file, `work/*.md`.
+Toudocu stores each work item in a separate file, `work/*.md`.
 Functionality, maintenance, documentation and research uses
 `TASK-*`, and bugs - `BUG-*`. All types remain one `WorkItem` entity,
 use general statuses, dependencies, context/verify commands and the annual archive.
@@ -26,7 +26,7 @@ For a draft, correct `Статус`, `Тип` and a non-empty section are requir
 
 ## When to create a task
 
-Docu-docu creates a neutral framework, but does not decide whether the work item is needed for
+Toudocu creates a neutral framework, but does not decide whether the work item is needed for
 specific request. Don't create `TASK-*` for every prompt, normal
 question, reading code, formatting, small local edits or
 refactoring without changing behavior.
@@ -39,10 +39,10 @@ behavior. If a Ready+ task already exists, use its context instead
 creating a duplicate.
 
 The installed skill sets this selective mode to `AGENTS.md` only by
-explicit prompt call `$docu-docu init`. This is not a Go CLI command and is not a reason
+explicit prompt call `$toudocu init`. This is not a Go CLI command and is not a reason
 create a separate task just for the sake of initialization.
 
-Full `$docu-docu refresh` and limited `$docu-docu refresh diff` also
+Full `$toudocu refresh` and limited `$toudocu refresh diff` also
 do not create `TASK-*` unconditionally. They apply the same threshold: durable work item
 appears only with a significant scope, stable acceptance criteria,
 handoff or an explicit requirement of the user or project.
@@ -63,7 +63,7 @@ Markdown also accepts the English values `draft`, `ready`,
 
 ## Actual impact on documentation
 
-`docu-docu task changes TASK-ID --base ... --target ...` and the Changes tab
+`toudocu task changes TASK-ID --base ... --target ...` and the Changes tab
 map explicitly listed `Влияние на документацию` paths to Git change
 set. `TASK-*` itself is displayed separately as a task contract and does not increase
 permanent documentation counter. Explicit paths take precedence over computed paths
@@ -71,7 +71,7 @@ connections module/use case/flow/screen/contract.
 
 `declared-document-not-changed` and `undeclared-document-change` by default
 warning: this is a review signal, not an automatic conclusion about the correctness of the code.
-The active base/target is always shown; Docu-docu does not detect hidden source
+The active base/target is always shown; Toudocu does not detect hidden source
 commit tasks.
 
 ## Types
@@ -112,7 +112,7 @@ the same scenario. The following fields are always required: `Серьёзнос
 | `Воспроизводимость` | `Всегда`, `Часто`, `Иногда`, `Редко`, `Не воспроизводится`, `Неизвестно` |
 | `Регрессия` | `Да`, `Нет` |
 
-Severity describes the consequences, and priority describes the order of operation; Docu-docu not
+Severity describes the consequences, and priority describes the order of operation; Toudocu not
 calculates one field from another. For `Регрессия: Да`, the document specifies
 version or period of manifestation.
 
@@ -172,8 +172,8 @@ work/archive/2026/TASK-AUTH-009.md
 Use commands rather than manual movement:
 
 ```bash
-docu-docu task archive TASK-AUTH-009 ./docs --format json
-docu-docu task restore TASK-AUTH-009 ./docs --format json
+toudocu task archive TASK-AUTH-009 ./docs --format json
+toudocu task restore TASK-AUTH-009 ./docs --format json
 ```
 
 Archiving is only allowed for `Done`/`Выполнено` and
@@ -227,7 +227,7 @@ refers to exactly one target and contains at least one command:
 - `AC-01` → `go test ./internal/auth -run TestInvalidToken`
 - `AC-02` → `go test ./internal/auth -run TestResetPassword`
 - `ALL` → `go test ./...`
-- `DOCS` → `docu-docu check ./docs --strict`
+- `DOCS` → `toudocu check ./docs --strict`
 ```
 
 Targets have the following meaning:
@@ -302,7 +302,7 @@ For `Выполнено` status, all criteria must be `[x]`.
 - `AC-01` → `go test ./internal/auth -run TestExpiredResetToken`
 - `AC-02` → `go test ./internal/auth -run TestResetTokenSingleUse`
 - `ALL` → `go test ./...`
-- `DOCS` → `docu-docu check ./docs --strict`
+- `DOCS` → `toudocu check ./docs --strict`
 
 ## Влияние на документацию
 

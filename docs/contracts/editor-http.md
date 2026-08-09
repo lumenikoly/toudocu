@@ -2,7 +2,7 @@
 
 - Идентификатор: CON-EDITOR-HTTP-V1
 - Статус: Готово
-- Владелец: Команда Docu-docu
+- Владелец: Команда Toudocu
 - Последнее обновление: 2026-08-08
 
 [OpenAPI 3.1.0](editor.openapi.yaml) содержит маршруты, параметры, коды ответа
@@ -11,23 +11,23 @@
 
 Здесь описаны гарантии canonical portal services, которые не выражаются одной
 HTTP-схемой: граница workspace, защита записи, поведение пересборки и проверка
-доступности новой версии Docu-docu.
+доступности новой версии Toudocu.
 
 ## Доступность
 
-Editor API существует только в canonical `docu-docu serve`. Его нет в
+Editor API существует только в canonical `toudocu serve`. Его нет в
 статической сборке, locale-разделах и при прямом `serve` translation root.
 Go включает editor UI только при capability `editor` и передаёт same-origin API
 base в versioned page bootstrap; frontend не выводит endpoint из URL страницы.
 
 Редактор видит только разрешённые `.md`, `.yaml`, `.yml` и `.json` внутри
 documentation root. OpenAPI-файлы проверяются тем же валидатором, что и при
-`docu-docu check`.
+`toudocu check`.
 
 ## Проверка версии
 
 Canonical `serve` по умолчанию публикует read-only endpoint
-`/_docu-docu/api/version`. При первом запросе процесс один раз обращается к
+`/_toudocu/api/version`. При первом запросе процесс один раз обращается к
 фиксированному GitHub Releases API проекта, принимает только stable release с
 точной версией `X.Y.Z`, ограничивает время ожидания тремя секундами и тело
 ответа 64 KiB, запрещает redirects, затем кеширует результат до завершения

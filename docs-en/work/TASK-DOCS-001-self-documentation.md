@@ -1,17 +1,17 @@
-# TASK-DOCS-001: Add Docu-docu self-documentation
+# TASK-DOCS-001: Add Toudocu self-documentation
 
 - Status: Completed
 - Type: Documentation
 - Priority: High
 - Module: MOD-MODEL
 - Use case: UC-DOCS-02
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-08-04
 
 ## Result
 
 The repository contains its own consistent documentation that describes
-current implementation and undergoes strict testing by Docu-docu itself.
+current implementation and undergoes strict testing by Toudocu itself.
 
 ## Scope
 
@@ -26,7 +26,7 @@ current implementation and undergoes strict testing by Docu-docu itself.
 
 ## Acceptance criteria
 
-- [x] `AC-01` Self-documentation passes `docu-docu check --strict` without comments.
+- [x] `AC-01` Self-documentation passes `toudocu check --strict` without comments.
 - [x] `AC-02` Modules, scripts, rules, roadmap and CLI contract are linked by stable IDs.
 - [x] `AC-03` README contains a direct link to the project's original documentation.
 
@@ -39,11 +39,11 @@ current implementation and undergoes strict testing by Docu-docu itself.
 
 ## Verification
 
-- `AC-01` → `go run ./cmd/docu-docu check ./docs --strict --stale-days 0`
+- `AC-01` → `go run ./cmd/toudocu check ./docs --strict --stale-days 0`
 - `AC-02` → `go test ./... -run 'TestKnowledgeModel|TestMinimalDocumentationCheckAndBuild'`
 - `AC-03` → `grep -Fq 'Исходная документация проекта' README.md && grep -Fq 'docs/index.md' README.md`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --strict --stale-days 0`
 
 ## Documentation impact
 

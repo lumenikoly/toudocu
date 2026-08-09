@@ -78,7 +78,7 @@ func TestBootstrapSerializationEscapesHTMLTermination(t *testing.T) {
 
 func TestStaticBootstrapRejectsEndpointsAndAbsoluteBases(t *testing.T) {
 	value := testBootstrap()
-	value.Endpoints = &Endpoints{Editor: "/_docu-docu/api/editor"}
+	value.Endpoints = &Endpoints{Editor: "/_toudocu/api/editor"}
 	if _, err := MarshalBootstrap(value); err == nil {
 		t.Fatal("static runtime accepted server endpoints")
 	}

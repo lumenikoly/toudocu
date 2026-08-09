@@ -1,6 +1,6 @@
-package docudocu
+package toudocu
 
-import markdowncore "docu-docu/internal/markdown"
+import markdowncore "toudocu/internal/markdown"
 
 type renderContext struct {
 	ResolveLink          LinkResolver

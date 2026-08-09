@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"encoding/json"
@@ -111,7 +111,7 @@ func TestReviewUnsafeBinaryAndLargeSource(t *testing.T) {
 
 func TestReviewStoreDiscussionFeedbackResponseAndReanchor(t *testing.T) {
 	root, docs := newReviewRepository(t)
-	t.Setenv("DOCU_DOCU_STATE_HOME", t.TempDir())
+	t.Setenv("TOUDOCU_STATE_HOME", t.TempDir())
 	service, err := newReviewService(reviewOptions(root, docs))
 	if err != nil {
 		t.Fatal(err)
@@ -206,7 +206,7 @@ func TestReviewStoreDiscussionFeedbackResponseAndReanchor(t *testing.T) {
 
 func TestReviewDiscussionMutationsAndCleanup(t *testing.T) {
 	root, docs := newReviewRepository(t)
-	t.Setenv("DOCU_DOCU_STATE_HOME", t.TempDir())
+	t.Setenv("TOUDOCU_STATE_HOME", t.TempDir())
 	service, err := newReviewService(reviewOptions(root, docs))
 	if err != nil {
 		t.Fatal(err)
@@ -271,7 +271,7 @@ func TestReviewDiscussionMutationsAndCleanup(t *testing.T) {
 
 func TestReviewFeedbackResponseEnforcesFIFO(t *testing.T) {
 	root, docs := newReviewRepository(t)
-	t.Setenv("DOCU_DOCU_STATE_HOME", t.TempDir())
+	t.Setenv("TOUDOCU_STATE_HOME", t.TempDir())
 	service, err := newReviewService(reviewOptions(root, docs))
 	if err != nil {
 		t.Fatal(err)
@@ -314,7 +314,7 @@ func TestReviewFeedbackResponseEnforcesFIFO(t *testing.T) {
 
 func TestReviewCleanupCorruptionAndBusyState(t *testing.T) {
 	root, docs := newReviewRepository(t)
-	t.Setenv("DOCU_DOCU_STATE_HOME", t.TempDir())
+	t.Setenv("TOUDOCU_STATE_HOME", t.TempDir())
 	service, err := newReviewService(reviewOptions(root, docs))
 	if err != nil {
 		t.Fatal(err)
@@ -340,7 +340,7 @@ func TestReviewCleanupCorruptionAndBusyState(t *testing.T) {
 
 func TestReviewCASConcurrentWritersAndBusyLock(t *testing.T) {
 	root, docs := newReviewRepository(t)
-	t.Setenv("DOCU_DOCU_STATE_HOME", t.TempDir())
+	t.Setenv("TOUDOCU_STATE_HOME", t.TempDir())
 	service, err := newReviewService(reviewOptions(root, docs))
 	if err != nil {
 		t.Fatal(err)
@@ -402,7 +402,7 @@ func TestReviewCASConcurrentWritersAndBusyLock(t *testing.T) {
 
 func TestReviewConflictDoesNotRetainSnapshot(t *testing.T) {
 	root, docs := newReviewRepository(t)
-	t.Setenv("DOCU_DOCU_STATE_HOME", t.TempDir())
+	t.Setenv("TOUDOCU_STATE_HOME", t.TempDir())
 	service, err := newReviewService(reviewOptions(root, docs))
 	if err != nil {
 		t.Fatal(err)
@@ -427,7 +427,7 @@ func TestReviewConflictDoesNotRetainSnapshot(t *testing.T) {
 
 func TestReviewHTTPAndCLI(t *testing.T) {
 	root, docs := newReviewRepository(t)
-	t.Setenv("DOCU_DOCU_STATE_HOME", t.TempDir())
+	t.Setenv("TOUDOCU_STATE_HOME", t.TempDir())
 	server := &documentationServer{options: reviewOptions(root, docs), changesCache: map[string]*ChangeSetReport{}}
 	request := httptest.NewRequest(http.MethodGet, reviewAPIBase+"/repository/changes", nil)
 	response := httptest.NewRecorder()
@@ -477,7 +477,7 @@ func TestReviewHTTPAndCLI(t *testing.T) {
 	readonlyResponse := httptest.NewRecorder()
 	readonlyRequest := httptest.NewRequest(http.MethodPost, reviewAPIBase+"/feedback/01ARZ3NDEKTSV4RRFFQ69G5FAW/response?target=HEAD", strings.NewReader(`{}`))
 	readonlyRequest.Header.Set("Content-Type", "application/json")
-	readonlyRequest.Header.Set("X-Docu-docu-Action", "review-feedback-response")
+	readonlyRequest.Header.Set("X-Toudocu-Action", "review-feedback-response")
 	readonlyRequest.Header.Set("Origin", "http://example.com")
 	server.ServeHTTP(readonlyResponse, readonlyRequest)
 	if readonlyResponse.Code != http.StatusForbidden || !strings.Contains(readonlyResponse.Body.String(), "REVIEW_READ_ONLY") {

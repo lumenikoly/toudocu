@@ -1,13 +1,13 @@
-# CLI Docu-docu v1
+# CLI Toudocu v1
 
 - Идентификатор: CON-CLI-V1
 - Статус: Готово
-- Владелец: Команда Docu-docu
+- Владелец: Команда Toudocu
 - Последнее обновление: 2026-08-09
 
 Документ фиксирует команды, побочные эффекты, exit codes и версионируемые
 JSON-результаты CLI. Конкретный синтаксис флагов показывает
-`docu-docu COMMAND --help`.
+`toudocu COMMAND --help`.
 
 ## Команды
 
@@ -32,13 +32,13 @@ JSON-результаты CLI. Конкретный синтаксис флаг�
 | `version` | Печатает версию | Нет |
 
 Путь без имени команды не запускает неявную сборку. Команд верхнего уровня
-`init` и `refresh` нет: одноимённые `$docu-docu` workflows принадлежат AI-skill,
+`init` и `refresh` нет: одноимённые `$toudocu` workflows принадлежат AI-skill,
 а не Go CLI.
 
 ## Skill lifecycle
 
 ```text
-docu-docu skill install|status|update|uninstall
+toudocu skill install|status|update|uninstall
   [--agent auto|codex|claude-code|copilot|all]
   [--scope project|user]
   [--repository-root DIR]
@@ -82,7 +82,7 @@ CLI различает состояния `not-installed`, `installed`, `outdate
   `--dry-run` можно использовать и для полного Draft.
 - `changes` читает Git напрямую без shell, fetch, checkout и записи в index.
 - Git revisions для `changes` разрешаются от enclosing Git top-level, а
-  `.docu-docu/config.yml` и repository-relative config paths — от явно
+  `.toudocu/config.yml` и repository-relative config paths — от явно
   выбранного `--repository-root`, который должен содержать documentation root.
 - `changes`, `changes file` и `task changes` принимают `--include-assets`,
   который включает binary assets независимо от `changes.includeAssets`, но с
@@ -120,8 +120,8 @@ CLI различает состояния `not-installed`, `installed`, `outdate
 ## Agent feedback
 
 ```text
-docu-docu changes feedback pending [--repository-root DIR] --json
-docu-docu changes feedback respond --input response.json \
+toudocu changes feedback pending [--repository-root DIR] --json
+toudocu changes feedback respond --input response.json \
   [--repository-root DIR] [--json]
 ```
 

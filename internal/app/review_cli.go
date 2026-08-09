@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"encoding/json"
@@ -138,8 +138,8 @@ func printReviewFeedbackHelp(w io.Writer) {
 	fmt.Fprint(w, `Передаёт локальные review snapshots между Changes и установленным AI-skill.
 
 Использование:
-  docu-docu changes feedback pending [--repository-root DIR] --json
-  docu-docu changes feedback respond --input response.json [--repository-root DIR] [--json]
+  toudocu changes feedback pending [--repository-root DIR] --json
+  toudocu changes feedback respond --input response.json [--repository-root DIR] [--json]
 
 pending возвращает oldest FIFO snapshot и повторяет его до успешного полного respond.
 Команды не запускают агента и не изменяют Git.

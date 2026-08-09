@@ -24,29 +24,29 @@ and receives an updated model and portal after saving or external changes.
 
 ## Preconditions
 
-- Docu-docu is available for launch;
+- Toudocu is available for launch;
 - the developer has read and write rights to the documentation and the output directory.
 
 ## Main scenario
 
-1. The developer runs `docu-docu serve ./docs`.
-2. Docu-docu builds the portal in the output directory.
-3. Docu-docu starts an HTTP server on `127.0.0.1:8080` and reports the address.
+1. The developer runs `toudocu serve ./docs`.
+2. Toudocu builds the portal in the output directory.
+3. Toudocu starts an HTTP server on `127.0.0.1:8080` and reports the address.
 4. The developer opens the portal in a browser.
 5. The portal requests same-origin version status. If a stable release is
    newer, a suggestion to open the official release appears below the header;
    the developer may dismiss it for that version.
-6. If the developer navigates to `/_docu-docu/api-docs/`, they select the Editor
+6. If the developer navigates to `/_toudocu/api-docs/`, they select the Editor
    or Changes contract, expand an operation, and optionally execute a safe
    `GET`/`HEAD`; the scenario ends at `SC-SITE-API-DOCS`.
 7. Otherwise, on the roadmap page the developer may choose an existing stage,
    review the suggested `DLV-ROADMAP-NNN`, change the ID, and add a one-line
-   deliverable. Docu-docu performs a CAS insertion and returns the page to the stage.
-8. Or the developer opens `/_docu-docu/editor/`; the Editor receives a
+   deliverable. Toudocu performs a CAS insertion and returns the page to the stage.
+8. Or the developer opens `/_toudocu/editor/`; the Editor receives a
    revision, a safe file list, and the shared template registry.
 9. The developer opens the source, changes the text, checks the Markdown preview
    and positional diagnostics, and saves it.
-10. Docu-docu compares the SHA-256 digest, atomically replaces the file, and synchronously
+10. Toudocu compares the SHA-256 digest, atomically replaces the file, and synchronously
    rebuilds model, HTML, search and diagnostics.
 11. When transitioning between canonical HTML documents, the portal can prefetch the
    target page, check the current revision and replace the document layout without
@@ -88,7 +88,7 @@ and receives an updated model and portal after saving or external changes.
 - a translation portal whose first build fails shows a safe page
   `Unavailable`; subsequent error does not replace last-known-good snapshot;
 - `--host 0.0.0.0` opens the server for the local network without TLS and authorization;
-  Docu-docu displays an explicit warning.
+  Toudocu displays an explicit warning.
 
 ## Postconditions
 
@@ -96,7 +96,7 @@ While the command is running, ordinary routes serve output, and a separate
 editor API reads and modifies only the permitted workspace inside the docs
 root. Other repository files are unavailable. After the process stops, the API
 disappears and the port is released. The locale mount
-`/_docu-docu/locales/<locale>/` is read-only: it contains no Editor, Changes,
+`/_toudocu/locales/<locale>/` is read-only: it contains no Editor, Changes,
 workspace, API docs, or canonical API.
 
 ## Business rules

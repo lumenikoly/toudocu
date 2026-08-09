@@ -1,4 +1,4 @@
-# TASK-SKILL-001: Add embedded Docu-docu skill installation
+# TASK-SKILL-001: Add embedded Toudocu skill installation
 
 - Status: Done
 - Type: Feature
@@ -6,12 +6,12 @@
 - Module: MOD-CLI
 - Use case: UC-AGENT-01
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-08-06
 
 ## Result
 
-The version `0.0.1` binary contains the canonical `docu-docu` skill and provides
+The version `0.0.1` binary contains the canonical `toudocu` skill and provides
 a safe offline lifecycle for Codex, Claude Code, and Copilot in project/user scope.
 
 ## Behavior change
@@ -23,7 +23,7 @@ chosen AI host directory without verifiable ownership or an update lifecycle.
 
 ### After
 
-The `docu-docu skill install|status|update|uninstall` commands resolve the
+The `toudocu skill install|status|update|uninstall` commands resolve the
 target, classify the existing copy using the manifest/checksums, and change
 only an unchanged managed package through atomic publication and rollback.
 
@@ -45,8 +45,8 @@ only an unchanged managed package through atomic publication and rollback.
 
 ## Acceptance criteria
 
-- [x] `AC-01` The binary embeds the full current `skills/docu-docu` package as
-  skill `docu-docu` version `0.0.1`, validating metadata, paths, collisions, and
+- [x] `AC-01` The binary embeds the full current `skills/toudocu` package as
+  skill `toudocu` version `0.0.1`, validating metadata, paths, collisions, and
   2 MiB/10 MiB limits.
 - [x] `AC-02` Registry, detection, target resolution, semver, manifest,
   checksums, and planner cover all eight public states.
@@ -76,10 +76,10 @@ only an unchanged managed package through atomic publication and rollback.
 - `AC-02` → `go test ./internal/skillinstall`
 - `AC-03` → `go test ./internal/app -run TestSkillCLI`
 - `AC-04` → `go test ./internal/skillinstall -run 'Test(Unsafe|Boundary|Modified|Symlink|Mode|Publish|Atomic|InstallDoesNotExecute|StageRejectsTraversal)'`
-- `AC-05` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
-- `AC-06` → `make check && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ./cmd/docu-docu && CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ./cmd/docu-docu && CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build ./cmd/docu-docu && CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build ./cmd/docu-docu && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./cmd/docu-docu && CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go test -c -o /tmp/docu-docu-skillinstall-darwin.test ./internal/skillinstall && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go test -c -o /tmp/docu-docu-skillinstall-windows.test.exe ./internal/skillinstall`
+- `AC-05` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
+- `AC-06` → `make check && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ./cmd/toudocu && CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ./cmd/toudocu && CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build ./cmd/toudocu && CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build ./cmd/toudocu && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./cmd/toudocu && CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go test -c -o /tmp/toudocu-skillinstall-darwin.test ./internal/skillinstall && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go test -c -o /tmp/toudocu-skillinstall-windows.test.exe ./internal/skillinstall`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `make check`
 
 ## Documentation impact

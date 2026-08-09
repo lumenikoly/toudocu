@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 // ChangeSetReport is the versioned, machine-readable documentation changes report.
 type ChangeSetReport struct {

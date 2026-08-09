@@ -1,7 +1,6 @@
-package docudocu
+package toudocu
 
 import (
-	frontend "docu-docu/internal/site"
 	"encoding/json"
 	"errors"
 	"html/template"
@@ -10,11 +9,12 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	frontend "toudocu/internal/site"
 )
 
 const (
-	editorAPIBase   = "/_docu-docu/api/editor"
-	editorUIPath    = "/_docu-docu/editor/"
+	editorAPIBase   = "/_toudocu/api/editor"
+	editorUIPath    = "/_toudocu/editor/"
 	editorBodyLimit = 3 << 20
 )
 
@@ -109,8 +109,8 @@ func requireEditorJSONAction(w http.ResponseWriter, r *http.Request, action stri
 		writeEditorError(w, http.StatusUnsupportedMediaType, "invalid_content_type", "Требуется Content-Type application/json", nil)
 		return false
 	}
-	if r.Header.Get("X-Docu-docu-Action") != action {
-		writeEditorError(w, http.StatusForbidden, "action_forbidden", "Неверный X-Docu-docu-Action", nil)
+	if r.Header.Get("X-Toudocu-Action") != action {
+		writeEditorError(w, http.StatusForbidden, "action_forbidden", "Неверный X-Toudocu-Action", nil)
 		return false
 	}
 	if !editorOriginAllowed(r) {
@@ -469,7 +469,7 @@ func (s *documentationServer) serveEditorUI(w http.ResponseWriter, r *http.Reque
 			{URL: "/assets/" + mustFrontendAsset("codemirror.js"), Module: true},
 			{URL: "/assets/" + mustFrontendAsset("editor.js"), Module: true},
 		},
-		Bootstrap: workspacePageBootstrap(uiModel, "_docu-docu/editor/index.html", "../../assets/", frontend.Capabilities{Editor: true, Rebuild: true}),
+		Bootstrap: workspacePageBootstrap(uiModel, "_toudocu/editor/index.html", "../../assets/", frontend.Capabilities{Editor: true, Rebuild: true}),
 		Header:    template.HTML(workspaceHeader(uiModel, workspaceEditor)),
 	})
 	if err != nil {

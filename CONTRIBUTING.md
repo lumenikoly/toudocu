@@ -1,6 +1,6 @@
 # Contributing
 
-Спасибо за вклад в Docu-docu.
+Спасибо за вклад в Toudocu.
 
 ## Процесс
 

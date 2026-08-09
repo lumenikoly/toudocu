@@ -4,7 +4,7 @@
 - Type: Screen
 - Module: MOD-SITE
 - Status: Implemented
-- Route: `/_docu-docu/api-docs/`
+- Route: `/_toudocu/api-docs/`
 - Preview: `../assets/screens/site-api-docs.png`
 - Last updated: 2026-08-06
 

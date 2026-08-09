@@ -8,7 +8,7 @@
 - Регрессия: Нет
 - Модуль: MOD-SITE
 - Сценарий: UC-DOCS-03
-- Владелец: Команда Docu-docu
+- Владелец: Команда Toudocu
 - Стандарты: STD-GO-001, STD-DOCS-001
 - Последнее обновление: 2026-08-09
 
@@ -75,8 +75,8 @@ Frontend не инвалидирует поколения validation/preview п�
 - `AC-02` → `npm --prefix web test`
 - `AC-03` → `npm --prefix web test`
 - `ALL` → `npm --prefix web test && go test ./...`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
-- `QUALITY` → `make fmt-check && go vet ./... && go test -race ./... && go mod verify && npm --prefix web run typecheck && npm --prefix web run build && for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64; do GOOS=${target%/*} GOARCH=${target#*/} CGO_ENABLED=0 go build -trimpath -o /dev/null ./cmd/docu-docu || exit 1; done`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
+- `QUALITY` → `make fmt-check && go vet ./... && go test -race ./... && go mod verify && npm --prefix web run typecheck && npm --prefix web run build && for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64; do GOOS=${target%/*} GOARCH=${target#*/} CGO_ENABLED=0 go build -trimpath -o /dev/null ./cmd/toudocu || exit 1; done`
 
 ## Регрессионный тест
 
