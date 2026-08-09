@@ -20,11 +20,17 @@ Git revisions разрешаются от enclosing Git top-level. Для вло
 
 ## Три уровня diff
 
-`Исходник` — Git unified patch без external diff и textconv. Unified view
+`Diff` — Git unified patch без external diff и textconv. Unified view
 показывает old/new line numbers, переходы, копирование и deep links для hunks;
 полный patch можно скопировать отдельно. `Side by side` использует read-only
 CodeMirror MergeView над содержимым обеих Git-сторон. Binary и слишком большие
 файлы получают diagnostic, не блокируя change set.
+
+`Файл целиком` показывает текущую версию выбранного UTF-8 файла, а для
+удалённого файла — версию до удаления. Разработчик может выделить диапазон и
+задать по нему вопрос в локальном review. Фильтр «Тип» оставляет все изменения,
+только документационные вместе с корневым `CHANGELOG.md` или только остальные
+repository files.
 
 `До и после` пропускает обе версии Markdown через безопасный renderer портала.
 Новая или удалённая сторона явно отсутствует. Изменённые Markdown-секции

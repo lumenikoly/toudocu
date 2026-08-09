@@ -443,7 +443,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   gap: 14px;
   margin: 20px 0 28px;
 }
-.metric-card, .card {
+.metric-card, .card, .document-card {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
@@ -572,6 +572,13 @@ a.dashboard-focus:hover .focus-arrow { transform: translateX(4px); }
 .card-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .card-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .card { padding: 18px; }
+.document-card { display: flex; min-width: 0; flex-direction: column; padding: 18px; }
+.document-card .card-kicker { display: flex; flex-wrap: wrap; gap: 6px; }
+.document-card h3 { margin: 14px 0 0; font-size: 17px; line-height: 1.3; }
+.document-card h3 a { color: var(--text); text-decoration: none; }
+.document-card h3 a:hover { color: var(--accent); }
+.document-card > p { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+.document-card .card-path { margin-top: auto; padding-top: 14px; color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
 .card-link { color: inherit; text-decoration: none; transition: transform 120ms ease, border-color 120ms ease; }
 .card-link:hover { transform: translateY(-1px); border-color: var(--border-strong); box-shadow: var(--shadow); }
 .card-header { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
@@ -1351,6 +1358,7 @@ html[data-density="compact"] .nav-link,
 html[data-density="compact"] .nav-folder-link { min-height: 30px; padding-block: 3px; }
 html[data-density="compact"] .metric-card,
 html[data-density="compact"] .card,
+html[data-density="compact"] .document-card,
 html[data-density="compact"] .doc-content { padding: var(--space-panel); }
 html[data-density="compact"] .doc-content th,
 html[data-density="compact"] .doc-content td,
@@ -1661,7 +1669,7 @@ html[data-color-scheme="dark"] .scheme-toggle-indicator { background: var(--text
   .site-header, .sidebar, .page-toc, .document-toolbar, .site-footer, .copy-code, .document-context-button, .section-toggle, .diagram-tools, .screen-map-tools { display: none !important; }
   .site-layout, .page-grid { display: block; }
   .page-grid { padding: 0; }
-  .doc-content, .card, .metric-card { box-shadow: none; break-inside: avoid; }
+  .doc-content, .card, .document-card, .metric-card { box-shadow: none; break-inside: avoid; }
   .doc-section .section-body { display: block !important; }
   .usecase-tabs { display: none; }
   .usecase-panel[hidden] { display: block; }

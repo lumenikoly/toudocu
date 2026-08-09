@@ -11,7 +11,7 @@ registerMessages(changesMessages);
     const state: any = { report: null, repository: null, files: [], linked: [], selected: null, tab: 'source', merge: null, etag: '', repositoryEtag: '', reviewEtag: '', review: null, composerTarget: null, composerReturn: null, activeDiscussion: '', discussionScroll: 0 };
     const elements: any = {
         base: $('[data-base]'), branchBase: $('[data-branch-base]'), target: $('[data-target]'), targetRevision: $('[data-target-revision]'), targetRevisionWrap: $('[data-target-revision-wrap]'), apply: $('[data-apply-range]'), range: $('[data-range-summary]'), rangeMeta: $('[data-range-meta]'),
-        summary: $('[data-summary]'), rangeDetails: $('[data-range-details]'), stale: $('[data-stale]'), search: $('[data-search]'), status: $('[data-status]'), list: $('[data-file-list]'),
+        summary: $('[data-summary]'), rangeDetails: $('[data-range-details]'), stale: $('[data-stale]'), search: $('[data-search]'), status: $('[data-status]'), scope: $('[data-scope]'), list: $('[data-file-list]'),
         count: $('[data-result-count]'), detail: $('[data-detail]'), toast: $('[data-changes-toast]'), toastMessage: $('[data-toast-message]'),
         discussions: $('[data-discussions-panel]'), discussionList: $('[data-discussion-list]'), openDiscussionCount: $('[data-open-discussion-count]'), unsentCount: $('[data-unsent-count]'), sendFeedback: $('[data-send-feedback]'), reviewSummary: $('[data-review-summary]'),
         composer: $('[data-review-composer]'), composerForm: $('[data-review-form]'), composerMessage: $('[data-review-message]'), composerError: $('[data-review-error]'), composerTarget: $('[data-review-target-summary]'),
@@ -47,6 +47,7 @@ registerMessages(changesMessages);
     const reviewURL: any = (endpoint: any = '', extra: any = {}) => { const params: any = query(); Object.entries(extra).forEach(([key, value]: any) => value != null && params.set(key, value)); return `${REVIEW}${endpoint}?${params}`; };
     const languageFor: any = (path: any) => path.endsWith('.json') ? 'json' : /\.ya?ml$/i.test(path) ? 'yaml' : path.endsWith('.go') ? 'go' : path.endsWith('.java') ? 'java' : /\.(js|jsx|mjs|cjs)$/i.test(path) ? 'javascript' : /\.(ts|tsx|mts|cts)$/i.test(path) ? 'typescript' : /\.md$/i.test(path) ? 'markdown' : 'text';
     const changeText: any = (change: any) => [change.path, change.oldPath].join(' ').toLocaleLowerCase('ru');
+    const isDocumentationFile: any = (change: any) => !!change.documentation || change.path === 'CHANGELOG.md' || change.oldPath === 'CHANGELOG.md';
     function normalizedReviewFile(file: any) {
         const documentation: any = file.documentation || {};
         return {
@@ -68,6 +69,8 @@ registerMessages(changesMessages);
             params.set('q', elements.search.value);
         if (elements.status.value)
             params.set('status', elements.status.value);
+        if (elements.scope.value)
+            params.set('scope', elements.scope.value);
         history.replaceState(null, '', `${location.pathname}?${params}`);
     }
     function renderSummary() {
@@ -82,6 +85,10 @@ registerMessages(changesMessages);
         if (search && !changeText(change).includes(search))
             return false;
         if (elements.status.value && change.status !== elements.status.value)
+            return false;
+        if (elements.scope.value === 'documents' && !isDocumentationFile(change))
+            return false;
+        if (elements.scope.value === 'other' && isDocumentationFile(change))
             return false;
         return true;
     }
@@ -120,7 +127,7 @@ registerMessages(changesMessages);
     }
     const tabsFor: any = (change: any) => {
         const documentation: any = !REVIEW || !!change.documentation;
-        return [['source', text("features.changes.index.022")], ...(documentation && change.renderedDiffAvailable ? [['rendered', text("features.changes.index.023")]] : []), ...(documentation && change.semanticDiffAvailable ? [['semantic', text("features.changes.index.024")]] : []), ...(documentation ? [['relations', text("features.changes.index.025")]] : []), ...(change.classification === 'contract' ? [['openapi', 'OpenAPI']] : []), ...(change.mermaidBlocks?.length ? [['mermaid', 'Mermaid']] : []), ...(change.classification === 'asset' ? [['assets', 'Assets']] : []), ...([...(change.entitiesBefore || []), ...(change.entitiesAfter || [])].some((item: any) => item.type === 'screen' || item.type === 'transition') ? [['map', text("features.changes.index.026")]] : [])];
+        return [['source', text("features.changes.index.022")], ...(!change.binary && !change.asset ? [['file', text("features.changes.index.133")]] : []), ...(documentation && change.renderedDiffAvailable ? [['rendered', text("features.changes.index.023")]] : []), ...(documentation && change.semanticDiffAvailable ? [['semantic', text("features.changes.index.024")]] : []), ...(documentation ? [['relations', text("features.changes.index.025")]] : []), ...(change.classification === 'contract' ? [['openapi', 'OpenAPI']] : []), ...(change.mermaidBlocks?.length ? [['mermaid', 'Mermaid']] : []), ...(change.classification === 'asset' ? [['assets', 'Assets']] : []), ...([...(change.entitiesBefore || []), ...(change.entitiesAfter || [])].some((item: any) => item.type === 'screen' || item.type === 'transition') ? [['map', text("features.changes.index.026")]] : [])];
     };
     async function selectChange(change: any, tab: any = state.tab) {
         if (REVIEW) {
@@ -160,6 +167,8 @@ registerMessages(changesMessages);
         const panel: any = $('[data-tab-panel]', elements.detail);
         if (state.tab === 'source')
             await renderSource(panel, change);
+        if (state.tab === 'file')
+            await renderFile(panel, change);
         if (state.tab === 'rendered')
             await renderBeforeAfter(panel, change);
         if (state.tab === 'semantic')
@@ -279,6 +288,82 @@ registerMessages(changesMessages);
         panel.querySelector('[data-hunk-next]')?.addEventListener('click', () => focusHunk(activeHunk + 1));
         panel.querySelector('[data-copy-diff]').addEventListener('click', async () => { await navigator.clipboard.writeText(change.sourceDiff || ''); announce(text("features.changes.index.036")); });
         showUnified();
+    }
+    async function renderFile(panel: any, change: any) {
+        panel.innerHTML = text("features.changes.index.134");
+        try {
+            const deleted: any = change.status === 'deleted';
+            const content: any = await fetchSide(change, deleted ? 'before' : 'after');
+            panel.innerHTML = `${deleted ? text("features.changes.index.136") : ''}<div data-file-view></div>`;
+            const host: any = $('[data-file-view]', panel);
+            if (window.ToudocuCodeMirror?.createViewer) {
+                const menu: any = document.createElement('div');
+                menu.className = 'review-selection-menu';
+                menu.hidden = true;
+                menu.setAttribute('role', 'toolbar');
+                menu.setAttribute('aria-label', text("features.changes.index.137"));
+                menu.innerHTML = `<button type="button" data-selection-copy>${text("features.changes.index.138")}</button>${REVIEW ? `<button type="button" data-selection-question>${text("features.changes.index.139")}</button>` : ''}`;
+                panel.append(menu);
+                const controller: any = new AbortController();
+                let pendingSelection: any = null;
+                let pendingText: any = '';
+                const hideMenu: any = () => { menu.hidden = true; pendingSelection = null; pendingText = ''; };
+                const showMenu: any = () => {
+                    const selected: any = window.getSelection();
+                    if (!pendingSelection || !selected || selected.isCollapsed || !selected.rangeCount || !host.contains(selected.anchorNode))
+                        return hideMenu();
+                    const rectangles: any = selected.getRangeAt(0).getClientRects();
+                    const rectangle: any = rectangles[rectangles.length - 1] || selected.getRangeAt(0).getBoundingClientRect();
+                    pendingText = selected.toString();
+                    menu.style.visibility = 'hidden';
+                    menu.hidden = false;
+                    requestAnimationFrame(() => {
+                        if (menu.hidden)
+                            return;
+                        const bounds: any = menu.getBoundingClientRect();
+                        const gap: any = 8;
+                        const left: any = Math.min(innerWidth - bounds.width - gap, Math.max(gap, rectangle.left + rectangle.width / 2 - bounds.width / 2));
+                        const above: any = rectangle.top - bounds.height - gap;
+                        const top: any = above >= gap ? above : Math.min(innerHeight - bounds.height - gap, rectangle.bottom + gap);
+                        menu.style.left = `${left}px`;
+                        menu.style.top = `${top}px`;
+                        menu.style.visibility = '';
+                    });
+                };
+                const viewer: any = window.ToudocuCodeMirror.createViewer({ parent: host, doc: content, language: change.language || languageFor(change.path), onSelect: (selection: any) => { hideMenu(); pendingSelection = selection; } });
+                state.merge = { ...viewer, destroy() { controller.abort(); menu.remove(); viewer.destroy(); } };
+                host.addEventListener('pointerup', showMenu, { signal: controller.signal });
+                host.addEventListener('keyup', (event: any) => { if (event.key === 'Shift' || !event.shiftKey) showMenu(); }, { signal: controller.signal });
+                document.addEventListener('pointerdown', (event: any) => { if (!menu.contains(event.target)) hideMenu(); }, { signal: controller.signal });
+                document.addEventListener('scroll', hideMenu, { capture: true, signal: controller.signal });
+                document.addEventListener('keydown', (event: any) => { if (event.key === 'Escape' && !menu.hidden) { event.preventDefault(); event.stopPropagation(); hideMenu(); viewer.focus(); } }, { capture: true, signal: controller.signal });
+                $('[data-selection-copy]', menu).addEventListener('click', async () => {
+                    try {
+                        await navigator.clipboard.writeText(pendingText);
+                        announce(text("features.changes.index.140"));
+                        hideMenu();
+                        viewer.focus();
+                    }
+                    catch { announce(text("features.changes.index.141")); }
+                });
+                $('[data-selection-question]', menu)?.addEventListener('click', () => {
+                    const selection: any = pendingSelection;
+                    const returnElement: any = $('.cm-content', host);
+                    hideMenu();
+                    openComposer({ type: 'fileRange', path: change.path, start: selection.start, end: selection.end }, returnElement);
+                });
+                $('[data-selection-question]', menu)?.toggleAttribute('disabled', !state.repository?.feedbackWritable);
+            }
+            else {
+                const pre: any = document.createElement('pre');
+                pre.className = 'changes-diff';
+                pre.textContent = content;
+                host.append(pre);
+            }
+        }
+        catch (error: any) {
+            panel.innerHTML = text("features.changes.index.135", [escapeHTML(error.message)]);
+        }
     }
     async function renderBeforeAfter(panel: any, change: any) {
         panel.innerHTML = text("features.changes.index.037");
@@ -683,6 +768,7 @@ registerMessages(changesMessages);
         }
         elements.search.value = params.get('q') || '';
         elements.status.value = params.get('status') || '';
+        elements.scope.value = params.get('scope') || '';
         const requestedPath: any = params.get('path');
         const requestedTab: any = params.get('tab') || 'source';
         try {
@@ -694,7 +780,7 @@ registerMessages(changesMessages);
         catch (error: any) {
             elements.detail.innerHTML = text("features.changes.index.071", [escapeHTML(error.message)]);
         }
-        [elements.search, elements.status].forEach((control: any) => control.addEventListener('input', async () => {
+        [elements.search, elements.status, elements.scope].forEach((control: any) => control.addEventListener('input', async () => {
             const visible: any = renderList();
             if (!visible.some((change: any) => change.path === state.selected?.path)) {
                 if (visible[0])

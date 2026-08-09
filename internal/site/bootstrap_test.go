@@ -31,7 +31,7 @@ func TestWorkspaceTemplatesRenderSemanticContent(t *testing.T) {
 			t.Fatalf("changes includes removed %s: %s", removed, changes)
 		}
 	}
-	for _, required := range []string{"data-range-details", "changes-list-filters", "data-search", "data-status", "data-global-comment"} {
+	for _, required := range []string{"data-range-details", "changes-list-filters", "data-search", "data-status", "data-scope", "data-global-comment"} {
 		if !strings.Contains(changes, required) {
 			t.Fatalf("changes missing %s: %s", required, changes)
 		}

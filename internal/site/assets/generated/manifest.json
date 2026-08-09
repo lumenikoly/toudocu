@@ -3,19 +3,19 @@
   "assets": {
     "api-docs.js": {
       "file": "api-docs.js",
-      "sha256": "c5e35a15ceee090ddd4721f828aa55341083dbd392b17537853826018553edf7"
+      "sha256": "a27882d54c6885fe3c423989d20de583e7ed7d61dcaee4be47e1c3f31cad3945"
     },
     "appearance.js": {
       "file": "appearance.js",
-      "sha256": "37a5532e5ba9ef048313dc0d1bb72441cb26ecfde5603d15b46ba55aa2203768"
+      "sha256": "0413540b023acbd9aefa844b5347bc7ce9f418a626a6dc78d540741493a8d312"
     },
     "changes.css": {
       "file": "changes.css",
-      "sha256": "a6469d634fe83eee72e1a51676fbe799788a2a311758a1e5503be0f2e3042960"
+      "sha256": "540d68a6c378c40ce916501efbd59402128d48227f678fe3d099bff0ddd96cd1"
     },
     "changes.js": {
       "file": "changes.js",
-      "sha256": "339bc4c01cc551349fa3f7157928101f3f5b4c7737089a2315a52e41c670f97d"
+      "sha256": "d0e598110090557d4f754335bc09a0588f55218f3b109fae0e1b1be671454bf8"
     },
     "codemirror.checksums.txt": {
       "file": "codemirror.checksums.txt",
@@ -55,15 +55,15 @@
     },
     "playable-flow.js": {
       "file": "playable-flow.js",
-      "sha256": "99991227d3f006fd8bcda23d8fd3b5b97267d5314d34ece79e18f77693e3f5bb"
+      "sha256": "46a47d6e068e389eb85e637c105f1cd48aaf0fde9ae953861312793c66d6dece"
     },
     "portal.css": {
       "file": "portal.css",
-      "sha256": "e5bc2464ae1c1e58f5c537682b07c70fe984b4ed5ec14d501291e7d14d103f5c"
+      "sha256": "cabf2c552346e202fac8777658cbb065597fcba8ec2f87e190cd3121ae63bb9d"
     },
     "portal.js": {
       "file": "portal.js",
-      "sha256": "a97687e8772ef550502ed6d3eb5ceba7a05cb2f43e6daffe94a660ee1f42ab2c"
+      "sha256": "583fc2d6bda997a7716f7c53a71d2c8dfe53d36af161b9f747b8e122940254f4"
     },
     "screen-map.css": {
       "file": "screen-map.css",
@@ -71,7 +71,7 @@
     },
     "screen-map.js": {
       "file": "screen-map.js",
-      "sha256": "158f8f4df3c7381ae207311bb21aa29731efe9bc8752abe8c63727bca3b7b052"
+      "sha256": "df5e06339868ee170e61f1713da49eddc904de85b22f08efa8e30079a754bb6a"
     },
     "serve.css": {
       "file": "serve.css",

@@ -31,21 +31,24 @@ Read-only CodeMirror merge обновляет theme compartment без сбро�
 ## Repository files и комментарии
 
 Список всегда сортируется по path и делится на «Изменённые» и «Связанные».
-Поиск и статус находятся в самой панели файлов; строки не повторяют filename в
-path. Picker ищет только по path/name; linked file остаётся client-side до
-первого `fileRange` или `file` comment.
+Поиск, статус и тип находятся в самой панели файлов. Тип переключает все
+изменения, документационные файлы вместе с корневым `CHANGELOG.md` и остальные
+файлы; строки не повторяют filename в path. Picker ищет только по path/name; linked file остаётся
+client-side до первого `fileRange` или `file` comment.
 
-Первый подходящий файл автоматически открывается на вкладке «Исходник». Явный
+Первый подходящий файл автоматически открывается на вкладке «Diff». Явный
 `path/tab` и выбранный файл при watcher refresh имеют приоритет; фильтр выбирает
-первый оставшийся файл или показывает компактное empty state. Старый
-`tab=summary` открывает source. Отдельной вкладки «Сводка» нет. Статус, path и
-line stats остаются в header, а diagnostics появляются только при наличии;
-severity `error` раскрывает их автоматически. Документационные файлы сохраняют
-только применимые rendered, semantic, relations, OpenAPI, Mermaid, assets и map
-вкладки. JSON, YAML, Markdown, Go, Java и JavaScript/TypeScript получают
-language support, прочий UTF-8 — plain text.
-Unified и Side-by-side образуют один переключатель, а copy diff остаётся
-tertiary action.
+первый оставшийся файл или показывает компактное empty state. Старые
+`tab=summary` и `tab=source` открывают Diff. Отдельной вкладки «Сводка» нет.
+Вкладка «Файл целиком» лениво загружает текущую версию, а для удалённого файла —
+версию до удаления. Выделенный диапазон можно передать в комментарий к файлу.
+Статус, path и line stats остаются в header, а diagnostics появляются только
+при наличии; severity `error` раскрывает их автоматически. Документационные
+файлы сохраняют только применимые rendered, semantic, relations, OpenAPI,
+Mermaid, assets и map вкладки. JSON, YAML, Markdown, Go, Java и
+JavaScript/TypeScript получают language support, прочий UTF-8 — plain text.
+Unified и Side-by-side образуют один переключатель внутри Diff, а copy diff
+остаётся tertiary action.
 
 Комментарий создаётся из gutter `+`, выделенного line range/exact text,
 действия файла или общего действия в header discussions. Composer содержит
