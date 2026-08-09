@@ -25,12 +25,13 @@ The Go CLI also has no `refresh` command. Explicit `$docu-docu refresh` and
 reviews all source documentation; the second scopes evidence from the current
 worktree relative to `HEAD` and includes affected documentation.
 
-For ordinary CLI, portal, task, and documentation work, use the canonical documentation root
-as the only source for repository search, inventory, semantic review,
-implementation analysis, and task context. Exclude configured translation roots,
-including translated work items. A translation root may be read only when the
-user explicitly asks to check, find, build, run, or inspect that locale; restrict
-the operation to the selected locale and the minimum necessary files.
+For ordinary CLI, portal, task, and documentation work, use the canonical
+documentation root as the only documentation and backlog source. Repository
+code, tests, contracts, CI, and other non-translation artifacts remain valid
+implementation evidence. Exclude configured translation roots, including
+translated work items. A translation root may be read only when the user
+explicitly asks to check, find, build, run, or inspect that locale; restrict the
+operation to the selected locale and the files required by that operation.
 
 ## Documentation gate
 
@@ -54,21 +55,24 @@ structural check both pass.
 |---|---|---|
 | `check` | No | Validate safety, links, IDs, and explicit relationships |
 | `build` | Writes output; `--clean` removes safe output | Generate the static portal and report |
-| `serve` | Builds output and starts local HTTP | Preview with rebuilds |
+| `serve` | Writes output and starts unauthenticated HTTP/editor; explicit save, create, and roadmap-add actions can change canonical sources | Preview with rebuilds |
+| `changes` / `changes file` / `task changes` | Read-only unless `-o` writes a report | Inspect Git-backed changes |
 | `search` | No | Find source documents |
 | `task init` / `scaffold` | Creates one file | Create a neutral ID-based scaffold |
 | `task ready` | No | Validate a full Draft or Ready contract |
 | `task context` | No | Read full Ready+ task-local context |
-| `task verify --dry-run` | No | Inspect the verification plan |
+| `task verify --dry-run` | Read-only unless `--report` writes JSON | Inspect the verification plan |
 | `task verify --run` | Executes trusted repository commands | Verify an explicitly requested task |
 | `task archive` | Moves one file | Archive one valid Done or Cancelled task |
 | `task restore` | Moves one file | Restore one task from the yearly archive |
+| `skill status` / `version` | No | Inspect the installed skill or CLI version |
+| `skill install` / `update` / `uninstall` | Writes the selected skill target | Manage the offline skill package |
 
 Prefer JSON for agent diagnosis and text for human confirmation:
 
 ```bash
-docu-docu check ./docs --repository-root . --format json
-docu-docu check ./docs --repository-root .
+docu-docu check <docs-root> --repository-root <repository-root> --format json
+docu-docu check <docs-root> --repository-root <repository-root>
 ```
 
 The ordinary check fails on errors and reports warnings. `--strict` additionally
@@ -132,8 +136,8 @@ read-only `task ready`. For implementation of an existing Ready+ task, start
 with:
 
 ```bash
-docu-docu task context TASK-AREA-001 ./docs \
-  --repository-root . \
+docu-docu task context TASK-AREA-001 <docs-root> \
+  --repository-root <repository-root> \
   --format json
 ```
 
@@ -156,8 +160,10 @@ checkboxes track implementation steps and need neither.
 Keep active task files in `work/`. Archive a terminal task only through:
 
 ```bash
-docu-docu task archive TASK-AREA-001 ./docs --format json
-docu-docu task restore TASK-AREA-001 ./docs --format json
+docu-docu task archive TASK-AREA-001 <docs-root> \
+  --repository-root <repository-root> --format json
+docu-docu task restore TASK-AREA-001 <docs-root> \
+  --repository-root <repository-root> --format json
 ```
 
 The archive path is `work/archive/YYYY/`. Archive and restore preserve Markdown
@@ -168,26 +174,31 @@ work items that still participate in dependencies or traceability.
 Run:
 
 ```bash
-docu-docu task verify TASK-AREA-001 ./docs --dry-run \
-  --repository-root . \
+docu-docu task verify TASK-AREA-001 <docs-root> --dry-run \
+  --repository-root <repository-root> \
   --format json
 
-docu-docu task verify TASK-AREA-001 ./docs --run \
-  --repository-root . \
+docu-docu task verify TASK-AREA-001 <docs-root> --run \
+  --repository-root <repository-root> \
   --format json \
-  --report ./build/task-report.json \
+  --report <report-path-outside-docs-root> \
   --timeout 10m
 ```
 
-only when all of these are true:
+`--dry-run` does not execute task commands and may be inspected when task
+verification is in scope. It writes a file only when `--report` is supplied;
+use that option only when the requested work authorizes the report path.
+
+Run `--run` only when all of these are true:
 
 - the user explicitly asked to execute or verify the task;
 - the repository and commands are trusted;
 - the task-local validation gate passes;
 - the report path is outside source documentation.
 
-The command executes each unique shell command from `AC-*`, `ALL`, and `DOCS`
-once from repository root. A failure does not stop remaining commands.
+The command executes each unique shell command from `AC-*`, `ALL`, `DOCS`, and
+the required `QUALITY` target when standards are declared, once from repository
+root. A failure does not stop remaining commands.
 
 ## Build and serve
 
@@ -201,6 +212,9 @@ playable flows and traceability by default. Use `--no-screen-map` only to omit
 the interactive map page; it does not remove screen documents, flows or JSON
 collections.
 
-Use `serve` on `127.0.0.1` by default. It has no TLS or authentication. Use
-`--host 0.0.0.0` only for an explicitly requested trusted local-network
-preview.
+Use `serve` on `127.0.0.1` by default. It has no TLS or authentication, and its
+editor can change canonical source files after explicit save, create, or
+roadmap-add browser actions. On the first canonical browser request it may also
+query GitHub Releases for latest stable metadata. Add `--no-update-check` when
+an outbound request is not part of the requested preview. Use `--host 0.0.0.0`
+only for an explicitly requested trusted local-network preview.

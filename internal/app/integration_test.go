@@ -1255,6 +1255,8 @@ func TestChangeFlagsRejectedOutsideChanges(t *testing.T) {
 		{"--status=modified"}, {"--status", "modified"},
 		{"--module=MOD-CLI"}, {"--module", "MOD-CLI"},
 		{"--permanent-only"},
+		{"--include-assets"},
+		{"--translation-input"},
 	}
 	nonChangesCommands := [][]string{
 		{"build", "./docs"},
@@ -1297,11 +1299,13 @@ func TestContextualHelp(t *testing.T) {
 		forbidden []string
 	}{
 		{[]string{"check", "--help"}, []string{"Побочные эффекты: отсутствуют", "--strict", "--format text|json"}, []string{"--host", "--clean"}},
-		{[]string{"serve", "--help"}, []string{"HTTP/editor workspace", "--host ADDRESS", "browser save"}, []string{"--base REV"}},
+		{[]string{"serve", "--help"}, []string{"HTTP/editor workspace", "--host ADDRESS", "roadmap add"}, []string{"--base REV"}},
+		{[]string{"changes", "--help"}, []string{"--include-assets", "--translation-input", "-o записывает явно"}, []string{"--report"}},
 		{[]string{"task", "--help"}, []string{"init|ready|context|verify|archive|restore|changes"}, []string{"требуется TASK-ID"}},
-		{[]string{"task", "changes", "--help"}, []string{"единственный task-scoped", "TASK-ID"}, []string{"--task"}},
+		{[]string{"task", "verify", "--help"}, []string{"--dry-run не выполняет команды", "--report в любом режиме записывает JSON-файл"}, []string{"--include-assets", "--translation-input"}},
+		{[]string{"task", "changes", "--help"}, []string{"единственный task-scoped", "TASK-ID", "--translation-input"}, []string{"--task"}},
 		{[]string{"scaffold", "--help"}, []string{".docu-docu/config.yml", "fallback — en"}, []string{"--host"}},
-		{[]string{"changes", "file", "--help"}, []string{"одного изменённого пути", "PATH"}, []string{"--task"}},
+		{[]string{"changes", "file", "--help"}, []string{"одного изменённого пути", "PATH", "--translation-input"}, []string{"--task"}},
 	}
 	for _, test := range tests {
 		var stdout, stderr strings.Builder

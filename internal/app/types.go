@@ -30,33 +30,36 @@ type Options struct {
 	ChangeMaxRenderedFileBytes int
 	ChangeIncludeTaskArtifacts bool
 	ChangeIncludeAssets        bool
-	// ChangeForceIncludeAssets is an API-only override for workflows that need
-	// binary copying irrespective of changes.includeAssets.
+	// ChangeForceIncludeAssets overrides changes.includeAssets for workflows that
+	// require a complete binary-asset change set.
 	ChangeForceIncludeAssets bool
-	ChangeSemanticDiff       bool
-	ChangeRenderedDiff       bool
-	ChangeExclude            []string
-	ChangeOmitSourceDiff     bool
-	InputDirectory           string
-	OutputDirectory          string
-	Title                    string
-	Excludes                 []string
-	StaleDays                int
-	RepositoryRoot           string
-	RepositoryURL            string
-	RepositoryRef            string
-	Clean                    bool
-	Open                     bool
-	Strict                   bool
-	NoScreenMap              bool
-	NoUpdateCheck            bool
-	Format                   string
-	ReportPath               string
-	Timeout                  time.Duration
-	Host                     string
-	Port                     int
-	Example                  bool
-	Now                      time.Time
+	// ChangeTranslationInput returns every reader-facing translation input,
+	// independent of configurable task, asset, and exclude filters.
+	ChangeTranslationInput bool
+	ChangeSemanticDiff     bool
+	ChangeRenderedDiff     bool
+	ChangeExclude          []string
+	ChangeOmitSourceDiff   bool
+	InputDirectory         string
+	OutputDirectory        string
+	Title                  string
+	Excludes               []string
+	StaleDays              int
+	RepositoryRoot         string
+	RepositoryURL          string
+	RepositoryRef          string
+	Clean                  bool
+	Open                   bool
+	Strict                 bool
+	NoScreenMap            bool
+	NoUpdateCheck          bool
+	Format                 string
+	ReportPath             string
+	Timeout                time.Duration
+	Host                   string
+	Port                   int
+	Example                bool
+	Now                    time.Time
 }
 
 type StatusInfo struct {

@@ -3,7 +3,7 @@
 - Идентификатор: CON-CLI-V1
 - Статус: Готово
 - Владелец: Команда Docu-docu
-- Последнее обновление: 2026-08-08
+- Последнее обновление: 2026-08-09
 
 Документ фиксирует команды, побочные эффекты, exit codes и версионируемые
 JSON-результаты CLI. Конкретный синтаксис флагов показывает
@@ -15,15 +15,15 @@ JSON-результаты CLI. Конкретный синтаксис флаг�
 |---|---|---|
 | `check` | Проверяет документы, связи и OpenAPI | Нет |
 | `build` | Собирает backend-independent static HTTP portal и `report.json` | Пишет только в output; `--clean` очищает проверенный output |
-| `serve` | Запускает локальный портал, watcher, Editor и Changes API | Меняет canonical docs только по явному сохранению в редакторе |
+| `serve` | Запускает локальный портал, watcher, Editor и Changes API | Меняет canonical docs только по явному save, create или roadmap add в редакторе |
 | `search` | Ищет по актуальной модели | Нет |
-| `changes`, `changes file` | Сравнивает Git revisions, index и working tree | Нет |
-| `task changes` | Показывает изменения и влияние на выбранную задачу | Нет |
+| `changes`, `changes file` | Сравнивает Git revisions, index и working tree | Нет, кроме явно указанного `-o` |
+| `task changes` | Показывает изменения и влияние на выбранную задачу | Нет, кроме явно указанного `-o` |
 | `task init` | Создаёт черновик `TASK-*` или `BUG-*` | Создаёт один новый файл без перезаписи |
 | `scaffold` | Создаёт типизированный документ | Создаёт один новый файл без перезаписи |
 | `task ready`, `task context` | Проверяет готовность или возвращает контекст задачи | Нет |
-| `task verify --dry-run` | Показывает план проверок задачи | Нет |
-| `task verify --run` | Выполняет команды, явно записанные в задаче | Да, в пределах самих команд репозитория |
+| `task verify --dry-run` | Показывает план проверок задачи | Нет, кроме явно указанного `--report` |
+| `task verify --run` | Выполняет команды, явно записанные в задаче | Да, в пределах команд репозитория и явно указанного `--report` |
 | `task archive`, `task restore` | Перемещает завершённую задачу в архив или обратно | Перемещает один файл без перезаписи |
 | `skill install`, `skill update`, `skill uninstall` | Управляет встроенным offline skill package | Пишет только в выбранный project/user target |
 | `skill status` | Показывает target и состояние skill package | Нет |
@@ -79,6 +79,16 @@ CLI различает состояния `not-installed`, `installed`, `outdate
 - `task verify --run` разрешён только для Ready, In Progress, Blocked и Done;
   `--dry-run` можно использовать и для полного Draft.
 - `changes` читает Git напрямую без shell, fetch, checkout и записи в index.
+- Git revisions для `changes` разрешаются от enclosing Git top-level, а
+  `.docu-docu/config.yml` и repository-relative config paths — от явно
+  выбранного `--repository-root`, который должен содержать documentation root.
+- `changes`, `changes file` и `task changes` принимают `--include-assets`,
+  который включает binary assets независимо от `changes.includeAssets`, но с
+  сохранением `changes.exclude`.
+- `--translation-input` включает reader-facing Markdown, work artifacts и
+  binary assets независимо от `includeTaskArtifacts`, `includeAssets` и
+  `changes.exclude`; исключениями остаются только `generated/**` и `cache/**`
+  внутри выбранного documentation root. С `--permanent-only` он несовместим.
 
 ## Результаты JSON
 

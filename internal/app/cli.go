@@ -72,7 +72,8 @@ func PrintCommandHelp(w io.Writer, topic string) {
 Пример:
   docu-docu serve ./docs --host 127.0.0.1 --port 8080
 
-Побочные эффекты: записывает output, запускает HTTP; browser save изменяет workspace.
+Побочные эффекты: записывает output, запускает HTTP; явные browser-действия
+save, create и roadmap add изменяют workspace.
 При первом открытии canonical-портала один раз проверяет latest stable GitHub Release;
 --no-update-check отключает этот outbound-запрос.`,
 		"changes": `Строит read-only Git-backed отчёт об изменениях документации.
@@ -81,19 +82,30 @@ func PrintCommandHelp(w io.Writer, topic string) {
   docu-docu changes [docs-dir] [--base REV|--branch-base REF]
                   [--target working-tree|index|HEAD|REV]
                   [--status STATUS] [--module ID] [--type TYPE]
-                  [--permanent-only] [--format text|json|markdown] [-o FILE]
+                  [--permanent-only] [--include-assets|--translation-input]
+                  [--repository-root DIR] [--format text|json|markdown] [-o FILE]
   docu-docu changes file PATH [docs-dir] [те же параметры]
 
 Пример:
   docu-docu changes ./docs --base main --target working-tree --format markdown
 
-Побочные эффекты: отсутствуют; команда только читает Git и workspace.`,
+--include-assets принудительно включает binary assets независимо от changes.includeAssets.
+--translation-input включает reader-facing Markdown, work artifacts и assets,
+игнорируя changes.exclude кроме generated/** и cache/** внутри docs root.
+
+Побочные эффекты: команда только читает Git и workspace; -o записывает явно
+указанный файл отчёта.`,
 		"changes-file": `Показывает detail одного изменённого пути без изменения файлов.
 
 Использование:
   docu-docu changes file PATH [docs-dir] [--base REV|--branch-base REF]
                        [--target working-tree|index|HEAD|REV]
-                       [--format text|json|markdown] [-o FILE]`,
+                       [--include-assets|--translation-input]
+                       [--repository-root DIR]
+                       [--format text|json|markdown] [-o FILE]
+
+Побочные эффекты: команда только читает Git и workspace; -o записывает явно
+указанный файл отчёта.`,
 		"search": `Ищет по свежим исходным Markdown без изменения файлов.
 
 Использование:
@@ -140,7 +152,8 @@ TYPE: Feature, Bug, Maintenance, Documentation или Research.
                       [--target TARGET] [--report FILE] [--timeout DURATION]
                       [--repository-root DIR] [--format text|json]
 
-Побочный эффект есть только у --run: выполняются команды задачи.`,
+--dry-run не выполняет команды. --report в любом режиме записывает JSON-файл;
+--run выполняет команды задачи.`,
 		"task-archive": `Перемещает валидную Done/Cancelled задачу в work/archive/YYYY без перезаписи.
 
 Использование:
@@ -154,7 +167,12 @@ TYPE: Feature, Bug, Maintenance, Documentation или Research.
 Использование:
   docu-docu task changes TASK-ID [docs-dir] [--base REV|--branch-base REF]
                        [--target working-tree|index|HEAD|REV]
-		               [--format text|json|markdown] [-o FILE]`,
+                       [--include-assets|--translation-input]
+                       [--repository-root DIR]
+                       [--format text|json|markdown] [-o FILE]
+
+Побочные эффекты: команда только читает Git и workspace; -o записывает явно
+указанный файл отчёта.`,
 		"skill": `Управляет встроенным offline-пакетом AI-skill Docu-docu.
 
 Использование:
@@ -393,6 +411,12 @@ parseOptions:
 		case arg == "--permanent-only":
 			changesOptionSpecified = true
 			options.ChangePermanentOnly = true
+		case arg == "--include-assets":
+			changesOptionSpecified = true
+			options.ChangeForceIncludeAssets = true
+		case arg == "--translation-input":
+			changesOptionSpecified = true
+			options.ChangeTranslationInput = true
 		case arg == "--lang":
 			v, e := takeArgValue(args, &i, arg)
 			if e != nil {
@@ -722,9 +746,12 @@ parseOptions:
 	}
 	isChangesCommand := options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes"
 	if changesOptionSpecified && !isChangesCommand {
-		return options, false, false, fmt.Errorf("--base, --branch-base, --status, --module и --permanent-only доступны только для changes")
+		return options, false, false, fmt.Errorf("--base, --branch-base, --status, --module, --permanent-only, --include-assets и --translation-input доступны только для changes")
 	}
 	if isChangesCommand {
+		if options.ChangeTranslationInput && options.ChangePermanentOnly {
+			return options, false, false, fmt.Errorf("--translation-input и --permanent-only нельзя использовать вместе")
+		}
 		if options.ChangeBranchBase != "" && options.ChangeBase != "" {
 			return options, false, false, fmt.Errorf("--base и --branch-base нельзя использовать вместе")
 		}

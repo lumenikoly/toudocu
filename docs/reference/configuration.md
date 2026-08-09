@@ -142,6 +142,12 @@ changes:
 Секция необязательна; стандартный режим остаётся `HEAD → working-tree`.
 `defaultBaseRef` используется только без явного base и не загружается с
 remote. Лимит отключает тяжёлое представление одного файла, не весь change set.
+CLI-флаг `--include-assets` для `changes`, `changes file` и `task changes`
+принудительно включает binary assets только в выбранный отчёт и не изменяет
+конфигурацию; `changes.exclude` продолжает действовать. `--translation-input`
+дополнительно переопределяет `includeTaskArtifacts` и произвольные exclude для
+полного reader-facing набора, сохраняя только исключения `generated/**` и
+`cache/**` внутри documentation root.
 
 ## Local server и editor workspace
 

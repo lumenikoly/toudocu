@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -27,7 +28,11 @@ func BuildDocumentationChanges(options Options) (*ChangeSetReport, error) {
 	if err != nil {
 		return nil, err
 	}
-	config, _, configErr := loadSiteConfig(g.root)
+	configRoot, err := resolveChangeConfigurationRoot(options.RepositoryRoot, g)
+	if err != nil {
+		return nil, err
+	}
+	config, _, configErr := loadSiteConfig(configRoot)
 	if configErr != nil {
 		return nil, configErr
 	}
@@ -44,13 +49,23 @@ func BuildDocumentationChanges(options Options) (*ChangeSetReport, error) {
 	if options.ChangeMaxRenderedFileBytes == 0 {
 		options.ChangeMaxRenderedFileBytes = config.Changes.MaxRenderedFileBytes
 	}
-	options.ChangeIncludeTaskArtifacts = config.Changes.IncludeTaskArtifacts
-	if !options.ChangeForceIncludeAssets {
-		options.ChangeIncludeAssets = config.Changes.IncludeAssets
-	} else {
+	if options.ChangeTranslationInput {
+		options.ChangeIncludeTaskArtifacts = true
 		options.ChangeIncludeAssets = true
+		options.ChangeExclude = []string{
+			path.Join(g.docsRel, "generated/**"),
+			path.Join(g.docsRel, "cache/**"),
+		}
+	} else {
+		options.ChangeIncludeTaskArtifacts = config.Changes.IncludeTaskArtifacts
+		if !options.ChangeForceIncludeAssets {
+			options.ChangeIncludeAssets = config.Changes.IncludeAssets
+		} else {
+			options.ChangeIncludeAssets = true
+		}
+		options.ChangeExclude = changeExcludesFromConfigurationRoot(g.root, configRoot, config.Changes.Exclude)
 	}
-	options.ChangeSemanticDiff, options.ChangeRenderedDiff, options.ChangeExclude = config.Changes.SemanticDiff, config.Changes.RenderedDiff, config.Changes.Exclude
+	options.ChangeSemanticDiff, options.ChangeRenderedDiff = config.Changes.SemanticDiff, config.Changes.RenderedDiff
 	baseRef := strings.TrimSpace(options.ChangeBase)
 	if baseRef == "" {
 		baseRef = "HEAD"
@@ -138,6 +153,33 @@ func BuildDocumentationChanges(options Options) (*ChangeSetReport, error) {
 	}
 	report.ChangeSetDigest = digestChangeSet(report)
 	return report, nil
+}
+
+func resolveChangeConfigurationRoot(repositoryRoot string, g *gitChangeSource) (string, error) {
+	if strings.TrimSpace(repositoryRoot) == "" {
+		return g.root, nil
+	}
+	root, err := resolvePathForSafety(repositoryRoot)
+	if err != nil {
+		return "", err
+	}
+	if !pathContains(g.root, root) || !pathContains(root, g.docsRoot) {
+		return "", fmt.Errorf("repository root должен находиться внутри Git root и содержать documentation root")
+	}
+	return root, nil
+}
+
+func changeExcludesFromConfigurationRoot(gitRoot, configRoot string, patterns []string) []string {
+	rel, err := filepath.Rel(gitRoot, configRoot)
+	if err != nil || rel == "." {
+		return append([]string(nil), patterns...)
+	}
+	prefix := filepath.ToSlash(rel)
+	result := make([]string, 0, len(patterns))
+	for _, pattern := range patterns {
+		result = append(result, path.Join(prefix, filepath.ToSlash(pattern)))
+	}
+	return result
 }
 
 func excludedChangePath(filePath string, patterns []string) bool {

@@ -6,16 +6,18 @@
   use cases, flows, screens, roadmap, or a task contract.
 - Do not use the skill for ordinary questions, code reading, formatting, or
   refactoring with no semantic documentation impact.
-- Treat the canonical documentation root as the only source for ordinary
-  documentation, implementation, and task context. Exclude configured
+- Treat the canonical documentation root as the only documentation and backlog
+  source for ordinary work. Code, tests, contracts, and CI outside translation
+  roots remain valid implementation evidence. Exclude configured
   translation roots from repository search, inventory, semantic review,
   implementation analysis, and task context, including translated work items.
   Read only the selected translation root for an explicit `$docu-docu translate
   <locale>` or an explicit request to check, find, build, run, or inspect that
   locale. For an explicit `$docu-docu translate diff`, process all configured
-  translation roots one at a time. Always limit access to the necessary
-  source/target pair and use paths, hashes, and structural reports first. Do not
-  add translation roots to ignore files.
+  translation roots one at a time. During translation and parity checks, limit
+  access to the necessary source/target pair and use paths, hashes, and
+  structural reports first. A full check or build of an explicitly selected
+  locale may read that entire root. Do not add translation roots to ignore files.
 - Use `$docu-docu refresh` for a full evidence-based review and update of
   source documentation. Use `$docu-docu refresh diff` for staged, unstaged,
   and untracked changes relative to `HEAD` plus affected documents. These are
@@ -28,7 +30,8 @@
   the change makes it inaccurate. Do not create documents, statuses, or
   relationships without supported semantics, and do not edit generated output
   as a source.
-- Treat `docs/architecture/overview.md` as the required architecture map. Every
+- Treat `architecture/overview.md`, relative to the canonical documentation
+  root, as the required architecture map. Every
   other Markdown document under `architecture/` must answer one explicit
   architecture question and be added to the overview with a direct link,
   including documents in nested directories.

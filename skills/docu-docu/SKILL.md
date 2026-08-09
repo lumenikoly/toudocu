@@ -10,7 +10,8 @@ source of truth; generated portals are output, not documentation sources.
 
 ## Route the request
 
-Read only the operation reference plus the two shared references named below.
+Read the one operation reference selected by this table. Load additional model
+or review references only when the request meets their conditions below.
 
 | Operation | Reference | Changes files? | Confirmation / authority |
 |---|---|---:|---|
@@ -27,12 +28,18 @@ files, first use, or an ordinary documentation request.
 Neither refresh form is a Docu-docu
 Go CLI command or an initialization request.
 
-For every operation, also read:
+Load these references conditionally:
 
 - [references/semantic-gate.md](references/semantic-gate.md) before changing
-  documentation;
+  source documentation;
 - [references/document-model.md](references/document-model.md) before creating
-  a typed document or changing stable IDs and relationships.
+  or selecting a typed document, or changing stable IDs and relationships;
+- [references/architecture-gate.md](references/architecture-gate.md) only for
+  architecture documents;
+- [references/screen-model.md](references/screen-model.md) only for `FLOW-*`,
+  `SC-*`, `TR-*`, or hotspots;
+- [references/work-item-model.md](references/work-item-model.md) only for
+  `TASK-*` or `BUG-*` contracts and task lifecycle work.
 
 ## Establish context
 
@@ -43,10 +50,11 @@ For every operation, also read:
 3. Discover docs root, repository root, excludes, stale policy, output, and
    strict policy from the repository. Use `./docs` and its parent only as a
    fallback.
-4. Run the repository's read-only check before writing. Otherwise use:
+4. Run the repository's established read-only check before writing. Otherwise
+   substitute the resolved paths in:
 
    ```bash
-   docu-docu check ./docs --repository-root . --format json
+   docu-docu check <docs-root> --repository-root <repository-root> --format json
    ```
 
 Diagnostics prove structural facts, not missing product intent. Never invent
@@ -54,20 +62,22 @@ behavior, status, owner, date, relationship, or procedure to silence one.
 
 ## Isolate translation context
 
-The canonical documentation root is the only source for ordinary documentation
-work, repository search and inventory, semantic review, implementation analysis,
-and task context. Exclude every configured translation root from those activities,
-including translated work items. Do not add translation roots to `.gitignore` or
-global ignore files: explicit locale workflows must remain able to select them.
+The canonical documentation root is the only documentation and backlog source
+for ordinary work, repository inventory, semantic review, implementation
+analysis, and task context. Repository code, tests, contracts, CI, and other
+non-translation artifacts remain valid implementation evidence. Exclude every
+configured translation root from those activities, including translated work
+items. Do not add translation roots to `.gitignore` or global ignore files:
+explicit locale workflows must remain able to select them.
 
 Read a configured translation root only for an explicit `$docu-docu translate
 <locale>`, an explicit `$docu-docu translate diff`, or an explicit request to
-check, find, build, run, or inspect that specific locale. For translate diff,
-visit the configured roots one at a time in normalized locale order. In every
-mode, limit access to the current locale and source/target pair. Do not read
-other files in that locale merely for context; for parity checks, compare
-relative paths, source digests, and structural reports before opening document
-contents.
+check, find, build, run, or inspect that specific locale. A whole-root check,
+build, run, or inspection may read that selected root. For translation and
+parity work, visit one locale and one necessary source/target pair at a time;
+compare relative paths, source digests, and structural reports before opening
+document contents. For translate diff, visit configured roots in normalized
+locale order.
 
 ## Documentation invariants
 
@@ -96,7 +106,8 @@ or handoff. Do not create one for every prompt or small local edit. Start
 implementation of an existing Ready+ item with:
 
 ```bash
-docu-docu task context TASK-AREA-001 ./docs --repository-root . --format json
+docu-docu task context TASK-AREA-001 <docs-root> \
+  --repository-root <repository-root> --format json
 ```
 
 Respect result, scope, exclusions, criteria, dependencies, linked standards,
@@ -110,7 +121,7 @@ restore only through the corresponding task command.
 After the semantic gate, run the ordinary project-wide check:
 
 ```bash
-docu-docu check ./docs --repository-root .
+docu-docu check <docs-root> --repository-root <repository-root>
 ```
 
 Run strict validation only when project policy or the user requires it. Build

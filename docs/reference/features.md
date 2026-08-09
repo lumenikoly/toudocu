@@ -38,10 +38,10 @@ Docu-docu поставляется одним Go-бинарником без в�
 | Версия | `docu-docu version` | версия генератора |
 
 Сборка требует явного `docu-docu build ./docs`; путь без команды отклоняется.
-Отдельной верхнеуровневой команды `init` нет: минимальный проект создаётся файлами
-`docs/index.md` и `docs/architecture/overview.md`; `task init` создаёт только
-work item. Параметры и exit codes
-определены в [CLI-контракте](../contracts/cli.md).
+Отдельной верхнеуровневой команды `init` нет: минимальный проект содержит
+`index.md` и `architecture/overview.md` внутри выбранного documentation root;
+`task init` создаёт только work item. Параметры и exit codes определены в
+[CLI-контракте](../contracts/cli.md).
 
 Skill lifecycle не входит в публичный Go-фасад и не использует JSON output.
 Targets, состояния и безопасное ручное разрешение конфликтов описывает
@@ -49,7 +49,9 @@ Targets, состояния и безопасное ручное разреше�
 
 Команды `changes` поддерживают фильтры `--status`, `--module`, `--type` и
 `--permanent-only`. Последний оставляет только постоянную документацию и
-исключает work artifacts, contracts и assets.
+исключает work artifacts, contracts и assets. Отдельный `--include-assets`
+принудительно включает binary assets независимо от `changes.includeAssets`, а
+`--translation-input` формирует полный reader-facing набор для перевода.
 
 ## Публичный Go API
 
@@ -84,10 +86,11 @@ workflow и Git-backed changes. Прямые вызовы возвращают �
   остаётся read-only и не используется task workflow или editor-записью. При
   обычной работе агент исключает все translation roots из поиска,
   инвентаризации, semantic review, task context и анализа реализации. Явный
-  перевод или запрос проверить, найти, собрать, запустить либо изучить
-  конкретную локаль открывает только выбранный root и минимально необходимую
-  source/target-пару; проверка паритета начинается с путей, хешей и структурных
-  отчётов. Локализованные metadata keys и status values допустимы только при
+  перевод открывает только выбранный root и минимально необходимую
+  source/target-пару; явный whole-root check, build, serve или inspection может
+  прочитать весь выбранный translation root. Проверка паритета начинается с
+  путей, хешей и структурных отчётов. Локализованные metadata keys и status
+  values допустимы только при
   сохранении нормализованной семантики: например, `Готово` (`done`) переводится
   как `Completed` или `Done`, а `Готово к работе` (`planned`) — как `Ready`.
   Перед обновлением manifest workflow сравнивает status kinds и вычисленное
@@ -314,8 +317,9 @@ Hotspots хранятся в `screens/hotspots.json` в процентах. Ск
 модули, use cases, экраны, переходы, правила, зависимости и diagnostics.
 
 `task verify --run` сначала применяет task-local validation gate, затем
-последовательно запускает уникальные команды `AC-*`, `ALL` и `DOCS` из
-repository root. Ошибка одной команды не скрывает результаты остальных.
+последовательно запускает уникальные команды `AC-*`, `ALL`, `DOCS` и, при
+явно связанных стандартах, `QUALITY` из repository root. Ошибка одной команды
+не скрывает результаты остальных.
 Timeout завершает дерево процессов, а stdout и stderr сохраняются ограниченным
 хвостом.
 

@@ -14,6 +14,10 @@ working-tree и `merge-base(base-ref, HEAD) → working-tree` через
 `--branch-base`. Base, target, resolved commit, branch и dirty state всегда
 видимы. Docu-docu не загружает remote refs и не угадывает неоднозначную базу.
 
+Git revisions разрешаются от enclosing Git top-level. Для вложенного проекта
+`--repository-root` отдельно выбирает его `.docu-docu/config.yml`; относительные
+`changes.exclude` интерпретируются от этого project root.
+
 ## Три уровня diff
 
 `Исходник` — Git unified patch без external diff и textconv. Unified view
@@ -59,6 +63,8 @@ docu-docu changes ./docs --format text
 docu-docu changes ./docs --base main --target working-tree --format json
 docu-docu changes ./docs --branch-base main --format markdown
 docu-docu changes ./docs --status modified --module MOD-AUTH --type use-case
+docu-docu changes ./docs --include-assets --format json
+docu-docu changes ./docs --translation-input --format json
 docu-docu changes ./docs --permanent-only --format json
 docu-docu changes file docs/modules/MOD-AUTH.md --base HEAD --target index
 docu-docu task changes TASK-AUTH-015 ./docs --format json
@@ -72,6 +78,8 @@ CLI-фильтры применяются к уже построенному cha
 | `--module VALUE` | совпадение по path, ID/названию сущности или semantic summary |
 | `--type TYPE` | тип нормализованной сущности, например `module`, `use-case`, `flow`, `screen` или `task` |
 | `--permanent-only` | только classification `permanent-documentation`, без work artifacts, contracts и assets |
+| `--include-assets` | включает binary assets независимо от `changes.includeAssets`, сохраняя `changes.exclude` |
+| `--translation-input` | включает reader-facing Markdown, work artifacts и assets; из config-excludes сохраняет только `generated/**` и `cache/**` внутри docs root |
 
 Фильтры можно сочетать. Text, JSON и Markdown получают одну отфильтрованную
 сводку; `-o FILE` записывает выбранный формат в отдельный файл.
@@ -82,8 +90,10 @@ Exit code `1` означает построенный отчёт с error, `2` �
 Workflow `$docu-docu translate` использует этот report только как входные
 данные: skill-параметр `--task` вызывает канонический `task changes` до
 `working-tree`, а `--base` —
-`<base> → working-tree`. Его API-only override включает assets даже если
-`changes.includeAssets: false`; schema `ChangeSetReport` при этом остаётся v1.
+`<base> → working-tree`. Публичный флаг `--translation-input` формирует полный
+reader-facing набор независимо от `changes.includeTaskArtifacts`,
+`changes.includeAssets` и произвольных `changes.exclude`; schema
+`ChangeSetReport` при этом остаётся v1.
 Точный `sourceDiff` остаётся приоритетным и доступным, когда rendered,
 semantic, OpenAPI или Mermaid представления добавляют свои diagnostics.
 

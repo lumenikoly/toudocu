@@ -123,6 +123,100 @@ func TestChangesForceIncludeAssetsOverridesConfigOnly(t *testing.T) {
 	if len(report.Changes) != 1 || report.Changes[0].Path != "docs/images/diagram.png" || !report.Changes[0].Binary {
 		t.Fatalf("asset override lost: %#v", report.Changes)
 	}
+
+	var stdout, stderr strings.Builder
+	code := RunCLI([]string{
+		"changes", docs, "--base", "HEAD", "--target", "working-tree",
+		"--include-assets", "--format", "json",
+	}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("changes --include-assets exit=%d stderr=%s", code, stderr.String())
+	}
+	var cliReport ChangeSetReport
+	if err := json.Unmarshal([]byte(stdout.String()), &cliReport); err != nil {
+		t.Fatal(err)
+	}
+	if len(cliReport.Changes) != 1 || cliReport.Changes[0].Path != "docs/images/diagram.png" || !cliReport.Changes[0].Binary {
+		t.Fatalf("CLI asset override lost: %#v", cliReport.Changes)
+	}
+}
+
+func TestChangesTranslationInputOverridesReaderFacingFilters(t *testing.T) {
+	root, docs := newChangesRepository(t)
+	writeSiteConfig(t, root, "changes:\n  includeTaskArtifacts: false\n  includeAssets: false\n  exclude:\n    - docs/guides/**\n    - docs/images/**\n")
+	writeChangesTestFile(t, filepath.Join(docs, "work", "TASK-CLI-001.md"), "# TASK-CLI-001: Translate\n")
+	writeChangesTestFile(t, filepath.Join(docs, "guides", "reader.md"), "# Reader guide\n")
+	writeChangesTestFile(t, filepath.Join(docs, "images", "diagram.png"), "\x89PNG\r\n\x1a\nasset")
+	writeChangesTestFile(t, filepath.Join(docs, "generated", "ignored.md"), "# Generated\n")
+
+	report, err := BuildDocumentationChanges(Options{
+		InputDirectory: docs, RepositoryRoot: root, ChangeBase: "HEAD",
+		ChangeTarget: "working-tree", ChangeTranslationInput: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	paths := map[string]bool{}
+	for _, change := range report.Changes {
+		paths[change.Path] = true
+	}
+	for _, expected := range []string{"docs/work/TASK-CLI-001.md", "docs/guides/reader.md", "docs/images/diagram.png"} {
+		if !paths[expected] {
+			t.Errorf("translation input omitted %s: %#v", expected, paths)
+		}
+	}
+	if paths["docs/generated/ignored.md"] {
+		t.Fatalf("translation input included generated output: %#v", paths)
+	}
+
+	var stdout, stderr strings.Builder
+	code := RunCLI([]string{
+		"changes", docs, "--repository-root", root, "--base", "HEAD",
+		"--target", "working-tree", "--translation-input", "--format", "json",
+	}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("changes --translation-input exit=%d stderr=%s", code, stderr.String())
+	}
+	var cliReport ChangeSetReport
+	if err := json.Unmarshal([]byte(stdout.String()), &cliReport); err != nil {
+		t.Fatal(err)
+	}
+	if len(cliReport.Changes) != len(report.Changes) {
+		t.Fatalf("CLI translation input differs from API: %#v", cliReport.Changes)
+	}
+}
+
+func TestChangesUsesNestedRepositoryRootConfiguration(t *testing.T) {
+	gitRoot, _ := newChangesRepository(t)
+	projectRoot := filepath.Join(gitRoot, "packages", "app")
+	docs := filepath.Join(projectRoot, "docs")
+	writeChangesTestFile(t, filepath.Join(docs, "index.md"), "# Nested\n")
+	gitTestRun(t, gitRoot, "add", "packages/app/docs")
+	gitTestRun(t, gitRoot, "commit", "-q", "-m", "nested baseline")
+	writeSiteConfig(t, gitRoot, "changes:\n  includeAssets: true\n")
+	writeSiteConfig(t, projectRoot, "changes:\n  includeAssets: true\n  exclude:\n    - docs/images/**\n")
+	writeChangesTestFile(t, filepath.Join(docs, "images", "diagram.png"), "\x89PNG\r\n\x1a\nasset")
+
+	nested, err := BuildDocumentationChanges(Options{
+		InputDirectory: docs, RepositoryRoot: projectRoot,
+		ChangeBase: "HEAD", ChangeTarget: "working-tree",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(nested.Changes) != 0 {
+		t.Fatalf("nested repository config was not applied relative to its root: %#v", nested.Changes)
+	}
+	gitLevel, err := BuildDocumentationChanges(Options{
+		InputDirectory: docs, RepositoryRoot: gitRoot,
+		ChangeBase: "HEAD", ChangeTarget: "working-tree",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(gitLevel.Changes) != 1 || gitLevel.Changes[0].Path != "packages/app/docs/images/diagram.png" {
+		t.Fatalf("Git-level configuration was not distinguished: %#v", gitLevel.Changes)
+	}
 }
 
 func TestOpenGitChangeSourceResolvesRepositoryAlias(t *testing.T) {

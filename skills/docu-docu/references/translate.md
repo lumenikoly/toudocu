@@ -22,25 +22,31 @@ has a repository-relative, independent root and all 12 built-in section titles.
 Roots may not be absolute, traverse, use symlinks, overlap another translation
 root, or be the canonical docs root. An invalid profile or collision aborts the
 whole preflight without changing any target. Use the bundled map in
-`assets/locale-packs.md` for `en` and `ru`. For another valid locale, propose
-the full map, obtain the titles in the request context, then save it once; do
-not rewrite an existing profile.
+`assets/locale-packs.md` to validate `en` and `ru`. Translation never creates or
+completes a profile. A missing root or title is
+`TRANSLATION_PROFILE_INCOMPLETE`; obtain an explicit configuration update in a
+separate request before translating.
 
-Build the source change set with `docu-docu task changes <TASK-ID> ./docs
---target working-tree --format json`, or `docu-docu changes ./docs --base <ref>
---target working-tree --format json`. For translate diff, build it once with:
+Build the source change set with `docu-docu task changes <TASK-ID> <docs-root>
+--repository-root <repository-root> --target working-tree --translation-input
+--format json`, or `docu-docu changes <docs-root> --repository-root
+<repository-root> --base <ref> --target working-tree --translation-input
+--format json`. For translate diff, build it once with:
 
 ```bash
-docu-docu changes ./docs --base HEAD --target working-tree --format json
+docu-docu changes <docs-root> --repository-root <repository-root> \
+  --base HEAD --target working-tree --translation-input --format json
 ```
 
 This includes staged, unstaged, and untracked canonical changes relative to
 `HEAD`. If Git or `HEAD` is unavailable, make no changes and report
 `TRANSLATION_DIFF_UNAVAILABLE`. Do not fetch, checkout, stage, alter refs, or
-use history beyond the resolved base. Request assets with the changes-only
-include assets override, regardless of `changes.includeAssets`. If the diff
-change set is empty, report every selected locale as unchanged and do not touch
-targets or manifests.
+use history beyond the resolved base. `--translation-input` includes
+reader-facing Markdown, work artifacts, and binary assets regardless of
+`changes.includeTaskArtifacts`, `changes.includeAssets`, or arbitrary
+`changes.exclude`; only `generated/**` and `cache/**` inside the canonical root
+remain excluded. If the diff change set is empty, report every selected locale
+as unchanged and do not touch targets or manifests.
 
 Select canonical Markdown changes, including `work/**`, `notes.md`, and
 `ideas.md`, so the target has the same reader-facing file set as the canonical
@@ -82,7 +88,7 @@ Do not write or update the manifest until this semantic comparison passes and
 one final:
 
 ```bash
-docu-docu check <target-root> --repository-root . --strict
+docu-docu check <target-root> --repository-root <repository-root> --strict
 ```
 
 passes. If it fails, leave translated file edits in the worktree, leave the

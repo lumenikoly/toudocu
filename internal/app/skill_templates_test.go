@@ -194,16 +194,16 @@ func TestDocuDocuTemplatesDoNotInventSemanticStructure(t *testing.T) {
 }
 
 func TestDocuDocuWorkItemReferenceAllowsCriteriaAndPlanChecklists(t *testing.T) {
-	content, err := os.ReadFile(repositoryPath("skills", "docu-docu", "references", "document-model.md"))
+	content, err := os.ReadFile(repositoryPath("skills", "docu-docu", "references", "work-item-model.md"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	reference := string(content)
 	if !strings.Contains(reference, "Checkboxes are allowed in both acceptance criteria and plan.") {
-		t.Fatal("document-model reference does not allow checkboxes in both acceptance criteria and plan")
+		t.Fatal("work-item-model reference does not allow checkboxes in both acceptance criteria and plan")
 	}
 	if strings.Contains(reference, "Put checkboxes only in acceptance criteria.") {
-		t.Fatal("document-model reference still restricts checkboxes to acceptance criteria")
+		t.Fatal("work-item-model reference still restricts checkboxes to acceptance criteria")
 	}
 }
 
@@ -259,13 +259,18 @@ func TestDocuDocuInitContract(t *testing.T) {
 		"conflicting",
 		"no `index.md`",
 		"`missing-architecture-overview` may be the only error",
-		"`docs/architecture/overview.md`",
+		"`<docs-root>/architecture/overview.md`",
+		"`missing-project-locale`",
+		"Never construct an\n   asset path for an unsupported locale",
+		"Set its H1 exactly to the resolved `project.sections.architecture`",
+		"entry document that existed before init",
+		"without removing\n   existing `site`, `changes`, or `translations` settings",
 		"as legacy\n   architecture",
 		"stop without migrating or rewriting",
 		"ordinary project-wide Docu-docu check",
 		"Do not create a `TASK-*` merely because init is running",
 	} {
-		if !strings.Contains(initReference, expected) {
+		if !containsNormalized(initReference, expected) {
 			t.Errorf("init reference does not contain %q", expected)
 		}
 	}
@@ -337,6 +342,10 @@ func TestDocuDocuCompactOperationRouter(t *testing.T) {
 		"$docu-docu translate diff",
 		"[references/workflows.md](references/workflows.md)",
 		"[references/semantic-gate.md](references/semantic-gate.md)",
+		"[references/architecture-gate.md](references/architecture-gate.md)",
+		"[references/screen-model.md](references/screen-model.md)",
+		"[references/work-item-model.md](references/work-item-model.md)",
+		"Load these references conditionally",
 		"both `index.md` and\n  `architecture/overview.md`",
 	} {
 		if !strings.Contains(skill, expected) {
@@ -409,7 +418,7 @@ func TestDocuDocuArchitectureGuidanceAndSemanticGate(t *testing.T) {
 		}
 	}
 
-	gate := readDocuDocuFile(t, filepath.Join("references", "semantic-gate.md"))
+	gate := readDocuDocuFile(t, filepath.Join("references", "architecture-gate.md"))
 	for i := 1; i <= 13; i++ {
 		code := fmt.Sprintf("ARCH%03d", i)
 		if strings.Count(gate, code) == 0 {
@@ -417,7 +426,7 @@ func TestDocuDocuArchitectureGuidanceAndSemanticGate(t *testing.T) {
 		}
 	}
 	for _, expected := range []string{
-		"Review `architecture/overview.md` separately",
+		"Review the overview separately",
 		"a transitive link is not",
 		"any non-empty question text",
 		"Punctuation, question",
@@ -474,14 +483,14 @@ func TestDocuDocuTranslationContextIsolation(t *testing.T) {
 		"refresh.md":   refresh,
 	} {
 		for _, expected := range []string{"canonical documentation root", "translation root"} {
-			if !strings.Contains(content, expected) {
+			if !containsNormalized(content, expected) {
 				t.Errorf("%s does not isolate translations with %q", name, expected)
 			}
 		}
 	}
 
 	for _, expected := range []string{
-		"only source for ordinary documentation",
+		"only documentation and backlog source",
 		"implementation analysis",
 		"including translated work items",
 		"explicit `$docu-docu translate",
@@ -489,7 +498,7 @@ func TestDocuDocuTranslationContextIsolation(t *testing.T) {
 		"source digests, and structural reports",
 		"Do not add translation roots to `.gitignore`",
 	} {
-		if !strings.Contains(skill, expected) {
+		if !containsNormalized(skill, expected) {
 			t.Errorf("SKILL.md does not contain translation isolation scenario %q", expected)
 		}
 	}
@@ -523,8 +532,11 @@ func TestDocuDocuTranslationContextIsolation(t *testing.T) {
 		"continue with the remaining locales",
 		"TRANSLATION_PROFILES_EMPTY",
 		"TRANSLATION_DIFF_UNAVAILABLE",
+		"--translation-input",
+		"regardless of `changes.includeTaskArtifacts`, `changes.includeAssets`, or arbitrary\n`changes.exclude`",
+		"Translation never creates or\ncompletes a profile",
 	} {
-		if !strings.Contains(translate, expected) {
+		if !containsNormalized(translate, expected) {
 			t.Errorf("translation workflow does not minimize context with %q", expected)
 		}
 	}
@@ -533,15 +545,63 @@ func TestDocuDocuTranslationContextIsolation(t *testing.T) {
 	}
 
 	guidanceCases := map[string][]string{
-		"ru": {"единственным источником обычного", "translation roots из поиска по репозиторию", "явном `$docu-docu translate <locale>`", "проверить, найти, собрать, запустить или изучить", "$docu-docu translate diff", "все настроенные\n  translation roots по одному", "source/target-парой", "пути, хеши и структурные отчёты", "Не\n  добавляйте translation roots в ignore-файлы"},
-		"en": {"only source for ordinary", "translation roots from repository search", "explicit `$docu-docu translate", "check, find, build, run, or inspect", "$docu-docu translate diff", "all configured\n  translation roots one at a time", "source/target pair", "paths, hashes, and structural reports", "Do not\n  add translation roots to ignore files"},
+		"ru": {"единственным документационным и\n  backlog-источником", "translation roots из поиска по репозиторию", "явном `$docu-docu translate <locale>`", "проверить, найти, собрать, запустить или изучить", "$docu-docu translate diff", "все настроенные\n  translation roots по одному", "source/target-парой", "пути, хеши и\n  структурные отчёты", "Не добавляйте translation roots в ignore-файлы"},
+		"en": {"only documentation and backlog\n  source", "translation\n  roots remain valid implementation evidence", "explicit `$docu-docu translate", "check, find, build, run, or inspect", "$docu-docu translate diff", "all configured\n  translation roots one at a time", "source/target pair", "paths, hashes, and\n  structural reports", "Do not add translation roots to ignore files"},
 	}
 	for language, expectedValues := range guidanceCases {
 		guidance := readDocuDocuFile(t, filepath.Join("assets", "project-guidance", language+".md"))
 		for _, expected := range expectedValues {
-			if !strings.Contains(guidance, expected) {
+			if !containsNormalized(guidance, expected) {
 				t.Errorf("%s guidance does not contain translation isolation scenario %q", language, expected)
 			}
+		}
+	}
+}
+
+func TestDocuDocuInstructionConsistency(t *testing.T) {
+	skill := readDocuDocuFile(t, "SKILL.md")
+	initReference := readDocuDocuFile(t, filepath.Join("references", "init.md"))
+	translate := readDocuDocuFile(t, filepath.Join("references", "translate.md"))
+	workflows := readDocuDocuFile(t, filepath.Join("references", "workflows.md"))
+	documentModel := readDocuDocuFile(t, filepath.Join("references", "document-model.md"))
+
+	for name, content := range map[string]string{
+		"SKILL.md": skill, "init.md": initReference, "translate.md": translate, "workflows.md": workflows,
+	} {
+		for _, forbidden := range []string{"docu-docu check ./docs", "docu-docu changes ./docs", "docu-docu task context TASK-AREA-001 ./docs"} {
+			if strings.Contains(content, forbidden) {
+				t.Errorf("%s hardcodes the fallback documentation root in an executable instruction: %q", name, forbidden)
+			}
+		}
+	}
+	for _, language := range []string{"ru", "en"} {
+		guidance := readDocuDocuFile(t, filepath.Join("assets", "project-guidance", language+".md"))
+		if strings.Contains(guidance, "docs/architecture/overview.md") {
+			t.Errorf("%s guidance hardcodes the fallback documentation root", language)
+		}
+	}
+
+	for _, expected := range []string{
+		"Every project requires `index.md` and `architecture/overview.md`",
+		"A missing\n`index.md` is a warning",
+		"architecture overview\nis an error",
+		"document type `Architecture` is a semantic-gate requirement",
+	} {
+		if !containsNormalized(documentModel, expected) {
+			t.Errorf("document-model.md misses architecture consistency statement %q", expected)
+		}
+	}
+	if strings.Contains(documentModel, "Only `index.md` is globally expected") || strings.Contains(documentModel, "Requires document type `Architecture`") {
+		t.Fatal("document-model.md retains a contradictory architecture contract")
+	}
+	for _, expected := range []string{
+		"`QUALITY` target when standards are declared",
+		"Read-only unless `--report` writes JSON",
+		"save, create, and roadmap-add actions can change canonical sources",
+		"`--no-update-check`",
+	} {
+		if !containsNormalized(workflows, expected) {
+			t.Errorf("workflows.md misses side-effect or verification contract %q", expected)
 		}
 	}
 }
@@ -608,6 +668,10 @@ func readSkillTemplate(t *testing.T, language, templateName string) string {
 		t.Fatal(err)
 	}
 	return string(content)
+}
+
+func containsNormalized(content, expected string) bool {
+	return strings.Contains(strings.Join(strings.Fields(content), " "), strings.Join(strings.Fields(expected), " "))
 }
 
 func repositoryPath(parts ...string) string {

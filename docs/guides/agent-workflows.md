@@ -110,6 +110,12 @@ Generated `build/`, `dist/`, `project-docs/` и portal output не редакт�
 как источник документации. Портал собирается только по запросу, для проверки
 или по установленной политике проекта.
 
+`serve` поднимает локальный редактор без аутентификации. Явные browser-действия
+save, create и roadmap add могут изменить canonical sources. По умолчанию
+canonical portal один раз проверяет latest stable release через GitHub Releases.
+Для работы без исходящего запроса агент добавляет `--no-update-check`; внешний
+bind требует отдельного явного запроса и доверенной сети.
+
 ### Work items
 
 Для существующей Ready+ задачи агент начинает с компактного read-only контекста:
@@ -172,6 +178,17 @@ section map и добавляет либо обновляет managed project gu
 изобретает typed entities и не создаёт задачу автоматически. Init не является
 командой Go CLI и никогда не запускается из-за отсутствующих файлов.
 
+Пути разрешаются от найденных repository root и documentation root, поэтому
+workflow не предполагает имя каталога `docs`. Для `en-*` и `ru-*` используются
+соответственно bundled assets `en` и `ru`. Другая locale допустима только при
+заранее заданной полной карте из 12 section titles и явном выборе английских
+или русских bundled guidance/structure assets; исходный текст при этом пишется
+в project locale. H1 нового built-in entry всегда берётся из итоговой section
+map, а не копируется из шаблона. При отсутствии этих данных init
+останавливается до записи. При strict policy warnings, которые init сам
+устраняет, не блокируют preflight: это только `missing-index`,
+`missing-project-locale` и `incomplete-project-sections`.
+
 ### Полная актуализация
 
 `$docu-docu refresh` сопоставляет каждый Markdown-документ canonical root с
@@ -220,12 +237,17 @@ $docu-docu translate <locale> --all-stale
 unstaged и untracked canonical-файлов через:
 
 ```bash
-docu-docu changes ./docs --base HEAD --target working-tree --format json
+docu-docu changes ./docs --base HEAD --target working-tree \
+  --translation-input --format json
 ```
 
-Затем workflow валидирует все настроенные translation profiles до первой
-записи и обрабатывает их по одному в нормализованном порядке locale. Профили не
-создаются автоматически. Пустой diff не меняет targets или manifests. Ошибка
+`--translation-input` сохраняет reader-facing файловый паритет независимо от
+task, asset и произвольных config-excludes, оставляя исключёнными только
+`generated/**` и `cache/**` внутри canonical root. Затем workflow валидирует все
+настроенные translation profiles до первой записи и обрабатывает их по одному в
+нормализованном порядке locale. Профили должны быть полными до запуска перевода
+и не создаются или не дополняются этим workflow. Пустой diff не меняет targets
+или manifests. Ошибка
 перевода или strict-check одной локали оставляет её manifest неизменённым, но не
 мешает обработать остальные; итоговый отчёт сохраняет отдельный результат для
 каждой локали.

@@ -73,7 +73,7 @@ func TestNewCLIFormsAndRemovedTaskCheck(t *testing.T) {
 		{"task", "verify", "TASK-CLI-001", "./docs", "--dry-run", "--target", "AC-01"},
 		{"task", "archive", "TASK-CLI-001", "./docs", "--format", "json"},
 		{"task", "restore", "TASK-CLI-001", "./docs", "--format", "json"},
-		{"task", "changes", "TASK-CLI-001", "./docs", "--format", "json"},
+		{"task", "changes", "TASK-CLI-001", "./docs", "--translation-input", "--format", "json"},
 	}
 	for _, args := range cases {
 		if _, _, _, err := ParseArguments(args); err != nil {
@@ -88,6 +88,18 @@ func TestNewCLIFormsAndRemovedTaskCheck(t *testing.T) {
 	}
 	if _, _, _, err := ParseArguments([]string{"changes", "./docs", "--task", "TASK-CLI-001"}); err == nil {
 		t.Fatal("changes --task must be removed in favor of task changes")
+	}
+	if options, _, _, err := ParseArguments([]string{"changes", "./docs", "--include-assets"}); err != nil || !options.ChangeForceIncludeAssets {
+		t.Fatalf("changes --include-assets was not parsed: options=%#v err=%v", options, err)
+	}
+	if options, _, _, err := ParseArguments([]string{"changes", "./docs", "--translation-input"}); err != nil || !options.ChangeTranslationInput {
+		t.Fatalf("changes --translation-input was not parsed: options=%#v err=%v", options, err)
+	}
+	if _, _, _, err := ParseArguments([]string{"changes", "./docs", "--translation-input", "--permanent-only"}); err == nil {
+		t.Fatal("translation input and permanent-only must be rejected together")
+	}
+	if _, _, _, err := ParseArguments([]string{"check", "./docs", "--include-assets"}); err == nil {
+		t.Fatal("--include-assets must be rejected outside changes commands")
 	}
 }
 

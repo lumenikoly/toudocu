@@ -12,8 +12,15 @@ another implicit skill trigger. The Docu-docu Go CLI has no `init` command.
 2. Resolve the narrowest repository root that contains the documentation and
    every referenced scope path. Reuse the established documentation directory;
    otherwise use `<repository-root>/docs`.
-3. Choose the project language from the existing `AGENTS.md`, then the existing
-   documentation. Use English when neither establishes a language.
+3. Resolve the project locale from an existing valid `project.locale`, then
+   repository instructions, then existing documentation. Use `en` when none
+   establishes a locale. Normalize an `en-*` locale to the `en` bundled assets
+   and a `ru-*` locale to `ru`. For any other valid locale, continue only when
+   the repository supplies a complete 12-title `project.sections` map and the
+   request context selects `en` or `ru` for bundled guidance and structural
+   template cues; otherwise stop before writing and request those missing
+   choices. Author new source prose in the project locale. Never construct an
+   asset path for an unsupported locale.
 4. Inspect the repository-root `AGENTS.md` for these exact markers:
 
    ```text
@@ -26,45 +33,59 @@ another implicit skill trigger. The Docu-docu Go CLI has no `init` command.
    reversed, or nested. Also stop when an unmanaged instruction establishes a
    conflicting Docu-docu trigger or task-creation policy; show the conflict and
    request user direction.
-5. Inspect `architecture/` before validation. If it contains Markdown other
-   than a structurally valid `architecture/overview.md`, treat it as legacy
-   architecture: run the ordinary read-only check with JSON output, show its
-   diagnostics, and stop without migrating or rewriting those files.
+5. Inspect `<docs-root>/architecture/` before validation. If it contains
+   Markdown other than a structurally valid `architecture/overview.md`, treat
+   it as legacy architecture: run the ordinary read-only check with JSON
+   output, show its diagnostics, and stop without migrating or rewriting those
+   files.
 6. If the documentation directory already contains Markdown, run its ordinary
    read-only Docu-docu check with JSON output. Errors block initialization, with
    one narrow exception: when `architecture/` contains no Markdown,
    `missing-architecture-overview` may be the only error and is the expected
-   condition repaired by init. Warnings remain visible and block only when
-   strict validation is established project policy.
+   condition repaired by init. Warnings remain visible. Under established
+   strict policy, only `missing-index`, `missing-project-locale`, and
+   `incomplete-project-sections` may remain non-blocking because this workflow
+   repairs them; every other warning blocks initialization.
 
 ## Apply the initialization
 
 1. If the selected documentation directory has no `index.md`, create a neutral
-   `docs/index.md` in the established project language. Base its title and
+   `<docs-root>/index.md` in the established project language. Base its title and
    description on repository evidence.
-2. If `architecture/` contains no Markdown, create
-   `docs/architecture/overview.md` from
-   `assets/templates/<language>/architecture-overview.md`. Keep the required
-   `Architecture Overview` document type, state only the evidence-backed system
-   boundary, leave the architecture-question map empty, and omit the optional
-   context diagram unless repository evidence supports it. Do not create
-   detailed architecture documents, typed entities, owners, statuses, or
-   relationships without evidence.
-3. Create or complete `.docu-docu/config.yml` with `project.locale` and all
-   built-in `project.sections` titles from the selected `en` or `ru` locale
-   pack in [`assets/locale-packs.md`](../assets/locale-packs.md). Apply those canonical titles only to built-in entry documents created
-   by this workflow; do not rewrite existing H1 headings.
-4. Select `assets/project-guidance/ru.md` or
-   `assets/project-guidance/en.md`. The selected managed block must contain the
+2. Resolve the complete section map in memory before creating built-in entry
+   documents. Preserve an existing non-empty configured title; otherwise use
+   the H1 of an entry document that existed before init; otherwise use the
+   selected `en` or `ru` [locale pack](../assets/locale-packs.md). A non-`en`/`ru`
+   locale must use the complete project-provided map established during
+   preflight.
+3. If `architecture/` contains no Markdown, create
+   `<docs-root>/architecture/overview.md` using
+   `assets/templates/<asset-language>/architecture-overview.md` as a structural
+   cue. Set its H1 exactly to the resolved `project.sections.architecture`
+   title; never copy the template H1 when it differs. For a non-`en`/`ru`
+   locale, author headings and prose in the project locale rather than copying
+   bundled language text. Keep the required `Architecture Overview` document
+   type, state only the evidence-backed system boundary, leave the
+   architecture-question map empty, and omit the optional context diagram
+   unless repository evidence supports it. Do not create detailed architecture
+   documents, typed entities, owners, statuses, or relationships without
+   evidence.
+4. Create or complete `<repository-root>/.docu-docu/config.yml` without removing
+   existing `site`, `changes`, or `translations` settings. Set the resolved
+   `project.locale` and write the already resolved 12 `project.sections`
+   titles. Do not rewrite existing H1 headings.
+5. Select `assets/project-guidance/ru.md` or
+   `assets/project-guidance/en.md` using the preflight asset language. The
+   selected managed block must contain the
    translation-context isolation rule: ordinary work uses only the canonical
    documentation root, while a selected translation root is read only for an
    explicit locale-specific request.
-5. Upsert the complete asset into the repository-root `AGENTS.md`:
+6. Upsert the complete asset into the repository-root `AGENTS.md`:
    - create the file with the block when it does not exist;
    - append the block after one blank line when both markers are absent;
    - replace from the start marker through the end marker when both occur once;
    - preserve every byte outside the managed block.
-6. Do not create a `TASK-*` merely because init is running. Create one only when
+7. Do not create a `TASK-*` merely because init is running. Create one only when
    the user or existing repository policy explicitly requires it.
 
 Do not install or refresh project guidance outside this explicit init workflow.
@@ -75,9 +96,11 @@ initialization completed atomically.
 
 1. Confirm that both managed markers occur exactly once and in the correct
    order.
-2. Confirm that `index.md` and `architecture/overview.md` exist and that
+2. Confirm that `<docs-root>/index.md` and
+   `<docs-root>/architecture/overview.md` exist and that
    overview has document type `Architecture Overview`.
 3. Run the ordinary project-wide Docu-docu check. Run an additional strict check
    only when strict validation is project policy.
-4. Report the resolved repository root, documentation directory, selected
-   language, created or updated files, errors, and remaining warnings.
+4. Report the resolved repository root, documentation directory, project
+   locale, asset language, created or updated files, errors, and remaining
+   warnings.

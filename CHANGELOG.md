@@ -2,6 +2,9 @@
 
 ## 0.0.1
 
+- `changes`, `changes file` и `task changes` получили явные
+  `--include-assets` и `--translation-input`: первый переопределяет фильтр
+  assets, второй формирует полный reader-facing вход для translation workflow.
 - Skill workflow `$docu-docu translate diff` переводит staged, unstaged и
   untracked canonical-изменения относительно `HEAD` во все настроенные locale
   profiles, сохраняя изоляцию и отдельный результат каждого target.
