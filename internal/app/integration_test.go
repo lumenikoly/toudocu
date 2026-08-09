@@ -1248,6 +1248,48 @@ func TestCLIArguments(t *testing.T) {
 	}
 }
 
+func TestChangeFlagsRejectedOutsideChanges(t *testing.T) {
+	options := [][]string{
+		{"--base=HEAD"}, {"--base", "HEAD"},
+		{"--branch-base=main"}, {"--branch-base", "main"},
+		{"--status=modified"}, {"--status", "modified"},
+		{"--module=MOD-CLI"}, {"--module", "MOD-CLI"},
+		{"--permanent-only"},
+	}
+	nonChangesCommands := [][]string{
+		{"build", "./docs"},
+		{"check", "./docs"},
+		{"serve", "./docs"},
+		{"search", "query", "./docs"},
+		{"scaffold", "module", "MOD-TEST", "./docs", "--title", "Test"},
+		{"task", "init", "./docs", "--area", "TEST", "--title", "Test", "--type", "Bug"},
+		{"task", "ready", "BUG-CLI-001", "./docs"},
+		{"task", "context", "BUG-CLI-001", "./docs"},
+		{"task", "verify", "BUG-CLI-001", "./docs", "--dry-run"},
+		{"task", "archive", "BUG-CLI-001", "./docs"},
+		{"task", "restore", "BUG-CLI-001", "./docs"},
+	}
+	changesCommands := [][]string{
+		{"changes", "./docs"},
+		{"changes", "file", "docs/index.md", "./docs"},
+		{"task", "changes", "BUG-CLI-001", "./docs"},
+	}
+	for _, option := range options {
+		for _, command := range nonChangesCommands {
+			args := append(append([]string{}, command...), option...)
+			if _, _, _, err := ParseArguments(args); err == nil || !strings.Contains(err.Error(), "только для changes") {
+				t.Fatalf("changes-only option %v must be rejected by %v, got %v", option, command, err)
+			}
+		}
+		for _, command := range changesCommands {
+			args := append(append([]string{}, command...), option...)
+			if _, _, _, err := ParseArguments(args); err != nil {
+				t.Fatalf("changes-only option %v must be accepted by %v: %v", option, command, err)
+			}
+		}
+	}
+}
+
 func TestContextualHelp(t *testing.T) {
 	tests := []struct {
 		args      []string

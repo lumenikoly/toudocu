@@ -13,8 +13,10 @@
   анализа реализации и task context, включая переведённые work items. Читайте
   только выбранный translation root при явном `$docu-docu translate <locale>`
   или явном запросе проверить, найти, собрать, запустить или изучить конкретную
-  локаль; ограничивайтесь необходимой source/target-парой и сначала используйте
-  пути, хеши и структурные отчёты. Не добавляйте translation roots в ignore-файлы.
+  локаль. При явном `$docu-docu translate diff` обрабатывайте все настроенные
+  translation roots по одному. Всегда ограничивайтесь необходимой
+  source/target-парой и сначала используйте пути, хеши и структурные отчёты. Не
+  добавляйте translation roots в ignore-файлы.
 - Используйте `$docu-docu refresh` для полного evidence-based ревью и
   обновления исходной документации. Используйте `$docu-docu refresh diff`
   для staged, unstaged и untracked изменений относительно `HEAD` и зависимых

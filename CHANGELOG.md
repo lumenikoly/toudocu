@@ -2,6 +2,9 @@
 
 ## 0.0.1
 
+- Skill workflow `$docu-docu translate diff` переводит staged, unstaged и
+  untracked canonical-изменения относительно `HEAD` во все настроенные locale
+  profiles, сохраняя изоляцию и отдельный результат каждого target.
 - Release workflow поддерживает stable и RC-каналы: RC публикуется как GitHub
   prerelease с тегом `X.Y.Z-rc.N` и устанавливается по явно выбранной версии.
 - Markdown полностью переведён на закреплённый Goldmark `v1.8.5`: один

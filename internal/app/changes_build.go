@@ -894,12 +894,12 @@ func digestChangeSet(report *ChangeSetReport) string {
 }
 
 func buildChangeTaskContext(g *gitChangeSource, target ChangeSide, taskID string) (*changeTaskContext, error) {
-	content, err := g.taskDocumentContent(target, taskID)
+	taskPath, content, err := g.taskDocumentContent(target, taskID)
 	if err != nil {
 		return nil, err
 	}
-	context := &changeTaskContext{content: content, pathExists: map[string]bool{}}
-	for _, path := range declaredTaskDocumentation(content) {
+	context := &changeTaskContext{content: content, path: taskPath, docsRel: g.docsRel, pathExists: map[string]bool{}}
+	for _, path := range declaredTaskDocumentation(content, taskPath, g.docsRel) {
 		if _, contentErr := g.content(target, path); contentErr == nil {
 			context.pathExists[path] = true
 		} else if !os.IsNotExist(contentErr) {
@@ -911,15 +911,15 @@ func buildChangeTaskContext(g *gitChangeSource, target ChangeSide, taskID string
 
 func buildTaskImpact(report *ChangeSetReport, taskID string) *TaskImpactReport {
 	impact := &TaskImpactReport{TaskID: taskID, Declared: []TaskImpactEntry{}, Actual: []TaskImpactEntry{}, TaskChanges: []DocumentationChange{}, Diagnostics: []Issue{}}
+	content, taskPath, docsRel := reportTaskDocumentContent(report, taskID)
 	for _, change := range report.Changes {
-		if strings.Contains(filepath.Base(change.Path), taskID) {
+		if taskPath != "" && (change.Path == taskPath || change.OldPath == taskPath) {
 			impact.TaskChanges = append(impact.TaskChanges, change)
 			continue
 		}
 		impact.Actual = append(impact.Actual, TaskImpactEntry{Path: change.Path, Changed: true, Created: change.Status == "added" || change.Status == "untracked"})
 	}
-	content := reportTaskDocumentContent(report, taskID)
-	declared := declaredTaskDocumentation(content)
+	declared := declaredTaskDocumentation(content, taskPath, docsRel)
 	scope := taskScopePaths(content)
 	changed := map[string]DocumentationChange{}
 	for _, change := range report.Changes {
@@ -967,54 +967,102 @@ func buildTaskImpact(report *ChangeSetReport, taskID string) *TaskImpactReport {
 	return impact
 }
 
-var documentationPathRE = regexp.MustCompile(`(?:docs/)?[A-Za-z0-9_.\-/ ]+\.(?:md|ya?ml|json|png|jpe?g|webp|svg)`)
+var documentationPathRE = regexp.MustCompile(`(?:\.\.?/)*(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+\.(?:md|ya?ml|json|png|jpe?g|webp|svg)`)
 
-func declaredTaskDocumentation(content []byte) []string {
+func normalizeTaskDocumentationPath(value, taskPath, docsRel string, relativeToTask bool) string {
+	value = normalizeSlashes(strings.TrimSpace(value))
+	if value == "" || strings.Contains(value, "://") || strings.HasPrefix(value, "#") || filepath.IsAbs(filepath.FromSlash(value)) {
+		return ""
+	}
+	if pathPart, _, _ := splitLinkDestination(value); pathPart != "" {
+		value = pathPart
+	}
+	var candidate string
+	switch {
+	case value == docsRel || strings.HasPrefix(value, strings.TrimSuffix(docsRel, "/")+"/"):
+		candidate = value
+	case relativeToTask || strings.HasPrefix(value, "./") || strings.HasPrefix(value, "../"):
+		candidate = filepath.ToSlash(filepath.Join(filepath.Dir(filepath.FromSlash(taskPath)), filepath.FromSlash(value)))
+	default:
+		candidate = filepath.ToSlash(filepath.Join(filepath.FromSlash(docsRel), filepath.FromSlash(value)))
+	}
+	candidate = filepath.ToSlash(filepath.Clean(filepath.FromSlash(candidate)))
+	docsPath := filepath.Clean(filepath.FromSlash(docsRel))
+	relative, err := filepath.Rel(docsPath, filepath.Clean(filepath.FromSlash(candidate)))
+	if err != nil || relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) || filepath.IsAbs(relative) {
+		return ""
+	}
+	return candidate
+}
+
+func declaredTaskDocumentation(content []byte, taskPath, docsRel string) []string {
 	if len(content) == 0 {
 		return []string{}
 	}
 	parsed := analyzeMarkdown(string(content))
-	sectionText := ""
+	var impactSection *Section
 	for _, section := range parsed.Sections {
 		title := strings.ToLower(section.Title)
 		if strings.Contains(title, "влияние на документацию") || strings.Contains(title, "documentation impact") {
-			sectionText = section.Markdown
+			copy := section
+			impactSection = &copy
 			break
 		}
 	}
+	if impactSection == nil {
+		return []string{}
+	}
 	seen := map[string]bool{}
 	paths := []string{}
-	for _, candidate := range documentationPathRE.FindAllString(sectionText, -1) {
-		candidate = strings.Trim(strings.TrimSpace(candidate), "`[]()'\"")
-		if !strings.HasPrefix(candidate, "docs/") && !strings.Contains(candidate, "/") && candidate != strings.ToLower(candidate) {
-			continue
+	links := []Link{}
+	for _, link := range parsed.Links {
+		if !link.Image && link.Line > impactSection.StartLine && link.Line <= impactSection.EndLine {
+			links = append(links, link)
 		}
-		if !strings.HasPrefix(candidate, "docs/") {
-			candidate = "docs/" + candidate
-		}
-		candidate = filepath.ToSlash(filepath.Clean(candidate))
-		if strings.HasPrefix(candidate, "docs/") && !seen[candidate] {
+	}
+	add := func(value string, relativeToTask bool) {
+		candidate := normalizeTaskDocumentationPath(value, taskPath, docsRel, relativeToTask)
+		if candidate != "" && !seen[candidate] {
 			seen[candidate] = true
 			paths = append(paths, candidate)
 		}
+	}
+	for _, candidate := range documentationPathRE.FindAllString(impactSection.Markdown, -1) {
+		insideLink := false
+		for _, link := range links {
+			if strings.Contains(link.Destination, candidate) {
+				insideLink = true
+				break
+			}
+		}
+		if insideLink {
+			continue
+		}
+		add(candidate, strings.HasPrefix(candidate, "."))
+	}
+	for _, link := range links {
+		add(link.Destination, true)
 	}
 	sort.Strings(paths)
 	return paths
 }
 
-func taskDocumentContent(repositoryRoot, taskID string) []byte {
+func taskDocumentContent(repositoryRoot, taskID string) (string, []byte) {
 	workRoot := filepath.Join(repositoryRoot, "docs", "work")
+	selectedPath := ""
 	var content []byte
 	_ = filepath.WalkDir(workRoot, func(path string, entry os.DirEntry, err error) error {
-		if err != nil || content != nil || entry.IsDir() {
+		if err != nil || entry.IsDir() || !strings.HasSuffix(strings.ToLower(entry.Name()), ".md") {
 			return nil
 		}
-		if strings.Contains(entry.Name(), taskID) && strings.HasSuffix(strings.ToLower(entry.Name()), ".md") {
-			content, _ = os.ReadFile(path)
+		candidate, readErr := os.ReadFile(path)
+		if readErr == nil && taskIDFromContent(candidate) == taskID {
+			selectedPath = filepath.ToSlash(toPosixRelative(repositoryRoot, path))
+			content = candidate
 		}
 		return nil
 	})
-	return content
+	return selectedPath, content
 }
 
 func taskScopePaths(content []byte) []string {
@@ -1046,13 +1094,14 @@ func taskScopePaths(content []byte) []string {
 	return values
 }
 
-func reportTaskDocumentContent(report *ChangeSetReport, taskID string) []byte {
+func reportTaskDocumentContent(report *ChangeSetReport, taskID string) ([]byte, string, string) {
 	if report.taskContext != nil {
-		return report.taskContext.content
+		return report.taskContext.content, report.taskContext.path, report.taskContext.docsRel
 	}
 	// Keep hand-built reports usable in focused unit tests. Production reports
 	// always have taskContext populated from their selected target snapshot.
-	return taskDocumentContent(report.Repository.Root, taskID)
+	path, content := taskDocumentContent(report.Repository.Root, taskID)
+	return content, path, "docs"
 }
 
 func taskTargetPathExists(report *ChangeSetReport, documentPath string) bool {

@@ -219,6 +219,7 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 	help, version := false, false
 	timeoutSpecified, hostSpecified, portSpecified := false, false, false
 	titleSpecified, languageSpecified, limitSpecified, outputSpecified := false, false, false, false
+	changesOptionSpecified := false
 	screenMapOption := ""
 	args := append([]string{}, argv...)
 	if len(args) > 0 {
@@ -350,38 +351,47 @@ parseOptions:
 				options.TaskType = strings.TrimPrefix(arg, "--type=")
 			}
 		case arg == "--base":
+			changesOptionSpecified = true
 			v, e := takeArgValue(args, &i, arg)
 			if e != nil {
 				return options, false, false, e
 			}
 			options.ChangeBase = v
 		case strings.HasPrefix(arg, "--base="):
+			changesOptionSpecified = true
 			options.ChangeBase = strings.TrimPrefix(arg, "--base=")
 		case arg == "--branch-base":
+			changesOptionSpecified = true
 			v, e := takeArgValue(args, &i, arg)
 			if e != nil {
 				return options, false, false, e
 			}
 			options.ChangeBranchBase = v
 		case strings.HasPrefix(arg, "--branch-base="):
+			changesOptionSpecified = true
 			options.ChangeBranchBase = strings.TrimPrefix(arg, "--branch-base=")
 		case arg == "--status":
+			changesOptionSpecified = true
 			v, e := takeArgValue(args, &i, arg)
 			if e != nil {
 				return options, false, false, e
 			}
 			options.ChangeStatus = v
 		case strings.HasPrefix(arg, "--status="):
+			changesOptionSpecified = true
 			options.ChangeStatus = strings.TrimPrefix(arg, "--status=")
 		case arg == "--module":
+			changesOptionSpecified = true
 			v, e := takeArgValue(args, &i, arg)
 			if e != nil {
 				return options, false, false, e
 			}
 			options.ChangeModule = v
 		case strings.HasPrefix(arg, "--module="):
+			changesOptionSpecified = true
 			options.ChangeModule = strings.TrimPrefix(arg, "--module=")
 		case arg == "--permanent-only":
+			changesOptionSpecified = true
 			options.ChangePermanentOnly = true
 		case arg == "--lang":
 			v, e := takeArgValue(args, &i, arg)
@@ -710,7 +720,11 @@ parseOptions:
 	if options.Strict && options.Command != "build" && options.Command != "check" && options.Command != "serve" && options.Command != "task-ready" {
 		return options, false, false, fmt.Errorf("--strict недоступен для этой команды")
 	}
-	if options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes" {
+	isChangesCommand := options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes"
+	if changesOptionSpecified && !isChangesCommand {
+		return options, false, false, fmt.Errorf("--base, --branch-base, --status, --module и --permanent-only доступны только для changes")
+	}
+	if isChangesCommand {
 		if options.ChangeBranchBase != "" && options.ChangeBase != "" {
 			return options, false, false, fmt.Errorf("--base и --branch-base нельзя использовать вместе")
 		}

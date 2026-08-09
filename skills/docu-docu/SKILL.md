@@ -17,12 +17,14 @@ Read only the operation reference plus the two shared references named below.
 | `$docu-docu init` | [references/init.md](references/init.md) | Yes | Only when the user explicitly invokes `$docu-docu init` |
 | `$docu-docu refresh` | [references/refresh.md](references/refresh.md) | May | Only when the user explicitly invokes `$docu-docu refresh` |
 | `$docu-docu refresh diff` | [references/refresh.md](references/refresh.md) | May | Only when the user explicitly invokes `$docu-docu refresh diff` |
-| `$docu-docu translate` | [references/translate.md](references/translate.md) | Yes | Only for an explicit translate request and selected target locale |
+| `$docu-docu translate <locale>` | [references/translate.md](references/translate.md) | Yes | Only for an explicit translate request and selected target locale |
+| `$docu-docu translate diff` | [references/translate.md](references/translate.md) | Yes | Only when explicitly invoked; selects every configured target locale |
 | CLI, portal, task, or ordinary documentation work | [references/workflows.md](references/workflows.md) | Depends on request | Follow the user's requested mutation; `task verify --run` needs an explicit verification request |
 
-Init, refresh, refresh diff, and translate are agent workflows. They are not
-Docu-docu Go CLI commands. Never infer initialization from missing files, first
-use, or an ordinary documentation request. Neither refresh form is a Docu-docu
+Init, refresh, refresh diff, translate, and translate diff are agent workflows.
+They are not Docu-docu Go CLI commands. Never infer initialization from missing
+files, first use, or an ordinary documentation request.
+Neither refresh form is a Docu-docu
 Go CLI command or an initialization request.
 
 For every operation, also read:
@@ -59,11 +61,13 @@ including translated work items. Do not add translation roots to `.gitignore` or
 global ignore files: explicit locale workflows must remain able to select them.
 
 Read a configured translation root only for an explicit `$docu-docu translate
-<locale>` request or an explicit request to check, find, build, run, or inspect
-that specific locale. Limit access to the selected locale and the source/target
-pair currently needed. Do not read other files in that locale merely for context;
-for parity checks, compare relative paths, source digests, and structural reports
-before opening document contents.
+<locale>`, an explicit `$docu-docu translate diff`, or an explicit request to
+check, find, build, run, or inspect that specific locale. For translate diff,
+visit the configured roots one at a time in normalized locale order. In every
+mode, limit access to the current locale and source/target pair. Do not read
+other files in that locale merely for context; for parity checks, compare
+relative paths, source digests, and structural reports before opening document
+contents.
 
 ## Documentation invariants
 

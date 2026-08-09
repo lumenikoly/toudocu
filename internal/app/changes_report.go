@@ -12,9 +12,11 @@ import (
 
 func filterDocumentationChanges(report *ChangeSetReport, options Options) {
 	taskPaths, taskEntities := map[string]bool{}, map[string]bool{}
+	taskPath := ""
 	if options.ChangeTaskID != "" {
-		content := reportTaskDocumentContent(report, options.ChangeTaskID)
-		for _, path := range declaredTaskDocumentation(content) {
+		content, selectedTaskPath, docsRel := reportTaskDocumentContent(report, options.ChangeTaskID)
+		taskPath = selectedTaskPath
+		for _, path := range declaredTaskDocumentation(content, selectedTaskPath, docsRel) {
 			taskPaths[path] = true
 		}
 		for _, path := range taskScopePaths(content) {
@@ -50,7 +52,7 @@ func filterDocumentationChanges(report *ChangeSetReport, options Options) {
 		if options.ChangeModule != "" && !changeContainsValue(change, options.ChangeModule) {
 			continue
 		}
-		if options.ChangeTaskID != "" && !changeRelatedToTask(change, options.ChangeTaskID, taskPaths, taskEntities) {
+		if options.ChangeTaskID != "" && !changeRelatedToTask(change, taskPath, taskPaths, taskEntities) {
 			continue
 		}
 		filtered = append(filtered, change)
@@ -63,8 +65,8 @@ func filterDocumentationChanges(report *ChangeSetReport, options Options) {
 	report.ChangeSetDigest = digestChangeSet(report)
 }
 
-func changeRelatedToTask(change DocumentationChange, taskID string, paths, entities map[string]bool) bool {
-	if strings.Contains(filepath.Base(change.Path), taskID) || strings.Contains(filepath.Base(change.OldPath), taskID) || paths[change.Path] || paths[change.OldPath] {
+func changeRelatedToTask(change DocumentationChange, taskPath string, paths, entities map[string]bool) bool {
+	if (taskPath != "" && (change.Path == taskPath || change.OldPath == taskPath)) || paths[change.Path] || paths[change.OldPath] {
 		return true
 	}
 	for _, entity := range append(append([]ChangeEntity{}, change.EntitiesBefore...), change.EntitiesAfter...) {

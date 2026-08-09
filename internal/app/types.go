@@ -414,6 +414,7 @@ type WorkItem struct {
 	line                int
 	ownerDoc            *Document
 	statusName          string
+	useCaseOmitted      bool
 }
 
 type CriterionVerification struct {

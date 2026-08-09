@@ -65,6 +65,7 @@ policy и output. Если соглашений нет, fallback — `./docs` и
 | `$docu-docu refresh` | Явный вызов полного refresh |
 | `$docu-docu refresh diff` | Явный вызов diff refresh |
 | `$docu-docu translate <locale> ...` | Явный запрос перевода и выбранная целевая локаль |
+| `$docu-docu translate diff` | Явный вызов перевода текущего diff во все настроенные целевые локали |
 | `task verify --run` | Явная просьба выполнить или проверить задачу в доверенном репозитории |
 
 Отсутствующие файлы, первое использование skill, обычная правка документации
@@ -214,6 +215,21 @@ $docu-docu translate <locale> --base REF
 $docu-docu translate <locale> --all-stale
 ```
 
+`$docu-docu translate diff` не принимает locale или дополнительные режимы. Он
+требует Git worktree и валидный `HEAD`, один раз строит change set staged,
+unstaged и untracked canonical-файлов через:
+
+```bash
+docu-docu changes ./docs --base HEAD --target working-tree --format json
+```
+
+Затем workflow валидирует все настроенные translation profiles до первой
+записи и обрабатывает их по одному в нормализованном порядке locale. Профили не
+создаются автоматически. Пустой diff не меняет targets или manifests. Ошибка
+перевода или strict-check одной локали оставляет её manifest неизменённым, но не
+мешает обработать остальные; итоговый отчёт сохраняет отдельный результат для
+каждой локали.
+
 Workflow поддерживает в configured translation root тот же набор читательских
 файлов, что и в canonical root. Он обрабатывает одну source/target-пару за раз,
 сохраняет IDs, команды, пути, URL, anchors, code fences и machine-readable
@@ -236,9 +252,10 @@ context. Настроенные translation roots, включая перевед
 
 Выбранный translation root читается только при явном
 `$docu-docu translate <locale>` или явной просьбе проверить, найти, собрать,
-запустить либо изучить эту локаль. Доступ ограничивается выбранной locale и
-минимальной source/target-парой; для parity сначала сравниваются relative paths,
-source digests и structural reports.
+запустить либо изучить эту локаль. Явный `$docu-docu translate diff` разрешает
+последовательно открыть все настроенные roots. В каждый момент доступ
+ограничивается одной locale и минимальной source/target-парой; для parity
+сначала сравниваются relative paths, source digests и structural reports.
 
 ## Что сообщает агент
 
@@ -249,5 +266,6 @@ targets и manifest для translate, а для init также конфигур
 warnings и применённую validation policy. Для refresh отчёт также включает
 просмотренную область, evidence, unresolved findings, migrations IDs и
 изменения дат. Для translate — выбранный режим, locale, parity и состояние
-manifest. Сборка портала и `task verify --run`, если они не были разрешены или
-не требовались, отмечаются как намеренно не выполненные.
+manifest; для translate diff — base `HEAD` и отдельный результат каждой
+настроенной locale. Сборка портала и `task verify --run`, если они не были
+разрешены или не требовались, отмечаются как намеренно не выполненные.

@@ -194,6 +194,12 @@ $docu-docu translate en --all-stale
 
 The skill updates a complete read-only language mirror while keeping the main documentation as the operational source of truth. It requires a locale and exactly one selection mode: `--task`, `--base`, or `--all-stale`.
 
+To translate the current staged, unstaged, and untracked diff relative to `HEAD` into every configured language, use:
+
+```text
+$docu-docu translate diff
+```
+
 ---
 
 ## Documentation validation
@@ -423,6 +429,12 @@ To update a separate language version, use:
 
 ```text
 $docu-docu translate en --all-stale
+```
+
+To update every configured translation with the current diff relative to `HEAD`, use:
+
+```text
+$docu-docu translate diff
 ```
 
 The main documentation remains the operational source of truth, while translations are stored as complete read-only mirrors. Each translation has a complete `translations.<locale>` profile with an independent root and built-in section names; this repository provides English in `docs-en/` alongside canonical Russian `docs/`. Task commands, scaffolding, and editor writes are rejected on translation roots.

@@ -67,7 +67,8 @@ workflow и Git-backed changes. Прямые вызовы возвращают �
 ## Skill workflows актуализации
 
 Устанавливаемый `docu-docu` предоставляет изменяющие agent workflows,
-которые не входят в Go CLI: `init`, `refresh`, `refresh diff` и `translate`.
+которые не входят в Go CLI: `init`, `refresh`, `refresh diff`, `translate` и
+`translate diff`.
 
 - `$docu-docu refresh` сверяет весь набор исходных Markdown-документов с
   текущим кодом, тестами, публичными интерфейсами, schemas, configuration, CI,
@@ -75,6 +76,9 @@ workflow и Git-backed changes. Прямые вызовы возвращают �
 - `$docu-docu refresh diff` начинает со staged, unstaged и untracked файлов
   относительно `HEAD` и добавляет зависимые документы по ссылкам, stable ID,
   task relationships и изменённому публичному поведению;
+- `$docu-docu translate diff` один раз строит canonical change set относительно
+  `HEAD`, затем переводит его во все настроенные locale profiles по одному и
+  сообщает результат каждого target независимо;
 - `$docu-docu translate <locale> --all-stale` поддерживает полный файловый
   паритет reader-facing Markdown, включая work items, notes и ideas. Locale root
   остаётся read-only и не используется task workflow или editor-записью. При

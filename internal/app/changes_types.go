@@ -18,6 +18,8 @@ type ChangeSetReport struct {
 // rather than whatever happens to be in the current working tree.
 type changeTaskContext struct {
 	content    []byte
+	path       string
+	docsRel    string
 	pathExists map[string]bool
 }
 

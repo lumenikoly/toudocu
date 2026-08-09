@@ -12,8 +12,10 @@
   implementation analysis, and task context, including translated work items.
   Read only the selected translation root for an explicit `$docu-docu translate
   <locale>` or an explicit request to check, find, build, run, or inspect that
-  locale; limit access to the necessary source/target pair and use paths, hashes,
-  and structural reports first. Do not add translation roots to ignore files.
+  locale. For an explicit `$docu-docu translate diff`, process all configured
+  translation roots one at a time. Always limit access to the necessary
+  source/target pair and use paths, hashes, and structural reports first. Do not
+  add translation roots to ignore files.
 - Use `$docu-docu refresh` for a full evidence-based review and update of
   source documentation. Use `$docu-docu refresh diff` for staged, unstaged,
   and untracked changes relative to `HEAD` plus affected documents. These are

@@ -95,6 +95,7 @@ $docu-docu init
 $docu-docu refresh
 $docu-docu refresh diff
 $docu-docu translate en --all-stale
+$docu-docu translate diff
 ```
 
 Обычные сценарии, различие между shell-командами и agent-вызовами, а также

@@ -334,6 +334,7 @@ func TestDocuDocuCompactOperationRouter(t *testing.T) {
 		"[references/init.md](references/init.md)",
 		"[references/refresh.md](references/refresh.md)",
 		"[references/translate.md](references/translate.md)",
+		"$docu-docu translate diff",
 		"[references/workflows.md](references/workflows.md)",
 		"[references/semantic-gate.md](references/semantic-gate.md)",
 		"both `index.md` and\n  `architecture/overview.md`",
@@ -514,6 +515,14 @@ func TestDocuDocuTranslationContextIsolation(t *testing.T) {
 		"`documents[].type` and `documents[].status.kind`",
 		"`effectiveCompleted`, `completionSource`",
 		"TRANSLATION_SEMANTIC_MISMATCH",
+		"$docu-docu translate diff",
+		"every configured translation profile",
+		"--base HEAD --target working-tree",
+		"staged, unstaged, and untracked canonical changes",
+		"normalized locale order",
+		"continue with the remaining locales",
+		"TRANSLATION_PROFILES_EMPTY",
+		"TRANSLATION_DIFF_UNAVAILABLE",
 	} {
 		if !strings.Contains(translate, expected) {
 			t.Errorf("translation workflow does not minimize context with %q", expected)
@@ -524,8 +533,8 @@ func TestDocuDocuTranslationContextIsolation(t *testing.T) {
 	}
 
 	guidanceCases := map[string][]string{
-		"ru": {"единственным источником обычного", "translation roots из поиска по репозиторию", "явном `$docu-docu translate <locale>`", "проверить, найти, собрать, запустить или изучить", "source/target-парой", "пути, хеши и структурные отчёты", "Не добавляйте translation roots в ignore-файлы"},
-		"en": {"only source for ordinary", "translation roots from repository search", "explicit `$docu-docu translate", "check, find, build, run, or inspect", "source/target pair", "paths, hashes,\n  and structural reports", "Do not add translation roots to ignore files"},
+		"ru": {"единственным источником обычного", "translation roots из поиска по репозиторию", "явном `$docu-docu translate <locale>`", "проверить, найти, собрать, запустить или изучить", "$docu-docu translate diff", "все настроенные\n  translation roots по одному", "source/target-парой", "пути, хеши и структурные отчёты", "Не\n  добавляйте translation roots в ignore-файлы"},
+		"en": {"only source for ordinary", "translation roots from repository search", "explicit `$docu-docu translate", "check, find, build, run, or inspect", "$docu-docu translate diff", "all configured\n  translation roots one at a time", "source/target pair", "paths, hashes, and structural reports", "Do not\n  add translation roots to ignore files"},
 	}
 	for language, expectedValues := range guidanceCases {
 		guidance := readDocuDocuFile(t, filepath.Join("assets", "project-guidance", language+".md"))

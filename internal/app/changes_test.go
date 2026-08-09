@@ -58,6 +58,52 @@ func TestParseNameStatusNULPaths(t *testing.T) {
 	}
 }
 
+func TestStatusStatesPreservePathsWithSpaces(t *testing.T) {
+	root, docs := newChangesRepository(t)
+	path := filepath.Join(docs, "modules", "file with spaces.md")
+	writeChangesTestFile(t, path, "# Before\n")
+	gitTestRun(t, root, "add", "docs/modules/file with spaces.md")
+	gitTestRun(t, root, "commit", "-q", "-m", "add spaced path")
+	writeChangesTestFile(t, path, "# Unstaged\n")
+
+	source, err := openGitChangeSource(docs, 60)
+	if err != nil {
+		t.Fatal(err)
+	}
+	states, err := source.statusStates()
+	if err != nil {
+		t.Fatal(err)
+	}
+	state := states["docs/modules/file with spaces.md"]
+	if !state.Unstaged || state.Staged {
+		t.Fatalf("unstaged path state lost: %#v in %#v", state, states)
+	}
+
+	gitTestRun(t, root, "add", "docs/modules/file with spaces.md")
+	states, err = source.statusStates()
+	if err != nil {
+		t.Fatal(err)
+	}
+	state = states["docs/modules/file with spaces.md"]
+	if !state.Staged || state.Unstaged {
+		t.Fatalf("staged path state lost: %#v in %#v", state, states)
+	}
+
+	renamed := filepath.Join(docs, "modules", "renamed with spaces.md")
+	if err := os.Rename(path, renamed); err != nil {
+		t.Fatal(err)
+	}
+	gitTestRun(t, root, "add", "-A", "docs/modules")
+	states, err = source.statusStates()
+	if err != nil {
+		t.Fatal(err)
+	}
+	state = states["docs/modules/renamed with spaces.md"]
+	if !state.Staged {
+		t.Fatalf("renamed path state lost: %#v in %#v", state, states)
+	}
+}
+
 func TestChangesForceIncludeAssetsOverridesConfigOnly(t *testing.T) {
 	root, docs := newChangesRepository(t)
 	writeSiteConfig(t, root, "changes:\n  includeAssets: false\n")
@@ -569,6 +615,66 @@ func TestTaskImpactUsesSelectedTargetTaskDocument(t *testing.T) {
 	}
 }
 
+func TestTaskImpactResolvesRelativeDocumentationLinks(t *testing.T) {
+	root, docs := newChangesRepository(t)
+	taskPath := filepath.Join(docs, "work", "TASK-CORE-001.md")
+	writeChangesTestFile(t, taskPath, "# TASK-CORE-001: Change\n\n## Documentation impact\n\nUpdate [the core module](../modules/MOD-CORE.md) and [local support](./support.md).\n")
+	writeChangesTestFile(t, filepath.Join(docs, "work", "support.md"), "# Support\n\nOriginal.\n")
+	gitTestRun(t, root, "add", "docs/work/TASK-CORE-001.md", "docs/work/support.md")
+	gitTestRun(t, root, "commit", "-q", "-m", "add task")
+	writeChangesTestFile(t, filepath.Join(docs, "modules", "MOD-CORE.md"), "# MOD-CORE: Core\n\nChanged.\n")
+	writeChangesTestFile(t, filepath.Join(docs, "work", "support.md"), "# Support\n\nChanged.\n")
+
+	report, err := BuildDocumentationChanges(Options{InputDirectory: docs, ChangeBase: "HEAD", ChangeTarget: "working-tree", ChangeTaskID: "TASK-CORE-001"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.TaskImpact == nil || len(report.TaskImpact.Declared) != 2 {
+		t.Fatalf("relative documentation impact was not resolved: %#v", report.TaskImpact)
+	}
+	declared := map[string]TaskImpactEntry{}
+	for _, entry := range report.TaskImpact.Declared {
+		declared[entry.Path] = entry
+	}
+	for _, path := range []string{"docs/modules/MOD-CORE.md", "docs/work/support.md"} {
+		if entry, ok := declared[path]; !ok || !entry.Changed {
+			t.Fatalf("unexpected declared impact for %s: %#v", path, report.TaskImpact.Declared)
+		}
+	}
+	for _, diagnostic := range report.TaskImpact.Diagnostics {
+		if diagnostic.Code == "undeclared-document-change" {
+			t.Fatalf("resolved relative link was still reported as undeclared: %#v", report.TaskImpact.Diagnostics)
+		}
+	}
+}
+
+func TestTaskChangesSelectsExactTaskIDFromHeading(t *testing.T) {
+	root, docs := newChangesRepository(t)
+	exactPath := filepath.Join(docs, "work", "custom-name.md")
+	prefixPath := filepath.Join(docs, "work", "TASK-CORE-0010.md")
+	writeChangesTestFile(t, exactPath, "# TASK-CORE-001: Exact\n\n## Documentation impact\n\nNo changes.\n")
+	writeChangesTestFile(t, prefixPath, "# TASK-CORE-0010: Prefix\n\n## Documentation impact\n\nNo changes.\n")
+	gitTestRun(t, root, "add", "docs/work")
+	gitTestRun(t, root, "commit", "-q", "-m", "add tasks")
+	writeChangesTestFile(t, exactPath, "# TASK-CORE-001: Exact\n\nChanged.\n")
+	writeChangesTestFile(t, prefixPath, "# TASK-CORE-0010: Prefix\n\nChanged.\n")
+
+	report, err := BuildDocumentationChanges(Options{InputDirectory: docs, ChangeBase: "HEAD", ChangeTarget: "working-tree", ChangeTaskID: "TASK-CORE-001"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.taskContext == nil || report.taskContext.path != "docs/work/custom-name.md" {
+		t.Fatalf("wrong task document selected: %#v", report.taskContext)
+	}
+	if report.TaskImpact == nil || len(report.TaskImpact.TaskChanges) != 1 || report.TaskImpact.TaskChanges[0].Path != "docs/work/custom-name.md" {
+		t.Fatalf("task changes used a filename substring: %#v", report.TaskImpact)
+	}
+	filterDocumentationChanges(report, Options{ChangeTaskID: "TASK-CORE-001"})
+	if len(report.Changes) != 1 || report.Changes[0].Path != "docs/work/custom-name.md" {
+		t.Fatalf("task filter used a filename substring: %#v", report.Changes)
+	}
+}
+
 func TestCommittedInBranchGitState(t *testing.T) {
 	root, docs := newChangesRepository(t)
 	writeChangesTestFile(t, filepath.Join(docs, "modules", "MOD-CORE.md"), "# MOD-CORE: Core\n\nCommitted branch change.\n")
@@ -585,7 +691,7 @@ func TestCommittedInBranchGitState(t *testing.T) {
 
 func TestTaskFilterKeepsDeclaredAndEntityRelatedChanges(t *testing.T) {
 	root := t.TempDir()
-	writeChangesTestFile(t, filepath.Join(root, "docs/work/TASK-AUTH-1.md"), "# TASK-AUTH-1\n\n## Влияние на документацию\n\n- docs/modules/MOD-AUTH.md\n")
+	writeChangesTestFile(t, filepath.Join(root, "docs/work/TASK-AUTH-1.md"), "# TASK-AUTH-1: Auth change\n\n## Влияние на документацию\n\n- docs/modules/MOD-AUTH.md\n")
 	report := &ChangeSetReport{Repository: ChangeRepository{Root: root}, Summary: ChangeSummary{Entities: map[string]int{}, Classifications: map[string]int{}}, Changes: []DocumentationChange{
 		{Path: "docs/work/TASK-AUTH-1.md", Classification: "work-artifact"},
 		{Path: "docs/modules/MOD-AUTH.md", Classification: "permanent-documentation", EntitiesAfter: []ChangeEntity{{ID: "MOD-AUTH", Type: "module"}}},

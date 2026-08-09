@@ -249,10 +249,11 @@ translation root либо каноническим docs root. При `check`, `b
 Task-команды, `scaffold` и editor-запись отклоняются с
 `TRANSLATION_ROOT_READ_ONLY`. Агент читает только выбранный translation root при
 явном `$docu-docu translate <locale>` или явном запросе проверить, найти,
-собрать, запустить или изучить эту локаль. Он обрабатывает одну необходимую
-source/target-пару за раз, а для проверки паритета сначала сравнивает пути,
-source-хеши manifest и структурные отчёты. Translation roots не добавляются в
-`.gitignore` или глобальные ignore-файлы.
+собрать, запустить или изучить эту локаль. Явный `$docu-docu translate diff`
+последовательно выбирает все настроенные profiles. Агент обрабатывает одну
+локаль и одну необходимую source/target-пару за раз, а для проверки паритета
+сначала сравнивает пути, source-хеши manifest и структурные отчёты. Translation
+roots не добавляются в `.gitignore` или глобальные ignore-файлы.
 
 ## Mermaid
 
