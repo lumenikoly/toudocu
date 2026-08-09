@@ -1,4 +1,4 @@
 interface:
   display_name: "Toudocu"
-  short_description: "Set up, update, and validate Toudocu documentation"
-  default_prompt: "Use $toudocu init to explicitly set up Toudocu for this project."
+  short_description: "Write and validate reliable, reader-first project documentation"
+  default_prompt: "Use $toudocu for this request. Select only the applicable workflow and references. Preserve project meaning; when changing documentation, write naturally in the selected document language and modify only evidence-backed sources. Do not initialize or run task verification unless explicitly requested."

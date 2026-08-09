@@ -96,10 +96,28 @@ func (store *reviewStore) loadUnlocked() (ReviewState, error) {
 	if err := json.Unmarshal(data, &state); err != nil || state.SchemaVersion != reviewSchemaVersion || state.StateDigest == "" || calculateReviewStateDigest(state) != state.StateDigest {
 		return ReviewState{}, &reviewFailure{Code: "REVIEW_STATE_CORRUPTED", Status: http.StatusInternalServerError, Message: "review state повреждён; файл не был перезаписан"}
 	}
+	migrateLegacyMessageTypes(&state)
 	if state.Feedback == nil {
 		state.Feedback = []FeedbackBatch{}
 	}
 	return state, nil
+}
+
+func migrateLegacyMessageTypes(state *ReviewState) {
+	if state.Session != nil {
+		for discussionIndex := range state.Session.Discussions {
+			for messageIndex := range state.Session.Discussions[discussionIndex].Messages {
+				state.Session.Discussions[discussionIndex].Messages[messageIndex].LegacyType = ""
+			}
+		}
+	}
+	for batchIndex := range state.Feedback {
+		for itemIndex := range state.Feedback[batchIndex].Items {
+			state.Feedback[batchIndex].Items[itemIndex].LegacyType = ""
+		}
+		state.Feedback[batchIndex].Digest = feedbackBatchDigest(state.Feedback[batchIndex])
+	}
+	state.StateDigest = calculateReviewStateDigest(*state)
 }
 
 func (store *reviewStore) withLock(operation func() error) error {

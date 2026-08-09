@@ -1,7 +1,8 @@
 # Toudocu document model
 
 Use this reference when deciding whether a document should remain free-form or
-participate in Toudocu's typed knowledge model.
+participate in Toudocu's typed knowledge model. Apply the
+[reader-first writing gate](writing-quality.md) to the content of either form.
 
 ## Validation boundary
 
@@ -58,9 +59,12 @@ H1 supplies the navigation title. Do not infer a typed category from filenames,
 document count, or prose.
 
 Use one H1 and a concise introduction when useful. These improve navigation but
-are not reasons to invent project metadata. Narrative content may use any
-language; recognized structural metadata and typed section aliases are Russian
-or English.
+are not reasons to invent project metadata. Reader-facing content may use any
+project-selected language and must be idiomatic in that language. Exact code
+tokens remain unchanged and receive a plain-language explanation when needed.
+Recognized structural metadata and typed section aliases are Russian or English;
+for another document language, preserve a supported structural key while writing
+the surrounding prose in the selected language.
 
 ## Stable IDs and relationships
 
@@ -95,9 +99,9 @@ decision, and consequences. Work-item schemas are defined in
 [work-item-model.md](work-item-model.md).
 
 Toudocu reports missing recommended sections as warnings. Use these sections
-when they add information; do not create empty or speculative prose. If the
-project does not need typed semantics, use the generic `document.md` template
-outside the reserved typed paths.
+when they add information; do not create empty, speculative, or terminology-led
+prose. If the project does not need typed semantics, use the generic
+`document.md` template outside the reserved typed paths.
 
 Common schema-driven anti-patterns include:
 

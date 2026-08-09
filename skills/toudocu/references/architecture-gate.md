@@ -1,9 +1,11 @@
 # Architecture semantic gate
 
-Use this reference only after the general [semantic gate](semantic-gate.md)
-when creating or changing `architecture/overview.md` or another architecture
-document. Review the overview separately from every detailed document. Record
-each result by code and return `PASS` only when all applicable checks pass.
+Use this reference only after the general
+[reader-first writing gate](writing-quality.md) and
+[semantic gate](semantic-gate.md) when creating or changing
+`architecture/overview.md` or another architecture document. Review the
+overview separately from every detailed document. Record each result by code
+and return `PASS` only when all applicable checks pass.
 
 ## Overview
 
@@ -22,12 +24,14 @@ each result by code and return `PASS` only when all applicable checks pass.
 ## Detailed architecture documents
 
 - `ARCH006`: the document declares type `Architecture`.
-- `ARCH007`: the document declares exactly one non-empty `Architecture
-  question` / `Архитектурный вопрос`.
+- `ARCH007`: the document declares exactly one non-empty architectural
+  question through the supported metadata key `Architecture question` or
+  `Архитектурный вопрос`.
 - `ARCH008`: the declared text is genuinely an architectural question, even
   when it has no question mark or interrogative word.
-- `ARCH009`: a short answer appears before supporting detail and lets the
-  intended reader grasp the main conclusion quickly.
+- `ARCH009`: a short answer appears before supporting detail, uses natural
+  target-language terms, and lets the intended reader grasp the main conclusion
+  without first decoding component names or identifiers.
 - `ARCH010`: scope and relevant exclusions keep the answer bounded.
 - `ARCH011`: the document does not absorb a detailed interaction (`FLOW-*`),
   API or data format (`CONTRACT`), factual catalog (`REFERENCE`), operational
@@ -42,5 +46,5 @@ The CLI automates only the structurally provable parts of `ARCH001`, `ARCH003`,
 `ARCH007`, and `ARCH013`, plus architecture link safety. The detail document
 type in `ARCH006` remains a semantic-gate check rather than a separate CLI
 diagnostic. The CLI accepts any non-empty question text. Punctuation, question
-form, architectural meaning, usefulness, evidence, boundaries, and duplication
-remain semantic-review results.
+form, architectural meaning, usefulness, evidence, wording, boundaries, and
+duplication remain writing or semantic-review results.

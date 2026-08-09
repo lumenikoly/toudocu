@@ -29,11 +29,12 @@ func TestRepositoryReviewProjectionAndFile(t *testing.T) {
 	root, docs := newReviewRepository(t)
 	writeChangesTestFile(t, filepath.Join(root, "server.go"), "package main\n\nfunc hello() {\n\tprintln(\"hello\")\n}\n")
 	writeChangesTestFile(t, filepath.Join(root, "new.js"), "export const value = 1;\n")
+	writeChangesTestFile(t, filepath.Join(docs, "modules", "MOD-CORE.md"), "# MOD-CORE: Core\n\n- Status: Active\n\n## Rules\n\nUpdated.\n")
 	report, err := BuildRepositoryReview(reviewOptions(root, docs))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !report.FeedbackWritable || report.RepositoryRevision == "" || len(report.Files) != 2 {
+	if !report.FeedbackWritable || report.RepositoryRevision == "" || len(report.Files) != 3 {
 		t.Fatalf("report=%#v", report)
 	}
 	paths := map[string]RepositoryReviewFile{}
@@ -42,6 +43,9 @@ func TestRepositoryReviewProjectionAndFile(t *testing.T) {
 	}
 	if paths["server.go"].Language != "go" || paths["new.js"].Status != "untracked" || paths["new.js"].Language != "javascript" {
 		t.Fatalf("files=%#v", paths)
+	}
+	if paths["server.go"].Documentation != nil || paths["docs/modules/MOD-CORE.md"].Documentation == nil {
+		t.Fatalf("documentation enrichment leaked: %#v", paths)
 	}
 	detail, err := BuildRepositoryReviewFile(reviewOptions(root, docs), "server.go")
 	if err != nil || detail.Current == nil || detail.Before == nil || !strings.Contains(detail.Patch, "hello") || len(detail.Hunks) == 0 {
@@ -128,7 +132,7 @@ func TestReviewStoreDiscussionFeedbackResponseAndReanchor(t *testing.T) {
 		ReviewMutationGuard: ReviewMutationGuard{ExpectedRevision: initial.Revision, ExpectedStateDigest: initial.StateDigest},
 		RepositoryRevision:  report.RepositoryRevision,
 		Target:              ReviewTarget{Type: "fileRange", Path: "server.go", Start: &ReviewPosition{Line: 3, Column: 6}, End: &ReviewPosition{Line: 3, Column: 11}},
-		Type:                "issue", Message: "Проверь имя функции",
+		Message:             "Проверь имя функции",
 	})
 	if err != nil || created.Session == nil || len(created.Session.Discussions) != 1 {
 		t.Fatalf("created=%#v err=%v", created, err)
@@ -151,13 +155,13 @@ func TestReviewStoreDiscussionFeedbackResponseAndReanchor(t *testing.T) {
 	}
 	if _, err := restarted.updateDiscussion(discussion.ID, UpdateDiscussionRequest{
 		ReviewMutationGuard: ReviewMutationGuard{ExpectedRevision: feedbackState.Revision, ExpectedStateDigest: feedbackState.StateDigest},
-		Operation:           "edit", MessageID: discussion.Messages[0].ID, Type: "issue", Message: "Нельзя изменить",
+		Operation:           "edit", MessageID: discussion.Messages[0].ID, Message: "Нельзя изменить",
 	}); reviewErrorCode(err) != "REVIEW_INVALID_STATE" {
 		t.Fatalf("sent message edit err=%v", err)
 	}
 	if _, err := restarted.updateDiscussion(discussion.ID, UpdateDiscussionRequest{
 		ReviewMutationGuard: ReviewMutationGuard{ExpectedRevision: feedbackState.Revision, ExpectedStateDigest: feedbackState.StateDigest},
-		Operation:           "reply", Type: "question", Message: "Нельзя ответить in-flight",
+		Operation:           "reply", Message: "Нельзя ответить in-flight",
 	}); reviewErrorCode(err) != "REVIEW_CONFLICT" {
 		t.Fatalf("in-flight reply err=%v", err)
 	}
@@ -216,7 +220,7 @@ func TestReviewDiscussionMutationsAndCleanup(t *testing.T) {
 	state, err = service.createDiscussion(CreateDiscussionRequest{
 		ReviewMutationGuard: ReviewMutationGuard{ExpectedRevision: state.Revision, ExpectedStateDigest: state.StateDigest},
 		RepositoryRevision:  report.RepositoryRevision,
-		Target:              ReviewTarget{Type: "global"}, Type: "question", Message: "Исходное сообщение",
+		Target:              ReviewTarget{Type: "global"}, Message: "Исходное сообщение",
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -224,7 +228,7 @@ func TestReviewDiscussionMutationsAndCleanup(t *testing.T) {
 	discussion := state.Session.Discussions[0]
 	state, err = service.updateDiscussion(discussion.ID, UpdateDiscussionRequest{
 		ReviewMutationGuard: ReviewMutationGuard{ExpectedRevision: state.Revision, ExpectedStateDigest: state.StateDigest},
-		Operation:           "edit", MessageID: discussion.Messages[0].ID, Type: "suggestion", Message: "Изменённое сообщение",
+		Operation:           "edit", MessageID: discussion.Messages[0].ID, Message: "Изменённое сообщение",
 	})
 	if err != nil || state.Session.Discussions[0].Messages[0].Body != "Изменённое сообщение" || state.Session.Discussions[0].Messages[0].EditedAt.IsZero() {
 		t.Fatalf("edited state=%#v err=%v", state, err)
@@ -240,7 +244,7 @@ func TestReviewDiscussionMutationsAndCleanup(t *testing.T) {
 		state, err = service.createDiscussion(CreateDiscussionRequest{
 			ReviewMutationGuard: ReviewMutationGuard{ExpectedRevision: state.Revision, ExpectedStateDigest: state.StateDigest},
 			RepositoryRevision:  report.RepositoryRevision,
-			Target:              ReviewTarget{Type: "global"}, Type: "issue", Message: message,
+			Target:              ReviewTarget{Type: "global"}, Message: message,
 		})
 		if err != nil {
 			t.Fatalf("create %d: %v", index, err)
@@ -282,7 +286,7 @@ func TestReviewFeedbackResponseEnforcesFIFO(t *testing.T) {
 		state, err = service.createDiscussion(CreateDiscussionRequest{
 			ReviewMutationGuard: ReviewMutationGuard{ExpectedRevision: state.Revision, ExpectedStateDigest: state.StateDigest},
 			RepositoryRevision:  report.RepositoryRevision,
-			Target:              ReviewTarget{Type: "global"}, Type: "issue", Message: message,
+			Target:              ReviewTarget{Type: "global"}, Message: message,
 		})
 		if err != nil {
 			t.Fatal(err)
@@ -338,6 +342,31 @@ func TestReviewCleanupCorruptionAndBusyState(t *testing.T) {
 	}
 }
 
+func TestReviewLegacyMessageTypeMigration(t *testing.T) {
+	root, docs := newReviewRepository(t)
+	t.Setenv("TOUDOCU_STATE_HOME", t.TempDir())
+	service, err := newReviewService(reviewOptions(root, docs))
+	if err != nil {
+		t.Fatal(err)
+	}
+	now := service.now()
+	state := emptyReviewState()
+	state.Session = &ReviewSession{ID: "review", CreatedAt: now, Discussions: []Discussion{{ID: "discussion", Messages: []ReviewMessage{{ID: "message", Author: "human", LegacyType: "issue", Body: "legacy", CreatedAt: now}}}}}
+	state.Feedback = []FeedbackBatch{{SchemaVersion: reviewSchemaVersion, ID: "feedback", ReviewID: "review", CreatedAt: now, Items: []FeedbackItem{{ID: "item", DiscussionID: "discussion", MessageID: "message", LegacyType: "issue", Body: "legacy"}}}}
+	state.Feedback[0].Digest = feedbackBatchDigest(state.Feedback[0])
+	state.StateDigest = calculateReviewStateDigest(state)
+	if err := os.MkdirAll(service.store.directory, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := service.store.writeState(state); err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := service.store.load()
+	if err != nil || loaded.Session.Discussions[0].Messages[0].LegacyType != "" || loaded.Feedback[0].Items[0].LegacyType != "" || feedbackBatchDigest(loaded.Feedback[0]) != loaded.Feedback[0].Digest {
+		t.Fatalf("legacy type migration: state=%#v err=%v", loaded, err)
+	}
+}
+
 func TestReviewCASConcurrentWritersAndBusyLock(t *testing.T) {
 	root, docs := newReviewRepository(t)
 	t.Setenv("TOUDOCU_STATE_HOME", t.TempDir())
@@ -350,7 +379,7 @@ func TestReviewCASConcurrentWritersAndBusyLock(t *testing.T) {
 	request := CreateDiscussionRequest{
 		ReviewMutationGuard: ReviewMutationGuard{ExpectedRevision: initial.Revision, ExpectedStateDigest: initial.StateDigest},
 		RepositoryRevision:  report.RepositoryRevision,
-		Target:              ReviewTarget{Type: "global"}, Type: "question", Message: "concurrent",
+		Target:              ReviewTarget{Type: "global"}, Message: "concurrent",
 	}
 	var wait sync.WaitGroup
 	wait.Add(2)
@@ -411,7 +440,7 @@ func TestReviewConflictDoesNotRetainSnapshot(t *testing.T) {
 	_, err = service.createDiscussion(CreateDiscussionRequest{
 		ReviewMutationGuard: ReviewMutationGuard{ExpectedRevision: 99, ExpectedStateDigest: "stale"},
 		RepositoryRevision:  report.RepositoryRevision,
-		Target:              ReviewTarget{Type: "file", Path: "server.go"}, Type: "issue", Message: "stale",
+		Target:              ReviewTarget{Type: "file", Path: "server.go"}, Message: "stale",
 	})
 	if reviewErrorCode(err) != "REVIEW_CONFLICT" {
 		t.Fatalf("conflict err=%v", err)
@@ -440,6 +469,11 @@ func TestReviewHTTPAndCLI(t *testing.T) {
 	if unsafe.Code != http.StatusForbidden || !strings.Contains(unsafe.Body.String(), "REVIEW_UNSAFE_PATH") {
 		t.Fatalf("unsafe HTTP: %d %s", unsafe.Code, unsafe.Body.String())
 	}
+	nested := httptest.NewRecorder()
+	server.ServeHTTP(nested, httptest.NewRequest(http.MethodGet, reviewAPIBase+"/repository/file?path=docs%2Fmodules%2FMOD-CORE.md", nil))
+	if nested.Code != http.StatusOK {
+		t.Fatalf("encoded nested path: %d %s", nested.Code, nested.Body.String())
+	}
 	var stdout, stderr strings.Builder
 	if code := RunCLI([]string{"changes", "feedback", "pending", "--repository-root", root, "--json"}, &stdout, &stderr); code != 0 {
 		t.Fatalf("pending exit=%d stderr=%s", code, stderr.String())
@@ -458,7 +492,7 @@ func TestReviewHTTPAndCLI(t *testing.T) {
 	created, err := service.createDiscussion(CreateDiscussionRequest{
 		ReviewMutationGuard: ReviewMutationGuard{ExpectedRevision: initial.Revision, ExpectedStateDigest: initial.StateDigest},
 		RepositoryRevision:  report.RepositoryRevision,
-		Target:              ReviewTarget{Type: "global"}, Type: "question", Message: "Что изменилось?",
+		Target:              ReviewTarget{Type: "global"}, Message: "Что изменилось?",
 	})
 	if err != nil {
 		t.Fatal(err)

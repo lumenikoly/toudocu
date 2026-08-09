@@ -48,7 +48,7 @@ func (service *reviewService) discussions() (ReviewState, error) {
 }
 
 func (service *reviewService) createDiscussion(request CreateDiscussionRequest) (ReviewState, error) {
-	if err := validateHumanMessage(request.Type, request.Message); err != nil {
+	if err := validateHumanMessage(request.Message); err != nil {
 		return ReviewState{}, err
 	}
 	report, err := BuildRepositoryReview(service.options)
@@ -92,7 +92,7 @@ func (service *reviewService) createDiscussion(request CreateDiscussionRequest) 
 		discussion := Discussion{
 			ID: discussionID, State: "open", Target: request.Target, Anchor: anchor,
 			Placement: placementFromTarget(request.Target, "exact", ""),
-			Messages:  []ReviewMessage{{ID: messageID, Author: "human", Type: request.Type, Body: strings.TrimSpace(request.Message), CreatedAt: now}},
+			Messages:  []ReviewMessage{{ID: messageID, Author: "human", Body: strings.TrimSpace(request.Message), CreatedAt: now}},
 			CreatedAt: now, UpdatedAt: now,
 		}
 		state.Session.Discussions = append(state.Session.Discussions, discussion)
@@ -126,23 +126,23 @@ func (service *reviewService) updateDiscussion(id string, request UpdateDiscussi
 					return &reviewFailure{Code: "REVIEW_CONFLICT", Status: http.StatusConflict, Message: "сначала отправьте или измените существующее unsent сообщение"}
 				}
 			}
-			if err := validateHumanMessage(request.Type, request.Message); err != nil {
+			if err := validateHumanMessage(request.Message); err != nil {
 				return err
 			}
 			messageID, err := newReviewID(now)
 			if err != nil {
 				return err
 			}
-			discussion.Messages = append(discussion.Messages, ReviewMessage{ID: messageID, Author: "human", Type: request.Type, Body: strings.TrimSpace(request.Message), CreatedAt: now})
+			discussion.Messages = append(discussion.Messages, ReviewMessage{ID: messageID, Author: "human", Body: strings.TrimSpace(request.Message), CreatedAt: now})
 		case "edit":
-			if err := validateHumanMessage(request.Type, request.Message); err != nil {
+			if err := validateHumanMessage(request.Message); err != nil {
 				return err
 			}
 			message := findUnsentHumanMessage(discussion, request.MessageID)
 			if message == nil {
 				return &reviewFailure{Code: "REVIEW_INVALID_STATE", Status: http.StatusConflict, Message: "редактировать можно только unsent human message"}
 			}
-			message.Type, message.Body, message.EditedAt = request.Type, strings.TrimSpace(request.Message), now
+			message.Body, message.EditedAt = strings.TrimSpace(request.Message), now
 		case "delete":
 			message := findUnsentHumanMessage(discussion, request.MessageID)
 			if message == nil {
@@ -195,7 +195,7 @@ func (service *reviewService) createFeedback(guard ReviewMutationGuard) (ReviewS
 				if discussion.Anchor != nil {
 					anchor = *discussion.Anchor
 				}
-				items = append(items, FeedbackItem{ID: itemID, DiscussionID: discussion.ID, MessageID: message.ID, Type: message.Type, Body: message.Body, Target: discussion.Target, Anchor: anchor})
+				items = append(items, FeedbackItem{ID: itemID, DiscussionID: discussion.ID, MessageID: message.ID, Body: message.Body, Target: discussion.Target, Anchor: anchor})
 			}
 		}
 		if len(items) == 0 {
@@ -704,12 +704,7 @@ func originalStartLine(target ReviewTarget) int {
 	return 0
 }
 
-func validateHumanMessage(kind, message string) error {
-	switch kind {
-	case "question", "suggestion", "issue", "praise":
-	default:
-		return &reviewFailure{Code: "REVIEW_INVALID_REQUEST", Status: http.StatusBadRequest, Message: "message type должен быть question, suggestion, issue или praise"}
-	}
+func validateHumanMessage(message string) error {
 	message = strings.TrimSpace(message)
 	if message == "" {
 		return &reviewFailure{Code: "REVIEW_INVALID_REQUEST", Status: http.StatusBadRequest, Message: "message не может быть пустым"}

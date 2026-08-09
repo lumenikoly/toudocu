@@ -221,7 +221,7 @@ paths:
       operationId: createReviewDiscussion
       summary: Create a discussion and server-owned anchor snapshot
       parameters: [{$ref: "#/components/parameters/CreateDiscussionAction"}]
-      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/CreateDiscussionRequest"}, example: {expectedRevision: 0, expectedStateDigest: abc123, repositoryRevision: def456, target: {type: fileRange, path: server.go, start: {line: 2, column: 1}, end: {line: 2, column: 5}}, type: issue, message: Проверить условие}}}}
+      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/CreateDiscussionRequest"}, example: {expectedRevision: 0, expectedStateDigest: abc123, repositoryRevision: def456, target: {type: fileRange, path: server.go, start: {line: 2, column: 1}, end: {line: 2, column: 5}}, message: Проверить условие}}}}
       responses:
         "201": {description: Discussion created, content: {application/json: {schema: {$ref: "#/components/schemas/ReviewState"}}}}
         "400": {$ref: "#/components/responses/ReviewError"}
@@ -669,7 +669,6 @@ components:
       properties:
         id: {type: string}
         author: {type: string, enum: [human, agent]}
-        type: {type: string, enum: [question, suggestion, issue, praise]}
         body: {type: string, minLength: 1, maxLength: 65536}
         outcome: {type: string, enum: [fixed, notFixed, needsClarification]}
         changedPaths: {type: array, maxItems: 256, items: {type: string}}
@@ -690,12 +689,11 @@ components:
         updatedAt: {type: string, format: date-time}
     FeedbackItem:
       type: object
-      required: [id, discussionId, messageId, type, body, target, anchor]
+      required: [id, discussionId, messageId, body, target, anchor]
       properties:
         id: {type: string}
         discussionId: {type: string}
         messageId: {type: string}
-        type: {type: string, enum: [question, suggestion, issue, praise]}
         body: {type: string, maxLength: 65536}
         target: {$ref: "#/components/schemas/ReviewTarget"}
         anchor: {$ref: "#/components/schemas/AnchorSnapshot"}
@@ -729,11 +727,11 @@ components:
     CreateDiscussionRequest:
       allOf:
         - {$ref: "#/components/schemas/MutationGuard"}
-        - {type: object, required: [repositoryRevision, target, type, message], properties: {repositoryRevision: {type: string}, target: {$ref: "#/components/schemas/ReviewTarget"}, type: {type: string, enum: [question, suggestion, issue, praise]}, message: {type: string, minLength: 1, maxLength: 65536}}}
+        - {type: object, required: [repositoryRevision, target, message], properties: {repositoryRevision: {type: string}, target: {$ref: "#/components/schemas/ReviewTarget"}, message: {type: string, minLength: 1, maxLength: 65536}}}
     UpdateDiscussionRequest:
       allOf:
         - {$ref: "#/components/schemas/MutationGuard"}
-        - {type: object, required: [operation], properties: {operation: {type: string, enum: [reply, edit, delete, resolve, reopen]}, messageId: {type: string}, type: {type: string, enum: [question, suggestion, issue, praise]}, message: {type: string, minLength: 1, maxLength: 65536}}}
+        - {type: object, required: [operation], properties: {operation: {type: string, enum: [reply, edit, delete, resolve, reopen]}, messageId: {type: string}, message: {type: string, minLength: 1, maxLength: 65536}}}
     CleanupReviewRequest:
       allOf:
         - {$ref: "#/components/schemas/MutationGuard"}

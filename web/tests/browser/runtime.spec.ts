@@ -293,7 +293,7 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
         if (change.path.endsWith("notes.md")) {
           change.semanticDiffAvailable = false;
           change.semanticChanges = [];
-          change.diagnostics = [...(change.diagnostics ?? []), { severity: "warning", code: "semantic-unavailable", message: "semantic unavailable" }];
+          change.diagnostics = [...(change.diagnostics ?? []), { severity: "error", code: "semantic-unavailable", message: "semantic unavailable" }];
         }
       }
       await route.fulfill({ response, json: report });
@@ -309,17 +309,39 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
         if (file.path.endsWith("notes.md") && file.documentation) {
           file.documentation.semanticDiffAvailable = false;
           file.documentation.semanticChanges = [];
-          file.documentation.diagnostics = [...(file.documentation.diagnostics ?? []), { severity: "warning", code: "semantic-unavailable", message: "semantic unavailable" }];
+          file.documentation.diagnostics = [...(file.documentation.diagnostics ?? []), { severity: "error", code: "semantic-unavailable", message: "semantic unavailable" }];
         }
       }
       await route.fulfill({ response, json: report });
     });
     await page.route("**/_toudocu/api/changes/render?**", (route) => route.fulfill({ status: 503, body: "render unavailable" }));
-    await page.goto(`${origin}/changes/`);
+    await page.goto(`${origin}/changes/?tab=summary&type=module&group=status`);
     await expect.poll(() => page.evaluate(() => (window as any).__toudocuFirstFrame)).toEqual({ siteTheme: "paper", colorScheme: "dark", theme: "dark", accent: "violet" });
     await expect(page.locator("[data-file-list]")).toBeVisible();
     await expect(page.locator("body")).toContainText("notes.md");
-    await page.locator('[data-file-list] [data-path$="notes.md"]').click();
+    await expect(page.locator('[data-tab="source"]')).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator('[data-tab="summary"]')).toHaveCount(0);
+    await expect(page).not.toHaveURL(/[?&](?:type|group)=|[?&]tab=summary/);
+    await expect(page.locator(".changes-diagnostics")).toHaveAttribute("open", "");
+    const range = page.locator("[data-range-details]");
+    const rangeSummary = range.locator("summary");
+    await rangeSummary.click();
+    await page.keyboard.press("Escape");
+    await expect(range).not.toHaveAttribute("open", "");
+    await expect(rangeSummary).toBeFocused();
+    await rangeSummary.click();
+    await page.getByRole("heading", { name: "Изменения", exact: true }).click();
+    await expect(range).not.toHaveAttribute("open", "");
+    await expect(rangeSummary).toBeFocused();
+    await rangeSummary.click();
+    await page.locator("[data-apply-range]").click();
+    await expect(range).not.toHaveAttribute("open", "");
+    await expect(rangeSummary).toBeFocused();
+    await page.locator("[data-search]").fill("missing-change");
+    await expect(page.locator('[data-ui-state="empty"]')).toContainText("Изменений нет");
+    await expect(page).toHaveURL(/q=missing-change/);
+    await page.locator("[data-search]").fill("notes.md");
+    await expect(page.locator('[data-tab="source"]')).toHaveAttribute("aria-selected", "true");
     await expect(page.locator('[data-tab="semantic"]')).toHaveCount(0);
     await page.locator('[data-tab="rendered"]').click();
     await expect(page.locator("[data-tab-panel]")).toContainText("Rendered diff недоступен");
@@ -328,6 +350,19 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await page.locator("[data-site-theme-select]").selectOption("terminal");
     await expect(page.locator('[data-tab="source"]')).toHaveAttribute("aria-selected", "true");
     await expect(page.locator("[data-source-view]")).toContainText("External edit");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.locator("[data-mobile-files]").click();
+    await expect(page.locator("[data-files-panel]")).toHaveClass(/is-open/);
+    await page.keyboard.press("Escape");
+    await expect(page.locator("[data-files-panel]")).not.toHaveClass(/is-open/);
+    await expect(page.locator("[data-mobile-files]")).toBeFocused();
+    await page.locator("[data-discussions-toggle]").click();
+    await expect(page.locator("[data-discussions-panel]")).toHaveClass(/is-open/);
+    await expect(page.locator("[data-global-comment]")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.locator("[data-discussions-toggle]")).toBeFocused();
+    await page.setViewportSize({ width: 1280, height: 720 });
 
     const fallbackContext = await page.context().browser()!.newContext();
     const fallbackPage = await fallbackContext.newPage();
@@ -392,6 +427,7 @@ test("Changes review hands three outcomes to the local agent CLI without auto-re
   run("git", ["commit", "-qm", "baseline"], fixture);
   writeFileSync(join(fixture, "server.go"), "package review\n\nfunc Server() string { return \"current\" }\n");
   writeFileSync(join(fixture, "path.go"), "package review\n\nfunc Path() string { return \"candidate\" }\n");
+  writeFileSync(join(fixture, "docs", "architecture", "overview.md"), "# Architecture\n\n- Тип документа: Architecture Overview\n\n## Boundary\n\nUpdated.\n");
   run("git", ["rm", "-q", "legacy.go"], fixture);
 
   const portServer = createServer();
@@ -414,6 +450,21 @@ test("Changes review hands three outcomes to the local agent CLI without auto-re
     await expect(page.getByRole("heading", { name: "Изменения", exact: true })).toBeVisible();
     await expect(page.locator('[data-file-list] [data-path="server.go"]')).toBeVisible();
 
+    await page.locator('[data-file-list] [data-path="server.go"]').click();
+    await expect(page.locator('[data-tab="rendered"], [data-tab="semantic"], [data-tab="relations"]')).toHaveCount(0);
+    await expect(page.locator('.changes-diagnostics')).toHaveCount(0);
+    await page.locator('[data-file-list] [data-path="docs/architecture/overview.md"]').click();
+    await expect(page.locator('[data-tab="rendered"]')).toBeVisible();
+    await expect(page.locator('[data-tab="semantic"]')).toBeVisible();
+    await expect(page.locator('[data-tab="relations"]')).toBeVisible();
+    await page.locator('[data-tab="rendered"]').click();
+    await expect(page.locator('[data-tab-panel] .rendered-document')).toHaveCount(2);
+    await page.locator('[data-file-list] [data-path="server.go"]').click();
+    await page.locator('[data-detail] [data-file-comment]').click();
+    const emptyComposer = page.locator('[data-review-composer]');
+    await emptyComposer.getByRole('button', { name: 'Отмена' }).click();
+    await expect(emptyComposer).not.toBeVisible();
+
     for (const path of ["server.go", "path.go"]) {
       await page.locator(`[data-file-list] [data-path="${path}"]`).click();
       await expect(page.locator('.changes-detail-header p')).toContainText(path);
@@ -421,7 +472,7 @@ test("Changes review hands three outcomes to the local agent CLI without auto-re
       await page.locator('[data-detail] [data-file-comment]').click();
       const composer = page.locator('[data-review-composer]');
       await expect(composer).toBeVisible();
-      await composer.locator('[data-review-type]').selectOption(path === "server.go" ? "issue" : "suggestion");
+      await expect(composer.locator('[data-review-type]')).toHaveCount(0);
       await composer.locator('[data-review-message]').fill(path === "server.go" ? "Проверь контракт Server." : "Уточни выбор path.");
       await composer.locator('button[type="submit"]').click();
       await expect(composer).not.toBeVisible();
@@ -432,7 +483,6 @@ test("Changes review hands three outcomes to the local agent CLI without auto-re
     await page.locator('[data-tab="source"]').click();
     await page.locator('[data-review-side="old"] .diff-comment').first().click();
     const composer = page.locator('[data-review-composer]');
-    await composer.locator('[data-review-type]').selectOption("question");
     await composer.locator('[data-review-message]').fill("Legacy точно можно удалить?");
     await composer.locator('button[type="submit"]').click();
 
@@ -443,6 +493,7 @@ test("Changes review hands three outcomes to the local agent CLI without auto-re
 
     const pending = feedbackCLI(["pending"]);
     expect(pending.feedback.items).toHaveLength(3);
+    expect(pending.feedback.items.every((item: any) => !("type" in item))).toBe(true);
     writeFileSync(join(fixture, "path.go"), "package review\n\nfunc Path() string { return \"fixed\" }\n");
     writeFileSync(join(fixture, "server_test.go"), "package review\n\nimport \"testing\"\n\nfunc TestPath(t *testing.T) { if Path() == \"\" { t.Fatal(\"empty\") } }\n");
     const results = pending.feedback.items.map((item: any) => {
@@ -482,7 +533,24 @@ test("Changes review hands three outcomes to the local agent CLI without auto-re
     expect(repeated.feedback.items).toHaveLength(1);
     expect(repeated.feedback.items[0].target.path).toBe("path.go");
 
-    await page.locator('[data-discussions-close]').click();
+    await page.goto(`${origin}/changes/`);
+    await expect(page.locator('[data-tab="source"]')).toHaveAttribute("aria-selected", "true");
+    await page.locator('[data-linked-file-open]').click();
+    await page.locator('[data-link-path="docs/index.md"]').click();
+    await expect(page.locator('.changes-detail-header p')).toContainText("docs/index.md");
+    await page.locator('[data-detail] [data-file-comment]').click();
+    await composer.locator('[data-review-message]').fill("Проверь связанный файл.");
+    await composer.locator('button[type="submit"]').click();
+    await expect(composer).not.toBeVisible();
+    await expect(page.locator('[data-open-discussion-count]')).toHaveText("4");
+    await page.route("**/_toudocu/api/changes/review/discussions", async (route) => {
+      await new Promise((resolveDelay) => setTimeout(resolveDelay, 250));
+      await route.continue();
+    }, { times: 1 });
+    await page.goto(`${origin}/changes/?path=docs%2Findex.md&tab=source`);
+    await expect(page.locator('[data-file-list] [data-path="docs/index.md"]')).toHaveClass(/is-active/);
+    await expect(page.locator('.changes-detail-header p')).toContainText("docs/index.md");
+
     await page.setViewportSize({ width: 390, height: 844 });
     const filesToggle = page.locator('[data-mobile-files]');
     await filesToggle.click();

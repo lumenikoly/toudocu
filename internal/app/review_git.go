@@ -260,9 +260,11 @@ func BuildRepositoryReview(options Options) (*RepositoryReviewReport, error) {
 		if doc := documentation[file.Path]; doc != nil {
 			copy := *doc
 			file.Documentation = &copy
-		} else if doc := documentation[file.OldPath]; doc != nil {
-			copy := *doc
-			file.Documentation = &copy
+		} else if file.OldPath != "" {
+			if doc := documentation[file.OldPath]; doc != nil {
+				copy := *doc
+				file.Documentation = &copy
+			}
 		}
 		report.Files = append(report.Files, file)
 		addReviewSummary(&report.Summary, file)
@@ -281,7 +283,10 @@ func documentationChangesByPath(options Options) map[string]*DocumentationChange
 	}
 	for index := range report.Changes {
 		change := &report.Changes[index]
-		result[change.Path], result[change.OldPath] = change, change
+		result[change.Path] = change
+		if change.OldPath != "" {
+			result[change.OldPath] = change
+		}
 	}
 	return result
 }

@@ -1,7 +1,9 @@
 # Toudocu workflows
 
 Use this reference when invoking the CLI, interpreting diagnostics, building a
-portal, or working with `TASK-*`.
+portal, or working with `TASK-*`. For any source-language change, also apply
+[writing-quality.md](writing-quality.md) and
+[semantic-gate.md](semantic-gate.md).
 
 ## Discover conventions
 
@@ -37,17 +39,20 @@ operation to the selected locale and the files required by that operation.
 
 For every documentation change, use this sequence:
 
-1. define the audience, purpose, and useful question;
+1. define the audience, useful question or task, and selected document language;
 2. identify the source of truth and decide whether to update an existing file;
-3. draft only evidence-backed content;
-4. complete the author review from [semantic-gate.md](semantic-gate.md);
-5. obtain independent semantic review when the change is risk-bearing;
-6. run Toudocu as the structural gate.
+3. collect authoritative evidence and distinguish current facts, requirements,
+   plans, and gaps;
+4. draft in natural target-language prose and complete the reader-first review
+   from [writing-quality.md](writing-quality.md);
+5. complete the author review from [semantic-gate.md](semantic-gate.md);
+6. obtain independent semantic review when the change is risk-bearing;
+7. run Toudocu as the structural gate.
 
 An initial read-only `check` may be used during discovery. Its diagnostics are
 evidence about the declared structure, not instructions to invent content.
-Do not call a document complete until the required semantic gate and the final
-structural check both pass.
+Do not call a document complete until the reader-first gate, required semantic
+gates, and final structural check pass.
 
 ## Command matrix
 
@@ -81,7 +86,7 @@ CI, or the user requires it.
 
 ## Diagnostic loop
 
-1. Confirm that the semantic gate for the draft has passed.
+1. Confirm that the reader-first and semantic gates for the draft have passed.
 2. Run `check --format json`.
 3. Group issues by document and stable code.
 4. Fix every error at its source without adding unsupported semantics.
@@ -112,8 +117,9 @@ project will use:
 
 When adding related types, create targets before references: module and rules,
 then use case, then screen documents or flow, then roadmap or work item.
-Replace every template placeholder before validation. A map or flow never
-replaces prose requirements or acceptance criteria.
+Replace every template placeholder before validation. Write headings, prose,
+table cells, and visible diagram labels in the selected document language. A
+map or flow never replaces prose requirements or acceptance criteria.
 
 Do not let the template select the entities or topology. In a flow template,
 replace `OPTIONAL_USE_CASES_METADATA` with the complete `Scenario` metadata line
@@ -122,7 +128,9 @@ flow. Replace `RELATED_DOCUMENT_LINKS` with one or more links to those use cases
 or to the relevant architecture document. Toudocu derives reverse `UC ↔ FLOW`
 relationships from the `Scenario` list. Whole-section placeholders such as
 `FLOW_DIAGRAM` and `TRANSITION_ROWS` must be replaced with content derived from
-product or repository evidence.
+product or repository evidence. Keep Mermaid syntax and exact IDs, but express
+visible labels as natural actions, questions, conditions, and outcomes rather
+than raw variable or event names.
 
 ## Task workflow
 

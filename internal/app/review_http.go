@@ -79,10 +79,6 @@ func (s *documentationServer) serveReviewAPI(w http.ResponseWriter, request *htt
 		if !allowReviewMethods(w, request, http.MethodGet) {
 			return
 		}
-		if encodedReviewPath(request.URL.RawQuery) {
-			writeReviewError(w, &reviewFailure{Code: "REVIEW_UNSAFE_PATH", Status: http.StatusForbidden, Message: "encoded review path запрещён"})
-			return
-		}
 		detail, err := BuildRepositoryReviewFile(reviewOptionsFromRequest(s.options, request), request.URL.Query().Get("path"))
 		if err != nil {
 			writeReviewError(w, err)
@@ -322,11 +318,6 @@ func reviewQueryLimit(raw string) (int, error) {
 		return 0, &reviewFailure{Code: "REVIEW_INVALID_REQUEST", Status: http.StatusBadRequest, Message: "limit должен быть от 1 до 200"}
 	}
 	return value, nil
-}
-
-func encodedReviewPath(rawQuery string) bool {
-	lower := strings.ToLower(rawQuery)
-	return strings.Contains(lower, "%2f") || strings.Contains(lower, "%5c") || strings.Contains(lower, "%2e") || strings.Contains(lower, "%25")
 }
 
 func reviewRouteDescription() string {

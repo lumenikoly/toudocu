@@ -168,8 +168,8 @@ task-local validation gate разрешён режим `--run`. Report сохр�
 
 `$toudocu feedback` получает oldest local snapshot командой
 `changes feedback pending --json`. Агент проверяет target/anchor и текущий Git
-diff, трактует `issue`, `suggestion`, `question` и `praise` по их смыслу,
-изменяет только обоснованные места и запускает минимальные релевантные проверки.
+diff, оценивает каждый комментарий по repository evidence, изменяет только
+обоснованные места и запускает минимальные релевантные проверки.
 
 Для каждого item возвращается ровно один outcome:
 `fixed`, `notFixed` или `needsClarification`, пояснение и только относящиеся к

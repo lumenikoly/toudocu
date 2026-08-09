@@ -1,6 +1,9 @@
 # Translation workflow
 
-Use only for one of these explicit requests:
+Use only for one of the explicit requests below. Apply the
+[reader-first writing gate](writing-quality.md) to every translated
+reader-facing file; translation parity does not excuse unnatural
+target-language wording.
 
 ```text
 $toudocu translate <locale> (--task <TASK-ID> | --base <ref> | --all-stale)
@@ -63,21 +66,38 @@ delete) orphan target files.
 
 Process one locale at a time and one source/target pair at a time. Give the
 translator only the source, the available exact source diff, existing target,
-and these rules. Translate reader-facing prose; preserve IDs, commands, paths,
-URLs, anchors, code fences, and Mermaid/OpenAPI syntax. A metadata key may use a
-recognized target-locale alias. An enum or status value may be localized only
-when its normalized semantic value remains unchanged. Compare normalized
-values, never lexical similarity: `Готово` has `status.kind=done` and translates
-to `Completed` or `Done`, never
-`Ready`; `Готово к работе` has `status.kind=planned` and translates to `Ready`.
-Do not read another locale root or other target-locale files for general context.
-For parity discovery, compare relative paths, manifest source digests, and
-structural reports before opening content; then open only the selected
+and these rules.
+
+Translate meaning, not source word order. Write idiomatic target-language prose
+and preserve the distinction between verified current behavior, requirements,
+plans, and known gaps. Do not copy mixed-language hybrids or unexplained code
+terms into the target merely because they occur in the source. When the source
+meaning is unambiguous, express it naturally without changing its semantics;
+when the source itself is ambiguous, report the ambiguity instead of resolving
+it by guesswork.
+
+Preserve IDs, commands, paths, URLs, anchors, code fences, API fields, enum
+values, and exact protocol or product names. Preserve Mermaid and OpenAPI
+syntax, Mermaid node IDs, and exact contract tokens, but translate visible
+Mermaid labels, notes, and arrow text. Introduce an uncommon preserved token
+after its plain-language meaning when the reader needs both, for example
+`Create the participant (REGISTER)`.
+
+A metadata key may use a recognized target-locale alias. An enum or status value
+may be localized only when its normalized semantic value remains unchanged.
+Compare normalized values, never lexical similarity: `Готово` has
+`status.kind=done` and translates to `Completed` or `Done`, never `Ready`;
+`Готово к работе` has `status.kind=planned` and translates to `Ready`.
+
+Do not read another locale root or other target-locale files for general
+context. For parity discovery, compare relative paths, manifest source digests,
+and structural reports before opening content; then open only the selected
 source/target pair needed for the current translation or repair.
 
 Maintain `.toudocu/translations/<locale>.json` as a map of canonical relative
-paths to SHA-256 source digests. Before writing it, run strict JSON checks for
-both the canonical and target roots. For matching relative paths, compare
+paths to SHA-256 source digests. Before writing it, complete the reader-first
+writing gate for every changed target file and run strict JSON checks for both
+the canonical and target roots. For matching relative paths, compare
 `documents[].type` and `documents[].status.kind`; also compare
 `project.status.kind`, roadmap stage `status.kind`, and every roadmap item's
 `effectiveCompleted`, `completionSource`, and target `status.kind`. Localized

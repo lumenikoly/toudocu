@@ -50,7 +50,11 @@ For every document in scope:
    examples, commands, and paths with current evidence.
 3. Classify it as current, needs update, unverifiable, obsolete, duplicated, or
    misplaced. A Toudocu warning alone is not evidence for adding content.
-4. Distinguish documentation drift from an implementation or product conflict.
+4. Review whether terminology and explanations still match the product and the
+   intended reader. Flag mixed-language fragments, unexplained identifiers,
+   literal translations, and implementation-led paragraphs that obscure the
+   actual behavior.
+5. Distinguish documentation drift from an implementation or product conflict.
    Refresh updates documentation to established current truth; it does not
    change code to make a document true. Report ambiguous conflicts as unresolved
    findings and do not guess which side should win.
@@ -58,30 +62,34 @@ For every document in scope:
 ## Apply evidence-backed updates
 
 1. Update the existing source of truth and every explicitly related document
-   required to keep the model honest. Apply the document model and semantic
-   gate from this skill.
+   required to keep the model honest. Apply the document model, reader-first
+   writing gate, and semantic gate from this skill. Rewrite unclear wording only
+   when evidence fixes the meaning unambiguously.
 2. Creating, deleting, renaming, or merging a document and changing a stable ID
    are allowed when current evidence makes the change unambiguous. Update every
    affected link, ID reference, task relationship, architecture overview entry,
    and generated route together. If evidence is incomplete, leave the source
    unchanged and report the unresolved finding.
-3. Change `Last updated` / `Последнее обновление` only when content or declared
-   relationships actually change. Do not create date-only churn for a document
-   that was merely reviewed. Never advance `Last verified` / `Последняя
-   проверка` for a runbook unless its procedure was actually verified.
+3. Change the document update date, stored under `Last updated` or `Последнее
+   обновление`, only when content or declared relationships actually change. Do
+   not create date-only churn for a document that was merely reviewed. Never
+   advance the runbook verification date, stored under `Last verified` or
+   `Последняя проверка`, unless its procedure was actually verified.
 4. Do not create statuses, owners, entities, links, or procedures to silence a
    diagnostic. Do not create a `TASK-*` merely because refresh is running; use
    the normal task threshold.
 5. Ensure `project.locale` and the complete built-in `project.sections` map
-   exist. Use the selected `en`/`ru` [locale pack](../assets/locale-packs.md) when available; for another
-   valid locale preserve an explicit one-time map. Update H1 only for existing
+   exist. Use the selected `en`/`ru`
+   [locale pack](../assets/locale-packs.md) when available; for another valid
+   locale preserve an explicit one-time map. Update H1 only for existing
    built-in entry documents, never custom section manifests.
 6. Never edit generated portal output as documentation. Preserve unrelated
    working-tree changes, including changes that existed before refresh.
 
 ## Review, validate, and publish
 
-1. Complete the author semantic review for every changed source document.
+1. Complete the reader-first writing review and author semantic review for every
+   changed source document.
 2. Obtain independent semantic review wherever `semantic-gate.md` requires it.
    Give the reviewer updated drafts and raw evidence, not a desired verdict or a
    green Toudocu result. Resolve `NEEDS_REWORK` before continuing.
@@ -90,9 +98,9 @@ For every document in scope:
    warnings left intentionally unresolved.
 4. Rebuild a portal only when it is tracked or repository instructions require
    it. Reconfirm the exact safe output path before `--clean`, and build only
-   after semantic and structural gates pass.
+   after the writing, semantic, and structural gates pass.
 5. Report the command mode, reviewed boundary, evidence used, current documents,
    changed/created/deleted/renamed documents, stable-ID migrations, unresolved
-   findings, semantic reviewer and verdict, structural diagnostics, date
-   changes, and portal build result. State explicitly when refresh produces no
-   source diff.
+   findings, writing-gate result, semantic reviewer and verdict, structural
+   diagnostics, date changes, and portal build result. State explicitly when
+   refresh produces no source diff.

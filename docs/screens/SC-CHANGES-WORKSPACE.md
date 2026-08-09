@@ -6,7 +6,7 @@
 - Статус: Реализован
 - Маршрут: `/changes/`
 - Превью: `../assets/screens/changes-workspace.png`
-- Последнее обновление: 2026-08-06
+- Последнее обновление: 2026-08-09
 
 Workspace сравнения выбранных Git-состояний: существующие documentation
 представления дополняются repository-wide файлами и локальными discussions.
@@ -16,26 +16,40 @@ Workspace сравнения выбранных Git-состояний: суще
 
 Общий workspace header показывает project branding, переходы в портал,
 Редактор и Изменения, активные Изменения через `aria-current`, а также тему
-оформления и цветовую схему. Base, optional branch base, target revision и
-действие сравнения находятся в отдельной контекстной панели.
+оформления и цветовую схему. Следующая компактная строка объединяет заголовок,
+Git range, файловую сводку и действие «Обсуждения». Base, optional branch base,
+target revision, resolved state, branch/dirty state и действие применения
+находятся в нативном disclosure. Он закрывается после применения, по `Esc` и
+клику снаружи, возвращая focus на summary.
 
 Смена оформления применяется сразу и сохраняется для остальных поверхностей.
 Read-only CodeMirror merge обновляет theme compartment без сброса выбранного
 документа и tab. Активный Mermaid diff перерисовывается, сохраняя отчёт,
-фильтры и URL state. На узком экране метрики, список и diff используют только
-локальную прокрутку без горизонтального overflow страницы.
+поиск, статус и URL state. Устаревшие параметры вторичных фильтров и группировки
+игнорируются.
 
 ## Repository files и комментарии
 
-Список делится на «Изменённые» и «Связанные». Picker ищет только по path/name;
-linked file остаётся client-side до первого `fileRange` или `file` comment.
-Документационные файлы сохраняют вкладки сводки, исходника, rendered,
-семантики, связей, OpenAPI, Mermaid, assets и карты. Go, Java,
-JavaScript/TypeScript получают language support, прочий UTF-8 — plain text.
+Список всегда сортируется по path и делится на «Изменённые» и «Связанные».
+Поиск и статус находятся в самой панели файлов; строки не повторяют filename в
+path. Picker ищет только по path/name; linked file остаётся client-side до
+первого `fileRange` или `file` comment.
+
+Первый подходящий файл автоматически открывается на вкладке «Исходник». Явный
+`path/tab` и выбранный файл при watcher refresh имеют приоритет; фильтр выбирает
+первый оставшийся файл или показывает компактное empty state. Старый
+`tab=summary` открывает source. Отдельной вкладки «Сводка» нет. Статус, path и
+line stats остаются в header, а diagnostics появляются только при наличии;
+severity `error` раскрывает их автоматически. Документационные файлы сохраняют
+только применимые rendered, semantic, relations, OpenAPI, Mermaid, assets и map
+вкладки. JSON, YAML, Markdown, Go, Java и JavaScript/TypeScript получают
+language support, прочий UTF-8 — plain text.
+Unified и Side-by-side образуют один переключатель, а copy diff остаётся
+tertiary action.
 
 Комментарий создаётся из gutter `+`, выделенного line range/exact text,
-действия файла или общего действия. Composer содержит только тип
-`issue|suggestion|question|praise` и сообщение; `Ctrl`/`Cmd`+`Enter` отправляет,
+действия файла или общего действия в header discussions. Composer содержит
+только сообщение; `Ctrl`/`Cmd`+`Enter` отправляет,
 `Esc` отменяет и focus возвращается к точке входа. Mixed old/new selection не
 принимается, а context line относится к new side.
 
@@ -47,15 +61,17 @@ unsent human message можно изменить или удалить; посл
 
 ## Обновление и responsive states
 
-Repository ETag и review ETag опрашиваются отдельно. Изменение неактивного файла
-обновляет projection автоматически. Для открытого файла появляется banner;
-refresh сохраняет выбранный tab, thread и scroll. Draft stale composer сохраняет
-текст, но требует заново выбрать anchor.
+Repository ETag и review ETag опрашиваются отдельно. При изменении repository
+для выбранного файла появляется banner, а без выбранного файла projection
+обновляется автоматически. Refresh сохраняет выбранный tab, thread и scroll.
+Draft stale composer сохраняет текст, но требует заново выбрать anchor.
 
-Desktop использует collapsible discussions panel, tablet — drawer справа,
-mobile — отдельные Files и Discussions drawers. Drawer сообщает dialog
+Desktop использует полноэкранный split с внутренней прокруткой: около 300 px для
+файлов, остальное для diff и третья колонка только при открытом discussions.
+Tablet использует discussions drawer справа, mobile — отдельные Files и
+Discussions drawers без горизонтального page overflow. Drawer сообщает dialog
 semantics и `aria-modal`, закрывается `Esc`, имеет видимый focus и touch targets.
-Тип, state, placement и outcome выражены текстом, а не только цветом.
+State, placement и outcome выражены текстом, а не только цветом.
 
 ## Capability
 
@@ -70,3 +86,4 @@ Review controls и API доступны только canonical `serve`. Commit, 
 - [MOD-REVIEW](../modules/MOD-REVIEW.md)
 - [FLOW-REVIEW-FEEDBACK](../flows/FLOW-REVIEW-FEEDBACK.md)
 - [Changes HTTP API](../contracts/changes-http.md)
+- [TASK-CHANGES-002](../work/TASK-CHANGES-002.md)

@@ -8,14 +8,13 @@ registerMessages(changesMessages);
     const REVIEW: any = page?.runtime === 'serve' && page.capabilities?.review ? page.endpoints?.review : '';
     const EDITOR_WORKSPACE: any = page?.runtime === 'serve' && page.capabilities?.editor ? page.endpoints?.editorWorkspace : '';
     const $: any = (selector: any, root: any = document) => root.querySelector(selector);
-    const state: any = { report: null, repository: null, files: [], linked: [], selected: null, tab: 'summary', merge: null, etag: '', repositoryEtag: '', reviewEtag: '', review: null, composerTarget: null, composerReturn: null, activeDiscussion: '', discussionScroll: 0 };
+    const state: any = { report: null, repository: null, files: [], linked: [], selected: null, tab: 'source', merge: null, etag: '', repositoryEtag: '', reviewEtag: '', review: null, composerTarget: null, composerReturn: null, activeDiscussion: '', discussionScroll: 0 };
     const elements: any = {
-        base: $('[data-base]'), branchBase: $('[data-branch-base]'), target: $('[data-target]'), targetRevision: $('[data-target-revision]'), targetRevisionWrap: $('[data-target-revision-wrap]'), apply: $('[data-apply-range]'), range: $('[data-range-summary]'),
-        summary: $('[data-summary]'), stale: $('[data-stale]'), search: $('[data-search]'), status: $('[data-status]'),
-        classification: $('[data-classification]'), gitState: $('[data-git-state]'), list: $('[data-file-list]'),
+        base: $('[data-base]'), branchBase: $('[data-branch-base]'), target: $('[data-target]'), targetRevision: $('[data-target-revision]'), targetRevisionWrap: $('[data-target-revision-wrap]'), apply: $('[data-apply-range]'), range: $('[data-range-summary]'), rangeMeta: $('[data-range-meta]'),
+        summary: $('[data-summary]'), rangeDetails: $('[data-range-details]'), stale: $('[data-stale]'), search: $('[data-search]'), status: $('[data-status]'), list: $('[data-file-list]'),
         count: $('[data-result-count]'), detail: $('[data-detail]'), toast: $('[data-changes-toast]'), toastMessage: $('[data-toast-message]'),
         discussions: $('[data-discussions-panel]'), discussionList: $('[data-discussion-list]'), openDiscussionCount: $('[data-open-discussion-count]'), unsentCount: $('[data-unsent-count]'), sendFeedback: $('[data-send-feedback]'), reviewSummary: $('[data-review-summary]'),
-        composer: $('[data-review-composer]'), composerForm: $('[data-review-form]'), composerType: $('[data-review-type]'), composerMessage: $('[data-review-message]'), composerError: $('[data-review-error]'), composerTarget: $('[data-review-target-summary]'),
+        composer: $('[data-review-composer]'), composerForm: $('[data-review-form]'), composerMessage: $('[data-review-message]'), composerError: $('[data-review-error]'), composerTarget: $('[data-review-target-summary]'),
         filesPanel: $('[data-files-panel]'), filePicker: $('[data-file-picker]'), filePickerQuery: $('[data-file-picker-query]'), filePickerResults: $('[data-file-picker-results]'), openFileStale: $('[data-open-file-stale]'),
     };
     if (!REVIEW)
@@ -29,24 +28,8 @@ registerMessages(changesMessages);
         if (state.selected && (state.tab === 'mermaid' || state.tab === 'rendered'))
             await renderDetail();
     });
-    function addToolbarControl(label: any, name: any, options: any, input: any = false) {
-        const wrapper: any = document.createElement('label');
-        const caption: any = document.createElement('span');
-        caption.textContent = label;
-        const control: any = document.createElement(input ? 'input' : 'select');
-        control.dataset[name] = '';
-        if (input)
-            control.placeholder = options;
-        else
-            options.forEach(([value, text]: any) => control.add(new Option(text, value)));
-        wrapper.append(caption, control);
-        $('.changes-toolbar').append(wrapper);
-        elements[name] = control;
-        return control;
-    }
     const escapeHTML: any = (value: any) => String(value ?? '').replace(/[&<>"']/g, (character: any) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } as Record<string, string>)[character]);
     const statusLabel: any = (status: any) => ({ added: text("features.changes.index.002"), untracked: 'Untracked', modified: text("features.changes.index.003"), deleted: text("features.changes.index.004"), renamed: text("features.changes.index.005"), copied: text("features.changes.index.006"), 'type-changed': text("features.changes.index.007"), linked: text("features.changes.index.091") } as Record<string, string>)[status] || status;
-    const commentTypeLabel: any = (type: any) => ({ issue: text("features.changes.index.124"), suggestion: text("features.changes.index.125"), question: text("features.changes.index.126"), praise: text("features.changes.index.127") } as Record<string, string>)[type] || type;
     const outcomeLabel: any = (outcome: any) => ({ fixed: text("features.changes.index.128"), notFixed: text("features.changes.index.129"), needsClarification: text("features.changes.index.130") } as Record<string, string>)[outcome] || outcome;
     const selectedTarget: any = () => elements.target.value === 'revision' ? elements.targetRevision.value.trim() : elements.target.value;
     const query: any = () => {
@@ -79,34 +62,20 @@ registerMessages(changesMessages);
         const params: any = query();
         if (state.selected)
             params.set('path', state.selected.path);
-        if (state.tab !== 'summary')
+        if (state.tab !== 'source')
             params.set('tab', state.tab);
         if (elements.search.value)
             params.set('q', elements.search.value);
         if (elements.status.value)
             params.set('status', elements.status.value);
-        if (elements.classification.value)
-            params.set('classification', elements.classification.value);
-        if (elements.gitState.value)
-            params.set('gitState', elements.gitState.value);
-        if (elements.entityType.value)
-            params.set('type', elements.entityType.value);
-        if (elements.module.value)
-            params.set('module', elements.module.value);
-        if (elements.task.value)
-            params.set('task', elements.task.value);
-        if (elements.sort.value !== 'path')
-            params.set('sort', elements.sort.value);
-        if (elements.group.value !== 'classification')
-            params.set('group', elements.group.value);
         history.replaceState(null, '', `${location.pathname}?${params}`);
     }
     function renderSummary() {
         const report: any = state.repository || state.report;
         const summary: any = report.summary;
-        elements.range.textContent = `Base: ${report.comparison.base.displayRef} — ${report.comparison.base.resolved.slice(0, 7)} · Target: ${report.comparison.target.displayRef}${report.comparison.target.resolved ? ` — ${report.comparison.target.resolved.slice(0, 7)}` : ''} · Branch: ${report.repository.branch || 'detached HEAD'} · State: ${report.repository.dirty ? 'dirty' : 'clean'}`;
-        const metrics: any = [[text("features.changes.index.008"), summary.files.added + summary.files.untracked], [text("features.changes.index.009"), summary.files.modified], [text("features.changes.index.010"), summary.files.deleted], [text("features.changes.index.011"), summary.files.renamed], [text("features.changes.index.012"), `+${summary.lines.added} −${summary.lines.deleted}`]];
-        elements.summary.innerHTML = metrics.map(([label, value]: any) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join('');
+        elements.range.textContent = `${report.comparison.base.displayRef} → ${report.comparison.target.displayRef}`;
+        elements.rangeMeta.textContent = `Base ${report.comparison.base.resolved.slice(0, 7)} · Target ${report.comparison.target.resolved ? report.comparison.target.resolved.slice(0, 7) : report.comparison.target.displayRef} · Branch ${report.repository.branch || 'detached HEAD'} · ${report.repository.dirty ? 'dirty' : 'clean'}`;
+        elements.summary.textContent = text("features.changes.index.131", [state.files.length, summary.lines.added, summary.lines.deleted]);
     }
     function matches(change: any) {
         const search: any = elements.search.value.trim().toLocaleLowerCase('ru');
@@ -114,35 +83,11 @@ registerMessages(changesMessages);
             return false;
         if (elements.status.value && change.status !== elements.status.value)
             return false;
-        if (elements.classification.value && change.classification !== elements.classification.value)
-            return false;
-        const git: any = elements.gitState.value;
-        if (git && !change.gitState[git])
-            return false;
-        if (elements.entityType.value && ![...(change.entitiesBefore || []), ...(change.entitiesAfter || [])].some((item: any) => item.type === elements.entityType.value))
-            return false;
-        if (elements.module.value && !changeText(change).includes(elements.module.value.toLocaleLowerCase('ru')))
-            return false;
-        if (elements.task.value && !changeText(change).includes(elements.task.value.toLocaleLowerCase('ru')))
-            return false;
         return true;
     }
     function renderList() {
-        const sortFiles: any = (files: any) => files.filter(matches).sort((left: any, right: any) => {
-            if (elements.sort.value === 'status')
-                return left.status.localeCompare(right.status) || left.path.localeCompare(right.path);
-            if (elements.sort.value === 'changes')
-                return (right.lines.added + right.lines.deleted) - (left.lines.added + left.lines.deleted) || left.path.localeCompare(right.path);
-            if (elements.sort.value === 'type')
-                return (left.entitiesAfter[0]?.type || left.entitiesBefore[0]?.type || '').localeCompare(right.entitiesAfter[0]?.type || right.entitiesBefore[0]?.type || '') || left.path.localeCompare(right.path);
-            if (elements.sort.value === 'module')
-                return changeModule(left).localeCompare(changeModule(right)) || left.path.localeCompare(right.path);
-            if (elements.sort.value === 'id')
-                return changeID(left).localeCompare(changeID(right)) || left.path.localeCompare(right.path);
-            return left.path.localeCompare(right.path);
-        });
-        const changed: any = sortFiles(state.files);
-        const linked: any = sortFiles(state.linked);
+        const changed: any = state.files.filter(matches).sort((left: any, right: any) => left.path.localeCompare(right.path));
+        const linked: any = state.linked.filter(matches).sort((left: any, right: any) => left.path.localeCompare(right.path));
         elements.count.textContent = text("features.changes.index.013", [changed.length + linked.length, state.files.length + state.linked.length]);
         elements.list.replaceChildren();
         const appendSection: any = (label: any, items: any) => {
@@ -156,9 +101,13 @@ registerMessages(changesMessages);
                 button.type = 'button';
                 button.className = `changes-file ${state.selected?.path === change.path ? 'is-active' : ''}`;
                 button.dataset.path = change.path;
-                const entity: any = change.entitiesAfter?.[0] || change.entitiesBefore?.[0];
                 const discussionCount: any = discussionsForPath(change.path).filter((item: any) => item.state === 'open').length;
-                button.innerHTML = `<span class="changes-file-status status-${escapeHTML(change.status)}">${escapeHTML(statusLabel(change.status))}</span><strong>${escapeHTML(entity?.id || change.path.split('/').pop())}${discussionCount ? ` <span class="review-file-badge" aria-label="${escapeHTML(text("features.changes.index.092", [discussionCount]))}">${discussionCount}</span>` : ''}</strong><span class="changes-file-title">${escapeHTML(entity?.title || '')}</span><span class="changes-file-path">${escapeHTML(change.oldPath ? `${change.oldPath} → ${change.path}` : change.path)}</span><span class="changes-line-stats">+${change.lines.added} −${change.lines.deleted}</span>`;
+                const filename: any = change.path.split('/').pop();
+                const directory: any = change.path.includes('/') ? change.path.slice(0, change.path.lastIndexOf('/')) : '';
+                const oldFilename: any = change.oldPath?.split('/').pop();
+                const oldDirectory: any = change.oldPath?.includes('/') ? change.oldPath.slice(0, change.oldPath.lastIndexOf('/')) : '';
+                const context: any = change.oldPath ? `${oldFilename === filename ? oldDirectory || '.' : change.oldPath} → ${directory || '.'}` : directory;
+                button.innerHTML = `<strong>${escapeHTML(filename)}${discussionCount ? ` <span class="review-file-badge" aria-label="${escapeHTML(text("features.changes.index.092", [discussionCount]))}">${discussionCount}</span>` : ''}</strong><span class="changes-line-stats">+${change.lines.added} −${change.lines.deleted}</span><span class="changes-file-path">${escapeHTML(context)}</span><span class="changes-file-status status-${escapeHTML(change.status)}">${escapeHTML(statusLabel(change.status))}</span>`;
                 button.addEventListener('click', () => selectChange(change));
                 elements.list.append(button);
             });
@@ -167,11 +116,12 @@ registerMessages(changesMessages);
         appendSection(text("features.changes.index.094"), linked);
         if (!changed.length && !linked.length)
             elements.list.innerHTML = text("features.changes.index.020");
+        return [...changed, ...linked];
     }
-    const changeID: any = (change: any) => change.entitiesAfter[0]?.id || change.entitiesBefore[0]?.id || '';
-    const changeModule: any = (change: any) => change.semanticChanges.find((item: any) => item.field === 'module')?.after || change.semanticChanges.find((item: any) => item.field === 'module')?.before || '';
-    const changeTask: any = (change: any) => (changeText(change).match(/TASK-[A-Z0-9-]+/) || [])[0] || '';
-    const tabsFor: any = (change: any) => [['summary', text("features.changes.index.021")], ['source', text("features.changes.index.022")], ...(change.renderedDiffAvailable ? [['rendered', text("features.changes.index.023")]] : []), ...(change.semanticDiffAvailable ? [['semantic', text("features.changes.index.024")]] : []), ...(change.documentation ? [['relations', text("features.changes.index.025")]] : []), ...(change.classification === 'contract' ? [['openapi', 'OpenAPI']] : []), ...(change.mermaidBlocks?.length ? [['mermaid', 'Mermaid']] : []), ...(change.classification === 'asset' ? [['assets', 'Assets']] : []), ...([...(change.entitiesBefore || []), ...(change.entitiesAfter || [])].some((item: any) => item.type === 'screen' || item.type === 'transition') ? [['map', text("features.changes.index.026")]] : [])];
+    const tabsFor: any = (change: any) => {
+        const documentation: any = !REVIEW || !!change.documentation;
+        return [['source', text("features.changes.index.022")], ...(documentation && change.renderedDiffAvailable ? [['rendered', text("features.changes.index.023")]] : []), ...(documentation && change.semanticDiffAvailable ? [['semantic', text("features.changes.index.024")]] : []), ...(documentation ? [['relations', text("features.changes.index.025")]] : []), ...(change.classification === 'contract' ? [['openapi', 'OpenAPI']] : []), ...(change.mermaidBlocks?.length ? [['mermaid', 'Mermaid']] : []), ...(change.classification === 'asset' ? [['assets', 'Assets']] : []), ...([...(change.entitiesBefore || []), ...(change.entitiesAfter || [])].some((item: any) => item.type === 'screen' || item.type === 'transition') ? [['map', text("features.changes.index.026")]] : [])];
+    };
     async function selectChange(change: any, tab: any = state.tab) {
         if (REVIEW) {
             try {
@@ -184,7 +134,8 @@ registerMessages(changesMessages);
             catch (error: any) { announce(error.message); }
         }
         state.selected = change;
-        state.tab = tabsFor(change).some(([id]: any) => id === tab) ? tab : 'summary';
+        tab = tab === 'summary' ? 'source' : tab;
+        state.tab = tabsFor(change).some(([id]: any) => id === tab) ? tab : 'source';
         state.merge?.destroy?.();
         state.merge = null;
         elements.filesPanel.classList.remove('is-open');
@@ -194,10 +145,10 @@ registerMessages(changesMessages);
         await renderDetail();
     }
     function detailHeader(change: any) {
-        const entity: any = change.entitiesAfter[0] || change.entitiesBefore[0];
         const editorLink: any = EDITOR_WORKSPACE && change.path.startsWith('docs/') ? text("features.changes.index.027", [escapeHTML(EDITOR_WORKSPACE), encodeURIComponent(change.path.replace(/^docs\//, ''))]) : '';
         const comment: any = REVIEW ? `<button type="button" class="changes-button secondary" data-file-comment ${state.repository?.feedbackWritable ? '' : 'disabled'}>${text("features.changes.index.095")}</button>` : '';
-        return text("features.changes.index.028", [escapeHTML(change.status), escapeHTML(statusLabel(change.status)), escapeHTML(entity?.id || change.path.split('/').pop()), entity?.title ? ` — ${escapeHTML(entity.title)}` : '', escapeHTML(change.oldPath ? `${change.oldPath} → ${change.path}` : change.path), change.lines.added, change.lines.deleted, `<div class="changes-detail-actions">${comment}${editorLink}</div>`, tabsFor(change).map(([id, label]: any) => `<button type="button" role="tab" aria-selected="${state.tab === id}" data-tab="${id}">${label}</button>`).join('')]);
+        const diagnostics: any = change.diagnostics?.length ? `<details class="changes-diagnostics" ${change.diagnostics.some((item: any) => item.severity === 'error') ? 'open' : ''}><summary>Diagnostics · ${change.diagnostics.length}</summary><ul>${change.diagnostics.map((item: any) => `<li class="is-${escapeHTML(item.severity)}"><code>${escapeHTML(item.code)}</code> ${escapeHTML(item.message)}</li>`).join('')}</ul></details>` : '';
+        return text("features.changes.index.028", [escapeHTML(change.status), escapeHTML(statusLabel(change.status)), escapeHTML(change.path.split('/').pop()), escapeHTML(change.oldPath ? `${change.oldPath} → ${change.path}` : change.path), change.lines.added, change.lines.deleted, `<div class="changes-detail-actions">${comment}${editorLink}</div>`, diagnostics, tabsFor(change).map(([id, label]: any) => `<button type="button" role="tab" aria-selected="${state.tab === id}" data-tab="${id}">${label}</button>`).join('')]);
     }
     async function renderDetail() {
         const change: any = state.selected;
@@ -207,8 +158,6 @@ registerMessages(changesMessages);
         elements.detail.querySelectorAll('[data-tab]').forEach((button: any) => button.addEventListener('click', () => selectChange(change, button.dataset.tab)));
         elements.detail.querySelector('[data-file-comment]')?.addEventListener('click', (event: any) => openComposer({ type: 'file', path: change.path }, event.currentTarget));
         const panel: any = $('[data-tab-panel]', elements.detail);
-        if (state.tab === 'summary')
-            renderChangeSummary(panel, change);
         if (state.tab === 'source')
             await renderSource(panel, change);
         if (state.tab === 'rendered')
@@ -226,10 +175,6 @@ registerMessages(changesMessages);
         if (state.tab === 'map')
             renderMap(panel, change);
     }
-    function renderChangeSummary(panel: any, change: any) {
-        const semantic: any = change.semanticChanges.slice(0, 8);
-        panel.innerHTML = text("features.changes.index.029", [semantic.length ? `<ul>${semantic.map((item: any) => `<li>${escapeHTML(item.summary)}${item.compatibility ? ` <span class="compatibility ${item.compatibility}">${escapeHTML(item.compatibility)}</span>` : ''}</li>`).join('')}</ul>` : text("features.changes.index.073"), ['staged', 'unstaged', 'untracked', 'committedInBranch'].filter((key: any) => change.gitState[key]).join(', ') || 'committed comparison', change.oldSize, change.newSize, change.sourceDiffAvailable ? text("features.changes.index.074") : text("features.changes.index.075"), change.renderedDiffAvailable ? text("features.changes.index.076") : text("features.changes.index.077"), change.semanticDiffAvailable ? text("features.changes.index.078") : text("features.changes.index.079"), change.diagnostics.length ? `<h3>Diagnostics</h3><ul>${change.diagnostics.map((item: any) => `<li><code>${escapeHTML(item.code)}</code> ${escapeHTML(item.message)}</li>`).join('')}</ul>` : '']);
-    }
     async function fetchSide(change: any, side: any, render: any = false) {
         if (!render && (change._before !== undefined || change._current !== undefined))
             return side === 'before' ? change._before || '' : change._current || '';
@@ -244,6 +189,7 @@ registerMessages(changesMessages);
         panel.innerHTML = text("features.changes.index.030", [change.sourceDiffHunks?.length > 1 ? text("features.changes.index.080") : '']);
         const host: any = $('[data-source-view]', panel);
         let activeHunk: any = 0;
+        const setMode: any = (mode: any) => panel.querySelectorAll('[data-source-mode]').forEach((button: any) => button.setAttribute('aria-pressed', String(button.dataset.sourceMode === mode)));
         const renderHunkLine: any = (line: any, counters: any) => {
             let oldLine: any = '', newLine: any = '';
             const marker: any = line[0] || ' ';
@@ -269,6 +215,7 @@ registerMessages(changesMessages);
             location.hash = hunks[activeHunk].id;
         };
         const showUnified: any = () => {
+            setMode('unified');
             state.merge?.destroy?.();
             state.merge = null;
             host.replaceChildren();
@@ -311,6 +258,7 @@ registerMessages(changesMessages);
                 requestAnimationFrame(() => focusHunk(requestedIndex));
         };
         const showMerge: any = async () => {
+            setMode('merge');
             host.innerHTML = text("features.changes.index.034");
             try {
                 const [before, after]: any = await Promise.all([fetchSide(change, 'before'), fetchSide(change, 'after')]);
@@ -501,7 +449,6 @@ registerMessages(changesMessages);
         state.composerTarget = target;
         state.composerReturn = returnElement || document.activeElement;
         state.composerMode = mode;
-        elements.composerType.value = mode.type || 'issue';
         elements.composerMessage.value = mode.message || '';
         elements.composerError.textContent = '';
         elements.composerTarget.textContent = target.type === 'global' ? text("features.changes.index.099") : `${target.path}${target.start ? ` · ${target.side || 'current'} ${target.start.line}:${target.start.column}–${target.end.line}:${target.end.column}` : ''}`;
@@ -539,10 +486,10 @@ registerMessages(changesMessages);
         try {
             let updated: any;
             if (mode.operation === 'create') {
-                updated = await reviewMutation('/discussions', 'review-discussion-create', 'POST', { ...reviewGuard(), repositoryRevision: state.repository.repositoryRevision, target: state.composerTarget, type: elements.composerType.value, message });
+                updated = await reviewMutation('/discussions', 'review-discussion-create', 'POST', { ...reviewGuard(), repositoryRevision: state.repository.repositoryRevision, target: state.composerTarget, message });
             }
             else {
-                updated = await reviewMutation(`/discussions/${mode.discussionId}`, 'review-discussion-update', 'PATCH', { ...reviewGuard(), operation: mode.operation, messageId: mode.messageId || undefined, type: elements.composerType.value, message });
+                updated = await reviewMutation(`/discussions/${mode.discussionId}`, 'review-discussion-update', 'PATCH', { ...reviewGuard(), operation: mode.operation, messageId: mode.messageId || undefined, message });
             }
             state.review = updated;
             elements.composer.close();
@@ -583,13 +530,13 @@ registerMessages(changesMessages);
             article.className = `review-thread is-${discussion.state}${state.activeDiscussion === discussion.id ? ' is-active' : ''}`;
             article.dataset.discussionId = discussion.id;
             const placement: any = discussion.placement || {};
-            article.innerHTML = `<header><div><strong>${escapeHTML(commentTypeLabel(discussion.messages[0]?.type || 'comment'))}</strong><span>${escapeHTML(text(discussion.state === 'open' ? "features.changes.index.105" : "features.changes.index.106"))} · ${escapeHTML(placement.status || 'exact')}</span></div><button type="button" data-thread-state ${state.repository?.feedbackWritable ? '' : 'disabled'}>${text(discussion.state === 'open' ? "features.changes.index.107" : "features.changes.index.108")}</button></header><button type="button" class="review-anchor" data-open-anchor>${escapeHTML(placement.path || discussion.target.path || text("features.changes.index.109"))}${placement.start ? `:${placement.start.line}` : ''}${placement.reason ? ` · ${escapeHTML(placement.reason)}` : ''}</button><ol>${discussion.messages.map((message: any) => `<li class="review-message is-${message.author}"><div><strong>${message.author === 'agent' ? `${text("features.changes.index.110")} · ${escapeHTML(outcomeLabel(message.outcome || 'response'))}` : escapeHTML(commentTypeLabel(message.type || text("features.changes.index.111")))}</strong><time>${escapeHTML(new Date(message.createdAt).toLocaleString())}</time></div><p>${escapeHTML(message.body)}</p>${message.changedPaths?.length ? `<button type="button" data-view-fix="${escapeHTML(message.id)}">${text("features.changes.index.112")}</button>` : ''}${message.author === 'human' && !message.feedbackId && state.repository?.feedbackWritable ? `<div class="review-message-actions"><button type="button" data-edit-message="${escapeHTML(message.id)}">${text("features.changes.index.113")}</button><button type="button" data-delete-message="${escapeHTML(message.id)}">${text("features.changes.index.114")}</button></div>` : ''}</li>`).join('')}</ol><button type="button" class="review-reply" ${discussion.state !== 'open' || discussionInFlightClient(discussion.id) || !state.repository?.feedbackWritable ? 'disabled' : ''}>${text("features.changes.index.115")}</button>`;
+            article.innerHTML = `<header><div><strong>${text("features.changes.index.111")}</strong><span>${escapeHTML(text(discussion.state === 'open' ? "features.changes.index.105" : "features.changes.index.106"))} · ${escapeHTML(placement.status || 'exact')}</span></div><button type="button" data-thread-state ${state.repository?.feedbackWritable ? '' : 'disabled'}>${text(discussion.state === 'open' ? "features.changes.index.107" : "features.changes.index.108")}</button></header><button type="button" class="review-anchor" data-open-anchor>${escapeHTML(placement.path || discussion.target.path || text("features.changes.index.109"))}${placement.start ? `:${placement.start.line}` : ''}${placement.reason ? ` · ${escapeHTML(placement.reason)}` : ''}</button><ol>${discussion.messages.map((message: any) => `<li class="review-message is-${message.author}"><div><strong>${message.author === 'agent' ? `${text("features.changes.index.110")} · ${escapeHTML(outcomeLabel(message.outcome || 'response'))}` : text("features.changes.index.111")}</strong><time>${escapeHTML(new Date(message.createdAt).toLocaleString())}</time></div><p>${escapeHTML(message.body)}</p>${message.changedPaths?.length ? `<button type="button" data-view-fix="${escapeHTML(message.id)}">${text("features.changes.index.112")}</button>` : ''}${message.author === 'human' && !message.feedbackId && state.repository?.feedbackWritable ? `<div class="review-message-actions"><button type="button" data-edit-message="${escapeHTML(message.id)}">${text("features.changes.index.113")}</button><button type="button" data-delete-message="${escapeHTML(message.id)}">${text("features.changes.index.114")}</button></div>` : ''}</li>`).join('')}</ol><button type="button" class="review-reply" ${discussion.state !== 'open' || discussionInFlightClient(discussion.id) || !state.repository?.feedbackWritable ? 'disabled' : ''}>${text("features.changes.index.115")}</button>`;
             article.querySelector('[data-thread-state]').addEventListener('click', () => updateDiscussion(discussion.id, discussion.state === 'open' ? 'resolve' : 'reopen'));
             article.querySelector('.review-reply').addEventListener('click', (event: any) => openComposer(discussion.target, event.currentTarget, { operation: 'reply', discussionId: discussion.id }));
             article.querySelector('[data-open-anchor]').addEventListener('click', () => openDiscussionAnchor(discussion));
             article.querySelectorAll('[data-edit-message]').forEach((button: any) => {
                 const message: any = discussion.messages.find((item: any) => item.id === button.dataset.editMessage);
-                button.addEventListener('click', () => openComposer(discussion.target, button, { operation: 'edit', discussionId: discussion.id, messageId: message.id, message: message.body, type: message.type }));
+                button.addEventListener('click', () => openComposer(discussion.target, button, { operation: 'edit', discussionId: discussion.id, messageId: message.id, message: message.body }));
             });
             article.querySelectorAll('[data-delete-message]').forEach((button: any) => button.addEventListener('click', () => updateDiscussion(discussion.id, 'delete', { messageId: button.dataset.deleteMessage })));
             article.querySelectorAll('[data-view-fix]').forEach((button: any) => button.addEventListener('click', () => viewFix(discussion, discussion.messages.find((item: any) => item.id === button.dataset.viewFix))));
@@ -684,6 +631,14 @@ registerMessages(changesMessages);
         elements.toast.classList.add('is-visible');
         setTimeout(() => elements.toast.classList.remove('is-visible'), copyPrompt ? 8000 : 2200);
     }
+    function showEmptyDetail() {
+        state.selected = null;
+        state.tab = 'source';
+        state.merge?.destroy?.();
+        state.merge = null;
+        elements.detail.innerHTML = text("features.changes.index.132");
+        updateURL();
+    }
     async function load(preserve: any = true) {
         const [response, repositoryResponse]: any = await Promise.all([fetch(apiURL(), { cache: 'no-store' }), REVIEW ? fetch(reviewURL('/repository/changes'), { cache: 'no-store' }) : Promise.resolve(null)]);
         const data: any = await response.json();
@@ -702,19 +657,19 @@ registerMessages(changesMessages);
         $('[data-global-comment]')?.toggleAttribute('disabled', !state.repository.feedbackWritable);
         $('[data-linked-file-open]')?.toggleAttribute('disabled', !state.repository.feedbackWritable);
         renderSummary();
-        renderList();
-        const requested: any = new URLSearchParams(location.search).get('path') || oldPath;
+        const visible: any = renderList();
+        const params: any = new URLSearchParams(location.search);
+        const requested: any = params.get('path') || oldPath;
         const selected: any = [...state.files, ...state.linked].find((change: any) => change.path === requested || change.oldPath === requested);
         if (selected)
-            await selectChange(selected, new URLSearchParams(location.search).get('tab') || state.tab);
+            await selectChange(selected, params.get('tab') || (preserve ? state.tab : 'source'));
+        else if (visible[0])
+            await selectChange(visible[0], 'source');
+        else
+            showEmptyDetail();
         elements.detail.scrollTop = oldScroll;
     }
     async function init() {
-        addToolbarControl(text("features.changes.index.052"), 'entityType', [['', text("features.changes.index.053")], ['use-case', 'UC'], ['flow', 'FLOW'], ['screen', 'SC'], ['transition', 'TR'], ['module', 'MOD'], ['contract', 'Contract'], ['decision', 'ADR'], ['work', 'TASK']]);
-        addToolbarControl(text("features.changes.index.054"), 'module', 'MOD-ID', true);
-        addToolbarControl(text("features.changes.index.055"), 'task', 'TASK-ID', true);
-        addToolbarControl(text("features.changes.index.056"), 'sort', [['path', text("features.changes.index.057")], ['type', text("features.changes.index.058")], ['status', text("features.changes.index.059")], ['changes', text("features.changes.index.060")], ['module', text("features.changes.index.061")], ['id', text("features.changes.index.062")]]);
-        addToolbarControl(text("features.changes.index.063"), 'group', [['classification', text("features.changes.index.064")], ['type', text("features.changes.index.065")], ['module', text("features.changes.index.066")], ['status', text("features.changes.index.067")], ['directory', text("features.changes.index.068")], ['task', text("features.changes.index.069")], ['none', text("features.changes.index.070")]]);
         const params: any = new URLSearchParams(location.search);
         const target: any = params.get('target') || 'working-tree';
         elements.base.value = params.get('base') || 'HEAD';
@@ -728,20 +683,28 @@ registerMessages(changesMessages);
         }
         elements.search.value = params.get('q') || '';
         elements.status.value = params.get('status') || '';
-        elements.classification.value = params.get('classification') || '';
-        elements.gitState.value = params.get('gitState') || '';
-        elements.entityType.value = params.get('type') || '';
-        elements.module.value = params.get('module') || '';
-        elements.task.value = params.get('task') || '';
-        elements.sort.value = params.get('sort') || 'path';
-        elements.group.value = params.get('group') || 'classification';
+        const requestedPath: any = params.get('path');
+        const requestedTab: any = params.get('tab') || 'source';
         try {
             await Promise.all([load(false), loadReview()]);
+            const requested: any = [...state.files, ...state.linked].find((change: any) => change.path === requestedPath || change.oldPath === requestedPath);
+            if (requested && (state.selected?.path !== requested.path || state.tab !== (requestedTab === 'summary' ? 'source' : requestedTab)))
+                await selectChange(requested, requestedTab);
         }
         catch (error: any) {
             elements.detail.innerHTML = text("features.changes.index.071", [escapeHTML(error.message)]);
         }
-        [elements.search, elements.status, elements.classification, elements.gitState, elements.entityType, elements.module, elements.task, elements.sort, elements.group].forEach((control: any) => control.addEventListener('input', () => { renderList(); updateURL(); }));
+        [elements.search, elements.status].forEach((control: any) => control.addEventListener('input', async () => {
+            const visible: any = renderList();
+            if (!visible.some((change: any) => change.path === state.selected?.path)) {
+                if (visible[0])
+                    await selectChange(visible[0], 'source');
+                else
+                    showEmptyDetail();
+            }
+            else
+                updateURL();
+        }));
         elements.target.addEventListener('change', () => {
             elements.targetRevisionWrap.hidden = elements.target.value !== 'revision';
             if (elements.target.value === 'revision')
@@ -753,6 +716,8 @@ registerMessages(changesMessages);
                 return;
             }
             state.selected = null;
+            elements.rangeDetails.open = false;
+            elements.range.focus();
             updateURL();
             try {
                 await Promise.all([load(false), loadReview()]);
@@ -761,7 +726,12 @@ registerMessages(changesMessages);
                 announce(error.message);
             }
         });
-        elements.composerForm.addEventListener('submit', (event: any) => { event.preventDefault(); submitComposer(); });
+        elements.composerForm.addEventListener('submit', (event: any) => {
+            if (event.submitter?.value === 'cancel')
+                return;
+            event.preventDefault();
+            submitComposer();
+        });
         elements.composerMessage.addEventListener('keydown', (event: any) => {
             if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) { event.preventDefault(); submitComposer(); }
         });
@@ -773,7 +743,9 @@ registerMessages(changesMessages);
         const closeFiles: any = () => { elements.filesPanel.classList.remove('is-open'); elements.filesPanel.setAttribute('role', 'navigation'); elements.filesPanel.removeAttribute('aria-modal'); $('[data-mobile-files]')?.setAttribute('aria-expanded', 'false'); $('[data-mobile-files]')?.focus(); };
         $('[data-mobile-files]')?.addEventListener('click', () => { elements.filesPanel.classList.add('is-open'); elements.filesPanel.setAttribute('role', 'dialog'); elements.filesPanel.setAttribute('aria-modal', 'true'); $('[data-mobile-files]')?.setAttribute('aria-expanded', 'true'); elements.filesPanel.querySelector('button')?.focus(); });
         $('[data-files-close]')?.addEventListener('click', closeFiles);
-        document.addEventListener('keydown', (event: any) => { if (event.key !== 'Escape') return; if (elements.discussions.classList.contains('is-open')) closeDiscussions(); else if (elements.filesPanel.classList.contains('is-open')) closeFiles(); });
+        const closeRange: any = () => { elements.rangeDetails.open = false; elements.range.focus(); };
+        document.addEventListener('click', (event: any) => { if (elements.rangeDetails.open && !elements.rangeDetails.contains(event.target)) closeRange(); });
+        document.addEventListener('keydown', (event: any) => { if (event.key !== 'Escape') return; if (elements.rangeDetails.open) closeRange(); else if (elements.discussions.classList.contains('is-open')) closeDiscussions(); else if (elements.filesPanel.classList.contains('is-open')) closeFiles(); });
         $('[data-linked-file-open]')?.addEventListener('click', async () => { elements.filePicker.showModal(); elements.filePickerQuery.focus(); await loadFilePicker(); });
         elements.filePickerQuery.addEventListener('input', () => loadFilePicker().catch((error: any) => announce(error.message)));
         elements.sendFeedback.addEventListener('click', async () => {

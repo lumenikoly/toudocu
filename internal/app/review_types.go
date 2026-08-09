@@ -109,7 +109,7 @@ type AnchorPlacement struct {
 type ReviewMessage struct {
 	ID           string    `json:"id"`
 	Author       string    `json:"author"`
-	Type         string    `json:"type,omitempty"`
+	LegacyType   string    `json:"type,omitempty"`
 	Body         string    `json:"body"`
 	Outcome      string    `json:"outcome,omitempty"`
 	ChangedPaths []string  `json:"changedPaths,omitempty"`
@@ -132,7 +132,7 @@ type FeedbackItem struct {
 	ID           string         `json:"id"`
 	DiscussionID string         `json:"discussionId"`
 	MessageID    string         `json:"messageId"`
-	Type         string         `json:"type"`
+	LegacyType   string         `json:"type,omitempty"`
 	Body         string         `json:"body"`
 	Target       ReviewTarget   `json:"target"`
 	Anchor       AnchorSnapshot `json:"anchor"`
@@ -171,7 +171,6 @@ type CreateDiscussionRequest struct {
 	ReviewMutationGuard
 	RepositoryRevision string       `json:"repositoryRevision"`
 	Target             ReviewTarget `json:"target"`
-	Type               string       `json:"type"`
 	Message            string       `json:"message"`
 }
 
@@ -179,7 +178,6 @@ type UpdateDiscussionRequest struct {
 	ReviewMutationGuard
 	Operation string `json:"operation"`
 	MessageID string `json:"messageId,omitempty"`
-	Type      string `json:"type,omitempty"`
 	Message   string `json:"message,omitempty"`
 }
 

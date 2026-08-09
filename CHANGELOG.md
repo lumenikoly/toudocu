@@ -2,6 +2,13 @@
 
 ## 0.0.1
 
+- У комментариев Changes удалён неиспользуемый тип: composer, discussion,
+  HTTP schema, local state и FIFO feedback теперь передают только текст.
+- Вкладка «Изменения» стала review-first workspace: первый source diff
+  открывается сразу, Git range и diagnostics раскрываются по запросу, а в
+  постоянной панели файлов остаются только path-sorted список, поиск и статус.
+  Desktop использует внутренний полноэкранный split, mobile — отдельные Files и
+  Discussions drawers без горизонтального overflow.
 - Canonical Changes workspace получил repository-wide local review:
   персистентные anchored discussions, changed/linked files, FIFO feedback
   snapshots и agent responses через `changes feedback pending|respond`. UI и

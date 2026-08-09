@@ -1,7 +1,7 @@
 # Process local Changes feedback
 
-Use this workflow only for an explicit `$toudocu feedback` request or the
-copied prompt “Обработай комментарии из Toudocu Changes”. It authorizes
+Use this workflow only for an explicit `$toudocu feedback` request or an
+explicit request to process comments from Toudocu Changes. It authorizes
 evidence-backed repository edits needed to address the supplied feedback and
 relevant verification; it does not authorize unrelated cleanup, Git writes,
 publishing, network services, or destructive actions.
@@ -39,8 +39,9 @@ Apply the message type consistently:
   changed path.
 
 Process every item in the batch. Preserve unrelated user changes and immutable
-feedback text. A stale/deleted anchor requires inspecting the original target,
-placement and current Git projection; do not guess a replacement. Run the
+feedback text. Apply the reader-first writing gate to any changed documentation
+or user-facing message. A stale/deleted anchor requires inspecting the
+original target, placement and current Git projection; do not guess a replacement. Run the
 smallest relevant established checks after edits and record their actual
 result. Do not mark an item fixed merely because a patch was attempted.
 
