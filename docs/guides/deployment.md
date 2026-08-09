@@ -1,10 +1,10 @@
 # Публикация статического портала
 
-`docu-docu build` создаёт read-only output, который после генерации не требует
-Docu-docu backend, Node.js, базы данных или CDN.
+`toudocu build` создаёт read-only output, который после генерации не требует
+Toudocu backend, Node.js, базы данных или CDN.
 
 ```bash
-docu-docu build ./docs --output ./site --clean
+toudocu build ./docs --output ./site --clean
 ```
 
 Загрузите весь каталог `site/` на обычный HTTP(S) static hosting: nginx,
@@ -27,7 +27,7 @@ Generated portal не хранится в Git. Workflow GitHub Pages на каж
 - `/project-docs/en/` — портал из `docs-en/`.
 
 Locale gateway учитывает только сохранённый явным переключателем ключ
-`docu-docu-landing-locale`, затем основную локаль браузера. `ru` и `ru-*`
+`toudocu-landing-locale`, затем основную локаль браузера. `ru` и `ru-*`
 открывают `/ru/`, остальные и неизвестные значения — `/en/`. Определение языка
 происходит только в `/`: прямой locale URL всегда сохраняет выбранный в URL
 язык, а при отключённом JavaScript корень показывает обе ссылки.
@@ -41,7 +41,7 @@ Static output является потенциально публичным ар�
 абсолютные filesystem paths, server configuration, editor metadata, credentials
 или данные вне разрешённой documentation model.
 
-Для локального просмотра используйте `docu-docu serve` и
+Для локального просмотра используйте `toudocu serve` и
 [локальный workflow](local-workflow.md).
 Прямое открытие `index.html` двойным кликом не является поддерживаемым способом
 публикации или проверки.

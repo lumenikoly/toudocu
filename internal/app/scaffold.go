@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"fmt"
@@ -299,7 +299,7 @@ func InitTask(options Options) (TaskInitReport, error) {
 			return TaskInitReport{}, err
 		}
 		return TaskInitReport{
-			SchemaVersion: 1, Kind: "task-init", Generator: GeneratorInfo{Name: "Docu-docu", Version: Version},
+			SchemaVersion: 1, Kind: "task-init", Generator: GeneratorInfo{Name: "Toudocu", Version: Version},
 			ID: id, Title: options.Title, Type: taskType, Language: options.Language, Path: relative,
 		}, nil
 	}
@@ -435,7 +435,7 @@ func Scaffold(options Options) (ScaffoldReport, error) {
 		return ScaffoldReport{}, err
 	}
 	return ScaffoldReport{
-		SchemaVersion: 1, Kind: "scaffold", Generator: GeneratorInfo{Name: "Docu-docu", Version: Version},
+		SchemaVersion: 1, Kind: "scaffold", Generator: GeneratorInfo{Name: "Toudocu", Version: Version},
 		EntityType: options.EntityKind, ID: options.EntityID, Title: options.Title, Language: options.Language, Path: relative,
 	}, nil
 }

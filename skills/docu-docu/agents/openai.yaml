@@ -1,4 +1,0 @@
-interface:
-  display_name: "Docu-docu"
-  short_description: "Set up, update, and validate Docu-docu documentation"
-  default_prompt: "Use $docu-docu init to explicitly set up Docu-docu for this project."

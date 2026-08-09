@@ -3,22 +3,28 @@ import { changesMessages } from "../../core/messages.ru";
 registerMessages(changesMessages);
 (() => {
     'use strict';
-    const page: any = window.DocuDocuPage;
+    const page: any = window.ToudocuPage;
     const API: any = page?.runtime === 'serve' && page.capabilities?.changes ? page.endpoints?.changes : '';
+    const REVIEW: any = page?.runtime === 'serve' && page.capabilities?.review ? page.endpoints?.review : '';
     const EDITOR_WORKSPACE: any = page?.runtime === 'serve' && page.capabilities?.editor ? page.endpoints?.editorWorkspace : '';
     const $: any = (selector: any, root: any = document) => root.querySelector(selector);
-    const state: any = { report: null, selected: null, tab: 'summary', merge: null, etag: '' };
+    const state: any = { report: null, repository: null, files: [], linked: [], selected: null, tab: 'summary', merge: null, etag: '', repositoryEtag: '', reviewEtag: '', review: null, composerTarget: null, composerReturn: null, activeDiscussion: '', discussionScroll: 0 };
     const elements: any = {
         base: $('[data-base]'), branchBase: $('[data-branch-base]'), target: $('[data-target]'), targetRevision: $('[data-target-revision]'), targetRevisionWrap: $('[data-target-revision-wrap]'), apply: $('[data-apply-range]'), range: $('[data-range-summary]'),
         summary: $('[data-summary]'), stale: $('[data-stale]'), search: $('[data-search]'), status: $('[data-status]'),
         classification: $('[data-classification]'), gitState: $('[data-git-state]'), list: $('[data-file-list]'),
-        count: $('[data-result-count]'), detail: $('[data-detail]'), toast: $('[data-changes-toast]'),
+        count: $('[data-result-count]'), detail: $('[data-detail]'), toast: $('[data-changes-toast]'), toastMessage: $('[data-toast-message]'),
+        discussions: $('[data-discussions-panel]'), discussionList: $('[data-discussion-list]'), openDiscussionCount: $('[data-open-discussion-count]'), unsentCount: $('[data-unsent-count]'), sendFeedback: $('[data-send-feedback]'), reviewSummary: $('[data-review-summary]'),
+        composer: $('[data-review-composer]'), composerForm: $('[data-review-form]'), composerType: $('[data-review-type]'), composerMessage: $('[data-review-message]'), composerError: $('[data-review-error]'), composerTarget: $('[data-review-target-summary]'),
+        filesPanel: $('[data-files-panel]'), filePicker: $('[data-file-picker]'), filePickerQuery: $('[data-file-picker-query]'), filePickerResults: $('[data-file-picker-results]'), openFileStale: $('[data-open-file-stale]'),
     };
+    if (!REVIEW)
+        document.querySelectorAll('[data-global-comment], [data-discussions-toggle], [data-linked-file-open]').forEach((element: any) => element.hidden = true);
     if (!API) {
         elements.detail.innerHTML = text("features.changes.index.001");
         return;
     }
-    document.addEventListener('docu-docu:themechange', async (event: any) => {
+    document.addEventListener('toudocu:themechange', async (event: any) => {
         state.merge?.setTheme?.(event.detail.theme);
         if (state.selected && (state.tab === 'mermaid' || state.tab === 'rendered'))
             await renderDetail();
@@ -39,7 +45,9 @@ registerMessages(changesMessages);
         return control;
     }
     const escapeHTML: any = (value: any) => String(value ?? '').replace(/[&<>"']/g, (character: any) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } as Record<string, string>)[character]);
-    const statusLabel: any = (status: any) => ({ added: text("features.changes.index.002"), untracked: 'Untracked', modified: text("features.changes.index.003"), deleted: text("features.changes.index.004"), renamed: text("features.changes.index.005"), copied: text("features.changes.index.006"), 'type-changed': text("features.changes.index.007") } as Record<string, string>)[status] || status;
+    const statusLabel: any = (status: any) => ({ added: text("features.changes.index.002"), untracked: 'Untracked', modified: text("features.changes.index.003"), deleted: text("features.changes.index.004"), renamed: text("features.changes.index.005"), copied: text("features.changes.index.006"), 'type-changed': text("features.changes.index.007"), linked: text("features.changes.index.091") } as Record<string, string>)[status] || status;
+    const commentTypeLabel: any = (type: any) => ({ issue: text("features.changes.index.124"), suggestion: text("features.changes.index.125"), question: text("features.changes.index.126"), praise: text("features.changes.index.127") } as Record<string, string>)[type] || type;
+    const outcomeLabel: any = (outcome: any) => ({ fixed: text("features.changes.index.128"), notFixed: text("features.changes.index.129"), needsClarification: text("features.changes.index.130") } as Record<string, string>)[outcome] || outcome;
     const selectedTarget: any = () => elements.target.value === 'revision' ? elements.targetRevision.value.trim() : elements.target.value;
     const query: any = () => {
         const params: any = new URLSearchParams();
@@ -53,8 +61,20 @@ registerMessages(changesMessages);
         return params;
     };
     const apiURL: any = (endpoint: any = '', extra: any = {}) => { const params: any = query(); Object.entries(extra).forEach(([key, value]: any) => value != null && params.set(key, value)); return `${API}${endpoint}?${params}`; };
-    const languageFor: any = (path: any) => path.endsWith('.json') ? 'json' : /\.ya?ml$/i.test(path) ? 'yaml' : 'markdown';
-    const changeText: any = (change: any) => [change.path, change.oldPath, ...change.entitiesBefore.map((item: any) => `${item.id} ${item.title}`), ...change.entitiesAfter.map((item: any) => `${item.id} ${item.title}`), ...change.semanticChanges.map((item: any) => item.summary)].join(' ').toLocaleLowerCase('ru');
+    const reviewURL: any = (endpoint: any = '', extra: any = {}) => { const params: any = query(); Object.entries(extra).forEach(([key, value]: any) => value != null && params.set(key, value)); return `${REVIEW}${endpoint}?${params}`; };
+    const languageFor: any = (path: any) => path.endsWith('.json') ? 'json' : /\.ya?ml$/i.test(path) ? 'yaml' : path.endsWith('.go') ? 'go' : path.endsWith('.java') ? 'java' : /\.(js|jsx|mjs|cjs)$/i.test(path) ? 'javascript' : /\.(ts|tsx|mts|cts)$/i.test(path) ? 'typescript' : /\.md$/i.test(path) ? 'markdown' : 'text';
+    const changeText: any = (change: any) => [change.path, change.oldPath].join(' ').toLocaleLowerCase('ru');
+    function normalizedReviewFile(file: any) {
+        const documentation: any = file.documentation || {};
+        return {
+            status: file.status || 'linked', path: file.path, oldPath: file.oldPath || '', gitState: file.gitState || {}, lines: file.lines || { added: 0, deleted: 0 }, binary: !!file.binary,
+            oldSize: documentation.oldSize || 0, newSize: file.size || documentation.newSize || 0, classification: documentation.classification || 'repository-file',
+            entitiesBefore: documentation.entitiesBefore || [], entitiesAfter: documentation.entitiesAfter || [], sourceDiffAvailable: file.status !== 'linked', renderedDiffAvailable: !!documentation.renderedDiffAvailable,
+            semanticDiffAvailable: !!documentation.semanticDiffAvailable, sourceDiff: documentation.sourceDiff || '', sourceDiffHunks: documentation.sourceDiffHunks || [], renderedSections: documentation.renderedSections || [],
+            mermaidBlocks: documentation.mermaidBlocks || [], semanticChanges: documentation.semanticChanges || [], relationChanges: documentation.relationChanges || [], diagnostics: documentation.diagnostics || [],
+            asset: documentation.asset, screen: documentation.screen, language: file.language || languageFor(file.path), documentation: file.documentation || null, _reviewFile: file,
+        };
+    }
     function updateURL() {
         const params: any = query();
         if (state.selected)
@@ -82,7 +102,7 @@ registerMessages(changesMessages);
         history.replaceState(null, '', `${location.pathname}?${params}`);
     }
     function renderSummary() {
-        const { report }: any = state;
+        const report: any = state.repository || state.report;
         const summary: any = report.summary;
         elements.range.textContent = `Base: ${report.comparison.base.displayRef} — ${report.comparison.base.resolved.slice(0, 7)} · Target: ${report.comparison.target.displayRef}${report.comparison.target.resolved ? ` — ${report.comparison.target.resolved.slice(0, 7)}` : ''} · Branch: ${report.repository.branch || 'detached HEAD'} · State: ${report.repository.dirty ? 'dirty' : 'clean'}`;
         const metrics: any = [[text("features.changes.index.008"), summary.files.added + summary.files.untracked], [text("features.changes.index.009"), summary.files.modified], [text("features.changes.index.010"), summary.files.deleted], [text("features.changes.index.011"), summary.files.renamed], [text("features.changes.index.012"), `+${summary.lines.added} −${summary.lines.deleted}`]];
@@ -99,7 +119,7 @@ registerMessages(changesMessages);
         const git: any = elements.gitState.value;
         if (git && !change.gitState[git])
             return false;
-        if (elements.entityType.value && ![...change.entitiesBefore, ...change.entitiesAfter].some((item: any) => item.type === elements.entityType.value))
+        if (elements.entityType.value && ![...(change.entitiesBefore || []), ...(change.entitiesAfter || [])].some((item: any) => item.type === elements.entityType.value))
             return false;
         if (elements.module.value && !changeText(change).includes(elements.module.value.toLocaleLowerCase('ru')))
             return false;
@@ -108,7 +128,7 @@ registerMessages(changesMessages);
         return true;
     }
     function renderList() {
-        const changes: any = state.report.changes.filter(matches).sort((left: any, right: any) => {
+        const sortFiles: any = (files: any) => files.filter(matches).sort((left: any, right: any) => {
             if (elements.sort.value === 'status')
                 return left.status.localeCompare(right.status) || left.path.localeCompare(right.path);
             if (elements.sort.value === 'changes')
@@ -121,29 +141,13 @@ registerMessages(changesMessages);
                 return changeID(left).localeCompare(changeID(right)) || left.path.localeCompare(right.path);
             return left.path.localeCompare(right.path);
         });
-        elements.count.textContent = text("features.changes.index.013", [changes.length, state.report.changes.length]);
+        const changed: any = sortFiles(state.files);
+        const linked: any = sortFiles(state.linked);
+        elements.count.textContent = text("features.changes.index.013", [changed.length + linked.length, state.files.length + state.linked.length]);
         elements.list.replaceChildren();
-        const groupKey: any = (change: any) => {
-            if (elements.group.value === 'status')
-                return change.status;
-            if (elements.group.value === 'type')
-                return change.entitiesAfter[0]?.type || change.entitiesBefore[0]?.type || 'unknown';
-            if (elements.group.value === 'module')
-                return changeModule(change) || text("features.changes.index.014");
-            if (elements.group.value === 'task')
-                return changeTask(change) || text("features.changes.index.015");
-            if (elements.group.value === 'directory')
-                return change.path.split('/').slice(0, -1).join('/') || '/';
-            if (elements.group.value === 'none')
-                return '';
-            return change.classification;
-        };
-        const labels: any = { 'permanent-documentation': text("features.changes.index.016"), contract: text("features.changes.index.017"), asset: 'Assets', 'work-artifact': text("features.changes.index.018") };
-        [...new Set(changes.map(groupKey))].forEach((key: any) => {
-            const items: any = changes.filter((change: any) => groupKey(change) === key);
+        const appendSection: any = (label: any, items: any) => {
             if (!items.length)
                 return;
-            const label: any = labels[key] || key || text("features.changes.index.019");
             const heading: any = document.createElement('h3');
             heading.textContent = label;
             elements.list.append(heading);
@@ -152,40 +156,48 @@ registerMessages(changesMessages);
                 button.type = 'button';
                 button.className = `changes-file ${state.selected?.path === change.path ? 'is-active' : ''}`;
                 button.dataset.path = change.path;
-                const entity: any = change.entitiesAfter[0] || change.entitiesBefore[0];
-                button.innerHTML = `<span class="changes-file-status status-${escapeHTML(change.status)}">${escapeHTML(statusLabel(change.status))}</span><strong>${escapeHTML(entity?.id || change.path.split('/').pop())}</strong><span class="changes-file-title">${escapeHTML(entity?.title || '')}</span><span class="changes-file-path">${escapeHTML(change.oldPath ? `${change.oldPath} → ${change.path}` : change.path)}</span><span class="changes-line-stats">+${change.lines.added} −${change.lines.deleted}</span>`;
+                const entity: any = change.entitiesAfter?.[0] || change.entitiesBefore?.[0];
+                const discussionCount: any = discussionsForPath(change.path).filter((item: any) => item.state === 'open').length;
+                button.innerHTML = `<span class="changes-file-status status-${escapeHTML(change.status)}">${escapeHTML(statusLabel(change.status))}</span><strong>${escapeHTML(entity?.id || change.path.split('/').pop())}${discussionCount ? ` <span class="review-file-badge" aria-label="${escapeHTML(text("features.changes.index.092", [discussionCount]))}">${discussionCount}</span>` : ''}</strong><span class="changes-file-title">${escapeHTML(entity?.title || '')}</span><span class="changes-file-path">${escapeHTML(change.oldPath ? `${change.oldPath} → ${change.path}` : change.path)}</span><span class="changes-line-stats">+${change.lines.added} −${change.lines.deleted}</span>`;
                 button.addEventListener('click', () => selectChange(change));
                 elements.list.append(button);
             });
-        });
-        if (!changes.length)
+        };
+        appendSection(text("features.changes.index.093"), changed);
+        appendSection(text("features.changes.index.094"), linked);
+        if (!changed.length && !linked.length)
             elements.list.innerHTML = text("features.changes.index.020");
     }
     const changeID: any = (change: any) => change.entitiesAfter[0]?.id || change.entitiesBefore[0]?.id || '';
     const changeModule: any = (change: any) => change.semanticChanges.find((item: any) => item.field === 'module')?.after || change.semanticChanges.find((item: any) => item.field === 'module')?.before || '';
     const changeTask: any = (change: any) => (changeText(change).match(/TASK-[A-Z0-9-]+/) || [])[0] || '';
-    const tabsFor: any = (change: any) => [['summary', text("features.changes.index.021")], ['source', text("features.changes.index.022")], ...(change.renderedDiffAvailable ? [['rendered', text("features.changes.index.023")]] : []), ...(change.semanticDiffAvailable ? [['semantic', text("features.changes.index.024")]] : []), ['relations', text("features.changes.index.025")], ...(change.classification === 'contract' ? [['openapi', 'OpenAPI']] : []), ...(change.mermaidBlocks?.length ? [['mermaid', 'Mermaid']] : []), ...(change.classification === 'asset' ? [['assets', 'Assets']] : []), ...([...(change.entitiesBefore || []), ...(change.entitiesAfter || [])].some((item: any) => item.type === 'screen' || item.type === 'transition') ? [['map', text("features.changes.index.026")]] : [])];
+    const tabsFor: any = (change: any) => [['summary', text("features.changes.index.021")], ['source', text("features.changes.index.022")], ...(change.renderedDiffAvailable ? [['rendered', text("features.changes.index.023")]] : []), ...(change.semanticDiffAvailable ? [['semantic', text("features.changes.index.024")]] : []), ...(change.documentation ? [['relations', text("features.changes.index.025")]] : []), ...(change.classification === 'contract' ? [['openapi', 'OpenAPI']] : []), ...(change.mermaidBlocks?.length ? [['mermaid', 'Mermaid']] : []), ...(change.classification === 'asset' ? [['assets', 'Assets']] : []), ...([...(change.entitiesBefore || []), ...(change.entitiesAfter || [])].some((item: any) => item.type === 'screen' || item.type === 'transition') ? [['map', text("features.changes.index.026")]] : [])];
     async function selectChange(change: any, tab: any = state.tab) {
-        if (change.sourceDiffAvailable && !change.sourceDiff) {
+        if (REVIEW) {
             try {
-                const response: any = await fetch(apiURL('/file', { path: change.path }), { cache: 'no-store' });
-                if (response.ok)
-                    change = await response.json();
+                const response: any = await fetch(reviewURL('/repository/file', { path: change.path }), { cache: 'no-store' });
+                const detail: any = await response.json();
+                if (!response.ok)
+                    throw new Error(detail.diagnostics?.[0]?.message || `HTTP ${response.status}`);
+                change = { ...change, sourceDiff: detail.patch || '', sourceDiffHunks: detail.hunks || [], sourceDiffAvailable: !!detail.patch, _before: detail.before || '', _current: detail.current || '', _repositoryRevision: detail.repositoryRevision, _reviewDetail: detail };
             }
-            catch { /* summary remains usable */ }
+            catch (error: any) { announce(error.message); }
         }
         state.selected = change;
         state.tab = tabsFor(change).some(([id]: any) => id === tab) ? tab : 'summary';
         state.merge?.destroy?.();
         state.merge = null;
+        elements.filesPanel.classList.remove('is-open');
+        $('[data-mobile-files]')?.setAttribute('aria-expanded', 'false');
         renderList();
         updateURL();
         await renderDetail();
     }
     function detailHeader(change: any) {
         const entity: any = change.entitiesAfter[0] || change.entitiesBefore[0];
-        const editorLink: any = EDITOR_WORKSPACE ? text("features.changes.index.027", [escapeHTML(EDITOR_WORKSPACE), encodeURIComponent(change.path.replace(/^docs\//, ''))]) : '';
-        return text("features.changes.index.028", [escapeHTML(change.status), escapeHTML(statusLabel(change.status)), escapeHTML(entity?.id || change.path.split('/').pop()), entity?.title ? ` — ${escapeHTML(entity.title)}` : '', escapeHTML(change.oldPath ? `${change.oldPath} → ${change.path}` : change.path), change.lines.added, change.lines.deleted, editorLink, tabsFor(change).map(([id, label]: any) => `<button type="button" role="tab" aria-selected="${state.tab === id}" data-tab="${id}">${label}</button>`).join('')]);
+        const editorLink: any = EDITOR_WORKSPACE && change.path.startsWith('docs/') ? text("features.changes.index.027", [escapeHTML(EDITOR_WORKSPACE), encodeURIComponent(change.path.replace(/^docs\//, ''))]) : '';
+        const comment: any = REVIEW ? `<button type="button" class="changes-button secondary" data-file-comment ${state.repository?.feedbackWritable ? '' : 'disabled'}>${text("features.changes.index.095")}</button>` : '';
+        return text("features.changes.index.028", [escapeHTML(change.status), escapeHTML(statusLabel(change.status)), escapeHTML(entity?.id || change.path.split('/').pop()), entity?.title ? ` — ${escapeHTML(entity.title)}` : '', escapeHTML(change.oldPath ? `${change.oldPath} → ${change.path}` : change.path), change.lines.added, change.lines.deleted, `<div class="changes-detail-actions">${comment}${editorLink}</div>`, tabsFor(change).map(([id, label]: any) => `<button type="button" role="tab" aria-selected="${state.tab === id}" data-tab="${id}">${label}</button>`).join('')]);
     }
     async function renderDetail() {
         const change: any = state.selected;
@@ -193,6 +205,7 @@ registerMessages(changesMessages);
             return;
         elements.detail.innerHTML = detailHeader(change);
         elements.detail.querySelectorAll('[data-tab]').forEach((button: any) => button.addEventListener('click', () => selectChange(change, button.dataset.tab)));
+        elements.detail.querySelector('[data-file-comment]')?.addEventListener('click', (event: any) => openComposer({ type: 'file', path: change.path }, event.currentTarget));
         const panel: any = $('[data-tab-panel]', elements.detail);
         if (state.tab === 'summary')
             renderChangeSummary(panel, change);
@@ -218,6 +231,8 @@ registerMessages(changesMessages);
         panel.innerHTML = text("features.changes.index.029", [semantic.length ? `<ul>${semantic.map((item: any) => `<li>${escapeHTML(item.summary)}${item.compatibility ? ` <span class="compatibility ${item.compatibility}">${escapeHTML(item.compatibility)}</span>` : ''}</li>`).join('')}</ul>` : text("features.changes.index.073"), ['staged', 'unstaged', 'untracked', 'committedInBranch'].filter((key: any) => change.gitState[key]).join(', ') || 'committed comparison', change.oldSize, change.newSize, change.sourceDiffAvailable ? text("features.changes.index.074") : text("features.changes.index.075"), change.renderedDiffAvailable ? text("features.changes.index.076") : text("features.changes.index.077"), change.semanticDiffAvailable ? text("features.changes.index.078") : text("features.changes.index.079"), change.diagnostics.length ? `<h3>Diagnostics</h3><ul>${change.diagnostics.map((item: any) => `<li><code>${escapeHTML(item.code)}</code> ${escapeHTML(item.message)}</li>`).join('')}</ul>` : '']);
     }
     async function fetchSide(change: any, side: any, render: any = false) {
+        if (!render && (change._before !== undefined || change._current !== undefined))
+            return side === 'before' ? change._before || '' : change._current || '';
         const response: any = await fetch(apiURL(render ? '/render' : '/content', { side, path: change.path }), { cache: 'no-store' });
         if (response.status === 204)
             return '';
@@ -240,7 +255,9 @@ registerMessages(changesMessages);
                 oldLine = counters.old++;
             if (marker === '+')
                 newLine = counters.new++;
-            return `<span class="diff-line diff-line-${marker === '+' ? 'added' : marker === '-' ? 'removed' : 'context'}"><span class="diff-line-number">${oldLine}</span><span class="diff-line-number">${newLine}</span><span class="diff-line-marker">${escapeHTML(marker)}</span><span class="diff-line-content">${escapeHTML(line.slice(1))}</span></span>`;
+            const side: any = marker === '-' ? 'old' : 'new';
+            const selectedLine: any = marker === '-' ? oldLine : newLine;
+            return `<span class="diff-line diff-line-${marker === '+' ? 'added' : marker === '-' ? 'removed' : 'context'}" data-review-side="${side}" data-review-line="${selectedLine}"><button type="button" class="diff-comment" aria-label="${escapeHTML(text(side === 'old' ? "features.changes.index.096" : "features.changes.index.097", [selectedLine]))}" ${state.repository?.feedbackWritable ? '' : 'disabled'}>+</button><span class="diff-line-number">${oldLine}</span><span class="diff-line-number">${newLine}</span><span class="diff-line-marker">${escapeHTML(marker)}</span><span class="diff-line-content">${escapeHTML(line.slice(1))}</span></span>`;
         };
         const focusHunk: any = (index: any) => {
             const hunks: any = [...host.querySelectorAll('.changes-hunk')];
@@ -256,10 +273,15 @@ registerMessages(changesMessages);
             state.merge = null;
             host.replaceChildren();
             if (!change.sourceDiffHunks?.length) {
-                const pre: any = document.createElement('pre');
-                pre.className = 'changes-diff';
-                pre.textContent = change.sourceDiff || text("features.changes.index.031");
-                host.append(pre);
+                if (change._current !== undefined && window.ToudocuCodeMirror?.createViewer) {
+                    state.merge = window.ToudocuCodeMirror.createViewer({ parent: host, doc: change._current || '', language: change.language || languageFor(change.path), onSelect: (selection: any) => selection && openComposer({ type: 'fileRange', path: change.path, start: selection.start, end: selection.end }, host) });
+                }
+                else {
+                    const pre: any = document.createElement('pre');
+                    pre.className = 'changes-diff';
+                    pre.textContent = change.sourceDiff || text("features.changes.index.031");
+                    host.append(pre);
+                }
                 return;
             }
             change.sourceDiffHunks.forEach((hunk: any, index: any) => {
@@ -277,6 +299,12 @@ registerMessages(changesMessages);
                 article.querySelector('[data-copy-hunk]').addEventListener('click', async () => { await navigator.clipboard.writeText(hunk.patch); announce(text("features.changes.index.033")); });
                 host.append(article);
             });
+            host.querySelectorAll('[data-review-line] .diff-comment').forEach((button: any) => button.addEventListener('click', () => {
+                const row: any = button.closest('[data-review-line]');
+                const content: any = row.querySelector('.diff-line-content').textContent || '';
+                openComposer({ type: 'diff', path: change.path, side: row.dataset.reviewSide, start: { line: Number(row.dataset.reviewLine), column: 1 }, end: { line: Number(row.dataset.reviewLine), column: Array.from(content).length + 1 } }, button);
+            }));
+            host.addEventListener('pointerup', () => openUnifiedSelection(change, host));
             const requested: any = decodeURIComponent(location.hash.slice(1));
             const requestedIndex: any = change.sourceDiffHunks.findIndex((hunk: any) => hunk.id === requested);
             if (requestedIndex >= 0)
@@ -287,8 +315,8 @@ registerMessages(changesMessages);
             try {
                 const [before, after]: any = await Promise.all([fetchSide(change, 'before'), fetchSide(change, 'after')]);
                 host.replaceChildren();
-                if (window.DocuDocuCodeMirror?.createMerge)
-                    state.merge = window.DocuDocuCodeMirror.createMerge({ parent: host, before, after, language: languageFor(change.path) });
+                if (window.ToudocuCodeMirror?.createMerge)
+                    state.merge = window.ToudocuCodeMirror.createMerge({ parent: host, before, after, language: change.language || languageFor(change.path), onSelect: (selection: any) => selection && openComposer({ type: 'diff', path: change.path, side: selection.side, start: selection.start, end: selection.end }, host) });
                 else {
                     host.innerHTML = `<div class="source-columns"><pre>${escapeHTML(before)}</pre><pre>${escapeHTML(after)}</pre></div>`;
                 }
@@ -451,21 +479,235 @@ registerMessages(changesMessages);
         const edge: any = (transition: any) => { const oldValue: any = transition.before; const newValue: any = transition.after; return `<li class="map-change-edge status-${escapeHTML(transition.status)}"><header><strong>${escapeHTML(transition.id)}</strong><span>${escapeHTML(statusLabel(transition.status))}</span></header><div class="map-edge-values"><span>${oldValue ? `${escapeHTML(oldValue.source)} → ${escapeHTML(oldValue.target)}` : text("features.changes.index.049")}</span><span>${newValue ? `${escapeHTML(newValue.source)} → ${escapeHTML(newValue.target)}` : text("features.changes.index.050")}</span></div>${newValue?.action || oldValue?.action ? `<p>${escapeHTML(newValue?.action || oldValue?.action)} · ${escapeHTML(newValue?.condition || oldValue?.condition || '')}</p>` : ''}</li>`; };
         panel.innerHTML = text("features.changes.index.051", [escapeHTML(change.status), after ? '' : 'is-ghost', escapeHTML(node?.id), escapeHTML(statusLabel(change.status)), escapeHTML(node?.title || ''), node?.route ? ` · ${escapeHTML(node.route)}` : '', screen.transitions.length ? `<ol class="map-change-edges">${screen.transitions.map(edge).join('')}</ol>` : text("features.changes.index.090"), apiURL('/screen-map')]);
     }
-    function announce(message: any) { elements.toast.textContent = message; elements.toast.classList.add('is-visible'); setTimeout(() => elements.toast.classList.remove('is-visible'), 2200); }
-    async function load(preserve: any = true) {
-        const response: any = await fetch(apiURL(), { cache: 'no-store' });
+    function discussionsForPath(path: any) {
+        return state.review?.session?.discussions?.filter((discussion: any) => discussion.target?.path === path || discussion.placement?.path === path) || [];
+    }
+    function discussionInFlightClient(discussionId: any) {
+        return (state.review?.feedback || []).some((batch: any) => !batch.respondedAt && batch.items?.some((item: any) => item.discussionId === discussionId));
+    }
+    function reviewGuard() { return { expectedRevision: state.review?.revision || 0, expectedStateDigest: state.review?.stateDigest || '' }; }
+    async function reviewMutation(endpoint: any, action: any, method: any, body: any) {
+        const response: any = await fetch(`${REVIEW}${endpoint}`, { method, headers: { 'Content-Type': 'application/json', 'X-Toudocu-Action': action }, body: JSON.stringify(body) });
         const data: any = await response.json();
         if (!response.ok)
             throw new Error(data.diagnostics?.[0]?.message || `HTTP ${response.status}`);
+        return data;
+    }
+    function openComposer(target: any, returnElement: any, mode: any = { operation: 'create' }) {
+        if (!REVIEW || !state.repository?.feedbackWritable) {
+            announce(text("features.changes.index.098"));
+            return;
+        }
+        state.composerTarget = target;
+        state.composerReturn = returnElement || document.activeElement;
+        state.composerMode = mode;
+        elements.composerType.value = mode.type || 'issue';
+        elements.composerMessage.value = mode.message || '';
+        elements.composerError.textContent = '';
+        elements.composerTarget.textContent = target.type === 'global' ? text("features.changes.index.099") : `${target.path}${target.start ? ` · ${target.side || 'current'} ${target.start.line}:${target.start.column}–${target.end.line}:${target.end.column}` : ''}`;
+        elements.composer.showModal();
+        requestAnimationFrame(() => elements.composerMessage.focus());
+    }
+    function openUnifiedSelection(change: any, host: any) {
+        const selection: any = window.getSelection();
+        if (!selection || selection.isCollapsed || !selection.rangeCount)
+            return;
+        const range: any = selection.getRangeAt(0);
+        const startContent: any = (range.startContainer.nodeType === Node.TEXT_NODE ? range.startContainer.parentElement : range.startContainer).closest?.('.diff-line-content');
+        const endContent: any = (range.endContainer.nodeType === Node.TEXT_NODE ? range.endContainer.parentElement : range.endContainer).closest?.('.diff-line-content');
+        const startRow: any = startContent?.closest('[data-review-line]');
+        const endRow: any = endContent?.closest('[data-review-line]');
+        if (!startRow || !endRow || !host.contains(startRow) || startRow.dataset.reviewSide !== endRow.dataset.reviewSide) {
+            if (startRow || endRow)
+                announce(text("features.changes.index.100"));
+            return;
+        }
+        const startColumn: any = Array.from((startContent.textContent || '').slice(0, range.startOffset)).length + 1;
+        const endColumn: any = Array.from((endContent.textContent || '').slice(0, range.endOffset)).length + 1;
+        openComposer({ type: 'diff', path: change.path, side: startRow.dataset.reviewSide, start: { line: Number(startRow.dataset.reviewLine), column: startColumn }, end: { line: Number(endRow.dataset.reviewLine), column: endColumn } }, startContent);
+        selection.removeAllRanges();
+    }
+    async function submitComposer() {
+        const mode: any = state.composerMode || { operation: 'create' };
+        const message: any = elements.composerMessage.value.trim();
+        if (!message)
+            return;
+        if (mode.operation === 'create' && !state.composerTarget) {
+            elements.composerError.textContent = text("features.changes.index.101");
+            return;
+        }
+        try {
+            let updated: any;
+            if (mode.operation === 'create') {
+                updated = await reviewMutation('/discussions', 'review-discussion-create', 'POST', { ...reviewGuard(), repositoryRevision: state.repository.repositoryRevision, target: state.composerTarget, type: elements.composerType.value, message });
+            }
+            else {
+                updated = await reviewMutation(`/discussions/${mode.discussionId}`, 'review-discussion-update', 'PATCH', { ...reviewGuard(), operation: mode.operation, messageId: mode.messageId || undefined, type: elements.composerType.value, message });
+            }
+            state.review = updated;
+            elements.composer.close();
+            elements.discussions.hidden = false;
+            elements.discussions.classList.add('is-open');
+            elements.discussions.setAttribute('role', matchMedia('(max-width: 1050px)').matches ? 'dialog' : 'complementary');
+            if (matchMedia('(max-width: 1050px)').matches)
+                elements.discussions.setAttribute('aria-modal', 'true');
+            $('[data-discussions-toggle]')?.setAttribute('aria-expanded', 'true');
+            renderReview();
+            renderList();
+            announce(text(mode.operation === 'create' ? "features.changes.index.102" : "features.changes.index.103"));
+        }
+        catch (error: any) { elements.composerError.textContent = error.message; }
+    }
+    async function updateDiscussion(discussionId: any, operation: any, extra: any = {}) {
+        try {
+            state.review = await reviewMutation(`/discussions/${discussionId}`, 'review-discussion-update', 'PATCH', { ...reviewGuard(), operation, ...extra });
+            renderReview();
+            renderList();
+        }
+        catch (error: any) { announce(error.message); }
+    }
+    function renderReview() {
+        if (!REVIEW || !state.review)
+            return;
+        const discussions: any = state.review.session?.discussions || [];
+        const open: any = discussions.filter((discussion: any) => discussion.state === 'open');
+        const unsent: any = open.flatMap((discussion: any) => discussion.messages.filter((message: any) => message.author === 'human' && !message.feedbackId));
+        elements.openDiscussionCount.textContent = String(open.length);
+        elements.unsentCount.textContent = String(unsent.length);
+        elements.sendFeedback.disabled = unsent.length === 0 || !state.repository?.feedbackWritable;
+        elements.reviewSummary.textContent = text("features.changes.index.104", [open.length, discussions.length - open.length]);
+        state.discussionScroll = elements.discussionList.scrollTop;
+        elements.discussionList.replaceChildren();
+        discussions.forEach((discussion: any) => {
+            const article: any = document.createElement('article');
+            article.className = `review-thread is-${discussion.state}${state.activeDiscussion === discussion.id ? ' is-active' : ''}`;
+            article.dataset.discussionId = discussion.id;
+            const placement: any = discussion.placement || {};
+            article.innerHTML = `<header><div><strong>${escapeHTML(commentTypeLabel(discussion.messages[0]?.type || 'comment'))}</strong><span>${escapeHTML(text(discussion.state === 'open' ? "features.changes.index.105" : "features.changes.index.106"))} · ${escapeHTML(placement.status || 'exact')}</span></div><button type="button" data-thread-state ${state.repository?.feedbackWritable ? '' : 'disabled'}>${text(discussion.state === 'open' ? "features.changes.index.107" : "features.changes.index.108")}</button></header><button type="button" class="review-anchor" data-open-anchor>${escapeHTML(placement.path || discussion.target.path || text("features.changes.index.109"))}${placement.start ? `:${placement.start.line}` : ''}${placement.reason ? ` · ${escapeHTML(placement.reason)}` : ''}</button><ol>${discussion.messages.map((message: any) => `<li class="review-message is-${message.author}"><div><strong>${message.author === 'agent' ? `${text("features.changes.index.110")} · ${escapeHTML(outcomeLabel(message.outcome || 'response'))}` : escapeHTML(commentTypeLabel(message.type || text("features.changes.index.111")))}</strong><time>${escapeHTML(new Date(message.createdAt).toLocaleString())}</time></div><p>${escapeHTML(message.body)}</p>${message.changedPaths?.length ? `<button type="button" data-view-fix="${escapeHTML(message.id)}">${text("features.changes.index.112")}</button>` : ''}${message.author === 'human' && !message.feedbackId && state.repository?.feedbackWritable ? `<div class="review-message-actions"><button type="button" data-edit-message="${escapeHTML(message.id)}">${text("features.changes.index.113")}</button><button type="button" data-delete-message="${escapeHTML(message.id)}">${text("features.changes.index.114")}</button></div>` : ''}</li>`).join('')}</ol><button type="button" class="review-reply" ${discussion.state !== 'open' || discussionInFlightClient(discussion.id) || !state.repository?.feedbackWritable ? 'disabled' : ''}>${text("features.changes.index.115")}</button>`;
+            article.querySelector('[data-thread-state]').addEventListener('click', () => updateDiscussion(discussion.id, discussion.state === 'open' ? 'resolve' : 'reopen'));
+            article.querySelector('.review-reply').addEventListener('click', (event: any) => openComposer(discussion.target, event.currentTarget, { operation: 'reply', discussionId: discussion.id }));
+            article.querySelector('[data-open-anchor]').addEventListener('click', () => openDiscussionAnchor(discussion));
+            article.querySelectorAll('[data-edit-message]').forEach((button: any) => {
+                const message: any = discussion.messages.find((item: any) => item.id === button.dataset.editMessage);
+                button.addEventListener('click', () => openComposer(discussion.target, button, { operation: 'edit', discussionId: discussion.id, messageId: message.id, message: message.body, type: message.type }));
+            });
+            article.querySelectorAll('[data-delete-message]').forEach((button: any) => button.addEventListener('click', () => updateDiscussion(discussion.id, 'delete', { messageId: button.dataset.deleteMessage })));
+            article.querySelectorAll('[data-view-fix]').forEach((button: any) => button.addEventListener('click', () => viewFix(discussion, discussion.messages.find((item: any) => item.id === button.dataset.viewFix))));
+            article.addEventListener('focusin', () => state.activeDiscussion = discussion.id);
+            elements.discussionList.append(article);
+        });
+        if (!discussions.length)
+            elements.discussionList.innerHTML = text("features.changes.index.116");
+        elements.discussionList.scrollTop = state.discussionScroll;
+    }
+    async function openDiscussionAnchor(discussion: any) {
+        state.activeDiscussion = discussion.id;
+        const path: any = discussion.placement?.path || discussion.target.path;
+        const file: any = [...state.files, ...state.linked].find((item: any) => item.path === path || item.oldPath === path);
+        if (file)
+            await selectChange(file, 'source');
+        highlightPlacement(discussion.placement);
+        if (discussion.placement?.status === 'stale' || discussion.placement?.status === 'deleted')
+            announce(`Anchor ${discussion.placement.status}: ${discussion.placement.reason || text("features.changes.index.117")}`);
+    }
+    function highlightPlacement(placement: any) {
+        if (!placement?.start || !placement?.end)
+            return false;
+        const side: any = placement.side || 'new';
+        if (state.merge?.highlight) {
+            state.merge.highlight(side, placement.start, placement.end);
+            return true;
+        }
+        const rows: any = [...elements.detail.querySelectorAll(`[data-review-side="${side}"][data-review-line]`)].filter((row: any) => {
+            const line: any = Number(row.dataset.reviewLine);
+            return line >= placement.start.line && line <= placement.end.line;
+        });
+        if (!rows.length)
+            return false;
+        rows.forEach((row: any) => row.classList.add('review-placement-highlight'));
+        rows[0].scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+        setTimeout(() => rows.forEach((row: any) => row.classList.remove('review-placement-highlight')), 1800);
+        return true;
+    }
+    async function viewFix(discussion: any, message: any) {
+        const actual: any = new Set(state.files.map((file: any) => file.path));
+        const preferred: any = discussion.placement?.path;
+        const path: any = message.changedPaths.includes(preferred) && actual.has(preferred) ? preferred : message.changedPaths.find((item: any) => actual.has(item));
+        if (!path) {
+            await openDiscussionAnchor(discussion);
+            announce(text("features.changes.index.118"));
+            return;
+        }
+        const file: any = state.files.find((item: any) => item.path === path);
+        await selectChange(file, 'source');
+        if (!highlightPlacement(discussion.placement)) {
+            elements.detail.classList.add('review-placement-highlight');
+            setTimeout(() => elements.detail.classList.remove('review-placement-highlight'), 1800);
+        }
+    }
+    async function loadReview() {
+        if (!REVIEW)
+            return;
+        const response: any = await fetch(`${REVIEW}/discussions`, { cache: 'no-store' });
+        const data: any = await response.json();
+        if (!response.ok)
+            throw new Error(data.diagnostics?.[0]?.message || `HTTP ${response.status}`);
+        state.review = data;
+        state.reviewEtag = response.headers.get('ETag') || '';
+        for (const discussion of data.session?.discussions || []) {
+            const path: any = discussion.target?.path;
+            if (path && !state.files.some((item: any) => item.path === path || item.oldPath === path) && !state.linked.some((item: any) => item.path === path))
+                state.linked.push(normalizedReviewFile({ status: 'linked', path, language: languageFor(path), gitState: {}, lines: { added: 0, deleted: 0 } }));
+        }
+        renderReview();
+        renderList();
+    }
+    async function loadFilePicker() {
+        const response: any = await fetch(`${REVIEW}/repository/files?q=${encodeURIComponent(elements.filePickerQuery.value)}&limit=50`, { cache: 'no-store' });
+        const data: any = await response.json();
+        if (!response.ok)
+            throw new Error(data.diagnostics?.[0]?.message || `HTTP ${response.status}`);
+        elements.filePickerResults.innerHTML = data.files.map((file: any) => `<button type="button" data-link-path="${escapeHTML(file.path)}"><strong>${escapeHTML(file.path.split('/').pop())}</strong><span>${escapeHTML(file.path)}</span></button>`).join('') || text("features.changes.index.119");
+        elements.filePickerResults.querySelectorAll('[data-link-path]').forEach((button: any) => button.addEventListener('click', async () => {
+            const path: any = button.dataset.linkPath;
+            if (!state.files.some((item: any) => item.path === path) && !state.linked.some((item: any) => item.path === path))
+                state.linked.push(normalizedReviewFile({ status: 'linked', path, language: languageFor(path), gitState: {}, lines: { added: 0, deleted: 0 } }));
+            elements.filePicker.close();
+            renderList();
+            await selectChange(state.linked.find((item: any) => item.path === path));
+        }));
+    }
+    function announce(message: any, copyPrompt: any = false) {
+        elements.toastMessage.textContent = message;
+        const copy: any = $('[data-copy-agent-prompt]', elements.toast);
+        copy.hidden = !copyPrompt;
+        elements.toast.classList.add('is-visible');
+        setTimeout(() => elements.toast.classList.remove('is-visible'), copyPrompt ? 8000 : 2200);
+    }
+    async function load(preserve: any = true) {
+        const [response, repositoryResponse]: any = await Promise.all([fetch(apiURL(), { cache: 'no-store' }), REVIEW ? fetch(reviewURL('/repository/changes'), { cache: 'no-store' }) : Promise.resolve(null)]);
+        const data: any = await response.json();
+        if (!response.ok)
+            throw new Error(data.diagnostics?.[0]?.message || `HTTP ${response.status}`);
+        const repository: any = repositoryResponse ? await repositoryResponse.json() : null;
+        if (repositoryResponse && !repositoryResponse.ok)
+            throw new Error(repository.diagnostics?.[0]?.message || `HTTP ${repositoryResponse.status}`);
         const oldPath: any = preserve ? state.selected?.path : null;
+        const oldScroll: any = preserve ? elements.detail.scrollTop : 0;
         state.report = data;
+        state.repository = repository || data;
+        state.files = repository ? repository.files.map(normalizedReviewFile) : data.changes;
         state.etag = response.headers.get('ETag') || '';
+        state.repositoryEtag = repositoryResponse?.headers.get('ETag') || '';
+        $('[data-global-comment]')?.toggleAttribute('disabled', !state.repository.feedbackWritable);
+        $('[data-linked-file-open]')?.toggleAttribute('disabled', !state.repository.feedbackWritable);
         renderSummary();
         renderList();
         const requested: any = new URLSearchParams(location.search).get('path') || oldPath;
-        const selected: any = data.changes.find((change: any) => change.path === requested || change.oldPath === requested);
+        const selected: any = [...state.files, ...state.linked].find((change: any) => change.path === requested || change.oldPath === requested);
         if (selected)
             await selectChange(selected, new URLSearchParams(location.search).get('tab') || state.tab);
+        elements.detail.scrollTop = oldScroll;
     }
     async function init() {
         addToolbarControl(text("features.changes.index.052"), 'entityType', [['', text("features.changes.index.053")], ['use-case', 'UC'], ['flow', 'FLOW'], ['screen', 'SC'], ['transition', 'TR'], ['module', 'MOD'], ['contract', 'Contract'], ['decision', 'ADR'], ['work', 'TASK']]);
@@ -494,7 +736,7 @@ registerMessages(changesMessages);
         elements.sort.value = params.get('sort') || 'path';
         elements.group.value = params.get('group') || 'classification';
         try {
-            await load(false);
+            await Promise.all([load(false), loadReview()]);
         }
         catch (error: any) {
             elements.detail.innerHTML = text("features.changes.index.071", [escapeHTML(error.message)]);
@@ -513,20 +755,74 @@ registerMessages(changesMessages);
             state.selected = null;
             updateURL();
             try {
-                await load(false);
+                await Promise.all([load(false), loadReview()]);
             }
             catch (error: any) {
                 announce(error.message);
             }
         });
+        elements.composerForm.addEventListener('submit', (event: any) => { event.preventDefault(); submitComposer(); });
+        elements.composerMessage.addEventListener('keydown', (event: any) => {
+            if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) { event.preventDefault(); submitComposer(); }
+        });
+        elements.composer.addEventListener('close', () => state.composerReturn?.focus?.());
+        $('[data-global-comment]')?.addEventListener('click', (event: any) => openComposer({ type: 'global' }, event.currentTarget));
+        const closeDiscussions: any = () => { elements.discussions.classList.remove('is-open'); elements.discussions.hidden = true; elements.discussions.setAttribute('role', 'complementary'); elements.discussions.removeAttribute('aria-modal'); $('[data-discussions-toggle]')?.setAttribute('aria-expanded', 'false'); $('[data-discussions-toggle]')?.focus(); };
+        $('[data-discussions-toggle]')?.addEventListener('click', () => { elements.discussions.hidden = false; elements.discussions.classList.add('is-open'); elements.discussions.setAttribute('role', matchMedia('(max-width: 1050px)').matches ? 'dialog' : 'complementary'); if (matchMedia('(max-width: 1050px)').matches) elements.discussions.setAttribute('aria-modal', 'true'); $('[data-discussions-toggle]')?.setAttribute('aria-expanded', 'true'); elements.discussions.querySelector('button')?.focus(); });
+        $('[data-discussions-close]')?.addEventListener('click', closeDiscussions);
+        const closeFiles: any = () => { elements.filesPanel.classList.remove('is-open'); elements.filesPanel.setAttribute('role', 'navigation'); elements.filesPanel.removeAttribute('aria-modal'); $('[data-mobile-files]')?.setAttribute('aria-expanded', 'false'); $('[data-mobile-files]')?.focus(); };
+        $('[data-mobile-files]')?.addEventListener('click', () => { elements.filesPanel.classList.add('is-open'); elements.filesPanel.setAttribute('role', 'dialog'); elements.filesPanel.setAttribute('aria-modal', 'true'); $('[data-mobile-files]')?.setAttribute('aria-expanded', 'true'); elements.filesPanel.querySelector('button')?.focus(); });
+        $('[data-files-close]')?.addEventListener('click', closeFiles);
+        document.addEventListener('keydown', (event: any) => { if (event.key !== 'Escape') return; if (elements.discussions.classList.contains('is-open')) closeDiscussions(); else if (elements.filesPanel.classList.contains('is-open')) closeFiles(); });
+        $('[data-linked-file-open]')?.addEventListener('click', async () => { elements.filePicker.showModal(); elements.filePickerQuery.focus(); await loadFilePicker(); });
+        elements.filePickerQuery.addEventListener('input', () => loadFilePicker().catch((error: any) => announce(error.message)));
+        elements.sendFeedback.addEventListener('click', async () => {
+            try {
+                const unsent: any = Number(elements.unsentCount.textContent || 0);
+                const result: any = await reviewMutation('/feedback', 'review-feedback-create', 'POST', reviewGuard());
+                state.review.revision = result.revision;
+                state.review.stateDigest = result.stateDigest;
+                state.review.feedback.push(result.feedback);
+                renderReview();
+                announce(text("features.changes.index.120", [unsent, text("features.changes.index.121")]), true);
+            }
+            catch (error: any) { announce(error.message); }
+        });
+        $('[data-copy-agent-prompt]')?.addEventListener('click', async () => { await navigator.clipboard.writeText(text("features.changes.index.121")); announce(text("features.changes.index.122")); });
+        $('[data-refresh-open-file]')?.addEventListener('click', async () => { elements.openFileStale.hidden = true; await load(true); });
         setInterval(async () => {
             try {
-                const response: any = await fetch(apiURL(), { method: 'HEAD', cache: 'no-store' });
-                const next: any = response.headers.get('ETag') || '';
-                if (state.etag && next && next !== state.etag) {
-                    elements.stale.hidden = false;
-                    await load(true);
-                    elements.stale.hidden = true;
+                if (REVIEW) {
+                    const response: any = await fetch(reviewURL('/repository/changes'), { headers: state.repositoryEtag ? { 'If-None-Match': state.repositoryEtag } : {}, cache: 'no-store' });
+                    if (response.status !== 304) {
+                        const next: any = response.headers.get('ETag') || '';
+                        if (state.repositoryEtag && next && next !== state.repositoryEtag) {
+                            if (elements.composer.open && state.composerMode?.operation === 'create') {
+                                state.composerTarget = null;
+                                elements.composerError.textContent = text("features.changes.index.123");
+                            }
+                            if (state.selected)
+                                elements.openFileStale.hidden = false;
+                            else
+                                await load(true);
+                        }
+                    }
+                    const reviewResponse: any = await fetch(`${REVIEW}/discussions`, { headers: state.reviewEtag ? { 'If-None-Match': state.reviewEtag } : {}, cache: 'no-store' });
+                    if (reviewResponse.status !== 304 && reviewResponse.ok) {
+                        state.review = await reviewResponse.json();
+                        state.reviewEtag = reviewResponse.headers.get('ETag') || '';
+                        renderReview();
+                        renderList();
+                    }
+                }
+                else {
+                    const response: any = await fetch(apiURL(), { method: 'HEAD', cache: 'no-store' });
+                    const next: any = response.headers.get('ETag') || '';
+                    if (state.etag && next && next !== state.etag) {
+                        elements.stale.hidden = false;
+                        await load(true);
+                        elements.stale.hidden = true;
+                    }
                 }
             }
             catch { /* current report remains readable */ }

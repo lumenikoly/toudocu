@@ -1,6 +1,6 @@
 //go:build !windows
 
-package docudocu
+package toudocu
 
 import (
 	"crypto/sha256"
@@ -35,23 +35,23 @@ func TestInstallerPlatformContract(t *testing.T) {
 	cases := []struct {
 		name, osName, archName, asset string
 	}{
-		{"linux-amd64", "Linux", "x86_64", "docu-docu-linux-amd64"},
-		{"linux-arm64", "Linux", "aarch64", "docu-docu-linux-arm64"},
-		{"darwin-amd64", "Darwin", "x86_64", "docu-docu-darwin-amd64"},
-		{"darwin-arm64", "Darwin", "arm64", "docu-docu-darwin-arm64"},
+		{"linux-amd64", "Linux", "x86_64", "toudocu-linux-amd64"},
+		{"linux-arm64", "Linux", "aarch64", "toudocu-linux-arm64"},
+		{"darwin-amd64", "Darwin", "x86_64", "toudocu-darwin-amd64"},
+		{"darwin-arm64", "Darwin", "arm64", "toudocu-darwin-arm64"},
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
 			fixture := newPlatformInstallerFixture(t, "0.0.1", test.asset)
 			installDir := filepath.Join(t.TempDir(), "bin")
 			output, err := runPOSIXInstaller(t, fixture.server.URL, test.osName, test.archName, map[string]string{
-				"DOCU_DOCU_INSTALL_DIR":    installDir,
-				"DOCU_DOCU_NO_MODIFY_PATH": "1",
+				"TOUDOCU_INSTALL_DIR":    installDir,
+				"TOUDOCU_NO_MODIFY_PATH": "1",
 			})
 			if err != nil {
 				t.Fatalf("installer failed: %v\n%s", err, output)
 			}
-			if _, err := os.Stat(filepath.Join(installDir, "docu-docu")); err != nil {
+			if _, err := os.Stat(filepath.Join(installDir, "toudocu")); err != nil {
 				t.Fatalf("installed binary: %v", err)
 			}
 			if !containsExactString(fixture.paths(), "/releases/latest/download/"+test.asset) {
@@ -61,9 +61,9 @@ func TestInstallerPlatformContract(t *testing.T) {
 	}
 
 	for _, test := range []struct{ osName, archName string }{{"Plan9", "x86_64"}, {"Linux", "386"}} {
-		fixture := newPlatformInstallerFixture(t, "0.0.1", "docu-docu-linux-amd64")
+		fixture := newPlatformInstallerFixture(t, "0.0.1", "toudocu-linux-amd64")
 		output, err := runPOSIXInstaller(t, fixture.server.URL, test.osName, test.archName, map[string]string{
-			"DOCU_DOCU_INSTALL_DIR": filepath.Join(t.TempDir(), "bin"),
+			"TOUDOCU_INSTALL_DIR": filepath.Join(t.TempDir(), "bin"),
 		})
 		if err == nil || !strings.Contains(output, "unsupported") {
 			t.Fatalf("unsupported %s/%s: err=%v output=%q", test.osName, test.archName, err, output)
@@ -75,7 +75,7 @@ func TestInstallerPlatformContract(t *testing.T) {
 }
 
 func TestInstallerSelectionAndPathContract(t *testing.T) {
-	fixture := newPlatformInstallerFixture(t, "0.0.1", "docu-docu-linux-amd64")
+	fixture := newPlatformInstallerFixture(t, "0.0.1", "toudocu-linux-amd64")
 	home := t.TempDir()
 	output, err := runPOSIXInstaller(t, fixture.server.URL, "Linux", "x86_64", map[string]string{
 		"HOME":  home,
@@ -85,22 +85,22 @@ func TestInstallerSelectionAndPathContract(t *testing.T) {
 		t.Fatalf("latest install failed: %v\n%s", err, output)
 	}
 	profile, err := os.ReadFile(filepath.Join(home, ".bashrc"))
-	if err != nil || strings.Count(string(profile), "# docu-docu installer") != 1 {
+	if err != nil || strings.Count(string(profile), "# toudocu installer") != 1 {
 		t.Fatalf("managed bash PATH entry: err=%v profile=%q", err, profile)
 	}
 	if !containsExactString(fixture.paths(), "/releases/latest/download/checksums.txt") {
 		t.Fatalf("latest URL not used: %v", fixture.paths())
 	}
 
-	pinned := newPlatformInstallerFixture(t, "0.0.1", "docu-docu-linux-amd64")
+	pinned := newPlatformInstallerFixture(t, "0.0.1", "toudocu-linux-amd64")
 	customHome := t.TempDir()
 	customInstall := filepath.Join(customHome, "custom-bin")
 	output, err = runPOSIXInstaller(t, pinned.server.URL, "Linux", "x86_64", map[string]string{
-		"HOME":                     customHome,
-		"SHELL":                    "/bin/bash",
-		"DOCU_DOCU_VERSION":        "0.0.1",
-		"DOCU_DOCU_INSTALL_DIR":    customInstall,
-		"DOCU_DOCU_NO_MODIFY_PATH": "0",
+		"HOME":                   customHome,
+		"SHELL":                  "/bin/bash",
+		"TOUDOCU_VERSION":        "0.0.1",
+		"TOUDOCU_INSTALL_DIR":    customInstall,
+		"TOUDOCU_NO_MODIFY_PATH": "0",
 	})
 	if err != nil {
 		t.Fatalf("pinned install failed: %v\n%s", err, output)
@@ -109,10 +109,10 @@ func TestInstallerSelectionAndPathContract(t *testing.T) {
 		t.Fatalf("pinned URL not used: %v", pinned.paths())
 	}
 
-	rc := newVersionedPlatformInstallerFixture(t, map[string]string{"0.0.1-rc.2": "0.0.1"}, "docu-docu-linux-amd64")
+	rc := newVersionedPlatformInstallerFixture(t, map[string]string{"0.0.1-rc.2": "0.0.1"}, "toudocu-linux-amd64")
 	rcOutput, err := runPOSIXInstaller(t, rc.server.URL, "Linux", "x86_64", map[string]string{
-		"DOCU_DOCU_VERSION":     "0.0.1-rc.2",
-		"DOCU_DOCU_INSTALL_DIR": filepath.Join(t.TempDir(), "bin"),
+		"TOUDOCU_VERSION":     "0.0.1-rc.2",
+		"TOUDOCU_INSTALL_DIR": filepath.Join(t.TempDir(), "bin"),
 	})
 	if err != nil {
 		t.Fatalf("rc install failed: %v\n%s", err, rcOutput)
@@ -127,10 +127,10 @@ func TestInstallerSelectionAndPathContract(t *testing.T) {
 		t.Fatalf("custom PATH guidance missing: %q", output)
 	}
 
-	invalid := newPlatformInstallerFixture(t, "0.0.1", "docu-docu-linux-amd64")
+	invalid := newPlatformInstallerFixture(t, "0.0.1", "toudocu-linux-amd64")
 	output, err = runPOSIXInstaller(t, invalid.server.URL, "Linux", "x86_64", map[string]string{
-		"DOCU_DOCU_VERSION":     "v0.0.1",
-		"DOCU_DOCU_INSTALL_DIR": filepath.Join(t.TempDir(), "bin"),
+		"TOUDOCU_VERSION":     "v0.0.1",
+		"TOUDOCU_INSTALL_DIR": filepath.Join(t.TempDir(), "bin"),
 	})
 	if err == nil || !strings.Contains(output, "X.Y.Z-rc.N") || len(invalid.paths()) != 0 {
 		t.Fatalf("invalid version: err=%v output=%q requests=%v", err, output, invalid.paths())
@@ -142,36 +142,36 @@ func TestInstallerIntegrityAndReplacement(t *testing.T) {
 	if err := os.MkdirAll(installDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	target := filepath.Join(installDir, "docu-docu")
+	target := filepath.Join(installDir, "toudocu")
 	if err := os.WriteFile(target, []byte("previous"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 
-	bad := newPlatformInstallerFixture(t, "0.0.1", "docu-docu-linux-amd64")
+	bad := newPlatformInstallerFixture(t, "0.0.1", "toudocu-linux-amd64")
 	bad.badChecksum = true
 	output, err := runPOSIXInstaller(t, bad.server.URL, "Linux", "x86_64", map[string]string{
-		"DOCU_DOCU_INSTALL_DIR": installDir,
-		"DOCU_DOCU_VERSION":     "0.0.1",
+		"TOUDOCU_INSTALL_DIR": installDir,
+		"TOUDOCU_VERSION":     "0.0.1",
 	})
 	if err == nil || !strings.Contains(output, "SHA-256 mismatch") {
 		t.Fatalf("checksum mismatch: err=%v output=%q", err, output)
 	}
 	assertFileContent(t, target, "previous")
 
-	mismatch := newPlatformInstallerFixture(t, "0.0.2", "docu-docu-linux-amd64")
+	mismatch := newPlatformInstallerFixture(t, "0.0.2", "toudocu-linux-amd64")
 	output, err = runPOSIXInstaller(t, mismatch.server.URL, "Linux", "x86_64", map[string]string{
-		"DOCU_DOCU_INSTALL_DIR": installDir,
-		"DOCU_DOCU_VERSION":     "0.0.1",
+		"TOUDOCU_INSTALL_DIR": installDir,
+		"TOUDOCU_VERSION":     "0.0.1",
 	})
 	if err == nil || !strings.Contains(output, "reported 0.0.2, expected 0.0.1") {
 		t.Fatalf("version mismatch: err=%v output=%q", err, output)
 	}
 	assertFileContent(t, target, "previous")
 
-	valid := newPlatformInstallerFixture(t, "0.0.1", "docu-docu-linux-amd64")
+	valid := newPlatformInstallerFixture(t, "0.0.1", "toudocu-linux-amd64")
 	output, err = runPOSIXInstaller(t, valid.server.URL, "Linux", "x86_64", map[string]string{
-		"DOCU_DOCU_INSTALL_DIR": installDir,
-		"DOCU_DOCU_VERSION":     "0.0.1",
+		"TOUDOCU_INSTALL_DIR": installDir,
+		"TOUDOCU_VERSION":     "0.0.1",
 	})
 	if err != nil {
 		t.Fatalf("valid replacement: %v\n%s", err, output)
@@ -181,13 +181,13 @@ func TestInstallerIntegrityAndReplacement(t *testing.T) {
 
 func TestInstallerRepeatUpgradeDowngradeAndPath(t *testing.T) {
 	home := t.TempDir()
-	fixture := newVersionedPlatformInstallerFixture(t, map[string]string{"1.0.0": "1.0.0", "2.0.0": "2.0.0"}, "docu-docu-linux-amd64")
+	fixture := newVersionedPlatformInstallerFixture(t, map[string]string{"1.0.0": "1.0.0", "2.0.0": "2.0.0"}, "toudocu-linux-amd64")
 	run := func(version string) string {
 		t.Helper()
 		output, err := runPOSIXInstaller(t, fixture.server.URL, "Linux", "x86_64", map[string]string{
-			"HOME":              home,
-			"SHELL":             "/bin/bash",
-			"DOCU_DOCU_VERSION": version,
+			"HOME":            home,
+			"SHELL":           "/bin/bash",
+			"TOUDOCU_VERSION": version,
 		})
 		if err != nil {
 			t.Fatalf("install %s: %v\n%s", version, err, output)
@@ -196,7 +196,7 @@ func TestInstallerRepeatUpgradeDowngradeAndPath(t *testing.T) {
 	}
 
 	run("1.0.0")
-	target := filepath.Join(home, ".local", "bin", "docu-docu")
+	target := filepath.Join(home, ".local", "bin", "toudocu")
 	before, err := os.Stat(target)
 	if err != nil {
 		t.Fatal(err)
@@ -214,7 +214,7 @@ func TestInstallerRepeatUpgradeDowngradeAndPath(t *testing.T) {
 	assertFileContent(t, target, string(installerFixtureBinary("1.0.0")))
 
 	profile, err := os.ReadFile(filepath.Join(home, ".bashrc"))
-	if err != nil || strings.Count(string(profile), "# docu-docu installer") != 1 {
+	if err != nil || strings.Count(string(profile), "# toudocu installer") != 1 {
 		t.Fatalf("PATH entry is not idempotent: err=%v profile=%q", err, profile)
 	}
 }

@@ -1,6 +1,6 @@
-package docudocu
+package toudocu
 
-import frontend "docu-docu/internal/site"
+import frontend "toudocu/internal/site"
 
 // EmbeddedFiles contains reproducible browser build output.
 var EmbeddedFiles = frontend.Files

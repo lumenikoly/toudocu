@@ -2,8 +2,8 @@
 
 - Идентификатор: MOD-CHANGES
 - Статус: Готово
-- Владелец: Команда Docu-docu
-- Последнее обновление: 2026-08-05
+- Владелец: Команда Toudocu
+- Последнее обновление: 2026-08-09
 
 Модуль превращает явно выбранные Git-состояния исходной документации в
 детерминированный отчёт для CLI, CI и локального портала.
@@ -36,7 +36,7 @@ comparison и isolation behavior.
 ### BR-CHANGES-001: Git является единственным источником версий
 
 Старая сторона читается из object database или index, новая — из явно
-выбранного revision, index или working tree. Docu-docu не сохраняет собственную
+выбранного revision, index или working tree. Toudocu не сохраняет собственную
 историю документации.
 
 ### BR-CHANGES-002: Исходный diff имеет приоритет
@@ -65,8 +65,9 @@ state. Неоднозначная базовая ветка требует вы�
 ## Стабильные интерфейсы
 
 - `ChangeSetReport` schema v1;
-- CLI `changes` и `task changes`;
-- read-only `/_docu-docu/api/changes/`;
+- CLI `changes` и `task changes`, включая `--include-assets` и полный
+  reader-facing режим `--translation-input`;
+- read-only `/_toudocu/api/changes/`;
 - diagnostic codes и comparison enums.
 
 ## Связанные сценарии

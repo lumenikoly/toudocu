@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"bytes"
@@ -132,22 +132,29 @@ func (g *gitChangeSource) statusStates() (map[string]ChangeGitState, error) {
 		if record == "" {
 			continue
 		}
-		fields := strings.Fields(record)
-		if len(fields) < 2 {
-			continue
-		}
-		switch fields[0] {
+		recordType := record[:1]
+		switch recordType {
 		case "?":
 			path := strings.TrimPrefix(record, "? ")
 			states[filepath.ToSlash(path)] = ChangeGitState{Untracked: true, Unstaged: true}
-		case "1", "2":
+		case "1":
+			fields := strings.SplitN(record, " ", 9)
+			if len(fields) != 9 {
+				continue
+			}
 			xy := fields[1]
-			path := fields[len(fields)-1]
+			path := fields[8]
 			state := ChangeGitState{Staged: len(xy) > 0 && xy[0] != '.', Unstaged: len(xy) > 1 && xy[1] != '.'}
 			states[filepath.ToSlash(path)] = state
-			if fields[0] == "2" {
-				i++
+		case "2":
+			fields := strings.SplitN(record, " ", 10)
+			if len(fields) == 10 {
+				xy := fields[1]
+				path := fields[9]
+				state := ChangeGitState{Staged: len(xy) > 0 && xy[0] != '.', Unstaged: len(xy) > 1 && xy[1] != '.'}
+				states[filepath.ToSlash(path)] = state
 			}
+			i++ // The following NUL token is the original path.
 		}
 	}
 	return states, nil
@@ -359,7 +366,15 @@ func (g *gitChangeSource) content(side ChangeSide, path string) ([]byte, error) 
 	}
 }
 
-func (g *gitChangeSource) taskDocumentContent(side ChangeSide, taskID string) ([]byte, error) {
+func taskIDFromContent(content []byte) string {
+	match := workItemHeadingRE.FindStringSubmatch(analyzeMarkdown(string(content)).Title)
+	if match == nil {
+		return ""
+	}
+	return match[1]
+}
+
+func (g *gitChangeSource) taskDocumentContent(side ChangeSide, taskID string) (string, []byte, error) {
 	workPath := filepath.ToSlash(filepath.Join(g.docsRel, "work"))
 	var paths []string
 	switch side.Type {
@@ -372,7 +387,7 @@ func (g *gitChangeSource) taskDocumentContent(side ChangeSide, taskID string) ([
 				}
 				return err
 			}
-			if entry.IsDir() || !strings.HasSuffix(strings.ToLower(entry.Name()), ".md") || !strings.Contains(entry.Name(), taskID) {
+			if entry.IsDir() || !strings.HasSuffix(strings.ToLower(entry.Name()), ".md") {
 				return nil
 			}
 			rel, relErr := filepath.Rel(g.root, path)
@@ -382,44 +397,50 @@ func (g *gitChangeSource) taskDocumentContent(side ChangeSide, taskID string) ([
 			paths = append(paths, filepath.ToSlash(rel))
 			return nil
 		}); err != nil {
-			return nil, err
+			return "", nil, err
 		}
 	case "index":
 		out, err := g.run("ls-files", "-z", "--", workPath)
 		if err != nil {
-			return nil, err
+			return "", nil, err
 		}
 		for _, raw := range bytes.Split(out, []byte{0}) {
 			path := filepath.ToSlash(string(raw))
-			if strings.HasSuffix(strings.ToLower(path), ".md") && strings.Contains(filepath.Base(path), taskID) {
+			if strings.HasSuffix(strings.ToLower(path), ".md") {
 				paths = append(paths, path)
 			}
 		}
 	case "commit":
 		out, err := g.run("ls-tree", "-r", "-z", "--name-only", side.Resolved, "--", workPath)
 		if err != nil {
-			return nil, err
+			return "", nil, err
 		}
 		for _, raw := range bytes.Split(out, []byte{0}) {
 			path := filepath.ToSlash(string(raw))
-			if strings.HasSuffix(strings.ToLower(path), ".md") && strings.Contains(filepath.Base(path), taskID) {
+			if strings.HasSuffix(strings.ToLower(path), ".md") {
 				paths = append(paths, path)
 			}
 		}
 	default:
-		return nil, fmt.Errorf("неподдерживаемая сторона %q", side.Type)
+		return "", nil, fmt.Errorf("неподдерживаемая сторона %q", side.Type)
 	}
 	sort.Strings(paths)
+	foundPath := ""
+	var foundContent []byte
 	for _, path := range paths {
 		content, err := g.content(side, path)
-		if err == nil {
-			return content, nil
+		if err == nil && taskIDFromContent(content) == taskID {
+			if foundPath != "" {
+				return "", nil, fmt.Errorf("идентификатор задачи %s неоднозначен", taskID)
+			}
+			foundPath, foundContent = path, content
+			continue
 		}
-		if !os.IsNotExist(err) {
-			return nil, err
+		if err != nil && !os.IsNotExist(err) {
+			return "", nil, err
 		}
 	}
-	return nil, nil
+	return foundPath, foundContent, nil
 }
 
 func isBinaryContent(content []byte) bool {

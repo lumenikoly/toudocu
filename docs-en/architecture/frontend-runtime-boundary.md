@@ -62,7 +62,7 @@ dismissal is stored for the specific version. The frontend does not infer the
 mode from the URL or incidental DOM markers.
 
 Opening HTML directly via `file://` is not an architectural or product
-contract. The existing `docu-docu serve` command provides a local browser
+contract. The existing `toudocu serve` command provides a local browser
 runtime; no new preview command is needed.
 
 ## Invariants

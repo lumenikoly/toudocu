@@ -1,4 +1,4 @@
-# Installing and updating Docu-docu
+# Installing and updating Toudocu
 
 This guide explains how to install the appropriate binary from a GitHub Release
 without administrator privileges. The same command checks the installation
@@ -9,13 +9,13 @@ again and updates it.
 Linux and macOS:
 
 ```sh
-curl -fsSL https://github.com/lumenikoly/docu-docu/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/lumenikoly/toudocu/releases/latest/download/install.sh | sh
 ```
 
 Windows PowerShell:
 
 ```powershell
-irm https://github.com/lumenikoly/docu-docu/releases/latest/download/install.ps1 | iex
+irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 | iex
 ```
 
 Running the installer again does not replace the binary when its SHA-256
@@ -26,12 +26,12 @@ installer replaces the old file only after all checks succeed.
 
 | System | Architecture | Release asset |
 |---|---|---|
-| Linux | AMD64 / x86-64 | `docu-docu-linux-amd64` |
-| Linux | ARM64 / AArch64 | `docu-docu-linux-arm64` |
-| macOS | Intel | `docu-docu-darwin-amd64` |
-| macOS | Apple silicon | `docu-docu-darwin-arm64` |
-| Windows | AMD64 / x86-64 | `docu-docu-windows-amd64.exe` |
-| Windows | ARM64 | `docu-docu-windows-arm64.exe` |
+| Linux | AMD64 / x86-64 | `toudocu-linux-amd64` |
+| Linux | ARM64 / AArch64 | `toudocu-linux-arm64` |
+| macOS | Intel | `toudocu-darwin-amd64` |
+| macOS | Apple silicon | `toudocu-darwin-arm64` |
+| Windows | AMD64 / x86-64 | `toudocu-windows-amd64.exe` |
+| Windows | ARM64 | `toudocu-windows-arm64.exe` |
 
 On Windows ARM64, the installer selects the native ARM64 binary, including
 when running from an emulated x64 process. Other unlisted combinations fail
@@ -42,16 +42,16 @@ before downloading.
 For a POSIX shell, pass the environment variable after the pipe:
 
 ```sh
-curl -fsSL https://github.com/lumenikoly/docu-docu/releases/latest/download/install.sh \
-  | DOCU_DOCU_VERSION=0.0.1 sh
+curl -fsSL https://github.com/lumenikoly/toudocu/releases/latest/download/install.sh \
+  | TOUDOCU_VERSION=0.0.1 sh
 ```
 
 PowerShell uses the same variable:
 
 ```powershell
-$env:DOCU_DOCU_VERSION = "0.0.1"
-irm https://github.com/lumenikoly/docu-docu/releases/latest/download/install.ps1 | iex
-Remove-Item Env:DOCU_DOCU_VERSION
+$env:TOUDOCU_VERSION = "0.0.1"
+irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 | iex
+Remove-Item Env:TOUDOCU_VERSION
 ```
 
 The accepted formats are `X.Y.Z` and `X.Y.Z-rc.N`, without a `v` prefix. An
@@ -60,8 +60,8 @@ a release candidate. RC builds are not selected through `latest`, so their tag
 is specified explicitly:
 
 ```sh
-curl -fsSL https://github.com/lumenikoly/docu-docu/releases/download/0.0.1-rc.1/install.sh \
-  | DOCU_DOCU_VERSION=0.0.1-rc.1 sh
+curl -fsSL https://github.com/lumenikoly/toudocu/releases/download/0.0.1-rc.1/install.sh \
+  | TOUDOCU_VERSION=0.0.1-rc.1 sh
 ```
 
 In GitHub Actions, an RC is published through the `release` workflow: select
@@ -73,8 +73,8 @@ continues to create an ordinary `X.Y.Z` release.
 
 By default, the binary is installed at:
 
-- `~/.local/bin/docu-docu` on Linux and macOS;
-- `%LOCALAPPDATA%\Programs\docu-docu\docu-docu.exe` on Windows.
+- `~/.local/bin/toudocu` on Linux and macOS;
+- `%LOCALAPPDATA%\Programs\toudocu\toudocu.exe` on Windows.
 
 If that directory is not in `PATH`, the installer adds one managed entry to
 `.bashrc`, `.zshrc`, fish `conf.d`, `.profile`, or the Windows user `PATH`. It
@@ -85,11 +85,11 @@ terminal.
 Using another directory does not change the shell profile:
 
 ```sh
-curl -fsSL https://github.com/lumenikoly/docu-docu/releases/latest/download/install.sh \
-  | DOCU_DOCU_INSTALL_DIR="$HOME/bin" sh
+curl -fsSL https://github.com/lumenikoly/toudocu/releases/latest/download/install.sh \
+  | TOUDOCU_INSTALL_DIR="$HOME/bin" sh
 ```
 
-`DOCU_DOCU_NO_MODIFY_PATH=1` disables changes to the profile or Windows user
+`TOUDOCU_NO_MODIFY_PATH=1` disables changes to the profile or Windows user
 `PATH`. In either case, the installer prints the directory that must be added
 to `PATH` manually.
 
@@ -97,7 +97,7 @@ to `PATH` manually.
 
 The HTTPS bootstrap downloads the binary and `checksums.txt` from the same
 GitHub Release. It requires exactly one SHA-256 entry for the selected artifact,
-compares the digest, and runs `docu-docu version` before replacement. A download,
+compares the digest, and runs `toudocu version` before replacement. A download,
 checksum, version, or staging error before replacement does not change the old
 binary. A later error writing `PATH` does not roll back an already verified
 binary: the installer prints a warning and a manual `PATH` hint.
@@ -108,5 +108,5 @@ The `curl | sh` and `irm | iex` commands also execute a remote installer. You
 can download and inspect it separately before running it.
 
 Network access and system download/hash tools are needed only by the installer.
-After installation, Docu-docu remains one self-contained Go binary with no
+After installation, Toudocu remains one self-contained Go binary with no
 runtime dependencies or external outbound downloads during normal operation.

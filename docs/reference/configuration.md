@@ -1,7 +1,7 @@
 # Справочник конфигурации
 
 CLI работает без конфигурационного файла. Необязательный
-`<repository-root>/.docu-docu/config.yml` целиком разбирается и валидируется при
+`<repository-root>/.toudocu/config.yml` целиком разбирается и валидируется при
 загрузке, включая configured branding assets. После общей валидации `build`,
 `check` и `serve` используют project/site configuration; `changes` и `task
 changes` — секцию `changes`; `task init` и `scaffold` — `project.locale`.
@@ -56,7 +56,7 @@ site:
 `wide` (1120 px).
 
 `--title` имеет приоритет над `site.title`, затем используются заголовок
-`index.md` и имя каталога. В footer по умолчанию название Docu-docu ведёт на
+`index.md` и имя каталога. В footer по умолчанию название Toudocu ведёт на
 лендинг. Поля `footer.text` и `footer.url` заменяют его экранированным текстом и
 необязательным HTTPS URL.
 
@@ -64,7 +64,7 @@ site:
 цветовой схемы (`system`, `light`, `dark`). Выбор сохраняется локально в
 браузере; значения конфигурации остаются начальными для нового посетителя.
 
-Logo, favicon и hero должны быть обычными файлами внутри `.docu-docu/assets/`;
+Logo, favicon и hero должны быть обычными файлами внутри `.toudocu/assets/`;
 абсолютные пути, traversal, symlinks и отсутствующие файлы отклоняются. SVG
 подключается как файл и не встраивается в HTML.
 
@@ -83,7 +83,7 @@ Logo, favicon и hero должны быть обычными файлами вн
 Путь должен указывать на фактический корень репозитория. Для текущего проекта:
 
 ```bash
-go run ./cmd/docu-docu check ./docs --repository-root . --strict
+go run ./cmd/toudocu check ./docs --repository-root . --strict
 ```
 
 ## Repository URL и ref
@@ -142,6 +142,12 @@ changes:
 Секция необязательна; стандартный режим остаётся `HEAD → working-tree`.
 `defaultBaseRef` используется только без явного base и не загружается с
 remote. Лимит отключает тяжёлое представление одного файла, не весь change set.
+CLI-флаг `--include-assets` для `changes`, `changes file` и `task changes`
+принудительно включает binary assets только в выбранный отчёт и не изменяет
+конфигурацию; `changes.exclude` продолжает действовать. `--translation-input`
+дополнительно переопределяет `includeTaskArtifacts` и произвольные exclude для
+полного reader-facing набора, сохраняя только исключения `generated/**` и
+`cache/**` внутри documentation root.
 
 ## Local server и editor workspace
 
@@ -158,13 +164,13 @@ HTTP-сервером, editor markup, API URL, CodeMirror и server-only scripts
 отсутствуют.
 
 Canonical `serve` без отдельной настройки публикует найденные OpenAPI contracts
-через `/_docu-docu/api-docs/`. Static build копирует specs, но не Swagger UI;
+через `/_toudocu/api-docs/`. Static build копирует specs, но не Swagger UI;
 translation mounts и direct translation serve не публикуют ни UI, ни ссылку.
 
 Canonical `serve` также по первому запросу browser проверяет latest stable
 release и при необходимости показывает неблокирующее предложение обновиться.
 Результат кешируется до остановки процесса. Для автономного запуска используйте
-`docu-docu serve --no-update-check ./docs`; static и translation portals эту
+`toudocu serve --no-update-check ./docs`; static и translation portals эту
 проверку никогда не включают.
 
 Workspace включает обычные `.md`, `.yaml`, `.yml` и `.json` внутри docs root и
@@ -175,7 +181,7 @@ guards не заменяют аутентификацию прямого LAN-к�
 
 ## Локаль и встроенные разделы
 
-`.docu-docu/config.yml` может содержать только `project`; `site` и `changes`
+`.toudocu/config.yml` может содержать только `project`; `site` и `changes`
 остаются независимыми необязательными разделами. `project.locale` принимает
 нормализуемый BCP-47-style тег (например, `ru`, `en-GB`, `pt-BR`, `sr-Latn`).
 `project.sections` задаёт названия всех встроенных разделов и является
@@ -213,7 +219,7 @@ project:
 ## Отдельные roots переводов
 
 `translations` описывает независимые порталы для workflow
-`$docu-docu translate`; это не новая Go CLI-команда. Канонический `docs/`
+`$toudocu translate`; это не новая Go CLI-команда. Канонический `docs/`
 остаётся единственным источником обычного документационного, implementation и
 task-контекста агента. Настроенные translation roots не входят в репозиторный
 поиск, инвентаризацию, semantic review или анализ реализации при обычной работе.
@@ -248,15 +254,16 @@ translation root либо каноническим docs root. При `check`, `b
 разрешены `check`, `build`, `search`, обычные `changes` и read-only `serve`.
 Task-команды, `scaffold` и editor-запись отклоняются с
 `TRANSLATION_ROOT_READ_ONLY`. Агент читает только выбранный translation root при
-явном `$docu-docu translate <locale>` или явном запросе проверить, найти,
-собрать, запустить или изучить эту локаль. Он обрабатывает одну необходимую
-source/target-пару за раз, а для проверки паритета сначала сравнивает пути,
-source-хеши manifest и структурные отчёты. Translation roots не добавляются в
-`.gitignore` или глобальные ignore-файлы.
+явном `$toudocu translate <locale>` или явном запросе проверить, найти,
+собрать, запустить или изучить эту локаль. Явный `$toudocu translate diff`
+последовательно выбирает все настроенные profiles. Агент обрабатывает одну
+локаль и одну необходимую source/target-пару за раз, а для проверки паритета
+сначала сравнивает пути, source-хеши manifest и структурные отчёты. Translation
+roots не добавляются в `.gitignore` или глобальные ignore-файлы.
 
 ## Mermaid
 
-Mermaid не имеет пользовательских CLI-настроек. Docu-docu закрепляет:
+Mermaid не имеет пользовательских CLI-настроек. Toudocu закрепляет:
 
 - типы `flowchart`, `stateDiagram-v2`, `sequenceDiagram`;
 - максимум 50 000 UTF-8 байт на блок;

@@ -3,6 +3,9 @@ import { Compartment, EditorState } from '@codemirror/state';
 import { markdown } from '@codemirror/lang-markdown';
 import { json } from '@codemirror/lang-json';
 import { yaml } from '@codemirror/lang-yaml';
+import { go } from '@codemirror/lang-go';
+import { java } from '@codemirror/lang-java';
+import { javascript } from '@codemirror/lang-javascript';
 import { setDiagnostics } from '@codemirror/lint';
 import { MergeView } from '@codemirror/merge';
 function languageExtension(language: any) {
@@ -10,7 +13,17 @@ function languageExtension(language: any) {
         return json();
     if (language === 'yaml')
         return yaml();
-    return markdown();
+    if (language === 'markdown')
+        return markdown();
+    if (language === 'go')
+        return go();
+    if (language === 'java')
+        return java();
+    if (language === 'javascript')
+        return javascript({ jsx: true });
+    if (language === 'typescript')
+        return javascript({ jsx: true, typescript: true });
+    return [];
 }
 function position(view: any, line: any, column: any) {
     const safeLine: any = Math.max(1, Math.min(Number(line) || 1, view.state.doc.lines));
@@ -28,15 +41,42 @@ function appearanceTheme(theme: any) {
     }, { dark: theme === 'dark' });
 }
 const currentTheme: any = () => document.documentElement.dataset.theme || 'light';
-window.DocuDocuCodeMirror = {
-    createMerge({ parent, before, after, language }: any) {
+function reviewSelection(view: any, side: any) {
+    const range: any = view.state.selection.main;
+    if (range.empty)
+        return null;
+    const toPosition: any = (offset: any) => {
+        const line: any = view.state.doc.lineAt(offset);
+        return { line: line.number, column: Array.from(view.state.sliceDoc(line.from, offset)).length + 1 };
+    };
+    return { side, start: toPosition(range.from), end: toPosition(range.to) };
+}
+function reviewPosition(view: any, value: any) {
+    const lineNumber: any = Math.max(1, Math.min(Number(value?.line) || 1, view.state.doc.lines));
+    const line: any = view.state.doc.line(lineNumber);
+    const scalarPrefix: any = Array.from(view.state.sliceDoc(line.from, line.to)).slice(0, Math.max(0, (Number(value?.column) || 1) - 1)).join('');
+    return line.from + scalarPrefix.length;
+}
+function highlightReviewRange(view: any, start: any, end: any) {
+    const anchor: any = reviewPosition(view, start);
+    const head: any = Math.max(anchor, reviewPosition(view, end));
+    view.dispatch({ selection: { anchor, head }, scrollIntoView: true });
+    view.focus();
+}
+window.ToudocuCodeMirror = {
+    createMerge({ parent, before, after, language, onSelect }: any) {
         const themeA: any = new Compartment();
         const themeB: any = new Compartment();
+        let highlighting: any = false;
         const readOnly: any = [basicSetup, languageExtension(language), EditorView.lineWrapping, EditorState.readOnly.of(true), EditorView.editable.of(false)];
+        const selectionExtension: any = (side: any) => EditorView.updateListener.of((update: any) => {
+            if (update.selectionSet && !highlighting)
+                onSelect?.(reviewSelection(update.view, side));
+        });
         const view: any = new MergeView({
             parent,
-            a: { doc: before, extensions: [readOnly, themeA.of(appearanceTheme(currentTheme()))] },
-            b: { doc: after, extensions: [readOnly, themeB.of(appearanceTheme(currentTheme()))] },
+            a: { doc: before, extensions: [readOnly, selectionExtension('old'), themeA.of(appearanceTheme(currentTheme()))] },
+            b: { doc: after, extensions: [readOnly, selectionExtension('new'), themeB.of(appearanceTheme(currentTheme()))] },
             collapseUnchanged: { margin: 3, minSize: 6 },
             highlightChanges: true,
             gutter: true,
@@ -46,6 +86,51 @@ window.DocuDocuCodeMirror = {
             setTheme(theme: any) {
                 view.a.dispatch({ effects: themeA.reconfigure(appearanceTheme(theme)) });
                 view.b.dispatch({ effects: themeB.reconfigure(appearanceTheme(theme)) });
+            },
+            highlight(side: any, start: any, end: any) {
+                highlighting = true;
+                try {
+                    highlightReviewRange(side === 'old' ? view.a : view.b, start, end);
+                }
+                finally {
+                    highlighting = false;
+                }
+            },
+        };
+    },
+    createViewer({ parent, doc, language, onSelect }: any) {
+        const themeCompartment: any = new Compartment();
+        let highlighting: any = false;
+        const view: any = new EditorView({
+            parent,
+            state: EditorState.create({
+                doc,
+                extensions: [
+                    basicSetup,
+                    languageExtension(language),
+                    EditorView.lineWrapping,
+                    EditorState.readOnly.of(true),
+                    EditorView.editable.of(false),
+                    themeCompartment.of(appearanceTheme(currentTheme())),
+                    EditorView.updateListener.of((update: any) => {
+                        if (update.selectionSet && !highlighting)
+                            onSelect?.(reviewSelection(update.view, 'new'));
+                    }),
+                ],
+            }),
+        });
+        return {
+            destroy: () => view.destroy(),
+            focus: () => view.focus(),
+            setTheme(theme: any) { view.dispatch({ effects: themeCompartment.reconfigure(appearanceTheme(theme)) }); },
+            highlight(_side: any, start: any, end: any) {
+                highlighting = true;
+                try {
+                    highlightReviewRange(view, start, end);
+                }
+                finally {
+                    highlighting = false;
+                }
             },
         };
     },
@@ -92,4 +177,3 @@ window.DocuDocuCodeMirror = {
         };
     },
 };
-

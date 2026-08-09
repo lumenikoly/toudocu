@@ -2,7 +2,7 @@
 
 - Identifier: MOD-CHANGES
 - Status: Completed
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-08-05
 
 The module turns explicitly selected Git source documentation states into
@@ -36,7 +36,7 @@ comparison and isolation behavior.
 ### BR-CHANGES-001: Git is the only version source
 
 The old side is read from the object database or index, the new side is read from explicitly
-selected revision, index or working tree. Docu-docu does not save its own
+selected revision, index or working tree. Toudocu does not save its own
 history of documentation.
 
 ### BR-CHANGES-002: Original diff takes precedence
@@ -66,7 +66,7 @@ Public paths are canonical, relative to the repository root and cannot be read
 
 - `ChangeSetReport` schema v1;
 - CLI `changes` and `task changes`;
-- read-only `/_docu-docu/api/changes/`;
+- read-only `/_toudocu/api/changes/`;
 - diagnostic codes and comparison enums.
 
 ## Related use cases

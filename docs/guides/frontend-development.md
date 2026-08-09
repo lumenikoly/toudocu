@@ -37,6 +37,13 @@ manifest и assets детерминированы: timestamps и random values �
 classification, path guards, semantic diff и verification нельзя переносить в
 TypeScript.
 
+Changes review использует единый CodeMirror selection contract с 1-based
+Unicode scalar line/column для merge и file viewer. Закреплены
+`@codemirror/lang-go@6.0.1`, `@codemirror/lang-java@6.0.2` и
+`@codemirror/lang-javascript@6.2.5`; JavaScript package также обслуживает
+TypeScript/JSX/TSX. Для остальных UTF-8 файлов применяется plain-text fallback.
+Путь, selected text, context, binary/size limits и re-anchoring остаются в Go.
+
 ## Связанные документы
 
 - [Граница Go/frontend](../architecture/frontend-runtime-boundary.md)

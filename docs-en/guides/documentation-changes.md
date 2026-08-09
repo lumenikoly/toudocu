@@ -1,6 +1,6 @@
 # Viewing documentation changes
 
-Docu-docu uses Git as the sole source of the old and new versions. It does not
+Toudocu uses Git as the sole source of the old and new versions. It does not
 create snapshots, fetch, or modify history, refs, the index, or the working
 tree. The section is available only in `serve` at `/changes/`; a regular
 `build` remains a self-contained view of current documentation and requires no
@@ -12,7 +12,7 @@ By default, `HEAD → working-tree` includes staged and unstaged changes,
 deletions, and untracked files. Other available comparisons are `HEAD → index`,
 revision → revision, revision → working-tree, and
 `merge-base(base-ref, HEAD) → working-tree` through `--branch-base`. The base,
-target, resolved commit, branch, and dirty state are always visible. Docu-docu
+target, resolved commit, branch, and dirty state are always visible. Toudocu
 does not load remote refs or guess an ambiguous base.
 
 ## Three diff levels
@@ -57,13 +57,13 @@ semantic view.
 ## CLI and CI
 
 ```bash
-docu-docu changes ./docs --format text
-docu-docu changes ./docs --base main --target working-tree --format json
-docu-docu changes ./docs --branch-base main --format markdown
-docu-docu changes ./docs --status modified --module MOD-AUTH --type use-case
-docu-docu changes ./docs --permanent-only --format json
-docu-docu changes file docs/modules/MOD-AUTH.md --base HEAD --target index
-docu-docu task changes TASK-AUTH-015 ./docs --format json
+toudocu changes ./docs --format text
+toudocu changes ./docs --base main --target working-tree --format json
+toudocu changes ./docs --branch-base main --format markdown
+toudocu changes ./docs --status modified --module MOD-AUTH --type use-case
+toudocu changes ./docs --permanent-only --format json
+toudocu changes file docs/modules/MOD-AUTH.md --base HEAD --target index
+toudocu task changes TASK-AUTH-015 ./docs --format json
 ```
 
 CLI filters are applied to an already built change set:
@@ -81,7 +81,7 @@ summary; `-o FILE` writes the selected format to a separate file.
 Exit code `1` means a report was built with an error, `2` means an invalid
 range, `3` means Git is unavailable/not found, and `4` means an internal error.
 
-The `$docu-docu translate` workflow uses this report only as input: the skill's
+The `$toudocu translate` workflow uses this report only as input: the skill's
 `--task` parameter invokes canonical `task changes` through `working-tree`,
 while `--base` invokes `<base> → working-tree`. Its API-only override includes
 assets even when `changes.includeAssets: false`; the `ChangeSetReport` schema

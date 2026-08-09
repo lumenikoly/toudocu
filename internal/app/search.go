@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"fmt"
@@ -142,7 +142,7 @@ func SearchDocumentation(model *Model, query string, limit int) (SearchReport, e
 		results[index] = found[index].match
 	}
 	return SearchReport{
-		SchemaVersion: 1, Kind: "search", Generator: GeneratorInfo{Name: "Docu-docu", Version: Version},
+		SchemaVersion: 1, Kind: "search", Generator: GeneratorInfo{Name: "Toudocu", Version: Version},
 		Query: query, Total: total, Limit: limit, Results: results,
 	}, nil
 }

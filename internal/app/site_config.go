@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-const defaultFooterURL = "https://lumenikoly.github.io/docu-docu/"
+const defaultFooterURL = "https://lumenikoly.github.io/toudocu/"
 
 // FooterConfig configures the escaped footer text and its optional HTTPS link.
 type FooterConfig struct {
@@ -50,7 +50,7 @@ type SiteConfig struct {
 	Changes      ChangesConfig
 	Project      ProjectConfig
 	// Translations describes independent documentation roots. It is deliberately
-	// not folded into Project: a Docu-docu model is always monolingual.
+	// not folded into Project: a Toudocu model is always monolingual.
 	Translations      map[string]TranslationProfile
 	translationErrors map[string]string
 }
@@ -77,7 +77,7 @@ func defaultSiteConfig() SiteConfig {
 		Density:      "comfortable",
 		ContentWidth: "standard",
 		Footer: FooterConfig{
-			Text: "Сгенерировано Docu-docu " + Version,
+			Text: "Сгенерировано Toudocu " + Version,
 			URL:  defaultFooterURL,
 		},
 		Hero:    HeroConfig{Enabled: true},
@@ -411,14 +411,14 @@ func validateBrandAsset(repositoryRoot, configuredPath, kind string) (string, st
 	}
 	clean := filepath.Clean(filepath.FromSlash(configuredPath))
 	if clean == "." || clean == "assets" || !strings.HasPrefix(clean, "assets"+string(filepath.Separator)) {
-		return "", "", fmt.Errorf("config.yml: site.%s должен находиться внутри .docu-docu/assets/", kind)
+		return "", "", fmt.Errorf("config.yml: site.%s должен находиться внутри .toudocu/assets/", kind)
 	}
 	relative := strings.TrimPrefix(clean, "assets"+string(filepath.Separator))
 	if relative == "" || relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
-		return "", "", fmt.Errorf("config.yml: site.%s выходит за пределы .docu-docu/assets/", kind)
+		return "", "", fmt.Errorf("config.yml: site.%s выходит за пределы .toudocu/assets/", kind)
 	}
-	assetsRoot := filepath.Join(repositoryRoot, ".docu-docu", "assets")
-	for _, directory := range []string{filepath.Join(repositoryRoot, ".docu-docu"), assetsRoot} {
+	assetsRoot := filepath.Join(repositoryRoot, ".toudocu", "assets")
+	for _, directory := range []string{filepath.Join(repositoryRoot, ".toudocu"), assetsRoot} {
 		info, err := os.Lstat(directory)
 		if err != nil {
 			if os.IsNotExist(err) {
@@ -456,13 +456,13 @@ func validateBrandAsset(repositoryRoot, configuredPath, kind string) (string, st
 }
 
 func loadSiteConfig(repositoryRoot string) (SiteConfig, map[string]string, error) {
-	configPath := filepath.Join(repositoryRoot, ".docu-docu", "config.yml")
+	configPath := filepath.Join(repositoryRoot, ".toudocu", "config.yml")
 	data, err := os.ReadFile(configPath)
 	if os.IsNotExist(err) {
 		return defaultSiteConfig(), map[string]string{}, nil
 	}
 	if err != nil {
-		return SiteConfig{}, nil, fmt.Errorf("не удалось прочитать .docu-docu/config.yml: %w", err)
+		return SiteConfig{}, nil, fmt.Errorf("не удалось прочитать .toudocu/config.yml: %w", err)
 	}
 	config, err := parseSiteConfig(data)
 	if err != nil {

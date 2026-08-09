@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"bufio"
@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"docu-docu/internal/skillinstall"
-	"docu-docu/skills"
+	"toudocu/internal/skillinstall"
+	"toudocu/skills"
 )
 
 type skillCLIOptions struct {
@@ -103,7 +103,7 @@ func runSkillCLI(argv []string, stdin io.Reader, stdout, stderr io.Writer, inter
 func parseSkillArguments(argv []string) (skillCLIOptions, error) {
 	options := skillCLIOptions{agent: "auto", scope: skillinstall.Project}
 	if len(argv) < 2 {
-		return options, fmt.Errorf("SKILL_USAGE: docu-docu skill install|status|update|uninstall [--agent AGENT] [--scope SCOPE]")
+		return options, fmt.Errorf("SKILL_USAGE: toudocu skill install|status|update|uninstall [--agent AGENT] [--scope SCOPE]")
 	}
 	options.operation = skillinstall.Operation(argv[1])
 	if options.operation != skillinstall.Install && options.operation != skillinstall.Status && options.operation != skillinstall.Update && options.operation != skillinstall.Uninstall {

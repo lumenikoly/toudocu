@@ -2,7 +2,7 @@
 
 This reference describes the machine-readable promises made by Markdown
 documents: how paths determine document kinds, which identifiers and
-relationships Docu-docu recognizes, and what the CLI validates. It helps an
+relationships Toudocu recognizes, and what the CLI validates. It helps an
 author understand the structural contract before writing, but does not replace
 semantic review.
 
@@ -12,7 +12,7 @@ it useful, and a successful `check` does not prove that its prose is true.
 
 ## Validation boundary
 
-Docu-docu validates only explicit promises:
+Toudocu validates only explicit promises:
 
 | Signal | Promise | Validation |
 |---|---|---|
@@ -111,7 +111,7 @@ flowchart LR
 
 ## Typed relationship matrix
 
-The reverse side states whether Docu-docu derives a backlink in the model and
+The reverse side states whether Toudocu derives a backlink in the model and
 portal; a derived reverse relationship needs no duplicate Markdown field.
 
 | Source | Declaration | Target | Cardinality | Reverse side |
@@ -146,7 +146,7 @@ Markdown link does not replace a required metadata field.
 
 ## Derived relationships and data
 
-Docu-docu derives views only from canonical Markdown sources:
+Toudocu derives views only from canonical Markdown sources:
 
 - `FLOW → UC` from `Scenario` automatically creates `UC → FLOW`.
 - `TR-*` rows create incoming/outgoing transitions, the screen graph, and the
@@ -210,7 +210,7 @@ the [work-item guide](../guides/work-items.md).
 - A dependency inferred from code or directory structure.
 - A generated backlink copied manually into a source document.
 
-Docu-docu does not infer standard applicability from globs or create product
+Toudocu does not infer standard applicability from globs or create product
 relationships from plausible coincidences. Meaningful relationships are
 declared explicitly and supported by project content.
 
@@ -232,7 +232,7 @@ flow or screens, and finally roadmap or work item. After changing an ID or
 relationship, run:
 
 ```bash
-go run ./cmd/docu-docu check ./docs --repository-root .
+go run ./cmd/toudocu check ./docs --repository-root .
 ```
 
 The check proves the structure and integrity of declared relationships.

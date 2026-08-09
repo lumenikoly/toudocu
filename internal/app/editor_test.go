@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"bytes"
@@ -39,7 +39,7 @@ func editorRequest(method, target, action string, body any) *http.Request {
 	request := httptest.NewRequest(method, target, reader)
 	if action != "" {
 		request.Header.Set("Content-Type", "application/json")
-		request.Header.Set("X-Docu-docu-Action", action)
+		request.Header.Set("X-Toudocu-Action", action)
 		request.Header.Set("Sec-Fetch-Site", "same-origin")
 		request.Header.Set("Origin", "http://"+request.Host)
 	}
@@ -65,7 +65,7 @@ func TestStaticSiteExcludesEditor(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, forbidden := range []string{"/_docu-docu/editor", "/_docu-docu/api/version", "/changes/", "editor.js", "changes.js", "serve.js", "serve-navigation.js", "data-server-rebuild", "data-roadmap-add", "docu-docu-revision", `"updateCheck":true`} {
+	for _, forbidden := range []string{"/_toudocu/editor", "/_toudocu/api/version", "/changes/", "editor.js", "changes.js", "serve.js", "serve-navigation.js", "data-server-rebuild", "data-roadmap-add", "toudocu-revision", `"updateCheck":true`, `"review":true`} {
 		if strings.Contains(string(page), forbidden) {
 			t.Fatalf("static page contains %q", forbidden)
 		}
@@ -75,7 +75,7 @@ func TestStaticSiteExcludesEditor(t *testing.T) {
 		if readErr != nil {
 			t.Fatal(readErr)
 		}
-		for _, forbidden := range []string{"__docu-docu", "server-rebuild", "localhost", options.InputDirectory} {
+		for _, forbidden := range []string{"__toudocu", "server-rebuild", "localhost", options.InputDirectory} {
 			if strings.Contains(string(app), forbidden) {
 				t.Fatalf("static asset %s contains %q", asset, forbidden)
 			}
@@ -94,7 +94,7 @@ func TestServeSiteIncludesEditor(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, expected := range []string{"/_docu-docu/editor/", "/_docu-docu/api/version", `"updateCheck":true`, "/changes/", "assets/serve.js", "data-docu-docu-serve-navigation", "data-server-rebuild", `aria-label="Открыть редактор"`, `aria-label="Пересобрать документацию"`, `meta name="docu-docu-revision" content="` + server.revision + `"`} {
+	for _, expected := range []string{"/_toudocu/editor/", "/_toudocu/api/version", `"updateCheck":true`, `"review":true`, "/_toudocu/api/changes/review", "/changes/", "assets/serve.js", "data-toudocu-serve-navigation", "data-server-rebuild", `aria-label="Открыть редактор"`, `aria-label="Пересобрать документацию"`, `meta name="toudocu-revision" content="` + server.revision + `"`} {
 		if !strings.Contains(string(page), expected) {
 			t.Fatalf("serve page missing %q", expected)
 		}
@@ -111,7 +111,7 @@ func TestServeSiteIncludesEditor(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, expected := range []string{"pointerover", "focusin", "80", "maxCacheEntries", "popstate", "aria-busy", "window.location.assign", "docu-docu:pagechange", "syncBootstrap"} {
+	for _, expected := range []string{"pointerover", "focusin", "80", "maxCacheEntries", "popstate", "aria-busy", "window.location.assign", "toudocu:pagechange", "syncBootstrap"} {
 		if !strings.Contains(string(navigation), expected) {
 			t.Fatalf("serve navigation missing %q", expected)
 		}
@@ -121,7 +121,7 @@ func TestServeSiteIncludesEditor(t *testing.T) {
 		t.Fatalf("serve page and polling endpoint use different revisions: meta=%s etag=%s body=%s", server.revision, files.Header().Get("ETag"), files.Body.String())
 	}
 	response := performEditorRequest(server, editorRequest(http.MethodGet, editorUIPath, "", nil))
-	if response.Code != http.StatusOK || !strings.Contains(response.Body.String(), "data-editor-host") || !strings.Contains(response.Body.String(), `class="workspace-brand brand" href="/"`) || !strings.Contains(response.Body.String(), `href="/_docu-docu/editor/" aria-label="Открыть редактор" aria-current="page"`) || !strings.Contains(response.Body.String(), `data-site-theme-select`) {
+	if response.Code != http.StatusOK || !strings.Contains(response.Body.String(), "data-editor-host") || !strings.Contains(response.Body.String(), `class="workspace-brand brand" href="/"`) || !strings.Contains(response.Body.String(), `href="/_toudocu/editor/" aria-label="Открыть редактор" aria-current="page"`) || !strings.Contains(response.Body.String(), `data-site-theme-select`) {
 		t.Fatalf("editor UI: status=%d body=%s", response.Code, response.Body.String())
 	}
 	changes := performEditorRequest(server, editorRequest(http.MethodGet, changesUIPath, "", nil))
@@ -152,7 +152,7 @@ func TestRoadmapAddControlIsServeOnly(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, forbidden := range []string{"data-roadmap-add", "Добавить результат", "/_docu-docu/api/editor/roadmap"} {
+	for _, forbidden := range []string{"data-roadmap-add", "Добавить результат", "/_toudocu/api/editor/roadmap"} {
 		if strings.Contains(string(staticPage), forbidden) {
 			t.Fatalf("static roadmap leaked %q", forbidden)
 		}
@@ -257,7 +257,7 @@ func TestEditorAtomicSave(t *testing.T) {
 	if runtime.GOOS != "windows" && info.Mode().Perm() != 0640 {
 		t.Fatalf("mode changed: %o", info.Mode().Perm())
 	}
-	leftovers, _ := filepath.Glob(filepath.Join(docs, ".docu-docu-edit-*"))
+	leftovers, _ := filepath.Glob(filepath.Join(docs, ".toudocu-edit-*"))
 	if len(leftovers) != 0 {
 		t.Fatalf("temporary files left: %v", leftovers)
 	}
@@ -396,7 +396,7 @@ func TestEditorPollingStateMachine(t *testing.T) {
 	for _, expected := range []string{"window.setInterval(() => loadFiles({ conditional: true })", "features.editor.index.004", "features.editor.index.013", "new Blob([currentContent()]"} {
 		assertEditorAssetContains(t, "editor.js", expected)
 	}
-	for _, expected := range []string{`meta[name="docu-docu-revision"]`, "etag", "baseline"} {
+	for _, expected := range []string{`meta[name="toudocu-revision"]`, "etag", "baseline"} {
 		assertEditorAssetContains(t, "serve.js", expected)
 	}
 }
@@ -412,7 +412,7 @@ func TestEditorResponsiveContract(t *testing.T) {
 }
 
 func TestSharedAppearanceAndDynamicEditorTheme(t *testing.T) {
-	for _, expected := range []string{"docu-docu:themechange", "docu-docu-site-theme", "docu-docu-color-scheme", "docu-docu-content-width"} {
+	for _, expected := range []string{"toudocu:themechange", "toudocu-site-theme", "toudocu-color-scheme", "toudocu-content-width"} {
 		assertEditorAssetContains(t, "preferences.ts", expected)
 	}
 	for _, expected := range []string{"setTheme", "themeCompartment.reconfigure", "new Compartment"} {

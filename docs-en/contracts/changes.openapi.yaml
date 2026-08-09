@@ -1,12 +1,12 @@
 openapi: 3.1.0
 info:
-  title: Docu-docu Documentation Changes HTTP API
+  title: Toudocu Documentation Changes HTTP API
   version: "1"
-  description: Wire-level contract for the read-only changes service exposed by docu-docu serve; configured locale mounts do not expose it.
+  description: Wire-level contract for the read-only changes service exposed by toudocu serve; configured locale mounts do not expose it.
 servers:
   - url: /
 paths:
-  /_docu-docu/api/changes:
+  /_toudocu/api/changes:
     get:
       operationId: getChangesSummary
       summary: Build a filtered documentation change-set report
@@ -55,7 +55,7 @@ paths:
         "405": {$ref: "#/components/responses/MethodNotAllowed"}
         "503": {$ref: "#/components/responses/ChangesError"}
         "500": {$ref: "#/components/responses/ChangesError"}
-  /_docu-docu/api/changes/file:
+  /_toudocu/api/changes/file:
     get:
       operationId: getChangedFile
       summary: Read one documentation change with source diff hunks
@@ -82,7 +82,7 @@ paths:
         "405": {$ref: "#/components/responses/MethodNotAllowed"}
         "503": {$ref: "#/components/responses/ChangesError"}
         "500": {$ref: "#/components/responses/ChangesError"}
-  /_docu-docu/api/changes/task:
+  /_toudocu/api/changes/task:
     get:
       operationId: getChangedTaskImpact
       summary: Read task impact for a selected TASK or BUG
@@ -107,7 +107,7 @@ paths:
         "405": {$ref: "#/components/responses/MethodNotAllowed"}
         "503": {$ref: "#/components/responses/ChangesError"}
         "500": {$ref: "#/components/responses/ChangesError"}
-  /_docu-docu/api/changes/content:
+  /_toudocu/api/changes/content:
     get:
       operationId: getChangedContent
       summary: Read raw content from one comparison side
@@ -131,7 +131,7 @@ paths:
         "413": {$ref: "#/components/responses/ChangesError"}
         "503": {$ref: "#/components/responses/ChangesError"}
         "500": {$ref: "#/components/responses/ChangesError"}
-  /_docu-docu/api/changes/render:
+  /_toudocu/api/changes/render:
     get:
       operationId: getRenderedChangedContent
       summary: Render Markdown from one comparison side
@@ -156,7 +156,7 @@ paths:
         "415": {$ref: "#/components/responses/ChangesError"}
         "503": {$ref: "#/components/responses/ChangesError"}
         "500": {$ref: "#/components/responses/ChangesError"}
-  /_docu-docu/api/changes/screen-map:
+  /_toudocu/api/changes/screen-map:
     get:
       operationId: getChangedScreenMap
       summary: Read screen and transition overlay schema v1

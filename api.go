@@ -1,12 +1,12 @@
-// Package docudocu exposes the typed Go facade for the Docu-docu CLI.
+// Package toudocu exposes the typed Go facade for the Toudocu CLI.
 //
 // The implementation is kept in internal/app so command and library consumers
 // use this package without coupling to the repository layout.
-package docudocu
+package toudocu
 
 import (
-	core "docu-docu/internal/app"
 	"io"
+	core "toudocu/internal/app"
 )
 
 const Version = core.Version

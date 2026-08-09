@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"fmt"
@@ -759,11 +759,11 @@ func buildDocumentationModel(options Options, overlay map[string][]byte) (*Model
 func validateBuiltinSectionConfiguration(model *Model) {
 	config := model.SiteConfig.Project
 	if config.Locale == "" {
-		model.Issues = append(model.Issues, newIssue("warning", "missing-project-locale", "Для локализованных встроенных разделов укажите project.locale в .docu-docu/config.yml.", ".docu-docu/config.yml", 0))
+		model.Issues = append(model.Issues, newIssue("warning", "missing-project-locale", "Для локализованных встроенных разделов укажите project.locale в .toudocu/config.yml.", ".toudocu/config.yml", 0))
 	}
 	complete := len(config.Sections) == len(BuiltinSections)
 	if !complete {
-		model.Issues = append(model.Issues, newIssue("warning", "incomplete-project-sections", "Для локализованных встроенных разделов укажите полный project.sections в .docu-docu/config.yml.", ".docu-docu/config.yml", 0))
+		model.Issues = append(model.Issues, newIssue("warning", "incomplete-project-sections", "Для локализованных встроенных разделов укажите полный project.sections в .toudocu/config.yml.", ".toudocu/config.yml", 0))
 	}
 	if config.Locale == "" || !complete {
 		return

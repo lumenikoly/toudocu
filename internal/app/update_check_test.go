@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"encoding/json"
@@ -54,7 +54,7 @@ func TestUpdateChecker(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				if r.Header.Get("Accept") != "application/vnd.github+json" || r.Header.Get("User-Agent") != "docu-docu/0.0.1" {
+				if r.Header.Get("Accept") != "application/vnd.github+json" || r.Header.Get("User-Agent") != "toudocu/0.0.1" {
 					t.Fatalf("headers=%v", r.Header)
 				}
 				w.WriteHeader(test.statusCode)

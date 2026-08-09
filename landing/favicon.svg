@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Docu-docu">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Toudocu">
   <rect width="64" height="64" fill="#09090b"/>
-  <path d="M13 15h17c13 0 21 6 21 17S43 49 30 49H13V15Zm13 9v16h4c7 0 10-2 10-8s-3-8-10-8h-4Z" fill="#fff"/>
+  <path d="M12 15h40v9H37v25H27V24H12V15Z" fill="#fff"/>
   <rect x="48" y="39" width="10" height="10" fill="#dff7d0"/>
 </svg>

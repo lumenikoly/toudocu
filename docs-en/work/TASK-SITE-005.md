@@ -8,12 +8,12 @@
 - Flow: FLOW-DOCS-SERVE
 - Screens: SC-SITE-HOME
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-08-08
 
 ## Result
 
-Canonical `docu-docu serve` checks the latest stable GitHub Release without
+Canonical `toudocu serve` checks the latest stable GitHub Release without
 blocking and shows a compact suggestion to open the official release when it
 is newer than the current binary. Static builds, locale portals, and the binary
 itself remain self-contained.
@@ -22,7 +22,7 @@ itself remain self-contained.
 
 ### Before
 
-The user learns about a new release only outside Docu-docu or by opening GitHub
+The user learns about a new release only outside Toudocu or by opening GitHub
 Releases manually.
 
 ### After
@@ -54,7 +54,7 @@ outbound request completely.
 
 - [x] `AC-01` `serve --no-update-check` disables the update capability,
   endpoint, and outbound request; other commands reject the flag.
-- [x] `AC-02` `GET|HEAD /_docu-docu/api/version` returns schema v1,
+- [x] `AC-02` `GET|HEAD /_toudocu/api/version` returns schema v1,
   `no-store`/`nosniff`, the current version, and `up-to-date`,
   `update-available`, or `unavailable`; other methods receive `405`.
 - [x] `AC-03` The checker limits timeout and response size, accepts only stable
@@ -84,9 +84,9 @@ outbound request completely.
 - `AC-03` → `go test ./internal/app -run TestUpdateChecker`
 - `AC-04` → `npm --prefix web run typecheck && npm --prefix web run test:browser`
 - `AC-05` → `go test ./internal/app ./internal/site && npm --prefix web test`
-- `AC-06` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
+- `AC-06` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `ALL` → `go test ./... && go test -race ./... && npm --prefix web test && npm --prefix web run test:browser`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `go vet ./... && go mod verify && npm --prefix web run typecheck`
 
 ## Documentation impact

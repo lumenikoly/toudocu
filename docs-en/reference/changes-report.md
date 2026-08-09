@@ -1,6 +1,6 @@
 # ChangeSetReport schema v1
 
-`docu-docu changes --format json` returns a deterministic report with
+`toudocu changes --format json` returns a deterministic report with
 `schemaVersion`, repository/branch/HEAD/dirty, resolved base/target,
 `changeSetDigest`, file/line/entity/classification summary, `changes[]`, task
 impact and diagnostics.
@@ -37,7 +37,7 @@ The remote party remains in the report as ghost data for the Screen Map.
 `mermaidBlocks` contains ID, status, caption, before/after and source
 locations. Individual diagnostics `mermaid-old-version-invalid` and
 `mermaid-new-version-invalid` does not hide the other party's available source code.
-This is the source before/after representation; Docu-docu does not intentionally build
+This is the source before/after representation; Toudocu does not intentionally build
 pixel-level image diff.
 
 Basic codes: `git-repository-not-found`, `git-command-failed`,
@@ -54,4 +54,4 @@ Basic codes: `git-repository-not-found`, `git-command-failed`,
 `deleted-entity-still-referenced`.
 
 Digest serves as cache identity and live invalidation, but is not its own
-history of Docu-docu.
+history of Toudocu.

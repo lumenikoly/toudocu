@@ -3,21 +3,21 @@ import { serveRuntimeMessages } from "./messages.ru";
 registerMessages(serveRuntimeMessages);
 (() => {
     'use strict';
-    const page: any = window.DocuDocuPage;
+    const page: any = window.ToudocuPage;
     const rebuildEndpoint: any = page?.runtime === 'serve' && page.capabilities?.rebuild ? page.endpoints?.rebuild : '';
     const editorEndpoint: any = page?.runtime === 'serve' && page.capabilities?.editor ? page.endpoints?.editor : '';
     const versionEndpoint: any = page?.runtime === 'serve' && page.capabilities?.updateCheck ? page.endpoints?.version : '';
     const button: any = document.querySelector('[data-server-rebuild]');
     const status: any = document.querySelector('[data-server-rebuild-status]');
     const label: any = document.querySelector('[data-server-rebuild-label]');
-    const baseline: any = (document.querySelector('meta[name="docu-docu-revision"]') as HTMLMetaElement | null)?.content || '';
+    const baseline: any = (document.querySelector('meta[name="toudocu-revision"]') as HTMLMetaElement | null)?.content || '';
     let etag: any = baseline ? `"${baseline}"` : '';
     function releaseURL(latestVersion: string, value: unknown): URL | null {
         if (typeof value !== 'string')
             return null;
         try {
             const parsed: any = new URL(value);
-            const expected: any = `https://github.com/lumenikoly/docu-docu/releases/tag/${encodeURIComponent(latestVersion)}`;
+            const expected: any = `https://github.com/lumenikoly/toudocu/releases/tag/${encodeURIComponent(latestVersion)}`;
             return parsed.href === expected ? parsed : null;
         }
         catch {
@@ -41,7 +41,7 @@ registerMessages(serveRuntimeMessages);
             const target: any = releaseURL(result.latestVersion, result.releaseURL);
             if (!target)
                 return;
-            const storageKey: any = 'docu-docu-dismissed-update';
+            const storageKey: any = 'toudocu-dismissed-update';
             try {
                 if (localStorage.getItem(storageKey) === result.latestVersion)
                     return;
@@ -126,7 +126,7 @@ registerMessages(serveRuntimeMessages);
             const response: any = await fetch(rebuildEndpoint, {
                 method: 'POST',
                 cache: 'no-store',
-                headers: { Accept: 'application/json', 'X-Docu-docu-Action': 'rebuild' },
+                headers: { Accept: 'application/json', 'X-Toudocu-Action': 'rebuild' },
             });
             if (!response.ok) {
                 const detail: any = await response.text();

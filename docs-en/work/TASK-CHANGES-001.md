@@ -8,12 +8,12 @@
 - Flow: FLOW-DOCS-CHANGES
 - Transitions: TR-SITE-005
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-08-05
 
 ## Result
 
-`docu-docu changes` and the `/changes` section show Git changes to source
+`toudocu changes` and the `/changes` section show Git changes to source
 documentation as source, rendered, and deterministic semantic diffs, correlate
 them with task impact, and export `ChangeSetReport` schema v1.
 
@@ -103,8 +103,8 @@ get the same report without changing Git.
 - `AC-11` → `go test ./... -run 'TestChangesInvalidation|TestChangesWithoutGit'`
 - `AC-12` → `go test ./... -run 'TestStaticSiteExcludesChanges|TestProjectReport'`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root .`
-- `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/docu-docu check ./docs --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root .`
+- `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/toudocu check ./docs --strict --stale-days 0`
 
 ## Documentation impact
 

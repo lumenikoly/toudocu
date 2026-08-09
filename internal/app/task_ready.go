@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"fmt"
@@ -215,11 +215,17 @@ func taskReadiness(model *Model, taskID string, strict bool) (*WorkItem, []Issue
 		code  string
 		label string
 	}{
-		{item.Result, "missing-task-result", "Result"},
 		{strings.Join(item.RepositoryPaths, " "), "missing-task-scope", "Scope"},
 		{item.OutOfScope, "missing-task-out-of-scope", "Out of scope"},
 		{item.Plan, "missing-task-plan", "Plan"},
 		{item.DocumentationImpact, "missing-task-documentation-impact", "Documentation impact"},
+	}
+	if item.Type != "Bug" {
+		required = append(required, struct {
+			value string
+			code  string
+			label string
+		}{item.Result, "missing-task-result", "Result"})
 	}
 	for _, field := range required {
 		if strings.TrimSpace(field.value) == "" {
@@ -229,12 +235,16 @@ func taskReadiness(model *Model, taskID string, strict bool) (*WorkItem, []Issue
 	if strings.TrimSpace(item.ModuleID) == "" {
 		issues = append(issues, readinessIssue("missing-task-module", "Для готовой к работе задачи требуется связанный module.", item))
 	}
-	if item.Type == "Feature" || item.Type == "Bug" {
+	if item.Type == "Feature" {
 		if strings.TrimSpace(item.BehaviorChange) == "" || item.Before == "" || item.After == "" {
-			issues = append(issues, readinessIssue("missing-behavior-change", "Для Feature/Bug требуются «Изменение поведения», «Было» и «Станет».", item))
+			issues = append(issues, readinessIssue("missing-behavior-change", "Для Feature требуются «Изменение поведения», «Было» и «Станет».", item))
 		}
 		if item.UseCaseID == "" {
-			issues = append(issues, readinessIssue("missing-task-use-case", "Для Feature/Bug требуется связанный use case.", item))
+			issues = append(issues, readinessIssue("missing-task-use-case", "Для Feature требуется связанный use case.", item))
+		}
+	} else if item.Type == "Bug" {
+		if item.UseCaseID == "" && !item.useCaseOmitted {
+			issues = append(issues, readinessIssue("missing-task-use-case", "Для Bug требуется связанный use case либо допустимое обоснование неприменимости.", item))
 		}
 	} else if item.Type != "" && item.UseCaseID == "" {
 		document := model.DocByPath[item.Document]
@@ -306,14 +316,14 @@ func uniqueIssues(issues []Issue) []Issue {
 func BuildTaskReady(model *Model, taskID string, strict bool) TaskReadyReport {
 	if err := rejectTranslationTaskModel(model); err != nil {
 		return TaskReadyReport{
-			SchemaVersion: 1, Kind: "task-ready", Generator: GeneratorInfo{Name: "Docu-docu", Version: Version},
+			SchemaVersion: 1, Kind: "task-ready", Generator: GeneratorInfo{Name: "Toudocu", Version: Version},
 			Task: taskSnapshot(nil, taskID), Status: "blocked",
 			Issues: []Issue{{Severity: "error", Code: "translation-root-read-only", Message: err.Error()}},
 		}
 	}
 	item, issues := taskReadiness(model, taskID, strict)
 	report := TaskReadyReport{
-		SchemaVersion: 1, Kind: "task-ready", Generator: GeneratorInfo{Name: "Docu-docu", Version: Version},
+		SchemaVersion: 1, Kind: "task-ready", Generator: GeneratorInfo{Name: "Toudocu", Version: Version},
 		Task: taskSnapshot(item, taskID), Status: "contract_incomplete", Issues: issues,
 	}
 	if item == nil {

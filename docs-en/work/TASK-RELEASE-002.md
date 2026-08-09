@@ -4,13 +4,13 @@
 - Type: Maintenance
 - Module: MOD-CLI
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-08-07
 
 ## Result
 
 The `0.0.1` release bundle and workflow are ready to publish the POSIX and
-PowerShell bootstraps: a user installs or updates Docu-docu with one command,
+PowerShell bootstraps: a user installs or updates Toudocu with one command,
 while the bootstrap selects the supported OS/architecture artifact and verifies
 its SHA-256 before replacing the file.
 
@@ -25,15 +25,15 @@ to `PATH`.
 
 The POSIX and PowerShell commands download the appropriate artifact and
 `checksums.txt`, verify integrity, and atomically install it without `sudo` at
-`~/.local/bin/docu-docu` or
-`%LOCALAPPDATA%\Programs\docu-docu\docu-docu.exe`. The canonical commands are:
+`~/.local/bin/toudocu` or
+`%LOCALAPPDATA%\Programs\toudocu\toudocu.exe`. The canonical commands are:
 
 ```sh
-curl -fsSL https://github.com/lumenikoly/docu-docu/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/lumenikoly/toudocu/releases/latest/download/install.sh | sh
 ```
 
 ```powershell
-irm https://github.com/lumenikoly/docu-docu/releases/latest/download/install.ps1 | iex
+irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 | iex
 ```
 
 Both `install.*` files are included in the release assets for version `0.0.1`.
@@ -66,9 +66,9 @@ installer prints the exact `source`/fish command, requests a login/re-login for
   macOS, and Windows artifacts and rejects an unsupported platform before any
   download.
 - [x] `AC-02` The latest stable release is selected by default;
-  `DOCU_DOCU_VERSION=X.Y.Z` pins the version and permits a downgrade,
-  `DOCU_DOCU_INSTALL_DIR` selects a nonstandard directory, and
-  `DOCU_DOCU_NO_MODIFY_PATH=1` prevents changes to `PATH`.
+  `TOUDOCU_VERSION=X.Y.Z` pins the version and permits a downgrade,
+  `TOUDOCU_INSTALL_DIR` selects a nonstandard directory, and
+  `TOUDOCU_NO_MODIFY_PATH=1` prevents changes to `PATH`.
 - [x] `AC-03` The binary is replaced only after exact verification of the
   release checksum and version; download, checksum, and filesystem failures do
   not damage the installed version, while a matching checksum produces an
@@ -96,11 +96,11 @@ installer prints the exact `source`/fish command, requests a login/re-login for
 - `AC-01` → `go test ./internal/app -run TestInstallerPlatformContract`
 - `AC-02` → `go test ./internal/app -run TestInstallerSelectionAndPathContract`
 - `AC-03` → `go test ./internal/app -run TestInstallerIntegrityAndReplacement`
-- `AC-04` → `make release && cd dist && sha256sum -c checksums.txt && test "$(wc -l < checksums.txt)" -eq 12 && for file in docu-docu-linux-amd64 docu-docu-linux-arm64 docu-docu-darwin-amd64 docu-docu-darwin-arm64 docu-docu-windows-amd64.exe docu-docu-windows-arm64.exe install.sh install.ps1 LICENSE THIRD_PARTY_NOTICES.md CODEMIRROR-CHECKSUMS.txt SWAGGER-UI-CHECKSUMS.txt; do awk -v file="$file" '$2 == file { found=1 } END { exit !found }' checksums.txt || exit 1; done`
-- `AC-05` → `go test ./internal/app -run TestInstallerDocumentationContract && go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
+- `AC-04` → `make release && cd dist && sha256sum -c checksums.txt && test "$(wc -l < checksums.txt)" -eq 12 && for file in toudocu-linux-amd64 toudocu-linux-arm64 toudocu-darwin-amd64 toudocu-darwin-arm64 toudocu-windows-amd64.exe toudocu-windows-arm64.exe install.sh install.ps1 LICENSE THIRD_PARTY_NOTICES.md CODEMIRROR-CHECKSUMS.txt SWAGGER-UI-CHECKSUMS.txt; do awk -v file="$file" '$2 == file { found=1 } END { exit !found }' checksums.txt || exit 1; done`
+- `AC-05` → `go test ./internal/app -run TestInstallerDocumentationContract && go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `AC-06` → `go test ./internal/app -run TestInstallerRepeatUpgradeDowngradeAndPath`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `make check`
 
 ## Documentation impact

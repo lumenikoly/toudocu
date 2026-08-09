@@ -2,10 +2,10 @@
 
 - Identifier: MOD-CLI
 - Status: Completed
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-08-06
 
-The module provides Docu-docu commands and deterministic workflow from search and
+The module provides Toudocu commands and deterministic workflow from search and
 task framework to context and controlled execution of declared checks.
 
 ## Purpose
@@ -15,7 +15,7 @@ predictable CLI with stable exit codes and JSON output.
 
 ## Code location
 
-- public façade and entrypoint: `api.go`, `cmd/docu-docu/main.go`;
+- public façade and entrypoint: `api.go`, `cmd/toudocu/main.go`;
 - CLI and local HTTP server: `internal/app/cli.go`, `internal/app/server.go`;
 - read-only context and readiness: `internal/app/task_context.go`, `internal/app/task_ready.go`;
 - search and frameworks: `internal/app/search.go`, `internal/app/scaffold.go`;
@@ -29,8 +29,8 @@ predictable CLI with stable exit codes and JSON output.
 
 The CLI does not interpret the user request. `task ready` and `task context`
 only read data, and `task verify --run` runs commands after local
-validation gate. Prompt-workflows `$docu-docu init`, `$docu-docu refresh`
-and `$docu-docu refresh diff` are outside the Go CLI boundary.
+validation gate. Prompt-workflows `$toudocu init`, `$toudocu refresh`
+and `$toudocu refresh diff` are outside the Go CLI boundary.
 The `skill` command manages only files from the embedded package and does not
 execute its content; the lifecycle is intentionally absent from the public Go facade.
 
@@ -51,9 +51,9 @@ The repeating command is executed once and saves all associated targets.
 When the timeout is exceeded, both the shell and the child processes it created
 are terminated; the report receives the status `timed_out`.
 
-### BR-CLI-004: Docu-docu does not interpret user request
+### BR-CLI-004: Toudocu does not interpret user request
 
-Docu-docu creates neutral wireframes and checks the structure. Selecting entities
+Toudocu creates neutral wireframes and checks the structure. Selecting entities
 formulation of requirements, change of status and confirmation of criteria remain
 responsibility of the performer.
 
@@ -103,7 +103,7 @@ or partial result returns exit code `1`.
 - commands are executed consistently even after an error;
 - each command is launched from repository root;
 - stdout and stderr are limited to the last 1 MiB of each stream;
-- building requires an explicit `docu-docu build`; a path without a command is rejected;
+- building requires an explicit `toudocu build`; a path without a command is rejected;
 - reserved skill-level names `init` and `refresh` are rejected as
   unknown Go CLI commands;
 - task workflow and entity creation never use a configured translation root;

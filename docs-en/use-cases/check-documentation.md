@@ -19,17 +19,17 @@ site and without executing work task commands.
 
 ## Preconditions
 
-- Docu-docu is available for launch;
+- Toudocu is available for launch;
 - the initiator has the rights to read documentation and repository root.
 
 ## Main scenario
 
-1. The initiator calls `docu-docu check ./docs`.
-2. Docu-docu reads Markdown files and builds an associated project model.
-3. Docu-docu checks mandatory architecture map, detailed questions
+1. The initiator calls `toudocu check ./docs`.
+2. Toudocu reads Markdown files and builds an associated project model.
+3. Toudocu checks mandatory architecture map, detailed questions
    architectural documents, structure, ID, links, roadmap, standards,
    runbooks, custom manifests and work tasks.
-4. Docu-docu displays diagnostics in text form or returns
+4. Toudocu displays diagnostics in text form or returns
    `ProjectReport` at `--format json`.
 5. The initiator uses the exit code and the report to accept the result of the check.
 

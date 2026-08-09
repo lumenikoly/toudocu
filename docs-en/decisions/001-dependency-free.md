@@ -3,10 +3,10 @@
 - Identifier: ADR-001
 - Status: Accepted
 - Date: 2026-07-25
-- Author: Docu-docu Team
+- Author: Toudocu Team
 - Last updated: 2026-08-08
 
-Docu-docu is delivered as a single Go binary and requires no runtime
+Toudocu is delivered as a single Go binary and requires no runtime
 dependencies. Pure-Go exceptions for external Go modules are recorded in
 [ADR-003](ADR-003.md) and [ADR-005](ADR-005.md); they add neither network access
 nor adjacent runtime files.

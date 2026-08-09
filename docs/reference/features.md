@@ -1,6 +1,6 @@
 # Каталог возможностей
 
-Страница перечисляет реализованные возможности Docu-docu и указывает, где
+Страница перечисляет реализованные возможности Toudocu и указывает, где
 зафиксирован их подробный контракт. Источником истины остаются Markdown-файлы:
 JSON и результат `build` не хранят отдельную модель и не редактируют исходники;
 только `serve` добавляет явные операции записи в canonical workspace.
@@ -15,45 +15,67 @@ JSON и результат `build` не хранят отдельную моде
 - В `serve`: unified/CodeMirror merge/rendered/semantic diff, OpenAPI,
   Mermaid, assets, screen-map overlay и task impact.
 
-Docu-docu поставляется одним Go-бинарником без внешних runtime-зависимостей.
+Toudocu поставляется одним Go-бинарником без внешних runtime-зависимостей.
 
 | Возможность | Команда | Результат |
 |---|---|---|
-| Проверка проекта | `docu-docu check ./docs` | diagnostics или `ProjectReport` |
-| Строгая проверка | `docu-docu check ./docs --strict` | warning также даёт exit code `1` |
-| Сборка портала | `docu-docu build ./docs` | автономный HTML и `report.json` |
-| Локальный workspace | `docu-docu serve ./docs` | view/edit, editor API, watcher и live rebuild |
-| Просмотр изменений | `docu-docu changes ./docs` | text, Markdown или `ChangeSetReport` v1 |
-| Изменение одного файла | `docu-docu changes file PATH ./docs` | detail выбранного изменённого path |
-| Поиск документов | `docu-docu search "query" ./docs` | `SearchReport` по свежим Markdown |
-| Создание задачи | `docu-docu task init ./docs --area AREA --title TITLE --type TYPE` | новый Draft и `TaskInitReport` |
-| Создание сущности | `docu-docu scaffold module|use-case|flow|screen|decision|standard|runbook ID ./docs --title TITLE` | атомарный scaffold и `ScaffoldReport` |
-| Проверка готовности | `docu-docu task ready TASK-ID ./docs` | read-only `TaskReadyReport` |
-| Контекст задачи | `docu-docu task context TASK-ID ./docs` | read-only `TaskContextReport` |
-| Проверка задачи | `docu-docu task verify TASK-ID ./docs --dry-run|--run` | план или выполнение команд и `TaskVerifyReport` |
-| Изменения задачи | `docu-docu task changes TASK-ID ./docs` | task-scoped change report и impact diagnostics |
-| Архивирование задачи | `docu-docu task archive TASK-ID ./docs` | перемещение терминальной задачи в годовой архив |
-| Восстановление задачи | `docu-docu task restore TASK-ID ./docs` | возврат задачи из годового архива |
-| Lifecycle AI-skill | `docu-docu skill install|status|update|uninstall` | text-состояние managed offline package |
-| Версия | `docu-docu version` | версия генератора |
+| Проверка проекта | `toudocu check ./docs` | diagnostics или `ProjectReport` |
+| Строгая проверка | `toudocu check ./docs --strict` | warning также даёт exit code `1` |
+| Сборка портала | `toudocu build ./docs` | автономный HTML и `report.json` |
+| Локальный workspace | `toudocu serve ./docs` | view/edit, editor API, watcher и live rebuild |
+| Просмотр изменений | `toudocu changes ./docs` | text, Markdown или `ChangeSetReport` v1 |
+| Получение review feedback | `toudocu changes feedback pending --json` | oldest schema-v1 snapshot или `feedback: null` |
+| Ответ на review feedback | `toudocu changes feedback respond --input response.json` | атомарно принятые agent messages |
+| Изменение одного файла | `toudocu changes file PATH ./docs` | detail выбранного изменённого path |
+| Поиск документов | `toudocu search "query" ./docs` | `SearchReport` по свежим Markdown |
+| Создание задачи | `toudocu task init ./docs --area AREA --title TITLE --type TYPE` | новый Draft и `TaskInitReport` |
+| Создание сущности | `toudocu scaffold module|use-case|flow|screen|decision|standard|runbook ID ./docs --title TITLE` | атомарный scaffold и `ScaffoldReport` |
+| Проверка готовности | `toudocu task ready TASK-ID ./docs` | read-only `TaskReadyReport` |
+| Контекст задачи | `toudocu task context TASK-ID ./docs` | read-only `TaskContextReport` |
+| Проверка задачи | `toudocu task verify TASK-ID ./docs --dry-run|--run` | план или выполнение команд и `TaskVerifyReport` |
+| Изменения задачи | `toudocu task changes TASK-ID ./docs` | task-scoped change report и impact diagnostics |
+| Архивирование задачи | `toudocu task archive TASK-ID ./docs` | перемещение терминальной задачи в годовой архив |
+| Восстановление задачи | `toudocu task restore TASK-ID ./docs` | возврат задачи из годового архива |
+| Lifecycle AI-skill | `toudocu skill install|status|update|uninstall` | text-состояние managed offline package |
+| Версия | `toudocu version` | версия генератора |
 
-Сборка требует явного `docu-docu build ./docs`; путь без команды отклоняется.
-Отдельной верхнеуровневой команды `init` нет: минимальный проект создаётся файлами
-`docs/index.md` и `docs/architecture/overview.md`; `task init` создаёт только
-work item. Параметры и exit codes
-определены в [CLI-контракте](../contracts/cli.md).
+Сборка требует явного `toudocu build ./docs`; путь без команды отклоняется.
+Отдельной верхнеуровневой команды `init` нет: минимальный проект содержит
+`index.md` и `architecture/overview.md` внутри выбранного documentation root;
+`task init` создаёт только work item. Параметры и exit codes определены в
+[CLI-контракте](../contracts/cli.md).
 
 Skill lifecycle не входит в публичный Go-фасад и не использует JSON output.
 Targets, состояния и безопасное ручное разрешение конфликтов описывает
 [руководство установки skill](../guides/skill-installation.md).
 
+## Локальное review изменений
+
+Canonical Changes workspace строит отдельную repository-wide проекцию поверх
+того же read-only Git adapter. Существующие documentation tabs сохраняются, а
+Go/Java/JavaScript/TypeScript и plain-text viewers дают единый selection
+contract для локальных comments. Discussions переживают restart и HEAD change,
+anchors получают explicit current, stale или deleted placement.
+
+«Отправить агенту» создаёт immutable FIFO snapshot, но не запускает LLM.
+Установленный `$toudocu feedback` workflow получает pending batch через CLI,
+вносит только обоснованные изменения, выполняет релевантные проверки и
+возвращает полный structured response. Static и translation runtimes review
+capability не получают; commit/index targets остаются read-only.
+
+Подробности: [MOD-REVIEW](../modules/MOD-REVIEW.md),
+[UC-REVIEW-01](../use-cases/UC-REVIEW-01.md) и
+[Changes HTTP API](../contracts/changes-http.md).
+
 Команды `changes` поддерживают фильтры `--status`, `--module`, `--type` и
 `--permanent-only`. Последний оставляет только постоянную документацию и
-исключает work artifacts, contracts и assets.
+исключает work artifacts, contracts и assets. Отдельный `--include-assets`
+принудительно включает binary assets независимо от `changes.includeAssets`, а
+`--translation-input` формирует полный reader-facing набор для перевода.
 
 ## Публичный Go API
 
-Корневой пакет `docu-docu` экспортирует типизированный фасад над CLI,
+Корневой пакет `toudocu` экспортирует типизированный фасад над CLI,
 документной моделью, генератором портала, поиском, task
 workflow и Git-backed changes. Прямые вызовы возвращают модели и отчёты без
 обязательной сериализации или запуска отдельного процесса.
@@ -66,24 +88,29 @@ workflow и Git-backed changes. Прямые вызовы возвращают �
 
 ## Skill workflows актуализации
 
-Устанавливаемый `docu-docu` предоставляет изменяющие agent workflows,
-которые не входят в Go CLI: `init`, `refresh`, `refresh diff` и `translate`.
+Устанавливаемый `toudocu` предоставляет изменяющие agent workflows,
+которые не входят в Go CLI: `init`, `refresh`, `refresh diff`, `translate` и
+`translate diff`.
 
-- `$docu-docu refresh` сверяет весь набор исходных Markdown-документов с
+- `$toudocu refresh` сверяет весь набор исходных Markdown-документов с
   текущим кодом, тестами, публичными интерфейсами, schemas, configuration, CI,
   требованиями и решениями;
-- `$docu-docu refresh diff` начинает со staged, unstaged и untracked файлов
+- `$toudocu refresh diff` начинает со staged, unstaged и untracked файлов
   относительно `HEAD` и добавляет зависимые документы по ссылкам, stable ID,
   task relationships и изменённому публичному поведению;
-- `$docu-docu translate <locale> --all-stale` поддерживает полный файловый
+- `$toudocu translate diff` один раз строит canonical change set относительно
+  `HEAD`, затем переводит его во все настроенные locale profiles по одному и
+  сообщает результат каждого target независимо;
+- `$toudocu translate <locale> --all-stale` поддерживает полный файловый
   паритет reader-facing Markdown, включая work items, notes и ideas. Locale root
   остаётся read-only и не используется task workflow или editor-записью. При
   обычной работе агент исключает все translation roots из поиска,
   инвентаризации, semantic review, task context и анализа реализации. Явный
-  перевод или запрос проверить, найти, собрать, запустить либо изучить
-  конкретную локаль открывает только выбранный root и минимально необходимую
-  source/target-пару; проверка паритета начинается с путей, хешей и структурных
-  отчётов. Локализованные metadata keys и status values допустимы только при
+  перевод открывает только выбранный root и минимально необходимую
+  source/target-пару; явный whole-root check, build, serve или inspection может
+  прочитать весь выбранный translation root. Проверка паритета начинается с
+  путей, хешей и структурных отчётов. Локализованные metadata keys и status
+  values допустимы только при
   сохранении нормализованной семантики: например, `Готово` (`done`) переводится
   как `Completed` или `Done`, а `Готово к работе` (`planned`) — как `Ready`.
   Перед обновлением manifest workflow сравнивает status kinds и вычисленное
@@ -107,7 +134,7 @@ Refresh обновляет только evidence-backed источники, не
 Минимальная документация содержит `index.md` и карту
 `architecture/overview.md` с типом `Architecture Overview`. Каждый другой
 `architecture/**/*.md` отвечает на один непустой архитектурный вопрос и
-должен быть напрямую указан в overview. По мере необходимости Docu-docu
+должен быть напрямую указан в overview. По мере необходимости Toudocu
 распознаёт:
 
 - `status.md`, `roadmap.md`, `risks.md`, `ideas.md` и `notes.md`;
@@ -194,7 +221,7 @@ health report,
 исходников, path/dirty/save toolbar, CodeMirror, вкладки Editor/Preview/Split и
 positional diagnostics. Markdown preview использует существующий safe renderer;
 JSON получает syntax и hotspots diagnostics, а произвольный YAML — только
-доступные Docu-docu diagnostics без выдуманной общей schema. Исключение —
+доступные Toudocu diagnostics без выдуманной общей schema. Исключение —
 `contracts/**/*.openapi.{yaml,yml,json}`: эти файлы получают OpenAPI 3.0/3.1
 root, operation, operationId, path-parameter и internal `$ref` validation с
 line/column; external references не загружаются.
@@ -210,7 +237,7 @@ diagnostic navigation и mobile drawer входят в тот же UI.
 [OpenAPI](../contracts/editor.openapi.yaml), а гарантии записи и границы
 workspace — в [поведенческом описании](../contracts/editor-http.md).
 
-Canonical `serve` также публикует `/_docu-docu/api-docs/`: vendored Swagger UI
+Canonical `serve` также публикует `/_toudocu/api-docs/`: vendored Swagger UI
 5.32.12 переключает Editor/Changes specs, не использует CDN и разрешает Try it
 out только для `GET`/`HEAD`. Static и translation portals UI не получают.
 
@@ -310,8 +337,9 @@ Hotspots хранятся в `screens/hotspots.json` в процентах. Ск
 модули, use cases, экраны, переходы, правила, зависимости и diagnostics.
 
 `task verify --run` сначала применяет task-local validation gate, затем
-последовательно запускает уникальные команды `AC-*`, `ALL` и `DOCS` из
-repository root. Ошибка одной команды не скрывает результаты остальных.
+последовательно запускает уникальные команды `AC-*`, `ALL`, `DOCS` и, при
+явно связанных стандартах, `QUALITY` из repository root. Ошибка одной команды
+не скрывает результаты остальных.
 Timeout завершает дерево процессов, а stdout и stderr сохраняются ограниченным
 хвостом.
 
@@ -355,7 +383,7 @@ Timeout завершает дерево процессов, а stdout и stderr 
 
 ## Ограничения
 
-Docu-docu не является сетевой CMS, collaborative editor или средой выполнения
+Toudocu не является сетевой CMS, collaborative editor или средой выполнения
 продукта. Live workspace существует только внутри процесса `serve`, не хранит
 серверную базу, не выполняет API-запросы пошагового viewer и не импортирует
 интерфейсы из Figma или frontend-кода.

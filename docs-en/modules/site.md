@@ -2,7 +2,7 @@
 
 - Identifier: MOD-SITE
 - Status: Completed
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-08-08
 
 The module produces backend-independent HTML pages, navigation, static JSON
@@ -43,7 +43,7 @@ and direct output symlinks. The decision is based on resolved paths.
 
 ### BR-SITE-002: The portal works on static HTTP hosting
 
-The `build` result requires no Docu-docu backend, database, Node.js, CDN, or
+The `build` result requires no Toudocu backend, database, Node.js, CDN, or
 external runtime. HTML, CSS, JavaScript, and JSON reside in output, use relative
 URLs, and work both at the root of an HTTP(S) host and under a nested URL path.
 Direct opening through `file://` is not a guaranteed product contract.
@@ -89,7 +89,7 @@ Configuration selects only fixed options; custom CSS, fonts, and theme plugins
 are not loaded.
 
 Custom logo, favicon, and hero files are read only as regular files from
-`.docu-docu/assets/`, validated when the model is built, and copied to
+`.toudocu/assets/`, validated when the model is built, and copied to
 `assets/branding/`. `build`, `check`, and `serve` use the same diagnostics and
 remain offline-first.
 
@@ -113,7 +113,7 @@ downloaded. Diagnostics do not block saving.
 ### BR-SITE-009: Locale portals are isolated from the canonical workspace
 
 When `serve` runs from the canonical root, configured `translations.<locale>`
-create independent read-only snapshots at `/_docu-docu/locales/<locale>/`.
+create independent read-only snapshots at `/_toudocu/locales/<locale>/`.
 The switch receives URLs only from server-computed targets: Markdown is matched
 by relative source path, a generated page by an existing output path, and
 otherwise the locale homepage is used. A locale mount receives no editor,
@@ -137,7 +137,7 @@ and is reused until a full page load.
 
 ### BR-SITE-011: API docs remain offline and read-mostly
 
-`/_docu-docu/api-docs/` exists only in canonical `serve`, uses same-origin specs
+`/_toudocu/api-docs/` exists only in canonical `serve`, uses same-origin specs
 and pinned Swagger UI 5.32.12 without a CDN. CSP prohibits external network
 access, and Try it out is available only for `GET`/`HEAD`. Locale mounts, direct
 translation serve, and static build contain no UI, assets, or navigation for it.
@@ -147,7 +147,7 @@ translation serve, and static build contain no UI, assets, or navigation for it.
 The canonical portal in `serve`, Editor, and Changes use the same `localStorage`
 keys for `classic`/`paper`/`terminal` and `system`/`light`/`dark`. A shared
 blocking `appearance.js` applies the saved theme, scheme, accent, density, and
-content width before CSS loads and publishes `docu-docu:themechange` on later
+content width before CSS loads and publishes `toudocu:themechange` on later
 changes. Deferred surface bundles do not repeat this initialization.
 
 Editor and Changes receive a shared header with project branding, “Portal /

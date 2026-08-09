@@ -3,7 +3,7 @@ package skillinstall
 import (
 	"fmt"
 
-	"docu-docu/skills"
+	"toudocu/skills"
 )
 
 func BuildPlan(operation Operation, target Target, bundle skills.Bundle) Plan {

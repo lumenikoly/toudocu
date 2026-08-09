@@ -2,7 +2,7 @@
 
 - Identifier: MOD-MARKDOWN
 - Status: Completed
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-08-06
 
 The module turns CommonMark and allowed GFM constructs into one normalized

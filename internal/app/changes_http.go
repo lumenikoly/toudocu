@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"crypto/sha256"
@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	changesAPIBase = "/_docu-docu/api/changes"
+	changesAPIBase = "/_toudocu/api/changes"
 	changesUIPath  = "/changes/"
 )
 
@@ -22,6 +22,11 @@ var changesRouteRegistry = []apiRoute{
 	{Path: changesAPIBase + "/content", Methods: []string{http.MethodGet}, Handler: (*documentationServer).serveChangesContent},
 	{Path: changesAPIBase + "/render", Methods: []string{http.MethodGet}, Handler: (*documentationServer).serveChangesRenderedContent},
 	{Path: changesAPIBase + "/screen-map", Methods: []string{http.MethodGet}, Handler: (*documentationServer).serveChangesScreenMap},
+}
+
+func allChangesRouteRegistry() []apiRoute {
+	routes := append([]apiRoute{}, changesRouteRegistry...)
+	return append(routes, reviewRouteRegistry...)
 }
 
 func changesOptionsFromRequest(base Options, request *http.Request) Options {
@@ -140,6 +145,10 @@ func matchAPIRoute(registry []apiRoute, request *http.Request) (*apiRoute, bool)
 }
 
 func (s *documentationServer) serveChangesAPI(w http.ResponseWriter, request *http.Request) {
+	if request.URL.Path == reviewAPIBase || strings.HasPrefix(request.URL.Path, reviewAPIBase+"/") {
+		s.serveReviewAPI(w, request)
+		return
+	}
 	route, methodAllowed := matchAPIRoute(changesRouteRegistry, request)
 	if route == nil {
 		writeChangesDiagnostic(w, http.StatusNotFound, "route_not_found", "Changes API route не найден")

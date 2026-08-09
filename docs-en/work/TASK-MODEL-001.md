@@ -6,7 +6,7 @@
 - Module: MOD-MODEL
 - Transitions: TR-SITE-004
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-08-05
 
 ## Result
@@ -19,7 +19,7 @@ project names, additive JSON `sectionType`, and a single `FLOW-*` catalog at
 
 - `internal/app/sections.go`, model, config parser and portal;
 - canonical route of the FLOW directory without legacy index in the source directory;
-- `$docu-docu` init/refresh workflow;
+- `$toudocu` init/refresh workflow;
 - configuration, model, portal and CLI documentation.
 
 ## Out of scope
@@ -63,9 +63,9 @@ directory and the route of individual documents, and its directory becomes only
 - `AC-04` → `go test ./... -run TestMissingProjectConfigurationUsesEnglishAndWarning`
 - `AC-05` → `go vet ./... && go test ./... && go test -race ./...`
 - `AC-06` → `go test ./... -run TestScreenPortalAndReportV1`
-- `AC-07` → `go run ./cmd/docu-docu check ./example/docs --repository-root ./example --strict --stale-days 0`
+- `AC-07` → `go run ./cmd/toudocu check ./example/docs --repository-root ./example --strict --stale-days 0`
 - `ALL` → `go vet ./... && go test ./... && go test -race ./...`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0 && go run ./cmd/docu-docu check ./example/docs --repository-root ./example --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0 && go run ./cmd/toudocu check ./example/docs --repository-root ./example --strict --stale-days 0`
 - `QUALITY` → `go test ./...`
 
 ## Plan
@@ -85,4 +85,4 @@ successful strict structural check.
 ## Use-case omission reason
 
 The change stabilizes the internal model and configuration contract; it does
-not add a standalone Docu-docu user scenario.
+not add a standalone Toudocu user scenario.

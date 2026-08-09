@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const landing = join(repo, "landing");
-const mount = "/docu-docu/";
+const mount = "/toudocu/";
 
 function mime(path: string): string {
   return ({
@@ -51,7 +51,7 @@ async function serveLanding(root = landing): Promise<{ server: Server; origin: s
 
 function runPortalBuild(input: string, output: string): void {
   const result = spawnSync("go", [
-    "run", "./cmd/docu-docu", "build", input,
+    "run", "./cmd/toudocu", "build", input,
     "--output", output,
     "--repository-root", ".",
     "--clean",
@@ -62,7 +62,7 @@ function runPortalBuild(input: string, output: string): void {
 }
 
 function buildPagesArtifact(): string {
-  const artifact = mkdtempSync(join(tmpdir(), "docu-docu-pages-"));
+  const artifact = mkdtempSync(join(tmpdir(), "toudocu-pages-"));
   try {
     for (const file of ["index.html", "favicon.svg", "styles.css", "script.js"]) {
       cpSync(join(landing, file), join(artifact, file));
@@ -101,7 +101,7 @@ test("localized headers identify the beta release", async ({ page }) => {
   const hosted = await serveLanding();
   try {
     for (const locale of ["en", "ru"]) {
-      await page.goto(`${hosted.origin}${locale}/`);
+      await page.goto(`${hosted.origin}${locale}/`, { waitUntil: "domcontentloaded" });
       await expect(page.locator(".site-header .wordmark .beta-badge")).toHaveText("BETA");
       await expect(page.locator(".site-footer .beta-badge")).toHaveCount(0);
     }
@@ -143,7 +143,7 @@ test("saved choice wins while invalid and unavailable storage fall back safely",
     const savedContext = await browser.newContext({ locale: "ru-RU" });
     const savedPage = await savedContext.newPage();
     await savedPage.goto(`${hosted.origin}ru/`);
-    await savedPage.evaluate(() => localStorage.setItem("docu-docu-landing-locale", "en"));
+    await savedPage.evaluate(() => localStorage.setItem("toudocu-landing-locale", "en"));
     await savedPage.goto(hosted.origin);
     await expect(savedPage).toHaveURL(`${hosted.origin}en/`);
     await savedContext.close();
@@ -151,7 +151,7 @@ test("saved choice wins while invalid and unavailable storage fall back safely",
     const corruptContext = await browser.newContext({ locale: "ru-RU" });
     const corruptPage = await corruptContext.newPage();
     await corruptPage.goto(`${hosted.origin}en/`);
-    await corruptPage.evaluate(() => localStorage.setItem("docu-docu-landing-locale", "not-a-locale"));
+    await corruptPage.evaluate(() => localStorage.setItem("toudocu-landing-locale", "not-a-locale"));
     await corruptPage.goto(hosted.origin);
     await expect(corruptPage).toHaveURL(`${hosted.origin}ru/`);
     await corruptContext.close();

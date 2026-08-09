@@ -10,11 +10,11 @@ const generated = new URL("../../internal/site/assets/generated/", import.meta.u
 const repo = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 
 test("generated project portal stays static and read-only", async (context) => {
-  const temporary = await mkdtemp(join(tmpdir(), "docu-docu-contract-"));
+  const temporary = await mkdtemp(join(tmpdir(), "toudocu-contract-"));
   context.after(() => rm(temporary, { recursive: true, force: true }));
   const output = join(temporary, "project-docs");
   const result = spawnSync("go", [
-    "run", "./cmd/docu-docu", "build", "./docs",
+    "run", "./cmd/toudocu", "build", "./docs",
     "--output", output,
     "--repository-root", ".",
     "--clean",
@@ -29,7 +29,7 @@ test("generated project portal stays static and read-only", async (context) => {
     assert.equal(source.includes('"runtime":"static"'), true, `${page} is not a static runtime`);
     assert.equal(source.includes('"runtime":"serve"'), false, `${page} leaked serve runtime`);
     assert.equal(source.includes("data-server-rebuild"), false, `${page} leaked rebuild control`);
-    assert.equal(source.includes('href="/_docu-docu/editor/'), false, `${page} leaked editor action`);
+    assert.equal(source.includes('href="/_toudocu/editor/'), false, `${page} leaked editor action`);
     assert.equal(source.includes('href="/changes/'), false, `${page} leaked changes action`);
   }
 
@@ -56,7 +56,7 @@ test("portal bundle has no server-only endpoint", async () => {
   const staticBundles = ["portal.js", "screen-map.js", "playable-flow.js"];
   for (const name of staticBundles) {
     const source = await readFile(new URL(name, generated), "utf8");
-    for (const forbidden of ["/_docu-docu/api/editor", "/_docu-docu/api/changes", "/_docu-docu/api/version", "/__docu-docu/rebuild", "localhost"]) {
+    for (const forbidden of ["/_toudocu/api/editor", "/_toudocu/api/changes", "/_toudocu/api/version", "/__toudocu/rebuild", "localhost"]) {
       assert.equal(source.includes(forbidden), false, `${forbidden} leaked into ${name}`);
     }
   }
@@ -109,7 +109,7 @@ test("strict TypeScript has no file-level bypass", async () => {
 
 test("serve navigation replaces the versioned bootstrap", async () => {
   const source = await readFile(new URL("../src/core/serve-navigation.ts", import.meta.url), "utf8");
-  for (const required of ["syncBootstrap", "parseBootstrap", "window.DocuDocuPage = parsed.value"]) {
+  for (const required of ["syncBootstrap", "parseBootstrap", "window.ToudocuPage = parsed.value"]) {
     assert.equal(source.includes(required), true, `serve navigation misses ${required}`);
   }
 });

@@ -2,7 +2,7 @@
 
 - Идентификатор: MOD-SITE
 - Статус: Готово
-- Владелец: Команда Docu-docu
+- Владелец: Команда Toudocu
 - Последнее обновление: 2026-08-08
 
 Модуль формирует backend-independent HTML-страницы, навигацию, статические
@@ -44,7 +44,7 @@ Markdown. Только явный режим `serve` предоставляет 
 
 ### BR-SITE-002: Портал работает на static HTTP hosting
 
-Результат `build` не требует Docu-docu backend, базы данных, Node.js, CDN или
+Результат `build` не требует Toudocu backend, базы данных, Node.js, CDN или
 внешнего runtime. HTML, CSS, JavaScript и JSON находятся в output, используют
 относительные URL и работают как в корне HTTP(S) host, так и во вложенном
 URL-пути. Прямое открытие через `file://` не является гарантированным
@@ -91,7 +91,7 @@ fallback favicon и браузерные ресурсы встроены чер�
 загружаются.
 
 Пользовательские logo, favicon и hero читаются только как обычные файлы из
-`.docu-docu/assets/`, проверяются при построении модели и копируются в
+`.toudocu/assets/`, проверяются при построении модели и копируются в
 `assets/branding/`. `build`, `check` и `serve` используют одну диагностику и
 остаются offline-first.
 
@@ -115,7 +115,7 @@ buffer можно скачать. Diagnostics не блокируют сохра
 ### BR-SITE-009: Locale portals изолированы от canonical workspace
 
 При запуске `serve` из canonical root configured `translations.<locale>`
-создают независимые read-only snapshots по `/_docu-docu/locales/<locale>/`.
+создают независимые read-only snapshots по `/_toudocu/locales/<locale>/`.
 Переключатель получает URL только из server-computed targets: Markdown
 сопоставляется по relative source path, generated page — по существующему
 output path, иначе используется locale homepage. Locale mount не получает
@@ -141,7 +141,7 @@ locale, external и специальные переходы всегда ост�
 
 ### BR-SITE-011: API docs остаётся offline и read-mostly
 
-`/_docu-docu/api-docs/` существует только у canonical `serve`, использует
+`/_toudocu/api-docs/` существует только у canonical `serve`, использует
 same-origin specs и закреплённый Swagger UI 5.32.12 без CDN. CSP запрещает
 external network, а Try it out доступен только для `GET`/`HEAD`. Locale mounts,
 direct translation serve и static build не содержат UI, assets или navigation.
@@ -152,7 +152,7 @@ Canonical portal режима `serve`, Editor и Changes используют о
 ключи `localStorage` для `classic`/`paper`/`terminal` и
 `system`/`light`/`dark`. Общий блокирующий `appearance.js` до загрузки CSS
 применяет сохранённые theme, scheme, accent, density и content width и
-публикует `docu-docu:themechange` при последующих изменениях. Отложенные
+публикует `toudocu:themechange` при последующих изменениях. Отложенные
 surface bundles не повторяют эту инициализацию.
 
 Editor и Changes получают общий header с project branding, навигацией

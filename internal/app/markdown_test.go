@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"bytes"
@@ -67,8 +67,8 @@ func TestMarkdownPolicyErrorsFailCheckAndBuild(t *testing.T) {
 }
 
 func TestMetadataInlineCodePreservesRouteUnderscores(t *testing.T) {
-	doc := analyzeMarkdown("# SC-SITE-API-DOCS: API\n\n- Маршрут: `/_docu-docu/api-docs/`\n")
-	if got := doc.Metadata["route"]; got != "/_docu-docu/api-docs/" {
+	doc := analyzeMarkdown("# SC-SITE-API-DOCS: API\n\n- Маршрут: `/_toudocu/api-docs/`\n")
+	if got := doc.Metadata["route"]; got != "/_toudocu/api-docs/" {
 		t.Fatalf("route = %q", got)
 	}
 }

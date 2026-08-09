@@ -9,7 +9,7 @@
 
 Разработчик преобразует каталог проектной документации в read-only портал,
 который публикуется на обычном HTTP(S) static hosting и после сборки не требует
-Docu-docu backend.
+Toudocu backend.
 
 ## Входные данные
 
@@ -19,16 +19,16 @@ Docu-docu backend.
 
 ## Предусловия
 
-- Docu-docu доступен для запуска;
+- Toudocu доступен для запуска;
 - у разработчика есть права чтения исходного каталога и записи в выходной.
 
 ## Основной сценарий
 
-1. Разработчик вызывает `docu-docu build ./docs --output ./build/project-docs`.
-2. Docu-docu читает документы и проверяет структуру, ссылки и связанные сущности.
-3. Docu-docu создаёт HTML-страницы, CSS/JavaScript, статические JSON-ресурсы и
+1. Разработчик вызывает `toudocu build ./docs --output ./build/project-docs`.
+2. Toudocu читает документы и проверяет структуру, ссылки и связанные сущности.
+3. Toudocu создаёт HTML-страницы, CSS/JavaScript, статические JSON-ресурсы и
    `report.json` из одной project model.
-4. Docu-docu сообщает путь к созданному `index.html` и итоговую статистику.
+4. Toudocu сообщает путь к созданному `index.html` и итоговую статистику.
 5. Разработчик публикует output на HTTP(S) static hosting.
 6. Браузер открывает портал из корня host или вложенного URL-пути.
 
@@ -47,7 +47,7 @@ Docu-docu backend.
 
 При успешной генерации выходной каталог содержит backend-independent портал,
 static data и `ProjectReport` schema v1. Исходный Markdown не изменён. Для
-локальной работы используется `docu-docu serve`; новая preview-команда не нужна.
+локальной работы используется `toudocu serve`; новая preview-команда не нужна.
 
 ## Бизнес-правила
 

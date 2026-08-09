@@ -2,7 +2,7 @@
 
 - Тип документа: Architecture Overview
 
-Docu-docu — локальный dependency-free Go runtime между исходным каталогом
+Toudocu — локальный dependency-free Go runtime между исходным каталогом
 документации и потребителями проверенной модели: Go-кодом через публичный фасад,
 автоматизацией через CLI/JSON и читателем статического HTTP-портала.
 Опциональный `serve` добавляет локальный HTTP/editor runtime и offline каталог
@@ -12,8 +12,8 @@ GitHub Releases API за метаданными latest stable release; база 
 
 ## Граница системы
 
-Разработчик, библиотечный потребитель, агент или CI передаёт Docu-docu каталог
-документации и явно выбранный repository root. Docu-docu читает Markdown и
+Разработчик, библиотечный потребитель, агент или CI передаёт Toudocu каталог
+документации и явно выбранный repository root. Toudocu читает Markdown и
 локальные assets и распознанные OpenAPI contracts, проверяет объявленные связи
 и wire structure и либо возвращает diagnostics,
 либо строит производные HTML/JSON-файлы. В `build` браузер только открывает
@@ -25,9 +25,10 @@ release metadata отключается флагом, не загружает к
 
 ## Карта архитектурных вопросов
 
-- [Где проходит системная граница Docu-docu и кто с ней взаимодействует?](system-boundary.md)
+- [Где проходит системная граница Toudocu и кто с ней взаимодействует?](system-boundary.md)
 - [Как runtime-компоненты делят ответственность?](runtime-components.md)
 - [Где проходит граница между Go-ядром и frontend runtime?](frontend-runtime-boundary.md)
 - [Где проходят границы доверия?](trust-boundaries.md)
 - [Как изолируются ошибки документации и запускаемых проверок?](failure-isolation.md)
 - [Как Git-состояния превращаются в согласованный change set документации?](documentation-changes.md)
+- [Как review discussion сохраняет связь с меняющимся содержимым repository?](review-anchoring.md)

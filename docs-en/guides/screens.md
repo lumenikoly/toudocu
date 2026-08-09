@@ -1,13 +1,13 @@
 # Screen map and playable use cases
 
-Docu-docu builds a map, catalog, step-by-step scenarios, and traceability from
+Toudocu builds a map, catalog, step-by-step scenarios, and traceability from
 `screens/SC-*.md` documents. A separate `screens/map.md` is not used.
 
 The map page can be explicitly enabled or disabled:
 
 ```bash
-docu-docu build ./docs --screen-map
-docu-docu build ./docs --no-screen-map
+toudocu build ./docs --screen-map
+toudocu build ./docs --no-screen-map
 ```
 
 When the overall map is disabled, the catalog, use-case pages with step mode,
@@ -84,7 +84,7 @@ A screen scenario defines:
 - Разрешить цикл: Да
 ```
 
-Docu-docu adds transitions for the selected `UC-*`, then calculates reachable
+Toudocu adds transitions for the selected `UC-*`, then calculates reachable
 screens, dead ends, cycles, and paths to terminal screens.
 
 A reachable nonterminal screen must have an outgoing transition. A cycle with
@@ -99,7 +99,7 @@ green outline or line and the `added` label; changed entries have a yellow
 `removed` label. State is never conveyed by color alone. The
 module/use-case/status/changed-only filters operate on the combined old/new
 model; selecting an element opens its semantic diff. JSON is available at
-`/_docu-docu/api/changes/screen-map`.
+`/_toudocu/api/changes/screen-map`.
 
 A card shows a preview or placeholder, ID, name, route, status, module, and the
 number of incoming and outgoing transitions. Available modes include:

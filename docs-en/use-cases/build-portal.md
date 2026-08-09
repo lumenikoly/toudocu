@@ -9,7 +9,7 @@
 
 The developer converts a project-documentation directory into a read-only
 portal that is published on ordinary HTTP(S) static hosting and requires no
-Docu-docu backend after the build.
+Toudocu backend after the build.
 
 ## Inputs
 
@@ -19,16 +19,16 @@ Docu-docu backend after the build.
 
 ## Preconditions
 
-- Docu-docu is available to run;
+- Toudocu is available to run;
 - the developer can read the source directory and write to the output directory.
 
 ## Main scenario
 
-1. The developer runs `docu-docu build ./docs --output ./build/project-docs`.
-2. Docu-docu reads documents and validates structure, links, and related entities.
-3. Docu-docu creates HTML pages, CSS/JavaScript, static JSON resources, and
+1. The developer runs `toudocu build ./docs --output ./build/project-docs`.
+2. Toudocu reads documents and validates structure, links, and related entities.
+3. Toudocu creates HTML pages, CSS/JavaScript, static JSON resources, and
    `report.json` from one project model.
-4. Docu-docu reports the path to the generated `index.html` and final statistics.
+4. Toudocu reports the path to the generated `index.html` and final statistics.
 5. The developer publishes the output on HTTP(S) static hosting.
 6. A browser opens the portal from the host root or a nested URL path.
 
@@ -47,7 +47,7 @@ Docu-docu backend after the build.
 
 After successful generation, the output directory contains a backend-independent
 portal, static data, and `ProjectReport` schema v1. The source Markdown is
-unchanged. Local work uses `docu-docu serve`; no new preview command is needed.
+unchanged. Local work uses `toudocu serve`; no new preview command is needed.
 
 ## Business rules
 

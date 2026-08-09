@@ -1,13 +1,13 @@
-# UC-AGENT-01: Install the Docu-docu AI skill
+# UC-AGENT-01: Install the Toudocu AI skill
 
 - Identifier: UC-AGENT-01
 - Status: Completed
-- Actor: Docu-docu user
+- Actor: Toudocu user
 - Module: MOD-CLI
 - Priority: High
 - Last updated: 2026-08-06
 
-The user installs the embedded offline `docu-docu` skill package in project or
+The user installs the embedded offline `toudocu` skill package in project or
 user scope for a supported AI host and can safely inspect, update, or remove the
 managed copy.
 
@@ -26,7 +26,7 @@ managed copy.
 
 ## Main scenario
 
-1. The user first runs `docu-docu skill status` or directly selects a mutating operation.
+1. The user first runs `toudocu skill status` or directly selects a mutating operation.
 2. The CLI determines the host, scope, and boundary and prints the absolute target.
 3. The planner classifies the existing copy and completes read-only planning for all selected targets.
 4. `install` publishes a missing bundle or updates an unchanged outdated managed copy; `update` updates only an existing managed copy.

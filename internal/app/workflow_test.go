@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"bytes"
@@ -73,7 +73,7 @@ func TestNewCLIFormsAndRemovedTaskCheck(t *testing.T) {
 		{"task", "verify", "TASK-CLI-001", "./docs", "--dry-run", "--target", "AC-01"},
 		{"task", "archive", "TASK-CLI-001", "./docs", "--format", "json"},
 		{"task", "restore", "TASK-CLI-001", "./docs", "--format", "json"},
-		{"task", "changes", "TASK-CLI-001", "./docs", "--format", "json"},
+		{"task", "changes", "TASK-CLI-001", "./docs", "--translation-input", "--format", "json"},
 	}
 	for _, args := range cases {
 		if _, _, _, err := ParseArguments(args); err != nil {
@@ -89,18 +89,30 @@ func TestNewCLIFormsAndRemovedTaskCheck(t *testing.T) {
 	if _, _, _, err := ParseArguments([]string{"changes", "./docs", "--task", "TASK-CLI-001"}); err == nil {
 		t.Fatal("changes --task must be removed in favor of task changes")
 	}
+	if options, _, _, err := ParseArguments([]string{"changes", "./docs", "--include-assets"}); err != nil || !options.ChangeForceIncludeAssets {
+		t.Fatalf("changes --include-assets was not parsed: options=%#v err=%v", options, err)
+	}
+	if options, _, _, err := ParseArguments([]string{"changes", "./docs", "--translation-input"}); err != nil || !options.ChangeTranslationInput {
+		t.Fatalf("changes --translation-input was not parsed: options=%#v err=%v", options, err)
+	}
+	if _, _, _, err := ParseArguments([]string{"changes", "./docs", "--translation-input", "--permanent-only"}); err == nil {
+		t.Fatal("translation input and permanent-only must be rejected together")
+	}
+	if _, _, _, err := ParseArguments([]string{"check", "./docs", "--include-assets"}); err == nil {
+		t.Fatal("--include-assets must be rejected outside changes commands")
+	}
 }
 
 func TestScaffoldLanguageDefaultsToProjectLocale(t *testing.T) {
 	root := t.TempDir()
 	docs := filepath.Join(root, "docs")
-	if err := os.MkdirAll(filepath.Join(root, ".docu-docu"), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Join(root, ".toudocu"), 0755); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.MkdirAll(docs, 0755); err != nil {
 		t.Fatal(err)
 	}
-	writeTestFile(t, root, ".docu-docu/config.yml", "project:\n  locale: ru-RU\n")
+	writeTestFile(t, root, ".toudocu/config.yml", "project:\n  locale: ru-RU\n")
 	options, _, _, err := ParseArguments([]string{"task", "init", docs, "--area", "CLI", "--title", "Задача", "--type", "Feature"})
 	if err != nil || options.Language != "ru" {
 		t.Fatalf("configured language = %q, err=%v", options.Language, err)
@@ -109,7 +121,7 @@ func TestScaffoldLanguageDefaultsToProjectLocale(t *testing.T) {
 	if err != nil || override.Language != "en" {
 		t.Fatalf("explicit language = %q, err=%v", override.Language, err)
 	}
-	writeTestFile(t, root, ".docu-docu/config.yml", "project:\n  locale: de\n")
+	writeTestFile(t, root, ".toudocu/config.yml", "project:\n  locale: de\n")
 	fallback, _, _, err := ParseArguments([]string{"scaffold", "module", "MOD-CORE", docs, "--title", "Core"})
 	if err != nil || fallback.Language != "en" {
 		t.Fatalf("fallback language = %q, err=%v", fallback.Language, err)
@@ -147,7 +159,7 @@ func TestSearchIndexMetadataOrderIsDeterministic(t *testing.T) {
 		Type:       "status",
 		Metadata: Metadata{
 			"status":  "Ready",
-			"owner":   "Docu-docu Team",
+			"owner":   "Toudocu Team",
 			"version": "0.0.1",
 		},
 		MetadataExtras: []MetadataExtra{{Key: "Channel", Value: "stable"}},
@@ -159,12 +171,12 @@ func TestSearchIndexMetadataOrderIsDeterministic(t *testing.T) {
 	if len(first) != 1 || len(second) != 1 || first[0].Text != second[0].Text {
 		t.Fatalf("search index changed between builds: %#v %#v", first, second)
 	}
-	want := "release status md docu docu team ready 0 0 1 stable"
+	want := "release status md toudocu team ready 0 0 1 stable"
 	if first[0].Text != want {
 		t.Fatalf("search index metadata order = %q, want %q", first[0].Text, want)
 	}
 	terms := strings.Join(metadataSearchTerms(document, true), " ")
-	if terms != "owner Docu-docu Team status Ready version 0.0.1 Channel stable" {
+	if terms != "owner Toudocu Team status Ready version 0.0.1 Channel stable" {
 		t.Fatalf("CLI metadata order = %q", terms)
 	}
 }

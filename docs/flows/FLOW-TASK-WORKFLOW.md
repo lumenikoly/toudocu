@@ -12,18 +12,18 @@
 
 ```mermaid
 flowchart TD
-    Search["docu-docu search QUERY"] --> Init["docu-docu task init"]
+    Search["toudocu search QUERY"] --> Init["toudocu task init"]
     Init --> Fill["Агент выбирает сущности и заполняет контракт"]
-    Fill --> Ready["docu-docu task ready TASK-ID"]
+    Fill --> Ready["toudocu task ready TASK-ID"]
     Ready --> Complete{"Контракт полный?"}
     Complete -->|Нет| Fill
     Complete -->|Да| Status["Агент вручную меняет Draft на Ready"]
-    Status --> Context["docu-docu task context TASK-ID"]
+    Status --> Context["toudocu task context TASK-ID"]
     Context --> Find["Найти ровно одну задачу"]
     Find --> Found{"Задача найдена однозначно?"}
     Found -->|Нет| ContextError["Вернуть код 1 без запуска команд"]
     Found -->|Да| Slice["Собрать задачу, связи, ограничения и diagnostics"]
-    Slice --> Plan["Спланировать и выполнить изменения вне Docu-docu"]
+    Slice --> Plan["Спланировать и выполнить изменения вне Toudocu"]
     Plan --> DryRun["Явно вызвать task verify --dry-run"]
     DryRun --> Check["После проверки плана вызвать task verify --run"]
     Check --> Gate["Применить task-local validation gate"]

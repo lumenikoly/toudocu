@@ -1,0 +1,4 @@
+interface:
+  display_name: "Toudocu"
+  short_description: "Set up, update, and validate Toudocu documentation"
+  default_prompt: "Use $toudocu init to explicitly set up Toudocu for this project."

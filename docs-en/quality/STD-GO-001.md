@@ -2,11 +2,11 @@
 
 - Identifier: STD-GO-001
 - Status: Active
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Scope: Repository Go code and tests
 - Last updated: 2026-08-06
 
-This standard keeps the Docu-docu implementation small, predictable,
+This standard keeps the Toudocu implementation small, predictable,
 self-contained, and verifiable on supported Go platforms.
 
 ## Rules

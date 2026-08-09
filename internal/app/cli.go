@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"encoding/json"
@@ -15,10 +15,10 @@ import (
 )
 
 func PrintHelp(w io.Writer) {
-	fmt.Fprintf(w, `Docu-docu %s
+	fmt.Fprintf(w, `Toudocu %s
 
 Использование:
-  docu-docu COMMAND [параметры]
+  toudocu COMMAND [параметры]
 
 Команды:
   check       Проверить исходную документацию без изменений
@@ -32,8 +32,8 @@ func PrintHelp(w io.Writer) {
   version     Показать версию
 
 Для справки по применимым параметрам и побочным эффектам:
-  docu-docu COMMAND --help
-  docu-docu task --help
+  toudocu COMMAND --help
+  toudocu task --help
 `, Version)
 }
 
@@ -42,128 +42,149 @@ func PrintCommandHelp(w io.Writer, topic string) {
 		"build": `Собирает автономный read-only портал и записывает output.
 
 Использование:
-  docu-docu build [docs-dir] [-o DIR] [--clean] [--open] [--strict]
+  toudocu build [docs-dir] [-o DIR] [--clean] [--open] [--strict]
                 [--exclude PATHS] [--stale-days N] [--repository-root DIR]
                 [--repository-url URL] [--repository-ref REF]
                 [--screen-map|--no-screen-map] [-t TITLE]
 
 Пример:
-  docu-docu build ./docs -o ./build/project-docs --clean
+  toudocu build ./docs -o ./build/project-docs --clean
 
 Побочные эффекты: создаёт output; --clean предварительно очищает только безопасный output.`,
 		"check": `Проверяет структуру, ссылки, ID и явные связи без изменения файлов.
 
 Использование:
-  docu-docu check [docs-dir] [--strict] [--format text|json]
+  toudocu check [docs-dir] [--strict] [--format text|json]
                 [--exclude PATHS] [--stale-days N] [--repository-root DIR]
 
 Пример:
-  docu-docu check ./docs --strict
+  toudocu check ./docs --strict
 
 Побочные эффекты: отсутствуют. Без --strict warnings не меняют exit code.`,
 		"serve": `Собирает портал и запускает локальный HTTP/editor workspace с live rebuild.
 
 Использование:
-  docu-docu serve [docs-dir] [-o DIR] [--host ADDRESS] [--port N]
+  toudocu serve [docs-dir] [-o DIR] [--host ADDRESS] [--port N]
                 [--open] [--strict] [--exclude PATHS] [--stale-days N]
                 [--repository-root DIR] [--screen-map|--no-screen-map]
                 [--no-update-check] [-t TITLE]
 
 Пример:
-  docu-docu serve ./docs --host 127.0.0.1 --port 8080
+  toudocu serve ./docs --host 127.0.0.1 --port 8080
 
-Побочные эффекты: записывает output, запускает HTTP; browser save изменяет workspace.
+Побочные эффекты: записывает output, запускает HTTP; явные browser-действия
+save, create и roadmap add изменяют workspace.
 При первом открытии canonical-портала один раз проверяет latest stable GitHub Release;
 --no-update-check отключает этот outbound-запрос.`,
 		"changes": `Строит read-only Git-backed отчёт об изменениях документации.
 
 Использование:
-  docu-docu changes [docs-dir] [--base REV|--branch-base REF]
+  toudocu changes [docs-dir] [--base REV|--branch-base REF]
                   [--target working-tree|index|HEAD|REV]
                   [--status STATUS] [--module ID] [--type TYPE]
-                  [--permanent-only] [--format text|json|markdown] [-o FILE]
-  docu-docu changes file PATH [docs-dir] [те же параметры]
+                  [--permanent-only] [--include-assets|--translation-input]
+                  [--repository-root DIR] [--format text|json|markdown] [-o FILE]
+  toudocu changes file PATH [docs-dir] [те же параметры]
+  toudocu changes feedback pending [--repository-root DIR] --json
+  toudocu changes feedback respond --input response.json [--repository-root DIR] [--json]
 
 Пример:
-  docu-docu changes ./docs --base main --target working-tree --format markdown
+  toudocu changes ./docs --base main --target working-tree --format markdown
 
-Побочные эффекты: отсутствуют; команда только читает Git и workspace.`,
+--include-assets принудительно включает binary assets независимо от changes.includeAssets.
+--translation-input включает reader-facing Markdown, work artifacts и assets,
+игнорируя changes.exclude кроме generated/** и cache/** внутри docs root.
+
+Побочные эффекты: обычные changes только читают Git и workspace; -o записывает явно
+указанный отчёт. Feedback respond пишет только local user-state вне repository
+и не изменяет Git или Markdown.`,
 		"changes-file": `Показывает detail одного изменённого пути без изменения файлов.
 
 Использование:
-  docu-docu changes file PATH [docs-dir] [--base REV|--branch-base REF]
+  toudocu changes file PATH [docs-dir] [--base REV|--branch-base REF]
                        [--target working-tree|index|HEAD|REV]
-                       [--format text|json|markdown] [-o FILE]`,
+                       [--include-assets|--translation-input]
+                       [--repository-root DIR]
+                       [--format text|json|markdown] [-o FILE]
+
+Побочные эффекты: команда только читает Git и workspace; -o записывает явно
+указанный файл отчёта.`,
 		"search": `Ищет по свежим исходным Markdown без изменения файлов.
 
 Использование:
-  docu-docu search "QUERY" [docs-dir] [--limit N] [--format text|json]
+  toudocu search "QUERY" [docs-dir] [--limit N] [--format text|json]
 
 Пример:
-  docu-docu search "task workflow" ./docs --format json`,
+  toudocu search "task workflow" ./docs --format json`,
 		"scaffold": `Атомарно создаёт один типизированный Markdown-файл.
 
 Использование:
-  docu-docu scaffold module|use-case|flow|screen|decision|standard|runbook ID
+  toudocu scaffold module|use-case|flow|screen|decision|standard|runbook ID
                    [docs-dir] --title TITLE [--lang en|ru] [--format text|json]
 
-Без --lang язык берётся из .docu-docu/config.yml; fallback — en.
+Без --lang язык берётся из .toudocu/config.yml; fallback — en.
 Пример:
-  docu-docu scaffold module MOD-CLI ./docs --title "CLI"`,
+  toudocu scaffold module MOD-CLI ./docs --title "CLI"`,
 		"task": `Операции жизненного цикла work item.
 
 Использование:
-  docu-docu task init|ready|context|verify|archive|restore|changes ...
+  toudocu task init|ready|context|verify|archive|restore|changes ...
 
 Для параметров операции:
-  docu-docu task OPERATION --help`,
+  toudocu task OPERATION --help`,
 		"task-init": `Атомарно создаёт новый Draft TASK-* или BUG-*.
 
 Использование:
-  docu-docu task init [docs-dir] --area AREA --title TITLE --type TYPE
+  toudocu task init [docs-dir] --area AREA --title TITLE --type TYPE
                     [--lang en|ru] [--format text|json]
 
 TYPE: Feature, Bug, Maintenance, Documentation или Research.
-Без --lang язык берётся из .docu-docu/config.yml; fallback — en.`,
+Без --lang язык берётся из .toudocu/config.yml; fallback — en.`,
 		"task-ready": `Проверяет полноту Draft/Ready контракта без изменения файлов.
 
 Использование:
-  docu-docu task ready TASK-ID [docs-dir] [--strict] [--format text|json]`,
+  toudocu task ready TASK-ID [docs-dir] [--strict] [--format text|json]`,
 		"task-context": `Возвращает компактный read-only контекст Ready+ задачи.
 
 Использование:
-  docu-docu task context TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]`,
+  toudocu task context TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]`,
 		"task-verify": `Планирует или выполняет доверенные команды проверки задачи.
 
 Использование:
-  docu-docu task verify TASK-ID [docs-dir] (--dry-run|--run)
+  toudocu task verify TASK-ID [docs-dir] (--dry-run|--run)
                       [--target TARGET] [--report FILE] [--timeout DURATION]
                       [--repository-root DIR] [--format text|json]
 
-Побочный эффект есть только у --run: выполняются команды задачи.`,
+--dry-run не выполняет команды. --report в любом режиме записывает JSON-файл;
+--run выполняет команды задачи.`,
 		"task-archive": `Перемещает валидную Done/Cancelled задачу в work/archive/YYYY без перезаписи.
 
 Использование:
-  docu-docu task archive TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]`,
+  toudocu task archive TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]`,
 		"task-restore": `Возвращает архивную задачу в work/ без перезаписи.
 
 Использование:
-  docu-docu task restore TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]`,
+  toudocu task restore TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]`,
 		"task-changes": `Строит единственный task-scoped read-only отчёт изменений и impact diagnostics.
 
 Использование:
-  docu-docu task changes TASK-ID [docs-dir] [--base REV|--branch-base REF]
+  toudocu task changes TASK-ID [docs-dir] [--base REV|--branch-base REF]
                        [--target working-tree|index|HEAD|REV]
-		               [--format text|json|markdown] [-o FILE]`,
-		"skill": `Управляет встроенным offline-пакетом AI-skill Docu-docu.
+                       [--include-assets|--translation-input]
+                       [--repository-root DIR]
+                       [--format text|json|markdown] [-o FILE]
+
+Побочные эффекты: команда только читает Git и workspace; -o записывает явно
+указанный файл отчёта.`,
+		"skill": `Управляет встроенным offline-пакетом AI-skill Toudocu.
 
 Использование:
-  docu-docu skill install|status|update|uninstall
+  toudocu skill install|status|update|uninstall
                   [--agent auto|codex|claude-code|copilot|all]
                   [--scope project|user] [--repository-root DIR]
 
 --repository-root доступен только для project scope. status ничего не изменяет.`,
-		"version": "Показывает версию Docu-docu без побочных эффектов.\n\nИспользование:\n  docu-docu version",
+		"version": "Показывает версию Toudocu без побочных эффектов.\n\nИспользование:\n  toudocu version",
 	}
 	if text, ok := help[topic]; ok {
 		fmt.Fprintln(w, text)
@@ -219,6 +240,7 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 	help, version := false, false
 	timeoutSpecified, hostSpecified, portSpecified := false, false, false
 	titleSpecified, languageSpecified, limitSpecified, outputSpecified := false, false, false, false
+	changesOptionSpecified := false
 	screenMapOption := ""
 	args := append([]string{}, argv...)
 	if len(args) > 0 {
@@ -228,7 +250,7 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			args = args[1:]
 		case "search":
 			if len(args) < 2 {
-				return options, false, false, fmt.Errorf("использование: docu-docu search \"<query>\" [каталог-документации]")
+				return options, false, false, fmt.Errorf("использование: toudocu search \"<query>\" [каталог-документации]")
 			}
 			options.Command, options.Query = "search", args[1]
 			args = args[2:]
@@ -237,14 +259,14 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			args = args[1:]
 			if len(args) > 0 && args[0] == "file" {
 				if len(args) < 2 {
-					return options, false, false, fmt.Errorf("использование: docu-docu changes file PATH [каталог-документации]")
+					return options, false, false, fmt.Errorf("использование: toudocu changes file PATH [каталог-документации]")
 				}
 				options.Command, options.ChangeFile = "changes-file", filepath.ToSlash(args[1])
 				args = args[2:]
 			}
 		case "scaffold":
 			if len(args) < 3 {
-				return options, false, false, fmt.Errorf("использование: docu-docu scaffold module|use-case|flow|screen|decision|standard|runbook ID [каталог-документации]")
+				return options, false, false, fmt.Errorf("использование: toudocu scaffold module|use-case|flow|screen|decision|standard|runbook ID [каталог-документации]")
 			}
 			options.Command, options.EntityKind, options.EntityID = "scaffold", args[1], args[2]
 			args = args[3:]
@@ -258,7 +280,7 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			args = args[1:]
 		case "task":
 			if len(args) < 2 {
-				return options, false, false, fmt.Errorf("использование: docu-docu task init|ready|context|verify|archive|restore ...")
+				return options, false, false, fmt.Errorf("использование: toudocu task init|ready|context|verify|archive|restore ...")
 			}
 			switch args[1] {
 			case "init":
@@ -271,7 +293,7 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 				}
 				options.Command = "task-" + args[1]
 			default:
-				return options, false, false, fmt.Errorf("использование: docu-docu task init|ready|context|verify|archive|restore ...")
+				return options, false, false, fmt.Errorf("использование: toudocu task init|ready|context|verify|archive|restore ...")
 			}
 			options.TaskID = args[2]
 			args = args[3:]
@@ -282,7 +304,7 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 		}
 	}
 	if options.Command == "" && !help && !version {
-		return options, false, false, fmt.Errorf("требуется команда; используйте docu-docu --help")
+		return options, false, false, fmt.Errorf("требуется команда; используйте toudocu --help")
 	}
 parseOptions:
 	for i := 0; i < len(args); i++ {
@@ -350,39 +372,54 @@ parseOptions:
 				options.TaskType = strings.TrimPrefix(arg, "--type=")
 			}
 		case arg == "--base":
+			changesOptionSpecified = true
 			v, e := takeArgValue(args, &i, arg)
 			if e != nil {
 				return options, false, false, e
 			}
 			options.ChangeBase = v
 		case strings.HasPrefix(arg, "--base="):
+			changesOptionSpecified = true
 			options.ChangeBase = strings.TrimPrefix(arg, "--base=")
 		case arg == "--branch-base":
+			changesOptionSpecified = true
 			v, e := takeArgValue(args, &i, arg)
 			if e != nil {
 				return options, false, false, e
 			}
 			options.ChangeBranchBase = v
 		case strings.HasPrefix(arg, "--branch-base="):
+			changesOptionSpecified = true
 			options.ChangeBranchBase = strings.TrimPrefix(arg, "--branch-base=")
 		case arg == "--status":
+			changesOptionSpecified = true
 			v, e := takeArgValue(args, &i, arg)
 			if e != nil {
 				return options, false, false, e
 			}
 			options.ChangeStatus = v
 		case strings.HasPrefix(arg, "--status="):
+			changesOptionSpecified = true
 			options.ChangeStatus = strings.TrimPrefix(arg, "--status=")
 		case arg == "--module":
+			changesOptionSpecified = true
 			v, e := takeArgValue(args, &i, arg)
 			if e != nil {
 				return options, false, false, e
 			}
 			options.ChangeModule = v
 		case strings.HasPrefix(arg, "--module="):
+			changesOptionSpecified = true
 			options.ChangeModule = strings.TrimPrefix(arg, "--module=")
 		case arg == "--permanent-only":
+			changesOptionSpecified = true
 			options.ChangePermanentOnly = true
+		case arg == "--include-assets":
+			changesOptionSpecified = true
+			options.ChangeForceIncludeAssets = true
+		case arg == "--translation-input":
+			changesOptionSpecified = true
+			options.ChangeTranslationInput = true
 		case arg == "--lang":
 			v, e := takeArgValue(args, &i, arg)
 			if e != nil {
@@ -710,7 +747,14 @@ parseOptions:
 	if options.Strict && options.Command != "build" && options.Command != "check" && options.Command != "serve" && options.Command != "task-ready" {
 		return options, false, false, fmt.Errorf("--strict недоступен для этой команды")
 	}
-	if options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes" {
+	isChangesCommand := options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes"
+	if changesOptionSpecified && !isChangesCommand {
+		return options, false, false, fmt.Errorf("--base, --branch-base, --status, --module, --permanent-only, --include-assets и --translation-input доступны только для changes")
+	}
+	if isChangesCommand {
+		if options.ChangeTranslationInput && options.ChangePermanentOnly {
+			return options, false, false, fmt.Errorf("--translation-input и --permanent-only нельзя использовать вместе")
+		}
 		if options.ChangeBranchBase != "" && options.ChangeBase != "" {
 			return options, false, false, fmt.Errorf("--base и --branch-base нельзя использовать вместе")
 		}
@@ -739,7 +783,7 @@ func splitCSV(value string) []string {
 }
 
 func configuredScaffoldLanguage(repositoryRoot string) string {
-	data, err := os.ReadFile(filepath.Join(repositoryRoot, ".docu-docu", "config.yml"))
+	data, err := os.ReadFile(filepath.Join(repositoryRoot, ".toudocu", "config.yml"))
 	if err != nil {
 		return "en"
 	}
@@ -784,6 +828,9 @@ func printCheckText(w io.Writer, model *Model) {
 
 // RunCLI executes one command and returns a process exit code.
 func RunCLI(argv []string, stdout, stderr io.Writer) int {
+	if code := runReviewFeedbackCLI(argv, stdout, stderr); code >= 0 {
+		return code
+	}
 	if topic, ok := helpTopic(argv); ok {
 		PrintCommandHelp(stdout, topic)
 		return 0

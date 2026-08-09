@@ -1,10 +1,10 @@
-package docudocu
+package toudocu
 
 import (
-	frontend "docu-docu/internal/site"
 	"html/template"
 	"io"
 	"net/http"
+	frontend "toudocu/internal/site"
 )
 
 func (s *documentationServer) serveChangesUI(w http.ResponseWriter, request *http.Request) {
@@ -36,7 +36,7 @@ func (s *documentationServer) serveChangesUI(w http.ResponseWriter, request *htt
 			{URL: "/assets/" + mustFrontendAsset("codemirror.js"), Module: true},
 			{URL: "/assets/" + mustFrontendAsset("changes.js"), Module: true},
 		},
-		Bootstrap: workspacePageBootstrap(uiModel, "changes/index.html", "../assets/", frontend.Capabilities{Changes: true}),
+		Bootstrap: workspacePageBootstrap(uiModel, "changes/index.html", "../assets/", frontend.Capabilities{Changes: true, Review: !s.translationReadOnly}),
 		Header:    template.HTML(workspaceHeader(uiModel, workspaceChanges)),
 	})
 	if err != nil {

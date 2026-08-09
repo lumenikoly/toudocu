@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"context"
@@ -248,7 +248,7 @@ func executeTaskVerify(model *Model, options Options, stdout, stderr io.Writer, 
 	startedAt := time.Now().UTC()
 	if err := rejectTranslationTaskModel(model); err != nil {
 		report := TaskVerifyReport{
-			SchemaVersion: 1, Kind: "task-verify", Generator: GeneratorInfo{Name: "Docu-docu", Version: Version},
+			SchemaVersion: 1, Kind: "task-verify", Generator: GeneratorInfo{Name: "Toudocu", Version: Version},
 			Task: taskSnapshot(nil, options.TaskID), StartedAt: startedAt, Mode: options.VerifyMode, Target: options.Target,
 			ValidationIssues: []Issue{{Severity: "error", Code: "translation-root-read-only", Message: err.Error()}},
 			Issues:           []Issue{}, Commands: []CommandExecutionResult{}, Criteria: []CriterionExecutionResult{}, Targets: []TargetExecutionResult{},
@@ -259,7 +259,7 @@ func executeTaskVerify(model *Model, options Options, stdout, stderr io.Writer, 
 	item, validationIssues := taskVerifyValidation(model, options.TaskID, options.Target, options.VerifyMode)
 	report := TaskVerifyReport{
 		SchemaVersion: 1, Kind: "task-verify",
-		Generator: GeneratorInfo{Name: "Docu-docu", Version: Version},
+		Generator: GeneratorInfo{Name: "Toudocu", Version: Version},
 		Task:      taskSnapshot(item, options.TaskID), StartedAt: startedAt, Mode: options.VerifyMode, Target: options.Target,
 		ValidationIssues: append([]Issue{}, validationIssues...),
 		Issues:           append([]Issue{}, model.Issues...),
@@ -359,7 +359,7 @@ func writeReportAtomically(target string, data []byte) error {
 	if err := os.MkdirAll(directory, 0700); err != nil {
 		return err
 	}
-	temporary, err := os.CreateTemp(directory, ".docu-docu-task-report-*")
+	temporary, err := os.CreateTemp(directory, ".toudocu-task-report-*")
 	if err != nil {
 		return err
 	}

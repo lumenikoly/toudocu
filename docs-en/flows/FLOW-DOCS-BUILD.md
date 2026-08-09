@@ -13,7 +13,7 @@ exit codes, and safe cleanup are defined by
 
 ```mermaid
 flowchart TD
-    Start["docu-docu build"] --> Resolve["Normalize input, output and repository root"]
+    Start["toudocu build"] --> Resolve["Normalize input, output and repository root"]
     Resolve --> Safe{"Are the paths safe?"}
     Safe -->|No| Reject["Reject the operation without deleting or writing"]
     Safe -->|Yes| Read["Read Markdown and local assets"]

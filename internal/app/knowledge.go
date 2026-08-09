@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"fmt"
@@ -763,7 +763,7 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 		DocumentationImpact: strings.TrimSpace(documentationImpactSection.Text),
 		DocumentationPaths:  documentationPathsFor(model, document, item),
 		Blocker:             strings.TrimSpace(blockerSection.Text),
-		ownerDoc:            document, statusName: statusName,
+		ownerDoc:            document, statusName: statusName, useCaseOmitted: useCaseOmitted,
 	}
 }
 

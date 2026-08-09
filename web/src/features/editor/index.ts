@@ -1,16 +1,19 @@
 import { registerMessages, text } from "../../core/locale";
 import { editorMessages } from "../../core/messages.ru";
 import { closeDialogOnEscape } from "../../components";
+import { diagnosticsForEditor, editorResponseIsCurrent } from "./state";
 registerMessages(editorMessages);
 (() => {
     'use strict';
-    const page: any = window.DocuDocuPage;
+    const page: any = window.ToudocuPage;
     const API: any = page?.runtime === 'serve' && page.capabilities?.editor ? page.endpoints?.editor : '';
     const $: any = (selector: any, root: any = document) => root.querySelector(selector);
     const state: any = {
         files: [], templates: [], revision: '', etag: '', current: null,
         baseline: '', dirty: false, external: null, view: 'editor', editor: null,
     };
+    let validationGeneration = 0;
+    let previewGeneration = 0;
     const elements: any = {
         tree: $('[data-tree]'), treeList: $('[data-file-tree]'), filter: $('[data-file-filter]'),
         path: $('[data-current-path]'), dirty: $('[data-dirty-state]'), save: $('[data-save]'),
@@ -45,7 +48,7 @@ registerMessages(editorMessages);
     function actionOptions(action: any, body: any, method: any = 'POST') {
         return {
             method,
-            headers: { 'Content-Type': 'application/json', 'X-Docu-docu-Action': action, Accept: 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-Toudocu-Action': action, Accept: 'application/json' },
             body: JSON.stringify(body),
         };
     }
@@ -83,15 +86,15 @@ registerMessages(editorMessages);
         state.editor = null;
         elements.host.replaceChildren();
         elements.fallback.hidden = true;
-        if (window.DocuDocuCodeMirror) {
-            state.editor = window.DocuDocuCodeMirror.create({ parent: elements.host, doc: content, language, onChange: onEditorChange });
+        if (window.ToudocuCodeMirror) {
+            state.editor = window.ToudocuCodeMirror.create({ parent: elements.host, doc: content, language, onChange: onEditorChange });
         }
         else {
             elements.fallback.hidden = false;
             elements.fallback.value = content;
         }
     }
-    document.addEventListener('docu-docu:themechange', (event: any) => {
+    document.addEventListener('toudocu:themechange', (event: any) => {
         state.editor?.setTheme?.(event.detail.theme);
     });
     function renderTree() {
@@ -173,6 +176,8 @@ registerMessages(editorMessages);
         return data.file;
     }
     function applyFile(file: any) {
+        validationGeneration++;
+        previewGeneration++;
         state.current = file;
         state.baseline = file.content;
         state.external = null;
@@ -203,7 +208,7 @@ registerMessages(editorMessages);
     function renderDiagnostics(diagnostics: any) {
         elements.diagnostics.replaceChildren();
         elements.diagnosticCount.textContent = String(diagnostics.length);
-        state.editor?.setDiagnostics?.(diagnostics);
+        state.editor?.setDiagnostics?.(diagnosticsForEditor(diagnostics, state.current?.path || ''));
         diagnostics.forEach((diagnostic: any) => {
             const item: any = document.createElement('li');
             const button: any = document.createElement('button');
@@ -231,25 +236,39 @@ registerMessages(editorMessages);
     async function validateCurrent() {
         if (!state.current)
             return;
+        const requestPath: any = state.current.path;
+        const requestGeneration: any = ++validationGeneration;
+        const content: any = currentContent();
         try {
-            const { data }: any = await request(`${API}/validate`, actionOptions('validate', { path: state.current.path, content: currentContent() }));
+            const { data }: any = await request(`${API}/validate`, actionOptions('validate', { path: requestPath, content }));
+            if (!editorResponseIsCurrent(requestPath, state.current?.path || '', requestGeneration, validationGeneration))
+                return;
             renderDiagnostics(data.diagnostics || []);
             if (state.current.language === 'markdown' && state.view !== 'editor')
                 updatePreview();
         }
         catch (error: any) {
+            if (!editorResponseIsCurrent(requestPath, state.current?.path || '', requestGeneration, validationGeneration))
+                return;
             announce(error.message, true);
         }
     }
     async function updatePreview() {
         if (state.current?.language !== 'markdown')
             return;
+        const requestPath: any = state.current.path;
+        const requestGeneration: any = ++previewGeneration;
+        const content: any = currentContent();
         try {
-            const { data }: any = await request(`${API}/preview`, actionOptions('preview', { path: state.current.path, content: currentContent() }));
+            const { data }: any = await request(`${API}/preview`, actionOptions('preview', { path: requestPath, content }));
+            if (!editorResponseIsCurrent(requestPath, state.current?.path || '', requestGeneration, previewGeneration))
+                return;
             elements.preview.innerHTML = `<article class="preview-document">${data.html}</article>`;
             renderDiagnostics(data.diagnostics || []);
         }
         catch (error: any) {
+            if (!editorResponseIsCurrent(requestPath, state.current?.path || '', requestGeneration, previewGeneration))
+                return;
             elements.preview.textContent = error.message;
         }
     }

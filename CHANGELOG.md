@@ -2,6 +2,20 @@
 
 ## 0.0.1
 
+- Canonical Changes workspace получил repository-wide local review:
+  персистентные anchored discussions, changed/linked files, FIFO feedback
+  snapshots и agent responses через `changes feedback pending|respond`. UI и
+  CLI не запускают агента и не меняют Git; static и translation runtimes review
+  capability не получают.
+- Serve-only CodeMirror bundle закрепляет Go 6.0.1, Java 6.0.2 и
+  JavaScript/TypeScript 6.2.5 language packages; остальные UTF-8 files
+  сохраняют plain-text selection fallback.
+- `changes`, `changes file` и `task changes` получили явные
+  `--include-assets` и `--translation-input`: первый переопределяет фильтр
+  assets, второй формирует полный reader-facing вход для translation workflow.
+- Skill workflow `$toudocu translate diff` переводит staged, unstaged и
+  untracked canonical-изменения относительно `HEAD` во все настроенные locale
+  profiles, сохраняя изоляцию и отдельный результат каждого target.
 - Release workflow поддерживает stable и RC-каналы: RC публикуется как GitHub
   prerelease с тегом `X.Y.Z-rc.N` и устанавливается по явно выбранной версии.
 - Markdown полностью переведён на закреплённый Goldmark `v1.8.5`: один
@@ -22,7 +36,7 @@
   только явными serve capabilities.
 - Migration: прямое открытие `index.html` с диска больше не является
   гарантированным контрактом. Для локальной работы используйте
-  `docu-docu serve`; для публикации — `docu-docu build` и static HTTP hosting.
+  `toudocu serve`; для публикации — `toudocu build` и static HTTP hosting.
   Новая команда preview не добавлена.
 - Portal, Editor и Changes получили единый compact workspace shell, project
   branding, навигацию и синхронные темы; CodeMirror меняет оформление без
@@ -52,11 +66,11 @@
   воспроизводимый портал с поиском, темами, branding и локализацией.
 - Workflow рабочих задач включает typed scaffolds, readiness, контекст, проверку
   и traceability; все публичные JSON-отчёты используют schema v1.
-- Skill `docu-docu` добавляет явные agent-workflow для инициализации,
+- Skill `toudocu` добавляет явные agent-workflow для инициализации,
   проверки актуальности исходной документации и перевода locale tree.
 - Релиз собирается для шести комбинаций OS/architecture, включая Windows ARM64,
   с единым quality gate, checksums, лицензией
   Apache-2.0 и notices для встроенных сторонних компонентов.
 - POSIX- и PowerShell-installers автоматически выбирают релизный
   бинарник, проверяют SHA-256 и без `sudo` устанавливают или
-  обновляют Docu-docu в профиле пользователя.
+  обновляют Toudocu в профиле пользователя.

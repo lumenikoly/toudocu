@@ -2,7 +2,7 @@
 
 - Identifier: MOD-MODEL
 - Status: Completed
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-08-05
 
 The module reads the documentation directory, builds the associated project model and generates

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"docu-docu/skills"
+	"toudocu/skills"
 )
 
 func testTarget(t *testing.T) (Target, skills.Bundle) {
@@ -242,7 +242,7 @@ func TestBoundaryEscapeAndParentSymlink(t *testing.T) {
 	if err := os.Symlink(outside, filepath.Join(root, ".agents")); err != nil {
 		t.Fatal(err)
 	}
-	target := Target{Agent: "codex", Scope: Project, Boundary: root, Path: filepath.Join(root, ".agents", "skills", "docu-docu")}
+	target := Target{Agent: "codex", Scope: Project, Boundary: root, Path: filepath.Join(root, ".agents", "skills", "toudocu")}
 	if Inspect(target, bundle).State != UnsafePath {
 		t.Fatal("symlink parent accepted")
 	}
@@ -296,7 +296,7 @@ func TestInstallDoesNotExecuteBundledContent(t *testing.T) {
 	target, _ := testTarget(t)
 	sentinel := filepath.Join(t.TempDir(), "executed")
 	script := []byte("#!/bin/sh\ntouch " + sentinel + "\n")
-	bundle := skills.Bundle{ID: skills.SkillID, Version: skills.SkillVersion, Checksum: "test", Files: []skills.File{{Path: "SKILL.md", Data: []byte("---\nname: docu-docu\n---\n"), Mode: 0o644}, {Path: "scripts/run.sh", Data: script, Mode: 0o755}}}
+	bundle := skills.Bundle{ID: skills.SkillID, Version: skills.SkillVersion, Checksum: "test", Files: []skills.File{{Path: "SKILL.md", Data: []byte("---\nname: toudocu\n---\n"), Mode: 0o644}, {Path: "scripts/run.sh", Data: script, Mode: 0o755}}}
 	result := Execute(BuildPlan(Install, target, bundle), "0.0.1")
 	if result.Error != nil {
 		t.Fatal(result.Error)

@@ -29,13 +29,13 @@ choosing, launches all or one target and receives a full report.
 ## Main scenario
 
 1. The performer calls
-   `docu-docu task verify TASK-ID ./docs --dry-run --format json`.
-2. Docu-docu finds the task and applies the task-local validation gate to it.
-3. Docu-docu lists the unique `AC-*`, `ALL`, and `DOCS` commands.
+   `toudocu task verify TASK-ID ./docs --dry-run --format json`.
+2. Toudocu finds the task and applies the task-local validation gate to it.
+3. Toudocu lists the unique `AC-*`, `ALL`, and `DOCS` commands.
 4. Dry-run returns commands with status `planned` without executing anything.
 5. After checking the plan, the executor explicitly calls `task verify --run`.
-6. Docu-docu sequentially runs the selected commands from the repository root.
-7. Docu-docu connects command results with criteria and generates
+6. Toudocu sequentially runs the selected commands from the repository root.
+7. Toudocu connects command results with criteria and generates
    `TaskVerifyReport`.
 8. The executor uses the final status, exit code and command output to
    accepting the result.

@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"bytes"
@@ -119,10 +119,13 @@ func TestTranslationRootAllowsReadOnlyPortalWithoutEditor(t *testing.T) {
 	}
 	home := httptest.NewRecorder()
 	handler.ServeHTTP(home, httptest.NewRequest(http.MethodGet, "/", nil))
-	if home.Code != http.StatusOK || strings.Contains(home.Body.String(), "/_docu-docu/editor/") {
+	if home.Code != http.StatusOK || strings.Contains(home.Body.String(), "/_toudocu/editor/") {
 		t.Fatalf("home: %d %s", home.Code, home.Body.String())
 	}
-	for _, route := range []string{editorUIPath, editorAPIBase + "/files", rebuildEndpoint} {
+	if strings.Contains(home.Body.String(), `"review":true`) || strings.Contains(home.Body.String(), reviewAPIBase) {
+		t.Fatalf("translation home exposed review capability: %s", home.Body.String())
+	}
+	for _, route := range []string{editorUIPath, editorAPIBase + "/files", reviewAPIBase + "/repository/changes", rebuildEndpoint} {
 		response := httptest.NewRecorder()
 		handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, route, nil))
 		if response.Code != http.StatusNotFound {

@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"bytes"
@@ -40,7 +40,7 @@ func newChangesRepository(t *testing.T) (string, string) {
 	docs := filepath.Join(root, "docs")
 	gitTestRun(t, root, "init", "-q")
 	gitTestRun(t, root, "config", "user.email", "test@example.test")
-	gitTestRun(t, root, "config", "user.name", "Docu-docu Test")
+	gitTestRun(t, root, "config", "user.name", "Toudocu Test")
 	writeChangesTestFile(t, filepath.Join(docs, "modules", "MOD-CORE.md"), "# MOD-CORE: Core\n\n- Status: Active\n\n## Rules\n\nOriginal.\n")
 	writeChangesTestFile(t, filepath.Join(docs, "use-cases", "UC-CORE-01.md"), "# UC-CORE-01: Open\n\n## Result\n\nOpened.\n")
 	gitTestRun(t, root, "add", "docs")
@@ -55,6 +55,52 @@ func TestParseNameStatusNULPaths(t *testing.T) {
 	}
 	if len(changes) != 2 || changes[0].status != "renamed" || changes[0].oldPath != "docs/old name.md" || changes[0].path != "docs/новое имя.md" || changes[1].status != "type-changed" {
 		t.Fatalf("unexpected changes: %#v", changes)
+	}
+}
+
+func TestStatusStatesPreservePathsWithSpaces(t *testing.T) {
+	root, docs := newChangesRepository(t)
+	path := filepath.Join(docs, "modules", "file with spaces.md")
+	writeChangesTestFile(t, path, "# Before\n")
+	gitTestRun(t, root, "add", "docs/modules/file with spaces.md")
+	gitTestRun(t, root, "commit", "-q", "-m", "add spaced path")
+	writeChangesTestFile(t, path, "# Unstaged\n")
+
+	source, err := openGitChangeSource(docs, 60)
+	if err != nil {
+		t.Fatal(err)
+	}
+	states, err := source.statusStates()
+	if err != nil {
+		t.Fatal(err)
+	}
+	state := states["docs/modules/file with spaces.md"]
+	if !state.Unstaged || state.Staged {
+		t.Fatalf("unstaged path state lost: %#v in %#v", state, states)
+	}
+
+	gitTestRun(t, root, "add", "docs/modules/file with spaces.md")
+	states, err = source.statusStates()
+	if err != nil {
+		t.Fatal(err)
+	}
+	state = states["docs/modules/file with spaces.md"]
+	if !state.Staged || state.Unstaged {
+		t.Fatalf("staged path state lost: %#v in %#v", state, states)
+	}
+
+	renamed := filepath.Join(docs, "modules", "renamed with spaces.md")
+	if err := os.Rename(path, renamed); err != nil {
+		t.Fatal(err)
+	}
+	gitTestRun(t, root, "add", "-A", "docs/modules")
+	states, err = source.statusStates()
+	if err != nil {
+		t.Fatal(err)
+	}
+	state = states["docs/modules/renamed with spaces.md"]
+	if !state.Staged {
+		t.Fatalf("renamed path state lost: %#v in %#v", state, states)
 	}
 }
 
@@ -76,6 +122,100 @@ func TestChangesForceIncludeAssetsOverridesConfigOnly(t *testing.T) {
 	}
 	if len(report.Changes) != 1 || report.Changes[0].Path != "docs/images/diagram.png" || !report.Changes[0].Binary {
 		t.Fatalf("asset override lost: %#v", report.Changes)
+	}
+
+	var stdout, stderr strings.Builder
+	code := RunCLI([]string{
+		"changes", docs, "--base", "HEAD", "--target", "working-tree",
+		"--include-assets", "--format", "json",
+	}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("changes --include-assets exit=%d stderr=%s", code, stderr.String())
+	}
+	var cliReport ChangeSetReport
+	if err := json.Unmarshal([]byte(stdout.String()), &cliReport); err != nil {
+		t.Fatal(err)
+	}
+	if len(cliReport.Changes) != 1 || cliReport.Changes[0].Path != "docs/images/diagram.png" || !cliReport.Changes[0].Binary {
+		t.Fatalf("CLI asset override lost: %#v", cliReport.Changes)
+	}
+}
+
+func TestChangesTranslationInputOverridesReaderFacingFilters(t *testing.T) {
+	root, docs := newChangesRepository(t)
+	writeSiteConfig(t, root, "changes:\n  includeTaskArtifacts: false\n  includeAssets: false\n  exclude:\n    - docs/guides/**\n    - docs/images/**\n")
+	writeChangesTestFile(t, filepath.Join(docs, "work", "TASK-CLI-001.md"), "# TASK-CLI-001: Translate\n")
+	writeChangesTestFile(t, filepath.Join(docs, "guides", "reader.md"), "# Reader guide\n")
+	writeChangesTestFile(t, filepath.Join(docs, "images", "diagram.png"), "\x89PNG\r\n\x1a\nasset")
+	writeChangesTestFile(t, filepath.Join(docs, "generated", "ignored.md"), "# Generated\n")
+
+	report, err := BuildDocumentationChanges(Options{
+		InputDirectory: docs, RepositoryRoot: root, ChangeBase: "HEAD",
+		ChangeTarget: "working-tree", ChangeTranslationInput: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	paths := map[string]bool{}
+	for _, change := range report.Changes {
+		paths[change.Path] = true
+	}
+	for _, expected := range []string{"docs/work/TASK-CLI-001.md", "docs/guides/reader.md", "docs/images/diagram.png"} {
+		if !paths[expected] {
+			t.Errorf("translation input omitted %s: %#v", expected, paths)
+		}
+	}
+	if paths["docs/generated/ignored.md"] {
+		t.Fatalf("translation input included generated output: %#v", paths)
+	}
+
+	var stdout, stderr strings.Builder
+	code := RunCLI([]string{
+		"changes", docs, "--repository-root", root, "--base", "HEAD",
+		"--target", "working-tree", "--translation-input", "--format", "json",
+	}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("changes --translation-input exit=%d stderr=%s", code, stderr.String())
+	}
+	var cliReport ChangeSetReport
+	if err := json.Unmarshal([]byte(stdout.String()), &cliReport); err != nil {
+		t.Fatal(err)
+	}
+	if len(cliReport.Changes) != len(report.Changes) {
+		t.Fatalf("CLI translation input differs from API: %#v", cliReport.Changes)
+	}
+}
+
+func TestChangesUsesNestedRepositoryRootConfiguration(t *testing.T) {
+	gitRoot, _ := newChangesRepository(t)
+	projectRoot := filepath.Join(gitRoot, "packages", "app")
+	docs := filepath.Join(projectRoot, "docs")
+	writeChangesTestFile(t, filepath.Join(docs, "index.md"), "# Nested\n")
+	gitTestRun(t, gitRoot, "add", "packages/app/docs")
+	gitTestRun(t, gitRoot, "commit", "-q", "-m", "nested baseline")
+	writeSiteConfig(t, gitRoot, "changes:\n  includeAssets: true\n")
+	writeSiteConfig(t, projectRoot, "changes:\n  includeAssets: true\n  exclude:\n    - docs/images/**\n")
+	writeChangesTestFile(t, filepath.Join(docs, "images", "diagram.png"), "\x89PNG\r\n\x1a\nasset")
+
+	nested, err := BuildDocumentationChanges(Options{
+		InputDirectory: docs, RepositoryRoot: projectRoot,
+		ChangeBase: "HEAD", ChangeTarget: "working-tree",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(nested.Changes) != 0 {
+		t.Fatalf("nested repository config was not applied relative to its root: %#v", nested.Changes)
+	}
+	gitLevel, err := BuildDocumentationChanges(Options{
+		InputDirectory: docs, RepositoryRoot: gitRoot,
+		ChangeBase: "HEAD", ChangeTarget: "working-tree",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(gitLevel.Changes) != 1 || gitLevel.Changes[0].Path != "packages/app/docs/images/diagram.png" {
+		t.Fatalf("Git-level configuration was not distinguished: %#v", gitLevel.Changes)
 	}
 }
 
@@ -569,6 +709,66 @@ func TestTaskImpactUsesSelectedTargetTaskDocument(t *testing.T) {
 	}
 }
 
+func TestTaskImpactResolvesRelativeDocumentationLinks(t *testing.T) {
+	root, docs := newChangesRepository(t)
+	taskPath := filepath.Join(docs, "work", "TASK-CORE-001.md")
+	writeChangesTestFile(t, taskPath, "# TASK-CORE-001: Change\n\n## Documentation impact\n\nUpdate [the core module](../modules/MOD-CORE.md) and [local support](./support.md).\n")
+	writeChangesTestFile(t, filepath.Join(docs, "work", "support.md"), "# Support\n\nOriginal.\n")
+	gitTestRun(t, root, "add", "docs/work/TASK-CORE-001.md", "docs/work/support.md")
+	gitTestRun(t, root, "commit", "-q", "-m", "add task")
+	writeChangesTestFile(t, filepath.Join(docs, "modules", "MOD-CORE.md"), "# MOD-CORE: Core\n\nChanged.\n")
+	writeChangesTestFile(t, filepath.Join(docs, "work", "support.md"), "# Support\n\nChanged.\n")
+
+	report, err := BuildDocumentationChanges(Options{InputDirectory: docs, ChangeBase: "HEAD", ChangeTarget: "working-tree", ChangeTaskID: "TASK-CORE-001"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.TaskImpact == nil || len(report.TaskImpact.Declared) != 2 {
+		t.Fatalf("relative documentation impact was not resolved: %#v", report.TaskImpact)
+	}
+	declared := map[string]TaskImpactEntry{}
+	for _, entry := range report.TaskImpact.Declared {
+		declared[entry.Path] = entry
+	}
+	for _, path := range []string{"docs/modules/MOD-CORE.md", "docs/work/support.md"} {
+		if entry, ok := declared[path]; !ok || !entry.Changed {
+			t.Fatalf("unexpected declared impact for %s: %#v", path, report.TaskImpact.Declared)
+		}
+	}
+	for _, diagnostic := range report.TaskImpact.Diagnostics {
+		if diagnostic.Code == "undeclared-document-change" {
+			t.Fatalf("resolved relative link was still reported as undeclared: %#v", report.TaskImpact.Diagnostics)
+		}
+	}
+}
+
+func TestTaskChangesSelectsExactTaskIDFromHeading(t *testing.T) {
+	root, docs := newChangesRepository(t)
+	exactPath := filepath.Join(docs, "work", "custom-name.md")
+	prefixPath := filepath.Join(docs, "work", "TASK-CORE-0010.md")
+	writeChangesTestFile(t, exactPath, "# TASK-CORE-001: Exact\n\n## Documentation impact\n\nNo changes.\n")
+	writeChangesTestFile(t, prefixPath, "# TASK-CORE-0010: Prefix\n\n## Documentation impact\n\nNo changes.\n")
+	gitTestRun(t, root, "add", "docs/work")
+	gitTestRun(t, root, "commit", "-q", "-m", "add tasks")
+	writeChangesTestFile(t, exactPath, "# TASK-CORE-001: Exact\n\nChanged.\n")
+	writeChangesTestFile(t, prefixPath, "# TASK-CORE-0010: Prefix\n\nChanged.\n")
+
+	report, err := BuildDocumentationChanges(Options{InputDirectory: docs, ChangeBase: "HEAD", ChangeTarget: "working-tree", ChangeTaskID: "TASK-CORE-001"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.taskContext == nil || report.taskContext.path != "docs/work/custom-name.md" {
+		t.Fatalf("wrong task document selected: %#v", report.taskContext)
+	}
+	if report.TaskImpact == nil || len(report.TaskImpact.TaskChanges) != 1 || report.TaskImpact.TaskChanges[0].Path != "docs/work/custom-name.md" {
+		t.Fatalf("task changes used a filename substring: %#v", report.TaskImpact)
+	}
+	filterDocumentationChanges(report, Options{ChangeTaskID: "TASK-CORE-001"})
+	if len(report.Changes) != 1 || report.Changes[0].Path != "docs/work/custom-name.md" {
+		t.Fatalf("task filter used a filename substring: %#v", report.Changes)
+	}
+}
+
 func TestCommittedInBranchGitState(t *testing.T) {
 	root, docs := newChangesRepository(t)
 	writeChangesTestFile(t, filepath.Join(docs, "modules", "MOD-CORE.md"), "# MOD-CORE: Core\n\nCommitted branch change.\n")
@@ -585,7 +785,7 @@ func TestCommittedInBranchGitState(t *testing.T) {
 
 func TestTaskFilterKeepsDeclaredAndEntityRelatedChanges(t *testing.T) {
 	root := t.TempDir()
-	writeChangesTestFile(t, filepath.Join(root, "docs/work/TASK-AUTH-1.md"), "# TASK-AUTH-1\n\n## Влияние на документацию\n\n- docs/modules/MOD-AUTH.md\n")
+	writeChangesTestFile(t, filepath.Join(root, "docs/work/TASK-AUTH-1.md"), "# TASK-AUTH-1: Auth change\n\n## Влияние на документацию\n\n- docs/modules/MOD-AUTH.md\n")
 	report := &ChangeSetReport{Repository: ChangeRepository{Root: root}, Summary: ChangeSummary{Entities: map[string]int{}, Classifications: map[string]int{}}, Changes: []DocumentationChange{
 		{Path: "docs/work/TASK-AUTH-1.md", Classification: "work-artifact"},
 		{Path: "docs/modules/MOD-AUTH.md", Classification: "permanent-documentation", EntitiesAfter: []ChangeEntity{{ID: "MOD-AUTH", Type: "module"}}},
@@ -669,7 +869,7 @@ func TestChangesUIAndMethodContract(t *testing.T) {
 	server, _ := changesHTTPServer(t)
 	page := httptest.NewRecorder()
 	server.ServeHTTP(page, httptest.NewRequest(http.MethodGet, changesUIPath, nil))
-	for _, marker := range []string{"Изменения документации", "data-file-list", "data-branch-base", "data-target-revision", "/assets/changes.js", "/assets/codemirror.js"} {
+	for _, marker := range []string{">Изменения<", "data-file-list", "data-discussions-panel", "data-review-composer", "data-branch-base", "data-target-revision", "/assets/changes.js", "/assets/codemirror.js"} {
 		if !strings.Contains(page.Body.String(), marker) {
 			t.Fatalf("changes UI missing %q", marker)
 		}

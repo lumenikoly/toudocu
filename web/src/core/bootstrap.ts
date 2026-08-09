@@ -33,11 +33,12 @@ export interface PageBootstrap {
     diagrams: boolean;
     editor: boolean;
     changes: boolean;
+    review: boolean;
     rebuild: boolean;
     taskWorkspace: boolean;
     updateCheck: boolean;
   };
-  endpoints?: Partial<Record<"editor" | "changes" | "rebuild" | "version", string>>;
+  endpoints?: Partial<Record<"editor" | "changes" | "review" | "rebuild" | "version", string>>;
 }
 
 export type BootstrapResult =
@@ -65,7 +66,7 @@ export function parseBootstrap(value: unknown): BootstrapResult {
 }
 
 export function readBootstrap(root: Document = document): BootstrapResult {
-  const node = root.getElementById("docu-docu-page");
+  const node = root.getElementById("toudocu-page");
   if (!node?.textContent) return { ok: false, reason: "bootstrap unavailable" };
   try {
     return parseBootstrap(JSON.parse(node.textContent));
@@ -75,7 +76,7 @@ export function readBootstrap(root: Document = document): BootstrapResult {
 }
 
 const result = readBootstrap();
-if (result.ok) window.DocuDocuPage = result.value;
+if (result.ok) window.ToudocuPage = result.value;
 else {
   document.documentElement.dataset.bootstrapError = result.reason;
   const messages = catalog(document.documentElement.lang);

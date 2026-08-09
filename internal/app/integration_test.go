@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"crypto/sha256"
@@ -1128,7 +1128,7 @@ func TestGenerateMermaidSiteAssetsAndMarkup(t *testing.T) {
 		t.Fatal(err)
 	}
 	html := string(htmlBytes)
-	for _, part := range []string{`data-mermaid-diagram`, `class="mermaid-source"`, `../assets/portal.js`, `id="docu-docu-page"`, "Показать исходный код"} {
+	for _, part := range []string{`data-mermaid-diagram`, `class="mermaid-source"`, `../assets/portal.js`, `id="toudocu-page"`, "Показать исходный код"} {
 		if !strings.Contains(html, part) {
 			t.Fatalf("Mermaid page missing %q: %s", part, html)
 		}
@@ -1248,6 +1248,50 @@ func TestCLIArguments(t *testing.T) {
 	}
 }
 
+func TestChangeFlagsRejectedOutsideChanges(t *testing.T) {
+	options := [][]string{
+		{"--base=HEAD"}, {"--base", "HEAD"},
+		{"--branch-base=main"}, {"--branch-base", "main"},
+		{"--status=modified"}, {"--status", "modified"},
+		{"--module=MOD-CLI"}, {"--module", "MOD-CLI"},
+		{"--permanent-only"},
+		{"--include-assets"},
+		{"--translation-input"},
+	}
+	nonChangesCommands := [][]string{
+		{"build", "./docs"},
+		{"check", "./docs"},
+		{"serve", "./docs"},
+		{"search", "query", "./docs"},
+		{"scaffold", "module", "MOD-TEST", "./docs", "--title", "Test"},
+		{"task", "init", "./docs", "--area", "TEST", "--title", "Test", "--type", "Bug"},
+		{"task", "ready", "BUG-CLI-001", "./docs"},
+		{"task", "context", "BUG-CLI-001", "./docs"},
+		{"task", "verify", "BUG-CLI-001", "./docs", "--dry-run"},
+		{"task", "archive", "BUG-CLI-001", "./docs"},
+		{"task", "restore", "BUG-CLI-001", "./docs"},
+	}
+	changesCommands := [][]string{
+		{"changes", "./docs"},
+		{"changes", "file", "docs/index.md", "./docs"},
+		{"task", "changes", "BUG-CLI-001", "./docs"},
+	}
+	for _, option := range options {
+		for _, command := range nonChangesCommands {
+			args := append(append([]string{}, command...), option...)
+			if _, _, _, err := ParseArguments(args); err == nil || !strings.Contains(err.Error(), "только для changes") {
+				t.Fatalf("changes-only option %v must be rejected by %v, got %v", option, command, err)
+			}
+		}
+		for _, command := range changesCommands {
+			args := append(append([]string{}, command...), option...)
+			if _, _, _, err := ParseArguments(args); err != nil {
+				t.Fatalf("changes-only option %v must be accepted by %v: %v", option, command, err)
+			}
+		}
+	}
+}
+
 func TestContextualHelp(t *testing.T) {
 	tests := []struct {
 		args      []string
@@ -1255,11 +1299,13 @@ func TestContextualHelp(t *testing.T) {
 		forbidden []string
 	}{
 		{[]string{"check", "--help"}, []string{"Побочные эффекты: отсутствуют", "--strict", "--format text|json"}, []string{"--host", "--clean"}},
-		{[]string{"serve", "--help"}, []string{"HTTP/editor workspace", "--host ADDRESS", "browser save"}, []string{"--base REV"}},
+		{[]string{"serve", "--help"}, []string{"HTTP/editor workspace", "--host ADDRESS", "roadmap add"}, []string{"--base REV"}},
+		{[]string{"changes", "--help"}, []string{"--include-assets", "--translation-input", "-o записывает явно"}, []string{"--report"}},
 		{[]string{"task", "--help"}, []string{"init|ready|context|verify|archive|restore|changes"}, []string{"требуется TASK-ID"}},
-		{[]string{"task", "changes", "--help"}, []string{"единственный task-scoped", "TASK-ID"}, []string{"--task"}},
-		{[]string{"scaffold", "--help"}, []string{".docu-docu/config.yml", "fallback — en"}, []string{"--host"}},
-		{[]string{"changes", "file", "--help"}, []string{"одного изменённого пути", "PATH"}, []string{"--task"}},
+		{[]string{"task", "verify", "--help"}, []string{"--dry-run не выполняет команды", "--report в любом режиме записывает JSON-файл"}, []string{"--include-assets", "--translation-input"}},
+		{[]string{"task", "changes", "--help"}, []string{"единственный task-scoped", "TASK-ID", "--translation-input"}, []string{"--task"}},
+		{[]string{"scaffold", "--help"}, []string{".toudocu/config.yml", "fallback — en"}, []string{"--host"}},
+		{[]string{"changes", "file", "--help"}, []string{"одного изменённого пути", "PATH", "--translation-input"}, []string{"--task"}},
 	}
 	for _, test := range tests {
 		var stdout, stderr strings.Builder
@@ -1405,7 +1451,7 @@ func TestWorkItemPlanChecklistAllowed(t *testing.T) {
 			"AC-01": "go test ./...",
 			"AC-02": "go test ./...",
 			"ALL":   "go test ./...",
-			"DOCS":  "go run ./cmd/docu-docu check ./docs --strict",
+			"DOCS":  "go run ./cmd/toudocu check ./docs --strict",
 		}, ""),
 		"## План\n\n1. Подготовить команды.\n2. Выполнить проверки.\n3. Сформировать отчёт и обновить документацию.",
 		"## План\n\n- [x] Выполненный шаг.\n- [ ] Следующий шаг.",

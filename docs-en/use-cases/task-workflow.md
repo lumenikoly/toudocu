@@ -19,19 +19,19 @@ changing code or documentation.
 
 ## Preconditions
 
-- Docu-docu is available for launch;
+- Toudocu is available for launch;
 - the performer has the rights to read the documentation and the repository.
 
 ## Main scenario
 
 1. The performer calls
-   `docu-docu task context TASK-ID ./docs --format json`.
-2. Docu-docu finds exactly one task with the specified ID.
-3. Docu-docu checks that the task status is Ready, In Progress, Blocked or
+   `toudocu task context TASK-ID ./docs --format json`.
+2. Toudocu finds exactly one task with the specified ID.
+3. Toudocu checks that the task status is Ready, In Progress, Blocked or
    Done.
-4. Docu-docu collects a complete task contract, fixed sections of related
+4. Toudocu collects a complete task contract, fixed sections of related
    entities, documentation-impact documents, business rules and diagnostics.
-5. Docu-docu returns `TaskContextReport` schema v1 with `requiredReads`.
+5. Toudocu returns `TaskContextReport` schema v1 with `requiredReads`.
 6. The performer uses the result, scope of changes and limitations of the task
    for planning work.
 

@@ -1,16 +1,16 @@
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
-$Repository = "lumenikoly/docu-docu"
-$Version = if ($env:DOCU_DOCU_VERSION) { $env:DOCU_DOCU_VERSION } else { "latest" }
-$DefaultInstallDir = Join-Path ([Environment]::GetFolderPath("LocalApplicationData")) "Programs\docu-docu"
-$InstallDir = if ($env:DOCU_DOCU_INSTALL_DIR) { $env:DOCU_DOCU_INSTALL_DIR } else { $DefaultInstallDir }
-$NoModifyPath = if ($env:DOCU_DOCU_NO_MODIFY_PATH) { $env:DOCU_DOCU_NO_MODIFY_PATH } else { "0" }
+$Repository = "lumenikoly/toudocu"
+$Version = if ($env:TOUDOCU_VERSION) { $env:TOUDOCU_VERSION } else { "latest" }
+$DefaultInstallDir = Join-Path ([Environment]::GetFolderPath("LocalApplicationData")) "Programs\toudocu"
+$InstallDir = if ($env:TOUDOCU_INSTALL_DIR) { $env:TOUDOCU_INSTALL_DIR } else { $DefaultInstallDir }
+$NoModifyPath = if ($env:TOUDOCU_NO_MODIFY_PATH) { $env:TOUDOCU_NO_MODIFY_PATH } else { "0" }
 $TempDir = $null
 $StageFile = $null
 
 function Fail([string]$Message) {
-    throw "docu-docu installer: $Message"
+    throw "toudocu installer: $Message"
 }
 
 try {
@@ -18,10 +18,10 @@ try {
         Fail "unsupported operating system; use install.sh on Linux or macOS"
     }
     if ($Version -ne "latest" -and $Version -notmatch '^\d+\.\d+\.\d+(-rc\.[1-9]\d*)?$') {
-        Fail "DOCU_DOCU_VERSION must be latest, X.Y.Z, or X.Y.Z-rc.N"
+        Fail "TOUDOCU_VERSION must be latest, X.Y.Z, or X.Y.Z-rc.N"
     }
     if ($NoModifyPath -ne "0" -and $NoModifyPath -ne "1") {
-        Fail "DOCU_DOCU_NO_MODIFY_PATH must be 0 or 1"
+        Fail "TOUDOCU_NO_MODIFY_PATH must be 0 or 1"
     }
 
     $Architecture = [Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()
@@ -29,8 +29,8 @@ try {
         $Architecture = "Arm64"
     }
     $Asset = switch ($Architecture) {
-        "X64" { "docu-docu-windows-amd64.exe"; break }
-        "Arm64" { "docu-docu-windows-arm64.exe"; break }
+        "X64" { "toudocu-windows-amd64.exe"; break }
+        "Arm64" { "toudocu-windows-arm64.exe"; break }
         default { Fail "unsupported Windows architecture: $Architecture; only AMD64 and ARM64 are published" }
     }
 
@@ -40,7 +40,7 @@ try {
         "https://github.com/$Repository/releases/download/$Version"
     }
 
-    $TempDir = Join-Path ([IO.Path]::GetTempPath()) ("docu-docu-install-" + [Guid]::NewGuid().ToString("N"))
+    $TempDir = Join-Path ([IO.Path]::GetTempPath()) ("toudocu-install-" + [Guid]::NewGuid().ToString("N"))
     [void](New-Item -ItemType Directory -Path $TempDir)
     $Downloaded = Join-Path $TempDir $Asset
     $Checksums = Join-Path $TempDir "checksums.txt"
@@ -71,7 +71,7 @@ try {
     }
 
     [void](New-Item -ItemType Directory -Force -Path $InstallDir)
-    $Target = Join-Path $InstallDir "docu-docu.exe"
+    $Target = Join-Path $InstallDir "toudocu.exe"
     $AlreadyInstalled = $false
     if (Test-Path -LiteralPath $Target -PathType Leaf) {
         $Installed = (Get-FileHash -Algorithm SHA256 -LiteralPath $Target).Hash.ToLowerInvariant()
@@ -81,10 +81,10 @@ try {
     }
 
     if (-not $AlreadyInstalled) {
-        $StageFile = Join-Path $InstallDir (".docu-docu.new." + [Guid]::NewGuid().ToString("N"))
+        $StageFile = Join-Path $InstallDir (".toudocu.new." + [Guid]::NewGuid().ToString("N"))
         Copy-Item -LiteralPath $Downloaded -Destination $StageFile
         if (Test-Path -LiteralPath $Target -PathType Leaf) {
-            $Backup = Join-Path $InstallDir (".docu-docu.backup." + [Guid]::NewGuid().ToString("N"))
+            $Backup = Join-Path $InstallDir (".toudocu.backup." + [Guid]::NewGuid().ToString("N"))
             [IO.File]::Replace($StageFile, $Target, $Backup, $true)
             $StageFile = $null
             Remove-Item -LiteralPath $Backup -Force -ErrorAction SilentlyContinue
@@ -113,19 +113,19 @@ try {
     }
 
     if ($AlreadyInstalled) {
-        Write-Output "docu-docu $DownloadedVersion is already installed at $Target"
+        Write-Output "toudocu $DownloadedVersion is already installed at $Target"
     } else {
-        Write-Output "Installed docu-docu $DownloadedVersion at $Target"
+        Write-Output "Installed toudocu $DownloadedVersion at $Target"
     }
     if ($InstallDir -ne $DefaultInstallDir) {
         $CurrentEntries = @($env:Path -split ';')
         if (-not ($CurrentEntries | Where-Object { $_.TrimEnd('\') -ieq $InstallDir.TrimEnd('\') })) {
-            Write-Output "Add $InstallDir to PATH to run docu-docu by name."
+            Write-Output "Add $InstallDir to PATH to run toudocu by name."
         }
     } elseif ($NoModifyPath -eq "1" -or $PathUpdateFailed) {
-        Write-Output "Add $DefaultInstallDir to PATH to run docu-docu by name."
+        Write-Output "Add $DefaultInstallDir to PATH to run toudocu by name."
     } elseif ($PathChanged) {
-        Write-Output "Open a new terminal to use docu-docu by name."
+        Write-Output "Open a new terminal to use toudocu by name."
     }
 } catch {
     Write-Error $_.Exception.Message

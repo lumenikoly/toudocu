@@ -19,19 +19,19 @@ brings her contract to a state suitable for manual translation to Ready.
 
 ## Preconditions
 
-- Docu-docu is available for launch;
+- Toudocu is available for launch;
 - the documentation directory exists;
 - the performer independently interpreted the request and selected the entities.
 
 ## Main scenario
 
-1. The executor calls `docu-docu search` and examines the appropriate source documents.
-2. The executor calls `docu-docu task init` with explicit area, title and type.
+1. The executor calls `toudocu search` and examines the appropriate source documents.
+2. The executor calls `toudocu task init` with explicit area, title and type.
 3. If necessary, the executor creates the selected entities via `scaffold`.
 4. The performer fills in scope, out of scope, behavior change, criteria,
    plan, verification mappings and documentation impact.
-5. The executor calls `docu-docu task ready TASK-ID`.
-6. For a full Draft, Docu-docu returns `contract_ready` without changing the Markdown.
+5. The executor calls `toudocu task ready TASK-ID`.
+6. For a full Draft, Toudocu returns `contract_ready` without changing the Markdown.
 7. The contractor checks the meaning of the contract and manually changes the status to Ready.
 8. Repeated `task ready` returns `ready`.
 
@@ -50,7 +50,7 @@ interprets the request, fills in the semantic fields and changes the status of t
 
 ## Business rules
 
-- [BR-CLI-004](../modules/cli.md#br-cli-004-docu-docu-does-not-interpret-user-request) - Docu-docu does not select entities or change status.
+- [BR-CLI-004](../modules/cli.md#br-cli-004-toudocu-does-not-interpret-user-request) - Toudocu does not select entities or change status.
 - [BR-MODEL-003](../modules/model.md#br-model-003-a-ready-to-run-task-has-a-full-verifiable-contract) - readiness checks the complete contract.
 
 ## Implementation

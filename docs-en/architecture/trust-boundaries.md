@@ -1,4 +1,4 @@
-# Docu-docu Trust Boundaries
+# Toudocu Trust Boundaries
 
 - Document type: Architecture
 - Architecture question: Where are the trust boundaries?
@@ -52,7 +52,7 @@ These guards protect against a cross-origin browser page but do not authenticate
 a direct HTTP client. An explicitly selected non-loopback listener therefore
 places reachable LAN clients inside the trust boundary; the CLI retains a
 warning about the absence of TLS and authorization. Locale routes are confined
-to `/_docu-docu/locales/<locale>/` and serve only generated read-only snapshots.
+to `/_toudocu/locales/<locale>/` and serve only generated read-only snapshots.
 They do not redirect to editor, changes, workspace, API docs, or the canonical
 API; the server computes target URLs from allowed profiles and mounts.
 
@@ -95,7 +95,7 @@ this check detects corruption but does not replace an independent signature.
 
 Installation does not receive `sudo`: writes are limited by default to a user
 install dir and one idempotent `PATH` entry. An explicit
-`DOCU_DOCU_INSTALL_DIR` may select any writable directory and does not change
+`TOUDOCU_INSTALL_DIR` may select any writable directory and does not change
 the profile. Download, verification, and staging finish before replacement; a
 failure does not damage an already installed binary. Direct `curl | sh` and
 `irm | iex` deliberately add the remote installer to the user's trust boundary.

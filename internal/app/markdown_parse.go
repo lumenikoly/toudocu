@@ -1,9 +1,9 @@
-package docudocu
+package toudocu
 
 import (
 	"strings"
 
-	markdowncore "docu-docu/internal/markdown"
+	markdowncore "toudocu/internal/markdown"
 )
 
 var fieldAliases = map[string]string{

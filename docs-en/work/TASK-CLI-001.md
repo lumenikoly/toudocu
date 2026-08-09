@@ -6,7 +6,7 @@
 - Module: MOD-CLI
 - Use case: UC-TASK-03
 - Flow: FLOW-TASK-WORKFLOW
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-07-29
 
 ## Result
@@ -38,11 +38,11 @@ The CLI provides `search`, `task init`, `scaffold`, `task ready`, extended
 - `internal/app/scaffold.go`
 - `internal/app/task_ready.go`
 - `docs/`
-- `skills/docu-docu/`
+- `skills/toudocu/`
 
 ## Out of scope
 
-- interpretation of natural-language request inside Docu-docu;
+- interpretation of natural-language request inside Toudocu;
 - automatic selection or filling of entities;
 - automatic change of statuses and acceptance checkboxes;
 - new external dependencies.
@@ -71,10 +71,10 @@ The CLI provides `search`, `task init`, `scaffold`, `task ready`, extended
 - `AC-04` → `go test ./... -run 'TestTaskVerify|TestCommandProcess'`
 - `AC-05` → `go test ./... -run 'TestGenerateSite|TestProjectReport'`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict`
 
 ## Documentation impact
 
 `README.md`, `CHANGELOG.md`, `docs/contracts/cli.md`,
 `docs/roadmap.md`, `docs/use-cases/`, `docs/flows/FLOW-TASK-WORKFLOW.md`,
-`docs/decisions/ADR-002.md` and `skills/docu-docu/`.
+`docs/decisions/ADR-002.md` and `skills/toudocu/`.

@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"encoding/json"
@@ -9,13 +9,13 @@ import (
 	"sync"
 	"time"
 
-	"docu-docu/internal/skillinstall"
+	"toudocu/internal/skillinstall"
 )
 
 const (
-	versionEndpoint        = "/_docu-docu/api/version"
-	latestReleaseAPI       = "https://api.github.com/repos/lumenikoly/docu-docu/releases/latest"
-	releasePageBase        = "https://github.com/lumenikoly/docu-docu/releases/tag/"
+	versionEndpoint        = "/_toudocu/api/version"
+	latestReleaseAPI       = "https://api.github.com/repos/lumenikoly/toudocu/releases/latest"
+	releasePageBase        = "https://github.com/lumenikoly/toudocu/releases/tag/"
 	maxReleaseResponseSize = 64 << 10
 )
 
@@ -69,7 +69,7 @@ func checkLatestVersion(client updateHTTPClient, endpoint, current string) versi
 		return result
 	}
 	request.Header.Set("Accept", "application/vnd.github+json")
-	request.Header.Set("User-Agent", "docu-docu/"+current)
+	request.Header.Set("User-Agent", "toudocu/"+current)
 	response, err := client.Do(request)
 	if err != nil {
 		return result

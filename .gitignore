@@ -1,4 +1,4 @@
-/docu-docu
+/toudocu
 /dist/
 /build/
 /example/site/
@@ -11,3 +11,5 @@
 *.test
 .DS_Store
 .tmp
+/.impeccable/
+.impeccable

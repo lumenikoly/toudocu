@@ -1,4 +1,4 @@
-// Package markdown owns Docu-docu's Markdown dialect, normalized analysis and
+// Package markdown owns Toudocu's Markdown dialect, normalized analysis and
 // safe HTML rendering. Goldmark AST values never leave this package.
 package markdown
 

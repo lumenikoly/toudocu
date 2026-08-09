@@ -3,7 +3,7 @@
 - Document type: Architecture
 - Architecture question: How do Git states turn into a consistent change set of documentation?
 
-Docu-docu resolves explicitly chosen local Git states, represents each
+Toudocu resolves explicitly chosen local Git states, represents each
 side with lazy snapshot and combines Git metadata with normalized ones
 document entities into one versioned `ChangeSetReport`.
 
@@ -36,7 +36,7 @@ renderers do not have a separate source of truth.
 Commit-to-commit change set is immutable. HTTP cache identity includes comparison,
 workspace revision, `HEAD`, porcelain-v2 status and resolved user
 refs. After the change, the next request builds a new report and digest, and the previous ones
-working bytes do not become history or snapshot Docu-docu.
+working bytes do not become history or snapshot Toudocu.
 
 ## Module boundaries
 

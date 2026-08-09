@@ -2,11 +2,11 @@ import type { PageBootstrap } from "./core/bootstrap";
 
 declare global {
   interface Window {
-    DocuDocuPage?: PageBootstrap;
-    DocuDocuAppearance?: any;
-    DocuDocuCodeMirror?: any;
-    DocuDocuInitializeScreenMap?: (scope: ParentNode, signal: AbortSignal) => void;
-    DocuDocuInitializePlayableFlow?: (scope: ParentNode, signal: AbortSignal) => void;
+    ToudocuPage?: PageBootstrap;
+    ToudocuAppearance?: any;
+    ToudocuCodeMirror?: any;
+    ToudocuInitializeScreenMap?: (scope: ParentNode, signal: AbortSignal) => void;
+    ToudocuInitializePlayableFlow?: (scope: ParentNode, signal: AbortSignal) => void;
     SwaggerUIBundle?: any;
     SwaggerUIStandalonePreset?: any;
     mermaid?: any;

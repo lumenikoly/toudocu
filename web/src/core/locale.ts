@@ -30,7 +30,7 @@ export function registerMessages(messages: Record<string, string>, translations:
 }
 
 export function text(key: string, values: unknown[] = []): string {
-  const locale = window.DocuDocuPage?.ui.locale || document.documentElement.lang || "en";
+  const locale = window.ToudocuPage?.ui.locale || document.documentElement.lang || "en";
   const template = catalog(locale)[key] || localeCatalog.en[key] || key;
   return values.reduce((result: string, value, index) => result.replaceAll(`{${index}}`, String(value ?? "")), template);
 }

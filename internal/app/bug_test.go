@@ -1,6 +1,7 @@
-package docudocu
+package toudocu
 
 import (
+	"io"
 	"strings"
 	"testing"
 )
@@ -77,7 +78,7 @@ Changing the session lifetime.
 
 - ` + "`AC-01`" + ` -> ` + "`go test ./...`" + `
 - ` + "`ALL`" + ` -> ` + "`go test ./...`" + `
-- ` + "`DOCS`" + ` -> ` + "`go run ./cmd/docu-docu check ./docs --strict`" + `
+- ` + "`DOCS`" + ` -> ` + "`go run ./cmd/toudocu check ./docs --strict`" + `
 
 ## Documentation impact
 
@@ -127,6 +128,14 @@ func TestBugWorkItemValidationAndPortalFilters(t *testing.T) {
 	if model.Stats.OpenBugs != 1 || model.Stats.HighSeverityBugs != 1 || model.Stats.RegressionBugs != 1 {
 		t.Fatalf("bug stats: %#v", model.Stats)
 	}
+	ready := BuildTaskReady(model, "BUG-AUTH-021", false)
+	if ready.Status != "ready" || !ready.ContractComplete || !ready.ReadyForWork {
+		t.Fatalf("valid bug readiness: %#v", ready)
+	}
+	verify := executeTaskVerify(model, Options{TaskID: "BUG-AUTH-021", VerifyMode: "dry-run"}, io.Discard, io.Discard, &fakeCommandRunner{})
+	if verify.Status != "planned" || len(verify.ValidationIssues) != 0 {
+		t.Fatalf("valid bug verification: %#v", verify)
+	}
 	catalog := renderDirectoryPage(model, "work")
 	for _, expected := range []string{`data-work-type="bug"`, `data-cause="established"`, `data-regression-test="present"`, `data-filter-control="workType"`, `data-filter-control="severity"`, `data-filter-control="reproducibility"`, "Серьёзность: High"} {
 		if !strings.Contains(catalog, expected) {
@@ -167,5 +176,9 @@ func TestTechnicalBugMayExplainMissingUseCase(t *testing.T) {
 	}
 	if issues := issuesForDocument(model, "work/BUG-AUTH-021.md"); len(issues) != 0 {
 		t.Fatalf("technical bug issues: %s", bugIssueCodes(issues))
+	}
+	ready := BuildTaskReady(model, "BUG-AUTH-021", false)
+	if ready.Status != "ready" || !ready.ReadyForWork {
+		t.Fatalf("technical bug readiness: %#v", ready)
 	}
 }

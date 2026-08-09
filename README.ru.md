@@ -1,15 +1,15 @@
-# Docu-docu
+# Toudocu
 
 [English](README.md) | **Русский**
 
-[![CI](https://github.com/lumenikoly/docu-docu/actions/workflows/test.yml/badge.svg)](https://github.com/lumenikoly/docu-docu/actions/workflows/test.yml)
-[![Docs contract](https://github.com/lumenikoly/docu-docu/actions/workflows/docs.yml/badge.svg)](https://github.com/lumenikoly/docu-docu/actions/workflows/docs.yml)
-[![Go Version](https://img.shields.io/github/go-mod/go-version/lumenikoly/docu-docu)](https://go.dev/)
-[![License](https://img.shields.io/github/license/lumenikoly/docu-docu)](LICENSE)
+[![CI](https://github.com/lumenikoly/toudocu/actions/workflows/test.yml/badge.svg)](https://github.com/lumenikoly/toudocu/actions/workflows/test.yml)
+[![Docs contract](https://github.com/lumenikoly/toudocu/actions/workflows/docs.yml/badge.svg)](https://github.com/lumenikoly/toudocu/actions/workflows/docs.yml)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/lumenikoly/toudocu)](https://go.dev/)
+[![License](https://img.shields.io/github/license/lumenikoly/toudocu)](LICENSE)
 
 **Инструмент для проверяемой Markdown-документации и статических HTTP-порталов.**
 
-**Docu-docu** помогает поддерживать документацию вместе с кодом, находить несоответствия и собирать удобные статические порталы для чтения.
+**Toudocu** помогает поддерживать документацию вместе с кодом, находить несоответствия и собирать удобные статические порталы для чтения.
 
 ### Главные возможности
 
@@ -31,37 +31,37 @@
 Linux и macOS:
 
 ```bash
-curl -fsSL https://github.com/lumenikoly/docu-docu/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/lumenikoly/toudocu/releases/latest/download/install.sh | sh
 ```
 
 Windows PowerShell:
 
 ```powershell
-irm https://github.com/lumenikoly/docu-docu/releases/latest/download/install.ps1 | iex
+irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 | iex
 ```
 
 Installer сам выбирает платформу, проверяет SHA-256 и ставит бинарник
 в каталог текущего пользователя. Повторный запуск этой же команды
-обновляет Docu-docu.
+обновляет Toudocu.
 
 Проверьте установку:
 
 ```bash
-docu-docu --help
+toudocu --help
 ```
 
 Также можно собрать бинарник из исходников:
 
 ```bash
-git clone https://github.com/lumenikoly/docu-docu.git
-cd docu-docu
+git clone https://github.com/lumenikoly/toudocu.git
+cd toudocu
 make build
 ```
 
 После сборки бинарник появится в корне репозитория:
 
 ```bash
-./docu-docu --help
+./toudocu --help
 ```
 
 Матрица платформ, закрепление версии, каталоги и границы проверки
@@ -74,7 +74,7 @@ Skill устанавливается отдельно в поддерживае�
 После установки он будет доступен как:
 
 ```text
-$docu-docu
+$toudocu
 ```
 
 Skill использует установленный CLI для проверки и сборки документации, а сам отвечает за анализ репозитория и обновление Markdown-файлов.
@@ -86,7 +86,7 @@ CLI можно использовать и без skill.
 Запустите skill из корня своего репозитория:
 
 ```text
-$docu-docu init
+$toudocu init
 ```
 
 Skill изучит проект и создаст начальную структуру документации.
@@ -94,13 +94,13 @@ Skill изучит проект и создаст начальную струк�
 ### 4. Проверьте документацию
 
 ```bash
-docu-docu check ./docs
+toudocu check ./docs
 ```
 
 ### 5. Запустите локальный портал
 
 ```bash
-docu-docu serve ./docs
+toudocu serve ./docs
 ```
 
 По умолчанию портал будет доступен по адресу:
@@ -114,16 +114,16 @@ http://127.0.0.1:8080
 ### 6. Соберите статическую версию
 
 ```bash
-docu-docu build ./docs \
+toudocu build ./docs \
   --output ./site \
   --clean
 ```
 
 Опубликуйте весь output на обычном HTTP(S) static hosting. Для локального
-просмотра используйте `docu-docu serve`:
+просмотра используйте `toudocu serve`:
 
 ```text
-docu-docu serve ./docs
+toudocu serve ./docs
 ```
 
 ---
@@ -132,12 +132,12 @@ docu-docu serve ./docs
 
 Skills позволяют работать с документацией через обычные запросы к AI-агенту.
 
-Они анализируют репозиторий, находят связанные документы и используют Docu-docu для проверки результата.
+Они анализируют репозиторий, находят связанные документы и используют Toudocu для проверки результата.
 
 ### Создать документацию
 
 ```text
-$docu-docu init
+$toudocu init
 ```
 
 Skill изучает репозиторий и создаёт начальную структуру документации.
@@ -147,7 +147,7 @@ Skill изучает репозиторий и создаёт начальную
 ### Сверить документацию с проектом
 
 ```text
-$docu-docu refresh
+$toudocu refresh
 ```
 
 Skill проверяет документацию по текущему состоянию репозитория и обновляет затронутые разделы.
@@ -157,7 +157,7 @@ Skill проверяет документацию по текущему сост
 ### Проверить текущие изменения
 
 ```text
-$docu-docu refresh diff
+$toudocu refresh diff
 ```
 
 Skill начинает с текущих Git-изменений и проверяет связанную с ними документацию.
@@ -167,20 +167,27 @@ Skill начинает с текущих Git-изменений и провер�
 ### Обновить перевод
 
 ```text
-$docu-docu translate en --all-stale
+$toudocu translate en --all-stale
 ```
 
 Skill обновляет полное read-only зеркало, сохраняя основной каталог оперативным источником истины. Нужны locale и ровно один режим выбора: `--task`, `--base` или `--all-stale`.
+
+Чтобы перевести текущий staged, unstaged и untracked diff относительно `HEAD`
+на все настроенные языки, используйте:
+
+```text
+$toudocu translate diff
+```
 
 ---
 
 ## Проверка документации
 
 ```bash
-docu-docu check ./docs
+toudocu check ./docs
 ```
 
-Docu-docu проверяет:
+Toudocu проверяет:
 
 * структуру каталогов и документов;
 * внутренние и внешние ссылки;
@@ -197,7 +204,7 @@ Docu-docu проверяет:
 ## Статический HTTP-портал
 
 ```bash
-docu-docu build ./docs \
+toudocu build ./docs \
   --output ./site \
   --clean
 ```
@@ -205,7 +212,7 @@ docu-docu build ./docs \
 Готовый портал:
 
 * работает на обычном HTTP(S) static hosting, включая вложенный URL-путь;
-* не требует Docu-docu или другого backend после генерации;
+* не требует Toudocu или другого backend после генерации;
 * не использует базу данных;
 * не загружает ресурсы из CDN;
 * не требует Node.js или npm;
@@ -219,7 +226,7 @@ docu-docu build ./docs \
 ## Локальный портал и редактор
 
 ```bash
-docu-docu serve ./docs
+toudocu serve ./docs
 ```
 
 Локальный режим предоставляет:
@@ -231,8 +238,8 @@ docu-docu serve ./docs
 * автоматическую пересборку;
 * предварительный просмотр ошибок;
 * просмотр изменений через Git;
-* неблокирующее предложение открыть новый stable-релиз Docu-docu;
-* автономную документацию OpenAPI по адресу `/_docu-docu/api-docs/` с
+* неблокирующее предложение открыть новый stable-релиз Toudocu;
+* автономную документацию OpenAPI по адресу `/_toudocu/api-docs/` с
   безопасным выполнением только `GET`/`HEAD`.
 
 По умолчанию сервер слушает:
@@ -245,14 +252,14 @@ docu-docu serve ./docs
 
 Проверка релиза выполняется не более одного раза за процесс и не обновляет
 бинарник. Чтобы отключить сетевой запрос и предложение в UI, запустите
-`docu-docu serve --no-update-check ./docs`.
+`toudocu serve --no-update-check ./docs`.
 
 ---
 
 ## Поиск
 
 ```bash
-docu-docu search "authentication" ./docs
+toudocu search "authentication" ./docs
 ```
 
 Поиск работает по исходным Markdown-файлам и помогает быстро найти существующее описание перед созданием нового документа.
@@ -262,31 +269,31 @@ docu-docu search "authentication" ./docs
 ## Просмотр изменений
 
 ```bash
-docu-docu changes ./docs
+toudocu changes ./docs
 ```
 
-Docu-docu использует Git, чтобы показать изменения документации между ветками, коммитами и текущим рабочим состоянием.
+Toudocu использует Git, чтобы показать изменения документации между ветками, коммитами и текущим рабочим состоянием.
 
 Пример сравнения с основной веткой:
 
 ```bash
-docu-docu changes ./docs \
+toudocu changes ./docs \
   --base main \
   --target working-tree
 ```
 
-Docu-docu не выполняет `commit`, `checkout`, `add` или `fetch` и не изменяет состояние репозитория.
+Toudocu не выполняет `commit`, `checkout`, `add` или `fetch` и не изменяет состояние репозитория.
 
 ---
 
 ## Шаблоны документов
 
-Docu-docu умеет создавать заготовки для новых документов.
+Toudocu умеет создавать заготовки для новых документов.
 
 Например:
 
 ```bash
-docu-docu scaffold module MOD-PAYMENTS ./docs \
+toudocu scaffold module MOD-PAYMENTS ./docs \
   --title "Payments"
 ```
 
@@ -311,7 +318,7 @@ docs/
 
 Остальные разделы можно добавлять по мере роста проекта.
 
-Docu-docu подходит для описания:
+Toudocu подходит для описания:
 
 * архитектуры;
 * компонентов;
@@ -329,7 +336,7 @@ Docu-docu подходит для описания:
 
 ## Поддерживаемый Markdown
 
-Docu-docu использует Goldmark `v1.8.5` как единый CommonMark AST-движок и
+Toudocu использует Goldmark `v1.8.5` как единый CommonMark AST-движок и
 включает только:
 
 * заголовки, абзацы, выделение и цитаты;
@@ -348,7 +355,7 @@ Attributes, footnotes, definition lists и typographer не включены. П
 
 ## Настройка портала
 
-Необязательный файл `.docu-docu/config.yml` позволяет настроить внешний вид и поведение портала.
+Необязательный файл `.toudocu/config.yml` позволяет настроить внешний вид и поведение портала.
 
 Пример:
 
@@ -388,7 +395,7 @@ terminal
 
 ## Переводы
 
-Основной язык проекта задаётся в `.docu-docu/config.yml`:
+Основной язык проекта задаётся в `.toudocu/config.yml`:
 
 ```yaml
 project:
@@ -398,7 +405,14 @@ project:
 Для обновления отдельной языковой версии используйте:
 
 ```text
-$docu-docu translate en --all-stale
+$toudocu translate en --all-stale
+```
+
+Для обновления всех настроенных переводов по текущему diff относительно `HEAD`
+используйте:
+
+```text
+$toudocu translate diff
 ```
 
 Основная документация остаётся оперативным источником истины, а переводы хранятся как полные read-only зеркала. Для каждого перевода требуется полный профиль `translations.<locale>` с независимым root и названиями встроенных разделов; в этом репозитории английский хранится в `docs-en/`, а канонический русский — в `docs/`. На translation roots запрещены task-команды, scaffold и editor-запись.
@@ -407,24 +421,24 @@ $docu-docu translate en --all-stale
 
 ## Основные команды
 
-| Задача                            | CLI                                                              | Из репозитория Docu-docu |
+| Задача                            | CLI                                                              | Из репозитория Toudocu |
 | --------------------------------- | ---------------------------------------------------------------- | ------------------------ |
-| Проверить документацию            | `docu-docu check ./docs`                                         | `make check`             |
-| Собрать портал                    | `docu-docu build ./docs --output ./site --clean`                 | `make docs`              |
-| Запустить локальный портал        | `docu-docu serve ./docs`                                         | `make docs-serve`        |
-| Собрать демонстрационный портал   | `docu-docu build ./example/docs --output ./example/site --clean` | `make demo`              |
-| Запустить демонстрационный портал | `docu-docu serve ./example/docs`                                 | `make demo-serve`        |
-| Найти документ                    | `docu-docu search "запрос" ./docs`                               | —                        |
-| Посмотреть изменения              | `docu-docu changes ./docs`                                       | —                        |
-| Создать шаблон                    | `docu-docu scaffold module MOD-PAYMENTS ./docs --title "Payments"` | —                      |
-| Собрать бинарник                  | `go build -o docu-docu ./cmd/docu-docu`                          | `make build`             |
+| Проверить документацию            | `toudocu check ./docs`                                         | `make check`             |
+| Собрать портал                    | `toudocu build ./docs --output ./site --clean`                 | `make docs`              |
+| Запустить локальный портал        | `toudocu serve ./docs`                                         | `make docs-serve`        |
+| Собрать демонстрационный портал   | `toudocu build ./example/docs --output ./example/site --clean` | `make demo`              |
+| Запустить демонстрационный портал | `toudocu serve ./example/docs`                                 | `make demo-serve`        |
+| Найти документ                    | `toudocu search "запрос" ./docs`                               | —                        |
+| Посмотреть изменения              | `toudocu changes ./docs`                                       | —                        |
+| Создать шаблон                    | `toudocu scaffold module MOD-PAYMENTS ./docs --title "Payments"` | —                      |
+| Собрать бинарник                  | `go build -o toudocu ./cmd/toudocu`                          | `make build`             |
 | Запустить тесты                   | `go test ./...`                                                  | `make test`              |
 | Собрать релизные бинарники        | вручную                                                          | `make release`           |
 | Удалить артефакты                 | вручную                                                          | `make clean`             |
 
-Команды `make` предназначены для разработки самого Docu-docu из исходного репозитория.
+Команды `make` предназначены для разработки самого Toudocu из исходного репозитория.
 
-Пользователи готового бинарника запускают команды `docu-docu` напрямую.
+Пользователи готового бинарника запускают команды `toudocu` напрямую.
 
 ---
 
@@ -432,7 +446,7 @@ $docu-docu translate en --all-stale
 
 Корневой пакет предоставляет типизированный фасад над моделью, генератором,
 отчётами и отдельными операциями CLI. Текущий module path — локальный
-`docu-docu`; канонический удалённый Go module ещё не опубликован, поэтому
+`toudocu`; канонический удалённый Go module ещё не опубликован, поэтому
 внешним потребителям пока не следует фиксировать этот import path.
 
 Текущий фасад определяют экспортируемые объявления и package documentation в
@@ -506,18 +520,18 @@ make clean
 ## Справка
 
 ```bash
-docu-docu --help
-docu-docu check --help
-docu-docu build --help
-docu-docu serve --help
-docu-docu search --help
-docu-docu changes --help
-docu-docu scaffold --help
+toudocu --help
+toudocu check --help
+toudocu build --help
+toudocu serve --help
+toudocu search --help
+toudocu changes --help
+toudocu scaffold --help
 ```
 
 Подробная документация:
 
-* [Возможности Docu-docu](docs/reference/features.md)
+* [Возможности Toudocu](docs/reference/features.md)
 * [Настройка](docs/reference/configuration.md)
 * [Команды CLI](docs/contracts/cli.md)
 * [Agent-workflows](docs/guides/agent-workflows.md)

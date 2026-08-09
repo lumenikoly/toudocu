@@ -2,21 +2,21 @@
 
 set -eu
 
-repository="lumenikoly/docu-docu"
-version="${DOCU_DOCU_VERSION:-latest}"
+repository="lumenikoly/toudocu"
+version="${TOUDOCU_VERSION:-latest}"
 default_install_dir="${HOME:?HOME is required}/.local/bin"
-install_dir="${DOCU_DOCU_INSTALL_DIR:-$default_install_dir}"
-no_modify_path="${DOCU_DOCU_NO_MODIFY_PATH:-0}"
+install_dir="${TOUDOCU_INSTALL_DIR:-$default_install_dir}"
+no_modify_path="${TOUDOCU_NO_MODIFY_PATH:-0}"
 stage_file=""
 temp_dir=""
 
 fail() {
-    printf 'docu-docu installer: %s\n' "$*" >&2
+    printf 'toudocu installer: %s\n' "$*" >&2
     exit 1
 }
 
 warn() {
-    printf 'docu-docu installer warning: %s\n' "$*" >&2
+    printf 'toudocu installer warning: %s\n' "$*" >&2
 }
 
 cleanup() {
@@ -34,12 +34,12 @@ case "$version" in
     latest) ;;
     *)
         printf '%s\n' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-rc\.[1-9][0-9]*)?$' ||
-            fail "DOCU_DOCU_VERSION must be latest, X.Y.Z, or X.Y.Z-rc.N"
+            fail "TOUDOCU_VERSION must be latest, X.Y.Z, or X.Y.Z-rc.N"
         ;;
 esac
 
 [ "$no_modify_path" = "0" ] || [ "$no_modify_path" = "1" ] ||
-    fail "DOCU_DOCU_NO_MODIFY_PATH must be 0 or 1"
+    fail "TOUDOCU_NO_MODIFY_PATH must be 0 or 1"
 
 command -v curl >/dev/null 2>&1 || fail "curl is required"
 
@@ -58,14 +58,14 @@ case "$arch_name" in
     *) fail "unsupported architecture: ${arch_name:-unknown}" ;;
 esac
 
-asset="docu-docu-$os-$arch"
+asset="toudocu-$os-$arch"
 if [ "$version" = "latest" ]; then
     release_url="https://github.com/$repository/releases/latest/download"
 else
     release_url="https://github.com/$repository/releases/download/$version"
 fi
 
-temp_dir=$(mktemp -d "${TMPDIR:-/tmp}/docu-docu-install.XXXXXX") ||
+temp_dir=$(mktemp -d "${TMPDIR:-/tmp}/toudocu-install.XXXXXX") ||
     fail "cannot create a temporary directory"
 downloaded="$temp_dir/$asset"
 checksums="$temp_dir/checksums.txt"
@@ -106,7 +106,7 @@ if [ "$version" != "latest" ] && [ "$downloaded_version" != "$expected_version" 
 fi
 
 mkdir -p "$install_dir" || fail "cannot create install directory: $install_dir"
-target="$install_dir/docu-docu"
+target="$install_dir/toudocu"
 
 already_installed=0
 if [ -f "$target" ]; then
@@ -124,7 +124,7 @@ if [ -f "$target" ]; then
 fi
 
 if [ "$already_installed" = "0" ]; then
-    stage_file="$install_dir/.docu-docu.new.$$"
+    stage_file="$install_dir/.toudocu.new.$$"
     cp "$downloaded" "$stage_file" || fail "cannot stage the downloaded binary in $install_dir"
     chmod 0755 "$stage_file" || fail "cannot make the staged binary executable"
     mv -f "$stage_file" "$target" || fail "cannot replace $target"
@@ -151,7 +151,7 @@ if [ "$install_dir" = "$default_install_dir" ]; then
                         path_line='export PATH="$HOME/.local/bin:$PATH"'
                         ;;
                     fish)
-                        profile_file="${XDG_CONFIG_HOME:-$HOME/.config}/fish/conf.d/docu-docu.fish"
+                        profile_file="${XDG_CONFIG_HOME:-$HOME/.config}/fish/conf.d/toudocu.fish"
                         path_line='fish_add_path "$HOME/.local/bin"'
                         ;;
                     *)
@@ -162,9 +162,9 @@ if [ "$install_dir" = "$default_install_dir" ]; then
                 if ! mkdir -p "$(dirname "$profile_file")"; then
                     warn "cannot create the profile directory; add $default_install_dir to PATH manually"
                     profile_file=""
-                elif [ ! -f "$profile_file" ] || ! grep -Fq '# docu-docu installer' "$profile_file"; then
+                elif [ ! -f "$profile_file" ] || ! grep -Fq '# toudocu installer' "$profile_file"; then
                     if {
-                        printf '\n# docu-docu installer\n'
+                        printf '\n# toudocu installer\n'
                         printf '%s\n' "$path_line"
                     } >> "$profile_file"; then
                         path_changed=1
@@ -179,17 +179,17 @@ if [ "$install_dir" = "$default_install_dir" ]; then
 fi
 
 if [ "$already_installed" = "1" ]; then
-    printf 'docu-docu %s is already installed at %s\n' "$downloaded_version" "$target"
+    printf 'toudocu %s is already installed at %s\n' "$downloaded_version" "$target"
 else
-    printf 'Installed docu-docu %s at %s\n' "$downloaded_version" "$target"
+    printf 'Installed toudocu %s at %s\n' "$downloaded_version" "$target"
 fi
 if [ "$install_dir" != "$default_install_dir" ]; then
     case ":${PATH:-}:" in
         *":$install_dir:"*) ;;
-        *) printf 'Add %s to PATH to run docu-docu by name.\n' "$install_dir" ;;
+        *) printf 'Add %s to PATH to run toudocu by name.\n' "$install_dir" ;;
     esac
 elif [ "$no_modify_path" = "1" ] && [ "$path_activation_needed" = "1" ]; then
-    printf 'Add %s to PATH to run docu-docu by name.\n' "$default_install_dir"
+    printf 'Add %s to PATH to run toudocu by name.\n' "$default_install_dir"
 elif [ "$path_activation_needed" = "1" ] && [ -n "$profile_file" ]; then
     case "$(basename "${SHELL:-sh}")" in
         bash) printf 'Run: . "%s"\n' "$profile_file" ;;
@@ -198,5 +198,5 @@ elif [ "$path_activation_needed" = "1" ] && [ -n "$profile_file" ]; then
         *) printf 'Start a new login shell, or run: . "%s"\n' "$profile_file" ;;
     esac
 elif [ "$path_activation_needed" = "1" ]; then
-    printf 'Add %s to PATH to run docu-docu by name.\n' "$default_install_dir"
+    printf 'Add %s to PATH to run toudocu by name.\n' "$default_install_dir"
 fi

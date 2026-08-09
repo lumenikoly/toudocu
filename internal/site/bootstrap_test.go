@@ -23,7 +23,7 @@ func TestWorkspaceTemplatesRenderSemanticContent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(changes, "Изменения документации") {
+	if !strings.Contains(changes, ">Изменения<") || !strings.Contains(changes, "data-discussions-panel") {
 		t.Fatalf("changes body missing: %s", changes)
 	}
 	editor, err := RenderEditor(view)
@@ -78,7 +78,7 @@ func TestBootstrapSerializationEscapesHTMLTermination(t *testing.T) {
 
 func TestStaticBootstrapRejectsEndpointsAndAbsoluteBases(t *testing.T) {
 	value := testBootstrap()
-	value.Endpoints = &Endpoints{Editor: "/_docu-docu/api/editor"}
+	value.Endpoints = &Endpoints{Editor: "/_toudocu/api/editor"}
 	if _, err := MarshalBootstrap(value); err == nil {
 		t.Fatal("static runtime accepted server endpoints")
 	}

@@ -8,7 +8,7 @@
 - Экраны: SC-SITE-HOME, SC-SITE-API-DOCS
 - Переходы: TR-SITE-006
 - Стандарты: STD-GO-001, STD-DOCS-001
-- Владелец: Команда Docu-docu
+- Владелец: Команда Toudocu
 - Последнее обновление: 2026-08-05
 
 ## Результат
@@ -54,7 +54,7 @@ Wire-контракты дублируются в Markdown, OpenAPI-файлы �
 - [x] `AC-02` `check` и editor diagnostics распознают `contracts/**/*.openapi.{yaml,yml,json}` и выдают устойчивые positional diagnostics для syntax/root/operation/operationId/path-parameter/internal-ref ошибок без network resolution.
 - [x] `AC-03` Декларативные route registries двусторонне соответствуют OpenAPI paths и methods.
 - [x] `AC-04` Changes разрешает HEAD только summary и возвращает schema-v1 diagnostic envelope для всех API errors; успешные content/render media types сохраняются.
-- [x] `AC-05` Canonical `serve` предоставляет `GET|HEAD /_docu-docu/api-docs/`, selector двух specs, same-origin assets, CSP/no-store/nosniff и Try it out только для GET/HEAD.
+- [x] `AC-05` Canonical `serve` предоставляет `GET|HEAD /_toudocu/api-docs/`, selector двух specs, same-origin assets, CSP/no-store/nosniff и Try it out только для GET/HEAD.
 - [x] `AC-06` Swagger UI 5.32.12, license и checksums vendored; runtime/CI и external network dependencies отсутствуют.
 - [x] `AC-07` Static build копирует OpenAPI specs, но не Swagger UI assets/navigation; translation portals и direct translation serve не содержат UI.
 - [x] `AC-08` Markdown-компаньоны и связанные ADR/standard/module/use-case/flow/screen/architecture/reference/README/changelog источники согласованы без изменения translation roots.
@@ -78,11 +78,11 @@ Wire-контракты дублируются в Markdown, OpenAPI-файлы �
 - `AC-05` → `go test ./... -run 'TestAPIDocsUI'`
 - `AC-06` → `go test ./... -run 'TestSwaggerUIVendoredAssets'`
 - `AC-07` → `go test ./... -run 'TestStaticSiteExcludesAPIDocs|TestTranslationServeExcludesAPIDocs'`
-- `AC-08` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0`
+- `AC-08` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `AC-09` → `go vet ./... && go test ./... && go test -race ./... && make check`
 - `ALL` → `go test ./...`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root .`
-- `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/docu-docu check ./docs --strict --stale-days 0 && make check`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root .`
+- `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/toudocu check ./docs --strict --stale-days 0 && make check`
 
 ## Влияние на документацию
 

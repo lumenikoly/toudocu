@@ -26,10 +26,10 @@ changing its contract.
 
 ## Main scenario
 
-1. The assignee runs `docu-docu task archive TASK-ID ./docs`.
-2. Docu-docu finds exactly one work item and checks its contract, status,
+1. The assignee runs `toudocu task archive TASK-ID ./docs`.
+2. Toudocu finds exactly one work item and checks its contract, status,
    source path, and destination path.
-3. Docu-docu verifies that the move will not break relative Markdown links.
+3. Toudocu verifies that the move will not break relative Markdown links.
 4. The file is moved without overwriting to `work/archive/YYYY/`.
 5. The command returns a `TaskMoveReport` with status `archived`.
 6. When needed, the assignee runs `task restore` for the same ID.

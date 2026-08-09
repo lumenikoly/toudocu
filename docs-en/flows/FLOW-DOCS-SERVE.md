@@ -13,7 +13,7 @@ restrictions, error scenarios, and postconditions are defined by
 
 ```mermaid
 flowchart TD
-    Start["docu-docu serve"] --> Build["Perform the initial build"]
+    Start["toudocu serve"] --> Build["Perform the initial build"]
     Build --> Built{"Did the build succeed?"}
     Built -->|No| Stop["Return code 1 and do not start the server"]
     Built -->|Yes| Listen["Listen on the specified address"]

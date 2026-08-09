@@ -26,8 +26,8 @@ rendered pages and project entities before completing the task.
 
 ## Main scenario
 
-1. The developer opens `/changes` or runs `docu-docu changes`.
-2. Docu-docu resolves and shows base/target without changing Git.
+1. The developer opens `/changes` or runs `toudocu changes`.
+2. Toudocu resolves and shows base/target without changing Git.
 3. The user receives a summary of permanent and work artifacts.
 4. The user filters documents and opens source, rendered, semantic or
    specialized diff.

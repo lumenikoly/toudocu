@@ -1,6 +1,6 @@
 # Third-party notices
 
-Docu-docu is licensed under Apache-2.0. The components below are separately
+Toudocu is licensed under Apache-2.0. The components below are separately
 licensed and retain their own copyright and license notices. Release packaging
 generates one complete `THIRD_PARTY_NOTICES.md` by combining this inventory with
 the notices of the embedded browser assets.
@@ -17,7 +17,9 @@ and separately listed vendored browser libraries are shipped.
 
 The serve-only editor bundles `codemirror@6.0.2`,
 `@codemirror/lang-markdown@6.5.1`, `@codemirror/lang-json@6.0.2`,
-`@codemirror/lang-yaml@6.1.3`, `@codemirror/lint@6.9.7`,
+`@codemirror/lang-yaml@6.1.3`, `@codemirror/lang-go@6.0.1`,
+`@codemirror/lang-java@6.0.2`, `@codemirror/lang-javascript@6.2.5`,
+`@codemirror/lint@6.9.7`,
 `@codemirror/merge@6.12.2` and their CodeMirror /
 Lezer transitive packages under the MIT License. The complete license notice is
 embedded as `assets/codemirror.LICENSE.txt`; release checksums are embedded as
@@ -32,7 +34,7 @@ IIFE bundle and is not a Go or end-user runtime dependency.
 - License: Apache-2.0 and MIT
 
 The package parses OpenAPI YAML for deterministic semantic comparison. It is
-linked into the Docu-docu binary and does not execute input or require a runtime
+linked into the Toudocu binary and does not execute input or require a runtime
 service. Its source distribution contains MIT-licensed libyaml-derived files
 and Apache-2.0-licensed remaining files; its copyright notices are retained in
 the module source and this attribution accompanies the binary release.
@@ -73,7 +75,7 @@ SOFTWARE.
 - License: MIT
 
 Goldmark parses CommonMark and the enabled GFM extensions into the internal
-Markdown AST. It is linked into the Docu-docu binary and requires no runtime
+Markdown AST. It is linked into the Toudocu binary and requires no runtime
 service, network access or CGO.
 
 Copyright (c) 2019 Yusuke Inuzuka

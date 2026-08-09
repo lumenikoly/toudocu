@@ -3,7 +3,7 @@
 - Status: In progress
 - Stage: Preparing stable release 0.0.1
 - Version: 0.0.1
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-08-07
 
 Version `0.0.1` is being prepared for stable release together with verifiable

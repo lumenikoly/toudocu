@@ -1,4 +1,4 @@
-// Package skills exposes the immutable skill package shipped with Docu-docu.
+// Package skills exposes the immutable skill package shipped with Toudocu.
 package skills
 
 import (
@@ -13,13 +13,13 @@ import (
 )
 
 const (
-	SkillID       = "docu-docu"
+	SkillID       = "toudocu"
 	SkillVersion  = "0.0.1"
 	maxFileSize   = 2 << 20
 	maxBundleSize = 10 << 20
 )
 
-//go:embed all:docu-docu
+//go:embed all:toudocu
 var embedded embed.FS
 
 type File struct {

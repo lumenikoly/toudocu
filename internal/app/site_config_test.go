@@ -1,4 +1,4 @@
-package docudocu
+package toudocu
 
 import (
 	"os"
@@ -22,7 +22,7 @@ func configFixture(t *testing.T) (string, string) {
 
 func writeSiteConfig(t *testing.T, root, content string) {
 	t.Helper()
-	directory := filepath.Join(root, ".docu-docu")
+	directory := filepath.Join(root, ".toudocu")
 	if err := os.MkdirAll(directory, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -48,10 +48,10 @@ func TestSiteConfigDefaultsAndMissingFile(t *testing.T) {
 		config.Density != "comfortable" || config.ContentWidth != "standard" || !config.Hero.Enabled {
 		t.Fatalf("defaults: %#v", config)
 	}
-	if model.Project.Title != "Index title" || config.Footer.Text != "Сгенерировано Docu-docu "+Version || config.Footer.URL != defaultFooterURL {
+	if model.Project.Title != "Index title" || config.Footer.Text != "Сгенерировано Toudocu "+Version || config.Footer.URL != defaultFooterURL {
 		t.Fatalf("default title/footer: %#v / %#v", model.Project, config.Footer)
 	}
-	if got := renderFooter(config.Footer); got != `Сгенерировано <a href="https://lumenikoly.github.io/docu-docu/" rel="noopener noreferrer">Docu-docu</a> `+Version {
+	if got := renderFooter(config.Footer); got != `Сгенерировано <a href="https://lumenikoly.github.io/toudocu/" rel="noopener noreferrer">Toudocu</a> `+Version {
 		t.Fatalf("rendered default footer: %q", got)
 	}
 }
@@ -147,7 +147,7 @@ func TestTranslationProfileRejectsUnsafeRootWhenSelected(t *testing.T) {
 
 func TestSiteConfigFullAndTitlePriority(t *testing.T) {
 	root, docs := configFixture(t)
-	assets := filepath.Join(root, ".docu-docu", "assets")
+	assets := filepath.Join(root, ".toudocu", "assets")
 	if err := os.MkdirAll(assets, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -267,7 +267,7 @@ func TestSiteConfigRejectsUnsafeBrandAssets(t *testing.T) {
 
 func TestSiteConfigRejectsBrandSymlink(t *testing.T) {
 	root, docs := configFixture(t)
-	assets := filepath.Join(root, ".docu-docu", "assets")
+	assets := filepath.Join(root, ".toudocu", "assets")
 	if err := os.MkdirAll(assets, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -290,10 +290,10 @@ func TestSiteConfigRejectsAssetDirectorySymlinkEscape(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(outside, "logo.svg"), []byte("<svg/>"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.MkdirAll(filepath.Join(root, ".docu-docu"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(root, ".toudocu"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.Symlink(outside, filepath.Join(root, ".docu-docu", "assets")); err != nil {
+	if err := os.Symlink(outside, filepath.Join(root, ".toudocu", "assets")); err != nil {
 		t.Skipf("symlinks unavailable: %v", err)
 	}
 	writeSiteConfig(t, root, "site:\n  logo: assets/logo.svg\n")
@@ -305,7 +305,7 @@ func TestSiteConfigRejectsAssetDirectorySymlinkEscape(t *testing.T) {
 func TestGenerateSiteBrandingAndThemeContract(t *testing.T) {
 	root, docs := configFixture(t)
 	output := filepath.Join(root, "site")
-	assets := filepath.Join(root, ".docu-docu", "assets")
+	assets := filepath.Join(root, ".toudocu", "assets")
 	if err := os.MkdirAll(assets, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -350,7 +350,7 @@ func TestGenerateSiteBrandingAndThemeContract(t *testing.T) {
 		}
 	}
 	portalSource, err := os.ReadFile(filepath.Join("..", "..", "web", "src", "core", "preferences.ts"))
-	if err != nil || !strings.Contains(string(portalSource), "docu-docu-site-theme") {
+	if err != nil || !strings.Contains(string(portalSource), "toudocu-site-theme") {
 		t.Fatalf("portal theme preference key is missing: %v", err)
 	}
 	if strings.Count(html, `data-theme="`) != 1 {

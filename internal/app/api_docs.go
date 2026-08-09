@@ -1,13 +1,13 @@
-package docudocu
+package toudocu
 
 import (
-	frontend "docu-docu/internal/site"
 	"encoding/json"
 	"io"
 	"net/http"
+	frontend "toudocu/internal/site"
 )
 
-const apiDocsUIPath = "/_docu-docu/api-docs/"
+const apiDocsUIPath = "/_toudocu/api-docs/"
 
 func (s *documentationServer) serveAPIDocsUI(w http.ResponseWriter, request *http.Request) {
 	if request.Method != http.MethodGet && request.Method != http.MethodHead {
@@ -49,7 +49,7 @@ func (s *documentationServer) serveAPIDocsUI(w http.ResponseWriter, request *htt
 			{URL: "/assets/" + mustFrontendAsset("swagger-ui-standalone-preset.js")},
 			{URL: "/assets/" + mustFrontendAsset("api-docs.js"), Module: true},
 		},
-		Bootstrap: workspacePageBootstrap(uiModel, "_docu-docu/api-docs/index.html", "../../assets/", frontend.Capabilities{}),
+		Bootstrap: workspacePageBootstrap(uiModel, "_toudocu/api-docs/index.html", "../../assets/", frontend.Capabilities{}),
 		SpecsJSON: string(encoded),
 	})
 	if err != nil {

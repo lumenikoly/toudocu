@@ -12,18 +12,18 @@ launching checks.
 
 ```mermaid
 flowchart TD
-    Search["docu-docu search QUERY"] --> Init["docu-docu task init"]
+    Search["toudocu search QUERY"] --> Init["toudocu task init"]
     Init --> Fill["The agent selects entities and fills out the contract"]
-    Fill --> Ready["docu-docu task ready TASK-ID"]
+    Fill --> Ready["toudocu task ready TASK-ID"]
     Ready --> Complete{"Is the contract complete?"}
     Complete -->|No| Fill
     Complete -->|Yes| Status["Agent manually changes Draft to Ready"]
-    Status --> Context["docu-docu task context TASK-ID"]
+    Status --> Context["toudocu task context TASK-ID"]
     Context --> Find["Find exactly one problem"]
     Find --> Found{"Has the problem been clearly found?"}
     Found -->|No| ContextError["Return code 1 without running commands"]
     Found -->|Yes| Slice["Collect task, connections, restrictions and diagnostics"]
-    Slice --> Plan["Plan and execute changes outside of Docu-docu"]
+    Slice --> Plan["Plan and execute changes outside of Toudocu"]
     Plan --> DryRun["Explicitly call task verify --dry-run"]
     DryRun --> Check["After checking the plan, call task verify --run"]
     Check --> Gate["Apply task-local validation gate"]

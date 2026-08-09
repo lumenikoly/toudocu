@@ -35,8 +35,8 @@ function initRoadmapEditor(): void {
   cleanup?.();
   cleanup = null;
   const trigger = document.querySelector<HTMLButtonElement>("[data-roadmap-add]");
-  const endpoint = window.DocuDocuPage?.runtime === "serve" && window.DocuDocuPage.capabilities?.editor
-    ? window.DocuDocuPage.endpoints?.editor
+  const endpoint = window.ToudocuPage?.runtime === "serve" && window.ToudocuPage.capabilities?.editor
+    ? window.ToudocuPage.endpoints?.editor
     : "";
   if (!trigger || !endpoint) return;
 
@@ -142,7 +142,7 @@ function initRoadmapEditor(): void {
         method: "POST",
         cache: "no-store",
         credentials: "same-origin",
-        headers: { "Content-Type": "application/json", "X-Docu-docu-Action": "roadmap-add" },
+        headers: { "Content-Type": "application/json", "X-Toudocu-Action": "roadmap-add" },
         body: JSON.stringify({ stageAnchor: select.value, id: id.value, text: wording.value, expectedDigest: state.digest }),
         signal,
       });
@@ -181,4 +181,4 @@ function initRoadmapEditor(): void {
 }
 
 initRoadmapEditor();
-document.addEventListener("docu-docu:pagechange", initRoadmapEditor);
+document.addEventListener("toudocu:pagechange", initRoadmapEditor);

@@ -1,13 +1,13 @@
 package skillinstall
 
 import (
-	"docu-docu/skills"
 	"fmt"
 	"path/filepath"
 	"sort"
+	"toudocu/skills"
 )
 
-const ManifestName = ".docu-docu-skill.json"
+const ManifestName = ".toudocu-skill.json"
 
 type AgentTarget struct {
 	Name       string
@@ -16,9 +16,9 @@ type AgentTarget struct {
 }
 
 var registry = []AgentTarget{
-	{Name: "codex", ProjectDir: ".agents/skills/docu-docu", UserDir: ".agents/skills/docu-docu"},
-	{Name: "claude-code", ProjectDir: ".claude/skills/docu-docu", UserDir: ".claude/skills/docu-docu"},
-	{Name: "copilot", ProjectDir: ".github/skills/docu-docu", UserDir: ".copilot/skills/docu-docu"},
+	{Name: "codex", ProjectDir: ".agents/skills/toudocu", UserDir: ".agents/skills/toudocu"},
+	{Name: "claude-code", ProjectDir: ".claude/skills/toudocu", UserDir: ".claude/skills/toudocu"},
+	{Name: "copilot", ProjectDir: ".github/skills/toudocu", UserDir: ".copilot/skills/toudocu"},
 }
 
 func Registry() []AgentTarget { return append([]AgentTarget(nil), registry...) }

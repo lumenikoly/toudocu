@@ -7,11 +7,11 @@ registerMessages(preferenceMessages);
     const script: any = document.currentScript;
     const media: any = matchMedia('(prefers-color-scheme: dark)');
     const definitions: any = {
-        siteTheme: { attribute: 'siteTheme', key: 'docu-docu-site-theme', values: ['classic', 'paper', 'terminal'], fallback: 'classic' },
-        colorScheme: { attribute: 'colorScheme', key: 'docu-docu-color-scheme', values: ['system', 'light', 'dark'], fallback: 'system' },
-        accent: { attribute: 'accent', key: 'docu-docu-accent', values: ['indigo', 'blue', 'teal', 'green', 'amber', 'rose', 'violet'], fallback: 'indigo' },
-        density: { attribute: 'density', key: 'docu-docu-density', values: ['comfortable', 'compact'], fallback: 'comfortable' },
-        contentWidth: { attribute: 'contentWidth', key: 'docu-docu-content-width', values: ['narrow', 'standard', 'wide'], fallback: 'standard' },
+        siteTheme: { attribute: 'siteTheme', key: 'toudocu-site-theme', values: ['classic', 'paper', 'terminal'], fallback: 'classic' },
+        colorScheme: { attribute: 'colorScheme', key: 'toudocu-color-scheme', values: ['system', 'light', 'dark'], fallback: 'system' },
+        accent: { attribute: 'accent', key: 'toudocu-accent', values: ['indigo', 'blue', 'teal', 'green', 'amber', 'rose', 'violet'], fallback: 'indigo' },
+        density: { attribute: 'density', key: 'toudocu-density', values: ['comfortable', 'compact'], fallback: 'comfortable' },
+        contentWidth: { attribute: 'contentWidth', key: 'toudocu-content-width', values: ['narrow', 'standard', 'wide'], fallback: 'standard' },
     };
     const state: any = {};
     const valid: any = (definition: any, value: any) => definition.values.includes(value);
@@ -43,7 +43,7 @@ registerMessages(preferenceMessages);
         root.dataset.theme = resolved;
         syncControls();
         if (announce)
-            document.dispatchEvent(new CustomEvent('docu-docu:themechange', { detail: { ...state, mode: state.colorScheme, theme: resolved } }));
+            document.dispatchEvent(new CustomEvent('toudocu:themechange', { detail: { ...state, mode: state.colorScheme, theme: resolved } }));
     }
     function bind() {
         document.querySelectorAll('[data-site-theme-select]').forEach((select: any) => select.addEventListener('change', () => set('siteTheme', select.value)));
@@ -70,5 +70,5 @@ registerMessages(preferenceMessages);
         if (state.colorScheme === 'system')
             apply();
     });
-    window.DocuDocuAppearance = { get: () => ({ ...state, theme: root.dataset.theme }), set, apply };
+    window.ToudocuAppearance = { get: () => ({ ...state, theme: root.dataset.theme }), set, apply };
 })();

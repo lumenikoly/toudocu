@@ -1,9 +1,9 @@
-# Docu-docu System Boundary
+# Toudocu System Boundary
 
 - Document type: Architecture
-- Architecture question: Where is the Docu-docu system boundary and who interacts with it?
+- Architecture question: Where is the Toudocu system boundary and who interacts with it?
 
-Docu-docu is limited to one local process that reads documentation and the
+Toudocu is limited to one local process that reads documentation and the
 repository, builds a validated model, and emits diagnostics or derived
 representations. Embedding Go code invokes the same model and operation facade
 without a separate process. In `serve`, the process accepts constrained
@@ -47,7 +47,7 @@ for dependency-free delivery is recorded in
 
 ## What remains outside
 
-Docu-docu does not store server state, access a database, or interpret the
+Toudocu does not store server state, access a database, or interpret the
 user's request. The boundary between the deterministic CLI and an agent's
 semantic work is recorded in [ADR-002](../decisions/ADR-002.md). Downloading
 release assets and writing the binary to a user install dir belong to a

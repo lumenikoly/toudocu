@@ -1,9 +1,9 @@
-package docudocu
+package toudocu
 
 import (
-	frontend "docu-docu/internal/site"
 	"html/template"
 	"strings"
+	frontend "toudocu/internal/site"
 )
 
 type workspaceSurface string
@@ -17,11 +17,11 @@ const (
 func workspaceModel(model *Model) *Model {
 	defaults := defaultSiteConfig()
 	if model == nil {
-		return &Model{Project: ProjectInfo{Title: "Docu-docu"}, SiteConfig: defaults}
+		return &Model{Project: ProjectInfo{Title: "Toudocu"}, SiteConfig: defaults}
 	}
 	copy := *model
 	if copy.Project.Title == "" {
-		copy.Project.Title = "Docu-docu"
+		copy.Project.Title = "Toudocu"
 	}
 	if copy.SiteConfig.Theme == "" {
 		copy.SiteConfig.Theme = defaults.Theme
@@ -67,7 +67,7 @@ func workspaceNavigation(active workspaceSurface) string {
 		icon    string
 	}{
 		{workspacePortal, "/", "Портал", "⌂"},
-		{workspaceEditor, "/_docu-docu/editor/", "Редактор", "✎"},
+		{workspaceEditor, "/_toudocu/editor/", "Редактор", "✎"},
 		{workspaceChanges, "/changes/", "Изменения", "⇄"},
 	}
 	var b strings.Builder
@@ -106,6 +106,12 @@ func workspacePageBootstrap(model *Model, pagePath, assetBase string, capabiliti
 	if locale == "" {
 		locale = "en"
 	}
+	endpoints := &frontend.Endpoints{
+		Editor: editorAPIBase, EditorWorkspace: editorUIPath, Changes: changesAPIBase, Rebuild: rebuildEndpoint,
+	}
+	if capabilities.Review {
+		endpoints.Review = reviewAPIBase
+	}
 	bootstrap, err := frontend.MarshalBootstrap(frontend.PageBootstrap{
 		SchemaVersion: 1,
 		Runtime:       frontend.RuntimeServe,
@@ -116,9 +122,7 @@ func workspacePageBootstrap(model *Model, pagePath, assetBase string, capabiliti
 			Accent: model.SiteConfig.Accent, Density: model.SiteConfig.Density, ContentWidth: model.SiteConfig.ContentWidth,
 		},
 		Capabilities: capabilities,
-		Endpoints: &frontend.Endpoints{
-			Editor: editorAPIBase, EditorWorkspace: editorUIPath, Changes: changesAPIBase, Rebuild: rebuildEndpoint,
-		},
+		Endpoints:    endpoints,
 	})
 	if err != nil {
 		panic(err)

@@ -2,7 +2,7 @@
 
 - Identifier: CON-EDITOR-HTTP-V1
 - Status: Completed
-- Owner: Docu-docu Team
+- Owner: Toudocu Team
 - Last updated: 2026-08-08
 
 [OpenAPI 3.1.0](editor.openapi.yaml) contains routes, parameters, response codes,
@@ -11,11 +11,11 @@ opening the specification in Swagger UI.
 
 This document describes guarantees of canonical portal services that a single
 HTTP schema cannot express: the workspace boundary, write protection, rebuild
-behavior, and checking whether a new Docu-docu version is available.
+behavior, and checking whether a new Toudocu version is available.
 
 ## Availability
 
-The Editor API exists only in canonical `docu-docu serve`. It is absent from a
+The Editor API exists only in canonical `toudocu serve`. It is absent from a
 static build, locale sections, and direct `serve` of a translation root. Go
 enables the editor UI only with the `editor` capability and passes a same-origin
 API base in the versioned page bootstrap; the frontend does not derive the
@@ -23,12 +23,12 @@ endpoint from the page URL.
 
 The editor sees only allowed `.md`, `.yaml`, `.yml`, and `.json` files inside
 the documentation root. OpenAPI files are validated by the same validator used
-by `docu-docu check`.
+by `toudocu check`.
 
 ## Version check
 
 By default, canonical `serve` publishes the read-only
-`/_docu-docu/api/version` endpoint. On the first request, the process contacts
+`/_toudocu/api/version` endpoint. On the first request, the process contacts
 the project's fixed GitHub Releases API once, accepts only a stable release
 with an exact `X.Y.Z` version, limits the request to three seconds and the
 response body to 64 KiB, rejects redirects, and then caches the result until

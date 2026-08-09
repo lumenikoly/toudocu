@@ -6,7 +6,7 @@
 - Модуль: MOD-MODEL
 - Сценарий: UC-DOCS-02
 - Стандарты: STD-GO-001, STD-DOCS-001
-- Владелец: Команда Docu-docu
+- Владелец: Команда Toudocu
 - Последнее обновление: 2026-07-31
 
 ## Результат
@@ -38,7 +38,7 @@ RU/EN-шаблоны, безопасный init и semantic gate `ARCH001`–`AR
 - `integration_test.go`;
 - `screens_test.go`;
 - `skill_templates_test.go`;
-- `skills/docu-docu/`;
+- `skills/toudocu/`;
 - `docs/`;
 - `example/docs/`;
 - `project-docs/`;
@@ -49,11 +49,11 @@ RU/EN-шаблоны, безопасный init и semantic gate `ARCH001`–`AR
 
 ## Не входит в задачу
 
-- новая Go-команда `docu-docu init`;
+- новая Go-команда `toudocu init`;
 - изменение `ProjectReport` schema v1 или типа `documents[].type`;
 - автоматическая миграция legacy-архитектуры;
 - проверка пунктуации, вопросительных слов или архитектурного смысла в CLI;
-- документы Docu-docu о deployment или владении данными без подтверждённого
+- документы Toudocu о deployment или владении данными без подтверждённого
   архитектурного вопроса.
 
 ## Критерии приёмки
@@ -70,7 +70,7 @@ RU/EN-шаблоны, безопасный init и semantic gate `ARCH001`–`AR
   останавливает init без автоматической миграции.
 - [x] `AC-05` Managed guidance и semantic gate синхронно задают границы типов,
   прямую карту overview и коды `ARCH001`–`ARCH013`.
-- [x] `AC-06` Архитектура Docu-docu и Service Desk разделена на подтверждённые
+- [x] `AC-06` Архитектура Toudocu и Service Desk разделена на подтверждённые
   вопросно-ориентированные документы, а оба портала пересобраны только из
   исходного Markdown после независимого review.
 
@@ -79,24 +79,24 @@ RU/EN-шаблоны, безопасный init и semantic gate `ARCH001`–`AR
 - [x] Добавить metadata aliases и структурные architecture diagnostics.
 - [x] Расширить behavioral и schema contract tests.
 - [x] Обновить templates, init workflow, managed guidance и semantic gate.
-- [x] Мигрировать документацию Docu-docu и демонстрационного Service Desk.
+- [x] Мигрировать документацию Toudocu и демонстрационного Service Desk.
 - [x] Выполнить независимый semantic review и устранить замечания.
-- [x] Пройти полный Go/Docu-docu verification и пересобрать portals.
+- [x] Пройти полный Go/Toudocu verification и пересобрать portals.
 
 ## Проверка
 
 - `AC-01` → `go test ./... -run 'TestArchitectureContract'`
 - `AC-02` → `go test ./... -run 'TestArchitectureContract'`
 - `AC-03` → `go test ./... -run 'TestArchitectureSchemaContract'`
-- `AC-04` → `go test ./... -run 'TestUseDocu-docuArchitecture|TestUseDocu-docuInitContract'`
-- `AC-05` → `go test ./... -run 'TestUseDocu-docuArchitecture'`
-- `AC-06` → `go run ./cmd/docu-docu build ./docs --output ./project-docs --repository-root . --clean --strict --stale-days 0 && go run ./cmd/docu-docu build ./example/docs --output ./example/project-docs --repository-root ./example --clean --strict --stale-days 0`
+- `AC-04` → `go test ./... -run 'TestUseToudocuArchitecture|TestUseToudocuInitContract'`
+- `AC-05` → `go test ./... -run 'TestUseToudocuArchitecture'`
+- `AC-06` → `go run ./cmd/toudocu build ./docs --output ./project-docs --repository-root . --clean --strict --stale-days 0 && go run ./cmd/toudocu build ./example/docs --output ./example/project-docs --repository-root ./example --clean --strict --stale-days 0`
 - `ALL` → `go test -count=1 ./...`
-- `DOCS` → `go run ./cmd/docu-docu check ./docs --repository-root . --strict --stale-days 0 && go run ./cmd/docu-docu check ./example/docs --repository-root ./example --strict --stale-days 0`
-- `QUALITY` → `go test ./... -run 'TestArchitectureContract|TestArchitectureSchemaContract|TestUseDocu-docuArchitecture'`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0 && go run ./cmd/toudocu check ./example/docs --repository-root ./example --strict --stale-days 0`
+- `QUALITY` → `go test ./... -run 'TestArchitectureContract|TestArchitectureSchemaContract|TestUseToudocuArchitecture'`
 
 ## Влияние на документацию
 
 Обновляются публичный архитектурный контракт, skill init и guidance,
-самодокументация Docu-docu, демонстрационный Service Desk, README, CLI/reference,
+самодокументация Toudocu, демонстрационный Service Desk, README, CLI/reference,
 модель, use case, changelog, стандарт документации и отслеживаемые portals.

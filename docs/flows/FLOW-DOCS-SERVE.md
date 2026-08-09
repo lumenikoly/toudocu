@@ -13,7 +13,7 @@
 
 ```mermaid
 flowchart TD
-    Start["docu-docu serve"] --> Build["Выполнить первоначальную сборку"]
+    Start["toudocu serve"] --> Build["Выполнить первоначальную сборку"]
     Build --> Built{"Сборка успешна?"}
     Built -->|Нет| Stop["Вернуть код 1 и не запускать сервер"]
     Built -->|Да| Listen["Слушать указанный адрес"]

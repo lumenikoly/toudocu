@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	"docu-docu/skills"
+	"toudocu/skills"
 )
 
 func Inspect(target Target, bundle skills.Bundle) Snapshot {
@@ -192,7 +192,7 @@ func scanTree(root string) (string, map[string]diskFile, bool, error) {
 }
 
 func validateManifest(manifest Manifest, target Target) error {
-	if manifest.SchemaVersion != 1 || manifest.ManagedBy != "docu-docu" || manifest.SkillID != skills.SkillID || manifest.CLIVersion == "" || manifest.Agent != target.Agent || manifest.Scope != target.Scope || manifest.BundleChecksum == "" {
+	if manifest.SchemaVersion != 1 || manifest.ManagedBy != "toudocu" || manifest.SkillID != skills.SkillID || manifest.CLIVersion == "" || manifest.Agent != target.Agent || manifest.Scope != target.Scope || manifest.BundleChecksum == "" {
 		return fmt.Errorf("manifest identity does not match target")
 	}
 	if _, err := parseVersion(manifest.SkillVersion); err != nil {
@@ -277,5 +277,5 @@ func newManifest(bundle skills.Bundle, target Target, cliVersion string) Manifes
 		files = append(files, FileChecksum{Path: file.Path, SHA256: checksum(file.Data)})
 	}
 	sort.Slice(files, func(i, j int) bool { return files[i].Path < files[j].Path })
-	return Manifest{SchemaVersion: 1, ManagedBy: "docu-docu", SkillID: bundle.ID, SkillVersion: bundle.Version, CLIVersion: cliVersion, Agent: target.Agent, Scope: target.Scope, BundleChecksum: bundle.Checksum, Files: files}
+	return Manifest{SchemaVersion: 1, ManagedBy: "toudocu", SkillID: bundle.ID, SkillVersion: bundle.Version, CLIVersion: cliVersion, Agent: target.Agent, Scope: target.Scope, BundleChecksum: bundle.Checksum, Files: files}
 }
