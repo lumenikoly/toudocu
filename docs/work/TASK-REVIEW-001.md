@@ -5,10 +5,11 @@
 - Приоритет: Высокий
 - Модуль: MOD-REVIEW
 - Сценарий: UC-REVIEW-01
-- Экраны: SC-CHANGES-WORKSPACE
+- Экраны: SC-SITE-DOCUMENT, SC-CHANGES-WORKSPACE
+- Переходы: TR-SITE-007
 - Стандарты: STD-GO-001, STD-DOCS-001
 - Владелец: Команда Toudocu
-- Последнее обновление: 2026-08-10
+- Последнее обновление: 2026-08-11
 
 ## Результат
 
@@ -82,6 +83,10 @@ AI-skill через CLI schema v1. Toudocu не запускает агента 
   отправляет полный ответ.
 - [x] `AC-11` `ChangeSetReport`, обычный `changes`, публичный Go-фасад,
   статический манифест и поведение переводов не меняются.
+- [x] `AC-12` На странице документа выделение открывает действия копирования
+  текста и контекста и форму вопроса. Сохранённый вопрос получает точную
+  привязку либо безопасную привязку ко всему файлу, после чего можно перейти в
+  «Изменения» с выбранным файлом.
 
 ## План
 
@@ -89,6 +94,7 @@ AI-skill через CLI schema v1. Toudocu не запускает агента 
 - [x] Добавить обсуждения, очередь пакетов, ответы, очистку и перенос привязок.
 - [x] Подключить CLI, локальный HTTP API и OpenAPI.
 - [x] Расширить интерфейс Changes и подсветку CodeMirror.
+- [x] Добавить вход в обсуждение по выделению на странице документа.
 - [x] Обновить skill и каноническую документацию, не читая переводы.
 
 ## Проверка
@@ -104,6 +110,8 @@ AI-skill через CLI schema v1. Toudocu не запускает агента 
 - `AC-09` → `npm --prefix web test && make browser-test`
 - `AC-10` → `go test ./internal/app -run 'TestToudocuFeedbackContract'`
 - `AC-11` → `go test ./internal/app -run 'TestStaticSiteExcludesChanges|TestTranslation|TestChangesCLI'`
+- `AC-12` → `TR-SITE-007` → `npm --prefix web run test:browser -- --grep 'Portal and Changes review'`
+- `AC-12` → `npm --prefix web run test:browser -- --grep 'Portal and Changes review'`
 - `ALL` → `go test ./...`
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `make check`
@@ -122,3 +130,5 @@ AI-skill через CLI schema v1. Toudocu не запускает агента 
 «Отправить агенту» создаёт ожидающий пакет и показывает фразу «Обработай
 комментарии из Toudocu Changes», но не запускает AI-агента. Агент должен
 отдельно выполнить `$toudocu feedback` или соответствующие команды CLI.
+На странице документа вопрос можно создать прямо из выделенного фрагмента;
+полный интерфейс обсуждений остаётся в разделе «Изменения».

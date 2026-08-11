@@ -47,6 +47,12 @@ func TestRepositoryReviewProjectionAndFile(t *testing.T) {
 	if paths["server.go"].Documentation != nil || paths["docs/modules/MOD-CORE.md"].Documentation == nil {
 		t.Fatalf("documentation enrichment leaked: %#v", paths)
 	}
+	scopedOptions := reviewOptions(root, docs)
+	scopedOptions.ChangeFile = "server.go"
+	scoped, err := BuildRepositoryReview(scopedOptions)
+	if err != nil || len(scoped.Files) != 1 || scoped.Files[0].Path != "server.go" || scoped.RepositoryRevision != report.RepositoryRevision {
+		t.Fatalf("scoped=%#v err=%v", scoped, err)
+	}
 	detail, err := BuildRepositoryReviewFile(reviewOptions(root, docs), "server.go")
 	if err != nil || detail.Current == nil || detail.Before == nil || !strings.Contains(detail.Patch, "hello") || len(detail.Hunks) == 0 {
 		t.Fatalf("detail=%#v err=%v", detail, err)
@@ -54,6 +60,11 @@ func TestRepositoryReviewProjectionAndFile(t *testing.T) {
 	linked, err := BuildRepositoryReviewFile(reviewOptions(root, docs), "path.go")
 	if err != nil || linked.File.Status != "linked" || linked.Current == nil {
 		t.Fatalf("linked=%#v err=%v", linked, err)
+	}
+	gitTestRun(t, root, "rm", "-q", "path.go")
+	deleted, err := BuildRepositoryReviewFile(reviewOptions(root, docs), "path.go")
+	if err != nil || deleted.File.Status != "deleted" || deleted.Before == nil || deleted.Current != nil {
+		t.Fatalf("deleted=%#v err=%v", deleted, err)
 	}
 	readonly := reviewOptions(root, docs)
 	readonly.ChangeTarget = "HEAD"

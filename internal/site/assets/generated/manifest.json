@@ -3,19 +3,19 @@
   "assets": {
     "api-docs.js": {
       "file": "api-docs.js",
-      "sha256": "a27882d54c6885fe3c423989d20de583e7ed7d61dcaee4be47e1c3f31cad3945"
+      "sha256": "c5e35a15ceee090ddd4721f828aa55341083dbd392b17537853826018553edf7"
     },
     "appearance.js": {
       "file": "appearance.js",
-      "sha256": "585fc9ed74ed2cac55d4f9f783a5c113b7ecc125d4522e6920166e25fe2078f2"
+      "sha256": "a96753c61c809052bfa5e85ece247d95a869b258bdbb9d4774016fc2fdf95645"
     },
     "changes.css": {
       "file": "changes.css",
-      "sha256": "540d68a6c378c40ce916501efbd59402128d48227f678fe3d099bff0ddd96cd1"
+      "sha256": "547f21d210a1c99ab9e89d17d28b328aab3525407c42ddb64a9872dce1f20482"
     },
     "changes.js": {
       "file": "changes.js",
-      "sha256": "0a48eb5fa697ce576092a517b5e6d700751488eee441d0de6b0956efecaf2fe5"
+      "sha256": "b46ec935daa73e90f73858124e8821f4c49df3eac62e1eacdfac66bdbd034603"
     },
     "codemirror.checksums.txt": {
       "file": "codemirror.checksums.txt",
@@ -55,7 +55,7 @@
     },
     "playable-flow.js": {
       "file": "playable-flow.js",
-      "sha256": "46a47d6e068e389eb85e637c105f1cd48aaf0fde9ae953861312793c66d6dece"
+      "sha256": "32bf0af809c0d5b685284f6cb36b8d7d11e0044794a0ac02316440538eb2536f"
     },
     "portal.css": {
       "file": "portal.css",
@@ -63,7 +63,7 @@
     },
     "portal.js": {
       "file": "portal.js",
-      "sha256": "583fc2d6bda997a7716f7c53a71d2c8dfe53d36af161b9f747b8e122940254f4"
+      "sha256": "51d3e5172a3e60a4a2678db9300b7bedb6d0f7b285dd23c5b56c0d457a569137"
     },
     "screen-map.css": {
       "file": "screen-map.css",
@@ -71,11 +71,11 @@
     },
     "screen-map.js": {
       "file": "screen-map.js",
-      "sha256": "df5e06339868ee170e61f1713da49eddc904de85b22f08efa8e30079a754bb6a"
+      "sha256": "e10c92c40f1ece02c791298abf4a8b351289579ea92f442d905bdaad211af9f0"
     },
     "serve.css": {
       "file": "serve.css",
-      "sha256": "e57fccd06e91ea932c543ae83a5b4243399da1606e6692a196b6980f7101eac2"
+      "sha256": "9064822a1fa6fdd7c9e0f86be924e6acf03a005bbb6e46a888b0b3cc465fbc73"
     },
     "serve.js": {
       "file": "serve.js",

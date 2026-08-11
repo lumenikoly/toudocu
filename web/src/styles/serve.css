@@ -48,6 +48,33 @@
 .update-notice-actions :is(a, button):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .update-notice-actions :is(a, button):active { transform: scale(.96); }
 .document-context-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.review-selection-menu { position: fixed; z-index: 80; display: flex; gap: 2px; padding: 4px; border-radius: 12px; background: var(--surface); box-shadow: 0 0 0 1px color-mix(in srgb, var(--text) 14%, transparent), 0 10px 28px rgb(0 0 0 / 18%); }
+.review-selection-menu[hidden] { display: none; }
+.review-selection-menu button { min-height: 40px; padding: 7px 12px; border: 0; border-radius: 8px; background: transparent; color: var(--text); cursor: pointer; font: 700 12px/1.2 var(--font-interface); transition: background-color 120ms ease, transform 120ms ease; }
+.review-selection-menu button:hover { background: var(--surface-strong); }
+.review-selection-menu button:active { transform: scale(.96); }
+.review-selection-menu [data-selection-question] { background: var(--accent); color: var(--surface); }
+.review-selection-menu [data-selection-question]:hover { background: var(--accent-strong); }
+.review-selection-menu button:disabled { background: var(--surface-strong); color: var(--muted); cursor: not-allowed; }
+.review-selection-menu button:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 42%, transparent); outline-offset: 2px; }
+.portal-review-dialog { width: min(560px, calc(100vw - 28px)); padding: 0; border: 0; border-radius: 12px; background: var(--surface); color: var(--text); box-shadow: 0 24px 70px rgb(0 0 0 / 25%); }
+.portal-review-dialog::backdrop { background: rgb(0 0 0 / 35%); }
+.portal-review-dialog form { display: grid; gap: 14px; padding: 18px; }
+.portal-review-dialog header { display: grid; gap: 2px; }
+.portal-review-dialog h2 { margin: 0; font-family: var(--font-heading); font-size: 22px; letter-spacing: -.02em; }
+.portal-review-dialog header span { color: var(--muted); font-size: 12px; }
+.portal-review-dialog label { display: grid; gap: 5px; color: var(--muted); font-size: 12px; font-weight: 650; }
+.portal-review-dialog pre { max-height: 180px; margin: 0; padding: 10px; overflow: auto; border-radius: 8px; background: var(--surface-soft); color: var(--text); font: 13px/1.5 var(--font-body); white-space: pre-wrap; }
+.portal-review-dialog textarea { width: 100%; resize: vertical; padding: 10px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); color: var(--text); font: 16px/1.45 var(--font-body); }
+.portal-review-error { min-height: 1.4em; margin: 0; color: var(--danger); font-size: 13px; }
+.portal-review-dialog footer { display: flex; justify-content: flex-end; gap: 10px; }
+.portal-review-dialog button { min-height: 42px; padding: 8px 15px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); color: var(--text); cursor: pointer; font: 700 13px/1.2 var(--font-interface); }
+.portal-review-dialog .portal-review-submit { border-color: var(--accent); background: var(--accent); color: var(--surface); }
+.portal-review-dialog button:disabled { cursor: wait; opacity: .62; }
+.portal-review-dialog :focus-visible, .portal-review-toast a:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 42%, transparent); outline-offset: 2px; }
+.portal-review-toast { position: fixed; right: 18px; bottom: 18px; z-index: 90; display: flex; align-items: center; gap: 12px; max-width: min(620px, calc(100vw - 36px)); padding: 11px 14px; border-radius: 8px; background: var(--text); color: var(--surface); font: 13px/1.35 var(--font-interface); }
+.portal-review-toast[hidden] { display: none; }
+.portal-review-toast a { min-height: 34px; display: inline-flex; align-items: center; border: 1px solid currentColor; border-radius: 7px; padding: 5px 9px; color: inherit; font-weight: 700; text-decoration: none; white-space: nowrap; }
 .roadmap-add-button { border-color: var(--accent); background: var(--accent); color: var(--surface); font-weight: 700; }
 .roadmap-add-button:hover { filter: brightness(.96); }
 .roadmap-add-button:disabled { cursor: wait; opacity: .62; }
@@ -76,6 +103,12 @@
   .server-rebuild.is-rebuilding .server-rebuild-icon { animation: none; }
 }
 @media (max-width: 560px) {
+  .review-selection-menu { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); width: calc(100vw - 16px); }
+  .review-selection-menu button { min-width: 0; min-height: 44px; white-space: normal; }
+  .portal-review-dialog { width: calc(100vw - 20px); margin: auto; }
+  .portal-review-dialog form { padding: 16px; }
+  .portal-review-dialog footer { display: grid; grid-template-columns: 1fr 1fr; }
+  .portal-review-toast { right: 10px; bottom: 10px; left: 10px; max-width: none; justify-content: space-between; }
   .update-notice { align-items: stretch; justify-content: flex-start; gap: 10px; padding: 11px 12px; }
   .update-notice-copy { flex: 1; display: grid; gap: 1px; align-content: center; }
   .update-notice-actions { flex: 0 0 auto; }

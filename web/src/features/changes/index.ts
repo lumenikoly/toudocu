@@ -8,7 +8,7 @@ registerMessages(changesMessages);
     const REVIEW: any = page?.runtime === 'serve' && page.capabilities?.review ? page.endpoints?.review : '';
     const EDITOR_WORKSPACE: any = page?.runtime === 'serve' && page.capabilities?.editor ? page.endpoints?.editorWorkspace : '';
     const $: any = (selector: any, root: any = document) => root.querySelector(selector);
-    const state: any = { report: null, repository: null, files: [], linked: [], linkedPaths: new Set(), selected: null, tab: 'source', merge: null, etag: '', repositoryEtag: '', reviewEtag: '', review: null, composerTarget: null, composerReturn: null, activeDiscussion: '', discussionScroll: 0 };
+    const state: any = { report: null, repository: null, files: [], linked: [], linkedPaths: new Set(), selected: null, tab: 'source', merge: null, etag: '', repositoryEtag: '', reviewEtag: '', review: null, composerTarget: null, composerReturn: null, activeDiscussion: '', discussionScroll: 0, detailRequest: 0 };
     const elements: any = {
         base: $('[data-base]'), branchBase: $('[data-branch-base]'), target: $('[data-target]'), targetRevision: $('[data-target-revision]'), targetRevisionWrap: $('[data-target-revision-wrap]'), apply: $('[data-apply-range]'), range: $('[data-range-summary]'), rangeMeta: $('[data-range-meta]'),
         summary: $('[data-summary]'), rangeDetails: $('[data-range-details]'), stale: $('[data-stale]'), search: $('[data-search]'), status: $('[data-status]'), scope: $('[data-scope]'), list: $('[data-file-list]'),
@@ -141,16 +141,7 @@ registerMessages(changesMessages);
         return [['source', text("features.changes.index.022")], ...(!change.binary && !change.asset ? [['file', text("features.changes.index.133")]] : []), ...(documentation && change.renderedDiffAvailable ? [['rendered', text("features.changes.index.023")]] : []), ...(documentation && change.semanticDiffAvailable ? [['semantic', text("features.changes.index.024")]] : []), ...(documentation ? [['relations', text("features.changes.index.025")]] : []), ...(change.classification === 'contract' ? [['openapi', 'OpenAPI']] : []), ...(change.mermaidBlocks?.length ? [['mermaid', 'Mermaid']] : []), ...(change.classification === 'asset' ? [['assets', 'Assets']] : []), ...([...(change.entitiesBefore || []), ...(change.entitiesAfter || [])].some((item: any) => item.type === 'screen' || item.type === 'transition') ? [['map', text("features.changes.index.026")]] : [])];
     };
     async function selectChange(change: any, tab: any = state.tab) {
-        if (REVIEW) {
-            try {
-                const response: any = await fetch(reviewURL('/repository/file', { path: change.path }), { cache: 'no-store' });
-                const detail: any = await response.json();
-                if (!response.ok)
-                    throw new Error(detail.diagnostics?.[0]?.message || `HTTP ${response.status}`);
-                change = { ...change, sourceDiff: detail.patch || '', sourceDiffHunks: detail.hunks || [], sourceDiffAvailable: !!detail.patch, _before: detail.before || '', _current: detail.current || '', _repositoryRevision: detail.repositoryRevision, _reviewDetail: detail };
-            }
-            catch (error: any) { announce(error.message); }
-        }
+        const request: any = ++state.detailRequest;
         state.selected = change;
         tab = tab === 'summary' ? 'source' : tab;
         state.tab = tabsFor(change).some(([id]: any) => id === tab) ? tab : 'source';
@@ -160,6 +151,32 @@ registerMessages(changesMessages);
         $('[data-mobile-files]')?.setAttribute('aria-expanded', 'false');
         renderList();
         updateURL();
+        if (REVIEW && !change._reviewDetail) {
+            elements.detail.innerHTML = detailHeader(change);
+            elements.detail.setAttribute('aria-busy', 'true');
+            elements.detail.querySelectorAll('[data-tab], [data-file-comment]').forEach((button: any) => button.disabled = true);
+            $('[data-tab-panel]', elements.detail).innerHTML = text("features.changes.index.134");
+            try {
+                const response: any = await fetch(reviewURL('/repository/file', { path: change.path }), { cache: 'no-store' });
+                const detail: any = await response.json();
+                if (!response.ok)
+                    throw new Error(detail.diagnostics?.[0]?.message || `HTTP ${response.status}`);
+                if (request !== state.detailRequest || state.selected !== change)
+                    return;
+                Object.assign(change, { sourceDiff: detail.patch || '', sourceDiffHunks: detail.hunks || [], sourceDiffAvailable: !!detail.patch, _before: detail.before || '', _current: detail.current || '', _repositoryRevision: detail.repositoryRevision, _reviewDetail: detail });
+            }
+            catch (error: any) {
+                if (request !== state.detailRequest || state.selected !== change)
+                    return;
+                elements.detail.removeAttribute('aria-busy');
+                $('[data-tab-panel]', elements.detail).innerHTML = text("features.changes.index.135", [escapeHTML(error.message)]);
+                announce(error.message);
+                return;
+            }
+        }
+        if (request !== state.detailRequest || state.selected !== change)
+            return;
+        elements.detail.removeAttribute('aria-busy');
         await renderDetail();
     }
     function detailHeader(change: any) {
@@ -727,10 +744,12 @@ registerMessages(changesMessages);
         setTimeout(() => elements.toast.classList.remove('is-visible'), copyPrompt ? 8000 : 2200);
     }
     function showEmptyDetail() {
+        state.detailRequest++;
         state.selected = null;
         state.tab = 'source';
         state.merge?.destroy?.();
         state.merge = null;
+        elements.detail.removeAttribute('aria-busy');
         elements.detail.innerHTML = text("features.changes.index.132");
         updateURL();
     }
@@ -782,15 +801,7 @@ registerMessages(changesMessages);
         elements.scope.value = params.get('scope') || '';
         const requestedPath: any = params.get('path');
         const requestedTab: any = params.get('tab') || 'source';
-        try {
-            await Promise.all([load(false), loadReview()]);
-            const requested: any = [...state.files, ...state.linked].find((change: any) => change.path === requestedPath || change.oldPath === requestedPath);
-            if (requested && (state.selected?.path !== requested.path || state.tab !== (requestedTab === 'summary' ? 'source' : requestedTab)))
-                await selectChange(requested, requestedTab);
-        }
-        catch (error: any) {
-            elements.detail.innerHTML = text("features.changes.index.071", [escapeHTML(error.message)]);
-        }
+        const selectionBeforeLoad: any = state.detailRequest;
         [elements.search, elements.status, elements.scope].forEach((control: any) => control.addEventListener('input', async () => {
             const visible: any = renderList();
             if (!visible.some((change: any) => change.path === state.selected?.path)) {
@@ -859,6 +870,15 @@ registerMessages(changesMessages);
         });
         $('[data-copy-agent-prompt]')?.addEventListener('click', async () => { await navigator.clipboard.writeText(text("features.changes.index.121")); announce(text("features.changes.index.122")); });
         $('[data-refresh-open-file]')?.addEventListener('click', async () => { elements.openFileStale.hidden = true; await load(true); });
+        try {
+            await Promise.all([load(false), loadReview()]);
+            const requested: any = [...state.files, ...state.linked].find((change: any) => change.path === requestedPath || change.oldPath === requestedPath);
+            if (requested && state.detailRequest <= selectionBeforeLoad + 1 && (state.selected?.path !== requested.path || state.tab !== (requestedTab === 'summary' ? 'source' : requestedTab)))
+                await selectChange(requested, requestedTab);
+        }
+        catch (error: any) {
+            elements.detail.innerHTML = text("features.changes.index.071", [escapeHTML(error.message)]);
+        }
         setInterval(async () => {
             try {
                 if (REVIEW) {

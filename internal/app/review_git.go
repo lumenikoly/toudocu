@@ -237,7 +237,11 @@ func BuildRepositoryReview(options Options) (*RepositoryReviewReport, error) {
 		Files:   []RepositoryReviewFile{}, FeedbackWritable: target.Type == "working-tree", Diagnostics: []Issue{},
 	}
 	documentation := documentationChangesByPath(options)
+	requested := filepath.ToSlash(strings.TrimSpace(options.ChangeFile))
 	for _, change := range changed {
+		if requested != "" && requested != change.path && requested != change.oldPath {
+			continue
+		}
 		file := RepositoryReviewFile{Status: change.status, Path: change.path, OldPath: change.oldPath, GitState: change.state, Language: reviewLanguage(change.path)}
 		patch, patchErr := g.diff(base, target, change)
 		if patchErr == nil {
@@ -351,6 +355,7 @@ func reviewInventory(g *gitChangeSource, query string, limit int) ([]RepositoryR
 }
 
 func BuildRepositoryReviewFile(options Options, requested string) (*RepositoryReviewFileDetail, error) {
+	options.ChangeFile = requested
 	report, err := BuildRepositoryReview(options)
 	if err != nil {
 		return nil, err

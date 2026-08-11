@@ -477,6 +477,155 @@ registerMessages(portalMessages);
             });
         });
     }
+    function initializeDocumentReview(signal: any) {
+        const page: any = pageContract();
+        const review: any = page?.runtime === 'serve' && page.capabilities?.review ? page.endpoints?.review : '';
+        const contextButton: any = $('[data-copy-document-context]');
+        const contents: any = $$('.doc-content');
+        if (!review || !contextButton || !contents.length)
+            return;
+        const title: any = contextButton.dataset.documentContextTitle || '';
+        const path: any = contextButton.dataset.documentContextPath || '';
+        if (!path)
+            return;
+        const menu: any = document.createElement('div');
+        menu.className = 'review-selection-menu';
+        menu.hidden = true;
+        menu.setAttribute('role', 'toolbar');
+        menu.setAttribute('aria-label', text("core.portal.034"));
+        menu.innerHTML = `<button type="button" data-selection-copy>${text("core.portal.035")}</button><button type="button" data-selection-context>${text("core.portal.036")}</button><button type="button" data-selection-question>${text("core.portal.037")}</button>`;
+        const dialog: any = document.createElement('dialog');
+        dialog.className = 'portal-review-dialog';
+        dialog.innerHTML = `<form method="dialog"><header><h2>${text("core.portal.042")}</h2><span data-portal-review-title></span></header><label>${text("core.portal.043")}<pre data-portal-review-selection></pre></label><label>${text("core.portal.044")}<textarea required maxlength="65536" rows="5" placeholder="${text("core.portal.045")}" data-portal-review-question></textarea></label><p class="portal-review-error" data-portal-review-error role="alert"></p><footer><button type="submit" value="cancel">${text("core.portal.046")}</button><button type="submit" class="portal-review-submit">${text("core.portal.047")}</button></footer></form>`;
+        $('[data-portal-review-title]', dialog).textContent = title;
+        const toast: any = document.createElement('div');
+        toast.className = 'portal-review-toast';
+        toast.hidden = true;
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
+        const toastMessage: any = document.createElement('span');
+        const toastLink: any = document.createElement('a');
+        toastLink.href = `/changes/?path=${encodeURIComponent(path)}`;
+        toastLink.textContent = text("core.portal.051");
+        toast.append(toastMessage, toastLink);
+        document.body.append(menu, dialog, toast);
+        let pending: any = null;
+        let dialogSelection: any = null;
+        let toastTimer: any = 0;
+        const hideMenu: any = () => { menu.hidden = true; pending = null; };
+        const announce: any = (message: any, showLink: any = false) => {
+            window.clearTimeout(toastTimer);
+            toastMessage.textContent = message;
+            toastLink.hidden = !showLink;
+            toast.hidden = false;
+            toastTimer = window.setTimeout(() => { toast.hidden = true; }, showLink ? 8000 : 2200);
+        };
+        const selectionContent: any = (selection: any) => contents.find((content: any) => content.contains(selection.anchorNode) && content.contains(selection.focusNode));
+        const showMenu: any = () => {
+            const selection: any = window.getSelection();
+            if (!selection || selection.isCollapsed || !selection.rangeCount || !selection.toString().trim() || !selectionContent(selection))
+                return hideMenu();
+            const range: any = selection.getRangeAt(0);
+            const rectangles: any = range.getClientRects();
+            const rectangle: any = rectangles[rectangles.length - 1] || range.getBoundingClientRect();
+            pending = { text: selection.toString() };
+            menu.style.visibility = 'hidden';
+            menu.hidden = false;
+            requestAnimationFrame(() => {
+                if (menu.hidden)
+                    return;
+                const bounds: any = menu.getBoundingClientRect();
+                const gap: any = 8;
+                const left: any = Math.min(innerWidth - bounds.width - gap, Math.max(gap, rectangle.left + rectangle.width / 2 - bounds.width / 2));
+                const above: any = rectangle.top - bounds.height - gap;
+                const top: any = above >= gap ? above : Math.min(innerHeight - bounds.height - gap, rectangle.bottom + gap);
+                menu.style.left = `${left}px`;
+                menu.style.top = `${top}px`;
+                menu.style.visibility = '';
+            });
+        };
+        const sourcePosition: any = (source: any, offset: any) => {
+            const before: any = source.slice(0, offset);
+            const lineStart: any = before.lastIndexOf('\n') + 1;
+            return { line: before.split('\n').length, column: [...before.slice(lineStart)].length + 1 };
+        };
+        const targetFor: any = (source: any, selected: any) => {
+            const start: any = source.indexOf(selected);
+            if (start < 0 || source.indexOf(selected, start + selected.length) >= 0)
+                return { type: 'file', path };
+            return { type: 'fileRange', path, start: sourcePosition(source, start), end: sourcePosition(source, start + selected.length) };
+        };
+        const copySelection: any = async (value: any, success: any) => {
+            hideMenu();
+            announce(await copyText(value) ? success : text("core.portal.041"));
+        };
+        $('[data-selection-copy]', menu).addEventListener('click', () => pending && copySelection(pending.text, text("core.portal.039")), { signal });
+        $('[data-selection-context]', menu).addEventListener('click', () => pending && copySelection(text("core.portal.038", [title, path, pending.text]), text("core.portal.040")), { signal });
+        $('[data-selection-question]', menu).addEventListener('click', () => {
+            if (!pending)
+                return;
+            dialogSelection = pending.text;
+            $('[data-portal-review-selection]', dialog).textContent = dialogSelection;
+            $('[data-portal-review-question]', dialog).value = '';
+            $('[data-portal-review-error]', dialog).textContent = '';
+            hideMenu();
+            dialog.showModal();
+            requestAnimationFrame(() => $('[data-portal-review-question]', dialog).focus());
+        }, { signal });
+        $('form', dialog).addEventListener('submit', async (event: any) => {
+            if (event.submitter?.value === 'cancel')
+                return;
+            event.preventDefault();
+            const question: any = $('[data-portal-review-question]', dialog).value.trim();
+            if (!question)
+                return;
+            const submit: any = event.submitter;
+            const error: any = $('[data-portal-review-error]', dialog);
+            submit.disabled = true;
+            submit.textContent = text("core.portal.048");
+            error.textContent = '';
+            try {
+                const [fileResponse, reviewResponse]: any = await Promise.all([
+                    fetch(`${review}/repository/file?path=${encodeURIComponent(path)}`, { cache: 'no-store' }),
+                    fetch(`${review}/discussions`, { cache: 'no-store' }),
+                ]);
+                const file: any = await fileResponse.json();
+                const state: any = await reviewResponse.json();
+                if (!fileResponse.ok || !reviewResponse.ok)
+                    throw new Error(file.diagnostics?.[0]?.message || state.diagnostics?.[0]?.message || `HTTP ${fileResponse.ok ? reviewResponse.status : fileResponse.status}`);
+                const target: any = targetFor(file.current || '', dialogSelection);
+                const message: any = target.type === 'fileRange' ? question : text("core.portal.052", [question, dialogSelection]);
+                if (new TextEncoder().encode(message).length > 65536)
+                    throw new Error(text("core.portal.053"));
+                const response: any = await fetch(`${review}/discussions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Toudocu-Action': 'review-discussion-create' },
+                    body: JSON.stringify({ expectedRevision: state.revision, expectedStateDigest: state.stateDigest, repositoryRevision: file.repositoryRevision, target, message }),
+                });
+                const result: any = await response.json();
+                if (!response.ok)
+                    throw new Error(result.diagnostics?.[0]?.message || `HTTP ${response.status}`);
+                dialog.close();
+                announce(text("core.portal.050"), true);
+            }
+            catch (failure: any) {
+                error.textContent = text("core.portal.049", [failure.message]);
+            }
+            finally {
+                submit.disabled = false;
+                submit.textContent = text("core.portal.047");
+            }
+        }, { signal });
+        contents.forEach((content: any) => {
+            content.addEventListener('pointerup', showMenu, { signal });
+            content.addEventListener('keyup', (event: any) => { if (event.key === 'Shift' || !event.shiftKey) showMenu(); }, { signal });
+        });
+        document.addEventListener('pointerdown', (event: any) => { if (!menu.contains(event.target)) hideMenu(); }, { signal });
+        document.addEventListener('scroll', hideMenu, { capture: true, signal });
+        window.addEventListener('resize', hideMenu, { signal });
+        document.addEventListener('keydown', (event: any) => { if (event.key === 'Escape' && !menu.hidden) { event.preventDefault(); hideMenu(); } }, { capture: true, signal });
+        signal.addEventListener('abort', () => { window.clearTimeout(toastTimer); menu.remove(); dialog.remove(); toast.remove(); }, { once: true });
+    }
     function initializeCodeCopy() {
         $$('.code-block').forEach((block: any) => {
             const code: any = $('code', block);
@@ -774,6 +923,7 @@ registerMessages(portalMessages);
         initializeTaskFilters();
         initializeCollapsibleSections();
         initializeDocumentContextCopy();
+        initializeDocumentReview(signal);
         initializeCodeCopy();
         initializeMermaid(signal);
         initializeUseCaseTabs(signal);
