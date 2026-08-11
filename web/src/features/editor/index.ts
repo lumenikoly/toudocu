@@ -181,6 +181,12 @@ registerMessages(editorMessages);
         state.current = file;
         state.baseline = file.content;
         state.external = null;
+        history.replaceState(history.state, '', `?path=${encodeURIComponent(file.path)}`);
+        try {
+            sessionStorage.setItem('toudocu-editor-path', file.path);
+        }
+        catch { /* storage may be unavailable */ }
+        $('[data-workspace="editor"]')?.setAttribute('href', `${location.pathname}${location.search}`);
         elements.conflict.hidden = true;
         elements.path.textContent = file.path;
         elements.raw.hidden = false;
@@ -199,7 +205,6 @@ registerMessages(editorMessages);
         try {
             applyFile(await fetchFile(path));
             elements.tree.classList.remove('is-open');
-            history.replaceState(null, '', `?path=${encodeURIComponent(path)}`);
         }
         catch (error: any) {
             announce(error.message, true);

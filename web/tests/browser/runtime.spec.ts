@@ -250,6 +250,11 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await expect(page.locator("[data-create-dialog]")).not.toBeVisible();
     await page.locator('[data-file-path="notes.md"]').click();
     await expect(page.locator("[data-current-path]")).toHaveText("notes.md");
+    await page.locator('[data-workspace="portal"]').click();
+    await expect(page).toHaveURL(`${origin}/`);
+    await expect(page.locator('[data-workspace="editor"]')).toHaveAttribute("href", "/_toudocu/editor/?path=notes.md");
+    await page.locator('[data-workspace="editor"]').click();
+    await expect(page.locator("[data-current-path]")).toHaveText("notes.md");
     for (const siteTheme of ["classic", "paper", "terminal"]) {
       await page.locator("[data-site-theme-select]").selectOption(siteTheme);
       const workspaceFonts = await page.evaluate(() => ({

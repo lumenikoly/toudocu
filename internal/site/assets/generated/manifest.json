@@ -7,7 +7,7 @@
     },
     "appearance.js": {
       "file": "appearance.js",
-      "sha256": "0413540b023acbd9aefa844b5347bc7ce9f418a626a6dc78d540741493a8d312"
+      "sha256": "585fc9ed74ed2cac55d4f9f783a5c113b7ecc125d4522e6920166e25fe2078f2"
     },
     "changes.css": {
       "file": "changes.css",
@@ -35,7 +35,7 @@
     },
     "editor.js": {
       "file": "editor.js",
-      "sha256": "92129b4d075292223cd278cecdba0489fcb11c73a98bf34c40d245e95130a11e"
+      "sha256": "09e58ebd1c053b944bd436454e9d22854cd208f26c8496208e5194ac93f52429"
     },
     "favicon.svg": {
       "file": "favicon.svg",

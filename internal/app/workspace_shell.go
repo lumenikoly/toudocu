@@ -77,7 +77,7 @@ func workspaceNavigation(active workspaceSurface) string {
 		if item.surface == active {
 			current = ` aria-current="page"`
 		}
-		b.WriteString(`<a class="workspace-nav-link" href="` + item.href + `" aria-label="Открыть ` + strings.ToLower(item.label) + `"` + current + `><span aria-hidden="true">` + item.icon + `</span><span class="workspace-nav-label">` + item.label + `</span></a>`)
+		b.WriteString(`<a class="workspace-nav-link" href="` + item.href + `" aria-label="Открыть ` + strings.ToLower(item.label) + `"` + current + ` data-workspace="` + string(item.surface) + `"><span aria-hidden="true">` + item.icon + `</span><span class="workspace-nav-label">` + item.label + `</span></a>`)
 	}
 	b.WriteString(`</nav>`)
 	return b.String()

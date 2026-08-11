@@ -46,6 +46,18 @@ registerMessages(preferenceMessages);
             document.dispatchEvent(new CustomEvent('toudocu:themechange', { detail: { ...state, mode: state.colorScheme, theme: resolved } }));
     }
     function bind() {
+        const editorLink: any = document.querySelector('[data-workspace="editor"]');
+        if (editorLink) {
+            try {
+                const path: any = sessionStorage.getItem('toudocu-editor-path');
+                if (path) {
+                    const target: any = new URL(editorLink.href, location.href);
+                    target.searchParams.set('path', path);
+                    editorLink.setAttribute('href', `${target.pathname}${target.search}`);
+                }
+            }
+            catch { /* storage may be unavailable */ }
+        }
         document.querySelectorAll('[data-site-theme-select]').forEach((select: any) => select.addEventListener('change', () => set('siteTheme', select.value)));
         document.querySelectorAll('[data-color-scheme-select]').forEach((select: any) => select.addEventListener('change', () => set('colorScheme', select.value)));
         syncControls();
