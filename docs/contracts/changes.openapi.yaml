@@ -210,6 +210,7 @@ paths:
         "415": {$ref: "#/components/responses/ReviewError"}
         "503": {$ref: "#/components/responses/ReviewError"}
   /_toudocu/api/changes/review/discussions:
+    parameters: [{$ref: "#/components/parameters/Base"}, {$ref: "#/components/parameters/BranchBase"}, {$ref: "#/components/parameters/Target"}]
     get:
       operationId: getReviewDiscussions
       summary: Read the persistent review state with current placements
@@ -230,11 +231,15 @@ paths:
         "413": {$ref: "#/components/responses/ReviewError"}
         "415": {$ref: "#/components/responses/ReviewError"}
   /_toudocu/api/changes/review/discussions/{id}:
+    parameters:
+      - {$ref: "#/components/parameters/ReviewID"}
+      - {$ref: "#/components/parameters/Base"}
+      - {$ref: "#/components/parameters/BranchBase"}
+      - {$ref: "#/components/parameters/Target"}
     patch:
       operationId: updateReviewDiscussion
       summary: Reply, edit or delete one unsent message, resolve, or reopen
       parameters:
-        - {$ref: "#/components/parameters/ReviewID"}
         - {$ref: "#/components/parameters/UpdateDiscussionAction"}
       requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/UpdateDiscussionRequest"}, example: {expectedRevision: 2, expectedStateDigest: abc123, operation: resolve}}}}
       responses:
@@ -249,7 +254,7 @@ paths:
     post:
       operationId: createReviewFeedback
       summary: Snapshot all unsent messages from open discussions
-      parameters: [{$ref: "#/components/parameters/CreateFeedbackAction"}]
+      parameters: [{$ref: "#/components/parameters/Base"}, {$ref: "#/components/parameters/BranchBase"}, {$ref: "#/components/parameters/Target"}, {$ref: "#/components/parameters/CreateFeedbackAction"}]
       requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/MutationGuard"}, example: {expectedRevision: 2, expectedStateDigest: abc123}}}}
       responses:
         "201": {description: Immutable feedback snapshot, content: {application/json: {schema: {$ref: "#/components/schemas/PendingFeedbackEnvelope"}}}}

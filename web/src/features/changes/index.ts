@@ -521,7 +521,7 @@ registerMessages(changesMessages);
     }
     function reviewGuard() { return { expectedRevision: state.review?.revision || 0, expectedStateDigest: state.review?.stateDigest || '' }; }
     async function reviewMutation(endpoint: any, action: any, method: any, body: any) {
-        const response: any = await fetch(`${REVIEW}${endpoint}`, { method, headers: { 'Content-Type': 'application/json', 'X-Toudocu-Action': action }, body: JSON.stringify(body) });
+        const response: any = await fetch(reviewURL(endpoint), { method, headers: { 'Content-Type': 'application/json', 'X-Toudocu-Action': action }, body: JSON.stringify(body) });
         const data: any = await response.json();
         if (!response.ok)
             throw new Error(data.diagnostics?.[0]?.message || `HTTP ${response.status}`);
@@ -681,7 +681,7 @@ registerMessages(changesMessages);
     async function loadReview() {
         if (!REVIEW)
             return;
-        const response: any = await fetch(`${REVIEW}/discussions`, { cache: 'no-store' });
+        const response: any = await fetch(reviewURL('/discussions'), { cache: 'no-store' });
         const data: any = await response.json();
         if (!response.ok)
             throw new Error(data.diagnostics?.[0]?.message || `HTTP ${response.status}`);
@@ -866,7 +866,7 @@ registerMessages(changesMessages);
                                 await load(true);
                         }
                     }
-                    const reviewResponse: any = await fetch(`${REVIEW}/discussions`, { headers: state.reviewEtag ? { 'If-None-Match': state.reviewEtag } : {}, cache: 'no-store' });
+                    const reviewResponse: any = await fetch(reviewURL('/discussions'), { headers: state.reviewEtag ? { 'If-None-Match': state.reviewEtag } : {}, cache: 'no-store' });
                     if (reviewResponse.status !== 304 && reviewResponse.ok) {
                         state.review = await reviewResponse.json();
                         state.reviewEtag = reviewResponse.headers.get('ETag') || '';
