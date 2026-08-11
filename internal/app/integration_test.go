@@ -1836,6 +1836,31 @@ func TestOutputSafety(t *testing.T) {
 	}
 }
 
+func TestBuildRejectsExistingOutputSymlinkWithoutClean(t *testing.T) {
+	_, docs, output := createFixture(t)
+	model := buildFixture(t, docs)
+	if err := os.MkdirAll(output, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	outside := filepath.Join(t.TempDir(), "outside.txt")
+	if err := os.WriteFile(outside, []byte("keep"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, filepath.Join(output, "index.html")); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+	if _, err := GenerateSite(model, Options{OutputDirectory: output}); err == nil {
+		t.Fatal("build without clean must reject an existing output symlink")
+	}
+	content, err := os.ReadFile(outside)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(content) != "keep" {
+		t.Fatalf("file outside output was overwritten: %q", content)
+	}
+}
+
 func TestMinimalDocumentationCheckAndBuild(t *testing.T) {
 	root := t.TempDir()
 	docs := filepath.Join(root, "docs")

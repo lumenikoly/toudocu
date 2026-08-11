@@ -198,6 +198,18 @@ func safeRemoveDirectory(directory, protectedDirectory string) error {
 
 func mkdirp(directory string) error { return os.MkdirAll(directory, 0o755) }
 
+func rejectSymlinks(root string) error {
+	return filepath.WalkDir(root, func(filePath string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.Type()&os.ModeSymlink != 0 {
+			return fmt.Errorf("выходной каталог содержит символическую ссылку: %s", filePath)
+		}
+		return nil
+	})
+}
+
 func writeFileEnsured(filePath string, content []byte) error {
 	if err := mkdirp(filepath.Dir(filePath)); err != nil {
 		return err

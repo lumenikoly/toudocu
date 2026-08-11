@@ -1279,6 +1279,9 @@ func generateSite(model *Model, options Options, serve bool) (GenerateResult, er
 	if err = mkdirp(output); err != nil {
 		return GenerateResult{}, err
 	}
+	if err = rejectSymlinks(output); err != nil {
+		return GenerateResult{}, err
+	}
 	runtime := "static"
 	if serve {
 		runtime = "serve"
