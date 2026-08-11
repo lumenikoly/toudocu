@@ -6,8 +6,8 @@
 - Module: MOD-MODEL
 - Transitions: TR-SITE-004
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Toudocu Team
-- Last updated: 2026-08-05
+- Owner: Toudocu team
+- Last updated: 2026-08-10
 
 ## Result
 
@@ -18,7 +18,7 @@ project names, additive JSON `sectionType`, and a single `FLOW-*` catalog at
 ## Scope
 
 - `internal/app/sections.go`, model, config parser and portal;
-- canonical route of the FLOW directory without legacy index in the source directory;
+- canonical FLOW catalog route without a legacy source-directory index;
 - `$toudocu` init/refresh workflow;
 - configuration, model, portal and CLI documentation.
 
@@ -36,10 +36,10 @@ strings, and the section title could be derived implicitly from H1.
 
 ### After
 
-Stable SectionType and project configuration determine the route, order,
-name and JSON representation of the built-in section; `flows` remains source
-directory and the route of individual documents, and its directory becomes only
-`processes`.
+Stable `SectionType` values and project configuration determine each built-in
+section's route, order, label, and JSON representation. `flows/` remains the
+source directory and individual-document route, while its catalog is available
+only at `processes/index.html`.
 
 ## Acceptance criteria
 
@@ -78,9 +78,9 @@ directory and the route of individual documents, and its directory becomes only
 
 ## Documentation impact
 
-Updated reference configuration, module contracts, CLI contract, README and
-init/refresh instructions skill. Generated portal is rebuilt only after
-successful strict structural check.
+Updated configuration reference, module contracts, CLI contract, README, and
+skill instructions for init and refresh. The generated portal was rebuilt only
+after the strict structural check passed.
 
 ## Use-case omission reason
 

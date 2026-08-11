@@ -1,10 +1,21 @@
 # Installing and updating Toudocu
 
-This guide explains how to install the appropriate binary from a GitHub Release
-without administrator privileges. The same command checks the installation
-again and updates it.
+GitHub Release installers are the main way to install or update Toudocu. A
+source build remains available for development and testing changes.
 
-## Install or update the latest release
+## Build from source
+
+```bash
+git clone https://github.com/lumenikoly/toudocu.git
+cd toudocu
+make build
+./toudocu version
+```
+
+This creates a `toudocu` binary in the working-copy root. It does not add the
+binary to `PATH`; move it to your own executable directory if needed.
+
+## Install or update the latest stable release
 
 Linux and macOS:
 
@@ -18,9 +29,9 @@ Windows PowerShell:
 irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 | iex
 ```
 
-Running the installer again does not replace the binary when its SHA-256
-already matches the release file. When a new version is available, the
-installer replaces the old file only after all checks succeed.
+Running the installer again will leave a binary with the same SHA-256 digest in
+place. When a newer version exists, replacement happens only after download,
+checksum, and version checks succeed.
 
 ## Supported platforms
 
@@ -55,19 +66,9 @@ Remove-Item Env:TOUDOCU_VERSION
 ```
 
 The accepted formats are `X.Y.Z` and `X.Y.Z-rc.N`, without a `v` prefix. An
-explicit version allows pinning, an intentional downgrade, and installation of
-a release candidate. RC builds are not selected through `latest`, so their tag
-is specified explicitly:
-
-```sh
-curl -fsSL https://github.com/lumenikoly/toudocu/releases/download/0.0.1-rc.1/install.sh \
-  | TOUDOCU_VERSION=0.0.1-rc.1 sh
-```
-
-In GitHub Actions, an RC is published through the `release` workflow: select
-branch `main`, channel `rc`, base version `0.0.1`, and a positive `rc_number`.
-The workflow creates a prerelease tagged `0.0.1-rc.N`; the stable channel
-continues to create an ordinary `X.Y.Z` release.
+explicit version allows pinning, an intentional downgrade, or installation of
+a specifically selected release candidate. `latest` always selects a stable
+release.
 
 ## Directory and PATH
 
@@ -109,4 +110,6 @@ can download and inspect it separately before running it.
 
 Network access and system download/hash tools are needed only by the installer.
 After installation, Toudocu remains one self-contained Go binary with no
-runtime dependencies or external outbound downloads during normal operation.
+runtime dependencies. The only optional outbound request during normal
+operation is the stable-version check in the main `serve` portal; disable it
+with `--no-update-check`.

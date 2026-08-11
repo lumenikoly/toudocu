@@ -3,8 +3,8 @@
 - Identifier: ADR-001
 - Status: Accepted
 - Date: 2026-07-25
-- Author: Toudocu Team
-- Last updated: 2026-08-08
+- Author: Toudocu team
+- Last updated: 2026-08-10
 
 Toudocu is delivered as a single Go binary and requires no runtime
 dependencies. Pure-Go exceptions for external Go modules are recorded in
@@ -40,23 +40,13 @@ value outweighs its impact on delivery, attack surface, and maintenance.
 
 ## Consequences
 
-### Positive
+Delivery and operation remain simple, cross-compilation is direct, and embedded
+assets cannot be misplaced. Mermaid works without Node.js or a CDN; the portal
+runs on ordinary HTTP hosting or through `serve`.
 
-- Minimal operational complexity.
-- Fast startup and straightforward cross-compilation.
-- No runtime package installation or network dependency downloads.
-- Assets are available without adjacent files.
-- Mermaid diagrams are available without Node.js, a CDN, or an external
-  backend; the browser runtime uses static HTTP hosting or built-in `serve`.
-
-### Negative
-
-- Markdown policy, the normalized model, and the safe renderer remain the
-  project's responsibility.
-- Updating the Markdown dialect or Goldmark requires corpus and security review.
-- Some CLI, HTML, and process-management code cannot be delegated to a library.
-- Updating vendored Mermaid requires a separate review of the license,
-  checksum, static HTTP compatibility, and security advisories.
+The cost is that the team owns the Markdown policy, safe rendering, and updates
+to Goldmark and bundled browser libraries. Such updates require compatibility,
+license, and security review.
 
 ## Review status
 

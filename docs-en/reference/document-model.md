@@ -220,10 +220,11 @@ Supported constructs are CommonMark headings, paragraphs, emphasis, links,
 safe raster images, blockquotes, lists, task lists, tables, strikethrough,
 literal autolinks, inline code, and fenced code.
 
-Raw HTML, completed leading front matter, attributes, footnotes, definition
-lists, active SVG/XML/HTML assets, and JavaScript URLs are unsupported. Local
-links and images must stay inside the repository root. Fenced code is not
-parsed as headings, links, metadata, or tasks.
+Raw HTML, front matter at the start of a file between matching `---` or `+++`
+lines, Markdown attributes, footnotes, definition lists, active SVG/XML/HTML
+assets, and JavaScript URLs are unsupported. Local links and images must stay
+inside the repository root. Fenced code is not parsed as headings, links,
+metadata, or tasks.
 
 ## Order for creating a connected model
 

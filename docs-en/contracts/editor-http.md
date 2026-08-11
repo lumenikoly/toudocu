@@ -1,9 +1,9 @@
 # Editor HTTP API: Behavior and Boundaries
 
 - Identifier: CON-EDITOR-HTTP-V1
-- Status: Completed
-- Owner: Toudocu Team
-- Last updated: 2026-08-08
+- Status: Ready
+- Owner: Toudocu team
+- Last updated: 2026-08-10
 
 [OpenAPI 3.1.0](editor.openapi.yaml) contains routes, parameters, response codes,
 and data schemas. In canonical `serve`, this page also provides a button for
@@ -43,12 +43,14 @@ reading the portal. `--no-update-check` disables the capability and endpoint.
 Static builds, locale mounts, and direct translation serves contain no version
 check and make no external requests.
 
-## Writing a file
+## Saving and creating files
 
-Save uses a SHA-256 digest to protect against overwriting external changes. A
-new file is written to a temporary file in the same directory, inherits the
-mode, and atomically replaces the source. On conflict, the editor preserves the
-local text and requires separate confirmation with the current digest.
+When a file is opened, the server returns a SHA-256 digest of its contents. A
+save succeeds only while that digest still matches, so an external edit is not
+lost. The server writes a temporary file in the same directory, preserves the
+mode, synchronizes it, and atomically replaces the source. On conflict, the
+browser keeps the local text and asks the user to reload or deliberately retry
+with the current digest.
 
 Document creation uses the same template registry as the CLI and does not
 overwrite an existing file. Diagnostics warn the user but do not themselves

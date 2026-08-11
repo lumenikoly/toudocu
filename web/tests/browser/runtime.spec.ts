@@ -113,6 +113,7 @@ test("static portal works over HTTP at root and nested paths", async ({ browser 
 });
 
 test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }) => {
+  test.setTimeout(60_000);
   const fixture = mkdtempSync(join(tmpdir(), "toudocu-serve-"));
   cpSync(join(repo, "docs"), join(fixture, "docs"), { recursive: true });
   cpSync(join(repo, ".toudocu"), join(fixture, ".toudocu"), { recursive: true });

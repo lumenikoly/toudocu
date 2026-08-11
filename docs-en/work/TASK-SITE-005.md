@@ -1,4 +1,4 @@
-# TASK-SITE-005: Show an Available Update in the Serve Portal
+# TASK-SITE-005: Show an available update in the serve portal
 
 - Status: Done
 - Type: Feature
@@ -8,15 +8,15 @@
 - Flow: FLOW-DOCS-SERVE
 - Screens: SC-SITE-HOME
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Toudocu Team
-- Last updated: 2026-08-08
+- Owner: Toudocu team
+- Last updated: 2026-08-10
 
 ## Result
 
-Canonical `toudocu serve` checks the latest stable GitHub Release without
-blocking and shows a compact suggestion to open the official release when it
-is newer than the current binary. Static builds, locale portals, and the binary
-itself remain self-contained.
+Canonical `toudocu serve` can check the latest stable GitHub release without
+blocking the portal. If it is newer than the running binary, the portal shows
+a small prompt that opens the official release page. Static builds, translated
+portals, and the binary itself remain self-contained.
 
 ## Behavior change
 
@@ -65,17 +65,15 @@ outbound request completely.
   for the latest version, and is hidden for errors or an up-to-date version.
 - [x] `AC-05` Static output, locale portals, and direct translation serves have
   no update endpoint/capability or server-only UI; bootstrap remains schema v1.
-- [x] `AC-06` ADR, CLI/OpenAPI contracts, architecture, MOD-SITE, UC-DOCS-03,
-  FLOW-DOCS-SERVE, SC-SITE-HOME, and references agree and passed independent
-  semantic review and structural gates.
+- [x] `AC-06` The ADR, contracts, architecture, module, use case, flow, screen,
+  and reference agree with the behavior.
 
 ## Plan
 
 - [x] Add the CLI option, update checker, HTTP route, and bootstrap capability.
 - [x] Add an accessible serve-only banner and dismissal lifecycle.
 - [x] Cover backend, frontend, static isolation, and browser behavior.
-- [x] Update canonical documentation sources and complete semantic gates.
-- [x] Rebuild frontend assets and complete repository verification.
+- [x] Update the canonical documentation sources.
 
 ## Verification
 

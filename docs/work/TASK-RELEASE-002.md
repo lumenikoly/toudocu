@@ -5,29 +5,27 @@
 - Модуль: MOD-CLI
 - Стандарты: STD-GO-001, STD-DOCS-001
 - Владелец: Команда Toudocu
-- Последнее обновление: 2026-08-07
+- Последнее обновление: 2026-08-11
 
 ## Результат
 
-Release bundle и workflow `0.0.1` готовы к публикации POSIX- и
-PowerShell-bootstrap: пользователь одной командой устанавливает или обновляет
-Toudocu, а bootstrap сам
-выбирает поддерживаемый OS/architecture artifact и проверяет SHA-256
-до замены файла.
+Релизный комплект `0.0.1` включает установочные скрипты POSIX и PowerShell.
+Скрипт выбирает файл для операционной системы и архитектуры, проверяет SHA-256
+и только затем заменяет программу.
 
 ## Изменение поведения
 
 ### Было
 
-Пользователь вручную выбирает бинарник в GitHub Releases, проверяет
-его и добавляет в `PATH`.
+Пользователь вручную выбирал бинарник в GitHub Releases, проверял его и
+добавлял каталог в `PATH`.
 
 ### Станет
 
-POSIX- и PowerShell-команды скачивают подходящий artifact и
-`checksums.txt`, проверяют целостность и без `sudo` атомарно
-устанавливают его в `~/.local/bin/toudocu` или
-`%LOCALAPPDATA%\Programs\toudocu\toudocu.exe`. Канонические команды:
+Одна из команд скачивает подходящий бинарник и `checksums.txt`, проверяет
+целостность и без `sudo` атомарно устанавливает
+Toudocu в `~/.local/bin/toudocu` или
+`%LOCALAPPDATA%\Programs\toudocu\toudocu.exe`:
 
 ```sh
 curl -fsSL https://github.com/lumenikoly/toudocu/releases/latest/download/install.sh | sh
@@ -37,61 +35,56 @@ curl -fsSL https://github.com/lumenikoly/toudocu/releases/latest/download/instal
 irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 | iex
 ```
 
-Оба `install.*` входят в release assets версии `0.0.1`.
+Оба `install.*` входят в файлы релиза `0.0.1`.
 
-Если standard user dir ещё не в `PATH`, POSIX installer один раз
-добавляет managed entry в `.zshrc` для zsh, `.bashrc` для bash, fish
-`conf.d`, а для остальных POSIX shells — в `.profile`. PowerShell installer
-один раз добавляет
-стандартный каталог в user `PATH`. Текущий parent shell не
-изменяется: installer печатает точную `source`/fish-команду, для
-`.profile` просит login/re-login, а для Windows — открыть новый terminal.
+Если стандартного пользовательского каталога нет в `PATH`, POSIX-скрипт один
+раз добавляет управляемую запись в `.zshrc`, `.bashrc`, fish `conf.d` или
+`.profile`, в зависимости от оболочки. PowerShell один раз добавляет каталог в
+пользовательский `PATH`. Уже запущенная оболочка не меняется: скрипт печатает
+точную команду перезагрузки профиля или просит открыть новый терминал.
 
 ## Область изменения
 
-- новые installer-скрипты в каталоге scripts;
+- установочные скрипты в `scripts/`;
 - `Makefile` и `.github/workflows/`;
-- installer contract tests в `internal/app/`;
-- `README.md`, `CHANGELOG.md` и `docs/`.
+- контрактные тесты установщиков в `internal/app/`;
+- README, журнал изменений и каноническая документация.
 
 ## Не входит в задачу
 
 - публикация Git-тега или GitHub Release;
-- фоновое самообновление или новая команда Go CLI;
-- system-wide установка через `sudo` и package managers;
-- другие новые release targets, кроме Windows ARM64;
-- подпись или notarization релизных бинарников.
+- фоновое самообновление и новая команда Go CLI;
+- системная установка через `sudo` и менеджеры пакетов;
+- новые целевые платформы, кроме добавленного Windows ARM64;
+- подпись и notarization бинарников.
 
 ## Критерии приёмки
 
-- [x] `AC-01` Installer однозначно выбирает шесть существующих
-  Linux, macOS и Windows artifacts, а неподдерживаемую
-  платформу отклоняет до загрузки.
-- [x] `AC-02` По умолчанию выбирается latest stable release;
-  `TOUDOCU_VERSION=X.Y.Z` закрепляет версию и разрешает downgrade,
-  `TOUDOCU_INSTALL_DIR` выбирает нестандартный каталог, а
-  `TOUDOCU_NO_MODIFY_PATH=1` запрещает изменение `PATH`.
-- [x] `AC-03` Бинарник заменяется только после точной проверки
-  release checksum и версии; download, checksum и filesystem failure
-  не повреждают уже установленную версию, а совпадающий checksum
-  даёт idempotent no-op.
-- [x] `AC-04` Release bundle содержит оба installer-скрипта, а
-  `checksums.txt` покрывает их вместе с бинарниками и notices.
-- [x] `AC-05` README и каноническая документация описывают
-  команды, матрицу, update/version override, `PATH`, проверку
-  SHA-256, границу сети только для bootstrap и стандартные команды
-  установки из stable GitHub Release.
-- [x] `AC-06` Повторный запуск, upgrade, downgrade и добавление
-  стандартного user install dir в shell/user `PATH` идемпотентны;
-  нестандартный каталог не меняет profile и получает подсказку.
+- [x] `AC-01` Установщик однозначно выбирает один из шести файлов Linux, macOS
+  и Windows, а неподдерживаемую платформу отклоняет до скачивания.
+- [x] `AC-02` По умолчанию выбирается последний стабильный релиз.
+  `TOUDOCU_VERSION=X.Y.Z` закрепляет версию и разрешает откат,
+  `TOUDOCU_INSTALL_DIR` задаёт каталог, а `TOUDOCU_NO_MODIFY_PATH=1` запрещает
+  менять `PATH`.
+- [x] `AC-03` Бинарник заменяется только после точной проверки контрольной
+  суммы и версии. Ошибка сети, контрольной суммы или файловой системы не
+  повреждает установленную версию; совпадающая сумма ничего не меняет.
+- [x] `AC-04` Набор релиза содержит оба установщика, а `checksums.txt`
+  охватывает их, бинарники, лицензии и уведомления.
+- [x] `AC-05` README и документация описывают команды, платформы, обновление,
+  выбор версии и каталога, `PATH`, SHA-256 и то, что сеть нужна только
+  установщику.
+- [x] `AC-06` Повторный запуск, обновление, откат и добавление стандартного
+  каталога в `PATH` идемпотентны. Нестандартный каталог профиль не меняет и
+  получает понятную подсказку.
 
 ## План
 
-1. Реализовать одинаковый installer contract для POSIX и PowerShell.
-2. Включить скрипты в release bundle и checksum generation.
-3. Добавить platform, integrity, replacement и release contract tests.
-4. Обновить источные документы и release notes.
-5. Пройти semantic gate, полную проверку и пересобрать портал.
+1. Реализовать одинаковые правила для POSIX и PowerShell.
+2. Включить скрипты в набор релиза и расчёт контрольных сумм.
+3. Добавить тесты выбора платформы, целостности, безопасной замены и состава
+   релиза.
+4. Обновить исходную документацию и примечания к выпуску.
 
 ## Проверка
 
@@ -107,10 +100,10 @@ irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 |
 
 ## Влияние на документацию
 
-Добавляется guide установки; обновляются README, `CHANGELOG.md`,
-текущее состояние, system/trust boundary и отслеживаемый портал.
+Было добавлено руководство по установке; обновлены README, журнал изменений,
+текущее состояние, системная граница, граница доверия и отслеживаемый портал.
 
 ## Обоснование отсутствия сценария
 
-Задача меняет release engineering и bootstrap-поставку, не добавляя
-команду или сценарий основного Go CLI.
+Задача меняет поставку релизных файлов и установщики, но не добавляет команду
+или сценарий основного Go CLI.

@@ -1,4 +1,4 @@
-# TASK-API-001: OpenAPI-контракты и offline Swagger UI
+# TASK-API-001: OpenAPI-контракты и автономный Swagger UI
 
 - Статус: Выполнено
 - Тип: Feature
@@ -9,64 +9,75 @@
 - Переходы: TR-SITE-006
 - Стандарты: STD-GO-001, STD-DOCS-001
 - Владелец: Команда Toudocu
-- Последнее обновление: 2026-08-05
+- Последнее обновление: 2026-08-10
 
 ## Результат
 
-Два OpenAPI 3.1.0 контракта являются источниками истины для wire-level Editor
-и Changes API, а canonical `serve` предоставляет их через полностью offline
-Swagger UI без изменения публичной schema v1 отчётов.
+Два файла OpenAPI 3.1.0 стали источниками точного HTTP-контракта Editor и
+Changes API. Канонический `serve` показывает их через встроенный Swagger UI,
+которому не нужен CDN. Публичная schema v1 отчётов не изменилась.
 
 ## Изменение поведения
 
 ### Было
 
-Wire-контракты дублируются в Markdown, OpenAPI-файлы не проверяются как
-отдельный тип источника, а локальный портал не предоставляет интерактивный
-каталог API.
+HTTP-контракт повторялся в Markdown, OpenAPI не проверялся как отдельный тип
+источника, а в локальном портале не было интерактивного справочника API.
 
 ### Станет
 
-`check` и editor diagnostics проверяют OpenAPI, route registries двусторонне
-соответствуют operations, Changes API имеет единый JSON error envelope и
-ограничивает HEAD summary-маршрутом, а canonical `serve` показывает оба
-контракта в vendored Swagger UI. Static и translation portals UI не получают.
+`check` и диагностика редактора проверяют OpenAPI. Реестр маршрутов в Go и
+операции OpenAPI должны соответствовать друг другу в обе стороны. Ошибки
+Changes API имеют единый JSON-формат, а `HEAD` разрешён только для краткого
+маршрута. Канонический `serve` показывает оба контракта во встроенном Swagger
+UI; статический портал и переводы этот интерфейс не получают.
 
 ## Область изменения
 
-- OpenAPI validation, Editor/Changes route registries и HTTP handlers в `internal/app/`;
-- vendored Swagger UI assets и dev-only asset build metadata;
-- canonical contracts, ADR, standard, modules, use case, flow, screens,
-  architecture/reference/README/changelog documentation;
-- tests wire parity, validation, portal isolation and vendored checksums.
+- проверка OpenAPI, реестры маршрутов и HTTP-обработчики в `internal/app/`;
+- встроенные ресурсы Swagger UI и метаданные их сборки;
+- OpenAPI-контракты и связанная документация;
+- тесты соответствия контрактов, изоляции портала и контрольных сумм.
 
 ## Не входит в задачу
 
-- новые CLI flags, Go exports или schemaVersion публичных JSON reports;
-- TLS, authentication, CORS или внешняя загрузка `$ref`;
-- Swagger UI в static build, locale mounts или при прямом serve translation root;
-- изменение успешных Editor payloads и media types raw/rendered Changes content;
-- изменение translation roots и generated portals.
+- новые параметры CLI, экспортируемые функции Go или новая версия JSON-схем;
+- TLS, аутентификация, CORS и загрузка внешних `$ref`;
+- Swagger UI в `build`, переводах и `serve`, запущенном из корня перевода;
+- изменение успешных ответов Editor и форматов содержимого Changes;
+- изменение корней переводов и сгенерированных порталов вручную.
 
 ## Критерии приёмки
 
-- [x] `AC-01` Два OpenAPI 3.1.0 файла полностью описывают действующие Editor и Changes operations, параметры, статусы, media types, examples и schema v1 components.
-- [x] `AC-02` `check` и editor diagnostics распознают `contracts/**/*.openapi.{yaml,yml,json}` и выдают устойчивые positional diagnostics для syntax/root/operation/operationId/path-parameter/internal-ref ошибок без network resolution.
-- [x] `AC-03` Декларативные route registries двусторонне соответствуют OpenAPI paths и methods.
-- [x] `AC-04` Changes разрешает HEAD только summary и возвращает schema-v1 diagnostic envelope для всех API errors; успешные content/render media types сохраняются.
-- [x] `AC-05` Canonical `serve` предоставляет `GET|HEAD /_toudocu/api-docs/`, selector двух specs, same-origin assets, CSP/no-store/nosniff и Try it out только для GET/HEAD.
-- [x] `AC-06` Swagger UI 5.32.12, license и checksums vendored; runtime/CI и external network dependencies отсутствуют.
-- [x] `AC-07` Static build копирует OpenAPI specs, но не Swagger UI assets/navigation; translation portals и direct translation serve не содержат UI.
-- [x] `AC-08` Markdown-компаньоны и связанные ADR/standard/module/use-case/flow/screen/architecture/reference/README/changelog источники согласованы без изменения translation roots.
-- [x] `AC-09` Unit, contract, regression, portal, race, strict documentation и repository checks проходят; browser QA подтверждает selector и safe GET.
+- [x] `AC-01` Два файла OpenAPI 3.1.0 описывают все действующие операции,
+  параметры, статусы, форматы данных, примеры и компоненты schema v1.
+- [x] `AC-02` `check` и редактор распознают
+  `contracts/**/*.openapi.{yaml,yml,json}` и показывают устойчивые позиции
+  ошибок синтаксиса, корня, операции, `operationId`, параметра пути и
+  внутреннего `$ref`, не обращаясь к сети.
+- [x] `AC-03` Реестры маршрутов и OpenAPI совпадают по путям и методам в обе
+  стороны.
+- [x] `AC-04` Changes разрешает `HEAD` только для сводки и возвращает ошибки в
+  едином формате schema v1. Успешные форматы содержимого не меняются.
+- [x] `AC-05` Канонический `serve` предоставляет
+  `GET|HEAD /_toudocu/api-docs/`, выбор одного из двух контрактов, ресурсы с
+  того же origin и безопасные заголовки. Выполнить можно только `GET` и `HEAD`.
+- [x] `AC-06` Swagger UI 5.32.12, его лицензия и контрольные суммы хранятся в
+  репозитории; при работе сеть и CI-службы не нужны.
+- [x] `AC-07` `build` копирует OpenAPI-файлы, но не Swagger UI. Переводы также
+  не получают его ресурсы и навигацию.
+- [x] `AC-08` Markdown-пояснения и связанные архитектурные документы
+  согласованы, не дублируют HTTP-схему и не меняют корни переводов.
+- [x] `AC-09` В задачу включены модульные, контрактные, регрессионные,
+  портальные и браузерные проверки.
 
 ## План
 
-- [x] Добавить и валидировать OpenAPI sources.
-- [x] Ввести route registries и нормализовать Changes errors/methods.
-- [x] Встроить offline Swagger UI и изолировать static/translation portals.
-- [x] Обновить source documentation и пройти semantic gates.
-- [x] Выполнить automated и browser verification.
+- [x] Добавить и проверять OpenAPI-источники.
+- [x] Ввести реестры маршрутов и единый формат ошибок Changes.
+- [x] Встроить Swagger UI и изолировать его от статического портала и
+  переводов.
+- [x] Обновить исходную документацию.
 
 ## Проверка
 
@@ -86,7 +97,7 @@ Wire-контракты дублируются в Markdown, OpenAPI-файлы �
 
 ## Влияние на документацию
 
-Добавляются два OpenAPI contracts, ADR, screen и этот work item. Обновляются
-Markdown HTTP companions, `STD-DOCS-001`, API/CLI references, Site/Changes
-modules, architecture answers, `UC-DOCS-03`, `FLOW-DOCS-SERVE`, README и
-CHANGELOG. Translation roots и generated portals не изменяются.
+Были добавлены два OpenAPI-контракта, ADR, экран и эта задача. Обновлены
+Markdown-пояснения к HTTP-контрактам, стандарт документации, модули, сценарий,
+процесс, архитектура, справочники, README и журнал изменений. Корни переводов
+историческая задача не меняла.

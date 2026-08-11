@@ -1,9 +1,9 @@
 # Toudocu CLI v1
 
 - Identifier: CON-CLI-V1
-- Status: Completed
-- Owner: Toudocu Team
-- Last updated: 2026-08-08
+- Status: Ready
+- Owner: Toudocu team
+- Last updated: 2026-08-10
 
 This document defines CLI commands, side effects, exit codes, and versioned JSON
 results. `toudocu COMMAND --help` shows the exact flag syntax.
@@ -14,9 +14,11 @@ results. `toudocu COMMAND --help` shows the exact flag syntax.
 |---|---|---|
 | `check` | Validates documents, relationships, and OpenAPI | No |
 | `build` | Builds a backend-independent static HTTP portal and `report.json` | Writes only to output; `--clean` clears validated output |
-| `serve` | Starts the local portal, watcher, Editor API, and Changes API | Changes canonical docs only after an explicit editor save |
+| `serve` | Starts the local portal, watcher, Editor API, and Changes API | Changes canonical docs only after an explicit editor action; discussions are written only to local user state |
 | `search` | Searches the current model | No |
 | `changes`, `changes file` | Compares Git revisions, index, and working tree | No |
+| `changes feedback pending` | Returns the oldest pending comment batch | No |
+| `changes feedback respond` | Stores one complete agent response | Local user state outside the repository only |
 | `task changes` | Shows changes and impact for the selected task | No |
 | `task init` | Creates a draft `TASK-*` or `BUG-*` | Creates one new file without overwriting |
 | `scaffold` | Creates a typed document | Creates one new file without overwriting |
@@ -29,8 +31,8 @@ results. `toudocu COMMAND --help` shows the exact flag syntax.
 | `version` | Prints the version | No |
 
 A path without a command name does not start an implicit build. There are no
-top-level `init` and `refresh` commands: the similarly named `$toudocu`
-workflows belong to the AI skill, not the Go CLI.
+top-level `init`, `refresh`, `translate`, or `feedback` commands: the similarly
+named `$toudocu` workflows belong to the AI skill, not the Go CLI.
 
 ## Skill lifecycle
 
@@ -78,6 +80,16 @@ partial result returns `1`. Diagnostics use stable short codes including
 - `task verify --run` is allowed only for Ready, In Progress, Blocked, and Done;
   `--dry-run` may also be used for a complete Draft.
 - `changes` reads Git directly without a shell, fetch, checkout, or index write.
+- Git refs are resolved from the outer Git root. `.toudocu/config.yml` and
+  relative settings are resolved from the explicit `--repository-root`, and
+  the documentation directory must be inside it.
+- `changes`, `changes file`, and `task changes` accept `--include-assets`.
+  Binary assets are then included regardless of `changes.includeAssets`, while
+  `changes.exclude` still applies.
+- `--translation-input` includes reader-facing Markdown, work items, and binary
+  assets regardless of other include flags or custom `changes.exclude` rules.
+  Only `generated/**` and `cache/**` inside the selected root remain excluded.
+  It cannot be combined with `--permanent-only`.
 
 ## JSON results
 
@@ -90,13 +102,40 @@ Every public report uses `schemaVersion: 1`.
   corresponding workflows.
 - `ChangeSetReport` is a separate change-report schema and is not part of
   `ProjectReport`.
+- `changes feedback pending --json` returns the state version and hash plus a
+  `feedback` field. An empty queue returns `feedback: null` with exit code `0`.
+- `changes feedback respond --input response.json --json` accepts the
+  discussion and batch identifiers, previous version and hash, and a complete
+  result list. Success returns `accepted: true` with the new version and hash.
 
 Empty collections serialize as `[]`; line numbers start at one. New optional
 fields may be added without changing the schema version.
 
 For every command, `task verify` records the exit code, time, duration, bounded
-stdout/stderr, and associated targets. The final status is `passed`, `failed`,
-or `blocked`.
+stdout/stderr, and associated targets. The final status is `planned`, `passed`,
+`failed`, or `blocked`.
+
+## Agent responses to comments
+
+```text
+toudocu changes feedback pending [--repository-root DIR] --json
+toudocu changes feedback respond --input response.json \
+  [--repository-root DIR] [--json]
+```
+
+Without `--repository-root`, Git discovers the outer repository from the
+current directory. An explicit path must be that repository's exact top level.
+`pending` returns batches in order and repeats the oldest one until a complete
+response is accepted.
+
+`respond` rejects an unknown identifier, a version or hash conflict, missing or
+duplicate items, a result outside `fixed|notFixed|needsClarification`, oversized
+text, and unsafe `changedPaths`. These commands do not start an agent or AI
+model, invoke a shell, or write to Git.
+
+Stable diagnostics include `REVIEW_INVALID_RESPONSE`,
+`REVIEW_MESSAGE_TOO_LARGE`, `REVIEW_STATE_BUSY`, `REVIEW_CONFLICT`,
+`REVIEW_UNSAFE_PATH`, `REVIEW_STATE_CORRUPTED`, and the other `REVIEW_*` codes.
 
 ## Exit codes
 

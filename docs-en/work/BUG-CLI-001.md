@@ -8,14 +8,14 @@
 - Regression: No
 - Module: MOD-CLI
 - Use case: Not applicable
-- Owner: Toudocu Team
+- Owner: Toudocu team
 - Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-09
+- Last updated: 2026-08-10
 
 ## Symptom
 
-The CLI accepts `--base`, `--branch-base`, `--status`, `--module`, and
-`--permanent-only` for commands that do not use Changes.
+The CLI accepted `--base`, `--branch-base`, `--status`, `--module`, and
+`--permanent-only` in commands that do not use Changes.
 
 ## Expected behavior
 
@@ -35,9 +35,9 @@ ignores the value.
 ## Evidence
 
 The command `check ./docs --base definitely-not-a-ref` exited with code `0`.
-The parser sets `Change*` fields but does not verify their ownership outside the
-Changes branch. Prior strict behavior is not supported, so the regression value
-is No.
+The parser filled the `Change*` fields but did not check which command owned
+them outside the Changes branch. The repository does not show earlier strict
+behavior, so this bug is not marked as a regression.
 
 ## Cause
 
@@ -91,5 +91,5 @@ unrelated command families and in the three supported Changes commands.
 
 ## Documentation impact
 
-Only `docs/work/BUG-CLI-001.md` changes; command-specific flags are already
-described in the CLI contract.
+Only this historical record changed. The CLI contract already documents which
+commands accept these flags.

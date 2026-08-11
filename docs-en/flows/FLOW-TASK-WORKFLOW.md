@@ -1,59 +1,53 @@
-# FLOW-TASK-WORKFLOW: Working with the task being checked
+# FLOW-TASK-WORKFLOW: Work with a verifiable task
 
 - Identifier: FLOW-TASK-WORKFLOW
-- Scenario: UC-TASK-01, UC-TASK-02, UC-TASK-03
+- Use cases: UC-TASK-01, UC-TASK-02, UC-TASK-03
 - Module: MOD-CLI
-- Last updated: 2026-07-28
+- Last updated: 2026-08-10
 
-The scheme links contract preparation, read-only context acquisition, and explicit
-launching checks.
+The diagram connects task preparation, safe context collection, and a separate,
+explicitly authorized verification run.
 
 ## Process
 
 ```mermaid
 flowchart TD
-    Search["toudocu search QUERY"] --> Init["toudocu task init"]
-    Init --> Fill["The agent selects entities and fills out the contract"]
-    Fill --> Ready["toudocu task ready TASK-ID"]
+    Search["Find related documents: toudocu search"] --> Init["Create a draft: toudocu task init"]
+    Init --> Fill["Fill in the goal, boundaries, links, criteria, and verification commands"]
+    Fill --> Ready["Check completeness: toudocu task ready TASK-ID"]
     Ready --> Complete{"Is the contract complete?"}
     Complete -->|No| Fill
-    Complete -->|Yes| Status["Agent manually changes Draft to Ready"]
-    Status --> Context["toudocu task context TASK-ID"]
-    Context --> Find["Find exactly one problem"]
-    Find --> Found{"Has the problem been clearly found?"}
-    Found -->|No| ContextError["Return code 1 without running commands"]
-    Found -->|Yes| Slice["Collect task, connections, restrictions and diagnostics"]
-    Slice --> Plan["Plan and execute changes outside of Toudocu"]
-    Plan --> DryRun["Explicitly call task verify --dry-run"]
-    DryRun --> Check["After checking the plan, call task verify --run"]
-    Check --> Gate["Apply task-local validation gate"]
-    Gate --> Valid{"Is the task contract correct?"}
-    Valid -->|No| Blocked["Return status blocked without running commands"]
-    Valid -->|Yes| Commands["Collect unique teams AC, ALL and DOCS"]
-    Commands --> Run["Execute commands sequentially from repository root"]
-    Run --> Results["Link results to acceptance criteria"]
-    Results --> Passed{"Are all checks successful?"}
-    Passed -->|Yes| Success["Return status passed and code 0"]
-    Passed -->|No| Failed["Return status failed and code 1"]
+    Complete -->|Yes| Status["Manually change Draft to Ready"]
+    Status --> Context["Collect context: toudocu task context TASK-ID"]
+    Context --> Found{"Was exactly one task found?"}
+    Found -->|No| ContextError["Return an error without running commands"]
+    Found -->|Yes| Plan["Plan and perform the work outside Toudocu"]
+    Plan --> DryRun["Explicitly inspect the plan: task verify --dry-run"]
+    DryRun --> Run["After separate authorization: task verify --run"]
+    Run --> Valid{"Is the verification contract valid?"}
+    Valid -->|No| Blocked["Return blocked without running commands"]
+    Valid -->|Yes| Commands["Run declared commands sequentially"]
+    Commands --> Passed{"Did every command pass?"}
+    Passed -->|Yes| Success["Return passed and code 0"]
+    Passed -->|No| Failed["Return failed and code 1"]
 ```
 
-## Process boundaries
+## Important behavior
 
-- `task context` never executes system commands.
-- `task ready` never changes status or Markdown.
-- `task verify --dry-run` never executes commands.
-- `task verify --run` only runs explicitly trusted commands after
-  local validation gate.
-- Only the agent interprets the request, creates semantic connections and confirms
-  criteria.
-- An error in one command does not stop the others; timeout terminates the tree
-  processes.
+- `task context`, `task ready`, and `task verify --dry-run` neither execute
+  system commands nor change Markdown.
+- `task verify --run` starts only after explicit authorization and runs only the
+  trusted commands written in the task.
+- One failed command does not hide the results of the others; a timeout stops
+  that command's entire process tree.
+- A person or agent—not Toudocu—judges the request's meaning, whether the links
+  are appropriate, and whether acceptance criteria are satisfied.
 
 ## Related documents
 
 - [UC-TASK-01: Get work task context](../use-cases/task-workflow.md)
 - [UC-TASK-02: Perform work task checks](../use-cases/task-verify.md)
 - [UC-TASK-03: Prepare a new work task](../use-cases/UC-TASK-03.md)
-- [MOD-CLI: CLI and workflow tasks](../modules/cli.md)
-- [Work Task Guide](../guides/work-items.md)
+- [MOD-CLI: CLI and work-item operations](../modules/cli.md)
+- [Work-item guide](../guides/work-items.md)
 - [CLI contract](../contracts/cli.md)

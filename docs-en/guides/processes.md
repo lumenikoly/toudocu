@@ -19,13 +19,13 @@ A use-case document defines requirements, actor, preconditions, main and
 alternative scenarios, acceptance criteria, and start and terminal screens:
 
 ```md
-# UC-AUTH-01: Вход пользователя
+# UC-AUTH-01: Sign in
 
-- Идентификатор: UC-AUTH-01
-- Модуль: MOD-AUTH
-- Начальный экран: SC-AUTH-LOGIN
-- Конечные экраны: SC-ACCOUNT-DASHBOARD
-- Статус: Реализован
+- Identifier: UC-AUTH-01
+- Module: MOD-AUTH
+- Entry screen: SC-AUTH-LOGIN
+- Exit screens: SC-ACCOUNT-DASHBOARD
+- Status: Ready
 ```
 
 The canonical `UC-*` HTML page is the scenario workspace and has four tabs:
@@ -49,22 +49,22 @@ sequence, branch, or error handling. Simple operations and individual endpoints
 remain in API contracts, so a `FLOW-*` is not needed for every request:
 
 ````md
-# FLOW-AUTH-LOGIN: Проверка входа
+# FLOW-AUTH-LOGIN: Validate sign-in
 
-- Идентификатор: FLOW-AUTH-LOGIN
-- Модуль: MOD-AUTH
-- Сценарий: UC-AUTH-01, UC-AUTH-02
+- Identifier: FLOW-AUTH-LOGIN
+- Module: MOD-AUTH
+- Use case: UC-AUTH-01, UC-AUTH-02
 
 ```mermaid
 sequenceDiagram
-    Form->>API: Отправить данные
-    API->>Identity: Проверить пользователя
-    Identity-->>API: Результат проверки
-    API-->>Form: Сессия или ошибка
+    Form->>API: Submit credentials
+    API->>Identity: Validate the user
+    Identity-->>API: Validation result
+    API-->>Form: Session or error
 ```
 ````
 
-The `Scenario` field supports multiple `UC-*` values. Toudocu builds both
+The Use case field supports multiple `UC-*` values. Toudocu builds both
 sides of the relationship: a process shows related use cases, and each use case
 shows related processes. Mermaid remains a representation; requirements and
 criteria are not extracted from diagram text. Architecture documents retain the

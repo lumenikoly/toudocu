@@ -8,19 +8,19 @@
 - Regression: No
 - Module: MOD-CLI
 - Use case: UC-TASK-02
-- Owner: Toudocu Team
+- Owner: Toudocu team
 - Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-09
+- Last updated: 2026-08-10
 
 ## Symptom
 
-A valid Ready bug cannot pass through `task ready` or `task verify`.
+A correctly documented bug could not pass `task ready` or `task verify`.
 
 ## Expected behavior
 
-The specialized `BUG-*` contract accepted by the project model passes the
-task-local readiness gate. A technical bug with `Use case: Not applicable`
-retains the documented exception.
+A `BUG-*` document accepted by the project model must also pass the task
+readiness check. A technical bug may use `Use case: Not applicable` when it
+contains the required explanation.
 
 ## Actual behavior
 
@@ -89,5 +89,5 @@ dry-run reports, not only through the internal parser.
 
 ## Documentation impact
 
-Only `docs/work/BUG-LOGIC-001.md` changes; the fix restores the already
-documented specialized Bug contract.
+Only this historical record changed. The fix restored the documented Bug
+contract.

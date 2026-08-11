@@ -5,7 +5,7 @@
 - Module: MOD-SITE
 - Status: Implemented
 - Preview: `../assets/screens/site-editor.png`
-- Last updated: 2026-08-06
+- Last updated: 2026-08-10
 
 The source-documentation workspace in `serve` mode: file selection, preview,
 diagnostics, creation, and protected saving.

@@ -2,9 +2,9 @@
 
 - Identifier: STD-DOCS-001
 - Status: Active
-- Owner: Toudocu Team
+- Owner: Toudocu team
 - Scope: Source documentation, skill templates, and generated portals
-- Last updated: 2026-08-07
+- Last updated: 2026-08-10
 
 This standard separates confirmed sources from local or generated views.
 Markdown remains the source of the document model; explicitly recognized
@@ -14,9 +14,8 @@ OpenAPI may own only the HTTP wire contract.
 
 1. Global scope is defined by `roadmap.md`; the state of an explicitly linked
    `UC-*` comes from its use case. Other local checklists are not aggregated.
-2. Generated `build/`, `dist/`, `example/site/`, `project-docs/`, and
-   `example/project-docs/` are local or CI artifacts, are not tracked by Git,
-   and are not edited as sources of truth.
+2. Generated `build/`, `dist/`, and `project-docs/` directories are local or CI
+   artifacts. They are not tracked by Git or edited as primary documentation.
 3. Published portals are rebuilt from Markdown in CI after semantic review and
    a structural check; local checks use ignored or temporary output.
 4. A typed document is created only for confirmed semantics; an unknown owner,
@@ -29,8 +28,8 @@ OpenAPI may own only the HTTP wire contract.
    file under `architecture/` answers one explicit architectural question and
    is listed by a direct link from the overview.
 8. FLOW, CONTRACT, REFERENCE, RUNBOOK, ADR, and MODULE details remain in their
-   corresponding sources of truth, while the semantic gate checks architectural
-   form and meaning under `ARCH001`–`ARCH013`.
+   corresponding document types. Semantic review checks architectural form and
+   meaning under `ARCH001`–`ARCH013`.
 9. `$toudocu refresh` and `$toudocu refresh diff` update source
    documentation only from current repository evidence; dates change together
    with content or relationships, and `Last verified` requires an actual

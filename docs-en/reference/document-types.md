@@ -122,7 +122,7 @@ module, guide, or other document type.
 - `screens/map.md` is an obsolete source. The catalog, Screen Map, and playable
   flows are built from `screens/SC-*.md`; no separate map should be maintained.
 - Generated HTML, `report.json`, and the search index are derived output. They
-  are not edited as sources of truth.
+  are not edited as primary documentation.
 
 ## Main selection rule
 

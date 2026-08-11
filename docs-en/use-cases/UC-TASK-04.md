@@ -1,11 +1,11 @@
 # UC-TASK-04: Archive or Restore a Work Item
 
 - Identifier: UC-TASK-04
-- Status: Completed
+- Status: Ready
 - Actor: Assignee — developer or software agent
 - Module: MOD-CLI
 - Priority: Medium
-- Last updated: 2026-08-05
+- Last updated: 2026-08-10
 
 The assignee moves a completed or cancelled task out of the active list into a
 yearly archive, or returns an archived work item to the active directory without
@@ -20,7 +20,7 @@ changing its contract.
 
 ## Preconditions
 
-- the task being archived has status Done/Выполнено or Cancelled/Отменено;
+- the task being archived has status Done or Cancelled;
 - the destination path does not exist;
 - direct Markdown links will still resolve after the move.
 

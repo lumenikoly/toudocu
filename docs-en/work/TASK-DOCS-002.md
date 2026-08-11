@@ -1,4 +1,4 @@
-# TASK-DOCS-002: Add extensible Quality, Runbooks and Custom sections
+# TASK-DOCS-002: Add standards, runbooks, and custom sections
 
 - Status: Completed
 - Type: Feature
@@ -6,70 +6,59 @@
 - Module: MOD-MODEL
 - Use case: UC-DOCS-02
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Toudocu Team
-- Last updated: 2026-07-31
+- Owner: Toudocu team
+- Last updated: 2026-08-10
 
 ## Result
 
-Toudocu supports optional `STD-*` standards, operational
-procedures `RB-*`, user top-level sections, their task connections,
-schema-v1 collections, scaffolds and stand-alone portal catalogs.
+Toudocu supports optional `STD-*` standards, `RB-*` operational procedures,
+and project-specific top-level sections. They are part of schema v1, have
+their own portal catalogs, and can be linked to a work item explicitly.
 
 ## Behavior change
 
 ### Before
 
-Unknown directories remained completely free-form, and Quality and Runbooks did not
-had standardized contracts, task connections and a specialized portal.
+Unknown directories were unstructured Markdown. Standards and operational
+procedures had no dedicated rules, work-item links, or portal pages.
 
 ### After
 
-The appeared `quality/`, `runbooks/` and custom sections receive explicit manifest and
-typed validation without new globally required files; task workflow
-only transfers the explicitly bound `STD-*` and `RB-*`.
+When `quality/`, `runbooks/`, or a custom section exists, it has an explicit
+`index.md` and validated metadata. None of these sections becomes mandatory for
+every project. A task context includes only the `STD-*` and `RB-*` documents
+named by that task.
 
 ## Scope
 
-- `internal/app/docs_core.go`;
-- `quality.go`;
-- `internal/app/knowledge.go`;
-- `internal/app/types.go`;
-- `report_types.go`;
-- `internal/app/markdown_parse.go`;
-- `internal/app/scaffold.go`;
-- `internal/app/task_context.go`;
-- `internal/app/task_ready.go`;
-- `internal/app/task_verify.go`;
-- `internal/app/site.go`;
-- `quality_test.go`;
-- `skills/toudocu/`;
-- `docs/`;
-- `AGENTS.md`.
+- the model, Markdown parser, and diagnostics in `internal/app/`;
+- scaffolding and task commands;
+- specialized portal catalogs;
+- the embedded skill, canonical documentation, and `AGENTS.md`.
 
 ## Out of scope
 
 - external dependencies;
 - automatic comparison of task scope with the standard glob area;
 - execution of commands directly from the standard;
-- creating your own runbook without a real operational procedure;
-- change the version of schema v1 or generator.
+- creating a placeholder runbook when no real operational procedure exists;
+- changing the schema v1 version.
 
 ## Acceptance criteria
 
 - [x] `AC-01` Standards, runbooks and custom manifests are validated with errors and warnings separated.
 - [x] `AC-02` Freshness respects `--stale-days` boundaries, including disabling age-based overdue with `0` value.
-- [x] `AC-03` Task references, conditional `QUALITY`, context and additive JSON save empty collections as `[]`.
-- [x] `AC-04` RU/EN scaffolds are created atomically and do not invent the owner or check date of the runbook.
-- [x] `AC-05` The standalone portal saves `processes` and adds catalogs, filters and four runbook metrics.
-- [x] `AC-06` Self-documentation contains only verified standards and does not create a fictitious runbook.
+- [x] `AC-03` Task references, the conditional `QUALITY` set, task context, and additive JSON fields preserve empty collections as `[]`.
+- [x] `AC-04` Russian and English scaffolds are created atomically and do not invent a runbook owner or review date.
+- [x] `AC-05` The portal keeps the `processes` route and adds catalogs, filters, and four runbook metrics.
+- [x] `AC-06` Toudocu's own documentation contains only confirmed standards and does not create a fictional runbook.
 
 ## Plan
 
 - [x] Add typed model, diagnostics, freshness and custom manifests.
 - [x] Expand task workflow, schema v1 and scaffolds.
 - [x] Add specialized catalogs and portal tests.
-- [x] Update self-documentation and undergo semantic review.
-- [x] Perform a full Go loop, strict-check, and secure portal rebuild.
+- [x] Update the source documentation.
 
 ## Verification
 
@@ -85,10 +74,7 @@ only transfers the explicitly bound `STD-*` and `RB-*`.
 
 ## Documentation impact
 
-Updated `README.md`, `CHANGELOG.md`, `docs/index.md`, `docs/modules/model.md`,
-`docs/use-cases/check-documentation.md`, `docs/contracts/cli.md`,
-`docs/reference/features.md`, `docs/guides/work-items.md` and
-`skills/toudocu/SKILL.md`; added guide
-`docs/guides/quality-runbooks.md`, original section `docs/quality/`, updated
-reference skill model and eight RU/EN skill templates standards, runbooks and their
-manifest. The generated portals remain derived from Markdown.
+The work updated the README, changelog, home page, model, validation use case,
+CLI contract, references, and embedded skill. It added the standards and
+runbooks guide and the `docs/quality/` section. Generated portals remain
+derived from Markdown.

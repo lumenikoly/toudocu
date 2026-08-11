@@ -8,14 +8,14 @@
 - Regression: No
 - Module: MOD-SITE
 - Use case: UC-DOCS-03
-- Owner: Toudocu Team
+- Owner: Toudocu team
 - Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-09
+- Last updated: 2026-08-10
 
 ## Symptom
 
-A late validation or preview response for file A replaces the diagnostics or
-preview for the already-open file B.
+A late validation or preview response for file A could replace the diagnostics
+or preview of the file B that was already open.
 
 ## Expected behavior
 
@@ -24,8 +24,8 @@ still current.
 
 ## Actual behavior
 
-After `await`, the frontend does not compare the response with the current file
-or a newer request.
+After `await`, the browser code did not compare the response with the open file
+or check whether a newer request had already completed.
 
 ## Steps to reproduce
 
@@ -35,9 +35,10 @@ or a newer request.
 
 ## Evidence
 
-`validateCurrent` and `updatePreview` apply data directly after `await`; there
-is no request token or path gate. The repository does not support previously
-working ordering, so the regression value is No.
+`validateCurrent` and `updatePreview` applied data immediately after `await`.
+There was no request marker or path check. The repository does not show that
+the ordering had worked correctly before, so this bug is not marked as a
+regression.
 
 ## Cause
 
@@ -88,5 +89,5 @@ workflows.
 
 ## Documentation impact
 
-Only `docs/work/BUG-SITE-002.md` changes; the documented Editor synchronization
-for the current workspace is preserved.
+Only this historical record changed. The documented Editor behavior for the
+current file remains the same.

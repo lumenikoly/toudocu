@@ -1,80 +1,76 @@
-# Standards, Runbooks and Custom sections
+# Standards, runbooks, and custom sections
 
-The manual describes the author's contract for optional sections. Globally
-`index.md` and `architecture/overview.md` are required; lack of manifest
-appeared `quality/`, `runbooks/` or custom section is a warning and
-becomes gate only with `--strict`.
+Only `index.md` and `architecture/overview.md` are globally required. The
+`quality/`, `runbooks/`, and any unknown top-level section become meaningful
+when they contain Markdown. At that point, the section needs its own
+`index.md`; a missing index is a warning and blocks only strict mode.
 
-## Standards
+## `STD-*` standards
 
-Each `quality/*.md`, except `quality/index.md`, declares one unique
-`STD-*`.
+Every `quality/*.md` file except `quality/index.md` describes one unique
+`STD-*` standard.
 
-The structure required for a useful document is:
+A useful standard contains:
 
-- `Идентификатор` / `Identifier`: correct `STD-*`; error if incorrect or
-  repeated ID;
-- `Владелец` / `Owner`, `Область` / `Scope`, ISO date
-  `Последнее обновление` / `Last updated`: warning if missing or error;
-- status `Черновик` / `Draft`, `Действует` / `Active` or `Effective`,
-  `Устарел` / `Obsolete` or `Deprecated`, `Заменён` / `Superseded`;
-- non-empty `Правила` / `Rules` and `Автоматические проверки` /
-  `Automated checks`: warning if missing;
-- the replaced standard specifies `Заменён` / `Superseded by: STD-*`; unfaithful,
-  unknown or self reference is error.
+- `Identifier`, `Owner`, `Scope`, and an ISO `Last updated` date;
+- status `Draft`, `Active` or `Effective`, `Obsolete` or `Deprecated`, or
+  `Superseded`;
+- non-empty Rules and Automated checks sections;
+- for a superseded standard, `Superseded by: STD-*` naming another existing
+  standard.
 
-Commands from the standard are not executed. Work item with non-empty `Стандарты` declares
-own mapping `QUALITY`.
+An invalid or duplicate identifier and an invalid supersession link are
+errors. Missing descriptive fields or sections are warnings. Commands written
+in a standard are not executed automatically. A work item that names Standards
+must map them to its `QUALITY` verification target.
 
-## Runbooks
+Russian field names and statuses are also recognized; use them only in a
+Russian-language documentation root.
 
-Each `runbooks/*.md`, except `runbooks/index.md`, declares one unique
-`RB-*`. Invalid or duplicate ID and inaccessible or insecure Markdown link
-are errors.
+## `RB-*` runbooks
 
-Fields `Владелец` / `Owner`, `Среда` / `Environment`, `Риск` / `Risk`, status and
-ISO date `Последняя проверка` / `Last verified` are checked by warnings. Statuses:
-`Черновик` / `Draft`, `Действует` / `Active`, `Требует проверки` /
-`Requires review`, `Устарел` / `Obsolete` or `Deprecated`. Risk:
-`Низкий` / `Low`, `Средний` / `Medium`, `Высокий` / `High`,
-`Критический` / `Critical`.
+A runbook is a verified operational procedure. Every `runbooks/*.md` file
+except `index.md` describes one unique `RB-*`.
 
-Must be non-empty:
+It records an owner, environment, risk, status, and `Last verified` date, and
+contains these non-empty sections:
 
-- `Предварительные условия` / `Prerequisites`;
-- `Процедура` / `Procedure` with numbered steps;
-- `Проверка` / `Verification`;
-- `Откат` / `Rollback`.
+- Prerequisites;
+- Procedure with numbered steps;
+- Verification;
+- Rollback.
 
-For high and critical risk, additional
-`Условия остановки` / `Stop conditions`.
+High- and critical-risk runbooks also need Stop conditions. Supported statuses
+are `Draft`, `Active`, `Requires review`, and `Obsolete` or `Deprecated`.
+Supported risks are `Low`, `Medium`, `High`, and `Critical`.
 
-For a valid runbook, a valid date within `--stale-days` means
-`recent`, older - `overdue`. The `--stale-days 0` value only disables
-age-based overdue. Missing, incorrect or future date and status
-`Requires review` means `review-required`. Draft and obsolete with valid
-date have freshness `not-applicable`.
+For an active runbook, a date within `--stale-days` produces `recent`; an older
+date produces `overdue`. `--stale-days 0` disables only the age comparison. A
+missing, invalid, or future date, or status `Requires review`, produces
+`review-required`. Freshness does not apply to draft or obsolete runbooks.
+
+This repository currently has no `docs/runbooks/` section: no operational
+procedures have been documented here yet.
 
 ## Custom sections
 
-Unknown top-level directory with Markdown is not classified by name,
-number of files or content. Its `index.md` contains:
+An unknown top-level directory is not classified by its name or contents. Its
+`index.md` must contain:
 
-- `Тип: Custom` / `Type: Custom`;
-- owner;
-- non-empty description;
-- H1, which becomes the title of the section in the navigation.
+- `Type: Custom`;
+- an owner;
+- a non-empty description;
+- an H1 title, used as the section name in portal navigation.
 
-The absence or incompleteness of manifest are warnings. Other documents
-sections remain normal Markdown.
+Other files in that directory remain ordinary Markdown.
 
-## Task context and JSON
+## Work items and JSON
 
-Fields `Стандарты` / `Standards` and `Затронутые runbooks` /
-`Affected runbooks` only accept existing IDs. Task context includes
-explicitly related entries in typed collections, `documents` and `requiredReads`.
-There is no standard automatic mapping of task scope to `Scope`.
+The Standards and Affected runbooks fields accept only existing identifiers.
+`task context` adds those documents to typed collections, `documents`, and
+`requiredReads`. Toudocu deliberately does not infer that a standard applies
+from its Scope; the person doing the work makes that decision.
 
-ProjectReport schema v1 additively contains `knowledge.standards`,
-`knowledge.runbooks`, task ID collections, and four runbook metrics. Empty
-collections are serialized as `[]`; The version of schema and generator does not change.
+`ProjectReport` schema v1 contains `knowledge.standards`,
+`knowledge.runbooks`, related work-item identifiers, and four runbook freshness
+counters. Empty collections serialize as `[]`.

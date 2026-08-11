@@ -1,18 +1,18 @@
-# TASK-RELEASE-001: Prepare stable release 0.0.1
+# TASK-RELEASE-001: Build stable release 0.0.1
 
 - Status: Completed
 - Type: Maintenance
 - Priority: High
 - Module: MOD-CLI
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Toudocu Team
-- Last updated: 2026-08-07
+- Owner: Toudocu team
+- Last updated: 2026-08-11
 
 ## Result
 
-The repository is locally ready to publish a stable release `0.0.1`: version,
-deterministic portals, reviews, release bundle and GitHub workflow
-are consistent, but the tag and post fail.
+The repository contains an aligned `0.0.1` version, reproducible portal build,
+local checks, release bundle, and GitHub Actions workflow. Creating the tag and
+starting publication were deliberately outside this task.
 
 ## Scope
 
@@ -23,37 +23,36 @@ are consistent, but the tag and post fail.
 - `README.md`;
 - `CHANGELOG.md`;
 - `project-docs/`;
-- `example/project-docs/`.
 
 ## Out of scope
 
 - creating a Git tag;
-- setting up or reading GitHub remote;
-- push, GitHub Actions and GitHub Release publication;
-- changing the set or signatures of CLI commands, Go API exports and JSON structure
-  schema v1; only the value of the existing `toudocu.Version` constant changes.
+- configuring or reading the remote GitHub repository;
+- `push`, starting GitHub Actions, and publishing a GitHub Release;
+- changing the command set, public Go API, or JSON schema v1 structure. Only
+  the existing `toudocu.Version` constant changed.
 
 ## Acceptance criteria
 
-- [x] `AC-01` The CLI and canonical documentation use the `0.0.1` version, and
+- [x] `AC-01` The CLI and canonical documentation use version `0.0.1`, and the
   release workflow accepts a tag with exactly the same name.
-- [x] `AC-02` Identical sources give the same byte-by-byte
-  `assets/search-index.js` regardless of the order in which the metadata map is traversed.
-- [x] `AC-03` Single local command checks formatting, Go code,
-  race detector, modules and both documentation root.
-- [x] `AC-04` The local release bundle contains six target binaries,
-  notices, licenses and verifiable `checksums.txt`.
-- [x] `AC-05` The original documentation and both monitored portals are consistent with
-  behavior of the release without prematurely marking the publication.
+- [x] `AC-02` Identical sources produce the same `assets/search-index.js`
+  regardless of metadata map traversal order.
+- [x] `AC-03` One local command checks formatting, Go code, race detection,
+  modules, and canonical documentation.
+- [x] `AC-04` The local release bundle contains six binaries, notices,
+  licenses, and a verifiable `checksums.txt`.
+- [x] `AC-05` Source documentation and the tracked portal describe the stable
+  version and supported installation methods without temporary caveats.
 
 ## Plan
 
 1. Fix the version and release contract.
-2. Eliminate non-deterministic ordering of the search index.
-3. Unify local and CI release gates.
+2. Eliminate accidental ordering in the search index.
+3. Align local and CI release checks.
 4. Update documentation and rebuild portals.
 5. Perform a full local release cycle without accessing GitHub.
-6. Get an independent semantic review of the changed release documentation.
+6. Independently review the meaning of the changed documentation.
 
 ## Verification
 
@@ -68,11 +67,11 @@ are consistent, but the tag and post fail.
 
 ## Documentation impact
 
-Version, current state, completed Changes entities, canonical are updated
-changelog and description of dependency-free delivery. Both monitored portals
-rebuilt from the original Markdown.
+The version, current status, completed Changes entities, root changelog, and
+self-contained delivery description were updated. The tracked portal was
+rebuilt from Markdown.
 
 ## Use-case omission reason
 
-The task changes release engineering and artifact reproducibility without adding
-new custom CLI script.
+The task concerns release engineering and artifact reproducibility, not a new
+user-facing CLI journey.

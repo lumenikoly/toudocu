@@ -3,11 +3,11 @@
 - Identifier: FLOW-DOCS-BUILD
 - Scenario: UC-DOCS-01
 - Module: MOD-SITE
-- Last updated: 2026-08-05
+- Last updated: 2026-08-10
 
-The diagram visualizes the pipeline of the `build` command. Result requirements,
-exit codes, and safe cleanup are defined by
-[UC-DOCS-01](../use-cases/build-portal.md), not by the diagram.
+The diagram follows `build` from the command to a directory that can be
+published on ordinary HTTP hosting. Exact options and exit codes are defined in
+[UC-DOCS-01](../use-cases/build-portal.md).
 
 ## Process
 
@@ -26,7 +26,7 @@ flowchart TD
     Publish --> Open["Open the portal at the root or a nested URL path"]
 ```
 
-## Process boundaries
+## Important behavior
 
 - An unsafe `--output` or `--clean` is blocked before any file is changed.
 - Model errors remain available in the generated portal and `report.json`.

@@ -1,8 +1,12 @@
-# Разработка frontend
+# Разработка интерфейса
 
-Frontend source находится в `web/`; Node.js является только build/test toolchain
-для разработчика. Обычный пользователь и `go build ./...` используют
-закоммиченные assets из `internal/site/assets/generated/`.
+Исходники браузерной части находятся в `web/`. Node.js нужен только
+разработчику, который меняет интерфейс. Обычный пользователь и `go build ./...`
+используют уже собранные ресурсы из `internal/site/assets/generated/`.
+
+## Принятый цикл
+
+Из корня репозитория:
 
 ```bash
 make web
@@ -11,7 +15,7 @@ make test
 make build
 ```
 
-Frontend-only цикл внутри `web/`:
+Только для интерфейса, из `web/`:
 
 ```bash
 npm ci
@@ -21,31 +25,32 @@ npm run build
 npm run test:browser
 ```
 
-Он не заменяет Go vet/tests/race, сборку бинарника и проверку расхождений
-generated assets, которые выполняют соответствующие Make targets.
+Этот короткий цикл не заменяет Go vet, обычные и race-тесты и сборку бинарника.
+Соответствующие цели Make выполняют их отдельно.
 
-TypeScript работает в strict mode, сборка выполняется esbuild. Generated
-manifest и assets детерминированы: timestamps и random values запрещены. После
-изменения frontend source необходимо закоммитить пересобранный
-`internal/site/assets/generated/`; CI повторит сборку и завершится ошибкой при
-расхождении.
+TypeScript работает в строгом режиме, сборку выполняет esbuild. Имена и
+содержимое производных ресурсов должны воспроизводиться: время и случайные
+значения в них запрещены. После изменения `web/` нужно закоммитить обновлённый
+`internal/site/assets/generated/`; CI повторит сборку и обнаружит расхождение.
 
-`appearance.js` доступен в static и serve runtime и подключается обычным
-блокирующим script до CSS, чтобы сохранённая тема действовала уже в первом
-кадре. `portal.js` доступен в static и serve runtime. `serve.js`, `editor.js`,
-`changes.js`, roadmap dialog, CodeMirror и Swagger UI являются serve-only. Project logic,
-classification, path guards, semantic diff и verification нельзя переносить в
-TypeScript.
+## Что входит в какой режим
 
-Changes review использует единый CodeMirror selection contract с 1-based
-Unicode scalar line/column для merge и file viewer. Закреплены
-`@codemirror/lang-go@6.0.1`, `@codemirror/lang-java@6.0.2` и
-`@codemirror/lang-javascript@6.2.5`; JavaScript package также обслуживает
-TypeScript/JSX/TSX. Для остальных UTF-8 файлов применяется plain-text fallback.
-Путь, selected text, context, binary/size limits и re-anchoring остаются в Go.
+- `appearance.js` и `portal.js` нужны и статическому порталу, и `serve`;
+- `appearance.js` загружается до CSS, чтобы сохранённая тема действовала с
+  первого кадра;
+- `serve.js`, `editor.js`, `changes.js`, диалог дорожной карты, CodeMirror и
+  Swagger UI доступны только при `serve`.
+
+Проектную модель, классификацию документов, проверку путей, семантический diff
+и решение о запуске команд нельзя переносить в TypeScript: это граница Go.
+
+В Changes все редакторы используют координаты Unicode, начиная с единицы.
+Подсветка закреплена для Go, Java, JavaScript, JSX, TypeScript и TSX. Остальные
+корректные UTF-8 файлы показываются как обычный текст. Путь, выделенный текст,
+контекст, пределы размера и перенос привязок проверяет Go.
 
 ## Связанные документы
 
-- [Граница Go/frontend](../architecture/frontend-runtime-boundary.md)
+- [Граница Go и браузера](../architecture/frontend-runtime-boundary.md)
 - [MOD-SITE](../modules/site.md)
 - [Проверка изменений](testing.md)

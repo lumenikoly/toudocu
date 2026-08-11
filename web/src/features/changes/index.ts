@@ -336,6 +336,7 @@ registerMessages(changesMessages);
                 host.addEventListener('keyup', (event: any) => { if (event.key === 'Shift' || !event.shiftKey) showMenu(); }, { signal: controller.signal });
                 document.addEventListener('pointerdown', (event: any) => { if (!menu.contains(event.target)) hideMenu(); }, { signal: controller.signal });
                 document.addEventListener('scroll', hideMenu, { capture: true, signal: controller.signal });
+                window.addEventListener('resize', hideMenu, { signal: controller.signal });
                 document.addEventListener('keydown', (event: any) => { if (event.key === 'Escape' && !menu.hidden) { event.preventDefault(); event.stopPropagation(); hideMenu(); viewer.focus(); } }, { capture: true, signal: controller.signal });
                 $('[data-selection-copy]', menu).addEventListener('click', async () => {
                     try {

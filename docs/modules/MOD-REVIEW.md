@@ -1,78 +1,79 @@
-# MOD-REVIEW: Локальное ревью изменений
+# MOD-REVIEW: Локальные обсуждения изменений
 
 - Идентификатор: MOD-REVIEW
 - Статус: Готово
 - Владелец: Команда Toudocu
-- Последнее обновление: 2026-08-09
+- Последнее обновление: 2026-08-10
 
-Модуль владеет локальными discussion threads поверх repository-wide Git
-comparison и неизменяемыми feedback snapshots для установленного
-AI-skill. Он не запускает агента и не вызывает LLM.
+Модуль хранит локальные обсуждения поверх Git diff и неизменяемые пакеты
+комментариев для AI-агента. Сам он не запускает агента и не обращается к
+внешней AI-модели.
 
 ## Назначение
 
-Дать разработчику в canonical `serve` связать комментарии с
-актуальными строками Git-изменений или linked files, передать новые
-сообщения агенту через локальную FIFO-очередь и показать ответ
-в исходном thread.
+В основном портале `serve` разработчик может привязать сообщение к строкам
+изменения или к связанному файлу, подготовить новые сообщения для агента и
+увидеть ответы в тех же обсуждениях.
 
 ## Расположение в коде
 
-- `internal/app/review_*.go` — repository projection, application services,
-  persistence, re-anchoring, HTTP и CLI;
-- `web/src/features/changes/` и `web/src/styles/changes.css` — review UI в
-  существующем Changes workspace;
-- `skills/toudocu/` — agent-side FIFO feedback workflow.
+- `internal/app/review_*.go` — текущее представление репозитория, хранение,
+  перенос привязок, HTTP и CLI;
+- `web/src/features/changes/` и `web/src/styles/changes.css` — интерфейс
+  обсуждений внутри раздела «Изменения»;
+- `skills/toudocu/` — процесс, через который агент по очереди получает и
+  возвращает пакеты комментариев.
 
 ## Границы
 
-Review доступен только canonical `serve`. Static portal, locale mounts и
-direct translation serve не получают review capability. Сессии и
-snapshots хранятся в user-state вне repository; Git working tree, index,
-refs и history модуль не изменяет.
+Обсуждения доступны только в основном портале `serve`. Статический портал,
+переводы и прямой `serve` каталога перевода этой возможности не получают.
+Состояние и снимки хранятся вне репозитория в пользовательском каталоге.
+Рабочее дерево, индекс, ссылки и история Git не меняются.
 
 ## Бизнес-правила
 
-### BR-REVIEW-001: Feedback writable только для working tree
+### BR-REVIEW-001: Комментарии можно записывать только для рабочего дерева
 
-Любой поддерживаемый base и target можно просматривать, но
-комментарии и feedback можно изменять только при
-`target=working-tree`.
+Любой поддерживаемый диапазон можно читать. Создавать и менять комментарии и
+пакеты для агента можно только тогда, когда конечное состояние —
+`working-tree`, то есть текущее рабочее дерево.
 
 ### BR-REVIEW-002: Передача не запускает агента
 
-Кнопка в UI атомарно фиксирует новые human messages открытых
-discussions. Установленный skill сам забирает oldest pending snapshot
-через CLI и отвечает полным schema-v1 response.
+Кнопка в интерфейсе одним действием фиксирует новые сообщения открытых
+обсуждений. После отдельной просьбы пользователя установленный skill получает
+самый старый ожидающий пакет через CLI и возвращает полный ответ версии 1.
 
 ### BR-REVIEW-003: Отправленное неизменяемо
 
-До передачи разрешено редактировать и удалять единственное
-unsent human message. После передачи message и feedback snapshot
-неизменяемы; продолжение обсуждения — новый reply.
+До передачи агенту последнее неотправленное сообщение можно изменить или
+удалить. После передачи сообщение и пакет остаются неизменными; продолжение
+обсуждения создаётся новым ответом.
 
 ## Инварианты
 
-- Browser не сохраняет selected text и context: Go извлекает их по
-  1-based Unicode scalar coordinates.
-- Каждая mutation имеет CAS по revision/state digest, OS-level lock и
-  атомарную замену state.
-- Response принимается только целиком и содержит ровно один
-  валидный result для каждого feedback item.
-- `fixed` не закрывает discussion; состояние только `open|resolved`.
-- Фактический Git diff, а не `changedPaths` агента, остаётся
-  source of truth для изменений repository.
+- Браузер передаёт только координаты Unicode, начиная с единицы. Выделенный
+  текст и контекст Go-процесс извлекает сам.
+- Каждая запись сверяет ожидаемую версию и хеш состояния, берёт блокировку
+  операционной системы и атомарно заменяет файл состояния.
+- Ответ принимается только целиком и содержит ровно один корректный результат
+  для каждого сообщения пакета.
+- Результат `fixed` не закрывает обсуждение; его состояние бывает только
+  `open` или `resolved`.
+- Реальные изменения определяет текущий Git diff, а не список `changedPaths`,
+  который указал агент.
 
 ## Стабильные интерфейсы
 
-- internal schema-v1 review DTO, не экспортируемые через `api.go`;
-- `/_toudocu/api/changes/review/` в canonical `serve`;
+- внутренние структуры обсуждений версии 1, не экспортируемые через `api.go`;
+- `/_toudocu/api/changes/review/` в основном портале `serve`;
 - `toudocu changes feedback pending|respond`;
-- [Changes HTTP contract](../contracts/changes-http.md);
+- [HTTP-контракт изменений](../contracts/changes-http.md);
 - [FLOW-REVIEW-FEEDBACK](../flows/FLOW-REVIEW-FEEDBACK.md);
-- [Перенос review anchors](../architecture/review-anchoring.md);
+- [Привязка комментариев](../architecture/review-anchoring.md);
 - [UC-REVIEW-01](../use-cases/UC-REVIEW-01.md).
 
 ## Связанные сценарии
 
-- [UC-REVIEW-01: Обсудить изменения и передать feedback агенту](../use-cases/UC-REVIEW-01.md)
+- [UC-REVIEW-01: Обсудить изменения и передать комментарии агенту](../use-cases/UC-REVIEW-01.md)

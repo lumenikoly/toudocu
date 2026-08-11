@@ -9,82 +9,90 @@
 - Переходы: TR-SITE-005
 - Стандарты: STD-GO-001, STD-DOCS-001
 - Владелец: Команда Toudocu
-- Последнее обновление: 2026-08-09
+- Последнее обновление: 2026-08-10
 
 ## Результат
 
-`toudocu changes` и раздел `/changes` показывают Git-изменения исходной
-документации как source, rendered и deterministic semantic diff, сопоставляют
-их с task impact и экспортируют `ChangeSetReport` schema v1.
+`toudocu changes` и раздел `/changes/` показывают изменения исходной
+документации в Git: точный патч, отрисованный Markdown и смысловое сравнение
+известных сущностей. Они сопоставляют изменённые документы с заявленным
+влиянием рабочей задачи и могут вывести `ChangeSetReport` schema v1.
 
 ## Изменение поведения
 
 ### Было
 
-Портал показывает только текущее состояние, а review использует внешний
-`git diff` без проектной семантики и task impact.
+Портал показывал только текущее состояние. Для проверки изменений приходилось
+использовать внешний `git diff`, который не знает типов документов, их связей
+и обещаний рабочей задачи.
 
 ### Станет
 
-`serve` предоставляет read-only Changes workspace с явным диапазоном,
-ленивыми специализированными представлениями и live invalidation. CLI и CI
-получают тот же отчёт без изменения Git.
+`serve` предоставляет раздел «Изменения» только для чтения с явным диапазоном
+сравнения. Тяжёлые представления загружаются по запросу, а после изменения
+файлов прежний отчёт помечается устаревшим. CLI и CI получают те же данные, не
+изменяя Git.
 
 ## Область изменения
 
-- публичный фасад `api.go` и `internal/app/cli.go`, `internal/app/types.go`, `internal/app/site_config.go`;
-- `internal/app/server.go`, `internal/app/site.go`, `internal/app/screen_site.go`;
-- `internal/app/assets/`, `package.json`, `package-lock.json`;
-- `go.mod`, `go.sum`, `THIRD_PARTY_NOTICES.md`;
-- тесты в `internal/app/`;
-- `docs/`, `README.md`, `CHANGELOG.md`;
-- `project-docs/` только через пересборку.
+- публичный Go-фасад и команды CLI;
+- чтение Git, построение отчёта и специальные виды сравнения в
+  `internal/app/`;
+- локальный HTTP API и интерфейс Changes;
+- закреплённые зависимости и их уведомления;
+- тесты, каноническая документация, README и журнал изменений.
 
 ## Не входит в задачу
 
-- изменение Git index, history, refs или working tree;
-- fetch, checkout, commit, merge, rebase и GitHub PR API;
-- inline review comments, approvals и conflict editor;
-- AI-generated summaries и исправление документации;
-- pixel diff Mermaid или изображений;
-- Git diff исходного кода вне documentation roots.
+- изменение рабочего дерева, индекса, истории и ссылок Git;
+- `fetch`, `checkout`, `commit`, `merge`, `rebase` и GitHub PR API;
+- комментарии к строкам, одобрение и редактор конфликтов;
+- созданные AI сводки и автоматическое исправление документации;
+- сравнение изображений по пикселям;
+- diff исходного кода вне каталогов документации.
 
 ## Критерии приёмки
 
-- [x] `AC-01` Git adapter поддерживает commit, index и working-tree snapshots,
-  staged/unstaged/untracked, rename/copy/type change и Unicode paths без shell,
-  external diff, textconv, hooks или fetch.
-- [x] `AC-02` `ChangeSetReport` schema v1 содержит явный resolved comparison,
-  digest, file/entity summaries, changes, task impact и diagnostics.
-- [x] `AC-03` Unified diff точно получен от Git, side-by-side выводится из hunks,
-  а большие или binary файлы не блокируют change set.
-- [x] `AC-04` Deterministic semantic diff поддерживает UC, FLOW, SC/TR, MOD,
-  ADR, TASK, Architecture и relations, игнорируя незначащее форматирование.
-- [x] `AC-05` OpenAPI YAML/JSON diff сравнивает operations, requests, responses,
-  schemas и security и классифицирует compatibility.
-- [x] `AC-06` Rendered Markdown, Mermaid, Screen Map и image assets доступны до
-  и после с изоляцией ошибки одной стороны.
-- [x] `AC-07` Task impact отделяет task contract от permanent documentation и
-  выдаёт declared/actual/scope diagnostics.
-- [x] `AC-08` CLI поддерживает summary, file и task reports, filters,
-  text/JSON/Markdown/output и exit codes 0–4.
-- [x] `AC-09` Read-only HTTP API проверяет revisions/paths/limits, поддерживает
-  lazy detail, ETag и live digest update.
-- [x] `AC-10` Changes UI поддерживает comparison selector, filters/search,
-  unified/merge/rendered/semantic/specialized tabs, deep links и accessibility.
-- [x] `AC-11` `serve` сохраняет filters/open file при invalidation, а отсутствие
-  Git показывает diagnostic и не ломает остальной портал.
-- [x] `AC-12` Static `build`, существующий `check`, ProjectReport schema v1 и
-  editor workflows сохраняют совместимость и проходят regression tests.
+- [x] `AC-01` Слой Git читает коммиты, индекс и рабочее дерево, включая
+  `staged`, `unstaged`, новые файлы, переименование, копирование, смену типа и
+  Unicode-пути. Он не вызывает оболочку, внешний diff, `textconv`, hooks,
+  `fetch` и запись.
+- [x] `AC-02` `ChangeSetReport` schema v1 содержит разрешённый диапазон, хеш,
+  сводки по файлам и сущностям, изменения, влияние задачи и диагностические
+  сообщения.
+- [x] `AC-03` Единый патч берётся точно из Git, представление в две колонки
+  строится из его фрагментов, а большой или бинарный файл не ломает весь отчёт.
+- [x] `AC-04` Воспроизводимое смысловое сравнение понимает `UC-*`, `FLOW-*`,
+  `SC-*`/`TR-*`, `MOD-*`, `ADR-*`, `TASK-*`, архитектуру и связи и игнорирует
+  форматирование, которое не меняет смысл.
+- [x] `AC-05` Для OpenAPI YAML/JSON сравниваются операции, запросы, ответы,
+  схемы и безопасность, а совместимость получает явную классификацию.
+- [x] `AC-06` Markdown, Mermaid, карта экранов и растровые ресурсы доступны до
+  и после изменения; ошибка одной стороны не скрывает другую.
+- [x] `AC-07` Влияние задачи отделяет её собственный контракт от постоянной
+  документации и показывает заявленные, фактические и вышедшие за границы
+  изменения.
+- [x] `AC-08` CLI поддерживает сводку, один файл и одну задачу, фильтры,
+  текстовый, JSON- и Markdown-вывод, запись в файл и коды завершения 0–4.
+- [x] `AC-09` HTTP API только для чтения проверяет ревизии, пути и размеры,
+  загружает подробности по запросу, использует ETag и обновляет хеш после
+  изменения файлов.
+- [x] `AC-10` Интерфейс позволяет выбрать диапазон, фильтровать и искать файлы,
+  переключать виды сравнения, открывать прямые ссылки и пользоваться основными
+  действиями с клавиатуры.
+- [x] `AC-11` После изменения файлов `serve` сохраняет фильтры и открытый файл.
+  Отсутствующий Git даёт понятное сообщение, но не ломает остальной портал.
+- [x] `AC-12` Статический `build`, существующий `check`, `ProjectReport` schema
+  v1 и редактор сохраняют прежнее поведение.
 
 ## План
 
-- [x] Реализовать Git snapshots, comparison model и ChangeSetReport.
-- [x] Добавить source, semantic, OpenAPI, task и specialized diff engines.
-- [x] Добавить CLI reports и exit-code mapping.
-- [x] Реализовать changes service, HTTP API, cache и invalidation.
-- [x] Реализовать Changes UI и интеграцию с document/task/screen pages.
-- [x] Обновить документацию, generated portals и выполнить все gates.
+- [x] Реализовать чтение состояний Git, модель сравнения и `ChangeSetReport`.
+- [x] Добавить обычный, смысловой, OpenAPI- и специализированный diff.
+- [x] Добавить отчёты CLI и коды завершения.
+- [x] Реализовать сервис Changes, HTTP API, кэш и обновление.
+- [x] Добавить интерфейс и переходы со страниц документов, задач и экранов.
+- [x] Обновить документацию.
 
 ## Проверка
 
@@ -107,26 +115,15 @@
 
 ## Влияние на документацию
 
-Добавляются module/use case/flow, architecture answer, YAML ADR, changes guide,
-HTTP/JSON contracts и diagnostics reference. Обновляются CLI, serve, task,
-OpenAPI, Screen Map, configuration, security, README и changelog.
+Были добавлены MOD-CHANGES, UC-DOCS-05, FLOW-DOCS-CHANGES, архитектурный ответ,
+ADR, руководство, HTTP/JSON-контракты и справочник диагностических сообщений.
+Также обновлены CLI, `serve`, рабочие задачи, OpenAPI, карта экранов,
+конфигурация, безопасность, README и журнал изменений.
 
-- `docs/modules/MOD-CHANGES.md`;
-- `docs/use-cases/UC-DOCS-05.md`;
-- `docs/flows/FLOW-DOCS-CHANGES.md`;
-- `docs/architecture/documentation-changes.md`;
-- `docs/architecture/overview.md`;
-- `docs/architecture/runtime-components.md`;
-- `docs/architecture/trust-boundaries.md`;
-- `docs/decisions/ADR-003.md`;
-- `docs/decisions/001-dependency-free.md`;
-- `docs/contracts/cli.md`;
-- `docs/contracts/changes-http.md`;
-- `docs/guides/documentation-changes.md`;
-- `docs/guides/work-items.md`;
-- `docs/guides/screens.md`;
-- `docs/reference/changes-report.md`;
-- `docs/reference/configuration.md`;
-- `docs/reference/features.md`;
-- `README.md`;
-- `CHANGELOG.md`.
+## Текущее состояние
+
+Это историческая задача первого выпуска Changes. Последующие изменения
+упростили рабочую область, добавили обсуждения всего репозитория, просмотр
+полного UTF-8-файла и фильтр по типу изменения. Текущий интерфейс использует
+вкладку «Diff», а не старые названия из первоначальных критериев. Полный путь
+описан в [руководстве Changes](../guides/documentation-changes.md).

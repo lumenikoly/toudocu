@@ -1,4 +1,4 @@
-# TASK-SITE-003: Separate the Go Core from the Portal Frontend Layer
+# TASK-SITE-003: Separate the Go core from the browser layer
 
 - Status: Completed
 - Type: Feature
@@ -8,8 +8,8 @@
 - Flow: FLOW-DOCS-BUILD
 - Screens: SC-SITE-HOME, SC-SITE-DOCUMENT, SC-SITE-USE-CASE, SC-SITE-SCREEN-MAP, SC-SITE-EDITOR, SC-CHANGES-WORKSPACE
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Toudocu Team
-- Last updated: 2026-08-06
+- Owner: Toudocu team
+- Last updated: 2026-08-10
 
 ## Result
 
@@ -84,8 +84,8 @@ existing JSON schemas. No new `preview` command is introduced.
 - `docs/guides/testing.md`, the new `docs/guides/deployment.md`, the new
   `docs/guides/local-workflow.md`, and the new
   `docs/guides/frontend-development.md`.
-- Tracked generated portals only through rebuilding after semantic and
-  structural gates.
+- Tracked generated portals only through rebuilding after semantic review and
+  structural checks.
 
 ## Out of scope
 
@@ -233,14 +233,13 @@ existing JSON schemas. No new `preview` command is introduced.
   loading/empty/error states while preserving existing appearance settings;
   move labels into a locale catalog and use stable page-kind IDs instead of
   analyzing H1 or localized DOM.
-- [x] Configure the `make`/CI regeneration gate, Go-only clone build, frontend
-  unit and browser suites, static/serve/security regression, and
-  reproducibility check.
+- [x] Configure `make` and CI to confirm that committed assets match the
+  frontend source, that a fresh clone builds with Go alone, and that frontend,
+  browser, static/serve, security, and reproducibility tests cover the cutover.
 - [x] Perform one cutover: remove legacy UI generation/assets and exclude the
   temporary duplicate implementation from the final branch.
-- [x] Update every listed source of truth, add a separate architecture-question
-  document and a direct overview link, update release and migration notes, and
-  then pass the semantic and structural gates.
+- [x] Update every listed source document, add the architecture answer and its
+  direct overview link, and update the release and migration notes.
 
 ## Verification
 

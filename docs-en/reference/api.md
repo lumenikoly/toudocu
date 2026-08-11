@@ -1,21 +1,24 @@
 # API and programmatic interface map
 
-This page helps developers and integrators choose a current Toudocu
-interface. Wire-level Editor and Changes contracts are defined in OpenAPI
-3.1.0; Markdown links lead to behavioral companions.
+Use this table to choose an interface Toudocu actually provides. OpenAPI 3.1.0
+defines exact Editor and Changes HTTP fields; adjacent Markdown explains
+behavior and security boundaries.
 
-| Interface | Availability | Purpose | Read/write boundary | Result | Contract |
-|---|---|---|---|---|---|
-| CLI | Installed binary or `go run ./cmd/toudocu` in the source repository | Check, build, `serve`, search, task workflow, and Git-backed changes | Most commands read documentation; `build` writes output, `task init`, scaffold, and task archive/restore change explicitly selected files, while `task verify --run` separately executes permitted commands | Text, exit code, or JSON schema v1; for `build`, an HTML portal and `report.json` | [CLI contract](../contracts/cli.md) |
-| Go API | Root Go package; no published remote module path yet | Embed the model, generator, task workflow, and changes without a separate process | Effects depend on the invoked operation; reading, writing, and execution are not hidden behind one implicit entrypoint; the Markdown AST/parser/renderer are internal | Go model, report, and error types; JSON only on explicit serialization | [Feature overview](features.md#public-go-api) |
-| JSON reports | `--format json`, `--report`, and generated `report.json` for supported operations | CI, agents, and integrations read the same typed model used by the portal | Reports do not change Markdown; the CLI may write an explicitly selected report or output | Versioned JSON schema v1: `ProjectReport`, task/search/scaffold reports, and change reports | [CLI contract and report schemas](../contracts/cli.md#json-results) |
-| Editor HTTP API | Only a canonical portal started with `toudocu serve` | List, read, preview, validate, create, and CAS-save workspace files | Reads allowed `.md`, `.yaml`, `.yml`, and `.json`; only explicit guarded create/save writes within the documentation root | JSON schema v1; raw source for a separate read-only request | [OpenAPI](../contracts/editor.openapi.yaml), [behavior](../contracts/editor-http.md) |
-| Version status HTTP API | Canonical `toudocu serve` unless `--no-update-check` is set | Compare the current version with the latest stable release | The browser requests same-origin; Go makes one constrained read-only request to a fixed GitHub endpoint | JSON schema v1 with `up-to-date`, `update-available`, or `unavailable` status | [OpenAPI](../contracts/editor.openapi.yaml), [behavior](../contracts/editor-http.md#version-check) |
-| Changes HTTP API | `toudocu serve`, including direct read-only serving of a translation root; configured locale mounts do not receive the API | Read-only comparison of Git states, files, rendered content, screen overlay, and task impact | Reads local Git revisions and the selected documentation root; does not change Git or Markdown | `ChangeSetReport` and related JSON schema v1, raw content, or sanitized HTML | [OpenAPI](../contracts/changes.openapi.yaml), [behavior](../contracts/changes-http.md) |
-| Offline API docs | `/_toudocu/api-docs/` only in canonical `serve` | Selector for both OpenAPI contracts, operation browsing, and safe Try it out | Same-origin; Try it out is limited to `GET`/`HEAD`; no CDN | Vendored Swagger UI 5.32.12 | [SC-SITE-API-DOCS](../screens/SC-SITE-API-DOCS.md) |
-| Manual rebuild | Only a canonical portal in `serve` mode | Explicitly rebuild the model, HTML, and search | Reads the canonical documentation root and writes generated output; does not change Markdown | Success JSON `{documents, pages, warnings, errors}` without `schemaVersion`; errors are plain text | [Editor OpenAPI](../contracts/editor.openapi.yaml), [behavior](../contracts/editor-http.md) |
+| Interface | Availability | Purpose | Read and write boundary | Details |
+|---|---|---|---|---|
+| CLI | Installed binary; `go run ./cmd/toudocu` in the source repository | Check, build, `serve`, search, changes, and work items | Most commands are read-only. `build` writes output, task creation and archiving move explicitly selected files, and `task verify --run` starts authorized commands | [CLI contract](../contracts/cli.md) |
+| Go API | Root package of this source module | Embed the model, generator, work-item operations, and changes without another process | Side effects depend on the called function and are not hidden behind one universal entry point | [Public Go API](features.md#public-go-api) |
+| JSON reports | `--format json`, `--report`, and `report.json` | CI, agents, and integrations | A report does not change Markdown; the CLI writes only an explicit report or output path | [CLI schemas](../contracts/cli.md#json-results) |
+| Editor HTTP API | Main `toudocu serve` portal only | List, read, preview, validate, create, and safely save files; add one `DLV-*` | Allowed `.md`, `.yaml`, `.yml`, and `.json` inside the canonical documentation root | [OpenAPI](../contracts/editor.openapi.yaml), [behavior](../contracts/editor-http.md) |
+| Version HTTP API | Main `serve` without `--no-update-check` | Compare the running version with the latest stable release | The browser calls the local server; Go makes one bounded read-only GitHub request | [Behavior](../contracts/editor-http.md#version-check) |
+| Changes HTTP API | `serve`; read-only when a translation root is served directly | Return `ChangeSetReport` and specialized documentation views | Reads local Git and the selected documentation roots; changes nothing | [OpenAPI](../contracts/changes.openapi.yaml), [behavior](../contracts/changes-http.md) |
+| Review HTTP API | Main `serve` only | List eligible files across the repository, store discussions, and display agent responses | Every range is readable; writes require `working-tree`; state lives outside the repository | [OpenAPI](../contracts/changes.openapi.yaml), [behavior](../contracts/changes-http.md#repository-wide-discussions) |
+| Feedback CLI | Binary or source repository | Move pending batches between Changes and the installed skill | Reads and writes local discussion state only; starts neither an agent nor Git | [CLI contract](../contracts/cli.md#agent-responses-to-comments) |
+| HTTP API reference | `/_toudocu/api-docs/` in the main `serve` portal only | Browse both OpenAPI contracts and try safe requests | Same-origin; Try it out permits only `GET` and `HEAD`; no CDN | [Screen](../screens/SC-SITE-API-DOCS.md) |
+| Manual rebuild | Main `serve` only | Reread documents and rebuild the model, HTML, and search | Reads canonical sources and writes derived output only; does not change Markdown | [Editor OpenAPI](../contracts/editor.openapi.yaml) |
 
-The Editor API and API docs are absent from every translation portal. A
-configured locale mount also receives no Changes API; when a translation root
-is served directly, the Changes API remains read-only. No HTTP interface runs
-Git write commands, shell commands, or task verification.
+The `toudocu` import path is intended for the source tree or an explicit local
+`replace`. The CLI remains the public distribution interface.
+
+Translation portals have no Editor, API reference, or review writes. No HTTP
+interface writes Git, invokes a system shell, or runs work-item verification.

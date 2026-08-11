@@ -138,9 +138,12 @@ components:
 
 ## Overview
 
-**Creative North Star: "The Variant Engineering Board"**
+**Design direction: an engineering board**
 
-Toudocu uses the direct, high-energy composition of the approved Variant reference: a parchment canvas, enormous cobalt statements, precise mono captions, capsule actions, and large softly colored blocks. The page feels like an engineering presentation board rather than a dark developer console or a generic SaaS dashboard.
+Toudocu uses a parchment canvas, large cobalt statements, precise monospace
+captions, capsule actions, and broad fields of soft color. The result should
+feel like an engineering presentation board, not a dark developer console or a
+generic SaaS dashboard.
 
 Real product UI sits inside soft white insets and replaces invented diagrams. Public claims stay factual and repository-backed; the expressive scale comes from typography, spacing, and block color rather than hype.
 
@@ -216,7 +219,8 @@ Commands use monospace, white surfaces, 12px radii, and restrained shadows. Veri
 
 ### Do:
 
-- **Do** match the approved Variant composition before inventing a new layout.
+- **Do** follow the composition and tokens defined in this document before
+  introducing a new layout.
 - **Do** use three-line oversized cobalt statements on open parchment space.
 - **Do** let one soft color own each large evidence block.
 - **Do** replace placeholder mockups with real Toudocu screenshots and commands.

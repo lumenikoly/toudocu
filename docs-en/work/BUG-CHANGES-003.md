@@ -8,24 +8,24 @@
 - Regression: No
 - Module: MOD-CHANGES
 - Use case: UC-DOCS-05
-- Owner: Toudocu Team
+- Owner: Toudocu team
 - Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-09
+- Last updated: 2026-08-10
 
 ## Symptom
 
-`task changes` depends on the task filename and conflates IDs that share a
-prefix.
+`task changes` depended on the task filename and could confuse two IDs with a
+shared prefix.
 
 ## Expected behavior
 
-The task contract is selected by the exact stable ID in the H1 of the selected
-Git snapshot; the filename does not participate in identity.
+The task is selected by the exact stable ID in its H1 in the chosen Git
+snapshot. Its filename does not define its identity.
 
 ## Actual behavior
 
-A file without an ID in its name is not found, while a change to `TASK-X-0010`
-is treated as a task file for `TASK-X-001`.
+A task whose filename did not contain its ID was not found. A change to
+`TASK-X-0010` was also treated as a change to `TASK-X-001`.
 
 ## Steps to reproduce
 
@@ -89,5 +89,4 @@ shared prefix.
 
 ## Documentation impact
 
-Only `docs/work/BUG-CHANGES-003.md` changes; the stable-ID rule is already
-documented.
+Only this historical record changed. The stable-ID rule was already documented.

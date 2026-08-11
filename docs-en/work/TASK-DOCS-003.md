@@ -5,28 +5,28 @@
 - Priority: High
 - Module: MOD-MODEL
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Toudocu Team
-- Last updated: 2026-07-31
+- Owner: Toudocu team
+- Last updated: 2026-08-10
 
 ## Result
 
-The user explicitly connects Toudocu to the project via `$toudocu init`;
-skill creates minimal documentation when necessary and safely
-sets limited usage rules for `AGENTS.md`.
+The user connects Toudocu to a project only through explicit `$toudocu init`.
+When needed, the skill creates minimal documentation and adds a constrained
+managed guidance block to `AGENTS.md`.
 
 ## Behavior change
 
 ### Before
 
-Skill did not have a separate onboarding call, but workflow certainly offered
-create `TASK-*` for each new request.
+The skill had no separate first-run workflow, and the previous process proposed
+a `TASK-*` for almost every request.
 
 ### After
 
-Only explicit `$toudocu init` performs preflight, creates the missing one
-`docs/index.md`, sets the `AGENTS.md` managed block and runs
-structural check. Regular calls do not change project instructions, but new ones
-`TASK-*` are created only for essential work.
+Only `$toudocu init` performs a read-only preflight, creates a missing
+`docs/index.md`, installs the managed `AGENTS.md` block, and runs the structural
+check. Ordinary calls do not change project instructions. A new `TASK-*` is
+created only for substantial work.
 
 ## Scope
 
@@ -81,4 +81,4 @@ and JSON schema do not change; generated portals cannot be edited.
 ## Use-case omission reason
 
 The change determines the behavior of the installed AI-skill and does not change
-Observable Go CLI or static portal user script.
+observable Go CLI or static-portal behavior.

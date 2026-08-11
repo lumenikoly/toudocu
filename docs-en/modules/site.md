@@ -1,9 +1,9 @@
 # Static portal
 
 - Identifier: MOD-SITE
-- Status: Completed
-- Owner: Toudocu Team
-- Last updated: 2026-08-08
+- Status: Ready
+- Owner: Toudocu team
+- Last updated: 2026-08-10
 
 The module produces backend-independent HTML pages, navigation, static JSON
 resources, and a typed `report.json` from the completed project model.
@@ -46,15 +46,22 @@ and direct output symlinks. The decision is based on resolved paths.
 The `build` result requires no Toudocu backend, database, Node.js, CDN, or
 external runtime. HTML, CSS, JavaScript, and JSON reside in output, use relative
 URLs, and work both at the root of an HTTP(S) host and under a nested URL path.
-Direct opening through `file://` is not a guaranteed product contract.
+Direct opening through `file://` is not supported. Use HTTP(S) hosting or
+`toudocu serve`.
 
-### BR-SITE-003: Dev server does not expose source repository
+### BR-SITE-003: The local server exposes files only through explicit interfaces
 
-Ordinary `serve` routes expose only the output directory. A separate editor API
-allows regular `.md`, `.yaml`, `.yml`, and `.json` files only within docs root,
-excludes hidden/excluded/output and symlink paths, and does not expose the rest
-of the repository. By default, the listener uses loopback; `--host 0.0.0.0`
-explicitly includes reachable local-network clients in the trust boundary.
+Ordinary `serve` routes expose the built portal, not arbitrary filesystem
+paths. The Editor API accepts only regular `.md`, `.yaml`, `.yml`, and `.json`
+files inside the documentation root and rejects hidden, excluded, output, and
+symlink paths.
+
+Changes is a separate explicit interface in canonical `serve`. It can read
+tracked and new non-ignored files inside the current repository to display the
+diff, full UTF-8 text, and discussions. It validates path, kind, and size,
+never returns absolute paths, and does not turn the server into a general file
+browser. By default, the listener uses loopback; `--host 0.0.0.0` explicitly
+includes reachable local-network clients in the trust boundary.
 
 ### BR-SITE-004: Mermaid works autonomously and in strict mode
 
@@ -96,10 +103,11 @@ remain offline-first.
 ### BR-SITE-007: Build and serve have different capabilities
 
 `GenerateSite` always creates a backend-independent read-only result for static
-HTTP hosting without editor markup, API UI, Swagger UI, CodeMirror, or
-server-only rebuild code. It copies discovered OpenAPI specs as ordinary portal
-assets. `serve` separately adds the live workspace, editor/source actions,
-polling, API, watcher, and vendored Swagger UI for canonical contracts.
+HTTP hosting without editor markup, API UI, Swagger UI, CodeMirror,
+discussions, or server-only rebuild code. It copies discovered OpenAPI specs as
+ordinary portal assets. `serve` separately adds the live workspace,
+editor/source actions, Changes and review capabilities, polling, API, watcher,
+and vendored Swagger UI for canonical contracts.
 
 ### BR-SITE-008: Writes are protected by optimistic concurrency
 
@@ -117,7 +125,8 @@ create independent read-only snapshots at `/_toudocu/locales/<locale>/`.
 The switch receives URLs only from server-computed targets: Markdown is matched
 by relative source path, a generated page by an existing output path, and
 otherwise the locale homepage is used. A locale mount receives no editor,
-changes API, rebuild controls, source paths, or canonical workspace. `build`
+Changes API, discussions, rebuild controls, source paths, or canonical
+workspace. `build`
 and `serve` directly on a translation root remain single-language and
 read-only: the server adds no editor markup, write API, or rebuild controls.
 
@@ -238,7 +247,7 @@ endpoint unavailable, and perform no check.
   dismissed version, and never blocks the main content;
 - a service-output conflict receives a separate safe path;
 - `ProjectReport` and HTML are built from the same model;
-- generated files do not become a source of truth.
+- generated files never become editable documentation sources.
 
 ## Stable interfaces
 

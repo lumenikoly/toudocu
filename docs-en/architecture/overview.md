@@ -2,13 +2,14 @@
 
 - Document type: Architecture Overview
 
-Toudocu is a local dependency-free Go runtime between the source
-documentation directory and consumers of the validated model: Go code through
-the public facade, automation through CLI/JSON, and readers of the static HTTP
-portal. Optional `serve` adds a local HTTP/editor runtime and an offline OpenAPI
-catalog. Only the canonical portal may make one constrained request to the
-GitHub Releases API for latest stable release metadata; a database, CDN, and
-external runtime are outside the system boundary.
+Toudocu is a local Go tool with no third-party Go dependencies. It reads source
+Markdown, validates relationships, and builds a static HTML portal. The same
+model is available to Go programs and through CLI JSON output.
+
+`serve` adds a local HTTP server, source-file editor, Changes workspace, and
+offline API reference. Only the main portal started by `serve` may make one
+constrained request to GitHub for metadata about the latest stable release.
+Normal operation needs no database, CDN, or external service.
 
 ## System boundary
 
@@ -16,12 +17,12 @@ A developer, library consumer, agent, or CI provides Toudocu with a
 documentation directory and an explicitly selected repository root. Toudocu
 reads Markdown, local assets, and recognized OpenAPI contracts, validates
 declared relationships and wire structure, and either returns diagnostics or
-builds derived HTML/JSON files. With `build`, the browser only opens the
-ready-made read-only portal. With `serve`, it may submit a constrained workspace
-write, after which the Go process rebuilds the model. Only a separate, explicit
-task verification mode may run repository commands. Release metadata checking
-can be disabled with a flag, does not download code, and does not exist in a
-static or translation portal.
+builds derived HTML and JSON files. After `build`, the browser reads a finished,
+read-only portal. With `serve`, it may submit an allowed file edit or local
+review comment, after which the Go process rebuilds the affected view. Only a
+separate, explicitly authorized task verification may run repository commands.
+Release metadata checking can be disabled, downloads no executable code, and
+is absent from static and translation portals.
 
 ## Map of architectural questions
 
@@ -31,3 +32,4 @@ static or translation portal.
 - [Where are the trust boundaries?](trust-boundaries.md)
 - [How are documentation and verification failures isolated?](failure-isolation.md)
 - [How do Git states become a consistent documentation change set?](documentation-changes.md)
+- [How does a comment remain attached when its file changes?](review-anchoring.md)

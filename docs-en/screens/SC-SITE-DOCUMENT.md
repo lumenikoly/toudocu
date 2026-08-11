@@ -5,14 +5,13 @@
 - Module: MOD-SITE
 - Status: Implemented
 - Preview: `../assets/screens/site-document.png`
-- Last updated: 2026-08-06
+- Last updated: 2026-08-10
 
-The canonical portal representation of a selected Markdown document. The
-document and generated output determine the exact URL, so no shared route
-pattern is deliberately declared here. For `risks.md`, the page also presents
-a clear text summary of statuses, the open count, and mitigation progress;
-risk statuses and mitigation checklists are displayed separately.
-For `roadmap.md`, canonical `serve` also adds an accessible dialog for creating
-one unfinished `DLV-*` in an existing stage. The dialog is a state of this page,
-not a separate screen or navigation transition; static and locale views do not
-contain it.
+This is the ordinary page for one Markdown document. Its URL comes from the
+source path, so this document does not declare one shared route pattern.
+
+For `risks.md`, the page adds a summary of open risks and completed
+mitigations; risk state remains separate from individual mitigation checkboxes.
+For `roadmap.md`, the main `serve` portal adds a dialog that can create one
+unfinished `DLV-*` in an existing stage. Static and translation portals do not
+include that dialog.

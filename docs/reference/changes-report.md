@@ -1,57 +1,71 @@
-# ChangeSetReport schema v1
+# ChangeSetReport версии 1
 
-`toudocu changes --format json` возвращает детерминированный отчёт с
-`schemaVersion`, repository/branch/HEAD/dirty, resolved base/target,
-`changeSetDigest`, file/line/entity/classification summary, `changes[]`, task
-impact и diagnostics.
+`toudocu changes --format json` возвращает воспроизводимый отчёт со
+`schemaVersion: 1`. В нём есть состояние репозитория и ветки, `HEAD`, признак
+локальных правок, разрешённые начало и конец сравнения, `changeSetDigest`,
+сводка файлов, строк, сущностей и классов, массив `changes[]`, влияние задачи и
+диагностические сообщения.
 
-`DocumentationChange` содержит status/path/oldPath, staged/unstaged/untracked,
-line stats, binary и byte sizes, classification, old/new entities, доступность
-представлений, точный Git patch, `sourceDiffHunks`, `renderedSections`,
-semantic/relation changes, asset metadata и diagnostics. Каждый hunk содержит
-стабильный ID для текущего patch, header, old/new ranges и собственный фрагмент
-patch. `SourceDiff` остаётся авторитетным полным текстом Git diff.
+## Один изменённый файл
 
-`renderedSections` содержит structural match по Markdown anchor: состояние
-`added-section`, `removed-section`, `modified-section`, `moved-section` или
-`unchanged-section`, anchors обеих сторон и source locations. Это проекция
-структуры Markdown, а не произвольный DOM diff. Asset metadata содержит MIME,
-dimensions, aspect ratio и доступный признак transparency. Рабочие
-артефакты используют `work-artifact` и не смешиваются с
-`permanent-documentation`; contracts и assets имеют свои classifications.
+`DocumentationChange` содержит:
 
-`SemanticChange` содержит kind, entity/subject, field, before/after, summary,
-source locations и optional OpenAPI compatibility. Relation changes имеют
-`relation-added` или `relation-removed` и обе стороны ребра.
+- `status`, `path`, прежний `oldPath` и признаки
+  `staged`/`unstaged`/`untracked`;
+- число добавленных и удалённых строк, двоичный признак и размеры;
+- класс файла и известные сущности до и после;
+- доступные представления и их диагностические сообщения;
+- точный патч Git `sourceDiff` и отдельные `sourceDiffHunks`;
+- различия отрисованных разделов, семантики и связей;
+- сведения о ресурсе, экране, OpenAPI и Mermaid, когда они применимы.
 
-OpenAPI fields используют стабильные пути, например
-`POST /login.parameters.header:client`,
-`POST /login.responses.200.headers.X-Request-ID` и
-`components.schemas.Login.properties.role.enum`. Это позволяет CI выбирать
-конкретный breaking change без разбора текста summary.
+Каждый фрагмент патча имеет стабильный для текущего отчёта ID, заголовок,
+диапазоны старых и новых строк и собственный текст. Полный `sourceDiff` остаётся
+главным источником истины.
 
-Для `SC-*` поле `screen` хранит node snapshots до/после и изменённые
-transitions с endpoints, action/condition и состоянием added/modified/removed.
-Удалённая сторона остаётся в отчёте как ghost data для Screen Map.
+## Markdown и ресурсы
 
-`mermaidBlocks` содержит ID, status, caption, исходники before/after и source
-locations. Отдельные diagnostics `mermaid-old-version-invalid` и
-`mermaid-new-version-invalid` не скрывают доступный исходник другой стороны.
-Это исходниковое before/after представление; Toudocu намеренно не строит
-pixel-level image diff.
+`renderedSections` сопоставляет разделы по якорям Markdown. Состояния:
+`added-section`, `removed-section`, `modified-section`, `moved-section`,
+`unchanged-section`. Это сравнение структуры Markdown, а не произвольного DOM.
 
-Основные codes: `git-repository-not-found`, `git-command-failed`,
-`git-base-not-found`, `git-target-not-found`, `git-merge-base-not-found`,
-`git-binary-diff-unavailable`, `change-file-too-large`,
-`change-old-version-missing`, `change-new-version-missing`,
-`semantic-old-version-invalid`, `semantic-new-version-invalid`,
-`mermaid-old-version-invalid`, `mermaid-new-version-invalid`,
-`rendered-old-version-failed`, `rendered-new-version-failed`,
-`openapi-old-version-invalid`, `openapi-new-version-invalid`,
-`openapi-breaking-change`, `declared-document-not-changed`,
-`declared-document-not-created`,
-`undeclared-document-change`, `undeclared-document-created` и
-`deleted-entity-still-referenced`.
+Для изображения сохраняются MIME-тип, ширина, высота, соотношение сторон и,
+когда это можно определить, прозрачность. Рабочие документы имеют класс
+`work-artifact`, постоянная документация — `permanent-documentation`, контракты
+и ресурсы — собственные классы.
 
-Digest служит cache identity и live invalidation, но не является собственной
-историей Toudocu.
+`SemanticChange` содержит вид изменения, сущность, поле, значения до и после,
+краткое объяснение, позиции и необязательную оценку совместимости OpenAPI.
+Связь имеет состояние `relation-added` или `relation-removed` и обе стороны.
+
+Пути OpenAPI стабильны, например
+`POST /login.parameters.header:client` или
+`components.schemas.Login.properties.role.enum`. CI может выбрать конкретное
+несовместимое изменение без разбора текста объяснения.
+
+Для `SC-*` поле `screen` хранит экран до и после и переходы со старой и новой
+целью, действием, условием и состоянием. Удалённый элемент сохраняется как
+данные старой стороны, чтобы карта могла его показать.
+
+`mermaidBlocks` содержит ID, состояние, подпись, исходник до и после и позиции.
+Ошибка одной стороны не скрывает исходник другой. Toudocu сравнивает текст
+диаграммы, а не пиксели готового изображения.
+
+## Основные коды
+
+- Git: `git-repository-not-found`, `git-command-failed`,
+  `git-base-not-found`, `git-target-not-found`,
+  `git-merge-base-not-found`, `git-binary-diff-unavailable`;
+- файл: `change-file-too-large`, `change-old-version-missing`,
+  `change-new-version-missing`;
+- специальные представления: `semantic-old-version-invalid`,
+  `semantic-new-version-invalid`, `mermaid-old-version-invalid`,
+  `mermaid-new-version-invalid`, `rendered-old-version-failed`,
+  `rendered-new-version-failed`, `openapi-old-version-invalid`,
+  `openapi-new-version-invalid`, `openapi-breaking-change`;
+- задача и связи: `declared-document-not-changed`,
+  `declared-document-not-created`, `undeclared-document-change`,
+  `undeclared-document-created`, `deleted-entity-still-referenced`.
+
+`changeSetDigest` нужен кэшу и обновлению живой страницы. Он не является
+собственной историей документов Toudocu.

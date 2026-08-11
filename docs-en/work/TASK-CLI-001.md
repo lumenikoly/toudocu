@@ -1,4 +1,4 @@
-# TASK-CLI-001: Implement the complete workflow of a work task
+# TASK-CLI-001: Implement the complete work-item workflow
 
 - Status: Completed
 - Type: Feature
@@ -6,25 +6,26 @@
 - Module: MOD-CLI
 - Use case: UC-TASK-03
 - Flow: FLOW-TASK-WORKFLOW
-- Owner: Toudocu Team
-- Last updated: 2026-07-29
+- Owner: Toudocu team
+- Last updated: 2026-08-10
 
 ## Result
 
-The CLI provides a deterministic path from searching documentation and creating
-framework to readiness, context and explicit verification of the selected task.
+The CLI takes a user from finding relevant documentation and creating a
+scaffold to checking readiness, collecting context, and explicitly running the
+selected work item's commands.
 
 ## Behavior change
 
 ### Before
 
-The CLI provided only `task context` and the `task check` execution command;
-frameworks, readiness and source-level search were missing.
+The CLI provided only `task context` and the command-running `task check`.
+Scaffolding, readiness checks, and source search were missing.
 
 ### After
 
 The CLI provides `search`, `task init`, `scaffold`, `task ready`, extended
-`task context` and `task verify`; The old `task check` command is missing.
+`task context`, and `task verify`. The old `task check` command is rejected.
 
 ## Scope
 
@@ -77,4 +78,4 @@ The CLI provides `search`, `task init`, `scaffold`, `task ready`, extended
 
 `README.md`, `CHANGELOG.md`, `docs/contracts/cli.md`,
 `docs/roadmap.md`, `docs/use-cases/`, `docs/flows/FLOW-TASK-WORKFLOW.md`,
-`docs/decisions/ADR-002.md` and `skills/toudocu/`.
+`docs/decisions/ADR-002.md`, and `skills/toudocu/`.

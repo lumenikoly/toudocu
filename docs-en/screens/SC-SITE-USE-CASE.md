@@ -1,11 +1,11 @@
-# SC-SITE-USE-CASE: Use-Case Workspace
+# SC-SITE-USE-CASE: Use-case page
 
 - Identifier: SC-SITE-USE-CASE
 - Type: Page
 - Module: MOD-SITE
 - Status: Implemented
 - Preview: `../assets/screens/site-use-case.png`
-- Last updated: 2026-08-06
+- Last updated: 2026-08-10
 
 A single page for a selected `UC-*`, with its description, map, playback, and
 relationships. The URL depends on the generated use case and is not declared as

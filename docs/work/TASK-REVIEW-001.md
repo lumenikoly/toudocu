@@ -1,4 +1,4 @@
-# TASK-REVIEW-001: Локальное ревью и feedback для AI-агента
+# TASK-REVIEW-001: Локальное обсуждение изменений с AI-агентом
 
 - Статус: Выполнено
 - Тип: Feature
@@ -8,88 +8,88 @@
 - Экраны: SC-CHANGES-WORKSPACE
 - Стандарты: STD-GO-001, STD-DOCS-001
 - Владелец: Команда Toudocu
-- Последнее обновление: 2026-08-09
+- Последнее обновление: 2026-08-10
 
 ## Результат
 
-Canonical Changes workspace показывает repository-wide diff, позволяет
-вести персистентные discussion threads и атомарно передавать новые
-comments установленному AI-skill через schema-v1 CLI без запуска
-агента или изменения Git.
+Канонический раздел «Изменения» показывает diff по всему репозиторию, хранит
+ветки обсуждений между запусками и передаёт новые комментарии установленному
+AI-skill через CLI schema v1. Toudocu не запускает агента и не меняет Git.
 
 ## Изменение поведения
 
 ### Было
 
-«Изменения» показывают только documentation roots и не хранят
-комментарии. Связь между local review и AI-агентом отсутствует.
+«Изменения» показывали только каталоги документации и не хранили комментарии.
+Передать результат локального просмотра AI-агенту было нельзя.
 
 ### Станет
 
-Существующий экран получает repository review, anchors, обсуждения,
-FIFO feedback handoff и agent responses; обычные `changes`, публичный
-Go-фасад, static и translation runtimes сохраняют прежнюю
-семантику.
+Существующий экран получает обзор всего репозитория, устойчивые привязки
+комментариев, обсуждения и очередь пакетов для агента. Ответ агента сохраняется
+рядом с обсуждением. Обычная команда `changes`, публичный Go-фасад, статический
+портал и переводы сохраняют прежнее поведение.
 
 ## Область изменения
 
-- `internal/app/`, `internal/site/`, `cmd/` и `api.go`;
-- `web/` и generated frontend assets в `internal/site/assets/generated/`;
-- `skills/toudocu/`;
-- `docs/`, `README.md`, `CHANGELOG.md` и `THIRD_PARTY_NOTICES.md`;
-- Go, frontend и browser tests.
+- сервисы, HTTP API, CLI и локальное состояние обсуждений в `internal/app/`;
+- интерфейс Changes и сгенерированные из `web/` ресурсы;
+- встроенный skill;
+- OpenAPI, каноническая документация, README, журнал изменений и уведомления о
+  зависимостях;
+- Go-, TypeScript- и браузерные тесты.
 
 ## Не входит в задачу
 
-- новые top-level Review, Feedback, Code и Files tabs;
-- запуск агента, LLM/API или автоматическое исправление;
-- Git write operations, remote review service и repository review files;
-- изменение `ChangeSetReport` schema v1 и public `api.go`;
-- review capability в static и translation runtimes;
-- чтение или обновление translation roots.
+- отдельные верхнеуровневые вкладки «Review», «Feedback», «Code» и «Files»;
+- запуск агента, обращение к внешней AI-модели/API и автоматическое исправление;
+- запись Git, удалённый сервис ревью и файлы обсуждений в репозитории;
+- изменение `ChangeSetReport` schema v1 и публичного `api.go`;
+- обсуждения в статическом портале и переводах;
+- чтение или обновление корней переводов.
 
 ## Критерии приёмки
 
-- [x] `AC-01` Repository projection показывает tracked и untracked
-  non-ignored files для arbitrary base/target, а write gate разрешает
-  mutations только для working tree.
-- [x] `AC-02` Schema-v1 store переживает restart/HEAD change,
-  применяет interprocess lock, CAS, atomic replace, permissions и не
-  перезаписывает corrupted state.
-- [x] `AC-03` Diff, fileRange, file и global targets валидируют
-  safe path и Unicode coordinates; Go извлекает selected text/context и
-  сохраняет только commented snapshots до 2 MiB.
-- [x] `AC-04` Discussions поддерживают create, reply, unsent
-  edit/delete, resolve/reopen, cleanup и immutable sent messages.
-- [x] `AC-05` Feedback batches неизменяемы, FIFO и pending повторяет
-  oldest snapshot до полного atomic response с ровно одним result
-  для каждого item.
-- [x] `AC-06` Review HTTP API совпадает с OpenAPI, требует JSON,
-  exact action и expected revision/digest и возвращает стабильные
-  diagnostics/statuses.
-- [x] `AC-07` CLI `changes feedback pending|respond` определяет
-  repository от cwd или флага, возвращает schema-v1 empty envelope
-  с exit 0 и валидирует response до mutation.
-- [x] `AC-08` Anchors re-anchor по заданному детерминированному
-  порядку или получают explicit stale/deleted placement.
-- [x] `AC-09` Экран «Изменения» сохраняет прежние tabs,
-  добавляет changed/linked files, доступные comment entry points,
-  responsive discussions panel/drawers, watcher banner и focus flow.
-- [x] `AC-10` Bundled skill обрабатывает `$toudocu feedback`,
-  проверяет targets, изменяет только обоснованные места,
-  запускает релевантные checks и отправляет full response.
-- [x] `AC-11` Regression tests доказывают неизменность
-  `ChangeSetReport`, ordinary `changes`, public Go facade, static manifest и
-  translation behavior.
+- [x] `AC-01` Представление репозитория показывает отслеживаемые и новые
+  неигнорируемые файлы для любого поддерживаемого диапазона. Запись разрешена
+  только при конечном состоянии `working-tree`.
+- [x] `AC-02` Хранилище schema v1 переживает перезапуск и изменение `HEAD`,
+  использует межпроцессную блокировку, CAS, атомарную замену и безопасные права
+  и не затирает повреждённое состояние.
+- [x] `AC-03` Цели `diff`, `fileRange`, `file` и `global` проверяют безопасный
+  путь и Unicode-координаты. Go сам извлекает выделенный текст и контекст и
+  хранит снимок только для прокомментированного фрагмента размером до 2 MiB.
+- [x] `AC-04` Обсуждение позволяет создать ветку, ответить, изменить или
+  удалить неотправленное сообщение, закрыть, открыть заново и очистить старое
+  состояние. Отправленное сообщение неизменяемо.
+- [x] `AC-05` Пакеты для агента неизменяемы и выдаются по порядку. Пока полный
+  ответ не сохранён атомарно, CLI повторяет самый старый пакет. Ответ содержит
+  ровно один результат для каждого сообщения.
+- [x] `AC-06` HTTP API обсуждений соответствует OpenAPI, принимает JSON, точное
+  действие и ожидаемые версию и хеш и возвращает стабильные статусы и
+  диагностические сообщения.
+- [x] `AC-07` `changes feedback pending|respond` находит репозиторий от текущего
+  каталога или параметра. Пустая очередь возвращает schema v1 и код `0`, а
+  ответ полностью проверяется до записи.
+- [x] `AC-08` Привязка переносится по заданному воспроизводимому порядку либо
+  явно помечается устаревшей или удалённой.
+- [x] `AC-09` Экран сохраняет существующие представления Changes, добавляет
+  изменённые и связанные файлы, понятные точки добавления комментария,
+  адаптивную панель обсуждений, уведомление наблюдателя и правильный порядок
+  фокуса.
+- [x] `AC-10` Встроенный skill обрабатывает `$toudocu feedback`, проверяет
+  цели, меняет только обоснованные места, выполняет относящиеся к ним команды и
+  отправляет полный ответ.
+- [x] `AC-11` `ChangeSetReport`, обычный `changes`, публичный Go-фасад,
+  статический манифест и поведение переводов не меняются.
 
 ## План
 
-- [x] Реализовать repository projection и review state services.
-- [x] Добавить discussions, feedback/response, cleanup и re-anchoring.
-- [x] Подключить CLI, canonical HTTP capability и OpenAPI.
-- [x] Расширить Changes UI и CodeMirror languages из `web/`.
-- [x] Обновить skill и canonical documentation без translation roots.
-- [x] Выполнить semantic, structural, Go, browser и cross-build gates.
+- [x] Реализовать представление репозитория и хранилище обсуждений.
+- [x] Добавить обсуждения, очередь пакетов, ответы, очистку и перенос привязок.
+- [x] Подключить CLI, локальный HTTP API и OpenAPI.
+- [x] Расширить интерфейс Changes и подсветку CodeMirror.
+- [x] Обновить skill и каноническую документацию, не читая переводы.
 
 ## Проверка
 
@@ -110,9 +110,15 @@ Go-фасад, static и translation runtimes сохраняют прежнюю
 
 ## Влияние на документацию
 
-Добавляются MOD-REVIEW, UC-REVIEW-01, FLOW-REVIEW-FEEDBACK,
-architecture/review-anchoring.md, ADR-007 и review OpenAPI contract.
-Обновляются `SC-CHANGES-WORKSPACE`, architecture overview/boundaries,
-Changes/CLI contracts, API/features references, agent/frontend guides,
-roadmap, root changelog и third-party notices. Generated frontend assets получаются
-только из `web/`; translation roots не читаются и не меняются.
+Были добавлены MOD-REVIEW, UC-REVIEW-01, FLOW-REVIEW-FEEDBACK,
+`architecture/review-anchoring.md`, ADR-007 и OpenAPI-контракт обсуждений.
+Обновлены экран Changes, архитектурные границы, контракты Changes и CLI,
+справочники, руководства, дорожная карта, журнал изменений и уведомления о
+зависимостях. Сгенерированные браузерные файлы получаются только из `web/`.
+
+## Текущее состояние
+
+Комментарии теперь содержат только текст: выбираемого типа нет. Кнопка
+«Отправить агенту» создаёт ожидающий пакет и показывает фразу «Обработай
+комментарии из Toudocu Changes», но не запускает AI-агента. Агент должен
+отдельно выполнить `$toudocu feedback` или соответствующие команды CLI.

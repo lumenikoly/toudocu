@@ -1,11 +1,11 @@
 # UC-AGENT-01: Install the Toudocu AI skill
 
 - Identifier: UC-AGENT-01
-- Status: Completed
+- Status: Ready
 - Actor: Toudocu user
 - Module: MOD-CLI
 - Priority: High
-- Last updated: 2026-08-06
+- Last updated: 2026-08-10
 
 The user installs the embedded offline `toudocu` skill package in project or
 user scope for a supported AI host and can safely inspect, update, or remove the

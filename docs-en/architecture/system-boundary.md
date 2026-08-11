@@ -1,14 +1,17 @@
 # Toudocu System Boundary
 
 - Document type: Architecture
-- Architecture question: Where is the Toudocu system boundary and who interacts with it?
+- Architectural question: Where is the Toudocu system boundary and who interacts with it?
 
 Toudocu is limited to one local process that reads documentation and the
 repository, builds a validated model, and emits diagnostics or derived
 representations. Embedding Go code invokes the same model and operation facade
-without a separate process. In `serve`, the process accepts constrained
-editor/changes requests, serves an offline OpenAPI UI, and atomically saves the
-selected workspace file. Canonical `serve` may also fetch latest stable release
+without a separate process. In `serve`, the process accepts constrained editor
+and Changes requests, serves an offline OpenAPI UI, and atomically saves the
+selected workspace file. Discussions and comment snapshots live in the
+operating system's user state directory, not in the repository. An agent
+receives only a batch the user has explicitly prepared in the UI. Canonical
+`serve` may also fetch stable release
 metadata once from a fixed GitHub API; this is the running portal's only network
 egress and can be disabled with a flag. The user, library consumer, agent, CI, and browser
 remain interacting parties outside this boundary. The release installer also
@@ -44,6 +47,9 @@ for dependency-free delivery is recorded in
   `task verify --run`.
 - The AI-skill host filesystem is changed only through explicit `skill install`,
   `update`, or `uninstall`; `status` remains read-only.
+- An installed skill retrieves the oldest pending review batch through the CLI
+  and returns a complete response. Toudocu does not start the agent or call an
+  external AI model.
 
 ## What remains outside
 

@@ -1,52 +1,61 @@
 # Risks
 
-Current technical and operational risks for Toudocu.
+This page lists risks that still need attention or permanent safeguards. A
+checked mitigation means that the safeguard exists; it does not mean that the
+risk can never return.
 
-## RISK-01: Changes to the Markdown dialect or engine
+## RISK-01: Markdown parsing rules change
 
 - Status: Mitigating
 - Probability: Low
 - Impact: Medium
-- Owner: Toudocu Team
+- Owner: Toudocu team
 
-Goldmark provides a single CommonMark/GFM AST, but an update to the version or
-extension set can change normalization, source ranges, and canonical HTML.
+Goldmark gives every Toudocu command the same CommonMark/GFM parse tree. A
+version or extension change can still alter generated HTML, source ranges, and
+normalization. That can affect portal output, links, and comment anchors.
 
-### Risk mitigation plan
+### Mitigation
 
-- [x] Record the supported constructs in README and the feature reference.
-- [x] Cover rendering and escaping with behavioral tests.
-- [x] Convert current documents into the Goldmark cutover regression corpus.
-- [ ] Update the dialect or engine only together with corpus, security, and semantic review.
+- [x] Supported syntax is documented in the README and feature reference.
+- [x] Rendering and safe escaping have behavioral tests.
+- [x] Project documents are part of the Goldmark regression corpus.
+- [ ] Update Goldmark or its extension set only together with the document
+  corpus, security review, and a semantic review of the resulting pages.
 
-## RISK-02: Execution of trusted task commands
+## RISK-02: Commands from a work item execute with user privileges
 
-- Status: Risk accepted
+- Status: Accepted
 - Probability: Low
 - Impact: High
 - Owner: Repository user
 
-Commands in the work-item verification section are executed through the system
-shell and have the permissions of the user who launched Toudocu.
+Verification commands run through the system shell with the privileges of the
+person who started Toudocu. A task from an untrusted source can therefore
+contain a dangerous command.
 
-### Risk mitigation plan
+### Mitigation
 
-- [x] Never execute commands during `check`, `build`, or `task context`.
-- [x] Require an explicit `task verify --run` invocation.
-- [x] Limit command duration and the amount of retained output.
+- [x] `check`, `build`, and `task context` never run task commands.
+- [x] Execution requires an explicit `task verify --run`.
+- [x] Command duration and retained output are bounded.
 
-## RISK-03: Error while cleaning output
+The user must still read the commands and trust their source before running
+`task verify --run`.
+
+## RISK-03: Cleaning output deletes unrelated data
 
 - Status: Mitigating
 - Probability: Low
 - Impact: High
-- Owner: Toudocu Team
+- Owner: Toudocu team
 
-An incorrect `--clean` implementation could damage data outside the generation
-directory.
+A defect in `build --clean` could otherwise remove data outside the portal
+output directory.
 
-### Risk mitigation plan
+### Mitigation
 
-- [x] Reject the root, documentation directory, and its parent directories.
-- [x] Check resolved paths and symbolic links.
-- [x] Retain negative tests for every corrected scenario.
+- [x] The filesystem root, documentation root, and its parents cannot be
+  cleaned.
+- [x] Symlinks are resolved and checked before cleaning.
+- [x] Every fixed dangerous case keeps a negative regression test.

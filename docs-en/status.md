@@ -1,47 +1,49 @@
 # Current status
 
 - Status: In progress
-- Stage: Preparing stable release 0.0.1
+- Stage: Maintaining version 0.0.1
 - Version: 0.0.1
-- Owner: Toudocu Team
-- Last updated: 2026-08-07
+- Owner: Toudocu team
+- Last updated: 2026-08-11
 
-Version `0.0.1` is being prepared for stable release together with verifiable
-POSIX and PowerShell installers, a release workflow, checksums, and installation
-documentation.
+The current stable version is `0.0.1`. The GitHub Release installers for POSIX
+and PowerShell select the appropriate binary and verify its checksum before
+replacing the program.
 
 ## Summary
 
 The CLI checks, builds, and locally serves documentation, produces typed JSON
-reports, supplies context for a selected task, and runs its checks only on an
-explicit command. The root Go package provides a stable façade for the model,
-generation, and reports for local embedding; a canonical remote module path has
-not yet been published. Embedded Mermaid Tiny renders linked processes without
-a CDN or Node.js. Negative tests cover path, HTML, diagram, HTTP-serving, and
-process-timeout safety.
+reports, returns context for a selected task, and runs its verification
+commands only after an explicit request. The root Go package provides a stable
+model, generation, and reporting facade for local embedding from the source
+tree; the CLI remains the public distribution interface. The embedded Mermaid
+Tiny renders related processes without a CDN or Node.js. Tests for prohibited
+scenarios cover path, HTML, diagram, HTTP serving, and execution-timeout safety.
 
-The process model produces separate `UC-*` and `FLOW-*` catalogs, stable
-ID-based URLs, and a use-case workspace with description, map, playback, and
-relationships. The screen model produces the main catalog, a separate overall
-map with SVG links, sitemap, hotspots, and traceability. The static portal works
-over HTTP(S) and supports keyboard, touch, states, errors, and fallback; local
-browsing uses `serve`.
+The process model gives `UC-*` and `FLOW-*` separate catalogs, stable ID-based
+URLs, and a use-case page with its description, map, step-by-step playback, and
+relationships. The screen model provides a catalog, an overall map with SVG
+links, hierarchy, hotspots, and a relationship table. Static portals work over
+HTTP(S), support keyboards and touch input, and expose clear error states;
+`serve` is used for local viewing.
 
-Active tasks, blockers, and the next outcome are derived from work items and the
-roadmap and displayed automatically in HTML.
+Active tasks, blockers, and the next deliverable are derived from work items
+and the roadmap and displayed in HTML automatically. The local Changes
+workspace can inspect files across the repository, filter by file kind, open
+the complete file, store anchored discussions, and send comments to an
+installed AI skill. The interface never starts the agent itself.
 
-## Readiness
+## Release readiness
 
-Source code and embedded assets ship as one binary without external runtime
-dependencies. Pinned pure-Go Goldmark and OpenAPI YAML dependencies are linked
-into the binary. Formatting, ordinary and race tests, vet, module checks, strict
-checks of both documentation roots, and six cross-builds run through one
-`make check` / `make release` workflow. The release bundle includes two
-installer assets; they select the appropriate binary and verify its SHA-256
-before replacing the file in the user's installation directory.
+Source code and embedded resources ship as one binary with no external runtime.
+The pinned Goldmark and OpenAPI YAML Go dependencies are linked into that
+binary. Formatting, ordinary tests, race detection, `go vet`, module
+verification, strict checks for both documentation roots, and builds for six
+target platforms are part of `make check` and `make release`. The release
+bundle includes two installers; they select the appropriate binary and verify
+its SHA-256 before replacing the file in the user's program directory.
 
 ## Next focus
 
-Complete the release gate, publish stable release `0.0.1` through the prepared
-GitHub Actions workflow, and verify installation against published checksums on
-supported platforms.
+Maintain version `0.0.1`: fix reported defects, keep the documentation current,
+and verify the installers on supported platforms.

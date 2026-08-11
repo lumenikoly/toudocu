@@ -1,7 +1,7 @@
-# Checking Toudocu changes
+# Verifying changes to Toudocu
 
-This guide defines a single local and CI cycle for the project's code and its
-own documentation.
+This guide records the project's accepted local and CI verification cycle for
+code, frontend assets, and source documentation.
 
 ## Quick check
 
@@ -62,7 +62,7 @@ go run ./cmd/toudocu task verify TASK-DOCS-001 ./docs --dry-run --format json
 `task verify --run` executes commands from the document and must be used only
 for a trusted task in the current repository.
 
-## Readiness criterion
+## When a change is ready
 
 A change is ready when:
 

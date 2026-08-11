@@ -1,50 +1,53 @@
-# FLOW-REVIEW-FEEDBACK: Передача локального feedback агенту
+# FLOW-REVIEW-FEEDBACK: Передача комментариев агенту
 
 - Идентификатор: FLOW-REVIEW-FEEDBACK
 - Сценарий: UC-REVIEW-01
 - Модуль: MOD-REVIEW
-- Последнее обновление: 2026-08-09
+- Последнее обновление: 2026-08-10
 
 ## Процесс
 
 ```mermaid
 sequenceDiagram
-    actor Developer as Разработчик
-    participant Browser as Changes workspace
-    participant Review as Review service
-    participant Store as Local user-state
-    participant Skill as Установленный skill
+    actor User as Разработчик
+    participant UI as Раздел «Изменения»
+    participant Review as Сервис обсуждений
+    participant Store as Локальное хранилище
+    participant Skill as Процесс toudocu feedback
     participant Agent as AI-агент
 
-    Developer->>Browser: Создать line/file/global comment
-    Browser->>Review: target + Unicode coordinates + CAS
-    Review->>Review: Проверить path и извлечь text/context
-    Review->>Store: Lock, snapshot, atomic state replace
-    Developer->>Browser: Отправить агенту · N
-    Browser->>Review: Snapshot всех unsent open messages
-    Review->>Store: Добавить immutable FIFO batch
+    User->>UI: Оставить комментарий к набору, файлу, строке или фрагменту
+    UI->>Review: Передать цель, координаты и ожидаемую версию состояния
+    Review->>Review: Проверить путь и извлечь текст с контекстом
+    Review->>Store: Безопасно сохранить обсуждение и снимок
+    User->>UI: Нажать «Отправить агенту»
+    UI->>Review: Зафиксировать все новые сообщения открытых обсуждений
+    Review->>Store: Добавить неизменяемый пакет в очередь
+    User->>Agent: Попросить обработать комментарии Toudocu Changes
     Agent->>Skill: $toudocu feedback
-    Skill->>Review: changes feedback pending --json
-    Review-->>Skill: Oldest pending batch
-    Skill->>Agent: Проверенные targets и comment semantics
-    Agent->>Agent: Обоснованные изменения и проверки
-    Skill->>Review: changes feedback respond --input response.json
-    Review->>Store: Atomic full response
-    Review-->>Browser: Agent messages в исходных threads
-    Developer->>Browser: Resolve или новый reply
+    Skill->>Review: Получить самый старый ожидающий пакет
+    Review-->>Skill: Вернуть пакет и привязки
+    Skill->>Agent: Передать проверенные цели и сообщения
+    Agent->>Agent: Проверить замечания и при необходимости изменить файлы
+    Skill->>Review: Отправить полный результат по каждому сообщению
+    Review->>Store: Целиком сохранить ответ
+    Review-->>UI: Показать ответы в исходных обсуждениях
+    User->>UI: Закрыть обсуждение или ответить ещё раз
 ```
 
-## Границы процесса
+## Что важно
 
-- Browser не является источником selected text, context или digest.
-- `pending` повторяет oldest batch до полного успешного `respond`.
-- Response с missing, duplicate или invalid item не меняет state.
-- `fixed` остаётся outcome сообщения и не закрывает discussion.
-- Ни UI, ни CLI не запускают агента и не изменяют Git.
+- Браузер не задаёт выделенный текст, контекст и хеш: сервер извлекает их сам.
+- Повторный запрос ожидающих комментариев возвращает самый старый пакет, пока
+  он не принят целиком.
+- Ответ с пропущенным, повторяющимся или неверным элементом не меняет ни одного
+  обсуждения.
+- Результат «Исправлено» не закрывает обсуждение автоматически.
+- Ни интерфейс, ни CLI не запускают агента и не меняют Git.
 
 ## Связанные документы
 
 - [UC-REVIEW-01](../use-cases/UC-REVIEW-01.md)
 - [MOD-REVIEW](../modules/MOD-REVIEW.md)
-- [Перенос anchors](../architecture/review-anchoring.md)
+- [Привязка комментариев](../architecture/review-anchoring.md)
 - [CLI-контракт](../contracts/cli.md)

@@ -1,14 +1,14 @@
 # UC-DOCS-04: Explore the Screen Map
 
 - Identifier: UC-DOCS-04
-- Status: Completed
+- Status: Ready
 - Actor: Developer
 - Module: MOD-SITE
 - Priority: High
 - Screens: SC-SITE-USE-CASE, SC-SITE-SCREEN-MAP
 - Start screen: SC-SITE-USE-CASE
 - Terminal screens: SC-SITE-SCREEN-MAP
-- Last updated: 2026-08-05
+- Last updated: 2026-08-10
 
 The developer explores user navigation and plays documented scenarios in the
 standalone portal.

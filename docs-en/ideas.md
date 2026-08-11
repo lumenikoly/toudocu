@@ -1,12 +1,20 @@
-# Development ideas
+# Ideas
 
-Free space for feature ideas and future plans. The content requires no status,
-identifiers, or mandatory sections.
+The capabilities below have not been accepted into the roadmap and are not
+promised to users. Each idea needs a defined data source and observable result
+before implementation.
 
-#### Add a button to this block for adding an idea, with a way to mark implemented ideas
+## Add ideas from the local portal
 
-#### Refine the agent prompts to improve documentation writing style
+The `ideas.md` file can currently be changed through the `serve` editor, but
+there is no separate “Add idea” button or “implemented” state. Such a button
+only makes sense after the project defines how an idea differs from a roadmap
+deliverable and how a completed idea leaves this list.
 
-#### Improve the portal design
+## Show project dependencies
 
-#### Add a block listing all dependencies, libraries, and tools used by the project
+The portal does not currently build a separate catalog of libraries and tools.
+Before implementation, the project must select authoritative sources for Go
+modules, browser packages, and embedded assets and decide which version and
+license facts readers need. Until then, `go.mod`, `web/package.json`, and
+`THIRD_PARTY_NOTICES.md` remain the sources.

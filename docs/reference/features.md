@@ -1,389 +1,153 @@
 # Каталог возможностей
 
-Страница перечисляет реализованные возможности Toudocu и указывает, где
-зафиксирован их подробный контракт. Источником истины остаются Markdown-файлы:
-JSON и результат `build` не хранят отдельную модель и не редактируют исходники;
-только `serve` добавляет явные операции записи в canonical workspace.
+Здесь перечислено реализованное поведение и дана ссылка на его подробное
+описание. Исходником остаётся Markdown: JSON и собранный портал — производные
+файлы. Запись в основной каталог появляется только после явного действия в
+`serve` или отдельной изменяющей команды.
 
-Быстрые точки входа: [единая карта API и программных интерфейсов](api.md) и
-[интерактивная Screen Map](../screens/).
+Быстрый выбор интерфейса: [карта API](api.md).
 
 ## CLI
 
-- Git-backed `changes`, `changes file` и `task changes` для working tree,
-  index, revisions и branch merge-base; text, JSON и Markdown reports.
-- В `serve`: unified/CodeMirror merge/rendered/semantic diff, OpenAPI,
-  Mermaid, assets, screen-map overlay и task impact.
-
-Toudocu поставляется одним Go-бинарником без внешних runtime-зависимостей.
+Toudocu поставляется одним Go-бинарником; для запуска не нужны Node.js, база
+данных или установка пакетов.
 
 | Возможность | Команда | Результат |
 |---|---|---|
-| Проверка проекта | `toudocu check ./docs` | diagnostics или `ProjectReport` |
-| Строгая проверка | `toudocu check ./docs --strict` | warning также даёт exit code `1` |
-| Сборка портала | `toudocu build ./docs` | автономный HTML и `report.json` |
-| Локальный workspace | `toudocu serve ./docs` | view/edit, editor API, watcher и live rebuild |
-| Просмотр изменений | `toudocu changes ./docs` | text, Markdown или `ChangeSetReport` v1 |
-| Получение review feedback | `toudocu changes feedback pending --json` | oldest schema-v1 snapshot или `feedback: null` |
-| Ответ на review feedback | `toudocu changes feedback respond --input response.json` | атомарно принятые agent messages |
-| Изменение одного файла | `toudocu changes file PATH ./docs` | detail выбранного изменённого path |
-| Поиск документов | `toudocu search "query" ./docs` | `SearchReport` по свежим Markdown |
-| Создание задачи | `toudocu task init ./docs --area AREA --title TITLE --type TYPE` | новый Draft и `TaskInitReport` |
-| Создание сущности | `toudocu scaffold module|use-case|flow|screen|decision|standard|runbook ID ./docs --title TITLE` | атомарный scaffold и `ScaffoldReport` |
-| Проверка готовности | `toudocu task ready TASK-ID ./docs` | read-only `TaskReadyReport` |
-| Контекст задачи | `toudocu task context TASK-ID ./docs` | read-only `TaskContextReport` |
-| Проверка задачи | `toudocu task verify TASK-ID ./docs --dry-run|--run` | план или выполнение команд и `TaskVerifyReport` |
-| Изменения задачи | `toudocu task changes TASK-ID ./docs` | task-scoped change report и impact diagnostics |
-| Архивирование задачи | `toudocu task archive TASK-ID ./docs` | перемещение терминальной задачи в годовой архив |
-| Восстановление задачи | `toudocu task restore TASK-ID ./docs` | возврат задачи из годового архива |
-| Lifecycle AI-skill | `toudocu skill install|status|update|uninstall` | text-состояние managed offline package |
-| Версия | `toudocu version` | версия генератора |
+| Проверить проект | `toudocu check ./docs` | Текст или `ProjectReport` |
+| Собрать портал | `toudocu build ./docs` | Статический HTML и `report.json` |
+| Работать локально | `toudocu serve ./docs` | Портал, редактор, изменения и локальные API |
+| Посмотреть Git diff | `toudocu changes ./docs` | Текст, Markdown или `ChangeSetReport` |
+| Посмотреть один файл | `toudocu changes file PATH ./docs` | Подробности выбранного изменения |
+| Найти документ | `toudocu search "query" ./docs` | `SearchReport` |
+| Создать задачу | `toudocu task init ./docs --area AREA --title TITLE --type TYPE` | Новый черновик без перезаписи |
+| Создать документ | `toudocu scaffold TYPE ID ./docs --title TITLE` | Каркас выбранного типа без перезаписи |
+| Проверить готовность | `toudocu task ready TASK-ID ./docs` | `TaskReadyReport`, файлы не меняются |
+| Получить контекст | `toudocu task context TASK-ID ./docs` | `TaskContextReport`, команды не запускаются |
+| Показать или выполнить проверки | `toudocu task verify TASK-ID ./docs --dry-run|--run` | План или `TaskVerifyReport` |
+| Сопоставить задачу с diff | `toudocu task changes TASK-ID ./docs` | Отчёт и предупреждения о заявленных документах |
+| Архивировать или вернуть | `toudocu task archive|restore TASK-ID ./docs` | Перемещение одного файла |
+| Управлять AI-skill | `toudocu skill install|status|update|uninstall` | Состояние встроенного автономного пакета |
+| Показать версию | `toudocu version` | Версия генератора |
 
-Сборка требует явного `toudocu build ./docs`; путь без команды отклоняется.
-Отдельной верхнеуровневой команды `init` нет: минимальный проект содержит
-`index.md` и `architecture/overview.md` внутри выбранного documentation root;
-`task init` создаёт только work item. Параметры и exit codes определены в
+Путь без имени команды отклоняется. Верхнеуровневых команд `init`, `refresh`,
+`translate` и `feedback` нет: это сообщения установленному AI-skill.
+
+Все параметры и коды завершения находятся в
 [CLI-контракте](../contracts/cli.md).
 
-Skill lifecycle не входит в публичный Go-фасад и не использует JSON output.
-Targets, состояния и безопасное ручное разрешение конфликтов описывает
-[руководство установки skill](../guides/skill-installation.md).
+## Изменения и обсуждения
 
-## Локальное review изменений
+`changes` сравнивает рабочее дерево, индекс, локальные коммиты или общую базу
+веток. В браузере доступны точный патч, файл целиком, Markdown до и после,
+семантика, связи и подходящие представления OpenAPI, Mermaid, ресурсов и карты.
 
-Canonical Changes workspace строит отдельную repository-wide проекцию поверх
-того же read-only Git adapter. Существующие documentation tabs сохраняются, а
-Go/Java/JavaScript/TypeScript и plain-text viewers дают единый selection
-contract для локальных comments. Discussions переживают restart и HEAD change,
-anchors получают explicit current, stale или deleted placement.
+Основной `serve` дополнительно показывает остальные файлы репозитория и
+локальные обсуждения. Комментарий можно привязать к набору, файлу, строке или
+выделенному тексту. Кнопка «Отправить агенту» только фиксирует пакет; агента
+нужно попросить отдельно. Ответ не закрывает обсуждение автоматически.
 
-«Отправить агенту» создаёт immutable FIFO snapshot, но не запускает LLM.
-Установленный `$toudocu feedback` workflow получает pending batch через CLI,
-вносит только обоснованные изменения, выполняет релевантные проверки и
-возвращает полный structured response. Static и translation runtimes review
-capability не получают; commit/index targets остаются read-only.
+Подробности:
 
-Подробности: [MOD-REVIEW](../modules/MOD-REVIEW.md),
-[UC-REVIEW-01](../use-cases/UC-REVIEW-01.md) и
-[Changes HTTP API](../contracts/changes-http.md).
-
-Команды `changes` поддерживают фильтры `--status`, `--module`, `--type` и
-`--permanent-only`. Последний оставляет только постоянную документацию и
-исключает work artifacts, contracts и assets. Отдельный `--include-assets`
-принудительно включает binary assets независимо от `changes.includeAssets`, а
-`--translation-input` формирует полный reader-facing набор для перевода.
+- [руководство по изменениям](../guides/documentation-changes.md);
+- [экран Changes](../screens/SC-CHANGES-WORKSPACE.md);
+- [процесс комментариев](../use-cases/UC-REVIEW-01.md).
 
 ## Публичный Go API
 
-Корневой пакет `toudocu` экспортирует типизированный фасад над CLI,
-документной моделью, генератором портала, поиском, task
-workflow и Git-backed changes. Прямые вызовы возвращают модели и отчёты без
-обязательной сериализации или запуска отдельного процесса.
+Корневой пакет экспортирует типизированные операции модели, портала, поиска,
+задач и изменений. Прямой вызов возвращает Go-структуру и не требует отдельного
+процесса или JSON.
 
-Канонический удалённый module path пока не опубликован. Текущий import path
-предназначен для исходного модуля или явного локального `replace`. Фактическую
-публичную поверхность определяют объявления и package documentation в
-корневом `api.go`; до публикации модуля отдельные гарантии совместимости для
-внешних потребителей не заявлены.
+Import path `toudocu` предназначен для исходного дерева или явного локального
+`replace`. Реальную поверхность Go API определяют экспортируемые объявления и
+комментарии в `api.go`; публичным интерфейсом поставки остаётся CLI.
 
-## Skill workflows актуализации
+## AI-skill
 
-Устанавливаемый `toudocu` предоставляет изменяющие agent workflows,
-которые не входят в Go CLI: `init`, `refresh`, `refresh diff`, `translate` и
-`translate diff`.
+Установленный skill добавляет процессы, которых нет в Go CLI:
 
-- `$toudocu refresh` сверяет весь набор исходных Markdown-документов с
-  текущим кодом, тестами, публичными интерфейсами, schemas, configuration, CI,
-  требованиями и решениями;
-- `$toudocu refresh diff` начинает со staged, unstaged и untracked файлов
-  относительно `HEAD` и добавляет зависимые документы по ссылкам, stable ID,
-  task relationships и изменённому публичному поведению;
-- `$toudocu translate diff` один раз строит canonical change set относительно
-  `HEAD`, затем переводит его во все настроенные locale profiles по одному и
-  сообщает результат каждого target независимо;
-- `$toudocu translate <locale> --all-stale` поддерживает полный файловый
-  паритет reader-facing Markdown, включая work items, notes и ideas. Locale root
-  остаётся read-only и не используется task workflow или editor-записью. При
-  обычной работе агент исключает все translation roots из поиска,
-  инвентаризации, semantic review, task context и анализа реализации. Явный
-  перевод открывает только выбранный root и минимально необходимую
-  source/target-пару; явный whole-root check, build, serve или inspection может
-  прочитать весь выбранный translation root. Проверка паритета начинается с
-  путей, хешей и структурных отчётов. Локализованные metadata keys и status
-  values допустимы только при
-  сохранении нормализованной семантики: например, `Готово` (`done`) переводится
-  как `Completed` или `Done`, а `Готово к работе` (`planned`) — как `Ready`.
-  Перед обновлением manifest workflow сравнивает status kinds и вычисленное
-  состояние roadmap в JSON-моделях обеих локалей.
+- `$toudocu init` — безопасно создаёт минимальный каркас и управляемую
+  инструкцию только по явной просьбе;
+- `$toudocu refresh` — сверяет всю основную документацию с кодом, контрактами,
+  CI и решениями;
+- `$toudocu refresh diff` — начинает с текущих изменений относительно `HEAD` и
+  добавляет зависимые документы;
+- `$toudocu translate <locale>` — синхронизирует выбранный настроенный перевод;
+- `$toudocu translate diff` — обрабатывает текущий diff для всех настроенных
+  переводов по очереди;
+- `$toudocu feedback` — получает пакеты комментариев Changes и возвращает ответ
+  по каждому сообщению.
 
-Refresh обновляет только evidence-backed источники, не меняет код ради
-согласования с текстом и не выполняет init. Даты меняются только вместе с
-содержанием или связями; runbook review date требует фактической проверки.
-Доказуемые delete, rename и stable-ID migration обновляют все ссылки вместе.
-После semantic и structural gates пересобираются только tracked или явно
-предписанные проектом portals.
+Основной каталог — единственный источник обычного анализа и задач. Переводы
+читаются только по явному запросу выбранной локали и остаются только для
+чтения. Подробный путь и разрешения описаны в
+[руководстве по AI-skill](../guides/agent-workflows.md).
 
-Полные пользовательские последовательности `init`, `refresh`, `refresh diff` и
-`translate` описаны в [руководстве по agent-workflows](../guides/agent-workflows.md).
+## Модель документов
 
-## Документная модель
+Минимальный проект содержит `index.md` и `architecture/overview.md`. По мере
+необходимости Toudocu распознаёт состояние, дорожную карту, риски, идеи,
+модули, сценарии, процессы, экраны, решения, контракты, стандарты, runbook,
+руководства, справочники и рабочие задачи.
 
-Единая таблица назначения, границ и правил выбора находится в
-[справочнике видов документов](document-types.md).
+Стабильные ID и явно указанные поля образуют проверяемые связи. Mermaid остаётся
+иллюстрацией: связи из текста диаграммы не извлекаются. Общий прогресс берётся
+только из `roadmap.md`.
 
-Минимальная документация содержит `index.md` и карту
-`architecture/overview.md` с типом `Architecture Overview`. Каждый другой
-`architecture/**/*.md` отвечает на один непустой архитектурный вопрос и
-должен быть напрямую указан в overview. По мере необходимости Toudocu
-распознаёт:
+- [Выбрать вид документа](document-types.md)
+- [Посмотреть точные связи](document-model.md)
+- [Описать рабочую задачу](../guides/work-items.md)
 
-- `status.md`, `roadmap.md`, `risks.md`, `ideas.md` и `notes.md`;
-- модули `MOD-*`, use cases `UC-*` и процессы `FLOW-*`;
-- стандарты `STD-*` и эксплуатационные процедуры `RB-*`;
-- архитектуру, контракты, решения, руководства и справочники;
-- неизвестные верхнеуровневые custom-разделы с явным manifest без
-  эвристик по количеству или тематике документов;
-- рабочие задачи `TASK-*`, критерии `AC-*` и команды проверки;
-- экраны `SC-*`, переходы `TR-*`, состояния и hotspots.
+## Markdown
 
-Модель проверяет обязательные поля и разделы, уникальность стабильных ID,
-статусы, зависимости, локальные и repository-ссылки, anchors, устаревание,
-согласованность roadmap, task scope и traceability.
+Goldmark `v1.8.5` разбирает CommonMark и встроенные расширения Table,
+TaskList, Strikethrough и Linkify. Поддерживаются безопасные ссылки,
+изображения, таблицы, списки, код и Mermaid `flowchart`, `stateDiagram-v2` и
+`sequenceDiagram`.
 
-Архитектурные diagnostics являются errors и используют коды
-`missing-architecture-overview`, `invalid-architecture-overview-type`,
-`missing-architecture-question`, `unlisted-architecture-document`,
-`broken-link` и `blocked-link`. Пунктуация и смысл вопроса остаются semantic
-gate, а schema v1 сохраняет `documents[].type: "architecture"`.
+Сырой HTML, завершённый front matter, опасные URL и активные HTML, XML, SVG и
+JavaScript-ресурсы блокируются. Mermaid работает из встроенного пакета в
+`securityLevel: strict` и не требует CDN.
 
-Полный авторский контракт новых разделов и freshness описан в руководстве
-[Standards, Runbooks и Custom-разделы](../guides/quality-runbooks.md).
+## Статический портал
 
-Глобальный прогресс вычисляется только по `roadmap.md`. Для связанного `UC-*`
-источником выполнения является статус use case; локальные чек-листы других
-документов не увеличивают глобальный процент.
+`build` создаёт главную страницу, документы и каталоги, поиск, карту экранов,
+связи, страницу состояния документации и `report.json`. Он работает на обычном
+HTTP-хостинге в корне или по вложенному пути. После сборки Go-сервер не нужен.
 
-## Markdown и диаграммы
+Корневой `CHANGELOG.md`, если он существует, показывается отдельным журналом
+изменений проекта, но не входит в модель задач и редактор. `docs/changelog.md`
+особой семантики не получает.
 
-Goldmark `v1.8.5` разбирает CommonMark и только явно включённые расширения:
+Навигация, поиск, тема, Mermaid и карта работают локальными ресурсами. Точные
+возможности — в [MOD-SITE](../modules/site.md) и
+[руководстве по публикации](../guides/deployment.md).
 
-- заголовки и автоматические уникальные anchors;
-- абзацы, выделение, ссылки, изображения и цитаты;
-- маркированные, нумерованные и task-списки;
-- таблицы, inline code и fenced code blocks;
-- strikethrough и literal HTTP(S), `www` и email autolinks;
-- Mermaid `flowchart`, `stateDiagram-v2` и `sequenceDiagram`.
+## Локальный `serve`
 
-Raw HTML и ведущий завершённый front matter создают errors; safe preview и
-rendered diff показывают их только как escaped source. Attributes, footnotes,
-definition lists и typographer не включены. Mermaid Tiny встроена локально, работает на
-static HTTP hosting, следует светлой или тёмной теме и всегда запускается с
-`securityLevel: strict`. Front matter, Mermaid directives и блоки более
-50 000 UTF-8 байт отклоняются.
+`serve` добавляет редактор исходных `.md`, `.yaml`, `.yml` и `.json`,
+автоматическую и ручную пересборку, изменения Git, обсуждения и встроенную
+OpenAPI-справку. Сохранение сверяет SHA-256 и не теряет внешнюю правку.
 
-## Автономный портал
+Основной портал может один раз проверить последний стабильный релиз; флаг
+`--no-update-check` отключает запрос. Переводы подключаются отдельными
+адресами только для чтения.
 
-`build` создаёт страницы документов и каталогов, главную-паспорт проекта,
-health report,
-поиск и `report.json`. Интерфейс предоставляет:
+Полный путь: [локальная работа с порталом](../guides/local-workflow.md).
 
-- иерархическую навигацию: активная группа раскрыта, остальные по умолчанию
-  свёрнуты, пользовательское состояние сохраняется;
-- цветовые статусы в значках документов с текстовой подписью для доступности и
-  отдельными `☐`/`☑` для невыполненных и выполненных `TASK-*`/`BUG-*`;
-- глобальный полнотекстовый поиск с клавиатурным вызовом `/`;
-- отдельную страницу «Журнал изменений проекта» из корневого `CHANGELOG.md`,
-  если это обычный читаемый файл; она участвует в portal search, но не входит в
-  `report.json`, task context, semantic model или editor workspace;
-- спокойную главную сводку: сведения о проекте, следующий результат, числа
-  активных задач, блокеров и открытых рисков и до пяти рекомендуемых точек
-  входа; подробные списки доступны через поиск, навигацию и каталоги разделов;
-- содержательную часть `index.md` без повторения H1 и структурных metadata в
-  постоянно видимом подробном обзоре, включая печатную версию;
-- оглавление и сворачиваемые разделы документа с чистыми accessible names;
-- копирование названия и repository-relative пути исходного Markdown-документа
-  для передачи контекста агенту;
-- копирование блоков кода с fallback на выделение;
-- фильтры каталогов, задач и traceability;
-- специализированные каталоги Quality и Runbooks с фильтрами и метриками
-  total, recent, review-required и overdue;
-- backlinks и связанные документы;
-- светлую и тёмную темы, печатную версию и адаптивный sidebar;
-- управление Mermaid-диаграммой: zoom, pan, fit и fullscreen.
+## Экраны и сценарии
 
-Все внутренние URL относительны. Портал не требует Go backend, CDN, Node.js или
-браузерного расширения, но публикуется через HTTP(S) и может загружать
-собственные static JSON resources из output.
+Документы `SC-*` и переходы `TR-*` строят карту и пошаговое прохождение
+сценария `UC-*`. У каждого перехода есть ровно один сценарий; глобальных
+переходов без `UC-*` нет. Пошаговый режим ничего не вызывает в реальном
+продукте — это симуляция документации.
 
-## Live workspace serve
+Подробный формат: [экраны и переходы](../guides/screens.md).
 
-`serve` добавляет к read-only portal отдельный Operate UI: дерево разрешённых
-исходников, path/dirty/save toolbar, CodeMirror, вкладки Editor/Preview/Split и
-positional diagnostics. Markdown preview использует существующий safe renderer;
-JSON получает syntax и hotspots diagnostics, а произвольный YAML — только
-доступные Toudocu diagnostics без выдуманной общей schema. Исключение —
-`contracts/**/*.openapi.{yaml,yml,json}`: эти файлы получают OpenAPI 3.0/3.1
-root, operation, operationId, path-parameter и internal `$ref` validation с
-line/column; external references не загружаются.
+## Границы продукта
 
-Save использует SHA-256 CAS и atomic replace. После save/create модель, HTML,
-search и diagnostics перестраиваются синхронно; watcher проверяет внешние
-изменения, а browser polling через ETag различает обычную страницу, clean editor
-и dirty conflict без потери local text. `Ctrl`/`Cmd`+`S`, leave guard,
-diagnostic navigation и mobile drawer входят в тот же UI.
-
-Создание документа в браузере и команды `task init`/`scaffold` используют один
-реестр шаблонов. Wire-контракт Editor API находится в
-[OpenAPI](../contracts/editor.openapi.yaml), а гарантии записи и границы
-workspace — в [поведенческом описании](../contracts/editor-http.md).
-
-Canonical `serve` также публикует `/_toudocu/api-docs/`: vendored Swagger UI
-5.32.12 переключает Editor/Changes specs, не использует CDN и разрешает Try it
-out только для `GET`/`HEAD`. Static и translation portals UI не получают.
-
-## Процессы и пользовательские сценарии
-
-«Пользовательские сценарии» — самостоятельный верхнеуровневый раздел и
-каноническая точка входа для `UC-*`. Раздел «Процессы» перечисляет именованные
-визуальные и межсистемные документы `FLOW-*`. Каталоги разделены:
-
-- `use-cases/index.html` показывает требования и пользовательский результат;
-- `processes/index.html` показывает процессы и фильтрует их по модулю и
-  связанному сценарию;
-- `flows/FLOW-*.html` остаются стабильными страницами отдельных процессов;
-  `flows/index.html` не создаётся.
-
-Документы `FLOW-*` являются прямыми дочерними пунктами «Процессов».
-Канонические документы получают стабильные URL по ID:
-
-- `use-cases/UC-*.html`;
-- `flows/FLOW-*.html`.
-
-Один `FLOW-*` может ссылаться на несколько `UC-*`. Обратные связи вычисляются
-автоматически. Страница use case объединяет вкладки «Описание», «Карта»,
-«Проиграть» и «Связи»; отдельная страница `flows/UC-*.html` не создаётся.
-
-## Карта экранов
-
-[Открыть собственную интерактивную Screen Map](../screens/). Она показывает
-высокоуровневую продуктовую навигацию и намеренно не перечисляет каждый
-generated route.
-
-При наличии `screens/SC-*.md` генерируются:
-
-- `screens/index.html` — интерактивная карта;
-- `screens/catalog.html` — фильтруемый каталог;
-- `screens/SC-*.html` — документы экранов со связями;
-- `traceability.html` — связь use case, screen, transition, task, criterion и verification.
-
-Родительский пункт «Экраны» ведёт в `screens/catalog.html`. При включённой
-общей карте `screens/index.html` добавляется отдельным дочерним пунктом;
-`--no-screen-map` удаляет только эту страницу и ссылку.
-
-Карточка карты показывает preview или placeholder, ID, название, маршрут,
-статус, модуль и количество входящих и исходящих переходов. Доступны режимы:
-
-- все экраны с группировкой по модулям;
-- выбранный модуль;
-- выбранный use case;
-- только незавершённые экраны;
-- sitemap по полю `Родительский экран`.
-
-Дополнительно работают поиск, фильтр статуса, zoom, pan, fit, reset,
-fullscreen, выбор экрана или перехода и боковая панель связей. Колесо мыши
-масштабирует карту без перехвата browser zoom с `Ctrl`/`Cmd`; клавиши `+`, `-`,
-`0`, `Esc` и `Enter` дублируют основные действия.
-
-Переходы различаются не только цветом:
-
-- navigation — сплошная направленная линия;
-- error — пунктир;
-- redirect — штриховая линия;
-- return — обратный изгиб;
-- external — двойная линия.
-
-Подробный формат и правила проверки описаны в
-[руководстве по экранам](../guides/screens.md).
-
-## Проигрываемые сценарии и hotspots
-
-Вкладка «Проиграть» на странице `use-cases/UC-*.html` начинается с
-`Начального экрана` use case и предлагает переходы этого сценария и глобальные
-переходы. При выборе действия viewer:
-
-1. добавляет текущий шаг в историю;
-2. открывает целевой экран и состояние;
-3. показывает код ошибки или сообщение;
-4. обновляет номер шага и доступные действия.
-
-`Назад` возвращает предыдущий шаг, `Сначала` очищает историю. На terminal screen
-показываются отдельные действия «Начать заново», «Показать карту» и
-«Открыть use case». Карта открывается на вкладке `#map`, а описание — на
-`#overview`.
-
-Hotspots хранятся в `screens/hotspots.json` в процентах. Скрытая зона
-проявляется при наведении или клавиатурном фокусе; переключатель показывает все
-зоны постоянно. Даже без изображения или валидного hotspot остаётся доступен
-текстовый список действий.
-
-## Рабочие задачи
-
-`TASK-*` и `BUG-*` поддерживают состояния от черновика до выполнения или
-отмены, общие зависимости, scope, критерии и проверки. Баги дополнительно
-фиксируют серьёзность, приоритет, воспроизводимость, регрессию, симптом,
-ожидаемое и фактическое поведение, доказательства и регрессионную проверку.
-
-`task context` не выполняет команды и возвращает только относящиеся к задаче
-модули, use cases, экраны, переходы, правила, зависимости и diagnostics.
-
-`task verify --run` сначала применяет task-local validation gate, затем
-последовательно запускает уникальные команды `AC-*`, `ALL`, `DOCS` и, при
-явно связанных стандартах, `QUALITY` из repository root. Ошибка одной команды
-не скрывает результаты остальных.
-Timeout завершает дерево процессов, а stdout и stderr сохраняются ограниченным
-хвостом.
-
-Полный формат приведён в
-[руководстве по рабочим задачам](../guides/work-items.md).
-
-## JSON и автоматизация
-
-`check --format json` и `report.json` используют чистую schema v1 и содержат:
-
-- сведения о генераторе, проекте, текущем состоянии и статистике;
-- документы, разрешённые ссылки, backlinks и related documents;
-- roadmap, риски, модули, use cases, business rules и work items;
-- screens, transitions, playable flows, hotspots и error definitions;
-- типизированные flows и двусторонние связи `UC ↔ FLOW`;
-- traceability matrix и diagnostics.
-
-`task context` и остальные task reports используют schema v1 с полем `kind`.
-Контракт развивается напрямую в v1 без параллельной версии схемы.
-
-## Безопасность и отказоустойчивость
-
-- сканер не переходит по Markdown-симлинкам;
-- опасные URL-схемы и активные HTML, SVG, XML и JavaScript assets блокируются;
-- preview разрешает только локальные PNG, JPG, JPEG, WEBP, AVIF и GIF;
-- repository links и task scope не могут выйти за `repository-root`;
-- `--clean` проверяет раскрытые пути и защищает input, его предков, системный
-  корень и output-симлинки;
-- обычные маршруты `serve` раздают только output, а editor API ограничен
-  canonical workspace paths внутри docs root; listener слушает loopback по
-  умолчанию и не использует кеширование;
-- ручная пересборка `serve` принимает только служебный `POST` с заголовком
-  действия; static build кнопку и endpoint не содержит;
-- ошибка отдельной Screen Map или проигрываемого сценария не лишает доступа к остальной
-  документации;
-- editor writes требуют JSON/action/same-origin guards, лимиты 3 MiB/2 MiB и не
-  получают CORS; при non-loopback listener прямые LAN-клиенты считаются
-  доверенными;
-- обычные `check`, `build`, `serve`, editor API и `task context` никогда не выполняют
-  команды из Markdown.
-
-## Ограничения
-
-Toudocu не является сетевой CMS, collaborative editor или средой выполнения
-продукта. Live workspace существует только внутри процесса `serve`, не хранит
-серверную базу, не выполняет API-запросы пошагового viewer и не импортирует
-интерфейсы из Figma или frontend-кода.
+Toudocu не является сетевой CMS, совместным редактором или средой выполнения
+описываемого продукта. `serve` хранит только локальное состояние обсуждений,
+не импортирует интерфейс из Figma или исходного кода и не выполняет реальные
+API-запросы во время пошагового сценария.

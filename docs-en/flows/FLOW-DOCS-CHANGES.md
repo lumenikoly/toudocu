@@ -1,29 +1,31 @@
-# FLOW-DOCS-CHANGES: Build and view documentation changes
+# FLOW-DOCS-CHANGES: View documentation changes
 
 - Identifier: FLOW-DOCS-CHANGES
-- Script: UC-DOCS-05
+- Use case: UC-DOCS-05
 - Module: MOD-CHANGES
-- Last updated: 2026-07-31
+- Last updated: 2026-08-10
 
-Process shows path from explicitly selected Git range to lazy
-representations of one deterministic change set.
+The diagram shows how a selected Git range becomes a file list and a set of
+readable views for each change.
 
 ## Process
 
 ```mermaid
 flowchart TD
-    Select["Select base and target"] --> Resolve["Allow local Git revisions"]
-    Resolve --> Files["Get statuses, numstat and snapshots"]
-    Files --> Report["Build metadata and ChangeSetReport"]
-    Report --> Source["Load source diff"]
-    Report --> Semantic["Normalize changed entities"]
-    Report --> Rendered["Render Markdown before and after"]
-    Report --> Specialized["Build OpenAPI, Mermaid, map and asset diff"]
-    Source --> Review["View or export the report"]
-    Semantic --> Review
-    Rendered --> Review
-    Specialized --> Review
+    Start["Open /changes/ or run toudocu changes"] --> Range["Select the start and end states"]
+    Range --> Resolve["Resolve both states in local Git"]
+    Resolve --> Files["Read the file list and exact patch"]
+    Files --> Report["Build one ChangeSetReport"]
+    Report --> Filter["Find or filter a file"]
+    Filter --> Diff["Read the Diff or the full file"]
+    Diff --> Extra{"Need another view?"}
+    Extra -->|Yes| Views["Open Before and after, Semantics, Relationships, or a specialized tab"]
+    Extra -->|No| Finish["Use the result or leave a comment"]
+    Views --> Finish
 ```
+
+The exact Git patch remains available even when Markdown, OpenAPI, Mermaid, or
+another optional analyzer fails. No step changes Git.
 
 ## Related documents
 

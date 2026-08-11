@@ -1,42 +1,45 @@
-# Isolation of documentation and check errors
+# Isolating documentation and verification failures
 
 - Document type: Architecture
-- Architecture question: How are errors in documentation and running checks isolated?
+- Architectural question: How are documentation errors and failed verification commands isolated?
 
-Reading and structure errors turn into document-linked diagnostics
-and do not open the way to fulfillment. Explicitly triggered task checks are executed
-sequentially in a separate process boundary, and their failures are timeout and limited
-the conclusion is recorded in the report. Only the editor API of `serve` mode changes the selected
-workspace file according to CAS; allowed shell commands have the rights of the current
-user and can change the entire repository.
+Read and structure problems become diagnostics attached to files; they never
+cause code to run. Work-item commands run only after explicit authorization,
+each in a separate process. The `serve` editor can replace only the selected
+allowed file, while an authorized verification command runs with the current
+user's permissions and may therefore change the whole repository.
 
-## Area
+## Scope
 
-The answer describes the isolation of two classes of failures: unreliable documentation and
-commands allowed through task workflow. User scripts remain in
+This document separates failures in documentation, executed commands, and the
+editor. The user-facing sequences are in
 [FLOW-DOCS-CHECK](../flows/FLOW-DOCS-CHECK.md) and
 [FLOW-TASK-WORKFLOW](../flows/FLOW-TASK-WORKFLOW.md).
 
 ## Documentation errors
 
-Scanning continues to collect available documents, and validation adds
-stable issues for the general model and specific files. The presence of error makes
-the operation was unsuccessful; warning changes exit code only in strict mode. None
-diagnostic path does not run work item commands.
+Scanning continues through documents that can still be read. Validation adds
+problems to the project model and to the affected files. An error makes the
+operation fail; a warning changes the exit code only with `--strict`. No
+diagnostic path executes commands from a work item.
 
-## Errors when running checks
+## Verification command failures
 
-`task verify --run` first requires a valid task-local contract. After admission
-each unique command is executed from repository root, and one command fails
-does not hide the results of others. Timeout terminates the process tree, stdout and
-stderr are stored in a limited tail, and the final report is separated from the original
-documentation. The safety of the side effects of the commands themselves ensures trust
-to the repository and the initiator's explicit decision to launch.
+`task verify --run` first requires a complete and valid task-local contract.
+It then starts each unique command from the repository root. One failed command
+does not hide the results of the others. A timeout stops the command's entire
+process tree, and only bounded tails of stdout and stderr are retained. The
+execution report is not written back into the source Markdown.
 
-## Editor workspace errors
+Toudocu cannot guarantee that an allowed command has safe side effects. The
+user accepts that responsibility by explicitly authorizing execution in a
+trusted repository.
 
-Diagnostics preview and validation do not block save. Malformed request, unsafe
-path, oversized content and stale digest are completed before the source is replaced. Temp
-is written in the same directory, synchronized and atomically replaces the file only after
-repeat CAS check. A rebuild error is returned to the current request or to
-server log watcher and does not turn into running a command.
+## Editor failures
+
+Preview diagnostics do not prevent saving. A malformed request, unsafe path,
+oversized body, or stale content hash is rejected before the source is
+replaced. A temporary file is created in the same directory, synchronized, and
+atomically replaces the source only after the hash is checked again. A later
+rebuild failure is returned to the current request or written to the watcher's
+log; it neither starts a project command nor stops the running server.

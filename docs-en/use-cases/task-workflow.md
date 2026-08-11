@@ -1,72 +1,72 @@
-# UC-TASK-01: Get work task context
+# UC-TASK-01: Collect work-item context
 
 - Identifier: UC-TASK-01
-- Status: Completed
-- Actor: Performer - developer or software agent
+- Status: Ready
+- Actor: Developer or software agent
 - Module: MOD-CLI
 - Priority: High
-- Last updated: 2026-07-28
+- Last updated: 2026-08-10
 
-The performer receives a limited context of one work task before
-changing code or documentation.
+Before changing code or documentation, the assignee retrieves a bounded context
+for one ready work item.
 
 ## Inputs
 
-- stable `TASK-*` ID;
-- documentation catalogue;
+- stable `TASK-*` identifier;
+- documentation root;
 - repository root;
-- result format `text` or `json`.
+- `text` or `json` output.
 
 ## Preconditions
 
-- Toudocu is available for launch;
-- the performer has the rights to read the documentation and the repository.
+- Toudocu is available;
+- the assignee can read the documentation and repository.
 
-## Main scenario
+## Main flow
 
-1. The performer calls
-   `toudocu task context TASK-ID ./docs --format json`.
-2. Toudocu finds exactly one task with the specified ID.
-3. Toudocu checks that the task status is Ready, In Progress, Blocked or
-   Done.
-4. Toudocu collects a complete task contract, fixed sections of related
-   entities, documentation-impact documents, business rules and diagnostics.
-5. Toudocu returns `TaskContextReport` schema v1 with `requiredReads`.
-6. The performer uses the result, scope of changes and limitations of the task
-   for planning work.
+1. The assignee runs:
 
-## Error scenarios
+   ```bash
+   toudocu task context TASK-ID ./docs --format json
+   ```
 
-- in step 2, the missing ID terminates the command with the code `1`;
-- multiple tasks with the same ID make the request ambiguous and terminate
-  command with code `1`;
-- Draft and Canceled are not allowed to receive implementation context;
-- related documentation issues remain in the `issues` report and are accessible
-  to the contractor before the start of work;
-- an error reading the project terminates the command before the context is formed.
+2. Toudocu finds exactly one work item with that identifier.
+3. Its status must be Ready, In progress, Blocked, or Done.
+4. The report contains the complete task contract, required sections from
+   explicitly related documents, declared documentation impact, business rules,
+   and diagnostics.
+5. `TaskContextReport` schema v1 lists `requiredReads`: the files the assignee
+   must actually read before working.
+6. The assignee plans changes within the task's goal, scope, constraints, and
+   exclusions.
+
+## Error flows
+
+- A missing identifier or several work items with the same identifier returns
+  code `1`.
+- Draft and Cancelled are not valid implementation context.
+- Problems in related documents remain in `issues` so the assignee sees them
+  before work starts.
+- A project read failure ends the command before context is created.
 
 ## Postconditions
 
-The performer received the context of the selected task. The source files are not modified,
-commands from the `Проверка` section were not executed.
+The assignee has the selected task context. Files are unchanged and no command
+from Verification has run.
 
 ## Business rules
 
-The rules are defined in the module document:
-
-- [BR-CLI-001](../modules/cli.md#br-cli-001-task-context-does-not-execute-commands) - the task context does not execute commands.
+- [BR-CLI-001](../modules/cli.md#br-cli-001-task-context-does-not-execute-commands)
 
 ## Implementation
 
-- [FLOW-TASK-WORKFLOW: Working with the task being checked](../flows/FLOW-TASK-WORKFLOW.md)
-- [CLI and workflow tasks](../modules/cli.md)
-- [Design Model and Validation](../modules/model.md)
+- [FLOW-TASK-WORKFLOW](../flows/FLOW-TASK-WORKFLOW.md)
+- [CLI and work-item operations](../modules/cli.md)
+- [Project model](../modules/model.md)
 - [CLI contract](../contracts/cli.md)
-- [Work Task Guide](../guides/work-items.md)
+- [Work-item guide](../guides/work-items.md)
 
-## Examination
+## Scenario verification
 
-- JSON test of the `TaskContextReport` composition;
-- test for missing and ambiguous `TASK-*`;
-- checking related rules, dependencies and documents;
-- separate test for lack of command execution.
+Coverage includes JSON composition, missing and duplicate identifiers, related
+rules and documents, and the guarantee that no commands run.

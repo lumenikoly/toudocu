@@ -84,6 +84,7 @@ work with your project, invoke the skill in a prompt to the AI agent:
 $toudocu check the project documentation and explain the problems found
 $toudocu prepare read-only context for TASK-AREA-001
 $toudocu update the specified guide from the current CLI contract
+$toudocu feedback
 ```
 
 Special modifying workflows are also invoked through prompts and only

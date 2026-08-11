@@ -24,12 +24,14 @@ $toudocu check the source documentation and explain the diagnostics
 $toudocu build the local portal in the output configured by the project
 $toudocu prepare context for TASK-AREA-001
 $toudocu update the installation guide from the current CLI contract
+$toudocu feedback
 ```
 
-The CLI provides `check`, `build`, `serve`, `search`, and `task ...`, but has no
-`init`, `refresh`, or `translate` commands. Inside the Toudocu source
-repository, the agent uses `go run ./cmd/toudocu`; in other projects it uses
-the installed `toudocu` from `PATH`.
+The CLI provides `check`, `build`, `serve`, `changes`, `search`, `scaffold`,
+`task`, `skill`, and `version`. It has no `init`, `refresh`, `translate`, or
+top-level `feedback` command: those are agent workflows. Inside the Toudocu
+source repository, the agent uses `go run ./cmd/toudocu`; in other projects it
+uses the installed `toudocu` from `PATH`.
 
 ## What to delegate to the skill
 
@@ -62,6 +64,8 @@ requests:
 | `$toudocu refresh` | Explicit full refresh call |
 | `$toudocu refresh diff` | Explicit diff refresh call |
 | `$toudocu translate <locale> ...` | Explicit translation request and target locale |
+| `$toudocu translate diff` | Explicit request to process the current diff for every configured locale |
+| `$toudocu feedback` | Explicit request to process comments from Changes |
 | `task verify --run` | Explicit request to verify or execute the task in a trusted repository |
 
 Missing files, first skill use, ordinary documentation edits, or `check` do not
@@ -127,7 +131,7 @@ Archive and restore only through `task archive` and `task restore`.
 
 ### Ordinary documentation edits
 
-Identify the audience, useful question, and source of truth; update an existing
+Identify the audience, useful question, and repository evidence; update an existing
 document instead of duplicating it; write only supported claims. Choose a typed
 document for its meaning, not for an ID or green check. Never invent unknown
 status, owner, date, relationship, or procedure.
@@ -144,7 +148,27 @@ Every change passes two gates:
 Fix structural errors at their sources. Never remove a meaningful relationship
 or add unsupported prose merely to obtain a clean report.
 
+If the user forbids checks, the agent does not run them and reports that fact
+plainly.
+
 ## Special workflows
+
+### Processing Changes comments
+
+`$toudocu feedback` retrieves the oldest pending batch through
+`changes feedback pending --json`. The agent validates each anchor and the
+current Git diff, evaluates the comment against the actual repository, and
+changes only justified files.
+
+For every message it returns one result—`fixed`, `notFixed`, or
+`needsClarification`—with a short explanation and only relevant
+`changedPaths`. The whole response is accepted atomically against the previous
+hash, version, and discussion state. On conflict, the agent retrieves and
+reviews the batch again instead of substituting expected values.
+
+After success, it continues with the next batch until the queue is empty.
+Neither the UI button nor the transport CLI starts the agent or resolves a
+discussion.
 
 ### Initialization
 

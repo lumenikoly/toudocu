@@ -1,73 +1,87 @@
 # MOD-CHANGES: Documentation changes
 
 - Identifier: MOD-CHANGES
-- Status: Completed
-- Owner: Toudocu Team
-- Last updated: 2026-08-05
+- Status: Ready
+- Owner: Toudocu team
+- Last updated: 2026-08-10
 
-The module turns explicitly selected Git source documentation states into
-a deterministic report for the CLI, CI, and local portal.
+This module compares two explicitly selected states in the local Git
+repository and produces one reproducible report for the CLI, CI, and local
+portal.
 
 ## Purpose
 
-Receive read-only Git snapshots, accurately show text changes and
-complement them with a comparison of the normalized project model without an LLM.
+Show the exact Git patch and, for known documents, add readable differences in
+structure, relationships, and rendered output. The analysis does not use an AI
+model.
 
-## Code location
+## Code locations
 
-- `internal/app/changes_*.go` — comparison, Git adapter, reports, and specialized diffs;
-- `internal/app/server.go` — read-only changes API and live invalidation;
-- `internal/app/changes_http.go` — declarative route registry and the common schema-v1 error envelope;
-- `web/src/features/changes/`, `web/src/styles/changes.css` — serve-only
-  browsing interface; the generated bundle is embedded from `internal/site/assets/generated/`.
+- `internal/app/changes_*.go` — Git reads, comparison, report generation, and
+  specialized views;
+- `internal/app/server.go` — local API and report invalidation after a working
+  tree change;
+- `internal/app/changes_http.go` — HTTP route registry and the shared
+  schema-v1 error format;
+- `web/src/features/changes/` and `web/src/styles/changes.css` — the
+  `serve`-only interface. Built assets are embedded from
+  `internal/site/assets/generated/`.
 
-## Module boundaries
+## Boundaries
 
-The module does not change the working tree, index, refs or Git history. Static
-`build` does not receive history and does not enable the changes API. Markdown rendering
-remains the responsibility of `MOD-MARKDOWN`, and the portal shell is `MOD-SITE`.
+The module does not change the working tree, index, refs, or Git history.
+Static `build` does not read history or include the Changes API. Markdown
+rendering belongs to `MOD-MARKDOWN`; `MOD-SITE` supplies the page shell.
 
 ## Business rules
 
-Wire-level paths, methods, responses, and schemas are defined by
-[Changes OpenAPI](../contracts/changes.openapi.yaml); this module owns
-comparison and isolation behavior.
+Paths, HTTP methods, and response schemas are defined in
+[Changes OpenAPI](../contracts/changes.openapi.yaml). This module owns
+comparison behavior and failure isolation.
 
 ### BR-CHANGES-001: Git is the only version source
 
-The old side is read from the object database or index, the new side is read from explicitly
-selected revision, index or working tree. Toudocu does not save its own
-history of documentation.
+The old side comes from the Git object database or index. The new side comes
+from an explicitly selected commit, the index, or the working tree. Toudocu
+keeps no independent history of documentation.
 
 ### BR-CHANGES-002: Original diff takes precedence
 
-Error semantic, rendered, Mermaid or OpenAPI parsing does not hide available
-Git patch and file statistics.
+A failure in semantic analysis, Markdown rendering, Mermaid, or OpenAPI does
+not hide an available Git patch or line statistics.
 
 ### BR-CHANGES-003: Range is always explicit
 
-The report and UI show requested and resolved base/target, branch, HEAD and dirty
-state. An ambiguous base branch requires user selection.
+The report and UI show both requested and resolved range endpoints, the branch,
+`HEAD`, and whether local changes exist. If the base branch is ambiguous, the
+user must select it.
 
-### BR-CHANGES-004: Analysis limited to documentation roots
+### BR-CHANGES-004: Public reports are limited to documentation roots
 
-Public paths are canonical, relative to the repository root and cannot be read
-`.git` or files outside the allowed roots.
+`ChangeSetReport`, the regular `changes` commands, and specialized document
+views cover only configured documentation roots. Every path is relative to the
+repository root and cannot read `.git` or escape the allowed roots.
+
+Repository-wide file listing and discussions belong to
+[MOD-REVIEW](MOD-REVIEW.md). They do not expand the public `ChangeSetReport`
+schema or add source code to documentation reports from the CLI.
 
 ## Invariants
 
-- Git is called directly without shell, external diff, textconv and fetch;
-- semantic diff is deterministic and does not use LLM;
-- the task file is not included in the summary of permanent documentation;
-- full source and rendered payload are loaded lazily;
-- existing `check` and static `build` retain the same result.
+- Git runs directly, without a system shell, external diff handler, `textconv`,
+  or `fetch`.
+- Semantic comparison is reproducible and does not use an AI model.
+- A `TASK-*` file is not counted as permanent project documentation.
+- Full contents and rendered versions load only when requested.
+- Existing `check` and static `build` behavior does not depend on this module.
 
 ## Stable interfaces
 
 - `ChangeSetReport` schema v1;
-- CLI `changes` and `task changes`;
+- `changes` and `task changes`, including `--include-assets` and the complete
+  translation input selected by `--translation-input`;
 - read-only `/_toudocu/api/changes/`;
-- diagnostic codes and comparison enums.
+- diagnostic codes and comparison-range values.
 
 ## Related use cases
 

@@ -1,87 +1,90 @@
-# Changelog
+# Журнал изменений
 
 ## 0.0.1
 
-- В Changes добавлен фильтр всех, документационных и остальных файлов.
-  Вкладка исходного patch переименована в «Diff», а соседняя вкладка «Файл
-  целиком» показывает полный UTF-8 файл и позволяет комментировать выделенный
-  диапазон.
-- У комментариев Changes удалён неиспользуемый тип: composer, discussion,
-  HTTP schema, local state и FIFO feedback теперь передают только текст.
-- Вкладка «Изменения» стала review-first workspace: первый source diff
-  открывается сразу, Git range и diagnostics раскрываются по запросу, а в
-  постоянной панели файлов остаются только path-sorted список, поиск и статус.
-  Desktop использует внутренний полноэкранный split, mobile — отдельные Files и
-  Discussions drawers без горизонтального overflow.
-- Canonical Changes workspace получил repository-wide local review:
-  персистентные anchored discussions, changed/linked files, FIFO feedback
-  snapshots и agent responses через `changes feedback pending|respond`. UI и
-  CLI не запускают агента и не меняют Git; static и translation runtimes review
-  capability не получают.
-- Serve-only CodeMirror bundle закрепляет Go 6.0.1, Java 6.0.2 и
-  JavaScript/TypeScript 6.2.5 language packages; остальные UTF-8 files
-  сохраняют plain-text selection fallback.
-- `changes`, `changes file` и `task changes` получили явные
-  `--include-assets` и `--translation-input`: первый переопределяет фильтр
-  assets, второй формирует полный reader-facing вход для translation workflow.
-- Skill workflow `$toudocu translate diff` переводит staged, unstaged и
-  untracked canonical-изменения относительно `HEAD` во все настроенные locale
-  profiles, сохраняя изоляцию и отдельный результат каждого target.
-- Release workflow поддерживает stable и RC-каналы: RC публикуется как GitHub
-  prerelease с тегом `X.Y.Z-rc.N` и устанавливается по явно выбранной версии.
-- Markdown полностью переведён на закреплённый Goldmark `v1.8.5`: один
-  CommonMark/GFM AST обслуживает model, validation, portal, editor и changes.
-  Включены только tables, task lists, strikethrough и literal autolinks.
-- Raw HTML и ведущий завершённый front matter теперь являются policy errors;
-  preview и rendered diff сохраняют безопасное escaped представление. Из
-  публичного Go facade удалены низкоуровневые parser/renderer types и функции;
-  высокоуровневые операции и JSON schema v1 сохранены.
-- Frontend source выделен в независимый TypeScript/CSS workspace `web/`;
-  детерминированные generated assets фиксируются в репозитории, проверяются CI
-  и встраиваются в один Go-бинарник. Node.js остаётся только build toolchain.
-- `build` создаёт backend-independent read-only портал для обычного HTTP(S)
-  static hosting, включая вложенный URL-путь. Go project model остаётся
-  единственным источником HTML, bootstrap и static JSON.
-- Static и serve runtime технически разделены: editor, changes, rebuild clients,
-  API URL, CodeMirror и Swagger UI отсутствуют в static output и добавляются
-  только явными serve capabilities.
-- Migration: прямое открытие `index.html` с диска больше не является
-  гарантированным контрактом. Для локальной работы используйте
-  `toudocu serve`; для публикации — `toudocu build` и static HTTP hosting.
-  Новая команда preview не добавлена.
-- Portal, Editor и Changes получили единый compact workspace shell, project
-  branding, навигацию и синхронные темы; CodeMirror меняет оформление без
-  потери editor state, а responsive layout сохраняет локальную прокрутку
-  рабочих областей без горизонтального overflow страницы.
-- Editor и Changes HTTP API получили OpenAPI 3.1.0 sources of truth,
-  declarative route parity и единый positional check; canonical `serve`
-  показывает оба контракта через offline Swagger UI 5.32.12, а static и
-  translation portals UI не получают.
-- Changes API разрешает `HEAD` только для summary и возвращает schema-v1
-  diagnostics envelope для всех API-ошибок без изменения успешных media types.
-- Translation roots поддерживают полный файловый паритет с canonical docs,
-  включая work items, notes и ideas, но остаются read-only: task workflow,
-  scaffold и editor-запись отклоняются до использования переводного контекста.
-- Самодокументация согласована с текущим состоянием репозитория: исправлены
-  onboarding и scaffold-примеры README, восстановлено описание Markdown subset,
-  а roadmap включает сценарий Documentation Changes.
-- Первый стабильный релиз dependency-free Go CLI для проверки Markdown и
-  построения автономного статического HTML-портала.
-- Команды `check`, `build`, `search`, `changes` и `task changes` обеспечивают
-  валидацию, поиск и Git-backed отчёты об изменениях в JSON, text и Markdown.
-- `serve` предоставляет безопасный локальный workspace с live rebuild,
-  предпросмотром Markdown, редактором и просмотром изменений; результат `build`
-  остаётся статическим и read-only.
-- Документная модель поддерживает архитектурные карты, модули, пользовательские
-  сценарии, Mermaid-процессы, экраны, переходы, интерактивную карту и
-  воспроизводимый портал с поиском, темами, branding и локализацией.
-- Workflow рабочих задач включает typed scaffolds, readiness, контекст, проверку
-  и traceability; все публичные JSON-отчёты используют schema v1.
-- Skill `toudocu` добавляет явные agent-workflow для инициализации,
-  проверки актуальности исходной документации и перевода locale tree.
-- Релиз собирается для шести комбинаций OS/architecture, включая Windows ARM64,
-  с единым quality gate, checksums, лицензией
-  Apache-2.0 и notices для встроенных сторонних компонентов.
-- POSIX- и PowerShell-installers автоматически выбирают релизный
-  бинарник, проверяют SHA-256 и без `sudo` устанавливают или
-  обновляют Toudocu в профиле пользователя.
+### Документация и портал
+
+- Добавлены проверка Markdown, поиск, построение статического портала и
+  локальный `serve` с редактором и автоматической пересборкой.
+- Документная модель поддерживает архитектурные вопросы, модули, правила,
+  пользовательские сценарии, процессы Mermaid, экраны, переходы, стандарты,
+  runbooks и рабочие задачи.
+- Портал содержит отдельные каталоги известных сущностей, поиск, связи, карту
+  экранов, темы и локализацию.
+- `build` создаёт портал только для чтения, которому после сборки не нужен
+  запущенный Toudocu. Публикация поддерживается по HTTP(S), в том числе во
+  вложенном URL-пути.
+- Прямое открытие `index.html` через `file://` больше не входит в
+  поддерживаемый контракт. Для локального просмотра предназначен
+  `toudocu serve`.
+- Браузерная часть вынесена в `web/`. Готовые TypeScript/CSS-ресурсы
+  фиксируются в репозитории и встраиваются в Go-бинарник; Node.js не нужен
+  пользователю.
+- Статический и локальный режимы разделены: Editor, Changes, CodeMirror,
+  Swagger UI и локальные API присутствуют только в `serve`.
+- Editor и Changes API описаны двумя OpenAPI 3.1.0-контрактами. Канонический
+  `serve` показывает их через встроенный Swagger UI 5.32.12 без CDN.
+- Toudocu использует Goldmark 1.8.5 и единый CommonMark/GFM-разбор. Включены
+  таблицы, task-списки, зачёркивание и буквальные автоматические ссылки.
+- Сырой HTML и front matter в начале файла между одинаковыми строками
+  `---` или `+++` считаются ошибками. Безопасный предпросмотр всё
+  равно показывает такой исходный текст в экранированном виде.
+
+### Changes и локальные обсуждения
+
+- `changes`, `changes file` и `task changes` показывают
+  Git-изменения документации в текстовом, JSON- и Markdown-формате, не изменяя
+  рабочее дерево, индекс, ссылки и историю.
+- Рабочая область `/changes/` охватывает весь локальный репозиторий,
+  автоматически открывает первый подходящий файл и показывает точный Git diff.
+- Добавлены просмотр полного UTF-8-файла и фильтр: все файлы, документация или
+  остальные файлы. Основная вкладка называется «Diff».
+- Git-диапазон и диагностические сообщения перенесены в раскрываемые панели.
+  На узких экранах список файлов и обсуждения открываются отдельными панелями
+  без горизонтальной прокрутки всей страницы.
+- Комментарий можно привязать к набору изменений, файлу, строке patch или
+  выделению в полном файле. Отдельного поля типа комментария нет.
+- Обсуждения и снимки хранятся локально вне репозитория. Toudocu переносит
+  привязку после однозначного изменения файла либо помечает её как устаревшую
+  или удалённую.
+- «Отправить агенту» создаёт неизменяемый пакет и показывает инструкцию, но не
+  запускает агента. Skill получает пакеты по очереди через
+  `changes feedback pending|respond` и возвращает ответы в исходные
+  обсуждения.
+- Для Go, Java, JavaScript и TypeScript в полном файле доступна подсветка
+  синтаксиса. Остальные корректные UTF-8-файлы показываются как обычный текст.
+
+### CLI, задачи и AI-skill
+
+- CLI поддерживает `check`, `build`, `serve`, `search`,
+  `changes`, `scaffold` и полный жизненный цикл рабочих задач.
+- `task verify` без `--run` не выполняет команды. Запуск происходит
+  только после явного `task verify --run`.
+- Публичные JSON-отчёты используют `schemaVersion: 1` и стабильные коды
+  завершения.
+- Встроенный skill можно установить, проверить, обновить и удалить для Codex,
+  Claude Code и Copilot. Управляемая копия не перезаписывается поверх локальных
+  изменений.
+- `$toudocu init`, `$toudocu refresh`,
+  `$toudocu translate` и `$toudocu feedback` реализованы как
+  процессы AI-skill, а не верхнеуровневые команды Go CLI.
+- `$toudocu refresh diff` начинает со staged, unstaged и untracked
+  изменений относительно `HEAD` и добавляет зависимые документы.
+- `$toudocu translate diff` последовательно обновляет все настроенные
+  языковые зеркала. Переводы остаются изолированными каталогами только для
+  чтения.
+- Параметры `--include-assets` и `--translation-input` позволяют
+  явно включить бинарные ресурсы и полный вход для перевода.
+
+### Поставка
+
+- Релизный комплект содержит сборки для Linux, macOS и Windows на AMD64 и
+  ARM64, включая Windows ARM64.
+- Release workflow различает стабильный канал и кандидаты
+  `X.Y.Z-rc.N`. Кандидат публикуется как предварительный релиз только
+  после явного запуска workflow.
+- POSIX- и PowerShell-установщики выбирают нужный бинарник, сверяют SHA-256 и
+  версию и только затем заменяют файл в каталоге пользователя.
+- Путь `releases/latest` устанавливает последний стабильный выпуск.
+- Корневой Go package предоставляет типизированный фасад для локального
+  встраивания из исходного дерева. Основным публичным интерфейсом остаётся CLI.

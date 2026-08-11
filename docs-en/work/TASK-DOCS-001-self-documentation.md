@@ -5,13 +5,13 @@
 - Priority: High
 - Module: MOD-MODEL
 - Use case: UC-DOCS-02
-- Owner: Toudocu Team
-- Last updated: 2026-08-04
+- Owner: Toudocu team
+- Last updated: 2026-08-10
 
 ## Result
 
-The repository contains its own consistent documentation that describes
-current implementation and undergoes strict testing by Toudocu itself.
+The repository contains Toudocu's source documentation. It describes the
+implemented behavior and is validated by Toudocu itself in strict mode.
 
 ## Scope
 
@@ -26,9 +26,9 @@ current implementation and undergoes strict testing by Toudocu itself.
 
 ## Acceptance criteria
 
-- [x] `AC-01` Self-documentation passes `toudocu check --strict` without comments.
-- [x] `AC-02` Modules, scripts, rules, roadmap and CLI contract are linked by stable IDs.
-- [x] `AC-03` README contains a direct link to the project's original documentation.
+- [x] `AC-01` Source documentation passes `toudocu check --strict` without diagnostics.
+- [x] `AC-02` Modules, use cases, rules, roadmap, and CLI contract are connected by stable IDs.
+- [x] `AC-03` README links directly to the project's source documentation.
 
 ## Plan
 
@@ -47,5 +47,5 @@ current implementation and undergoes strict testing by Toudocu itself.
 
 ## Documentation impact
 
-Created source design documents in `docs/`. README now leads to
+Created the canonical `docs/` root. README now links to
 `docs/index.md`; the generated portal remains a build artifact.
