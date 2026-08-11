@@ -41,10 +41,15 @@ button:disabled { cursor: not-allowed; opacity: .52; }
 .tree-heading { display: flex; align-items: center; justify-content: space-between; margin: 0 4px 14px; }
 .tree-search { display: grid; gap: 6px; margin: 0 4px 18px; color: var(--editor-muted); font-size: 12px; font-weight: 700; }
 .tree-search input { width: 100%; min-height: 40px; border: 1px solid var(--editor-border); border-radius: 9px; background: var(--editor-bg); color: var(--editor-text); padding: 8px 10px; }
-.editor-tree nav section + section { margin-top: 20px; }
-.editor-tree nav h2 { margin: 0 8px 6px; color: var(--editor-muted); font-size: 11px; letter-spacing: .07em; text-transform: uppercase; }
 .editor-tree ul { list-style: none; margin: 0; padding: 0; }
+.editor-tree details > ul { padding-inline-start: 14px; }
 .editor-tree li + li { margin-top: 2px; }
+.editor-tree summary { position: relative; display: flex; min-height: 32px; align-items: center; gap: 8px; border-radius: 8px; color: var(--editor-muted); padding: 6px 8px; cursor: pointer; font-size: 12px; font-weight: 700; list-style: none; }
+.editor-tree summary::-webkit-details-marker { display: none; }
+.editor-tree summary::before { width: 6px; height: 6px; flex: none; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; content: ""; transform: rotate(-45deg); transition: transform 140ms ease; }
+.editor-tree details[open] > summary::before { transform: rotate(45deg); }
+.editor-tree summary:hover { background: var(--editor-soft); }
+.editor-tree summary:focus-visible { outline: 3px solid color-mix(in srgb, var(--editor-accent) 38%, transparent); outline-offset: 2px; }
 .editor-tree [data-file-path] { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; width: 100%; border: 0; border-radius: 8px; background: transparent; color: inherit; padding: 8px; text-align: left; cursor: pointer; }
 .editor-tree [data-file-path] span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .editor-tree [data-file-path] small { color: var(--editor-muted); font-size: 10px; text-transform: uppercase; }
@@ -125,5 +130,5 @@ html[data-theme="dark"] {
   .editor-tree { inset-block-start: 168px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .editor-tree, .editor-toast { transition: none; }
+  .editor-tree, .editor-tree summary::before, .editor-toast { transition: none; }
 }

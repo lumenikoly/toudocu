@@ -31,11 +31,11 @@
     },
     "editor.css": {
       "file": "editor.css",
-      "sha256": "c602777c51bd08c53ec5f3167480d503e04ac282d7553a30c0ba9a39b5913760"
+      "sha256": "6529cc709c31f0777eab00dc8878872a98ab26f359903acd9c0f19a2ce28bab6"
     },
     "editor.js": {
       "file": "editor.js",
-      "sha256": "09e58ebd1c053b944bd436454e9d22854cd208f26c8496208e5194ac93f52429"
+      "sha256": "3f479cec07fcba31985ab4eeb359beedec150387b04a066c87f1134b347ab050"
     },
     "favicon.svg": {
       "file": "favicon.svg",
@@ -63,7 +63,7 @@
     },
     "portal.js": {
       "file": "portal.js",
-      "sha256": "51d3e5172a3e60a4a2678db9300b7bedb6d0f7b285dd23c5b56c0d457a569137"
+      "sha256": "4fb3beeaa166640451f346f68d839f04271d8a6d5371d7641ffafdc77d693233"
     },
     "screen-map.css": {
       "file": "screen-map.css",

@@ -481,8 +481,8 @@ registerMessages(portalMessages);
         const page: any = pageContract();
         const review: any = page?.runtime === 'serve' && page.capabilities?.review ? page.endpoints?.review : '';
         const contextButton: any = $('[data-copy-document-context]');
-        const contents: any = $$('.doc-content');
-        if (!review || !contextButton || !contents.length)
+        const selectionArea: any = contextButton?.closest('[data-dashboard-overview], .page-content');
+        if (!review || !contextButton || !selectionArea)
             return;
         const title: any = contextButton.dataset.documentContextTitle || '';
         const path: any = contextButton.dataset.documentContextPath || '';
@@ -520,7 +520,7 @@ registerMessages(portalMessages);
             toast.hidden = false;
             toastTimer = window.setTimeout(() => { toast.hidden = true; }, showLink ? 8000 : 2200);
         };
-        const selectionContent: any = (selection: any) => contents.find((content: any) => content.contains(selection.anchorNode) && content.contains(selection.focusNode));
+        const selectionContent: any = (selection: any) => selectionArea.contains(selection.anchorNode) && selectionArea.contains(selection.focusNode);
         const showMenu: any = () => {
             const selection: any = window.getSelection();
             if (!selection || selection.isCollapsed || !selection.rangeCount || !selection.toString().trim() || !selectionContent(selection))
@@ -616,10 +616,8 @@ registerMessages(portalMessages);
                 submit.textContent = text("core.portal.047");
             }
         }, { signal });
-        contents.forEach((content: any) => {
-            content.addEventListener('pointerup', showMenu, { signal });
-            content.addEventListener('keyup', (event: any) => { if (event.key === 'Shift' || !event.shiftKey) showMenu(); }, { signal });
-        });
+        selectionArea.addEventListener('pointerup', showMenu, { signal });
+        selectionArea.addEventListener('keyup', (event: any) => { if (event.key === 'Shift' || !event.shiftKey) showMenu(); }, { signal });
         document.addEventListener('pointerdown', (event: any) => { if (!menu.contains(event.target)) hideMenu(); }, { signal });
         document.addEventListener('scroll', hideMenu, { capture: true, signal });
         window.addEventListener('resize', hideMenu, { signal });

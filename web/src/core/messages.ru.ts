@@ -132,7 +132,6 @@ export const apiDocsMessages: Record<string, string> = {
 export const editorMessages: Record<string, string> = {
   "features.editor.index.001": "Редактор недоступен в этом runtime.",
   "features.editor.index.002": "{0}Редактор — Toudocu",
-  "features.editor.index.003": "Корень",
   "features.editor.index.004": "Файл удалён с диска. Текст сохранён в редакторе: скачайте его или восстановите файл снаружи.",
   "features.editor.index.005": "Ваш текст сохранён в редакторе. Сравните версии или подтвердите перезапись.",
   "features.editor.index.006": "Файл обновлён внешним процессом.",

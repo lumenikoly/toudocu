@@ -583,16 +583,25 @@ test("Portal and Changes review hand local discussions to the agent CLI without 
     await waitForHTTP(origin);
     await page.context().grantPermissions(["clipboard-read", "clipboard-write"], { origin });
     await page.goto(`${origin}/architecture/overview.html`);
-    const selectPortalText = (value: string) => page.getByText(value, { exact: true }).first().evaluate((element) => {
+    const selectPortalElement = (element: any) => element.evaluate((target: HTMLElement) => {
       const range = document.createRange();
-      range.selectNodeContents(element);
+      range.selectNodeContents(target);
       const selection = window.getSelection();
       selection?.removeAllRanges();
       selection?.addRange(range);
-      element.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
+      target.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
     });
-    await selectPortalText("Updated.");
+    const selectPortalText = (value: string) => selectPortalElement(page.getByText(value, { exact: true }).first());
     const portalSelectionMenu = page.locator(".review-selection-menu");
+    await selectPortalElement(page.locator(".page-header h1"));
+    await expect(portalSelectionMenu).toBeVisible();
+    await portalSelectionMenu.getByRole("button", { name: "Копировать текст" }).click();
+    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe("Architecture");
+    await selectPortalElement(page.locator(".metadata-grid dd").filter({ hasText: "Architecture Overview" }).first());
+    await expect(portalSelectionMenu).toBeVisible();
+    await portalSelectionMenu.getByRole("button", { name: "Копировать текст" }).click();
+    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe("Architecture Overview");
+    await selectPortalText("Updated.");
     await expect(portalSelectionMenu).toBeVisible();
     await expect(portalSelectionMenu.getByRole("button")).toHaveCount(3);
     await portalSelectionMenu.getByRole("button", { name: "Копировать текст" }).click();
