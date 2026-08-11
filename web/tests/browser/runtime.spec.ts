@@ -452,7 +452,7 @@ test("Changes review hands three outcomes to the local agent CLI without auto-re
   writeFileSync(join(fixture, "docs", "architecture", "overview.md"), "# Architecture\n\n- Тип документа: Architecture Overview\n");
   writeFileSync(join(fixture, "server.go"), "package review\n\nfunc Server() string { return \"old\" }\n");
   writeFileSync(join(fixture, "path.go"), "package review\n\nfunc Path() string { return \"old\" }\n");
-  writeFileSync(join(fixture, "legacy.go"), "package review\n\nfunc Legacy() bool { return true }\n");
+  writeFileSync(join(fixture, "legacy.go"), "package review\n\nfunc Legacy() bool { return true }");
   run("git", ["init", "-q"], fixture);
   run("git", ["config", "user.email", "review@example.invalid"], fixture);
   run("git", ["config", "user.name", "Review Browser"], fixture);
@@ -514,6 +514,10 @@ test("Changes review hands three outcomes to the local agent CLI without auto-re
     await page.locator('[data-file-list] [data-path="legacy.go"]').click();
     await expect(page.locator('.changes-detail-header p')).toContainText("legacy.go");
     await page.locator('[data-tab="source"]').click();
+    const noNewline = page.locator('.diff-line', { hasText: 'No newline at end of file' });
+    await expect(noNewline).toHaveCount(1);
+    await expect(noNewline.locator('.diff-comment')).toHaveCount(0);
+    await expect(noNewline).not.toHaveAttribute('data-review-line', /.+/);
     await page.locator('[data-review-side="old"] .diff-comment').first().click();
     const composer = page.locator('[data-review-composer]');
     await composer.locator('[data-review-message]').fill("Legacy точно можно удалить?");
@@ -576,11 +580,13 @@ test("Changes review hands three outcomes to the local agent CLI without auto-re
     await composer.locator('button[type="submit"]').click();
     await expect(composer).not.toBeVisible();
     await expect(page.locator('[data-open-discussion-count]')).toHaveText("4");
-    await page.route("**/_toudocu/api/changes/review/discussions", async (route) => {
+    writeFileSync(join(fixture, "docs", "index.md"), "# Review\n\nChanged.\n");
+    await page.route("**/_toudocu/api/changes/review/repository/changes**", async (route) => {
       await new Promise((resolveDelay) => setTimeout(resolveDelay, 250));
       await route.continue();
     }, { times: 1 });
     await page.goto(`${origin}/changes/?path=docs%2Findex.md&tab=source`);
+    await expect(page.locator('[data-file-list] [data-path="docs/index.md"]')).toHaveCount(1);
     await expect(page.locator('[data-file-list] [data-path="docs/index.md"]')).toHaveClass(/is-active/);
     await expect(page.locator('.changes-detail-header p')).toContainText("docs/index.md");
 

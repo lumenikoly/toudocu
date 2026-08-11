@@ -336,6 +336,10 @@ func TestEditorDiagnostics(t *testing.T) {
 	if err != nil || len(jsonDiagnostics) != 1 || jsonDiagnostics[0].Line != 2 || jsonDiagnostics[0].Column < 1 {
 		t.Fatalf("JSON diagnostics: %#v %v", jsonDiagnostics, err)
 	}
+	unicodeJSON := jsonSyntaxDiagnostic("data.json", []byte(`{"ключ": }`))
+	if len(unicodeJSON) != 1 || unicodeJSON[0].Column != 14 {
+		t.Fatalf("JSON diagnostic must keep its 1-based UTF-8 byte column: %#v", unicodeJSON)
+	}
 	yamlDiagnostics, err := server.workspace.diagnostics("config.yaml", []byte("anything: [\n"))
 	if err != nil || len(yamlDiagnostics) != 0 {
 		t.Fatalf("YAML invented diagnostics: %#v %v", yamlDiagnostics, err)

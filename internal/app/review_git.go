@@ -154,7 +154,7 @@ func resolveReviewComparison(g *gitChangeSource, options Options) (ChangeSide, C
 	return base, target, nil
 }
 
-func repositoryReviewRevision(g *gitChangeSource) (string, error) {
+func repositoryReviewRevision(g *gitChangeSource, base, target ChangeSide) (string, error) {
 	head, err := g.resolveCommit("HEAD")
 	if err != nil {
 		return "", err
@@ -168,8 +168,10 @@ func repositoryReviewRevision(g *gitChangeSource) (string, error) {
 		return "", err
 	}
 	hash := sha256.New()
-	_, _ = hash.Write([]byte(head))
-	_, _ = hash.Write([]byte{0})
+	for _, part := range []string{base.Type, base.Revision, base.Resolved, target.Type, target.Revision, target.Resolved, head} {
+		_, _ = hash.Write([]byte(part))
+		_, _ = hash.Write([]byte{0})
+	}
 	_, _ = hash.Write(status)
 	_, _ = hash.Write([]byte{0})
 	_, _ = hash.Write(diff)
@@ -220,7 +222,7 @@ func BuildRepositoryReview(options Options) (*RepositoryReviewReport, error) {
 	if err != nil {
 		return nil, &reviewFailure{Code: "REVIEW_GIT_UNAVAILABLE", Status: http.StatusServiceUnavailable, Message: err.Error()}
 	}
-	revision, err := repositoryReviewRevision(g)
+	revision, err := repositoryReviewRevision(g, base, target)
 	if err != nil {
 		return nil, err
 	}

@@ -88,6 +88,56 @@ func TestRepositoryReviewRevisionTracksUntrackedBytes(t *testing.T) {
 	}
 }
 
+func TestRepositoryReviewRevisionTracksResolvedComparison(t *testing.T) {
+	root, docs := newReviewRepository(t)
+	t.Setenv("TOUDOCU_STATE_HOME", t.TempDir())
+	head := gitTestRun(t, root, "rev-parse", "HEAD")
+	gitTestRun(t, root, "branch", "review-base", head)
+	options := reviewOptions(root, docs)
+	options.ChangeBase = "review-base"
+	first, err := BuildRepositoryReview(options)
+	if err != nil {
+		t.Fatal(err)
+	}
+	server := &documentationServer{options: options, changesCache: map[string]*ChangeSetReport{}}
+	firstHTTP := httptest.NewRecorder()
+	server.ServeHTTP(firstHTTP, httptest.NewRequest(http.MethodGet, reviewAPIBase+"/repository/changes?base=review-base", nil))
+	firstETag := firstHTTP.Header().Get("ETag")
+	tree := gitTestRun(t, root, "rev-parse", "HEAD^{tree}")
+	moved := gitTestRun(t, root, "commit-tree", tree, "-p", head, "-m", "move review base")
+	gitTestRun(t, root, "update-ref", "refs/heads/review-base", moved)
+	second, err := BuildRepositoryReview(options)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if gitTestRun(t, root, "rev-parse", "HEAD") != head || first.Comparison.Base.Resolved == second.Comparison.Base.Resolved || first.RepositoryRevision == second.RepositoryRevision {
+		t.Fatalf("resolved comparison did not invalidate revision: first=%#v second=%#v", first.Comparison, second.Comparison)
+	}
+	secondRequest := httptest.NewRequest(http.MethodGet, reviewAPIBase+"/repository/changes?base=review-base", nil)
+	secondRequest.Header.Set("If-None-Match", firstETag)
+	secondHTTP := httptest.NewRecorder()
+	server.ServeHTTP(secondHTTP, secondRequest)
+	if secondHTTP.Code != http.StatusOK || firstETag == "" || secondHTTP.Header().Get("ETag") == firstETag {
+		t.Fatalf("resolved comparison did not invalidate ETag: first=%q second=%q status=%d", firstETag, secondHTTP.Header().Get("ETag"), secondHTTP.Code)
+	}
+	service, err := newReviewService(options)
+	if err != nil {
+		t.Fatal(err)
+	}
+	state, err := service.discussions()
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = service.createDiscussion(CreateDiscussionRequest{
+		ReviewMutationGuard: ReviewMutationGuard{ExpectedRevision: state.Revision, ExpectedStateDigest: state.StateDigest},
+		RepositoryRevision:  first.RepositoryRevision,
+		Target:              ReviewTarget{Type: "global"}, Message: "stale range",
+	})
+	if reviewErrorCode(err) != "REVIEW_CONFLICT" {
+		t.Fatalf("stale comparison revision accepted: %v", err)
+	}
+}
+
 func TestReviewUnsafeBinaryAndLargeSource(t *testing.T) {
 	root, docs := newReviewRepository(t)
 	if _, err := BuildRepositoryReviewFile(reviewOptions(root, docs), "../.git/config"); reviewErrorCode(err) != "REVIEW_UNSAFE_PATH" {

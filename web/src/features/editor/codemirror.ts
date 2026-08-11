@@ -8,6 +8,7 @@ import { java } from '@codemirror/lang-java';
 import { javascript } from '@codemirror/lang-javascript';
 import { setDiagnostics } from '@codemirror/lint';
 import { MergeView } from '@codemirror/merge';
+import { utf16OffsetForUTF8Column } from './state';
 function languageExtension(language: any) {
     if (language === 'json')
         return json();
@@ -28,7 +29,7 @@ function languageExtension(language: any) {
 function position(view: any, line: any, column: any) {
     const safeLine: any = Math.max(1, Math.min(Number(line) || 1, view.state.doc.lines));
     const record: any = view.state.doc.line(safeLine);
-    return Math.min(record.to, record.from + Math.max(0, (Number(column) || 1) - 1));
+    return record.from + utf16OffsetForUTF8Column(record.text, column);
 }
 function appearanceTheme(theme: any) {
     return EditorView.theme({

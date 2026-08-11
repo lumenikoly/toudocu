@@ -47,3 +47,11 @@ test('editor ignores responses for another file or an older request', () => {
     assert.equal(state.editorResponseIsCurrent('docs/old.md', 'docs/current.md', 4, 4), false);
     assert.equal(state.editorResponseIsCurrent('docs/current.md', 'docs/current.md', 3, 4), false);
 });
+
+test('editor converts Go UTF-8 byte columns to CodeMirror UTF-16 offsets', () => {
+    assert.equal(state.utf16OffsetForUTF8Column('ascii', 4), 3);
+    assert.equal(state.utf16OffsetForUTF8Column('{"ключ": }', 14), 9);
+    assert.equal(state.utf16OffsetForUTF8Column('я😀x', 3), 1);
+    assert.equal(state.utf16OffsetForUTF8Column('я😀x', 7), 3);
+    assert.equal(state.utf16OffsetForUTF8Column('я😀x', 8), 4);
+});

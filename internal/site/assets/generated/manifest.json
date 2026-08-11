@@ -15,15 +15,15 @@
     },
     "changes.js": {
       "file": "changes.js",
-      "sha256": "c80ca93a9dad69471a7c18c2cfb79745bce3fe4fc8b1a7acb65ab74f7e4d3c11"
+      "sha256": "0a48eb5fa697ce576092a517b5e6d700751488eee441d0de6b0956efecaf2fe5"
     },
     "codemirror.checksums.txt": {
       "file": "codemirror.checksums.txt",
-      "sha256": "6da2c5c111fa01713dff2be020909a9cf1802b48b8def07991f311b56ab474a4"
+      "sha256": "9146cbb4182b51bb302a8224dec93a330a83af72badbecb2cc5d9bf51acfac5f"
     },
     "codemirror.js": {
       "file": "codemirror.js",
-      "sha256": "4f226643d367ad54000cdb45215d7e55f1408a557837b945ad9ee455cdeec96c"
+      "sha256": "51444e18f83cb28d1a2028e1baafec6d8e35dd5bbb9b451e74d384be15c5c33d"
     },
     "codemirror.LICENSE.txt": {
       "file": "codemirror.LICENSE.txt",
@@ -35,7 +35,7 @@
     },
     "editor.js": {
       "file": "editor.js",
-      "sha256": "697ed3ba27f9c135a01151a588a9c8364170eb909653c4c5385d8de46dd747ec"
+      "sha256": "92129b4d075292223cd278cecdba0489fcb11c73a98bf34c40d245e95130a11e"
     },
     "favicon.svg": {
       "file": "favicon.svg",

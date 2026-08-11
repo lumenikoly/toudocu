@@ -8,7 +8,7 @@ registerMessages(changesMessages);
     const REVIEW: any = page?.runtime === 'serve' && page.capabilities?.review ? page.endpoints?.review : '';
     const EDITOR_WORKSPACE: any = page?.runtime === 'serve' && page.capabilities?.editor ? page.endpoints?.editorWorkspace : '';
     const $: any = (selector: any, root: any = document) => root.querySelector(selector);
-    const state: any = { report: null, repository: null, files: [], linked: [], selected: null, tab: 'source', merge: null, etag: '', repositoryEtag: '', reviewEtag: '', review: null, composerTarget: null, composerReturn: null, activeDiscussion: '', discussionScroll: 0 };
+    const state: any = { report: null, repository: null, files: [], linked: [], linkedPaths: new Set(), selected: null, tab: 'source', merge: null, etag: '', repositoryEtag: '', reviewEtag: '', review: null, composerTarget: null, composerReturn: null, activeDiscussion: '', discussionScroll: 0 };
     const elements: any = {
         base: $('[data-base]'), branchBase: $('[data-branch-base]'), target: $('[data-target]'), targetRevision: $('[data-target-revision]'), targetRevisionWrap: $('[data-target-revision-wrap]'), apply: $('[data-apply-range]'), range: $('[data-range-summary]'), rangeMeta: $('[data-range-meta]'),
         summary: $('[data-summary]'), rangeDetails: $('[data-range-details]'), stale: $('[data-stale]'), search: $('[data-search]'), status: $('[data-status]'), scope: $('[data-scope]'), list: $('[data-file-list]'),
@@ -58,6 +58,17 @@ registerMessages(changesMessages);
             mermaidBlocks: documentation.mermaidBlocks || [], semanticChanges: documentation.semanticChanges || [], relationChanges: documentation.relationChanges || [], diagnostics: documentation.diagnostics || [],
             asset: documentation.asset, screen: documentation.screen, language: file.language || languageFor(file.path), documentation: file.documentation || null, _reviewFile: file,
         };
+    }
+    function reconcileLinkedFiles() {
+        const changedPaths: any = new Set(state.files.flatMap((file: any) => [file.path, file.oldPath].filter(Boolean)));
+        for (const discussion of state.review?.session?.discussions || []) {
+            const path: any = discussion.target?.path;
+            if (path)
+                state.linkedPaths.add(path);
+        }
+        state.linked = [...state.linkedPaths]
+            .filter((path: any) => !changedPaths.has(path))
+            .map((path: any) => normalizedReviewFile({ status: 'linked', path, language: languageFor(path), gitState: {}, lines: { added: 0, deleted: 0 } }));
     }
     function updateURL() {
         const params: any = query();
@@ -202,6 +213,8 @@ registerMessages(changesMessages);
         const renderHunkLine: any = (line: any, counters: any) => {
             let oldLine: any = '', newLine: any = '';
             const marker: any = line[0] || ' ';
+            if (![' ', '-', '+'].includes(marker))
+                return `<span class="diff-line diff-line-context"><span></span><span class="diff-line-number"></span><span class="diff-line-number"></span><span class="diff-line-marker">${escapeHTML(marker)}</span><span class="diff-line-content">${escapeHTML(line.slice(1))}</span></span>`;
             if (marker === ' ') {
                 oldLine = counters.old++;
                 newLine = counters.new++;
@@ -687,11 +700,7 @@ registerMessages(changesMessages);
             throw new Error(data.diagnostics?.[0]?.message || `HTTP ${response.status}`);
         state.review = data;
         state.reviewEtag = response.headers.get('ETag') || '';
-        for (const discussion of data.session?.discussions || []) {
-            const path: any = discussion.target?.path;
-            if (path && !state.files.some((item: any) => item.path === path || item.oldPath === path) && !state.linked.some((item: any) => item.path === path))
-                state.linked.push(normalizedReviewFile({ status: 'linked', path, language: languageFor(path), gitState: {}, lines: { added: 0, deleted: 0 } }));
-        }
+        reconcileLinkedFiles();
         renderReview();
         renderList();
     }
@@ -703,11 +712,11 @@ registerMessages(changesMessages);
         elements.filePickerResults.innerHTML = data.files.map((file: any) => `<button type="button" data-link-path="${escapeHTML(file.path)}"><strong>${escapeHTML(file.path.split('/').pop())}</strong><span>${escapeHTML(file.path)}</span></button>`).join('') || text("features.changes.index.119");
         elements.filePickerResults.querySelectorAll('[data-link-path]').forEach((button: any) => button.addEventListener('click', async () => {
             const path: any = button.dataset.linkPath;
-            if (!state.files.some((item: any) => item.path === path) && !state.linked.some((item: any) => item.path === path))
-                state.linked.push(normalizedReviewFile({ status: 'linked', path, language: languageFor(path), gitState: {}, lines: { added: 0, deleted: 0 } }));
+            state.linkedPaths.add(path);
+            reconcileLinkedFiles();
             elements.filePicker.close();
             renderList();
-            await selectChange(state.linked.find((item: any) => item.path === path));
+            await selectChange([...state.files, ...state.linked].find((item: any) => item.path === path));
         }));
     }
     function announce(message: any, copyPrompt: any = false) {
@@ -738,6 +747,7 @@ registerMessages(changesMessages);
         state.report = data;
         state.repository = repository || data;
         state.files = repository ? repository.files.map(normalizedReviewFile) : data.changes;
+        reconcileLinkedFiles();
         state.etag = response.headers.get('ETag') || '';
         state.repositoryEtag = repositoryResponse?.headers.get('ETag') || '';
         $('[data-global-comment]')?.toggleAttribute('disabled', !state.repository.feedbackWritable);
@@ -870,6 +880,7 @@ registerMessages(changesMessages);
                     if (reviewResponse.status !== 304 && reviewResponse.ok) {
                         state.review = await reviewResponse.json();
                         state.reviewEtag = reviewResponse.headers.get('ETag') || '';
+                        reconcileLinkedFiles();
                         renderReview();
                         renderList();
                     }
