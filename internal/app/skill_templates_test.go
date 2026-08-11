@@ -261,7 +261,8 @@ func TestToudocuInitContract(t *testing.T) {
 		"`missing-architecture-overview` may be the only error",
 		"`<docs-root>/architecture/overview.md`",
 		"`missing-project-locale`",
-		"Never construct an\n   asset path for an unsupported locale",
+		"Use `assets/project-guidance/en.md` for every project locale",
+		"Managed agent instructions\n   remain English",
 		"Set its H1 exactly to the resolved `project.sections.architecture`",
 		"entry document that existed before init",
 		"without removing\n   existing `site`, `changes`, or `translations` settings",
@@ -282,9 +283,9 @@ func TestToudocuRefreshContract(t *testing.T) {
 		"explicitly invokes `$toudocu refresh`",
 		"`$toudocu refresh diff`",
 		"[references/refresh.md](references/refresh.md)",
-		"Neither refresh form is a Toudocu\nGo CLI command or an initialization request",
+		"They are not Toudocu Go CLI commands",
 	} {
-		if !strings.Contains(skill, expected) {
+		if !containsNormalized(skill, expected) {
 			t.Errorf("SKILL.md does not define refresh contract %q", expected)
 		}
 	}
@@ -305,14 +306,14 @@ func TestToudocuRefreshContract(t *testing.T) {
 		"unresolved\n   findings",
 		"Creating, deleting, renaming, or merging a document",
 		"Update every\n   affected link, ID reference",
-		"only when content or declared\n   relationships actually change",
-		"Never advance `Last verified`",
+		"only when content or declared relationships actually change",
+		"Never advance the runbook verification date",
 		"Never edit generated portal output as documentation",
 		"Obtain independent semantic review",
 		"Rebuild a portal only when it is tracked",
 		"Refresh never performs initialization",
 	} {
-		if !strings.Contains(refresh, expected) {
+		if !containsNormalized(refresh, expected) {
 			t.Errorf("refresh reference does not contain %q", expected)
 		}
 	}
@@ -322,7 +323,7 @@ func TestToudocuRefreshContract(t *testing.T) {
 		t.Fatal("init reference must not route refresh")
 	}
 
-	for _, language := range []string{"ru", "en"} {
+	for _, language := range []string{"en"} {
 		guidance := readToudocuFile(t, filepath.Join("assets", "project-guidance", language+".md"))
 		for _, expected := range []string{"$toudocu refresh", "$toudocu refresh diff", "HEAD"} {
 			if !strings.Contains(guidance, expected) {
@@ -365,7 +366,7 @@ func TestToudocuFeedbackContract(t *testing.T) {
 func TestToudocuCompactOperationRouter(t *testing.T) {
 	skill := readToudocuFile(t, "SKILL.md")
 	for _, expected := range []string{
-		"| Operation | Reference | Changes files? | Confirmation / authority |",
+		"| Operation | Reference | Changes files? | Authority |",
 		"[references/init.md](references/init.md)",
 		"[references/refresh.md](references/refresh.md)",
 		"[references/translate.md](references/translate.md)",
@@ -377,9 +378,9 @@ func TestToudocuCompactOperationRouter(t *testing.T) {
 		"[references/screen-model.md](references/screen-model.md)",
 		"[references/work-item-model.md](references/work-item-model.md)",
 		"Load these references conditionally",
-		"both `index.md` and\n  `architecture/overview.md`",
+		"Every project requires both `index.md` and\n  `architecture/overview.md`",
 	} {
-		if !strings.Contains(skill, expected) {
+		if !containsNormalized(skill, expected) {
 			t.Errorf("compact router missing %q", expected)
 		}
 	}
@@ -389,7 +390,7 @@ func TestToudocuCompactOperationRouter(t *testing.T) {
 }
 
 func TestToudocuArchitectureTemplates(t *testing.T) {
-	for _, language := range []string{"ru", "en"} {
+	for _, language := range []string{"en"} {
 		t.Run(language, func(t *testing.T) {
 			overview := readSkillTemplate(t, language, "architecture-overview.md")
 			detail := readSkillTemplate(t, language, "architecture-detail.md")
@@ -440,7 +441,7 @@ func TestToudocuArchitectureTemplates(t *testing.T) {
 }
 
 func TestToudocuArchitectureGuidanceAndSemanticGate(t *testing.T) {
-	for _, language := range []string{"ru", "en"} {
+	for _, language := range []string{"en"} {
 		guidance := readToudocuFile(t, filepath.Join("assets", "project-guidance", language+".md"))
 		for _, expected := range []string{"architecture/overview.md", "FLOW-*", "CONTRACT", "REFERENCE", "RUNBOOK", "ADR", "MODULE"} {
 			if !strings.Contains(guidance, expected) {
@@ -462,7 +463,7 @@ func TestToudocuArchitectureGuidanceAndSemanticGate(t *testing.T) {
 		"any non-empty question text",
 		"Punctuation, question",
 	} {
-		if !strings.Contains(gate, expected) {
+		if !containsNormalized(gate, expected) {
 			t.Errorf("semantic gate does not contain %q", expected)
 		}
 	}
@@ -472,7 +473,7 @@ func TestToudocuProjectGuidanceTemplates(t *testing.T) {
 	const startMarker = "<!-- toudocu:project-guidance:start -->"
 	const endMarker = "<!-- toudocu:project-guidance:end -->"
 
-	for _, language := range []string{"ru", "en"} {
+	for _, language := range []string{"en"} {
 		content := readToudocuFile(t, filepath.Join("assets", "project-guidance", language+".md"))
 		if strings.Count(content, startMarker) != 1 || strings.Count(content, endMarker) != 1 {
 			t.Errorf("%s guidance must contain each managed marker exactly once", language)
@@ -491,12 +492,8 @@ func TestToudocuProjectGuidanceTemplates(t *testing.T) {
 		}
 	}
 
-	ru := readToudocuFile(t, filepath.Join("assets", "project-guidance", "ru.md"))
 	en := readToudocuFile(t, filepath.Join("assets", "project-guidance", "en.md"))
-	if !strings.Contains(ru, "Не создавайте задачу для каждого prompt") {
-		t.Error("Russian guidance does not prevent per-prompt task creation")
-	}
-	if !strings.Contains(en, "Do not create a task for every prompt") {
+	if !containsNormalized(en, "Do not create a task for every prompt") {
 		t.Error("English guidance does not prevent per-prompt task creation")
 	}
 }
@@ -571,13 +568,13 @@ func TestToudocuTranslationContextIsolation(t *testing.T) {
 			t.Errorf("translation workflow does not minimize context with %q", expected)
 		}
 	}
-	if !strings.Contains(initReference, "managed block must contain the\n   translation-context isolation rule") {
+	if !containsNormalized(initReference, "Use `assets/project-guidance/en.md` for every project locale") ||
+		!containsNormalized(initReference, "isolate translation roots from ordinary work") {
 		t.Error("init does not require translation isolation in installed guidance")
 	}
 
 	guidanceCases := map[string][]string{
-		"ru": {"единственным документационным и\n  backlog-источником", "translation roots из поиска по репозиторию", "явном `$toudocu translate <locale>`", "проверить, найти, собрать, запустить или изучить", "$toudocu translate diff", "все настроенные\n  translation roots по одному", "source/target-парой", "пути, хеши и\n  структурные отчёты", "Не добавляйте translation roots в ignore-файлы"},
-		"en": {"only documentation and backlog\n  source", "translation\n  roots remain valid implementation evidence", "explicit `$toudocu translate", "check, find, build, run, or inspect", "$toudocu translate diff", "all configured\n  translation roots one at a time", "source/target pair", "paths, hashes, and\n  structural reports", "Do not add translation roots to ignore files"},
+		"en": {"only documentation and backlog source", "outside translation roots remain valid implementation evidence", "explicit `$toudocu translate <locale>`", "check, find, build, run, or inspect", "$toudocu translate diff", "Process locales one at a time", "do not add translation roots to ignore files"},
 	}
 	for language, expectedValues := range guidanceCases {
 		guidance := readToudocuFile(t, filepath.Join("assets", "project-guidance", language+".md"))
@@ -605,7 +602,7 @@ func TestToudocuInstructionConsistency(t *testing.T) {
 			}
 		}
 	}
-	for _, language := range []string{"ru", "en"} {
+	for _, language := range []string{"en"} {
 		guidance := readToudocuFile(t, filepath.Join("assets", "project-guidance", language+".md"))
 		if strings.Contains(guidance, "docs/architecture/overview.md") {
 			t.Errorf("%s guidance hardcodes the fallback documentation root", language)
@@ -661,8 +658,8 @@ func TestToudocuMetadata(t *testing.T) {
 	metadata := readToudocuFile(t, filepath.Join("agents", "openai.yaml"))
 	for _, expected := range []string{
 		`display_name: "Toudocu"`,
-		`short_description: "Set up, update, and validate Toudocu documentation"`,
-		`default_prompt: "Use $toudocu init to explicitly set up Toudocu for this project."`,
+		`short_description: "Write and validate reliable, reader-first project documentation"`,
+		`default_prompt: "Use $toudocu for this request. Select only the applicable workflow and references.`,
 	} {
 		if !strings.Contains(metadata, expected) {
 			t.Errorf("openai.yaml does not contain %q", expected)

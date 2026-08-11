@@ -5,11 +5,11 @@
 - Актор: Разработчик
 - Модуль: MOD-SITE
 - Приоритет: Средний
-- Экраны: SC-SITE-HOME, SC-SITE-EDITOR, SC-SITE-DOCUMENT, SC-SITE-API-DOCS, SC-CHANGES-WORKSPACE
+- Экраны: SC-SITE-HOME, SC-SITE-EDITOR, SC-SITE-DOCUMENT, SC-SITE-API-DOCS
 - Начальный экран: SC-SITE-HOME
 - Конечные экраны: SC-SITE-DOCUMENT, SC-SITE-API-DOCS
 - Разрешить цикл: Да
-- Последнее обновление: 2026-08-10
+- Последнее обновление: 2026-08-11
 
 Разработчик запускает портал на своём компьютере, читает документацию и при
 необходимости правит исходные файлы во встроенном редакторе. После сохранения

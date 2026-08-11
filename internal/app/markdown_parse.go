@@ -12,7 +12,7 @@ var fieldAliases = map[string]string{
 	"author": "author", "автор": "author", "actor": "actor", "актор": "actor", "priority": "priority", "приоритет": "priority",
 	"severity": "severity", "серьёзность": "severity", "серьезность": "severity", "reproducibility": "reproducibility", "воспроизводимость": "reproducibility",
 	"regression": "regression", "регрессия": "regression", "type": "type", "тип": "type", "document type": "documentType", "тип документа": "documentType",
-	"architecture question": "architectureQuestion", "архитектурный вопрос": "architectureQuestion", "source": "source", "источник": "source",
+	"architecture question": "architectureQuestion", "architectural question": "architectureQuestion", "архитектурный вопрос": "architectureQuestion", "source": "source", "источник": "source",
 	"criticality": "criticality", "критичность": "criticality", "module": "module", "модуль": "module", "use case": "useCase", "scenario": "useCase",
 	"сценарий": "useCase", "связанный сценарий": "useCase", "flow": "flow", "process": "flow", "процесс": "flow",
 	"screens": "screens", "screens affected": "screens", "экраны": "screens", "затронутые экраны": "screens", "transitions": "transitions",

@@ -5,11 +5,11 @@
 - Actor: Developer
 - Module: MOD-SITE
 - Priority: Medium
-- Screens: SC-SITE-HOME, SC-SITE-EDITOR, SC-SITE-DOCUMENT, SC-SITE-API-DOCS, SC-CHANGES-WORKSPACE
+- Screens: SC-SITE-HOME, SC-SITE-EDITOR, SC-SITE-DOCUMENT, SC-SITE-API-DOCS
 - Start screen: SC-SITE-HOME
 - Terminal screens: SC-SITE-DOCUMENT, SC-SITE-API-DOCS
 - Allow cycle: Yes
-- Last updated: 2026-08-10
+- Last updated: 2026-08-11
 
 A developer runs the portal on their computer, reads documentation, and edits
 source files when needed. After a save, Toudocu rereads the sources and displays

@@ -95,6 +95,7 @@ async function exerciseStaticPortal(page: Page, origin: string): Promise<void> {
 test("static portal works over HTTP at root and nested paths", async ({ browser }) => {
   const fixture = mkdtempSync(join(tmpdir(), "toudocu-static-"));
   cpSync(join(repo, "docs"), join(fixture, "docs"), { recursive: true });
+  writeFileSync(join(fixture, "docs", "notes.md"), "# Заметки\n\nТестовая заметка.\n");
   cpSync(join(repo, ".toudocu"), join(fixture, ".toudocu"), { recursive: true });
   const output = join(fixture, "site");
   run("go", ["run", "./cmd/toudocu", "build", join(fixture, "docs"), "--repository-root", fixture, "-o", output, "--clean"]);
@@ -116,6 +117,7 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
   test.setTimeout(60_000);
   const fixture = mkdtempSync(join(tmpdir(), "toudocu-serve-"));
   cpSync(join(repo, "docs"), join(fixture, "docs"), { recursive: true });
+  writeFileSync(join(fixture, "docs", "notes.md"), "# Заметки\n\nТестовая заметка.\n");
   cpSync(join(repo, ".toudocu"), join(fixture, ".toudocu"), { recursive: true });
   run("git", ["init", "-q"], fixture);
   run("git", ["config", "user.email", "browser@example.invalid"], fixture);

@@ -593,7 +593,7 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 			requiredWorkSection{[]string{"фактическое поведение", "actual behavior"}, "Фактическое поведение"},
 		)
 	} else {
-		requiredSections = append(requiredSections, requiredWorkSection{[]string{"результат", "result"}, "Результат"})
+		requiredSections = append(requiredSections, requiredWorkSection{[]string{"результат", "result", "outcome"}, "Результат"})
 	}
 	strictWorkflow := statusValid && statusName != "draft"
 	if strictWorkflow {
