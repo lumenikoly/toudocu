@@ -52,7 +52,7 @@ func TestQualityMetadataStatusAliasesAndValidationBoundaries(t *testing.T) {
 	dangling := strings.Replace(validStandard("STD-DANGLING-001"), "- Status: Active", "- Status: Superseded\n- Superseded by: STD-MISSING-001", 1)
 	writeTestFile(t, docs, "quality/STD-DANGLING-001.md", dangling)
 	writeTestFile(t, docs, "runbooks/index.md", "# Runbooks\n\nProcedures.\n")
-	missingSections := "# RB-OPS-EMPTY: Empty\n\n- Identifier: RB-OPS-EMPTY\n- Status: Active\n- Owner: Ops\n- Environment: Production\n- Risk: Critical\n- Last verified: invalid\n\nNo procedure.\n"
+	missingSections := "# RB-OPS-EMPTY: Empty\n\n- Identifier: RB-OPS-EMPTY\n- Status: Active\n- Environment: Production\n- Risk: Critical\n- Last verified: invalid\n\nNo procedure.\n"
 	writeTestFile(t, docs, "runbooks/RB-OPS-EMPTY.md", missingSections)
 	writeTestFile(t, docs, "runbooks/invalid.md", strings.Replace(validRunbook("RB-OPS-INVALID", "Active", "2026-07-20", "Low"), "RB-OPS-INVALID", "INVALID", 2))
 	writeTestFile(t, docs, "runbooks/duplicate.md", validRunbook("RB-OPS-EMPTY", "Active", "2026-07-20", "Low"))
@@ -68,14 +68,14 @@ func TestQualityMetadataStatusAliasesAndValidationBoundaries(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, code := range []string{
-		"duplicate-standard-id", "missing-standard-owner", "missing-standard-scope",
+		"duplicate-standard-id", "missing-standard-scope",
 		"invalid-standard-status", "invalid-standard-updated", "missing-standard-rules",
 		"missing-standard-automatic-checks", "self-standard-replacement", "dangling-standard-replacement",
-		"invalid-runbook-id", "duplicate-runbook-id", "missing-runbook-owner",
+		"invalid-runbook-id", "duplicate-runbook-id",
 		"missing-runbook-environment", "invalid-runbook-status", "invalid-runbook-risk",
 		"missing-runbook-section", "runbook-procedure-not-numbered",
 		"missing-runbook-stop-conditions", "runbook-review-required", "stale-runbook",
-		"invalid-custom-manifest-type", "missing-custom-owner", "missing-custom-description",
+		"invalid-custom-manifest-type", "missing-custom-description",
 	} {
 		if !hasIssueCode(model.Issues, code) {
 			t.Errorf("missing validation code %s: %#v", code, model.Issues)
@@ -98,7 +98,6 @@ func validStandard(id string) string {
 
 - Identifier: ` + id + `
 - Status: Active
-- Owner: Platform
 - Scope: Go sources
 - Last updated: 2026-07-01
 
@@ -119,7 +118,6 @@ func validRunbook(id, status, verified, risk string) string {
 
 - Identifier: ` + id + `
 - Status: ` + status + `
-- Owner: Operations
 - Environment: Production
 - Risk: ` + risk + `
 - Last verified: ` + verified + `
@@ -198,7 +196,7 @@ func TestTypedKnowledgeErrorsAndCustomManifest(t *testing.T) {
 	writeTestFile(t, docs, "quality/bad.md", "# Bad\n\n- Identifier: std-bad\n- Status: Superseded\n\n## Rules\n\nRule.\n\n## Automated checks\n\nCheck.\n")
 	writeTestFile(t, docs, "runbooks/index.md", "# Runbooks\n\nOperational procedures.\n")
 	writeTestFile(t, docs, "runbooks/RB-BAD-001.md", validRunbook("RB-BAD-001", "Active", "2026-07-20", "Low")+"\n[Missing target](missing.md)\n")
-	writeTestFile(t, docs, "handbook/index.md", "# Team handbook\n\n- Type: Custom\n- Owner: Enablement\n\nTeam-specific guidance.\n")
+	writeTestFile(t, docs, "handbook/index.md", "# Team handbook\n\n- Type: Custom\n\nTeam-specific guidance.\n")
 	writeTestFile(t, docs, "handbook/start.md", "# Start\n\nRead this first.\n")
 	writeTestFile(t, docs, "misc/note.md", "# Note\n\nNo manifest exists.\n")
 
@@ -212,7 +210,7 @@ func TestTypedKnowledgeErrorsAndCustomManifest(t *testing.T) {
 		!hasIssueCode(model.Issues, "invalid-runbook-link") {
 		t.Fatalf("expected diagnostics missing: %#v", model.Issues)
 	}
-	for _, code := range []string{"invalid-custom-manifest-type", "missing-custom-owner", "missing-custom-description"} {
+	for _, code := range []string{"invalid-custom-manifest-type", "missing-custom-description"} {
 		if hasIssueCode(model.Issues, code) {
 			t.Fatalf("valid custom manifest received %s: %#v", code, model.Issues)
 		}
@@ -324,9 +322,8 @@ func TestStandardAndRunbookScaffoldsAndCatalogs(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if strings.Contains(string(data), "Owner:") || strings.Contains(string(data), "Владелец:") ||
-			strings.Contains(string(data), "Last verified:") || strings.Contains(string(data), "Последняя проверка:") {
-			t.Fatalf("scaffold invented owner or review date:\n%s", data)
+		if strings.Contains(string(data), "Last verified:") || strings.Contains(string(data), "Последняя проверка:") {
+			t.Fatalf("scaffold invented review date:\n%s", data)
 		}
 		if _, err := Scaffold(Options{InputDirectory: docs, EntityKind: test.kind, EntityID: test.id, Title: "Overwrite", Language: test.language}); err == nil {
 			t.Fatal("scaffold overwrote an existing file")
@@ -368,7 +365,7 @@ func TestStandardAndRunbookScaffoldsAndCatalogs(t *testing.T) {
 	writeTestFile(t, docs, "quality/STD-GO-001.md", validStandard("STD-GO-001"))
 	writeTestFile(t, docs, "runbooks/index.md", "# Operations\n\nRunbook catalog.\n")
 	writeTestFile(t, docs, "runbooks/RB-OPS-001.md", validRunbook("RB-OPS-001", "Active", "2026-07-20", "Low"))
-	writeTestFile(t, docs, "handbook/index.md", "# Team handbook\n\n- Type: Custom\n- Owner: Enablement\n\nTeam guidance.\n")
+	writeTestFile(t, docs, "handbook/index.md", "# Team handbook\n\n- Type: Custom\n\nTeam guidance.\n")
 	writeTestFile(t, docs, "handbook/start.md", "# Start\n\nStart here.\n")
 	writeTestFile(t, docs, "modules/core.md", "# MOD-CORE: Core\n\n- Identifier: MOD-CORE\n- Status: Planned\n\nCore module.\n")
 	writeTestFile(t, docs, "use-cases/core.md", "# UC-CORE-01: Continue\n\n- Identifier: UC-CORE-01\n- Status: Planned\n- Module: MOD-CORE\n\nContinue.\n")

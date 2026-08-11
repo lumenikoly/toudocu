@@ -238,7 +238,7 @@ paths:
       - {$ref: "#/components/parameters/Target"}
     patch:
       operationId: updateReviewDiscussion
-      summary: Reply, edit or delete one unsent message, resolve, or reopen
+      summary: Reply, edit or delete one unsent message, resolve, reopen, or delete a discussion
       parameters:
         - {$ref: "#/components/parameters/UpdateDiscussionAction"}
       requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/UpdateDiscussionRequest"}, example: {expectedRevision: 2, expectedStateDigest: abc123, operation: resolve}}}}
@@ -736,7 +736,7 @@ components:
     UpdateDiscussionRequest:
       allOf:
         - {$ref: "#/components/schemas/MutationGuard"}
-        - {type: object, required: [operation], properties: {operation: {type: string, enum: [reply, edit, delete, resolve, reopen]}, messageId: {type: string}, message: {type: string, minLength: 1, maxLength: 65536}}}
+        - {type: object, required: [operation], properties: {operation: {type: string, enum: [reply, edit, delete, resolve, reopen, deleteDiscussion]}, messageId: {type: string}, message: {type: string, minLength: 1, maxLength: 65536}}}
     CleanupReviewRequest:
       allOf:
         - {$ref: "#/components/schemas/MutationGuard"}

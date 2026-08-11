@@ -6,7 +6,6 @@
 - Модуль: {{MODULE_ID}}
 {{OPTIONAL_FLOW_METADATA}}
 {{OPTIONAL_SCREENS_METADATA}}
-- Владелец: {{OWNER}}
 - Последнее обновление: {{DATE}}
 
 ## Результат

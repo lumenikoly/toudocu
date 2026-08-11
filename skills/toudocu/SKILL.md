@@ -65,7 +65,7 @@ Load these references conditionally:
    ```
 
 Diagnostics prove structural facts, not missing product intent. Never invent
-behavior, status, owner, date, relationship, procedure, or terminology to
+behavior, status, date, relationship, procedure, or terminology to
 silence one.
 
 ## Write for the reader
@@ -120,7 +120,7 @@ locale order.
   question. FLOW, CONTRACT, REFERENCE, RUNBOOK, ADR, and MODULE details stay in
   their own sources of truth.
 - Use typed documents only for evidence-backed semantics. Unknown top-level
-  sections need an `index.md` manifest with `Type: Custom`, owner, description,
+  sections need an `index.md` manifest with `Type: Custom`, description,
   and a useful H1. Create `runbooks/` only for a real operational procedure.
 - Replace every template placeholder. Remove unsupported optional sections.
   Mermaid is visualization only; prose owns requirements and acceptance.

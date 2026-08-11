@@ -4,7 +4,6 @@
 - Type: Maintenance
 - Module: MOD-CLI
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Toudocu team
 - Last updated: 2026-08-11
 
 ## Result

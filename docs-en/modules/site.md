@@ -2,7 +2,6 @@
 
 - Identifier: MOD-SITE
 - Status: Ready
-- Owner: Toudocu team
 - Last updated: 2026-08-10
 
 The module produces backend-independent HTML pages, navigation, static JSON

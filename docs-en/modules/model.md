@@ -2,7 +2,6 @@
 
 - Identifier: MOD-MODEL
 - Status: Ready
-- Owner: Toudocu team
 - Last updated: 2026-08-10
 
 This module reads the documentation root, connects known entities, and reports

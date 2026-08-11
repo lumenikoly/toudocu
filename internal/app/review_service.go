@@ -43,6 +43,7 @@ func (service *reviewService) discussions() (ReviewState, error) {
 	for index := range state.Session.Discussions {
 		state.Session.Discussions[index].Placement = service.reanchor(state.Session.Discussions[index], report)
 	}
+	sortReviewDiscussions(&state)
 	state.RepositoryRevision = report.RepositoryRevision
 	return state, nil
 }
@@ -107,7 +108,7 @@ func (service *reviewService) createDiscussion(request CreateDiscussionRequest) 
 }
 
 func (service *reviewService) updateDiscussion(id string, request UpdateDiscussionRequest) (ReviewState, error) {
-	return service.store.mutate(request.ReviewMutationGuard, func(state *ReviewState) error {
+	result, err := service.store.mutate(request.ReviewMutationGuard, func(state *ReviewState) error {
 		discussion := findDiscussion(state, id)
 		if discussion == nil {
 			return &reviewFailure{Code: "REVIEW_NOT_FOUND", Status: http.StatusNotFound, Message: "discussion не найден"}
@@ -158,6 +159,37 @@ func (service *reviewService) updateDiscussion(id string, request UpdateDiscussi
 				removeDiscussion(state, discussion.ID)
 				return nil
 			}
+		case "deleteDiscussion":
+			removeDiscussion(state, id)
+			kept := state.Feedback[:0]
+			for _, batch := range state.Feedback {
+				affected := false
+				for _, item := range batch.Items {
+					if item.DiscussionID == id {
+						affected = true
+						break
+					}
+				}
+				if !affected {
+					kept = append(kept, batch)
+					continue
+				}
+				if batch.RespondedAt.IsZero() {
+					for _, item := range batch.Items {
+						discussion := findDiscussion(state, item.DiscussionID)
+						if discussion == nil {
+							continue
+						}
+						for index := range discussion.Messages {
+							if discussion.Messages[index].ID == item.MessageID && discussion.Messages[index].FeedbackID == batch.ID {
+								discussion.Messages[index].FeedbackID = ""
+							}
+						}
+					}
+				}
+			}
+			state.Feedback = kept
+			return nil
 		case "resolve":
 			discussion.State = "resolved"
 		case "reopen":
@@ -168,6 +200,10 @@ func (service *reviewService) updateDiscussion(id string, request UpdateDiscussi
 		discussion.UpdatedAt = now
 		return nil
 	})
+	if err == nil && request.Operation == "deleteDiscussion" {
+		service.store.garbageCollectSnapshots(result)
+	}
+	return result, err
 }
 
 func (service *reviewService) createFeedback(guard ReviewMutationGuard) (ReviewState, *FeedbackBatch, error) {
@@ -782,6 +818,9 @@ func asReviewFailure(err error, target **reviewFailure) bool {
 func sortReviewDiscussions(state *ReviewState) {
 	if state.Session != nil {
 		sort.SliceStable(state.Session.Discussions, func(i, j int) bool {
+			if state.Session.Discussions[i].State != state.Session.Discussions[j].State {
+				return state.Session.Discussions[i].State == "open"
+			}
 			return state.Session.Discussions[i].CreatedAt.Before(state.Session.Discussions[j].CreatedAt)
 		})
 	}

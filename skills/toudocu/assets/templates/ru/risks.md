@@ -7,7 +7,6 @@
 - Статус: {{STATUS}}
 - Вероятность: {{PROBABILITY}}
 - Влияние: {{IMPACT}}
-- Владелец: {{OWNER}}
 
 {{RISK_DESCRIPTION}}
 

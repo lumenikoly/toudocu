@@ -12,7 +12,7 @@ Every `quality/*.md` file except `quality/index.md` describes one unique
 
 A useful standard contains:
 
-- `Identifier`, `Owner`, `Scope`, and an ISO `Last updated` date;
+- `Identifier`, `Scope`, and an ISO `Last updated` date;
 - status `Draft`, `Active` or `Effective`, `Obsolete` or `Deprecated`, or
   `Superseded`;
 - non-empty Rules and Automated checks sections;
@@ -32,7 +32,7 @@ Russian-language documentation root.
 A runbook is a verified operational procedure. Every `runbooks/*.md` file
 except `index.md` describes one unique `RB-*`.
 
-It records an owner, environment, risk, status, and `Last verified` date, and
+It records an environment, risk, status, and `Last verified` date, and
 contains these non-empty sections:
 
 - Prerequisites;
@@ -58,7 +58,6 @@ An unknown top-level directory is not classified by its name or contents. Its
 `index.md` must contain:
 
 - `Type: Custom`;
-- an owner;
 - a non-empty description;
 - an H1 title, used as the section name in portal navigation.
 

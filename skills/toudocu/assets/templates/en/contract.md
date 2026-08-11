@@ -2,7 +2,6 @@
 
 - Identifier: {{CONTRACT_ID}}
 - Status: {{STATUS}}
-- Owner: {{OWNER}}
 - Last updated: {{DATE}}
 
 {{CONTRACT_SUMMARY}}

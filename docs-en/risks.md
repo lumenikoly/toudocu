@@ -9,7 +9,6 @@ risk can never return.
 - Status: Mitigating
 - Probability: Low
 - Impact: Medium
-- Owner: Toudocu team
 
 Goldmark gives every Toudocu command the same CommonMark/GFM parse tree. A
 version or extension change can still alter generated HTML, source ranges, and
@@ -28,7 +27,6 @@ normalization. That can affect portal output, links, and comment anchors.
 - Status: Accepted
 - Probability: Low
 - Impact: High
-- Owner: Repository user
 
 Verification commands run through the system shell with the privileges of the
 person who started Toudocu. A task from an untrusted source can therefore
@@ -48,7 +46,6 @@ The user must still read the commands and trust their source before running
 - Status: Mitigating
 - Probability: Low
 - Impact: High
-- Owner: Toudocu team
 
 A defect in `build --clean` could otherwise remove data outside the portal
 output directory.

@@ -67,7 +67,7 @@ another implicit skill trigger. The Toudocu Go CLI has no `init` command.
    required `Architecture Overview` document type, state only the
    evidence-backed system boundary, leave the architecture-question map empty,
    and omit the optional context diagram unless repository evidence supports
-   it. Do not create detailed architecture documents, typed entities, owners,
+   it. Do not create detailed architecture documents, typed entities,
    statuses, or relationships without evidence.
 4. Create or complete `<repository-root>/.toudocu/config.yml` without removing
    existing `site`, `changes`, or `translations` settings. Set the resolved

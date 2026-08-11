@@ -28,7 +28,7 @@ checks purpose, evidence, document boundaries, and truth.
    typed contract.
 7. If a required typed field cannot be supported, stop and reconsider the
    document type or report the missing product intent. Do not invent an entity,
-   relationship, status, owner, date, transition, procedure, or verification
+   relationship, status, date, transition, procedure, or verification
    command.
 
 ## Author review

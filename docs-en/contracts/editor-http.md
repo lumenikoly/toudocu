@@ -2,7 +2,6 @@
 
 - Identifier: CON-EDITOR-HTTP-V1
 - Status: Ready
-- Owner: Toudocu team
 - Last updated: 2026-08-10
 
 [OpenAPI 3.1.0](editor.openapi.yaml) contains routes, parameters, response codes,

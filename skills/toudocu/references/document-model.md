@@ -54,7 +54,7 @@ is an error. All other document types are optional.
 | Any other path | Free-form documentation | Renders safely without a typed entity contract |
 
 When an unknown top-level directory contains Markdown, its `index.md` is a
-custom-section manifest with `Type: Custom`, an owner, and a description. Its
+custom-section manifest with `Type: Custom` and a description. Its
 H1 supplies the navigation title. Do not infer a typed category from filenames,
 document count, or prose.
 

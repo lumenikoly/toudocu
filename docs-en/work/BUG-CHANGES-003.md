@@ -8,7 +8,6 @@
 - Regression: No
 - Module: MOD-CHANGES
 - Use case: UC-DOCS-05
-- Owner: Toudocu team
 - Standards: STD-GO-001, STD-DOCS-001
 - Last updated: 2026-08-10
 

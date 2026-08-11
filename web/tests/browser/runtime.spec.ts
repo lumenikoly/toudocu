@@ -611,24 +611,69 @@ test("Portal and Changes review hand local discussions to the agent CLI without 
     await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe("Документ: Architecture\nПуть: docs/architecture/overview.md\n\nВыделенный фрагмент:\nUpdated.");
     await selectPortalText("Updated.");
     await portalSelectionMenu.getByRole("button", { name: "Добавить вопрос" }).click();
-    const portalComposer = page.locator(".portal-review-dialog");
+    const portalComposer = page.locator(".portal-review-dialog:not(.portal-review-confirm)");
     await expect(portalComposer).toBeVisible();
     await expect(portalComposer.locator("[data-portal-review-selection]")).toHaveText("Updated.");
     await portalComposer.locator("[data-portal-review-question]").fill("Почему граница изменилась?");
     await portalComposer.locator(".portal-review-submit").click();
     await expect(portalComposer).not.toBeVisible();
     await expect(page.locator(".portal-review-toast")).toContainText("Вопрос добавлен в обсуждение.");
+    await expect(page.locator('.portal-review-toast button')).toBeHidden();
+    const portalPanel = page.locator('.portal-review-panel');
+    await expect(portalPanel).toBeVisible();
+    await expect(page.locator('[data-portal-review-count]')).toHaveText('1');
+    await expect(portalPanel).toContainText('Почему граница изменилась?');
     await selectPortalText("Repeated.");
     await portalSelectionMenu.getByRole("button", { name: "Добавить вопрос" }).click();
     await expect(portalComposer.locator("[data-portal-review-selection]")).toHaveText("Repeated.");
     await portalComposer.locator("[data-portal-review-question]").fill("Почему фрагмент повторяется?");
     await portalComposer.locator(".portal-review-submit").click();
     await expect(portalComposer).not.toBeVisible();
-    await page.locator(".portal-review-toast a").click();
+    await expect(page.locator('[data-portal-review-count]')).toHaveText('2');
+    await portalPanel.locator('[data-portal-review-send]').click();
+    await expect(portalPanel.locator('[data-portal-review-unsent]')).toHaveText('0');
+    await expect(page.locator('.portal-review-toast')).toContainText('Агенту подготовлено комментариев: 2.');
+    await page.locator('.portal-review-toast').getByRole('button', { name: 'Копировать команду' }).click();
+    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe('Обработай комментарии из Toudocu Changes');
+
+    const portalPending = feedbackCLI(["pending"]);
+    expect(portalPending.feedback.items).toHaveLength(2);
+    const portalQuestion = portalPending.feedback.items.find((item: any) => item.body === "Почему граница изменилась?");
+    expect(portalQuestion.anchor.selectedText).toBe("Updated.");
+    const fallbackQuestion = portalPending.feedback.items.find((item: any) => item.body.startsWith("Почему фрагмент повторяется?"));
+    expect(fallbackQuestion.target.type).toBe("file");
+    expect(fallbackQuestion.body).toContain("Выделенный фрагмент:\nRepeated.");
+    const portalResponsePath = join(mkdtempSync(join(tmpdir(), "toudocu-review-response-")), "response.json");
+    writeFileSync(portalResponsePath, JSON.stringify({
+      schemaVersion: 1,
+      reviewId: portalPending.feedback.reviewId,
+      feedbackId: portalPending.feedback.id,
+      feedbackDigest: portalPending.feedback.feedbackDigest,
+      expectedRevision: portalPending.revision,
+      expectedStateDigest: portalPending.stateDigest,
+      results: portalPending.feedback.items.map((item: any) => ({ itemId: item.id, outcome: "needsClarification", message: "Нужно уточнить вопрос по документации.", changedPaths: [] })),
+    }));
+    feedbackCLI(["respond", "--input", portalResponsePath]);
+    await expect(portalPanel).toContainText('Нужно уточнить вопрос по документации.');
+
+    const boundaryThread = portalPanel.locator('.portal-review-thread').filter({ hasText: 'Почему граница изменилась?' });
+    await boundaryThread.getByRole('button', { name: 'Закрыть', exact: true }).click();
+    await expect(portalPanel.locator('.portal-review-thread').last()).toContainText('Почему граница изменилась?');
+    await expect(portalPanel.locator('.portal-review-thread').last()).toHaveClass(/is-resolved/);
+    await boundaryThread.getByRole('button', { name: 'Открыть снова' }).click();
+    await expect(page.locator('[data-portal-review-count]')).toHaveText('2');
+    const fallbackThread = portalPanel.locator('.portal-review-thread').filter({ hasText: 'Почему фрагмент повторяется?' });
+    await fallbackThread.getByRole('button', { name: 'Удалить' }).click();
+    await page.locator('.portal-review-confirm').getByRole('button', { name: 'Удалить' }).click();
+    await expect(page.locator('.portal-review-confirm')).not.toBeVisible();
+    await expect(page.locator('[data-portal-review-count]')).toHaveText('1');
+    await expect(portalPanel.locator('.portal-review-thread')).toHaveCount(1);
+    await portalPanel.getByRole('button', { name: 'Закрыть панель' }).click();
+    await page.getByRole('link', { name: 'Показать изменения' }).click();
     await expect(page.getByRole("heading", { name: "Изменения", exact: true })).toBeVisible();
     await expect(page.locator('[data-file-list] [data-path="server.go"]')).toBeVisible();
     await expect(page.locator('[data-file-list] [data-path="docs/architecture/overview.md"]')).toHaveClass(/is-active/);
-    await expect(page.locator('[data-open-discussion-count]')).toHaveText("2");
+    await expect(page.locator('[data-open-discussion-count]')).toHaveText("1");
 
     await page.locator('[data-file-list] [data-path="server.go"]').click();
     await expect(page.locator('[data-tab="rendered"], [data-tab="semantic"], [data-tab="relations"]')).toHaveCount(0);
@@ -670,20 +715,14 @@ test("Portal and Changes review hand local discussions to the agent CLI without 
     await composer.locator('[data-review-message]').fill("Legacy точно можно удалить?");
     await composer.locator('button[type="submit"]').click();
 
-    await expect(page.locator('[data-open-discussion-count]')).toHaveText("5");
-    await expect(page.locator('[data-unsent-count]')).toHaveText("5");
+    await expect(page.locator('[data-open-discussion-count]')).toHaveText("4");
+    await expect(page.locator('[data-unsent-count]')).toHaveText("3");
     await page.locator('[data-send-feedback]').click();
     await expect(page.locator('[data-unsent-count]')).toHaveText("0");
 
     const pending = feedbackCLI(["pending"]);
-    expect(pending.feedback.items).toHaveLength(5);
+    expect(pending.feedback.items).toHaveLength(3);
     expect(pending.feedback.items.every((item: any) => !("type" in item))).toBe(true);
-    const portalQuestion = pending.feedback.items.find((item: any) => item.body === "Почему граница изменилась?");
-    expect(portalQuestion.body).toBe("Почему граница изменилась?");
-    expect(portalQuestion.anchor.selectedText).toBe("Updated.");
-    const fallbackQuestion = pending.feedback.items.find((item: any) => item.body.startsWith("Почему фрагмент повторяется?"));
-    expect(fallbackQuestion.target.type).toBe("file");
-    expect(fallbackQuestion.body).toContain("Выделенный фрагмент:\nRepeated.");
     writeFileSync(join(fixture, "path.go"), "package review\n\nfunc Path() string { return \"fixed\" }\n");
     writeFileSync(join(fixture, "server_test.go"), "package review\n\nimport \"testing\"\n\nfunc TestPath(t *testing.T) { if Path() == \"\" { t.Fatal(\"empty\") } }\n");
     const results = pending.feedback.items.map((item: any) => {
@@ -706,7 +745,15 @@ test("Portal and Changes review hand local discussions to the agent CLI without 
     await expect(page.locator('[data-discussion-list]')).toContainText("Исправлено");
     await expect(page.locator('[data-discussion-list]')).toContainText("Не исправлено");
     await expect(page.locator('[data-discussion-list]')).toContainText("Нужно уточнение");
-    await expect(page.locator('[data-open-discussion-count]')).toHaveText("5");
+    await expect(page.locator('[data-open-discussion-count]')).toHaveText("4");
+
+    const serverThread = page.locator('.review-thread').filter({ hasText: "server.go" });
+    await serverThread.getByRole('button', { name: 'Удалить' }).click();
+    const changesDeleteConfirm = page.locator('[data-review-delete-confirm]');
+    await expect(changesDeleteConfirm).toBeVisible();
+    await changesDeleteConfirm.getByRole('button', { name: 'Удалить' }).click();
+    await expect(changesDeleteConfirm).not.toBeVisible();
+    await expect(page.locator('[data-open-discussion-count]')).toHaveText("3");
 
     const legacyThread = page.locator('.review-thread').filter({ hasText: "legacy.go" });
     await legacyThread.getByRole("button", { name: "Посмотреть исправление" }).click();
@@ -732,7 +779,7 @@ test("Portal and Changes review hand local discussions to the agent CLI without 
     await composer.locator('[data-review-message]').fill("Проверь связанный файл.");
     await composer.locator('button[type="submit"]').click();
     await expect(composer).not.toBeVisible();
-    await expect(page.locator('[data-open-discussion-count]')).toHaveText("6");
+    await expect(page.locator('[data-open-discussion-count]')).toHaveText("4");
     writeFileSync(join(fixture, "docs", "index.md"), "# Review\n\nChanged.\n");
     await page.route("**/_toudocu/api/changes/review/repository/changes**", async (route) => {
       await new Promise((resolveDelay) => setTimeout(resolveDelay, 250));
@@ -757,6 +804,20 @@ test("Portal and Changes review hand local discussions to the agent CLI without 
     await expect(discussionsToggle).toBeFocused();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
     await expect(page.locator('[data-discussions-panel]')).toHaveAttribute("hidden", "");
+    await page.goto(`${origin}/architecture/overview.html`);
+    await page.setViewportSize({ width: 320, height: 640 });
+    const portalDiscussionsToggle = page.locator('.portal-review-toggle');
+    await portalDiscussionsToggle.click();
+    await expect(page.locator('.portal-review-panel')).toBeVisible();
+    await expect(page.locator('.portal-review-panel')).toHaveCSS('width', '320px');
+    expect(await page.evaluate(() => {
+      const header = document.querySelector('.portal-review-panel > header');
+      const title = header?.firstElementChild?.getBoundingClientRect();
+      const actions = header?.lastElementChild?.getBoundingClientRect();
+      return getComputedStyle(document.documentElement).overflow === 'hidden' && !!title && !!actions && actions.top >= title.bottom;
+    })).toBe(true);
+    await page.keyboard.press('Escape');
+    await expect(portalDiscussionsToggle).toBeFocused();
     expect(await page.evaluate(() => window.ToudocuPage?.capabilities.review)).toBe(true);
     expect((await page.locator('script#toudocu-page').textContent())?.includes("reviewId")).toBe(false);
   } finally {

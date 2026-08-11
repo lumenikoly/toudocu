@@ -1,6 +1,5 @@
 # Quality Standards
 
-- Owner: Toudocu team
 
 This section records mandatory rules for developing Toudocu and maintaining its
 documentation. Each standard applies only to its declared Scope. A standard is

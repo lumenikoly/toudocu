@@ -111,9 +111,6 @@ func validateTypedKnowledge(model *Model) {
 			standardByID[id] = document
 		}
 		statusName, statusValid := standardStatus(document.Metadata["status"])
-		if document.Metadata["owner"] == "" {
-			typedWarning(model, document, "missing-standard-owner", "У стандарта не указан владелец.")
-		}
 		if document.Metadata["scope"] == "" {
 			typedWarning(model, document, "missing-standard-scope", "У стандарта не указана область.")
 		}
@@ -135,7 +132,7 @@ func validateTypedKnowledge(model *Model) {
 			typedError(model, document, "missing-standard-superseded-by", "Заменённый стандарт должен ссылаться полем «Заменён» на STD-*.")
 		}
 		standards = append(standards, KnowledgeStandard{
-			ID: id, Title: document.Title, Status: document.Status, Owner: document.Metadata["owner"],
+			ID: id, Title: document.Title, Status: document.Status,
 			Scope: document.Metadata["scope"], Updated: document.Metadata["updated"],
 			SupersededBy: document.Metadata["supersededBy"], Rules: rules, AutomaticChecks: checks,
 			Document: document.SourcePath,
@@ -162,9 +159,6 @@ func validateTypedKnowledge(model *Model) {
 			runbookByID[id] = document
 		}
 		statusName, statusValid := runbookStatus(document.Metadata["status"])
-		if document.Metadata["owner"] == "" {
-			typedWarning(model, document, "missing-runbook-owner", "У runbook не указан владелец.")
-		}
 		if document.Metadata["environment"] == "" {
 			typedWarning(model, document, "missing-runbook-environment", "У runbook не указана среда.")
 		}
@@ -216,7 +210,7 @@ func validateTypedKnowledge(model *Model) {
 			freshness = "recent"
 		}
 		runbooks = append(runbooks, KnowledgeRunbook{
-			ID: id, Title: document.Title, Status: document.Status, Owner: document.Metadata["owner"],
+			ID: id, Title: document.Title, Status: document.Status,
 			Environment: document.Metadata["environment"], Risk: document.Metadata["risk"],
 			LastVerified: document.Metadata["lastVerified"], Freshness: freshness, Document: document.SourcePath,
 		})
@@ -266,9 +260,6 @@ func validateSectionManifests(model *Model) {
 		}
 		if canonicalText(manifest.Metadata["type"]) != "custom" {
 			typedWarning(model, manifest, "invalid-custom-manifest-type", "Манифест пользовательского раздела должен содержать «Тип: Custom».")
-		}
-		if manifest.Metadata["owner"] == "" {
-			typedWarning(model, manifest, "missing-custom-owner", "У пользовательского раздела не указан владелец.")
 		}
 		if manifest.Description == "" {
 			typedWarning(model, manifest, "missing-custom-description", "Манифест пользовательского раздела должен содержать непустое описание.")

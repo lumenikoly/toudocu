@@ -76,7 +76,6 @@ The user can continue from the start screen.
 				"{{OPTIONAL_TRANSITIONS_METADATA}}": "- Переходы: TR-CORE-001",
 				"{{TRANSITION_ID}}":                 "TR-CORE-001",
 				"{{VERIFICATION_REFERENCE}}":        "TestOpenWorkspace",
-				"{{OWNER}}":                         "Team",
 				"{{RESULT}}":                        "The continue path works.",
 				"{{BEFORE}}":                        "The continue path is unavailable.",
 				"{{AFTER}}":                         "The continue path opens the workspace.",

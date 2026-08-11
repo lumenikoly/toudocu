@@ -58,7 +58,7 @@ staleness. Never invent information merely to remove a warning.
 | Any other path | Ordinary Markdown without a built-in typed contract |
 
 An unknown top-level Markdown section declares its own `index.md` with
-`Type: Custom`, an owner, a description, and a useful H1. This adds navigation,
+`Type: Custom`, a description, and a useful H1. This adds navigation,
 not new built-in semantics. See [Document Types](document-types.md) for the
 semantic boundaries between kinds.
 

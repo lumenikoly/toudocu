@@ -3,7 +3,6 @@
 - Статус: {{STATUS}}
 - Этап: {{STAGE}}
 - Версия: {{VERSION}}
-- Владелец: {{OWNER}}
 - Последнее обновление: {{DATE}}
 
 {{CURRENT_STATE_SUMMARY}}

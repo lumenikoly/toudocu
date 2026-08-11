@@ -85,7 +85,6 @@ cannot be used for another type.
 | `Affected runbooks` | Optional existing `RB-*` identifiers; included in context |
 | `Depends on` | `TASK-*` and `BUG-*`, separated by spaces, commas, or semicolons |
 | `Priority` | Optional label; no fixed vocabulary outside the bug contract |
-| `Owner` | Optional team or responsible person |
 | `Last updated` | Optional ISO date used by stale-document policy |
 
 Identifiers are unique across all of `work/**`, including the archive. A
@@ -168,7 +167,7 @@ always shown; Toudocu does not guess a hidden task-start commit.
 
 A bug first establishes the defect, then proves a correction of that same
 behavior. Severity, Priority, Reproducibility, Regression, Module, Use case,
-Owner, and Last updated are always required.
+and Last updated are always required.
 
 | Field | Accepted values |
 |---|---|
@@ -240,7 +239,6 @@ archived by mistake. Identifiers and dependencies span all of `work/**`, so
 - Module: MOD-AUTH
 - Use case: UC-AUTH-03
 - Flow: FLOW-AUTH-RECOVERY
-- Owner: Identity team
 - Depends on: TASK-MAIL-004
 - Last updated: 2026-07-27
 

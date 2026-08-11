@@ -5,7 +5,6 @@
 - Priority: Medium
 - Module: MOD-SITE
 - Use case: UC-DOCS-01
-- Owner: Toudocu team
 - Last updated: 2026-08-10
 
 ## Result

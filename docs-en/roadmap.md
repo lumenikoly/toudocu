@@ -7,7 +7,6 @@ itself.
 ## Implemented
 
 - Status: Completed
-- Owner: Toudocu team
 
 - [x] `UC-DOCS-01` Build a self-contained documentation portal.
 - [x] `UC-DOCS-02` Check documentation structure and relationships.
@@ -28,7 +27,6 @@ itself.
 ## Version 0.0.1
 
 - Status: Completed
-- Owner: Toudocu team
 
 - [x] `UC-AGENT-01` Install and maintain the embedded AI skill.
 - [x] `DLV-ROADMAP-001` Add an outcome to an existing roadmap stage from

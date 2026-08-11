@@ -2,7 +2,6 @@
 
 - Identifier: MOD-MARKDOWN
 - Status: Ready
-- Owner: Toudocu team
 - Last updated: 2026-08-10
 
 This module parses the supported CommonMark and GFM syntax once, produces one

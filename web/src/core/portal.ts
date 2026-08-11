@@ -152,7 +152,7 @@ registerMessages(portalMessages);
         function score(item: any, query: any, terms: any) {
             const title: any = normalize(item.title);
             const path: any = normalize(item.path);
-            const haystack: any = item.text || normalize(`${item.title} ${item.path} ${item.description} ${item.status} ${item.owner}`);
+            const haystack: any = item.text || normalize(`${item.title} ${item.path} ${item.description} ${item.status}`);
             if (!terms.every((term: any) => haystack.includes(term)))
                 return -1;
             let value: any = 0;
@@ -488,6 +488,15 @@ registerMessages(portalMessages);
         const path: any = contextButton.dataset.documentContextPath || '';
         if (!path)
             return;
+        const escapeHTML: any = (value: any) => String(value ?? '').replace(/[&<>"']/g, (character: any) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } as Record<string, string>)[character]);
+        const placementLabel: any = (status: any) => ({ exact: text("core.portal.063"), moved: text("core.portal.064"), stale: text("core.portal.065"), deleted: text("core.portal.066") } as Record<string, string>)[status] || status;
+        const outcomeLabel: any = (outcome: any) => ({ fixed: text("core.portal.067"), notFixed: text("core.portal.068"), needsClarification: text("core.portal.069") } as Record<string, string>)[outcome] || outcome;
+        const toggle: any = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'document-context-button portal-review-toggle';
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.innerHTML = `${text("core.portal.054")} · <span data-portal-review-count>0</span>`;
+        contextButton.insertAdjacentElement('afterend', toggle);
         const menu: any = document.createElement('div');
         menu.className = 'review-selection-menu';
         menu.hidden = true;
@@ -496,30 +505,146 @@ registerMessages(portalMessages);
         menu.innerHTML = `<button type="button" data-selection-copy>${text("core.portal.035")}</button><button type="button" data-selection-context>${text("core.portal.036")}</button><button type="button" data-selection-question>${text("core.portal.037")}</button>`;
         const dialog: any = document.createElement('dialog');
         dialog.className = 'portal-review-dialog';
-        dialog.innerHTML = `<form method="dialog"><header><h2>${text("core.portal.042")}</h2><span data-portal-review-title></span></header><label>${text("core.portal.043")}<pre data-portal-review-selection></pre></label><label>${text("core.portal.044")}<textarea required maxlength="65536" rows="5" placeholder="${text("core.portal.045")}" data-portal-review-question></textarea></label><p class="portal-review-error" data-portal-review-error role="alert"></p><footer><button type="submit" value="cancel">${text("core.portal.046")}</button><button type="submit" class="portal-review-submit">${text("core.portal.047")}</button></footer></form>`;
+        dialog.innerHTML = `<form method="dialog"><header><h2 data-portal-review-dialog-title>${text("core.portal.042")}</h2><span data-portal-review-title></span></header><label data-portal-review-selection-wrap>${text("core.portal.043")}<pre data-portal-review-selection></pre></label><label>${text("core.portal.044")}<textarea required maxlength="65536" rows="5" placeholder="${text("core.portal.045")}" data-portal-review-question></textarea></label><p class="portal-review-error" data-portal-review-error role="alert"></p><footer><button type="submit" value="cancel">${text("core.portal.046")}</button><button type="submit" class="portal-review-submit">${text("core.portal.047")}</button></footer></form>`;
         $('[data-portal-review-title]', dialog).textContent = title;
+        const confirmDialog: any = document.createElement('dialog');
+        confirmDialog.className = 'portal-review-dialog portal-review-confirm';
+        confirmDialog.innerHTML = `<form method="dialog"><header><h2>${text("core.portal.077")}</h2></header><p>${text("core.portal.078")}</p><p class="portal-review-error" data-portal-review-delete-error role="alert"></p><footer><button type="submit" value="cancel">${text("core.portal.046")}</button><button type="submit" class="portal-review-delete">${text("core.portal.072")}</button></footer></form>`;
+        const scrim: any = document.createElement('button');
+        scrim.type = 'button';
+        scrim.className = 'portal-review-scrim';
+        scrim.hidden = true;
+        scrim.setAttribute('aria-label', text("core.portal.057"));
+        const panel: any = document.createElement('aside');
+        panel.className = 'portal-review-panel';
+        panel.hidden = true;
+        panel.setAttribute('aria-label', text("core.portal.054"));
+        panel.innerHTML = `<header><div><strong>${text("core.portal.054")}</strong><span>${escapeHTML(path)}</span></div><div><button type="button" data-portal-review-new>${text("core.portal.056")}</button><button type="button" data-portal-review-close>${text("core.portal.057")}</button></div></header><p class="portal-review-summary" data-portal-review-summary></p><div class="portal-review-list" data-portal-review-list></div><footer><button type="button" class="portal-review-send" data-portal-review-send disabled>${text("core.portal.075")} · <span data-portal-review-unsent>0</span></button><small>${text("core.portal.076")}</small></footer>`;
         const toast: any = document.createElement('div');
         toast.className = 'portal-review-toast';
         toast.hidden = true;
         toast.setAttribute('role', 'status');
         toast.setAttribute('aria-live', 'polite');
         const toastMessage: any = document.createElement('span');
-        const toastLink: any = document.createElement('a');
-        toastLink.href = `/changes/?path=${encodeURIComponent(path)}`;
-        toastLink.textContent = text("core.portal.051");
-        toast.append(toastMessage, toastLink);
-        document.body.append(menu, dialog, toast);
+        const toastAction: any = document.createElement('button');
+        toastAction.type = 'button';
+        toastAction.hidden = true;
+        toast.append(toastMessage, toastAction);
+        document.body.append(menu, dialog, confirmDialog, scrim, panel, toast);
+        let reviewState: any = null;
+        let reviewEtag: any = '';
         let pending: any = null;
         let dialogSelection: any = null;
+        let composerMode: any = { operation: 'create' };
+        let pendingDelete: any = '';
+        let panelReturn: any = null;
+        let panelCloseTimer: any = 0;
+        let toastCallback: any = null;
         let toastTimer: any = 0;
         const hideMenu: any = () => { menu.hidden = true; pending = null; };
-        const announce: any = (message: any, showLink: any = false) => {
+        const announce: any = (message: any, actionLabel: any = '', callback: any = null) => {
             window.clearTimeout(toastTimer);
             toastMessage.textContent = message;
-            toastLink.hidden = !showLink;
+            toastAction.textContent = actionLabel;
+            toastAction.hidden = !actionLabel;
+            toastCallback = callback;
             toast.hidden = false;
-            toastTimer = window.setTimeout(() => { toast.hidden = true; }, showLink ? 8000 : 2200);
+            toastTimer = window.setTimeout(() => { toast.hidden = true; }, actionLabel ? 8000 : 2600);
         };
+        const reviewGuard: any = () => ({ expectedRevision: reviewState?.revision || 0, expectedStateDigest: reviewState?.stateDigest || '' });
+        const reviewMutation: any = async (endpoint: any, action: any, method: any, body: any) => {
+            const response: any = await fetch(`${review}${endpoint}`, { method, headers: { 'Content-Type': 'application/json', 'X-Toudocu-Action': action }, body: JSON.stringify(body) });
+            const result: any = await response.json();
+            if (!response.ok)
+                throw new Error(result.diagnostics?.[0]?.message || `HTTP ${response.status}`);
+            return result;
+        };
+        const documentDiscussions: any = () => [...(reviewState?.session?.discussions || [])]
+            .filter((discussion: any) => discussion.target?.path === path || discussion.placement?.path === path)
+            .sort((left: any, right: any) => Number(left.state !== 'open') - Number(right.state !== 'open') || String(left.createdAt).localeCompare(String(right.createdAt)));
+        const discussionInFlight: any = (discussionId: any) => (reviewState?.feedback || []).some((batch: any) => !batch.respondedAt && batch.items?.some((item: any) => item.discussionId === discussionId));
+        const renderReview: any = () => {
+            const discussions: any = documentDiscussions();
+            const open: any = discussions.filter((discussion: any) => discussion.state === 'open');
+            const allOpen: any = (reviewState?.session?.discussions || []).filter((discussion: any) => discussion.state === 'open');
+            const unsent: any = allOpen.flatMap((discussion: any) => discussion.messages.filter((message: any) => message.author === 'human' && !message.feedbackId));
+            $('[data-portal-review-count]', toggle).textContent = String(open.length);
+            $('[data-portal-review-summary]', panel).textContent = text("core.portal.055", [open.length, discussions.length - open.length]);
+            $('[data-portal-review-unsent]', panel).textContent = String(unsent.length);
+            $('[data-portal-review-send]', panel).disabled = unsent.length === 0;
+            const list: any = $('[data-portal-review-list]', panel);
+            const scrollTop: any = list.scrollTop;
+            list.replaceChildren();
+            discussions.forEach((discussion: any) => {
+                const placement: any = discussion.placement || {};
+                const article: any = document.createElement('article');
+                article.className = `portal-review-thread is-${discussion.state}`;
+                article.innerHTML = `<header><div><strong>${text("core.portal.070")}</strong><span>${text(discussion.state === 'open' ? "core.portal.059" : "core.portal.060")} · ${escapeHTML(placementLabel(placement.status || 'exact'))}</span></div><div class="portal-review-thread-actions"><button type="button" data-portal-thread-state>${text(discussion.state === 'open' ? "core.portal.071" : "core.portal.073")}</button><button type="button" class="is-danger" data-portal-thread-delete>${text("core.portal.072")}</button></div></header><p class="portal-review-anchor">${escapeHTML(placement.path || discussion.target?.path || path)}${placement.start ? `:${placement.start.line}` : ''}${placement.reason ? ` · ${escapeHTML(placement.reason)}` : ''}</p><ol>${discussion.messages.map((message: any) => `<li class="is-${escapeHTML(message.author)}"><div><strong>${message.author === 'agent' ? `${text("core.portal.061")} · ${escapeHTML(outcomeLabel(message.outcome || 'response'))}` : text("core.portal.070")}</strong><time>${escapeHTML(new Date(message.createdAt).toLocaleString('ru-RU'))}</time></div><p>${escapeHTML(message.body)}</p></li>`).join('')}</ol><button type="button" class="portal-review-reply" data-portal-thread-reply ${discussion.state !== 'open' || discussionInFlight(discussion.id) ? 'disabled' : ''}>${text("core.portal.074")}</button>`;
+                $('[data-portal-thread-state]', article).addEventListener('click', async (event: any) => {
+                    event.currentTarget.disabled = true;
+                    try {
+                        reviewState = await reviewMutation(`/discussions/${discussion.id}`, 'review-discussion-update', 'PATCH', { ...reviewGuard(), operation: discussion.state === 'open' ? 'resolve' : 'reopen' });
+                        renderReview();
+                    }
+                    catch (failure: any) { await loadReview().catch(() => { }); announce(failure.message); }
+                }, { signal });
+                $('[data-portal-thread-delete]', article).addEventListener('click', () => {
+                    pendingDelete = discussion.id;
+                    $('[data-portal-review-delete-error]', confirmDialog).textContent = '';
+                    confirmDialog.showModal();
+                }, { signal });
+                $('[data-portal-thread-reply]', article).addEventListener('click', () => openComposer({ operation: 'reply', discussionId: discussion.id }), { signal });
+                list.append(article);
+            });
+            if (!discussions.length)
+                list.innerHTML = `<div class="portal-review-empty"><p>${text("core.portal.058")}</p><button type="button" data-portal-review-empty-new>${text("core.portal.056")}</button></div>`;
+            $('[data-portal-review-empty-new]', list)?.addEventListener('click', () => openComposer({ operation: 'create' }), { signal });
+            list.scrollTop = scrollTop;
+        };
+        const loadReview: any = async () => {
+            const response: any = await fetch(`${review}/discussions`, { headers: reviewEtag ? { 'If-None-Match': reviewEtag } : {}, cache: 'no-store' });
+            if (response.status === 304)
+                return;
+            const result: any = await response.json();
+            if (!response.ok)
+                throw new Error(result.diagnostics?.[0]?.message || `HTTP ${response.status}`);
+            reviewState = result;
+            reviewEtag = response.headers.get('ETag') || '';
+            renderReview();
+        };
+        const openPanel: any = async () => {
+            window.clearTimeout(panelCloseTimer);
+            panelReturn = document.activeElement;
+            panel.hidden = false;
+            scrim.hidden = false;
+            toggle.setAttribute('aria-expanded', 'true');
+            requestAnimationFrame(() => panel.classList.add('is-open'));
+            $('[data-portal-review-close]', panel).focus();
+            try { await loadReview(); }
+            catch (failure: any) {
+                $('[data-portal-review-list]', panel).innerHTML = `<div class="portal-review-empty is-error"><p>${escapeHTML(text("core.portal.080", [failure.message]))}</p><button type="button" data-portal-review-retry>${text("core.portal.081")}</button></div>`;
+                $('[data-portal-review-retry]', panel)?.addEventListener('click', () => loadReview().catch((error: any) => announce(error.message)), { signal });
+            }
+        };
+        const closePanel: any = () => {
+            panel.classList.remove('is-open');
+            scrim.hidden = true;
+            toggle.setAttribute('aria-expanded', 'false');
+            panelCloseTimer = window.setTimeout(() => { panel.hidden = true; }, 180);
+            panelReturn?.focus?.();
+        };
+        function openComposer(mode: any) {
+            composerMode = mode;
+            dialogSelection = mode.selection || null;
+            $('[data-portal-review-dialog-title]', dialog).textContent = text(mode.operation === 'reply' ? "core.portal.082" : "core.portal.042");
+            $('[data-portal-review-selection-wrap]', dialog).hidden = !dialogSelection;
+            $('[data-portal-review-selection]', dialog).textContent = dialogSelection || '';
+            $('[data-portal-review-question]', dialog).value = '';
+            $('[data-portal-review-error]', dialog).textContent = '';
+            $('.portal-review-submit', dialog).textContent = text(mode.operation === 'reply' ? "core.portal.083" : "core.portal.047");
+            dialog.showModal();
+            requestAnimationFrame(() => $('[data-portal-review-question]', dialog).focus());
+        }
         const selectionContent: any = (selection: any) => selectionArea.contains(selection.anchorNode) && selectionArea.contains(selection.focusNode);
         const showMenu: any = () => {
             const selection: any = window.getSelection();
@@ -564,13 +689,9 @@ registerMessages(portalMessages);
         $('[data-selection-question]', menu).addEventListener('click', () => {
             if (!pending)
                 return;
-            dialogSelection = pending.text;
-            $('[data-portal-review-selection]', dialog).textContent = dialogSelection;
-            $('[data-portal-review-question]', dialog).value = '';
-            $('[data-portal-review-error]', dialog).textContent = '';
+            const selection: any = pending.text;
             hideMenu();
-            dialog.showModal();
-            requestAnimationFrame(() => $('[data-portal-review-question]', dialog).focus());
+            openComposer({ operation: 'create', selection });
         }, { signal });
         $('form', dialog).addEventListener('submit', async (event: any) => {
             if (event.submitter?.value === 'cancel')
@@ -585,44 +706,77 @@ registerMessages(portalMessages);
             submit.textContent = text("core.portal.048");
             error.textContent = '';
             try {
-                const [fileResponse, reviewResponse]: any = await Promise.all([
-                    fetch(`${review}/repository/file?path=${encodeURIComponent(path)}`, { cache: 'no-store' }),
-                    fetch(`${review}/discussions`, { cache: 'no-store' }),
-                ]);
-                const file: any = await fileResponse.json();
-                const state: any = await reviewResponse.json();
-                if (!fileResponse.ok || !reviewResponse.ok)
-                    throw new Error(file.diagnostics?.[0]?.message || state.diagnostics?.[0]?.message || `HTTP ${fileResponse.ok ? reviewResponse.status : fileResponse.status}`);
-                const target: any = targetFor(file.current || '', dialogSelection);
-                const message: any = target.type === 'fileRange' ? question : text("core.portal.052", [question, dialogSelection]);
-                if (new TextEncoder().encode(message).length > 65536)
-                    throw new Error(text("core.portal.053"));
-                const response: any = await fetch(`${review}/discussions`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-Toudocu-Action': 'review-discussion-create' },
-                    body: JSON.stringify({ expectedRevision: state.revision, expectedStateDigest: state.stateDigest, repositoryRevision: file.repositoryRevision, target, message }),
-                });
-                const result: any = await response.json();
-                if (!response.ok)
-                    throw new Error(result.diagnostics?.[0]?.message || `HTTP ${response.status}`);
+                if (!reviewState)
+                    await loadReview();
+                if (composerMode.operation === 'reply') {
+                    reviewState = await reviewMutation(`/discussions/${composerMode.discussionId}`, 'review-discussion-update', 'PATCH', { ...reviewGuard(), operation: 'reply', message: question });
+                }
+                else {
+                    const fileResponse: any = await fetch(`${review}/repository/file?path=${encodeURIComponent(path)}`, { cache: 'no-store' });
+                    const file: any = await fileResponse.json();
+                    if (!fileResponse.ok)
+                        throw new Error(file.diagnostics?.[0]?.message || `HTTP ${fileResponse.status}`);
+                    const target: any = dialogSelection ? targetFor(file.current || '', dialogSelection) : { type: 'file', path };
+                    const message: any = dialogSelection && target.type === 'file' ? text("core.portal.052", [question, dialogSelection]) : question;
+                    if (new TextEncoder().encode(message).length > 65536)
+                        throw new Error(text("core.portal.053"));
+                    reviewState = await reviewMutation('/discussions', 'review-discussion-create', 'POST', { ...reviewGuard(), repositoryRevision: file.repositoryRevision, target, message });
+                }
                 dialog.close();
-                announce(text("core.portal.050"), true);
+                renderReview();
+                await openPanel();
+                announce(text(composerMode.operation === 'reply' ? "core.portal.084" : "core.portal.050"));
             }
             catch (failure: any) {
                 error.textContent = text("core.portal.049", [failure.message]);
             }
             finally {
                 submit.disabled = false;
-                submit.textContent = text("core.portal.047");
+                submit.textContent = text(composerMode.operation === 'reply' ? "core.portal.083" : "core.portal.047");
             }
         }, { signal });
+        $('form', confirmDialog).addEventListener('submit', async (event: any) => {
+            if (event.submitter?.value === 'cancel')
+                return;
+            event.preventDefault();
+            const submit: any = event.submitter;
+            const error: any = $('[data-portal-review-delete-error]', confirmDialog);
+            submit.disabled = true;
+            error.textContent = '';
+            try {
+                reviewState = await reviewMutation(`/discussions/${pendingDelete}`, 'review-discussion-update', 'PATCH', { ...reviewGuard(), operation: 'deleteDiscussion' });
+                confirmDialog.close();
+                renderReview();
+                announce(text("core.portal.079"));
+            }
+            catch (failure: any) { error.textContent = failure.message; }
+            finally { submit.disabled = false; }
+        }, { signal });
+        toggle.addEventListener('click', openPanel, { signal });
+        $('[data-portal-review-new]', panel).addEventListener('click', () => openComposer({ operation: 'create' }), { signal });
+        $('[data-portal-review-close]', panel).addEventListener('click', closePanel, { signal });
+        scrim.addEventListener('click', closePanel, { signal });
+        $('[data-portal-review-send]', panel).addEventListener('click', async (event: any) => {
+            const button: any = event.currentTarget;
+            const unsent: any = Number($('[data-portal-review-unsent]', panel).textContent || 0);
+            button.disabled = true;
+            try {
+                await reviewMutation('/feedback', 'review-feedback-create', 'POST', reviewGuard());
+                await loadReview();
+                announce(text("core.portal.085", [unsent]), text("core.portal.086"), async () => announce(await copyText(text("core.portal.087")) ? text("core.portal.088") : text("core.portal.041")));
+            }
+            catch (failure: any) { announce(text("core.portal.089", [failure.message])); renderReview(); }
+        }, { signal });
+        toastAction.addEventListener('click', () => toastCallback?.(), { signal });
         selectionArea.addEventListener('pointerup', showMenu, { signal });
         selectionArea.addEventListener('keyup', (event: any) => { if (event.key === 'Shift' || !event.shiftKey) showMenu(); }, { signal });
         document.addEventListener('pointerdown', (event: any) => { if (!menu.contains(event.target)) hideMenu(); }, { signal });
         document.addEventListener('scroll', hideMenu, { capture: true, signal });
         window.addEventListener('resize', hideMenu, { signal });
-        document.addEventListener('keydown', (event: any) => { if (event.key === 'Escape' && !menu.hidden) { event.preventDefault(); hideMenu(); } }, { capture: true, signal });
-        signal.addEventListener('abort', () => { window.clearTimeout(toastTimer); menu.remove(); dialog.remove(); toast.remove(); }, { once: true });
+        document.addEventListener('keydown', (event: any) => { if (event.key !== 'Escape') return; if (!menu.hidden) { event.preventDefault(); hideMenu(); } else if (panel.classList.contains('is-open') && !dialog.open && !confirmDialog.open) closePanel(); }, { capture: true, signal });
+        const pollTimer: any = window.setInterval(() => { if (panel.classList.contains('is-open') && !document.hidden && !dialog.open && !confirmDialog.open) loadReview().catch(() => { }); }, 2000);
+        loadReview().catch(() => { });
+        signal.addEventListener('abort', () => { window.clearTimeout(toastTimer); window.clearTimeout(panelCloseTimer); window.clearInterval(pollTimer); toggle.remove(); menu.remove(); dialog.remove(); confirmDialog.remove(); scrim.remove(); panel.remove(); toast.remove(); }, { once: true });
     }
     function initializeCodeCopy() {
         $$('.code-block').forEach((block: any) => {

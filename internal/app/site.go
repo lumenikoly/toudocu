@@ -15,7 +15,7 @@ import (
 
 const Version = "0.0.1"
 
-var fieldOrder = []string{"status", "type", "stage", "version", "owner", "author", "actor", "priority", "criticality", "module", "useCase", "flow", "screens", "transitions", "standards", "runbooks", "startScreen", "terminalScreens", "allowCycle", "route", "preview", "parentScreen", "component", "environment", "risk", "lastVerified", "supersededBy", "errors", "dependsOn", "source", "date", "plannedDate", "updated", "probability", "impact", "scope", "id", "tags"}
+var fieldOrder = []string{"status", "type", "stage", "version", "author", "actor", "priority", "criticality", "module", "useCase", "flow", "screens", "transitions", "standards", "runbooks", "startScreen", "terminalScreens", "allowCycle", "route", "preview", "parentScreen", "component", "environment", "risk", "lastVerified", "supersededBy", "errors", "dependsOn", "source", "date", "plannedDate", "updated", "probability", "impact", "scope", "id", "tags"}
 
 var typeIcons = map[string]string{"overview": "⌂", "status": "◐", "roadmap": "→", "risks": "!", "ideas": "✦", "notes": "✎", "changelog": "↻", "use-case": "◎", "module": "▦", "architecture": "◇", "contract": "⇄", "decision": "◆", "flow": "⇢", "screen-map": "⌗", "screen-index": "⌗", "screen": "▣", "guide": "◫", "work": "☐", "reference": "≡", "standard": "✓", "quality-index": "✓", "runbook": "↻", "runbook-index": "↻", "document": "•"}
 
@@ -666,7 +666,7 @@ func renderRiskStatus(model *Model, document *Document) string {
 	for _, label := range labels {
 		statusCounts = append(statusCounts, fmt.Sprintf(`<span>%d %s</span>`, counts[label], escapeHTML(strings.ToLower(label))))
 	}
-	return `<section class="risk-status" aria-labelledby="risk-status-title"><div><h2 id="risk-status-title">Статус рисков</h2><p class="risk-status-total">Незакрытых рисков: ` + fmt.Sprintf(`%d из %d`, model.Stats.OpenRisks, total) + `</p><p class="risk-status-counts">` + strings.Join(statusCounts, ` <span aria-hidden="true">·</span> `) + `</p></div><ul class="risk-status-explanations"><li><strong>Открыт</strong> — требует решения.</li><li><strong>Снижается</strong> — меры выполняются, риск ещё не закрыт.</li><li><strong>Риск принят</strong> — владелец осознанно принимает риск; в незакрытые не входит.</li></ul></section>`
+	return `<section class="risk-status" aria-labelledby="risk-status-title"><div><h2 id="risk-status-title">Статус рисков</h2><p class="risk-status-total">Незакрытых рисков: ` + fmt.Sprintf(`%d из %d`, model.Stats.OpenRisks, total) + `</p><p class="risk-status-counts">` + strings.Join(statusCounts, ` <span aria-hidden="true">·</span> `) + `</p></div><ul class="risk-status-explanations"><li><strong>Открыт</strong> — требует решения.</li><li><strong>Снижается</strong> — меры выполняются, риск ещё не закрыт.</li><li><strong>Риск принят</strong> — команда осознанно принимает риск; в незакрытые не входит.</li></ul></section>`
 }
 
 func renderDocumentPage(model *Model, document *Document) string {
@@ -778,7 +778,7 @@ func docCard(current string, document *Document) string {
 	if strings.TrimSpace(document.Metadata["status"]) != "" {
 		statusChip = renderStatusChip(document.Status)
 	}
-	return `<article class="document-card" data-filter-item data-search="` + escapeAttr(searchText) + `" data-status="` + escapeAttr(document.Status.Kind) + `" data-type="` + escapeAttr(document.Type) + `" data-work-type="` + escapeAttr(workType) + `" data-severity="` + escapeAttr(severity) + `" data-regression="` + escapeAttr(regression) + `" data-reproducibility="` + escapeAttr(reproducibility) + `" data-cause="` + escapeAttr(causeState) + `" data-regression-test="` + escapeAttr(regressionTestState) + `" data-owner="` + escapeAttr(document.Metadata["owner"]) + `" data-archive="` + archiveState + `"><div class="card-kicker">` + statusChip + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + archiveBadge + `</div><h3><a href="` + escapeAttr(relativeURL(current, document.OutputPath)) + `">` + escapeHTML(document.Title) + `</a></h3><p>` + escapeHTML(truncate(document.Description, 180)) + `</p>` + workDetails + renderProgress(document.TaskStats, "Задачи") + `<div class="card-path">` + escapeHTML(document.SourcePath) + `</div></article>`
+	return `<article class="document-card" data-filter-item data-search="` + escapeAttr(searchText) + `" data-status="` + escapeAttr(document.Status.Kind) + `" data-type="` + escapeAttr(document.Type) + `" data-work-type="` + escapeAttr(workType) + `" data-severity="` + escapeAttr(severity) + `" data-regression="` + escapeAttr(regression) + `" data-reproducibility="` + escapeAttr(reproducibility) + `" data-cause="` + escapeAttr(causeState) + `" data-regression-test="` + escapeAttr(regressionTestState) + `" data-archive="` + archiveState + `"><div class="card-kicker">` + statusChip + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + archiveBadge + `</div><h3><a href="` + escapeAttr(relativeURL(current, document.OutputPath)) + `">` + escapeHTML(document.Title) + `</a></h3><p>` + escapeHTML(truncate(document.Description, 180)) + `</p>` + workDetails + renderProgress(document.TaskStats, "Задачи") + `<div class="card-path">` + escapeHTML(document.SourcePath) + `</div></article>`
 }
 
 func filterControls(includeStatus, includeType bool) string {
@@ -997,7 +997,7 @@ func dashboardOverviewBody(model *Model, document *Document) string {
 
 func renderDashboard(model *Model) string {
 	meta := ""
-	if values := nonEmpty([]string{model.Project.Stage, model.Project.Version, model.Project.Owner, model.Project.Updated}); len(values) > 0 {
+	if values := nonEmpty([]string{model.Project.Stage, model.Project.Version, model.Project.Updated}); len(values) > 0 {
 		meta = `<div class="hero-meta">` + escapeHTML(strings.Join(values, " · ")) + `</div>`
 	}
 	overview := ""
@@ -1083,7 +1083,7 @@ func renderKnowledgeCatalogPage(model *Model, kind string) string {
 		if document == nil {
 			continue
 		}
-		searchText := strings.Join([]string{runbook.ID, runbook.Title, runbook.Owner, runbook.Environment, runbook.Risk}, " ")
+		searchText := strings.Join([]string{runbook.ID, runbook.Title, runbook.Environment, runbook.Risk}, " ")
 		cards.WriteString(`<article class="document-card" data-filter-item data-search="` + escapeAttr(searchText) +
 			`" data-status="` + escapeAttr(document.Status.Kind) + `" data-freshness="` + escapeAttr(runbook.Freshness) +
 			`"><div class="card-kicker">` + renderStatusChip(document.Status) + `<span class="badge">` + escapeHTML(runbook.Freshness) +
@@ -1178,13 +1178,13 @@ func BuildReport(model *Model) ProjectReport {
 	for _, risk := range model.Risks {
 		risks = append(risks, ReportRisk{
 			ID: risk.ID, Title: risk.Title, Status: risk.Status, Probability: risk.Probability,
-			Impact: risk.Impact, Owner: risk.Owner, TaskStats: risk.TaskStats,
+			Impact: risk.Impact, TaskStats: risk.TaskStats,
 			Document: risk.Document.SourcePath, Anchor: risk.Anchor,
 		})
 	}
 	project := ReportProject{
 		Title: model.Project.Title, Description: model.Project.Description, Status: model.Project.Status,
-		Stage: model.Project.Stage, Version: model.Project.Version, Owner: model.Project.Owner,
+		Stage: model.Project.Stage, Version: model.Project.Version,
 		Updated: model.Project.Updated, Summary: model.Project.Summary,
 	}
 	screens := make([]ReportScreen, 0, len(model.Knowledge.Screens))
@@ -1196,7 +1196,7 @@ func BuildReport(model *Model) ProjectReport {
 		screens = append(screens, ReportScreen{
 			ID: screen.ID, Title: screen.Title, Description: screen.Description,
 			Module: screen.ModuleID, Type: screen.Kind, Status: status,
-			Route: screen.Route, Preview: screen.Preview, Component: screen.Component, Owner: screen.Owner,
+			Route: screen.Route, Preview: screen.Preview, Component: screen.Component,
 			Updated: screen.Updated, Parent: screen.ParentID, States: append([]ScreenState{}, screen.States...),
 			IncomingTransitions: append([]string{}, screen.IncomingTransitionIDs...),
 			OutgoingTransitions: append([]string{}, screen.OutgoingTransitionIDs...),

@@ -475,7 +475,6 @@ func validateRequiredBugMetadata(model *Model, document *Document, item parsedWo
 		{"regression", "Регрессия"},
 		{"module", "Модуль"},
 		{"useCase", "Сценарий"},
-		{"owner", "Владелец"},
 		{"updated", "Последнее обновление"},
 	}
 	for _, field := range fields {
@@ -745,7 +744,7 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 		ID: match[1], Title: match[2], Status: StatusFor(item.Metadata["status"]), Type: typeName,
 		Priority: item.Metadata["priority"], Severity: item.Metadata["severity"],
 		Reproducibility: item.Metadata["reproducibility"], Regression: item.Metadata["regression"],
-		Updated: item.Metadata["updated"], Owner: item.Metadata["owner"], ModuleID: item.Metadata["module"],
+		Updated: item.Metadata["updated"], ModuleID: item.Metadata["module"],
 		UseCaseID: useCaseID, FlowID: strings.TrimSpace(item.Metadata["flow"]),
 		ScreenIDs:     splitReferences(item.Metadata["screens"]),
 		TransitionIDs: splitReferences(item.Metadata["transitions"]),
@@ -1059,7 +1058,7 @@ func buildRisks(model *Model) []Risk {
 					completed++
 				}
 			}
-			result = append(result, Risk{ID: id, Title: title, FullTitle: section.Title, Status: StatusFor(section.Metadata["status"]), Probability: fallbackValue(section.Metadata["probability"], "Не указана"), Impact: fallbackValue(section.Metadata["impact"], "Не указано"), Owner: fallbackValue(section.Metadata["owner"], "Не указан"), TaskStats: TaskStats{Total: len(section.Tasks), Completed: completed, Remaining: len(section.Tasks) - completed, Percent: progress(completed, len(section.Tasks))}, Document: document, Anchor: section.ID, Text: section.Text})
+			result = append(result, Risk{ID: id, Title: title, FullTitle: section.Title, Status: StatusFor(section.Metadata["status"]), Probability: fallbackValue(section.Metadata["probability"], "Не указана"), Impact: fallbackValue(section.Metadata["impact"], "Не указано"), TaskStats: TaskStats{Total: len(section.Tasks), Completed: completed, Remaining: len(section.Tasks) - completed, Percent: progress(completed, len(section.Tasks))}, Document: document, Anchor: section.ID, Text: section.Text})
 		}
 	}
 	return result
@@ -1126,9 +1125,9 @@ func buildRoadmapStages(model *Model) []RoadmapStage {
 			}
 			result = append(result, RoadmapStage{
 				Title: section.Title, Status: StatusFor(section.Metadata["status"]),
-				PlannedDate: section.Metadata["plannedDate"], Owner: section.Metadata["owner"],
-				TaskStats: TaskStats{Total: len(items), Completed: completed, Remaining: len(items) - completed, Percent: progress(completed, len(items))},
-				Items:     items, Document: document, Anchor: section.ID, Text: section.Text,
+				PlannedDate: section.Metadata["plannedDate"],
+				TaskStats:   TaskStats{Total: len(items), Completed: completed, Remaining: len(items) - completed, Percent: progress(completed, len(items))},
+				Items:       items, Document: document, Anchor: section.ID, Text: section.Text,
 			})
 		}
 	}
@@ -1318,7 +1317,7 @@ func buildProjectInfo(model *Model, requestedTitle string) ProjectInfo {
 			updated = overview.UpdatedAt.Format("2006-01-02")
 		}
 	}
-	return ProjectInfo{Title: title, Description: description, Status: StatusFor(merged["status"]), Stage: merged["stage"], Version: merged["version"], Owner: merged["owner"], Updated: updated, Summary: summary, OverviewDocument: overview, StatusDocument: statusDoc}
+	return ProjectInfo{Title: title, Description: description, Status: StatusFor(merged["status"]), Stage: merged["stage"], Version: merged["version"], Updated: updated, Summary: summary, OverviewDocument: overview, StatusDocument: statusDoc}
 }
 
 func pathBase(value string) string {
@@ -1350,7 +1349,7 @@ func buildSearchIndex(model *Model) []SearchItem {
 		result = append(result, SearchItem{
 			Title: document.Title, Path: document.SourcePath, URL: document.OutputPath,
 			Type: document.Type, TypeLabel: document.TypeLabel, Status: document.Metadata["status"],
-			Archived: archived, ArchiveYear: archiveYear, Owner: document.Metadata["owner"],
+			Archived: archived, ArchiveYear: archiveYear,
 			Description: truncate(description, 220), Text: text,
 		})
 	}

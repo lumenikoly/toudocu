@@ -134,7 +134,7 @@ Archive and restore only through `task archive` and `task restore`.
 Identify the audience, useful question, and repository evidence; update an existing
 document instead of duplicating it; write only supported claims. Choose a typed
 document for its meaning, not for an ID or green check. Never invent unknown
-status, owner, date, relationship, or procedure.
+status, date, relationship, or procedure.
 
 Every change passes two gates:
 

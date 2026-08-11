@@ -5,7 +5,6 @@
 - Priority: High
 - Module: MOD-MODEL
 - Use case: UC-DOCS-02
-- Owner: Toudocu team
 - Last updated: 2026-08-10
 
 ## Result

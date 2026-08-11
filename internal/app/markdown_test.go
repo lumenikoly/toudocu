@@ -10,7 +10,6 @@ import (
 const sampleMarkdown = `# Документ
 
 - Статус: В работе
-- Владелец: Team A
 
 Краткое описание.
 
@@ -29,7 +28,7 @@ func TestMarkdownAnalysis(t *testing.T) {
 	if doc.Title != "Документ" || doc.Description != "Краткое описание." {
 		t.Fatalf("unexpected document: %#v", doc)
 	}
-	if doc.Metadata["status"] != "В работе" || doc.Metadata["owner"] != "Team A" {
+	if doc.Metadata["status"] != "В работе" {
 		t.Fatalf("metadata: %#v", doc.Metadata)
 	}
 	if len(doc.Tasks) != 2 || !doc.Tasks[0].Completed {

@@ -319,10 +319,24 @@ func TestReviewDiscussionMutationsAndCleanup(t *testing.T) {
 	if err != nil || state.Session.Discussions[0].State != "resolved" {
 		t.Fatalf("resolved state=%#v err=%v", state, err)
 	}
+	state, err = service.updateDiscussion(closedID, UpdateDiscussionRequest{
+		ReviewMutationGuard: ReviewMutationGuard{ExpectedRevision: state.Revision, ExpectedStateDigest: state.StateDigest},
+		Operation:           "deleteDiscussion",
+	})
+	if err != nil || len(state.Session.Discussions) != 1 || state.Session.Discussions[0].ID == closedID {
+		t.Fatalf("deleted discussion state=%#v err=%v", state, err)
+	}
+	state, err = service.updateDiscussion(state.Session.Discussions[0].ID, UpdateDiscussionRequest{
+		ReviewMutationGuard: ReviewMutationGuard{ExpectedRevision: state.Revision, ExpectedStateDigest: state.StateDigest},
+		Operation:           "resolve",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
 	state, err = service.cleanup(CleanupReviewRequest{
 		ReviewMutationGuard: ReviewMutationGuard{ExpectedRevision: state.Revision, ExpectedStateDigest: state.StateDigest}, Mode: "closed",
 	})
-	if err != nil || len(state.Session.Discussions) != 1 || state.Session.Discussions[0].ID == closedID {
+	if err != nil || len(state.Session.Discussions) != 0 {
 		t.Fatalf("closed cleanup state=%#v err=%v", state, err)
 	}
 	previousSession := state.Session.ID
@@ -331,6 +345,40 @@ func TestReviewDiscussionMutationsAndCleanup(t *testing.T) {
 	})
 	if err != nil || state.Session.ID == previousSession || len(state.Session.Discussions) != 0 || len(state.Feedback) != 0 {
 		t.Fatalf("full cleanup state=%#v err=%v", state, err)
+	}
+}
+
+func TestReviewDeleteDiscussionRewritesFeedback(t *testing.T) {
+	root, docs := newReviewRepository(t)
+	t.Setenv("TOUDOCU_STATE_HOME", t.TempDir())
+	service, err := newReviewService(reviewOptions(root, docs))
+	if err != nil {
+		t.Fatal(err)
+	}
+	state, _ := service.discussions()
+	report, _ := BuildRepositoryReview(reviewOptions(root, docs))
+	for _, message := range []string{"Удалить", "Оставить"} {
+		state, err = service.createDiscussion(CreateDiscussionRequest{
+			ReviewMutationGuard: ReviewMutationGuard{ExpectedRevision: state.Revision, ExpectedStateDigest: state.StateDigest},
+			RepositoryRevision:  report.RepositoryRevision,
+			Target:              ReviewTarget{Type: "global"}, Message: message,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	deletedID := state.Session.Discussions[0].ID
+	keptID := state.Session.Discussions[1].ID
+	state, _, err = service.createFeedback(ReviewMutationGuard{ExpectedRevision: state.Revision, ExpectedStateDigest: state.StateDigest})
+	if err != nil {
+		t.Fatal(err)
+	}
+	state, err = service.updateDiscussion(deletedID, UpdateDiscussionRequest{
+		ReviewMutationGuard: ReviewMutationGuard{ExpectedRevision: state.Revision, ExpectedStateDigest: state.StateDigest},
+		Operation:           "deleteDiscussion",
+	})
+	if err != nil || len(state.Session.Discussions) != 1 || state.Session.Discussions[0].ID != keptID || len(state.Feedback) != 0 || state.Session.Discussions[0].Messages[0].FeedbackID != "" {
+		t.Fatalf("deleted discussion feedback state=%#v err=%v", state, err)
 	}
 }
 

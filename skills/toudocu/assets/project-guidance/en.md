@@ -43,7 +43,7 @@
   acceptance criteria, verification, or handoff. Do not create a task for every
   prompt.
 - Update the existing source of truth when a change makes it inaccurate. Do not
-  invent documents, statuses, owners, relationships, procedures, or dates to
+  invent documents, statuses, relationships, procedures, or dates to
   satisfy a template or diagnostic, and never edit generated portal output as a
   source.
 - Keep `architecture/overview.md` as the required system-boundary and question

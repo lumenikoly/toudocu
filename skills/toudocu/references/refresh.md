@@ -75,7 +75,7 @@ For every document in scope:
    not create date-only churn for a document that was merely reviewed. Never
    advance the runbook verification date, stored under `Last verified` or
    `Последняя проверка`, unless its procedure was actually verified.
-4. Do not create statuses, owners, entities, links, or procedures to silence a
+4. Do not create statuses, entities, links, or procedures to silence a
    diagnostic. Do not create a `TASK-*` merely because refresh is running; use
    the normal task threshold.
 5. Ensure `project.locale` and the complete built-in `project.sections` map

@@ -6,7 +6,6 @@
 - Module: MOD-CLI
 - Use case: UC-TASK-03
 - Flow: FLOW-TASK-WORKFLOW
-- Owner: Toudocu team
 - Last updated: 2026-08-10
 
 ## Result

@@ -2,7 +2,6 @@
 
 - Identifier: MOD-CHANGES
 - Status: Ready
-- Owner: Toudocu team
 - Last updated: 2026-08-10
 
 This module compares two explicitly selected states in the local Git

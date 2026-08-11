@@ -3,7 +3,6 @@
 - Status: In progress
 - Stage: Maintaining version 0.0.1
 - Version: 0.0.1
-- Owner: Toudocu team
 - Last updated: 2026-08-11
 
 The current stable version is `0.0.1`. The GitHub Release installers for POSIX

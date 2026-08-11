@@ -2,7 +2,6 @@
 
 - Identifier: STD-DOCS-001
 - Status: Active
-- Owner: Toudocu team
 - Scope: Source documentation, skill templates, and generated portals
 - Last updated: 2026-08-10
 
@@ -18,8 +17,8 @@ OpenAPI may own only the HTTP wire contract.
    artifacts. They are not tracked by Git or edited as primary documentation.
 3. Published portals are rebuilt from Markdown in CI after semantic review and
    a structural check; local checks use ignored or temporary output.
-4. A typed document is created only for confirmed semantics; an unknown owner,
-   date, status, or procedure is not invented merely to remove a warning.
+4. A typed document is created only for confirmed semantics; an unknown date,
+   status, or procedure is not invented merely to remove a warning.
 5. Explicitly linked standards and runbooks are read together with task
    context; the author checks the scope of other applicable standards without
    CLI glob heuristics.

@@ -13,7 +13,7 @@ Toudocu — dependency-free Go CLI. Сохраняйте реализацию н
 - эксплуатационные процедуры: `docs/runbooks/`, только если раздел существует
   и содержит реальный `RB-*`;
 - неизвестный верхнеуровневый раздел с Markdown: собственный `index.md` с
-  `Тип: Custom`, владельцем и описанием;
+  `Тип: Custom` и описанием;
 - архитектура и источники истины:
   [`docs/architecture/overview.md`](docs/architecture/overview.md);
 - workflow work items: [`docs/guides/work-items.md`](docs/guides/work-items.md).

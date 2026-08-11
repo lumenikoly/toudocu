@@ -1,6 +1,5 @@
 # {{RUNBOOK_SECTION_TITLE}}
 
-- Владелец: {{OWNER}}
 
 {{RUNBOOK_SECTION_DESCRIPTION}}
 

@@ -96,7 +96,7 @@ CI, or the user requires it.
 7. If strict validation is project policy, run it as an additional final gate.
 
 Do not suppress an integrity error by removing a meaningful relationship. Do
-not suppress a warning by inventing status, dates, owners, sections, or
+not suppress a warning by inventing status, dates, sections, or
 behavior. Report warnings intentionally left unresolved.
 
 ## New documentation

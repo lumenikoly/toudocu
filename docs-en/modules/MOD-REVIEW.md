@@ -2,7 +2,6 @@
 
 - Identifier: MOD-REVIEW
 - Status: Ready
-- Owner: Toudocu team
 - Last updated: 2026-08-10
 
 This module stores local discussions over a Git diff and immutable comment

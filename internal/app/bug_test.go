@@ -21,7 +21,6 @@ func completeBugFixture(status string) string {
 - Regression: Yes
 - Module: MOD-AUTH
 - Use case: UC-AUTH-01
-- Owner: Backend Team
 - Last updated: 2026-07-30
 
 ## Symptom

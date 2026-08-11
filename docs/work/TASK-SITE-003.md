@@ -8,7 +8,6 @@
 - Процесс: FLOW-DOCS-BUILD
 - Экраны: SC-SITE-HOME, SC-SITE-DOCUMENT, SC-SITE-USE-CASE, SC-SITE-SCREEN-MAP, SC-SITE-EDITOR, SC-CHANGES-WORKSPACE
 - Стандарты: STD-GO-001, STD-DOCS-001
-- Владелец: Команда Toudocu
 - Последнее обновление: 2026-08-10
 
 ## Результат

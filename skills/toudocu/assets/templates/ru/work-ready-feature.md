@@ -8,7 +8,6 @@
 {{OPTIONAL_FLOW_METADATA}}
 {{OPTIONAL_SCREENS_METADATA}}
 {{OPTIONAL_TRANSITIONS_METADATA}}
-- Владелец: {{OWNER}}
 - Последнее обновление: {{DATE}}
 
 ## Результат

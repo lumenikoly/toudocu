@@ -5,7 +5,6 @@
 - Priority: High
 - Module: MOD-MODEL
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Toudocu team
 - Last updated: 2026-08-10
 
 ## Result

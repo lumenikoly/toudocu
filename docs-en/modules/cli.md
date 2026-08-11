@@ -2,7 +2,6 @@
 
 - Identifier: MOD-CLI
 - Status: Ready
-- Owner: Toudocu team
 - Last updated: 2026-08-10
 
 This module provides documentation checks, portal builds, local serving,

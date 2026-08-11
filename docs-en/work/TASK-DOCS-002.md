@@ -6,7 +6,6 @@
 - Module: MOD-MODEL
 - Use case: UC-DOCS-02
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Toudocu team
 - Last updated: 2026-08-10
 
 ## Result
@@ -49,7 +48,7 @@ named by that task.
 - [x] `AC-01` Standards, runbooks and custom manifests are validated with errors and warnings separated.
 - [x] `AC-02` Freshness respects `--stale-days` boundaries, including disabling age-based overdue with `0` value.
 - [x] `AC-03` Task references, the conditional `QUALITY` set, task context, and additive JSON fields preserve empty collections as `[]`.
-- [x] `AC-04` Russian and English scaffolds are created atomically and do not invent a runbook owner or review date.
+- [x] `AC-04` Russian and English scaffolds are created atomically and do not invent a runbook review date.
 - [x] `AC-05` The portal keeps the `processes` route and adds catalogs, filters, and four runbook metrics.
 - [x] `AC-06` Toudocu's own documentation contains only confirmed standards and does not create a fictional runbook.
 

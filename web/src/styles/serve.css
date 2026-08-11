@@ -61,7 +61,7 @@
 .portal-review-dialog::backdrop { background: rgb(0 0 0 / 35%); }
 .portal-review-dialog form { display: grid; gap: 14px; padding: 18px; }
 .portal-review-dialog header { display: grid; gap: 2px; }
-.portal-review-dialog h2 { margin: 0; font-family: var(--font-heading); font-size: 22px; letter-spacing: -.02em; }
+.portal-review-dialog h2 { margin: 0; font-family: var(--font-heading); font-size: 1.22rem; letter-spacing: -.02em; }
 .portal-review-dialog header span { color: var(--muted); font-size: 12px; }
 .portal-review-dialog label { display: grid; gap: 5px; color: var(--muted); font-size: 12px; font-weight: 650; }
 .portal-review-dialog pre { max-height: 180px; margin: 0; padding: 10px; overflow: auto; border-radius: 8px; background: var(--surface-soft); color: var(--text); font: 13px/1.5 var(--font-body); white-space: pre-wrap; }
@@ -71,10 +71,54 @@
 .portal-review-dialog button { min-height: 42px; padding: 8px 15px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); color: var(--text); cursor: pointer; font: 700 13px/1.2 var(--font-interface); }
 .portal-review-dialog .portal-review-submit { border-color: var(--accent); background: var(--accent); color: var(--surface); }
 .portal-review-dialog button:disabled { cursor: wait; opacity: .62; }
-.portal-review-dialog :focus-visible, .portal-review-toast a:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 42%, transparent); outline-offset: 2px; }
+.portal-review-dialog :focus-visible, .portal-review-toast button:focus-visible, .portal-review-panel button:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 42%, transparent); outline-offset: 2px; }
+.portal-review-confirm form { gap: 16px; }
+.portal-review-confirm form > p { margin: 0; color: var(--muted); line-height: 1.5; }
+.portal-review-confirm .portal-review-delete { border-color: var(--danger); background: var(--danger); color: white; }
+.portal-review-scrim { display: none; }
+.portal-review-panel { position: fixed; z-index: 76; inset: 64px 0 0 auto; width: min(440px, calc(100vw - 40px)); min-width: 0; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; overflow: hidden; background: var(--surface-soft); color: var(--text); box-shadow: -18px 0 52px rgb(0 0 0 / 20%); transform: translateX(105%); transition: transform 180ms cubic-bezier(.2, .8, .2, 1); font-family: var(--font-interface); }
+.portal-review-panel[hidden] { display: none; }
+.portal-review-panel.is-open { transform: translateX(0); }
+.portal-review-panel > header { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.portal-review-panel > header > div:first-child { min-width: 0; display: grid; gap: 2px; }
+.portal-review-panel > header strong { font-family: var(--font-heading); font-size: 1.22rem; letter-spacing: -.02em; }
+.portal-review-panel > header span { overflow: hidden; color: var(--muted); font-size: .78rem; text-overflow: ellipsis; white-space: nowrap; }
+.portal-review-panel > header > div:last-child { flex: 0 0 auto; display: flex; align-items: center; gap: 4px; }
+.portal-review-panel button { min-height: 40px; border: 0; border-radius: 8px; padding: 7px 10px; background: transparent; color: var(--accent); cursor: pointer; font: 700 .78rem/1.25 var(--font-interface); }
+.portal-review-panel button:hover { background: var(--accent-soft); }
+.portal-review-panel button:active { transform: scale(.96); }
+.portal-review-panel button:disabled { background: transparent; color: var(--muted); cursor: not-allowed; transform: none; }
+.portal-review-summary { margin: 0; padding: 10px 16px; border-bottom: 1px solid var(--border); color: var(--muted); font-size: .78rem; font-variant-numeric: tabular-nums; }
+.portal-review-list { min-height: 0; overflow: auto; padding: 12px; overscroll-behavior: contain; }
+.portal-review-thread { margin-bottom: 12px; overflow: clip; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.portal-review-thread.is-resolved { border-style: dashed; }
+.portal-review-thread > header { min-width: 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 11px 12px; border-bottom: 1px solid var(--border); }
+.portal-review-thread > header > div:first-child { min-width: 0; display: grid; gap: 2px; }
+.portal-review-thread > header strong { font-size: .86rem; }
+.portal-review-thread > header span { color: var(--muted); font-size: .72rem; overflow-wrap: anywhere; }
+.portal-review-thread-actions { flex: 0 0 auto; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 2px; }
+.portal-review-thread-actions .is-danger { color: var(--danger); }
+.portal-review-anchor { margin: 0; padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--muted); font: .76rem/1.45 var(--font-mono); overflow-wrap: anywhere; }
+.portal-review-thread ol { margin: 0; padding: 0; list-style: none; }
+.portal-review-thread li { padding: 12px; border-bottom: 1px solid var(--border); }
+.portal-review-thread li.is-agent { background: var(--info-soft); }
+.portal-review-thread li > div { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.portal-review-thread li strong { font-size: .78rem; }
+.portal-review-thread time { flex: 0 0 auto; color: var(--muted); font-size: .72rem; font-variant-numeric: tabular-nums; }
+.portal-review-thread li p { margin: 7px 0 0; color: var(--text); line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+.portal-review-thread .portal-review-reply { margin: 5px 6px; }
+.portal-review-empty { min-height: 220px; display: grid; place-content: center; justify-items: center; gap: 10px; padding: 24px; color: var(--muted); text-align: center; }
+.portal-review-empty p { max-width: 34ch; margin: 0; }
+.portal-review-empty.is-error { color: var(--danger); }
+.portal-review-panel > footer { display: grid; gap: 5px; padding: 12px 16px max(12px, env(safe-area-inset-bottom)); border-top: 1px solid var(--border); background: var(--surface); }
+.portal-review-panel > footer .portal-review-send { min-height: 44px; background: var(--accent); color: white; font-size: .86rem; }
+.portal-review-panel > footer .portal-review-send:hover { background: var(--accent-strong); }
+.portal-review-panel > footer .portal-review-send:disabled { background: var(--surface-strong); color: var(--muted); }
+.portal-review-panel > footer small { color: var(--muted); font-size: .72rem; line-height: 1.4; }
 .portal-review-toast { position: fixed; right: 18px; bottom: 18px; z-index: 90; display: flex; align-items: center; gap: 12px; max-width: min(620px, calc(100vw - 36px)); padding: 11px 14px; border-radius: 8px; background: var(--text); color: var(--surface); font: 13px/1.35 var(--font-interface); }
 .portal-review-toast[hidden] { display: none; }
-.portal-review-toast a { min-height: 34px; display: inline-flex; align-items: center; border: 1px solid currentColor; border-radius: 7px; padding: 5px 9px; color: inherit; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.portal-review-toast button { min-height: 34px; display: inline-flex; align-items: center; border: 1px solid currentColor; border-radius: 8px; padding: 5px 9px; background: transparent; color: inherit; font: inherit; font-weight: 700; white-space: nowrap; cursor: pointer; }
+.portal-review-toast button[hidden] { display: none; }
 .roadmap-add-button { border-color: var(--accent); background: var(--accent); color: var(--surface); font-weight: 700; }
 .roadmap-add-button:hover { filter: brightness(.96); }
 .roadmap-add-button:disabled { cursor: wait; opacity: .62; }
@@ -109,6 +153,12 @@
   .portal-review-dialog form { padding: 16px; }
   .portal-review-dialog footer { display: grid; grid-template-columns: 1fr 1fr; }
   .portal-review-toast { right: 10px; bottom: 10px; left: 10px; max-width: none; justify-content: space-between; }
+  .portal-review-scrim { position: fixed; z-index: 75; inset: 0; display: block; width: 100%; border: 0; background: rgb(0 0 0 / 38%); }
+  .portal-review-scrim[hidden] { display: none; }
+  .portal-review-panel { z-index: 76; inset: 0; width: 100%; }
+  .portal-review-panel > header { padding-block: 10px; }
+  .portal-review-panel button { min-height: 44px; }
+  html:has(.portal-review-panel.is-open), body:has(.portal-review-panel.is-open) { max-width: 100%; overflow: hidden; }
   .update-notice { align-items: stretch; justify-content: flex-start; gap: 10px; padding: 11px 12px; }
   .update-notice-copy { flex: 1; display: grid; gap: 1px; align-content: center; }
   .update-notice-actions { flex: 0 0 auto; }
@@ -117,8 +167,12 @@
   .roadmap-dialog-form { width: auto; padding: 20px 16px; }
   .roadmap-dialog-actions { display: grid; grid-template-columns: 1fr 1fr; }
 }
+@media (max-width: 360px) {
+  .portal-review-panel > header { display: grid; align-items: stretch; gap: 7px; }
+  .portal-review-panel > header > div:last-child { display: grid; grid-template-columns: 1fr 1fr; }
+}
 @media print {
-  .update-notice { display: none; }
+  .update-notice, .portal-review-toggle, .portal-review-panel, .portal-review-scrim, .review-selection-menu, .portal-review-toast { display: none; }
 }
 .is-soft-navigating::before {
   content: "";

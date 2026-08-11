@@ -2,7 +2,6 @@
 
 - Идентификатор: {{RUNBOOK_ID}}
 - Статус: {{STATUS}}
-- Владелец: {{OWNER}}
 - Среда: {{ENVIRONMENT}}
 - Риск: {{RISK}}
 {{OPTIONAL_LAST_VERIFIED_METADATA}}

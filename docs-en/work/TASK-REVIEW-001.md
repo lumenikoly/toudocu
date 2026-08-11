@@ -7,7 +7,6 @@
 - Use case: UC-REVIEW-01
 - Screens: SC-CHANGES-WORKSPACE
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Toudocu team
 - Last updated: 2026-08-10
 
 ## Outcome

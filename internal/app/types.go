@@ -194,7 +194,6 @@ type Risk struct {
 	Status      StatusInfo
 	Probability string
 	Impact      string
-	Owner       string
 	TaskStats   TaskStats
 	Document    *Document
 	Anchor      string
@@ -205,7 +204,6 @@ type RoadmapStage struct {
 	Title       string
 	Status      StatusInfo
 	PlannedDate string
-	Owner       string
 	TaskStats   TaskStats
 	Items       []RoadmapItem
 	Document    *Document
@@ -264,7 +262,6 @@ type KnowledgeStandard struct {
 	ID              string     `json:"id"`
 	Title           string     `json:"title"`
 	Status          StatusInfo `json:"status"`
-	Owner           string     `json:"owner,omitempty"`
 	Scope           string     `json:"scope,omitempty"`
 	Updated         string     `json:"updated,omitempty"`
 	SupersededBy    string     `json:"supersededBy,omitempty"`
@@ -277,7 +274,6 @@ type KnowledgeRunbook struct {
 	ID           string     `json:"id"`
 	Title        string     `json:"title"`
 	Status       StatusInfo `json:"status"`
-	Owner        string     `json:"owner,omitempty"`
 	Environment  string     `json:"environment,omitempty"`
 	Risk         string     `json:"risk,omitempty"`
 	LastVerified string     `json:"lastVerified,omitempty"`
@@ -301,7 +297,6 @@ type KnowledgeScreen struct {
 	Status                StatusInfo    `json:"status"`
 	Preview               string        `json:"preview,omitempty"`
 	Component             string        `json:"component,omitempty"`
-	Owner                 string        `json:"owner,omitempty"`
 	Updated               string        `json:"updated,omitempty"`
 	ParentID              string        `json:"parent,omitempty"`
 	States                []ScreenState `json:"states"`
@@ -390,7 +385,6 @@ type WorkItem struct {
 	Reproducibility     string                  `json:"reproducibility,omitempty"`
 	Regression          string                  `json:"regression,omitempty"`
 	Updated             string                  `json:"updated,omitempty"`
-	Owner               string                  `json:"owner,omitempty"`
 	ModuleID            string                  `json:"moduleId,omitempty"`
 	UseCaseID           string                  `json:"useCaseId,omitempty"`
 	FlowID              string                  `json:"flowId,omitempty"`
@@ -457,7 +451,6 @@ type ProjectInfo struct {
 	Status           StatusInfo
 	Stage            string
 	Version          string
-	Owner            string
 	Updated          string
 	Summary          string
 	OverviewDocument *Document
@@ -535,7 +528,6 @@ type SearchItem struct {
 	Status      string `json:"status"`
 	Archived    bool   `json:"archived"`
 	ArchiveYear string `json:"archiveYear,omitempty"`
-	Owner       string `json:"owner"`
 	Description string `json:"description"`
 	Text        string `json:"text"`
 }

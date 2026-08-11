@@ -2,7 +2,6 @@
 
 - Identifier: CON-CLI-V1
 - Status: Ready
-- Owner: Toudocu team
 - Last updated: 2026-08-10
 
 This document defines CLI commands, side effects, exit codes, and versioned JSON

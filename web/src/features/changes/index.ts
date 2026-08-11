@@ -8,13 +8,13 @@ registerMessages(changesMessages);
     const REVIEW: any = page?.runtime === 'serve' && page.capabilities?.review ? page.endpoints?.review : '';
     const EDITOR_WORKSPACE: any = page?.runtime === 'serve' && page.capabilities?.editor ? page.endpoints?.editorWorkspace : '';
     const $: any = (selector: any, root: any = document) => root.querySelector(selector);
-    const state: any = { report: null, repository: null, files: [], linked: [], linkedPaths: new Set(), selected: null, tab: 'source', merge: null, etag: '', repositoryEtag: '', reviewEtag: '', review: null, composerTarget: null, composerReturn: null, activeDiscussion: '', discussionScroll: 0, detailRequest: 0 };
+    const state: any = { report: null, repository: null, files: [], linked: [], linkedPaths: new Set(), selected: null, tab: 'source', merge: null, etag: '', repositoryEtag: '', reviewEtag: '', review: null, composerTarget: null, composerReturn: null, pendingDelete: '', activeDiscussion: '', discussionScroll: 0, detailRequest: 0 };
     const elements: any = {
         base: $('[data-base]'), branchBase: $('[data-branch-base]'), target: $('[data-target]'), targetRevision: $('[data-target-revision]'), targetRevisionWrap: $('[data-target-revision-wrap]'), apply: $('[data-apply-range]'), range: $('[data-range-summary]'), rangeMeta: $('[data-range-meta]'),
         summary: $('[data-summary]'), rangeDetails: $('[data-range-details]'), stale: $('[data-stale]'), search: $('[data-search]'), status: $('[data-status]'), scope: $('[data-scope]'), list: $('[data-file-list]'),
         count: $('[data-result-count]'), detail: $('[data-detail]'), toast: $('[data-changes-toast]'), toastMessage: $('[data-toast-message]'),
         discussions: $('[data-discussions-panel]'), discussionList: $('[data-discussion-list]'), openDiscussionCount: $('[data-open-discussion-count]'), unsentCount: $('[data-unsent-count]'), sendFeedback: $('[data-send-feedback]'), reviewSummary: $('[data-review-summary]'),
-        composer: $('[data-review-composer]'), composerForm: $('[data-review-form]'), composerMessage: $('[data-review-message]'), composerError: $('[data-review-error]'), composerTarget: $('[data-review-target-summary]'),
+        composer: $('[data-review-composer]'), composerForm: $('[data-review-form]'), composerMessage: $('[data-review-message]'), composerError: $('[data-review-error]'), composerTarget: $('[data-review-target-summary]'), deleteConfirm: $('[data-review-delete-confirm]'), deleteForm: $('[data-review-delete-form]'),
         filesPanel: $('[data-files-panel]'), filePicker: $('[data-file-picker]'), filePickerQuery: $('[data-file-picker-query]'), filePickerResults: $('[data-file-picker-results]'), openFileStale: $('[data-open-file-stale]'),
     };
     if (!REVIEW)
@@ -31,6 +31,7 @@ registerMessages(changesMessages);
     const escapeHTML: any = (value: any) => String(value ?? '').replace(/[&<>"']/g, (character: any) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } as Record<string, string>)[character]);
     const statusLabel: any = (status: any) => ({ added: text("features.changes.index.002"), untracked: 'Untracked', modified: text("features.changes.index.003"), deleted: text("features.changes.index.004"), renamed: text("features.changes.index.005"), copied: text("features.changes.index.006"), 'type-changed': text("features.changes.index.007"), linked: text("features.changes.index.091") } as Record<string, string>)[status] || status;
     const outcomeLabel: any = (outcome: any) => ({ fixed: text("features.changes.index.128"), notFixed: text("features.changes.index.129"), needsClarification: text("features.changes.index.130") } as Record<string, string>)[outcome] || outcome;
+    const placementLabel: any = (status: any) => ({ exact: text("features.changes.index.145"), moved: text("features.changes.index.146"), stale: text("features.changes.index.147"), deleted: text("features.changes.index.148") } as Record<string, string>)[status] || status;
     const selectedTarget: any = () => elements.target.value === 'revision' ? elements.targetRevision.value.trim() : elements.target.value;
     const query: any = () => {
         const params: any = new URLSearchParams();
@@ -626,13 +627,14 @@ registerMessages(changesMessages);
             state.review = await reviewMutation(`/discussions/${discussionId}`, 'review-discussion-update', 'PATCH', { ...reviewGuard(), operation, ...extra });
             renderReview();
             renderList();
+            return true;
         }
-        catch (error: any) { announce(error.message); }
+        catch (error: any) { announce(error.message); return false; }
     }
     function renderReview() {
         if (!REVIEW || !state.review)
             return;
-        const discussions: any = state.review.session?.discussions || [];
+        const discussions: any = [...(state.review.session?.discussions || [])].sort((left: any, right: any) => Number(left.state !== 'open') - Number(right.state !== 'open'));
         const open: any = discussions.filter((discussion: any) => discussion.state === 'open');
         const unsent: any = open.flatMap((discussion: any) => discussion.messages.filter((message: any) => message.author === 'human' && !message.feedbackId));
         elements.openDiscussionCount.textContent = String(open.length);
@@ -646,8 +648,12 @@ registerMessages(changesMessages);
             article.className = `review-thread is-${discussion.state}${state.activeDiscussion === discussion.id ? ' is-active' : ''}`;
             article.dataset.discussionId = discussion.id;
             const placement: any = discussion.placement || {};
-            article.innerHTML = `<header><div><strong>${text("features.changes.index.111")}</strong><span>${escapeHTML(text(discussion.state === 'open' ? "features.changes.index.105" : "features.changes.index.106"))} · ${escapeHTML(placement.status || 'exact')}</span></div><button type="button" data-thread-state ${state.repository?.feedbackWritable ? '' : 'disabled'}>${text(discussion.state === 'open' ? "features.changes.index.107" : "features.changes.index.108")}</button></header><button type="button" class="review-anchor" data-open-anchor>${escapeHTML(placement.path || discussion.target.path || text("features.changes.index.109"))}${placement.start ? `:${placement.start.line}` : ''}${placement.reason ? ` · ${escapeHTML(placement.reason)}` : ''}</button><ol>${discussion.messages.map((message: any) => `<li class="review-message is-${message.author}"><div><strong>${message.author === 'agent' ? `${text("features.changes.index.110")} · ${escapeHTML(outcomeLabel(message.outcome || 'response'))}` : text("features.changes.index.111")}</strong><time>${escapeHTML(new Date(message.createdAt).toLocaleString())}</time></div><p>${escapeHTML(message.body)}</p>${message.changedPaths?.length ? `<button type="button" data-view-fix="${escapeHTML(message.id)}">${text("features.changes.index.112")}</button>` : ''}${message.author === 'human' && !message.feedbackId && state.repository?.feedbackWritable ? `<div class="review-message-actions"><button type="button" data-edit-message="${escapeHTML(message.id)}">${text("features.changes.index.113")}</button><button type="button" data-delete-message="${escapeHTML(message.id)}">${text("features.changes.index.114")}</button></div>` : ''}</li>`).join('')}</ol><button type="button" class="review-reply" ${discussion.state !== 'open' || discussionInFlightClient(discussion.id) || !state.repository?.feedbackWritable ? 'disabled' : ''}>${text("features.changes.index.115")}</button>`;
+            article.innerHTML = `<header><div><strong>${text("features.changes.index.111")}</strong><span>${escapeHTML(text(discussion.state === 'open' ? "features.changes.index.105" : "features.changes.index.106"))} · ${escapeHTML(placementLabel(placement.status || 'exact'))}</span></div><div class="review-thread-actions"><button type="button" data-thread-state ${state.repository?.feedbackWritable ? '' : 'disabled'}>${text(discussion.state === 'open' ? "features.changes.index.107" : "features.changes.index.108")}</button><button type="button" class="is-danger" data-delete-discussion ${state.repository?.feedbackWritable ? '' : 'disabled'}>${text("features.changes.index.142")}</button></div></header><button type="button" class="review-anchor" data-open-anchor>${escapeHTML(placement.path || discussion.target.path || text("features.changes.index.109"))}${placement.start ? `:${placement.start.line}` : ''}${placement.reason ? ` · ${escapeHTML(placement.reason)}` : ''}</button><ol>${discussion.messages.map((message: any) => `<li class="review-message is-${message.author}"><div><strong>${message.author === 'agent' ? `${text("features.changes.index.110")} · ${escapeHTML(outcomeLabel(message.outcome || 'response'))}` : text("features.changes.index.111")}</strong><time>${escapeHTML(new Date(message.createdAt).toLocaleString())}</time></div><p>${escapeHTML(message.body)}</p>${message.changedPaths?.length ? `<button type="button" data-view-fix="${escapeHTML(message.id)}">${text("features.changes.index.112")}</button>` : ''}${message.author === 'human' && !message.feedbackId && state.repository?.feedbackWritable ? `<div class="review-message-actions"><button type="button" data-edit-message="${escapeHTML(message.id)}">${text("features.changes.index.113")}</button><button type="button" data-delete-message="${escapeHTML(message.id)}">${text("features.changes.index.114")}</button></div>` : ''}</li>`).join('')}</ol><button type="button" class="review-reply" ${discussion.state !== 'open' || discussionInFlightClient(discussion.id) || !state.repository?.feedbackWritable ? 'disabled' : ''}>${text("features.changes.index.115")}</button>`;
             article.querySelector('[data-thread-state]').addEventListener('click', () => updateDiscussion(discussion.id, discussion.state === 'open' ? 'resolve' : 'reopen'));
+            article.querySelector('[data-delete-discussion]').addEventListener('click', () => {
+                state.pendingDelete = discussion.id;
+                elements.deleteConfirm.showModal();
+            });
             article.querySelector('.review-reply').addEventListener('click', (event: any) => openComposer(discussion.target, event.currentTarget, { operation: 'reply', discussionId: discussion.id }));
             article.querySelector('[data-open-anchor]').addEventListener('click', () => openDiscussionAnchor(discussion));
             article.querySelectorAll('[data-edit-message]').forEach((button: any) => {
@@ -844,6 +850,18 @@ registerMessages(changesMessages);
             if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) { event.preventDefault(); submitComposer(); }
         });
         elements.composer.addEventListener('close', () => state.composerReturn?.focus?.());
+        elements.deleteForm.addEventListener('submit', async (event: any) => {
+            if (event.submitter?.value === 'cancel')
+                return;
+            event.preventDefault();
+            event.submitter.disabled = true;
+            const updated: any = await updateDiscussion(state.pendingDelete, 'deleteDiscussion');
+            event.submitter.disabled = false;
+            if (updated) {
+                elements.deleteConfirm.close();
+                announce(text("features.changes.index.144"));
+            }
+        });
         $('[data-global-comment]')?.addEventListener('click', (event: any) => openComposer({ type: 'global' }, event.currentTarget));
         const closeDiscussions: any = () => { elements.discussions.classList.remove('is-open'); elements.discussions.hidden = true; elements.discussions.setAttribute('role', 'complementary'); elements.discussions.removeAttribute('aria-modal'); $('[data-discussions-toggle]')?.setAttribute('aria-expanded', 'false'); $('[data-discussions-toggle]')?.focus(); };
         $('[data-discussions-toggle]')?.addEventListener('click', () => { elements.discussions.hidden = false; elements.discussions.classList.add('is-open'); elements.discussions.setAttribute('role', matchMedia('(max-width: 1050px)').matches ? 'dialog' : 'complementary'); if (matchMedia('(max-width: 1050px)').matches) elements.discussions.setAttribute('aria-modal', 'true'); $('[data-discussions-toggle]')?.setAttribute('aria-expanded', 'true'); elements.discussions.querySelector('button')?.focus(); });
@@ -859,11 +877,8 @@ registerMessages(changesMessages);
         elements.sendFeedback.addEventListener('click', async () => {
             try {
                 const unsent: any = Number(elements.unsentCount.textContent || 0);
-                const result: any = await reviewMutation('/feedback', 'review-feedback-create', 'POST', reviewGuard());
-                state.review.revision = result.revision;
-                state.review.stateDigest = result.stateDigest;
-                state.review.feedback.push(result.feedback);
-                renderReview();
+                await reviewMutation('/feedback', 'review-feedback-create', 'POST', reviewGuard());
+                await loadReview();
                 announce(text("features.changes.index.120", [unsent, text("features.changes.index.121")]), true);
             }
             catch (error: any) { announce(error.message); }

@@ -5,6 +5,5 @@
 ## {{MILESTONE}}
 
 - Статус: {{STATUS}}
-- Владелец: {{OWNER}}
 
 - [ ] `{{ROADMAP_ID}}` {{ROADMAP_OUTCOME}}

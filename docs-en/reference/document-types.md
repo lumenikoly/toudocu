@@ -68,7 +68,7 @@ these types merely to gain an extra portal page or remove a warning.
 | Type and location | Purpose | When to create | Do not use for |
 |---|---|---|---|
 | **Contract** — `contracts/` | Defines an external interface, command, API, schema, or exchange format | When consumers need a precise, stable interaction boundary | A tutorial sequence, architectural explanation, or fact catalog |
-| **Standard** — `quality/STD-*.md`, ID `STD-*` | Defines mandatory and verifiable project rules | When a rule has a scope, owner, and verification method | Non-binding advice or a one-off procedure |
+| **Standard** — `quality/STD-*.md`, ID `STD-*` | Defines mandatory and verifiable project rules | When a rule has a scope and verification method | Non-binding advice or a one-off procedure |
 | **Runbook** — `runbooks/RB-*.md`, ID `RB-*` | Gives a safe operational procedure with verification and rollback | Only for a real operation with a known environment and risk | A general guide, product flow, or invented procedure |
 | **Guide** — `guides/` | Helps readers achieve a concrete result | For installation, setup, or a sequence of actions | An encyclopedic fact catalog or normative contract |
 | **Reference** — `reference/` | Collects facts, options, and parameters for quick lookup | When readers understand the task and need an exact value or choice | Step-by-step teaching, decision rationale, or current status |
@@ -117,8 +117,8 @@ module, guide, or other document type.
 - `screens/index.md` is the entry page for the built-in screen section and gets
   a separate machine type `screen-index`; it is not an `SC-*` entity.
 - `quality/index.md` and `runbooks/index.md` define their section entry pages.
-  An unknown section's manifest additionally declares `Type: Custom`, an owner,
-  and a description.
+  An unknown section's manifest additionally declares `Type: Custom` and a
+  description.
 - `screens/map.md` is an obsolete source. The catalog, Screen Map, and playable
   flows are built from `screens/SC-*.md`; no separate map should be maintained.
 - Generated HTML, `report.json`, and the search index are derived output. They

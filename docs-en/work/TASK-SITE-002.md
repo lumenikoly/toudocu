@@ -8,7 +8,6 @@
 - Flow: FLOW-DOCS-SERVE
 - Transitions: TR-SITE-001, TR-SITE-002, TR-SITE-003
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Toudocu team
 - Last updated: 2026-08-10
 
 ## Result

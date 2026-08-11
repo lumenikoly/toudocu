@@ -6,7 +6,6 @@
 - Module: MOD-CLI
 - Use case: UC-AGENT-01
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Toudocu team
 - Last updated: 2026-08-10
 
 ## Result

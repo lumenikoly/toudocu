@@ -3,7 +3,6 @@
 - Status: {{STATUS}}
 - Stage: {{STAGE}}
 - Version: {{VERSION}}
-- Owner: {{OWNER}}
 - Last updated: {{DATE}}
 
 {{CURRENT_STATE_SUMMARY}}

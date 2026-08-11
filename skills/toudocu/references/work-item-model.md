@@ -25,7 +25,7 @@ Feature tasks require an existing use case. Maintenance, Documentation, and
 Research tasks without a use case require a non-empty Use-case omission reason.
 
 Bug work items use `BUG-*` and require severity, priority, reproducibility,
-regression, module, use case, owner, and updated date. They require Symptom,
+regression, module, use case, and updated date. They require Symptom,
 Expected behavior, Actual behavior, and either Steps to reproduce or Evidence
 even in Draft. Ready+ bugs additionally require Cause, Scope, Out of scope,
 numbered Plan, Acceptance criteria, Verification, regression-test coverage,

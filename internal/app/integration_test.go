@@ -150,12 +150,11 @@ func createFixture(t *testing.T) (string, string, string) {
 	writeArchitectureOverview(t, docs, "")
 	writeTestFile(t, docs, "status.md", "# Состояние\n\n- Статус: В работе\n- Этап: MVP\n- Последнее обновление: 2026-07-24\n\nТекущее состояние.\n\n## Краткое состояние\n\nОсновной поток работает.\n")
 	writeTestFile(t, docs, "roadmap.md", "# Roadmap\n\nПлан.\n\n## MVP\n\n- Статус: В работе\n- Плановая дата: 2026-09-01\n\n- [x] `DLV-DOCS-01` Документация готова.\n- [ ] `UC-AUTH-01` Пользователь входит.\n")
-	writeTestFile(t, docs, "risks.md", "# Риски\n\nОписание рисков.\n\n## RISK-01: Тестовый риск\n\n- Статус: Открыт\n- Вероятность: Высокая\n- Влияние: Среднее\n- Владелец: Team\n\n- [ ] Снизить риск\n")
+	writeTestFile(t, docs, "risks.md", "# Риски\n\nОписание рисков.\n\n## RISK-01: Тестовый риск\n\n- Статус: Открыт\n- Вероятность: Высокая\n- Влияние: Среднее\n\n- [ ] Снизить риск\n")
 	writeTestFile(t, docs, "modules/auth.md", `# Авторизация
 
 - Идентификатор: MOD-AUTH
 - Статус: В работе
-- Владелец: Backend
 
 Модуль входа.
 
@@ -956,7 +955,7 @@ func TestRiskPageExplainsRiskStatusesAndMitigationProgress(t *testing.T) {
 
 - [x] Выполнить первую меру
 
-## RISK-03: Решение принято владельцем
+## RISK-03: Решение принято
 
 - Статус: Риск принят
 
@@ -975,7 +974,7 @@ func TestRiskPageExplainsRiskStatusesAndMitigationProgress(t *testing.T) {
 		"1 риск принят",
 		"Открыт</strong> — требует решения.",
 		"Снижается</strong> — меры выполняются, риск ещё не закрыт.",
-		"Риск принят</strong> — владелец осознанно принимает риск; в незакрытые не входит.",
+		"Риск принят</strong> — команда осознанно принимает риск; в незакрытые не входит.",
 		"Выполнение мер снижения",
 		">Меры снижения</span>",
 	} {
