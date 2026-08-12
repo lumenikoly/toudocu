@@ -80,7 +80,10 @@ function buildPagesArtifact(): string {
 }
 
 async function closeServer(server: Server): Promise<void> {
-  await new Promise<void>((resolveClose) => server.close(() => resolveClose()));
+  await new Promise<void>((resolveClose) => {
+    server.close(() => resolveClose());
+    server.closeAllConnections();
+  });
 }
 
 async function expectNoOverflow(page: Page): Promise<void> {
