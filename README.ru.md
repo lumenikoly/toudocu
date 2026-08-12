@@ -29,7 +29,7 @@ Toudocu хранит документацию рядом с кодом, пров
 - `changes` строит отчёты по локальному Git, не изменяя репозиторий;
 - `task` создаёт, проверяет, перемещает и, только после явного разрешения,
   выполняет команды рабочей задачи;
-- встроенный skill помогает агенту создать, обновить, перевести документацию и
+- встроенный навык помогает агенту создать, обновить, перевести документацию и
   обработать комментарии из Changes.
 
 ## Быстрый старт
@@ -62,7 +62,7 @@ go build -o toudocu.exe ./cmd/toudocu
 ### 2. Создайте исходную документацию
 
 Перейдите в корень репозитория, который хотите документировать. Если вы
-используете поддерживаемого AI-агента, установите в этот проект встроенный
+используете поддерживаемого агента разработки, установите в этот проект встроенный
 skill:
 
 ```bash
@@ -77,10 +77,10 @@ toudocu skill install --agent codex
 $toudocu init
 ```
 
-Это вызов AI-skill, а не команда Go CLI. Skill изучает проект и создаёт
+Это вызов встроенного навыка, а не команда Go-программы. Агент изучает проект и создаёт
 минимальную структуру без выдуманных модулей, статусов и процедур.
 
-Если skill не используется, минимальный набор можно создать вручную:
+Если навык не используется, минимальный набор можно создать вручную:
 
 ```text
 docs/
@@ -116,13 +116,15 @@ toudocu serve ./docs
 - открывать и создавать исходные файлы в Editor;
 - видеть предварительный просмотр и диагностические сообщения;
 - просматривать текущий Git diff в Changes;
-- комментировать изменение, строку, выделение или целый файл;
+- выделять текст документа, включая заголовки, и создавать вопрос или запрос
+  на изменение;
 - добавлять результат в существующий этап `roadmap.md`.
 
-Changes не запускает агента. Кнопка «Отправить агенту» только создаёт
-неизменяемый пакет комментариев и показывает инструкцию. После отдельного
-запроса `$toudocu feedback` skill получает самый старый ожидающий пакет,
-обрабатывает его и возвращает ответы в исходные обсуждения.
+Toudocu не запускает агента. Черновик можно изменить или удалить, а «Добавить
+в очередь» создаёт неизменяемую запись очереди. Кнопка «Скопировать промт» мгновенно
+копирует просьбу обработать очередь. Установленный навык получает по одному
+запросу через `toudocu agent next --json` и возвращает ответ командой
+`toudocu agent respond` в исходное обсуждение.
 
 У `serve` нет TLS и встроенной аутентификации. По умолчанию он безопасно
 ограничен loopback-адресом. Не открывайте сервер во внешнюю сеть без отдельной
@@ -177,6 +179,8 @@ irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 |
 | Найти текст или ID | `toudocu search "запрос" ./docs` |
 | Посмотреть Git-изменения | `toudocu changes ./docs` |
 | Посмотреть один файл | `toudocu changes file PATH ./docs` |
+| Получить следующий запрос документации | `toudocu agent next --json` |
+| Сохранить ответ агента | `toudocu agent respond --input response.json` |
 | Сопоставить diff с задачей | `toudocu task changes TASK-ID ./docs` |
 | Создать нейтральный каркас | `toudocu scaffold module MOD-PAYMENTS ./docs --title "Платежи"` |
 | Создать рабочую задачу | `toudocu task init ./docs --area AREA --title "Название" --type TYPE` |
@@ -186,13 +190,14 @@ irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 |
 | Явно выполнить команды задачи | `toudocu task verify TASK-ID ./docs --run` |
 | Переместить задачу в архив | `toudocu task archive TASK-ID ./docs` |
 | Вернуть задачу из архива | `toudocu task restore TASK-ID ./docs` |
-| Управлять встроенным skill | `toudocu skill install|status|update|uninstall` |
+| Управлять встроенным навыком | `toudocu skill install|status|update|uninstall` |
 
-`$toudocu init`, `$toudocu refresh`, `$toudocu translate` и
-`$toudocu feedback` — процессы AI-skill. У Go CLI нет одноимённых
-верхнеуровневых команд.
+`$toudocu init`, `$toudocu refresh` и `$toudocu translate` — процессы
+встроенного навыка. У Go CLI нет одноимённых верхнеуровневых команд. Обратная
+связь с агентом, напротив, использует реальные команды `toudocu agent
+next|respond`.
 
-## Обновление и переводы через skill
+## Обновление и переводы через навык
 
 Полная сверка исходной документации:
 
@@ -294,9 +299,9 @@ make release
 - [Настройка](docs/reference/configuration.md)
 - [Локальная работа](docs/guides/local-workflow.md)
 - [Просмотр изменений](docs/guides/documentation-changes.md)
-- [Работа AI-skill](docs/guides/agent-workflows.md)
+- [Работа встроенного навыка](docs/guides/agent-workflows.md)
 - [Рабочие задачи](docs/guides/work-items.md)
-- [Установка skill](docs/guides/skill-installation.md)
+- [Установка навыка](docs/guides/skill-installation.md)
 - [Виды документов](docs/reference/document-types.md)
 - [Исходная документация Toudocu](docs/index.md)
 - [Участие в разработке](CONTRIBUTING.ru.md)

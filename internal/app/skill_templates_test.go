@@ -332,32 +332,30 @@ func TestToudocuRefreshContract(t *testing.T) {
 	}
 }
 
-func TestToudocuFeedbackContract(t *testing.T) {
+func TestToudocuAgentFeedbackContract(t *testing.T) {
 	skill := readToudocuFile(t, "SKILL.md")
 	for _, expected := range []string{
-		"`$toudocu feedback`",
-		"[references/feedback.md](references/feedback.md)",
-		"never\nstarts an agent or LLM",
+		"Обработай запросы из Toudocu",
+		"[references/agent-feedback.md](references/agent-feedback.md)",
+		"edit documentation only for verified `change_request`",
 	} {
 		if !containsNormalized(skill, expected) {
-			t.Errorf("SKILL.md does not define feedback contract %q", expected)
+			t.Errorf("SKILL.md does not define agent feedback contract %q", expected)
 		}
 	}
-	feedback := readToudocuFile(t, filepath.Join("references", "feedback.md"))
+	feedback := readToudocuFile(t, filepath.Join("references", "agent-feedback.md"))
 	for _, expected := range []string{
-		"changes feedback pending",
-		"`feedback` is `null`",
-		"one result for each item",
-		"`fixed`",
-		"`notFixed`",
-		"`needsClarification`",
-		"changes feedback respond",
-		"Do not retry a conflict",
-		"until `feedback: null`",
-		"never resolve discussions automatically",
+		"toudocu agent next",
+		"until the queue is empty",
+		"`question`: answer from current evidence and do not change documentation",
+		"`change_request`: change only canonical documentation",
+		"`needs_clarification`",
+		"toudocu agent respond",
+		"AGENT_RESPONSE_CONFLICT",
+		"Never resolve the discussion for the user",
 	} {
 		if !containsNormalized(feedback, expected) {
-			t.Errorf("feedback reference does not contain %q", expected)
+			t.Errorf("agent feedback reference does not contain %q", expected)
 		}
 	}
 }
@@ -369,7 +367,7 @@ func TestToudocuCompactOperationRouter(t *testing.T) {
 		"[references/init.md](references/init.md)",
 		"[references/refresh.md](references/refresh.md)",
 		"[references/translate.md](references/translate.md)",
-		"[references/feedback.md](references/feedback.md)",
+		"[references/agent-feedback.md](references/agent-feedback.md)",
 		"$toudocu translate diff",
 		"[references/workflows.md](references/workflows.md)",
 		"[references/semantic-gate.md](references/semantic-gate.md)",

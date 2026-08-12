@@ -1,0 +1,293 @@
+openapi: 3.1.0
+info:
+  title: Toudocu Agent Feedback HTTP API
+  version: "1"
+  description: Local versioned contract for documentation discussions, drafts, FIFO agent deliveries and responses. Every mutation must prove a same-origin request through either a matching Origin header or Sec-Fetch-Site set to same-origin. If both headers are present, both are checked.
+servers:
+  - url: /
+paths:
+  /_toudocu/api/agent/discussions:
+    get:
+      operationId: listAgentDiscussions
+      summary: Read discussions with current deterministic anchor placements
+      responses:
+        "200": {description: Current state, content: {application/json: {schema: {$ref: "#/components/schemas/ReviewState"}, example: {schemaVersion: 1, revision: 0, stateDigest: abc123, deliveries: []}}}}
+        "304": {description: ETag matches}
+        "405": {$ref: "#/components/responses/AgentError"}
+        "500": {$ref: "#/components/responses/AgentError"}
+        "503": {$ref: "#/components/responses/AgentError"}
+    post:
+      operationId: createAgentDiscussion
+      summary: Create an open discussion with one editable draft
+      security: [{RequestOrigin: []}, {FetchMetadata: []}]
+      parameters: [{$ref: "#/components/parameters/CreateDiscussionAction"}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDiscussionRequest"
+            example: {expectedRevision: 0, expectedStateDigest: abc123, target: {kind: document, path: docs/architecture/runtime.md}, selection: {selectedText: partial rebuild, occurrence: 1}, intent: question, text: "Why is a full rebuild needed?"}
+      responses:
+        "201": {description: Created state, content: {application/json: {schema: {$ref: "#/components/schemas/ReviewState"}}}}
+        "400": {$ref: "#/components/responses/AgentError"}
+        "403": {$ref: "#/components/responses/AgentError"}
+        "404": {$ref: "#/components/responses/AgentError"}
+        "409": {$ref: "#/components/responses/AgentError"}
+        "413": {$ref: "#/components/responses/AgentError"}
+        "415": {$ref: "#/components/responses/AgentError"}
+        "405": {$ref: "#/components/responses/AgentError"}
+        "500": {$ref: "#/components/responses/AgentError"}
+        "503": {$ref: "#/components/responses/AgentError"}
+  /_toudocu/api/agent/discussions/{discussionId}:
+    parameters: [{$ref: "#/components/parameters/DiscussionID"}]
+    get:
+      operationId: getAgentDiscussion
+      summary: Read one discussion
+      responses:
+        "200": {description: Discussion, content: {application/json: {schema: {$ref: "#/components/schemas/Discussion"}}}}
+        "404": {$ref: "#/components/responses/AgentError"}
+        "405": {$ref: "#/components/responses/AgentError"}
+        "500": {$ref: "#/components/responses/AgentError"}
+        "503": {$ref: "#/components/responses/AgentError"}
+    patch:
+      operationId: updateAgentDiscussion
+      summary: Resolve or reopen a discussion
+      security: [{RequestOrigin: []}, {FetchMetadata: []}]
+      parameters: [{$ref: "#/components/parameters/UpdateDiscussionAction"}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/UpdateDiscussionRequest"}, example: {expectedRevision: 2, expectedStateDigest: abc123, state: resolved}}}}
+      responses:
+        "200": {description: Updated state, content: {application/json: {schema: {$ref: "#/components/schemas/ReviewState"}}}}
+        "400": {$ref: "#/components/responses/AgentError"}
+        "403": {$ref: "#/components/responses/AgentError"}
+        "404": {$ref: "#/components/responses/AgentError"}
+        "405": {$ref: "#/components/responses/AgentError"}
+        "409": {$ref: "#/components/responses/AgentError"}
+        "413": {$ref: "#/components/responses/AgentError"}
+        "415": {$ref: "#/components/responses/AgentError"}
+        "500": {$ref: "#/components/responses/AgentError"}
+        "503": {$ref: "#/components/responses/AgentError"}
+    delete:
+      operationId: deleteAgentDiscussion
+      summary: Delete a discussion and its deliveries
+      security: [{RequestOrigin: []}, {FetchMetadata: []}]
+      parameters: [{$ref: "#/components/parameters/DeleteDiscussionAction"}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/MutationGuard"}, example: {expectedRevision: 2, expectedStateDigest: abc123}}}}
+      responses:
+        "200": {description: Updated state, content: {application/json: {schema: {$ref: "#/components/schemas/ReviewState"}}}}
+        "400": {$ref: "#/components/responses/AgentError"}
+        "403": {$ref: "#/components/responses/AgentError"}
+        "404": {$ref: "#/components/responses/AgentError"}
+        "405": {$ref: "#/components/responses/AgentError"}
+        "409": {$ref: "#/components/responses/AgentError"}
+        "413": {$ref: "#/components/responses/AgentError"}
+        "415": {$ref: "#/components/responses/AgentError"}
+        "500": {$ref: "#/components/responses/AgentError"}
+        "503": {$ref: "#/components/responses/AgentError"}
+  /_toudocu/api/agent/discussions/{discussionId}/messages:
+    parameters: [{$ref: "#/components/parameters/DiscussionID"}]
+    post:
+      operationId: createAgentMessage
+      summary: Add one follow-up draft
+      security: [{RequestOrigin: []}, {FetchMetadata: []}]
+      parameters: [{$ref: "#/components/parameters/CreateMessageAction"}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/HumanMessageMutation"}, example: {expectedRevision: 2, expectedStateDigest: abc123, intent: change_request, text: Then update this section.}}}}
+      responses:
+        "201": {description: Updated state, content: {application/json: {schema: {$ref: "#/components/schemas/ReviewState"}}}}
+        "400": {$ref: "#/components/responses/AgentError"}
+        "403": {$ref: "#/components/responses/AgentError"}
+        "404": {$ref: "#/components/responses/AgentError"}
+        "405": {$ref: "#/components/responses/AgentError"}
+        "409": {$ref: "#/components/responses/AgentError"}
+        "413": {$ref: "#/components/responses/AgentError"}
+        "415": {$ref: "#/components/responses/AgentError"}
+        "500": {$ref: "#/components/responses/AgentError"}
+        "503": {$ref: "#/components/responses/AgentError"}
+  /_toudocu/api/agent/discussions/{discussionId}/messages/{messageId}:
+    parameters: [{$ref: "#/components/parameters/DiscussionID"}, {$ref: "#/components/parameters/MessageID"}]
+    patch:
+      operationId: updateAgentMessage
+      summary: Edit a draft human message
+      security: [{RequestOrigin: []}, {FetchMetadata: []}]
+      parameters: [{$ref: "#/components/parameters/UpdateMessageAction"}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/HumanMessageMutation"}, example: {expectedRevision: 2, expectedStateDigest: abc123, intent: question, text: Please explain this rule.}}}}
+      responses:
+        "200": {description: Updated state, content: {application/json: {schema: {$ref: "#/components/schemas/ReviewState"}}}}
+        "400": {$ref: "#/components/responses/AgentError"}
+        "403": {$ref: "#/components/responses/AgentError"}
+        "404": {$ref: "#/components/responses/AgentError"}
+        "405": {$ref: "#/components/responses/AgentError"}
+        "409": {$ref: "#/components/responses/AgentError"}
+        "413": {$ref: "#/components/responses/AgentError"}
+        "415": {$ref: "#/components/responses/AgentError"}
+        "500": {$ref: "#/components/responses/AgentError"}
+        "503": {$ref: "#/components/responses/AgentError"}
+    delete:
+      operationId: deleteAgentMessage
+      summary: Delete a draft human message
+      security: [{RequestOrigin: []}, {FetchMetadata: []}]
+      parameters: [{$ref: "#/components/parameters/DeleteMessageAction"}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/MutationGuard"}, example: {expectedRevision: 2, expectedStateDigest: abc123}}}}
+      responses:
+        "200": {description: Updated state, content: {application/json: {schema: {$ref: "#/components/schemas/ReviewState"}}}}
+        "400": {$ref: "#/components/responses/AgentError"}
+        "403": {$ref: "#/components/responses/AgentError"}
+        "404": {$ref: "#/components/responses/AgentError"}
+        "405": {$ref: "#/components/responses/AgentError"}
+        "409": {$ref: "#/components/responses/AgentError"}
+        "413": {$ref: "#/components/responses/AgentError"}
+        "415": {$ref: "#/components/responses/AgentError"}
+        "500": {$ref: "#/components/responses/AgentError"}
+        "503": {$ref: "#/components/responses/AgentError"}
+  /_toudocu/api/agent/discussions/{discussionId}/messages/{messageId}/submit:
+    parameters: [{$ref: "#/components/parameters/DiscussionID"}, {$ref: "#/components/parameters/MessageID"}]
+    post:
+      operationId: submitAgentMessage
+      summary: Make a draft immutable and atomically create a pending delivery
+      security: [{RequestOrigin: []}, {FetchMetadata: []}]
+      parameters: [{$ref: "#/components/parameters/SubmitMessageAction"}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/MutationGuard"}, example: {expectedRevision: 2, expectedStateDigest: abc123}}}}
+      responses:
+        "201": {description: Updated state and delivery, content: {application/json: {schema: {$ref: "#/components/schemas/SubmitMessageResult"}, example: {schemaVersion: 1, revision: 3, stateDigest: def456, repositoryRevision: abc123, session: {id: SESSION-01, createdAt: 2026-08-11T20:00:00Z, discussions: []}, deliveries: [{schemaVersion: 1, id: DEL-01, sequence: 1, state: pending, discussionId: DISC-01, messageIds: [MSG-01], createdAt: 2026-08-11T20:00:03Z}], delivery: {schemaVersion: 1, id: DEL-01, sequence: 1, state: pending, discussionId: DISC-01, messageIds: [MSG-01], createdAt: 2026-08-11T20:00:03Z}}}}}
+        "400": {$ref: "#/components/responses/AgentError"}
+        "403": {$ref: "#/components/responses/AgentError"}
+        "404": {$ref: "#/components/responses/AgentError"}
+        "405": {$ref: "#/components/responses/AgentError"}
+        "409": {$ref: "#/components/responses/AgentError"}
+        "413": {$ref: "#/components/responses/AgentError"}
+        "415": {$ref: "#/components/responses/AgentError"}
+        "500": {$ref: "#/components/responses/AgentError"}
+        "503": {$ref: "#/components/responses/AgentError"}
+  /_toudocu/api/agent/deliveries/next:
+    post:
+      operationId: claimNextAgentDelivery
+      summary: Claim only the oldest unfinished delivery
+      security: [{RequestOrigin: []}, {FetchMetadata: []}]
+      parameters: [{$ref: "#/components/parameters/NextDeliveryAction"}]
+      requestBody: {content: {application/json: {schema: {type: object, additionalProperties: false}, example: {}}}}
+      responses:
+        "200": {description: One delivery or pending false, content: {application/json: {schema: {$ref: "#/components/schemas/AgentRequest"}, example: {schemaVersion: 1, pending: false}}}}
+        "400": {$ref: "#/components/responses/AgentError"}
+        "403": {$ref: "#/components/responses/AgentError"}
+        "405": {$ref: "#/components/responses/AgentError"}
+        "409": {$ref: "#/components/responses/AgentError"}
+        "413": {$ref: "#/components/responses/AgentError"}
+        "415": {$ref: "#/components/responses/AgentError"}
+        "500": {$ref: "#/components/responses/AgentError"}
+        "503": {$ref: "#/components/responses/AgentError"}
+  /_toudocu/api/agent/deliveries/{deliveryId}/response:
+    parameters: [{$ref: "#/components/parameters/DeliveryID"}]
+    post:
+      operationId: submitAgentResponse
+      summary: Append an idempotent structured response
+      security: [{RequestOrigin: []}, {FetchMetadata: []}]
+      parameters: [{$ref: "#/components/parameters/RespondDeliveryAction"}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/AgentResponse"}
+            example: {schemaVersion: 1, deliveryId: DEL-01, discussionId: DISC-01, outcome: answered, message: A full rebuild is only used after configuration changes., evidence: [{path: internal/server/rebuild.go, startLine: 81, endLine: 103}], changedPaths: []}
+      responses:
+        "200": {description: Updated state, content: {application/json: {schema: {$ref: "#/components/schemas/ReviewState"}}}}
+        "400": {$ref: "#/components/responses/AgentError"}
+        "403": {$ref: "#/components/responses/AgentError"}
+        "404": {$ref: "#/components/responses/AgentError"}
+        "405": {$ref: "#/components/responses/AgentError"}
+        "409": {$ref: "#/components/responses/AgentError"}
+        "413": {$ref: "#/components/responses/AgentError"}
+        "415": {$ref: "#/components/responses/AgentError"}
+        "500": {$ref: "#/components/responses/AgentError"}
+        "503": {$ref: "#/components/responses/AgentError"}
+components:
+  securitySchemes:
+    RequestOrigin:
+      type: apiKey
+      in: header
+      name: Origin
+      description: Must use the request scheme and Host. If Sec-Fetch-Site is also present, it must equal same-origin.
+    FetchMetadata:
+      type: apiKey
+      in: header
+      name: Sec-Fetch-Site
+      description: Must equal same-origin. If Origin is also present, it must match the request scheme and Host.
+  parameters:
+    DiscussionID: {name: discussionId, in: path, required: true, schema: {type: string, pattern: '^DISC-[0-9A-HJKMNP-TV-Z]{26}$'}}
+    MessageID: {name: messageId, in: path, required: true, schema: {type: string, pattern: '^MSG-[0-9A-HJKMNP-TV-Z]{26}$'}}
+    DeliveryID: {name: deliveryId, in: path, required: true, schema: {type: string, pattern: '^DEL-[0-9A-HJKMNP-TV-Z]{26}$'}}
+    CreateDiscussionAction: {name: X-Toudocu-Action, in: header, required: true, schema: {const: agent-discussion-create}}
+    UpdateDiscussionAction: {name: X-Toudocu-Action, in: header, required: true, schema: {const: agent-discussion-update}}
+    DeleteDiscussionAction: {name: X-Toudocu-Action, in: header, required: true, schema: {const: agent-discussion-delete}}
+    CreateMessageAction: {name: X-Toudocu-Action, in: header, required: true, schema: {const: agent-message-create}}
+    UpdateMessageAction: {name: X-Toudocu-Action, in: header, required: true, schema: {const: agent-message-update}}
+    DeleteMessageAction: {name: X-Toudocu-Action, in: header, required: true, schema: {const: agent-message-delete}}
+    SubmitMessageAction: {name: X-Toudocu-Action, in: header, required: true, schema: {const: agent-message-submit}}
+    NextDeliveryAction: {name: X-Toudocu-Action, in: header, required: true, schema: {const: agent-delivery-next}}
+    RespondDeliveryAction: {name: X-Toudocu-Action, in: header, required: true, schema: {const: agent-delivery-response}}
+  responses:
+    AgentError:
+      description: Stable agent feedback diagnostic
+      content:
+        application/json:
+          schema: {type: object, required: [schemaVersion, diagnostics], properties: {schemaVersion: {type: integer, const: 1}, diagnostics: {type: array, items: {type: object, required: [severity, code, message], properties: {severity: {const: error}, code: {type: string}, message: {type: string}}}}}}
+          example: {schemaVersion: 1, diagnostics: [{severity: error, code: AGENT_REVISION_CONFLICT, message: agent feedback revision/state digest is stale}]}
+  schemas:
+    MutationGuard:
+      type: object
+      additionalProperties: false
+      required: [expectedRevision, expectedStateDigest]
+      properties: {expectedRevision: {type: integer, minimum: 0}, expectedStateDigest: {type: string}}
+    Position: {type: object, additionalProperties: false, required: [line, column], properties: {line: {type: integer, minimum: 1}, column: {type: integer, minimum: 1}}}
+    Range: {type: object, additionalProperties: false, required: [start, end], properties: {start: {$ref: "#/components/schemas/Position"}, end: {$ref: "#/components/schemas/Position"}}}
+    Target:
+      type: object
+      additionalProperties: false
+      required: [kind, path]
+      properties: {kind: {const: document}, path: {type: string}, documentId: {type: string}, range: {$ref: "#/components/schemas/Range"}}
+    Message:
+      type: object
+      required: [id, author, text, evidence, changedPaths, createdAt]
+      properties: {id: {type: string}, author: {enum: [human, agent]}, intent: {enum: [question, change_request]}, state: {enum: [draft, submitted]}, text: {type: string}, deliveryId: {type: string}, outcome: {enum: [answered, changed, no_change, needs_clarification, failed]}, evidence: {type: array, items: {type: object}}, changedPaths: {type: array, items: {type: string}}, createdAt: {type: string, format: date-time}}
+    Discussion:
+      type: object
+      required: [id, state, target, placement, messages, createdAt, updatedAt]
+      properties: {id: {type: string}, state: {enum: [open, resolved]}, target: {$ref: "#/components/schemas/Target"}, anchor: {type: object}, placement: {type: object}, messages: {type: array, items: {$ref: "#/components/schemas/Message"}}, createdAt: {type: string, format: date-time}, updatedAt: {type: string, format: date-time}}
+    Delivery:
+      type: object
+      required: [schemaVersion, id, sequence, state, discussionId, messageIds, createdAt]
+      properties: {schemaVersion: {type: integer, const: 1}, id: {type: string}, sequence: {type: integer, minimum: 1}, state: {enum: [pending, claimed, responded]}, discussionId: {type: string}, messageIds: {type: array, items: {type: string}}, createdAt: {type: string, format: date-time}}
+    ReviewState:
+      type: object
+      required: [schemaVersion, revision, stateDigest, deliveries]
+      properties: {schemaVersion: {type: integer, const: 1}, revision: {type: integer, minimum: 0}, stateDigest: {type: string}, repositoryRevision: {type: string}, session: {type: object}, deliveries: {type: array, items: {$ref: "#/components/schemas/Delivery"}}}
+    SubmitMessageResult:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, revision, stateDigest, repositoryRevision, session, deliveries, delivery]
+      properties: {schemaVersion: {type: integer, const: 1}, revision: {type: integer, minimum: 0}, stateDigest: {type: string}, repositoryRevision: {type: string}, session: {type: object}, deliveries: {type: array, items: {$ref: "#/components/schemas/Delivery"}}, delivery: {$ref: "#/components/schemas/Delivery"}}
+    CreateDiscussionRequest:
+      type: object
+      additionalProperties: false
+      required: [expectedRevision, expectedStateDigest, target, intent, text]
+      properties: {expectedRevision: {type: integer, minimum: 0}, expectedStateDigest: {type: string}, target: {$ref: "#/components/schemas/Target"}, selection: {type: object, additionalProperties: false, required: [selectedText], properties: {selectedText: {type: string, description: At most 32768 UTF-8 bytes, x-maxBytes: 32768}, occurrence: {type: integer, minimum: 1}}}, intent: {enum: [question, change_request]}, text: {type: string, description: At most 65536 UTF-8 bytes, x-maxBytes: 65536}}
+    HumanMessageMutation:
+      type: object
+      additionalProperties: false
+      required: [expectedRevision, expectedStateDigest, intent, text]
+      properties: {expectedRevision: {type: integer, minimum: 0}, expectedStateDigest: {type: string}, intent: {enum: [question, change_request]}, text: {type: string, description: At most 65536 UTF-8 bytes, x-maxBytes: 65536}}
+    UpdateDiscussionRequest:
+      type: object
+      additionalProperties: false
+      required: [expectedRevision, expectedStateDigest, state]
+      properties: {expectedRevision: {type: integer, minimum: 0}, expectedStateDigest: {type: string}, state: {enum: [open, resolved]}}
+    AgentRequest:
+      type: object
+      required: [schemaVersion, pending]
+      properties: {schemaVersion: {type: integer, const: 1}, pending: {type: boolean}, deliveryId: {type: string}, discussion: {$ref: "#/components/schemas/Discussion"}, target: {type: object}, repository: {type: object}, pendingCount: {type: integer}, hasMore: {type: boolean}}
+    AgentResponse:
+      type: object
+      additionalProperties: false
+      description: The complete encoded JSON object is limited to 65536 UTF-8 bytes.
+      x-maxBytes: 65536
+      required: [schemaVersion, deliveryId, discussionId, outcome, message]
+      properties: {schemaVersion: {type: integer, const: 1}, deliveryId: {type: string}, discussionId: {type: string}, outcome: {enum: [answered, changed, no_change, needs_clarification, failed]}, message: {type: string, description: At most 65536 UTF-8 bytes, x-maxBytes: 65536}, evidence: {type: array, maxItems: 256, items: {type: object, additionalProperties: false, required: [path], properties: {path: {type: string}, startLine: {type: integer, minimum: 0}, endLine: {type: integer, minimum: 0}}}}, changedPaths: {type: array, maxItems: 256, items: {type: string}}}

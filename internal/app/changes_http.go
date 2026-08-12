@@ -26,7 +26,7 @@ var changesRouteRegistry = []apiRoute{
 
 func allChangesRouteRegistry() []apiRoute {
 	routes := append([]apiRoute{}, changesRouteRegistry...)
-	return append(routes, reviewRouteRegistry...)
+	return append(routes, reviewRepositoryRouteRegistry...)
 }
 
 func changesOptionsFromRequest(base Options, request *http.Request) Options {
@@ -145,7 +145,7 @@ func matchAPIRoute(registry []apiRoute, request *http.Request) (*apiRoute, bool)
 }
 
 func (s *documentationServer) serveChangesAPI(w http.ResponseWriter, request *http.Request) {
-	if request.URL.Path == reviewAPIBase || strings.HasPrefix(request.URL.Path, reviewAPIBase+"/") {
+	if request.URL.Path == reviewRepositoryAPIBase || strings.HasPrefix(request.URL.Path, reviewRepositoryAPIBase+"/") {
 		s.serveReviewAPI(w, request)
 		return
 	}

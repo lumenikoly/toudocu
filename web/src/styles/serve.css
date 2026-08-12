@@ -65,7 +65,8 @@
 .portal-review-dialog header span { color: var(--muted); font-size: 12px; }
 .portal-review-dialog label { display: grid; gap: 5px; color: var(--muted); font-size: 12px; font-weight: 650; }
 .portal-review-dialog pre { max-height: 180px; margin: 0; padding: 10px; overflow: auto; border-radius: 8px; background: var(--surface-soft); color: var(--text); font: 13px/1.5 var(--font-body); white-space: pre-wrap; }
-.portal-review-dialog textarea { width: 100%; resize: vertical; padding: 10px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); color: var(--text); font: 16px/1.45 var(--font-body); }
+.portal-review-dialog textarea, .portal-review-dialog select { width: 100%; min-height: 42px; padding: 10px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); color: var(--text); font: 16px/1.45 var(--font-body); }
+.portal-review-dialog textarea { resize: vertical; }
 .portal-review-error { min-height: 1.4em; margin: 0; color: var(--danger); font-size: 13px; }
 .portal-review-dialog footer { display: flex; justify-content: flex-end; gap: 10px; }
 .portal-review-dialog button { min-height: 42px; padding: 8px 15px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); color: var(--text); cursor: pointer; font: 700 13px/1.2 var(--font-interface); }

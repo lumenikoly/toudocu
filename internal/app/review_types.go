@@ -3,15 +3,20 @@ package toudocu
 import "time"
 
 const (
-	reviewSchemaVersion   = 1
-	reviewSnapshotLimit   = 2 << 20
-	reviewMessageLimit    = 64 << 10
-	reviewResponseLimit   = 1 << 20
-	reviewContextByteSize = 2 << 10
+	reviewSchemaVersion     = 1
+	reviewStoreVersion      = 1
+	reviewSnapshotLimit     = 2 << 20
+	reviewMessageLimit      = 64 << 10
+	reviewResponseLimit     = 64 << 10
+	reviewRequestLimit      = 104 << 10
+	reviewSelectionLimit    = 32 << 10
+	reviewContextByteSize   = 2 << 10
+	reviewClaimLease        = 30 * time.Minute
+	reviewResolvedRetention = 30 * 24 * time.Hour
 )
 
-// RepositoryReviewReport is an internal repository-wide projection. It is not
-// part of the public Go facade and intentionally does not change ChangeSetReport.
+// RepositoryReviewReport is an internal repository-wide projection used by
+// the Changes workspace. Agent Feedback never stores this projection.
 type RepositoryReviewReport struct {
 	SchemaVersion      int                    `json:"schemaVersion"`
 	Repository         ChangeRepository       `json:"repository"`
@@ -49,11 +54,14 @@ type RepositoryReviewFileDetail struct {
 
 type ReviewState struct {
 	SchemaVersion      int             `json:"schemaVersion"`
+	StoreVersion       int             `json:"storeVersion,omitempty"`
 	Revision           uint64          `json:"revision"`
 	StateDigest        string          `json:"stateDigest"`
-	RepositoryRevision string          `json:"-"`
+	RepositoryRevision string          `json:"repositoryRevision,omitempty"`
+	DocsPath           string          `json:"docsPath,omitempty"`
+	NextSequence       uint64          `json:"nextSequence,omitempty"`
 	Session            *ReviewSession  `json:"session,omitempty"`
-	Feedback           []FeedbackBatch `json:"feedback"`
+	Deliveries         []AgentDelivery `json:"deliveries"`
 }
 
 type ReviewSession struct {
@@ -66,7 +74,7 @@ type Discussion struct {
 	ID        string          `json:"id"`
 	State     string          `json:"state"`
 	Target    ReviewTarget    `json:"target"`
-	Anchor    *AnchorSnapshot `json:"anchor,omitempty"`
+	Anchor    *DocumentAnchor `json:"anchor,omitempty"`
 	Placement AnchorPlacement `json:"placement"`
 	Messages  []ReviewMessage `json:"messages"`
 	CreatedAt time.Time       `json:"createdAt"`
@@ -78,88 +86,103 @@ type ReviewPosition struct {
 	Column int `json:"column"`
 }
 
-type ReviewTarget struct {
-	Type  string          `json:"type"`
-	Path  string          `json:"path,omitempty"`
-	Side  string          `json:"side,omitempty"`
-	Start *ReviewPosition `json:"start,omitempty"`
-	End   *ReviewPosition `json:"end,omitempty"`
+type ReviewRange struct {
+	Start ReviewPosition `json:"start"`
+	End   ReviewPosition `json:"end"`
 }
 
-type AnchorSnapshot struct {
-	OriginalTarget             ReviewTarget `json:"originalTarget"`
-	OriginalPath               string       `json:"originalPath,omitempty"`
-	OriginalRepositoryRevision string       `json:"originalRepositoryRevision"`
-	ContentDigest              string       `json:"contentDigest,omitempty"`
-	SelectedText               string       `json:"selectedText,omitempty"`
-	ContextBefore              string       `json:"contextBefore,omitempty"`
-	ContextAfter               string       `json:"contextAfter,omitempty"`
-	SnapshotRef                string       `json:"snapshotRef,omitempty"`
+type ReviewTarget struct {
+	Kind       string       `json:"kind"`
+	Path       string       `json:"path"`
+	DocumentID string       `json:"documentId,omitempty"`
+	Range      *ReviewRange `json:"range,omitempty"`
+}
+
+type DocumentAnchor struct {
+	Kind          string       `json:"kind"`
+	Path          string       `json:"path"`
+	DocumentID    string       `json:"documentId,omitempty"`
+	SourceDigest  string       `json:"sourceDigest"`
+	Range         *ReviewRange `json:"range,omitempty"`
+	SelectedText  string       `json:"selectedText,omitempty"`
+	ContextBefore string       `json:"contextBefore,omitempty"`
+	ContextAfter  string       `json:"contextAfter,omitempty"`
 }
 
 type AnchorPlacement struct {
-	Status string          `json:"status"`
-	Path   string          `json:"path,omitempty"`
-	Side   string          `json:"side,omitempty"`
-	Start  *ReviewPosition `json:"start,omitempty"`
-	End    *ReviewPosition `json:"end,omitempty"`
-	Reason string          `json:"reason,omitempty"`
+	Status string       `json:"status"`
+	Path   string       `json:"path"`
+	Range  *ReviewRange `json:"range,omitempty"`
+	Reason string       `json:"reason,omitempty"`
 }
 
 type ReviewMessage struct {
-	ID           string    `json:"id"`
-	Author       string    `json:"author"`
-	LegacyType   string    `json:"type,omitempty"`
-	Body         string    `json:"body"`
-	Outcome      string    `json:"outcome,omitempty"`
-	ChangedPaths []string  `json:"changedPaths,omitempty"`
-	FeedbackID   string    `json:"feedbackId,omitempty"`
-	CreatedAt    time.Time `json:"createdAt"`
-	EditedAt     time.Time `json:"editedAt,omitempty"`
+	ID           string          `json:"id"`
+	Author       string          `json:"author"`
+	Intent       string          `json:"intent,omitempty"`
+	State        string          `json:"state,omitempty"`
+	Text         string          `json:"text"`
+	DeliveryID   string          `json:"deliveryId,omitempty"`
+	Outcome      string          `json:"outcome,omitempty"`
+	Evidence     []AgentEvidence `json:"evidence"`
+	ChangedPaths []string        `json:"changedPaths"`
+	CreatedAt    time.Time       `json:"createdAt"`
+	EditedAt     *time.Time      `json:"editedAt,omitempty"`
+	SubmittedAt  *time.Time      `json:"submittedAt,omitempty"`
 }
 
-type FeedbackBatch struct {
-	SchemaVersion int            `json:"schemaVersion"`
-	ID            string         `json:"id"`
-	ReviewID      string         `json:"reviewId"`
-	Digest        string         `json:"feedbackDigest"`
-	CreatedAt     time.Time      `json:"createdAt"`
-	RespondedAt   time.Time      `json:"respondedAt,omitempty"`
-	Items         []FeedbackItem `json:"items"`
+type AgentDelivery struct {
+	SchemaVersion  int        `json:"schemaVersion"`
+	ID             string     `json:"id"`
+	Sequence       uint64     `json:"sequence"`
+	State          string     `json:"state"`
+	DiscussionID   string     `json:"discussionId"`
+	MessageIDs     []string   `json:"messageIds"`
+	CreatedAt      time.Time  `json:"createdAt"`
+	ClaimedAt      *time.Time `json:"claimedAt,omitempty"`
+	LeaseExpiresAt *time.Time `json:"leaseExpiresAt,omitempty"`
+	RespondedAt    *time.Time `json:"respondedAt,omitempty"`
+	ResponseDigest string     `json:"responseDigest,omitempty"`
 }
 
-type FeedbackItem struct {
-	ID           string         `json:"id"`
-	DiscussionID string         `json:"discussionId"`
-	MessageID    string         `json:"messageId"`
-	LegacyType   string         `json:"type,omitempty"`
-	Body         string         `json:"body"`
-	Target       ReviewTarget   `json:"target"`
-	Anchor       AnchorSnapshot `json:"anchor"`
+type AgentEvidence struct {
+	Path      string `json:"path"`
+	StartLine int    `json:"startLine,omitempty"`
+	EndLine   int    `json:"endLine,omitempty"`
 }
 
-type AgentFeedbackResponse struct {
-	SchemaVersion       int                   `json:"schemaVersion"`
-	ReviewID            string                `json:"reviewId"`
-	FeedbackID          string                `json:"feedbackId"`
-	FeedbackDigest      string                `json:"feedbackDigest"`
-	ExpectedRevision    uint64                `json:"expectedRevision"`
-	ExpectedStateDigest string                `json:"expectedStateDigest"`
-	Results             []AgentFeedbackResult `json:"results"`
+type AgentResponse struct {
+	SchemaVersion int             `json:"schemaVersion"`
+	DeliveryID    string          `json:"deliveryId"`
+	DiscussionID  string          `json:"discussionId"`
+	Outcome       string          `json:"outcome"`
+	Message       string          `json:"message"`
+	Evidence      []AgentEvidence `json:"evidence"`
+	ChangedPaths  []string        `json:"changedPaths"`
 }
 
-type AgentFeedbackResult struct {
-	ItemID       string   `json:"itemId"`
-	Outcome      string   `json:"outcome"`
-	Message      string   `json:"message"`
-	ChangedPaths []string `json:"changedPaths"`
+type AgentRequest struct {
+	SchemaVersion int                 `json:"schemaVersion"`
+	Pending       bool                `json:"pending"`
+	DeliveryID    string              `json:"deliveryId,omitempty"`
+	Discussion    *Discussion         `json:"discussion,omitempty"`
+	Target        *AgentRequestTarget `json:"target,omitempty"`
+	Repository    *AgentRepository    `json:"repository,omitempty"`
+	PendingCount  int                 `json:"pendingCount,omitempty"`
+	HasMore       bool                `json:"hasMore,omitempty"`
 }
 
-type PendingFeedbackEnvelope struct {
-	SchemaVersion int            `json:"schemaVersion"`
-	Revision      uint64         `json:"revision"`
-	StateDigest   string         `json:"stateDigest"`
-	Feedback      *FeedbackBatch `json:"feedback"`
+type AgentRequestTarget struct {
+	Kind         string       `json:"kind"`
+	Path         string       `json:"path"`
+	DocumentID   string       `json:"documentId,omitempty"`
+	AnchorState  string       `json:"anchorState"`
+	Range        *ReviewRange `json:"range,omitempty"`
+	SelectedText string       `json:"selectedText,omitempty"`
+}
+
+type AgentRepository struct {
+	Head string `json:"head"`
 }
 
 type ReviewMutationGuard struct {
@@ -167,24 +190,34 @@ type ReviewMutationGuard struct {
 	ExpectedStateDigest string `json:"expectedStateDigest"`
 }
 
+type SelectionHint struct {
+	SelectedText string `json:"selectedText"`
+	Occurrence   int    `json:"occurrence,omitempty"`
+}
+
 type CreateDiscussionRequest struct {
 	ReviewMutationGuard
-	RepositoryRevision string       `json:"repositoryRevision"`
-	Target             ReviewTarget `json:"target"`
-	Message            string       `json:"message"`
+	Target    ReviewTarget   `json:"target"`
+	Selection *SelectionHint `json:"selection,omitempty"`
+	Intent    string         `json:"intent"`
+	Text      string         `json:"text"`
+}
+
+type CreateMessageRequest struct {
+	ReviewMutationGuard
+	Intent string `json:"intent"`
+	Text   string `json:"text"`
+}
+
+type UpdateMessageRequest struct {
+	ReviewMutationGuard
+	Intent string `json:"intent"`
+	Text   string `json:"text"`
 }
 
 type UpdateDiscussionRequest struct {
 	ReviewMutationGuard
-	Operation string `json:"operation"`
-	MessageID string `json:"messageId,omitempty"`
-	Message   string `json:"message,omitempty"`
-}
-
-type CleanupReviewRequest struct {
-	ReviewMutationGuard
-	Mode    string `json:"mode"`
-	Confirm bool   `json:"confirm,omitempty"`
+	State string `json:"state"`
 }
 
 type reviewFailure struct {

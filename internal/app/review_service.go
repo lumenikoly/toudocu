@@ -3,7 +3,7 @@ package toudocu
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -14,9 +14,10 @@ import (
 )
 
 type reviewService struct {
-	store   *reviewStore
-	options Options
-	now     func() time.Time
+	store    *reviewStore
+	options  Options
+	docsRoot string
+	now      func() time.Time
 }
 
 func newReviewService(options Options) (*reviewService, error) {
@@ -25,7 +26,23 @@ func newReviewService(options Options) (*reviewService, error) {
 		return nil, err
 	}
 	options.RepositoryRoot = store.repositoryRoot
-	return &reviewService{store: store, options: options, now: func() time.Time { return time.Now().UTC() }}, nil
+	docsRoot := options.InputDirectory
+	if strings.TrimSpace(docsRoot) == "" {
+		state, loadErr := store.load()
+		if loadErr != nil {
+			return nil, loadErr
+		}
+		if state.DocsPath != "" {
+			docsRoot = filepath.Join(store.repositoryRoot, filepath.FromSlash(state.DocsPath))
+		} else {
+			docsRoot = filepath.Join(store.repositoryRoot, "docs")
+		}
+	}
+	docsRoot, err = resolvePathForSafety(docsRoot)
+	if err != nil || !pathContains(store.repositoryRoot, docsRoot) {
+		return nil, agentFailure("AGENT_INVALID_PATH", http.StatusForbidden, "canonical documentation root must stay inside the repository")
+	}
+	return &reviewService{store: store, options: options, docsRoot: docsRoot, now: func() time.Time { return time.Now().UTC() }}, nil
 }
 
 func (service *reviewService) discussions() (ReviewState, error) {
@@ -33,467 +50,441 @@ func (service *reviewService) discussions() (ReviewState, error) {
 	if err != nil {
 		return ReviewState{}, err
 	}
-	if state.Session == nil {
-		return state, nil
-	}
-	report, reportErr := BuildRepositoryReview(service.options)
-	if reportErr != nil {
-		return ReviewState{}, reportErr
-	}
-	for index := range state.Session.Discussions {
-		state.Session.Discussions[index].Placement = service.reanchor(state.Session.Discussions[index], report)
-	}
+	service.applyPlacements(&state)
 	sortReviewDiscussions(&state)
-	state.RepositoryRevision = report.RepositoryRevision
+	state.RepositoryRevision = service.repositoryRevision(state)
 	return state, nil
 }
 
 func (service *reviewService) createDiscussion(request CreateDiscussionRequest) (ReviewState, error) {
-	if err := validateHumanMessage(request.Message); err != nil {
+	if err := validateHumanMessage(request.Intent, request.Text); err != nil {
 		return ReviewState{}, err
 	}
-	report, err := BuildRepositoryReview(service.options)
-	if err != nil {
-		return ReviewState{}, err
-	}
-	if !report.FeedbackWritable {
-		return ReviewState{}, &reviewFailure{Code: "REVIEW_READ_ONLY", Status: http.StatusForbidden, Message: "review target is read-only"}
-	}
-	if request.RepositoryRevision != report.RepositoryRevision {
-		return ReviewState{}, &reviewFailure{Code: "REVIEW_CONFLICT", Status: http.StatusConflict, Message: "repository revision is stale"}
-	}
-	anchor, snapshot, err := service.captureAnchor(report, request.Target)
+	anchor, target, err := service.captureAnchor(request.Target, request.Selection)
 	if err != nil {
 		return ReviewState{}, err
 	}
 	now := service.now()
-	discussionID, err := newReviewID(now)
+	discussionID, err := newAgentID("DISC", now)
 	if err != nil {
 		return ReviewState{}, err
 	}
-	messageID, err := newReviewID(now.Add(time.Nanosecond))
+	messageID, err := newAgentID("MSG", now.Add(time.Nanosecond))
 	if err != nil {
 		return ReviewState{}, err
 	}
-	result, mutateErr := service.store.mutate(request.ReviewMutationGuard, func(state *ReviewState) error {
+	result, err := service.store.mutate(request.ReviewMutationGuard, func(state *ReviewState) error {
 		if state.Session == nil {
-			sessionID, idErr := newReviewID(now)
+			sessionID, idErr := newAgentID("SESS", now)
 			if idErr != nil {
 				return idErr
 			}
 			state.Session = &ReviewSession{ID: sessionID, CreatedAt: now, Discussions: []Discussion{}}
 		}
-		if anchor != nil {
-			snapshotRef, snapshotErr := service.store.saveSnapshot(snapshot)
-			if snapshotErr != nil {
-				return snapshotErr
-			}
-			anchor.SnapshotRef = snapshotRef
-		}
-		discussion := Discussion{
-			ID: discussionID, State: "open", Target: request.Target, Anchor: anchor,
-			Placement: placementFromTarget(request.Target, "exact", ""),
-			Messages:  []ReviewMessage{{ID: messageID, Author: "human", Body: strings.TrimSpace(request.Message), CreatedAt: now}},
+		state.DocsPath = service.docsPath()
+		state.Session.Discussions = append(state.Session.Discussions, Discussion{
+			ID: discussionID, State: "open", Target: target, Anchor: anchor,
+			Placement: placementFromTarget(target, "current", ""),
+			Messages: []ReviewMessage{{
+				ID: messageID, Author: "human", Intent: request.Intent, State: "draft", Text: strings.TrimSpace(request.Text),
+				Evidence: []AgentEvidence{}, ChangedPaths: []string{}, CreatedAt: now,
+			}},
 			CreatedAt: now, UpdatedAt: now,
-		}
-		state.Session.Discussions = append(state.Session.Discussions, discussion)
+		})
+		service.garbageCollect(state, now)
 		return nil
 	})
-	if mutateErr != nil {
-		if current, loadErr := service.store.load(); loadErr == nil {
-			service.store.garbageCollectSnapshots(current)
-		}
-	}
-	return result, mutateErr
+	return service.present(result), err
 }
 
-func (service *reviewService) updateDiscussion(id string, request UpdateDiscussionRequest) (ReviewState, error) {
+func (service *reviewService) createMessage(discussionID string, request CreateMessageRequest) (ReviewState, error) {
+	if err := validateHumanMessage(request.Intent, request.Text); err != nil {
+		return ReviewState{}, err
+	}
+	now := service.now()
+	messageID, err := newAgentID("MSG", now)
+	if err != nil {
+		return ReviewState{}, err
+	}
 	result, err := service.store.mutate(request.ReviewMutationGuard, func(state *ReviewState) error {
-		discussion := findDiscussion(state, id)
+		discussion := findDiscussion(state, discussionID)
 		if discussion == nil {
-			return &reviewFailure{Code: "REVIEW_NOT_FOUND", Status: http.StatusNotFound, Message: "discussion not found"}
+			return agentFailure("AGENT_DISCUSSION_NOT_FOUND", http.StatusNotFound, "discussion not found")
 		}
-		now := service.now()
-		switch request.Operation {
-		case "reply":
-			if discussion.State != "open" {
-				return &reviewFailure{Code: "REVIEW_INVALID_STATE", Status: http.StatusConflict, Message: "reply is available only in an open discussion"}
-			}
-			if discussionInFlight(*state, discussion.ID) {
-				return &reviewFailure{Code: "REVIEW_CONFLICT", Status: http.StatusConflict, Message: "discussion is waiting for an agent response"}
-			}
-			for _, message := range discussion.Messages {
-				if message.Author == "human" && message.FeedbackID == "" {
-					return &reviewFailure{Code: "REVIEW_CONFLICT", Status: http.StatusConflict, Message: "send or edit the existing unsent message first"}
-				}
-			}
-			if err := validateHumanMessage(request.Message); err != nil {
-				return err
-			}
-			messageID, err := newReviewID(now)
-			if err != nil {
-				return err
-			}
-			discussion.Messages = append(discussion.Messages, ReviewMessage{ID: messageID, Author: "human", Body: strings.TrimSpace(request.Message), CreatedAt: now})
-		case "edit":
-			if err := validateHumanMessage(request.Message); err != nil {
-				return err
-			}
-			message := findUnsentHumanMessage(discussion, request.MessageID)
-			if message == nil {
-				return &reviewFailure{Code: "REVIEW_INVALID_STATE", Status: http.StatusConflict, Message: "only an unsent human message can be edited"}
-			}
-			message.Body, message.EditedAt = strings.TrimSpace(request.Message), now
-		case "delete":
-			message := findUnsentHumanMessage(discussion, request.MessageID)
-			if message == nil {
-				return &reviewFailure{Code: "REVIEW_INVALID_STATE", Status: http.StatusConflict, Message: "only an unsent human message can be deleted"}
-			}
-			for index := range discussion.Messages {
-				if discussion.Messages[index].ID == message.ID {
-					discussion.Messages = append(discussion.Messages[:index], discussion.Messages[index+1:]...)
-					break
-				}
-			}
-			if len(discussion.Messages) == 0 {
-				removeDiscussion(state, discussion.ID)
-				return nil
-			}
-		case "deleteDiscussion":
-			removeDiscussion(state, id)
-			kept := state.Feedback[:0]
-			for _, batch := range state.Feedback {
-				affected := false
-				for _, item := range batch.Items {
-					if item.DiscussionID == id {
-						affected = true
-						break
-					}
-				}
-				if !affected {
-					kept = append(kept, batch)
-					continue
-				}
-				if batch.RespondedAt.IsZero() {
-					for _, item := range batch.Items {
-						discussion := findDiscussion(state, item.DiscussionID)
-						if discussion == nil {
-							continue
-						}
-						for index := range discussion.Messages {
-							if discussion.Messages[index].ID == item.MessageID && discussion.Messages[index].FeedbackID == batch.ID {
-								discussion.Messages[index].FeedbackID = ""
-							}
-						}
-					}
-				}
-			}
-			state.Feedback = kept
-			return nil
-		case "resolve":
-			discussion.State = "resolved"
-		case "reopen":
-			discussion.State = "open"
-		default:
-			return &reviewFailure{Code: "REVIEW_INVALID_REQUEST", Status: http.StatusBadRequest, Message: "unknown discussion operation"}
+		if discussion.State != "open" {
+			return agentFailure("AGENT_INVALID_MESSAGE", http.StatusConflict, "a message can be added only to an open discussion")
 		}
+		if draftMessage(discussion) != nil || discussionInFlight(*state, discussionID, now) {
+			return agentFailure("AGENT_REVISION_CONFLICT", http.StatusConflict, "finish the current draft or agent delivery first")
+		}
+		discussion.Messages = append(discussion.Messages, ReviewMessage{
+			ID: messageID, Author: "human", Intent: request.Intent, State: "draft", Text: strings.TrimSpace(request.Text),
+			Evidence: []AgentEvidence{}, ChangedPaths: []string{}, CreatedAt: now,
+		})
+		discussion.UpdatedAt = now
+		service.garbageCollect(state, now)
+		return nil
+	})
+	return service.present(result), err
+}
+
+func (service *reviewService) updateMessage(discussionID, messageID string, request UpdateMessageRequest) (ReviewState, error) {
+	if err := validateHumanMessage(request.Intent, request.Text); err != nil {
+		return ReviewState{}, err
+	}
+	now := service.now()
+	result, err := service.store.mutate(request.ReviewMutationGuard, func(state *ReviewState) error {
+		discussion := findDiscussion(state, discussionID)
+		message := findDraftMessage(discussion, messageID)
+		if discussion == nil {
+			return agentFailure("AGENT_DISCUSSION_NOT_FOUND", http.StatusNotFound, "discussion not found")
+		}
+		if message == nil {
+			return agentFailure("AGENT_INVALID_MESSAGE", http.StatusConflict, "only a draft human message can be edited")
+		}
+		message.Intent, message.Text, message.EditedAt = request.Intent, strings.TrimSpace(request.Text), &now
 		discussion.UpdatedAt = now
 		return nil
 	})
-	if err == nil && request.Operation == "deleteDiscussion" {
-		service.store.garbageCollectSnapshots(result)
-	}
-	return result, err
+	return service.present(result), err
 }
 
-func (service *reviewService) createFeedback(guard ReviewMutationGuard) (ReviewState, *FeedbackBatch, error) {
-	var created *FeedbackBatch
-	state, err := service.store.mutate(guard, func(state *ReviewState) error {
-		if state.Session == nil {
-			return &reviewFailure{Code: "REVIEW_NO_FEEDBACK", Status: http.StatusConflict, Message: "there are no new messages to send"}
+func (service *reviewService) deleteMessage(discussionID, messageID string, guard ReviewMutationGuard) (ReviewState, error) {
+	now := service.now()
+	result, err := service.store.mutate(guard, func(state *ReviewState) error {
+		discussion := findDiscussion(state, discussionID)
+		if discussion == nil {
+			return agentFailure("AGENT_DISCUSSION_NOT_FOUND", http.StatusNotFound, "discussion not found")
 		}
-		items := []FeedbackItem{}
-		for discussionIndex := range state.Session.Discussions {
-			discussion := &state.Session.Discussions[discussionIndex]
-			if discussion.State != "open" || discussionInFlight(*state, discussion.ID) {
-				continue
-			}
-			for messageIndex := range discussion.Messages {
-				message := &discussion.Messages[messageIndex]
-				if message.Author != "human" || message.FeedbackID != "" {
-					continue
-				}
-				itemID, idErr := newReviewID(service.now().Add(time.Duration(len(items)) * time.Nanosecond))
-				if idErr != nil {
-					return idErr
-				}
-				anchor := AnchorSnapshot{}
-				if discussion.Anchor != nil {
-					anchor = *discussion.Anchor
-				}
-				items = append(items, FeedbackItem{ID: itemID, DiscussionID: discussion.ID, MessageID: message.ID, Body: message.Body, Target: discussion.Target, Anchor: anchor})
-			}
+		if findDraftMessage(discussion, messageID) == nil {
+			return agentFailure("AGENT_INVALID_MESSAGE", http.StatusConflict, "only a draft human message can be deleted")
 		}
-		if len(items) == 0 {
-			return &reviewFailure{Code: "REVIEW_NO_FEEDBACK", Status: http.StatusConflict, Message: "there are no new messages to send"}
-		}
-		feedbackID, idErr := newReviewID(service.now())
-		if idErr != nil {
-			return idErr
-		}
-		batch := FeedbackBatch{SchemaVersion: reviewSchemaVersion, ID: feedbackID, ReviewID: state.Session.ID, CreatedAt: service.now(), Items: items}
-		batch.Digest = feedbackBatchDigest(batch)
-		for _, item := range items {
-			discussion := findDiscussion(state, item.DiscussionID)
-			for index := range discussion.Messages {
-				if discussion.Messages[index].ID == item.MessageID {
-					discussion.Messages[index].FeedbackID = feedbackID
-				}
-			}
-		}
-		state.Feedback = append(state.Feedback, batch)
-		created = &batch
-		return nil
-	})
-	return state, created, err
-}
-
-func feedbackBatchDigest(batch FeedbackBatch) string {
-	batch.Digest = ""
-	data, _ := json.Marshal(batch)
-	return digestBytes(data)
-}
-
-func (service *reviewService) pendingFeedback() (PendingFeedbackEnvelope, error) {
-	state, err := service.store.load()
-	if err != nil {
-		return PendingFeedbackEnvelope{}, err
-	}
-	envelope := PendingFeedbackEnvelope{SchemaVersion: reviewSchemaVersion, Revision: state.Revision, StateDigest: state.StateDigest}
-	for index := range state.Feedback {
-		if state.Feedback[index].RespondedAt.IsZero() {
-			copy := state.Feedback[index]
-			envelope.Feedback = &copy
-			break
-		}
-	}
-	return envelope, nil
-}
-
-func (service *reviewService) respond(response AgentFeedbackResponse) (ReviewState, error) {
-	if response.SchemaVersion != reviewSchemaVersion {
-		return ReviewState{}, invalidReviewResponse("unsupported response schemaVersion")
-	}
-	guard := ReviewMutationGuard{ExpectedRevision: response.ExpectedRevision, ExpectedStateDigest: response.ExpectedStateDigest}
-	return service.store.mutate(guard, func(state *ReviewState) error {
-		if state.Session == nil || state.Session.ID != response.ReviewID {
-			return invalidReviewResponse("unknown reviewId")
-		}
-		var batch *FeedbackBatch
-		for index := range state.Feedback {
-			if state.Feedback[index].RespondedAt.IsZero() {
-				if state.Feedback[index].ID != response.FeedbackID {
-					return invalidReviewResponse("response must match oldest pending feedback")
-				}
-				batch = &state.Feedback[index]
+		for index := range discussion.Messages {
+			if discussion.Messages[index].ID == messageID {
+				discussion.Messages = append(discussion.Messages[:index], discussion.Messages[index+1:]...)
 				break
 			}
 		}
-		if batch == nil || !batch.RespondedAt.IsZero() || batch.Digest != response.FeedbackDigest || feedbackBatchDigest(*batch) != batch.Digest {
-			return invalidReviewResponse("unknown, completed, or mismatched feedback")
-		}
-		if len(response.Results) != len(batch.Items) {
-			return invalidReviewResponse("response must contain exactly one result per feedback item")
-		}
-		results := map[string]AgentFeedbackResult{}
-		for _, result := range response.Results {
-			if _, duplicate := results[result.ItemID]; duplicate {
-				return invalidReviewResponse("duplicate item result")
-			}
-			if !validReviewOutcome(result.Outcome) || strings.TrimSpace(result.Message) == "" {
-				return invalidReviewResponse("invalid outcome or empty message")
-			}
-			if len(result.Message) > reviewMessageLimit {
-				return &reviewFailure{Code: "REVIEW_MESSAGE_TOO_LARGE", Status: http.StatusRequestEntityTooLarge, Message: "agent message exceeds the limit"}
-			}
-			if len(result.ChangedPaths) > 256 {
-				return invalidReviewResponse("too many changedPaths")
-			}
-			g, err := openGitRepositorySource(service.options.RepositoryRoot, 60)
-			if err != nil {
-				return err
-			}
-			for _, path := range result.ChangedPaths {
-				if err := validateReviewChangedPath(g, path); err != nil {
-					return invalidReviewResponse("unsafe changedPath")
-				}
-			}
-			results[result.ItemID] = result
-		}
-		for _, item := range batch.Items {
-			if _, ok := results[item.ID]; !ok {
-				return invalidReviewResponse("missing feedback item result")
-			}
-		}
-		now := service.now()
-		for _, item := range batch.Items {
-			result := results[item.ID]
-			discussion := findDiscussion(state, item.DiscussionID)
-			if discussion == nil {
-				return invalidReviewResponse("feedback discussion no longer exists")
-			}
-			messageID, err := newReviewID(now.Add(time.Duration(len(discussion.Messages)) * time.Nanosecond))
-			if err != nil {
-				return err
-			}
-			discussion.Messages = append(discussion.Messages, ReviewMessage{ID: messageID, Author: "agent", Body: strings.TrimSpace(result.Message), Outcome: result.Outcome, ChangedPaths: append([]string{}, result.ChangedPaths...), FeedbackID: batch.ID, CreatedAt: now})
+		if len(discussion.Messages) == 0 {
+			removeDiscussion(state, discussionID)
+		} else {
 			discussion.UpdatedAt = now
 		}
-		batch.RespondedAt = now
 		return nil
 	})
+	return service.present(result), err
 }
 
-func invalidReviewResponse(message string) error {
-	return &reviewFailure{Code: "REVIEW_INVALID_RESPONSE", Status: http.StatusBadRequest, Message: message}
-}
-
-func (service *reviewService) cleanup(request CleanupReviewRequest) (ReviewState, error) {
-	state, err := service.store.mutate(request.ReviewMutationGuard, func(state *ReviewState) error {
-		switch request.Mode {
-		case "closed":
-			if state.Session == nil {
-				return nil
-			}
-			kept := state.Session.Discussions[:0]
-			for _, discussion := range state.Session.Discussions {
-				if discussion.State != "resolved" || discussionInFlight(*state, discussion.ID) {
-					kept = append(kept, discussion)
-				}
-			}
-			state.Session.Discussions = kept
-		case "all":
-			if !request.Confirm {
-				return &reviewFailure{Code: "REVIEW_CONFIRMATION_REQUIRED", Status: http.StatusBadRequest, Message: "full cleanup requires confirm=true"}
-			}
-			now := service.now()
-			id, idErr := newReviewID(now)
-			if idErr != nil {
-				return idErr
-			}
-			state.Session = &ReviewSession{ID: id, CreatedAt: now, Discussions: []Discussion{}}
-			state.Feedback = []FeedbackBatch{}
-		default:
-			return &reviewFailure{Code: "REVIEW_INVALID_REQUEST", Status: http.StatusBadRequest, Message: "cleanup mode must be closed or all"}
+func (service *reviewService) submitMessage(discussionID, messageID string, guard ReviewMutationGuard) (ReviewState, *AgentDelivery, error) {
+	now := service.now()
+	deliveryID, err := newAgentID("DEL", now)
+	if err != nil {
+		return ReviewState{}, nil, err
+	}
+	var delivery *AgentDelivery
+	result, err := service.store.mutate(guard, func(state *ReviewState) error {
+		discussion := findDiscussion(state, discussionID)
+		if discussion == nil {
+			return agentFailure("AGENT_DISCUSSION_NOT_FOUND", http.StatusNotFound, "discussion not found")
 		}
+		message := findDraftMessage(discussion, messageID)
+		if message == nil || discussion.State != "open" {
+			return agentFailure("AGENT_INVALID_MESSAGE", http.StatusConflict, "only a draft in an open discussion can be queued")
+		}
+		if discussionInFlight(*state, discussionID, now) {
+			return agentFailure("AGENT_INBOX_BUSY", http.StatusConflict, "this discussion already has an unfinished delivery")
+		}
+		placement := service.reanchor(*discussion)
+		if placement.Status == "deleted" {
+			return agentFailure("AGENT_INVALID_TARGET", http.StatusConflict, "the selected document or fragment was deleted")
+		}
+		if placement.Range != nil {
+			discussion.Target.Range = cloneReviewRange(placement.Range)
+		}
+		if refreshed, _, captureErr := service.captureAnchor(discussion.Target, nil); captureErr == nil {
+			discussion.Anchor = refreshed
+		}
+		discussion.Placement = placement
+		message.State, message.DeliveryID, message.SubmittedAt, message.EditedAt = "submitted", deliveryID, &now, nil
+		state.NextSequence++
+		created := AgentDelivery{
+			SchemaVersion: reviewSchemaVersion, ID: deliveryID, Sequence: state.NextSequence, State: "pending",
+			DiscussionID: discussionID, MessageIDs: []string{messageID}, CreatedAt: now,
+		}
+		state.Deliveries = append(state.Deliveries, created)
+		discussion.UpdatedAt = now
+		delivery = &created
 		return nil
 	})
-	if err == nil {
-		service.store.garbageCollectSnapshots(state)
-	}
-	return state, err
+	return service.present(result), delivery, err
 }
 
-func (service *reviewService) captureAnchor(report *RepositoryReviewReport, target ReviewTarget) (*AnchorSnapshot, []byte, error) {
-	if err := validateReviewTarget(target); err != nil {
-		return nil, nil, err
+func (service *reviewService) updateDiscussion(id string, request UpdateDiscussionRequest) (ReviewState, error) {
+	if request.State != "open" && request.State != "resolved" {
+		return ReviewState{}, agentFailure("AGENT_INVALID_MESSAGE", http.StatusBadRequest, "discussion state must be open or resolved")
 	}
-	if target.Type == "global" {
-		return nil, nil, nil
-	}
-	g, err := openGitRepositorySource(service.options.RepositoryRoot, service.options.ChangeRenameSimilarity)
-	if err != nil {
-		return nil, nil, err
-	}
-	path, err := validateReviewPath(g, target.Path)
-	if err != nil {
-		return nil, nil, err
-	}
-	side := report.Comparison.Target
-	resolvedPath := path
-	if target.Type == "diff" {
-		var changed *RepositoryReviewFile
-		for index := range report.Files {
-			if report.Files[index].Path == path || report.Files[index].OldPath == path {
-				changed = &report.Files[index]
-				break
+	now := service.now()
+	result, err := service.store.mutate(request.ReviewMutationGuard, func(state *ReviewState) error {
+		discussion := findDiscussion(state, id)
+		if discussion == nil {
+			return agentFailure("AGENT_DISCUSSION_NOT_FOUND", http.StatusNotFound, "discussion not found")
+		}
+		discussion.State, discussion.UpdatedAt = request.State, now
+		service.garbageCollect(state, now)
+		return nil
+	})
+	return service.present(result), err
+}
+
+func (service *reviewService) deleteDiscussion(id string, guard ReviewMutationGuard) (ReviewState, error) {
+	result, err := service.store.mutate(guard, func(state *ReviewState) error {
+		if findDiscussion(state, id) == nil {
+			return agentFailure("AGENT_DISCUSSION_NOT_FOUND", http.StatusNotFound, "discussion not found")
+		}
+		removeDiscussion(state, id)
+		kept := state.Deliveries[:0]
+		for _, delivery := range state.Deliveries {
+			if delivery.DiscussionID != id {
+				kept = append(kept, delivery)
 			}
 		}
-		if changed == nil {
-			return nil, nil, &reviewFailure{Code: "REVIEW_NOT_FOUND", Status: http.StatusNotFound, Message: "diff target not found"}
+		state.Deliveries = kept
+		return nil
+	})
+	return service.present(result), err
+}
+
+func (service *reviewService) claimNext() (AgentRequest, error) {
+	now := service.now()
+	request := AgentRequest{SchemaVersion: reviewSchemaVersion, Pending: false}
+	state, err := service.store.update(func(state *ReviewState) (bool, error) {
+		unfinished := unfinishedDeliveries(state)
+		if len(unfinished) == 0 {
+			return false, nil
 		}
-		if target.Side == "old" {
-			side = report.Comparison.Base
-			if changed.OldPath != "" {
-				resolvedPath = changed.OldPath
-			}
-		} else {
-			resolvedPath = changed.Path
+		delivery := unfinished[0]
+		if delivery.State == "claimed" && delivery.LeaseExpiresAt != nil && delivery.LeaseExpiresAt.After(now) {
+			return false, agentFailure("AGENT_INBOX_BUSY", http.StatusConflict, "the oldest delivery is claimed by another consumer")
 		}
-	}
-	content, err := readReviewText(g, side, resolvedPath)
+		leaseExpiresAt := now.Add(reviewClaimLease)
+		delivery.State, delivery.ClaimedAt, delivery.LeaseExpiresAt = "claimed", &now, &leaseExpiresAt
+		discussion := findDiscussion(state, delivery.DiscussionID)
+		if discussion == nil {
+			return false, corruptedReviewState("the oldest delivery has no discussion")
+		}
+		discussion.Placement = service.reanchor(*discussion)
+		request = service.agentRequest(*state, *delivery, *discussion, len(unfinished))
+		return true, nil
+	})
 	if err != nil {
-		return nil, nil, err
+		return AgentRequest{}, err
+	}
+	if !request.Pending {
+		return request, nil
+	}
+	_ = state
+	return request, nil
+}
+
+func (service *reviewService) respond(response AgentResponse) (ReviewState, error) {
+	response = normalizeAgentResponse(response)
+	if err := reviewResponseSize(response); err != nil {
+		return ReviewState{}, err
+	}
+	if err := service.validateAgentResponse(response); err != nil {
+		return ReviewState{}, err
+	}
+	data, _ := json.Marshal(response)
+	responseDigest := digestBytes(data)
+	now := service.now()
+	result, err := service.store.update(func(state *ReviewState) (bool, error) {
+		delivery := findDelivery(state, response.DeliveryID)
+		if delivery == nil {
+			return false, agentFailure("AGENT_DELIVERY_NOT_FOUND", http.StatusNotFound, "delivery not found")
+		}
+		if delivery.DiscussionID != response.DiscussionID {
+			return false, agentFailure("AGENT_INVALID_MESSAGE", http.StatusBadRequest, "discussionId does not match delivery")
+		}
+		if delivery.State == "responded" {
+			if delivery.ResponseDigest == responseDigest {
+				return false, nil
+			}
+			return false, agentFailure("AGENT_RESPONSE_CONFLICT", http.StatusConflict, "the delivery already has a different response")
+		}
+		unfinished := unfinishedDeliveries(state)
+		if len(unfinished) == 0 || unfinished[0].ID != delivery.ID {
+			return false, agentFailure("AGENT_INBOX_BUSY", http.StatusConflict, "response must complete the oldest delivery")
+		}
+		discussion := findDiscussion(state, delivery.DiscussionID)
+		if discussion == nil {
+			return false, corruptedReviewState("delivery discussion disappeared")
+		}
+		human := messageByID(discussion, delivery.MessageIDs[0])
+		if human == nil {
+			return false, corruptedReviewState("delivery message disappeared")
+		}
+		if human.Intent == "question" && response.Outcome == "changed" {
+			return false, agentFailure("AGENT_INVALID_MESSAGE", http.StatusBadRequest, "a question cannot report a documentation change")
+		}
+		if response.Outcome == "changed" && len(response.ChangedPaths) == 0 {
+			return false, agentFailure("AGENT_INVALID_MESSAGE", http.StatusBadRequest, "changed requires at least one changedPaths entry")
+		}
+		for _, path := range response.ChangedPaths {
+			if err := service.validateDocumentationPath(path, true); err != nil {
+				return false, err
+			}
+		}
+		messageID, idErr := newAgentID("MSG", now)
+		if idErr != nil {
+			return false, idErr
+		}
+		discussion.Messages = append(discussion.Messages, ReviewMessage{
+			ID: messageID, Author: "agent", Text: response.Message, DeliveryID: delivery.ID, Outcome: response.Outcome,
+			Evidence: append([]AgentEvidence{}, response.Evidence...), ChangedPaths: append([]string{}, response.ChangedPaths...), CreatedAt: now,
+		})
+		discussion.UpdatedAt = now
+		delivery.State, delivery.RespondedAt, delivery.ResponseDigest = "responded", &now, responseDigest
+		delivery.LeaseExpiresAt = nil
+		return true, nil
+	})
+	return service.present(result), err
+}
+
+func (service *reviewService) agentRequest(state ReviewState, delivery AgentDelivery, discussion Discussion, pendingCount int) AgentRequest {
+	placement := discussion.Placement
+	target := AgentRequestTarget{
+		Kind: discussion.Target.Kind, Path: placement.Path, DocumentID: discussion.Target.DocumentID,
+		AnchorState: placement.Status, Range: cloneReviewRange(placement.Range),
+	}
+	if discussion.Anchor != nil {
+		target.SelectedText = discussion.Anchor.SelectedText
+	}
+	head := ""
+	if g, err := openGitRepositorySource(service.options.RepositoryRoot, 60); err == nil {
+		head, _ = g.resolveCommit("HEAD")
+	}
+	return AgentRequest{
+		SchemaVersion: reviewSchemaVersion, Pending: true, DeliveryID: delivery.ID, Discussion: &discussion, Target: &target,
+		Repository: &AgentRepository{Head: head}, PendingCount: pendingCount, HasMore: pendingCount > 1,
+	}
+}
+
+func (service *reviewService) captureAnchor(target ReviewTarget, selection *SelectionHint) (*DocumentAnchor, ReviewTarget, error) {
+	if target.Kind == "" {
+		target.Kind = "document"
+	}
+	if target.Kind != "document" {
+		return nil, ReviewTarget{}, agentFailure("AGENT_INVALID_TARGET", http.StatusBadRequest, "MVP accepts only target.kind=document")
+	}
+	path, content, err := service.readDocumentation(target.Path)
+	if err != nil {
+		return nil, ReviewTarget{}, err
+	}
+	target.Path = path
+	if selection != nil && target.Range == nil {
+		selected := selection.SelectedText
+		if len([]byte(selected)) > reviewSelectionLimit {
+			return nil, ReviewTarget{}, agentFailure("AGENT_PAYLOAD_TOO_LARGE", http.StatusRequestEntityTooLarge, "selectedText exceeds 32 KiB")
+		}
+		matches := allByteMatches(content, []byte(selected))
+		occurrence := max(1, selection.Occurrence)
+		if strings.TrimSpace(selected) == "" || occurrence > len(matches) {
+			return nil, ReviewTarget{}, agentFailure("AGENT_INVALID_TARGET", http.StatusConflict, "selected text occurrence was not found in the current document")
+		}
+		match := matches[occurrence-1]
+		target.Range = &ReviewRange{Start: offsetReviewPosition(content, match), End: offsetReviewPosition(content, match+len(selected))}
 	}
 	selected, before, after, err := extractReviewSelection(content, target)
 	if err != nil {
-		return nil, nil, err
+		return nil, ReviewTarget{}, err
 	}
-	return &AnchorSnapshot{
-		OriginalTarget: target, OriginalPath: resolvedPath, OriginalRepositoryRevision: report.RepositoryRevision,
-		ContentDigest: digestBytes(content), SelectedText: selected, ContextBefore: before, ContextAfter: after,
-	}, content, nil
+	if len([]byte(selected)) > reviewSelectionLimit {
+		return nil, ReviewTarget{}, agentFailure("AGENT_PAYLOAD_TOO_LARGE", http.StatusRequestEntityTooLarge, "selectedText exceeds 32 KiB")
+	}
+	return &DocumentAnchor{
+		Kind: "document", Path: path, DocumentID: target.DocumentID, SourceDigest: "sha256:" + digestBytes(content),
+		Range: cloneReviewRange(target.Range), SelectedText: selected, ContextBefore: before, ContextAfter: after,
+	}, target, nil
 }
 
-func validateReviewTarget(target ReviewTarget) error {
-	switch target.Type {
-	case "global":
-		if target.Path != "" || target.Start != nil || target.End != nil || target.Side != "" {
-			return &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "global target does not accept path, range, or side"}
+func (service *reviewService) readDocumentation(requested string) (string, []byte, error) {
+	g, err := openGitRepositorySource(service.options.RepositoryRoot, 60)
+	if err != nil {
+		return "", nil, err
+	}
+	path, err := validateReviewPath(g, requested)
+	if err != nil {
+		return "", nil, mapReviewPathError(err)
+	}
+	if err := service.validateDocumentationPath(path, false); err != nil {
+		return "", nil, err
+	}
+	content, err := readReviewText(g, ChangeSide{Type: "working-tree"}, path)
+	if err != nil {
+		return "", nil, mapReviewPathError(err)
+	}
+	return path, content, nil
+}
+
+func (service *reviewService) validateDocumentationPath(requested string, allowMissing bool) error {
+	g, err := openGitRepositorySource(service.options.RepositoryRoot, 60)
+	if err != nil {
+		return err
+	}
+	path, err := validateReviewPath(g, requested)
+	if err != nil {
+		return mapReviewPathError(err)
+	}
+	absolute := filepath.Join(g.root, filepath.FromSlash(path))
+	if !pathContains(service.docsRoot, absolute) || !strings.EqualFold(filepath.Ext(path), ".md") {
+		return agentFailure("AGENT_INVALID_PATH", http.StatusForbidden, "path must be a Markdown file inside the canonical documentation root")
+	}
+	if allowMissing {
+		if err := validateReviewChangedPath(g, path); err != nil {
+			return mapReviewPathError(err)
 		}
-		return nil
-	case "file":
-		if target.Path == "" || target.Start != nil || target.End != nil || target.Side != "" {
-			return &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "file target accepts only path"}
-		}
-	case "fileRange":
-		if target.Path == "" || target.Start == nil || target.End == nil || target.Side != "" {
-			return &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "fileRange requires path and range"}
-		}
-	case "diff":
-		if target.Path == "" || target.Start == nil || target.End == nil || target.Side != "old" && target.Side != "new" {
-			return &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "diff requires path, one side, and range"}
-		}
-	default:
-		return &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "target type must be diff, fileRange, file, or global"}
 	}
 	return nil
 }
 
+func mapReviewPathError(err error) error {
+	var failure *reviewFailure
+	if !errors.As(err, &failure) {
+		return err
+	}
+	code := "AGENT_INVALID_PATH"
+	if failure.Code == "REVIEW_NOT_FOUND" {
+		code = "AGENT_INVALID_TARGET"
+	} else if strings.Contains(strings.ToLower(failure.Message), "escapes the repository") {
+		code = "AGENT_PATH_OUTSIDE_ROOT"
+	}
+	return agentFailure(code, failure.Status, failure.Message)
+}
+
 func extractReviewSelection(content []byte, target ReviewTarget) (string, string, string, error) {
-	if target.Type == "file" {
+	if target.Range == nil {
 		return "", truncateUTF8End(content, reviewContextByteSize), "", nil
 	}
-	start, err := reviewPositionOffset(content, *target.Start)
+	start, err := reviewPositionOffset(content, target.Range.Start)
 	if err != nil {
 		return "", "", "", err
 	}
-	end, err := reviewPositionOffset(content, *target.End)
+	end, err := reviewPositionOffset(content, target.Range.End)
 	if err != nil || end <= start {
-		return "", "", "", &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "review range is empty or outside the file"}
+		return "", "", "", agentFailure("AGENT_INVALID_TARGET", http.StatusBadRequest, "document range is empty or outside the file")
 	}
 	return string(content[start:end]), truncateUTF8Start(content[max(0, start-reviewContextByteSize):start], reviewContextByteSize), truncateUTF8End(content[end:min(len(content), end+reviewContextByteSize)], reviewContextByteSize), nil
 }
 
 func reviewPositionOffset(content []byte, position ReviewPosition) (int, error) {
 	if position.Line < 1 || position.Column < 1 {
-		return 0, &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "line and column must be 1-based"}
+		return 0, agentFailure("AGENT_INVALID_TARGET", http.StatusBadRequest, "line and column must be 1-based")
 	}
 	line, offset := 1, 0
 	for line < position.Line {
 		newline := bytes.IndexByte(content[offset:], '\n')
 		if newline < 0 {
-			return 0, &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "line is outside the file"}
+			return 0, agentFailure("AGENT_INVALID_TARGET", http.StatusBadRequest, "line is outside the file")
 		}
 		offset += newline + 1
 		line++
@@ -504,11 +495,11 @@ func reviewPositionOffset(content []byte, position ReviewPosition) (int, error) 
 	}
 	lineContent := content[offset:end]
 	if !utf8.Valid(lineContent) {
-		return 0, &reviewFailure{Code: "REVIEW_BINARY", Status: http.StatusUnsupportedMediaType, Message: "invalid UTF-8 review source"}
+		return 0, agentFailure("AGENT_INVALID_TARGET", http.StatusUnsupportedMediaType, "document source is not UTF-8")
 	}
 	runes := []rune(string(lineContent))
 	if position.Column > len(runes)+1 {
-		return 0, &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "column is outside the line"}
+		return 0, agentFailure("AGENT_INVALID_TARGET", http.StatusBadRequest, "column is outside the line")
 	}
 	return offset + len([]byte(string(runes[:position.Column-1]))), nil
 }
@@ -534,96 +525,48 @@ func truncateUTF8End(content []byte, limit int) string {
 }
 
 func placementFromTarget(target ReviewTarget, status, reason string) AnchorPlacement {
-	return AnchorPlacement{Status: status, Path: target.Path, Side: target.Side, Start: target.Start, End: target.End, Reason: reason}
+	return AnchorPlacement{Status: status, Path: target.Path, Range: cloneReviewRange(target.Range), Reason: reason}
 }
 
-func (service *reviewService) reanchor(discussion Discussion, report *RepositoryReviewReport) AnchorPlacement {
+func (service *reviewService) reanchor(discussion Discussion) AnchorPlacement {
 	if discussion.Anchor == nil {
-		return placementFromTarget(discussion.Target, "exact", "")
+		return placementFromTarget(discussion.Target, "stale", "anchor is missing")
 	}
 	anchor := discussion.Anchor
-	path := anchor.OriginalPath
-	if path == "" {
-		path = discussion.Target.Path
-	}
-	renamed := false
-	for _, file := range report.Files {
-		if file.OldPath == path && file.Status == "renamed" {
-			path = file.Path
-			renamed = true
-			break
-		}
-	}
-	g, err := openGitRepositorySource(service.options.RepositoryRoot, service.options.ChangeRenameSimilarity)
+	_, content, err := service.readDocumentation(anchor.Path)
 	if err != nil {
-		return placementFromTarget(discussion.Target, "stale", "Git is unavailable")
+		return AnchorPlacement{Status: "deleted", Path: anchor.Path, Reason: "document was deleted"}
 	}
-	side := ChangeSide{Type: "working-tree"}
-	if discussion.Target.Type == "diff" && discussion.Target.Side == "old" {
-		side = report.Comparison.Base
+	if anchor.Range == nil {
+		return AnchorPlacement{Status: "current", Path: anchor.Path}
 	}
-	content, err := readReviewText(g, side, path)
-	if err != nil {
-		var failure *reviewFailure
-		if os.IsNotExist(err) || asReviewFailure(err, &failure) && failure.Code == "REVIEW_NOT_FOUND" {
-			return AnchorPlacement{Status: "deleted", Path: path, Side: discussion.Target.Side, Reason: "anchor file was deleted"}
-		}
-		return AnchorPlacement{Status: "stale", Path: path, Side: discussion.Target.Side, Reason: err.Error()}
-	}
-	if discussion.Target.Type == "file" {
-		status, reason := "exact", ""
-		if renamed {
-			status, reason = "moved", "unambiguous Git rename"
-		}
-		return AnchorPlacement{Status: status, Path: path, Side: discussion.Target.Side, Reason: reason}
-	}
-	if digestBytes(content) == anchor.ContentDigest {
-		status, reason := "exact", ""
-		if renamed {
-			status, reason = "moved", "unambiguous Git rename"
-		}
-		placement := placementFromTarget(discussion.Target, status, reason)
-		placement.Path = path
-		return placement
-	}
-	if anchor.SelectedText == "" {
-		return AnchorPlacement{Status: "stale", Path: path, Side: discussion.Target.Side, Reason: "file content changed"}
-	}
-	if from, to, unique := uniqueReviewContextPair(content, anchor.ContextBefore, anchor.ContextAfter); unique && from == to {
-		return placementForOffsets(content, path, discussion.Target.Side, from, to, "deleted", "anchor fragment was deleted")
-	}
-	if anchor.SnapshotRef != "" && side.Type == "working-tree" {
-		snapshotPath := filepath.Join(service.store.snapshotsPath, anchor.SnapshotRef)
-		currentPath := filepath.Join(g.root, filepath.FromSlash(path))
-		if hunks, mapErr := gitReviewLineHunks(g.root, snapshotPath, currentPath); mapErr == nil {
-			if placement, mapped := placementFromGitLineHunks(content, discussion.Target, path, hunks); mapped {
-				if renamed {
-					placement.Reason = "unambiguous Git rename and line mapping"
-				}
-				return placement
-			}
-		}
+	if "sha256:"+digestBytes(content) == anchor.SourceDigest {
+		return AnchorPlacement{Status: "current", Path: anchor.Path, Range: cloneReviewRange(anchor.Range)}
 	}
 	matches := allByteMatches(content, []byte(anchor.SelectedText))
-	if startLine := originalStartLine(discussion.Target); startLine > 0 {
+	if anchor.Range != nil {
 		window := []int{}
 		for _, offset := range matches {
 			line := 1 + bytes.Count(content[:offset], []byte{'\n'})
-			if line >= startLine-20 && line <= startLine+20 {
+			if line >= anchor.Range.Start.Line-20 && line <= anchor.Range.Start.Line+20 {
 				window = append(window, offset)
 			}
 		}
 		if len(window) == 1 {
-			return placementForOffsets(content, path, discussion.Target.Side, window[0], window[0]+len(anchor.SelectedText), "moved", "exact text within a ±20-line window")
+			return placementForOffsets(content, anchor.Path, window[0], window[0]+len(anchor.SelectedText), "moved", "exact text found near the original range")
 		}
 	}
 	if len(matches) == 1 {
-		return placementForOffsets(content, path, discussion.Target.Side, matches[0], matches[0]+len(anchor.SelectedText), "moved", "unique exact text")
+		return placementForOffsets(content, anchor.Path, matches[0], matches[0]+len(anchor.SelectedText), "moved", "unique exact text")
 	}
 	if from, to, unique := uniqueReviewContextPair(content, anchor.ContextBefore, anchor.ContextAfter); unique {
-		return placementForOffsets(content, path, discussion.Target.Side, from, to, "moved", "unique context boundary pair")
+		status, reason := "moved", "unique surrounding context"
+		if from == to {
+			status, reason = "deleted", "selected fragment was deleted"
+		}
+		return placementForOffsets(content, anchor.Path, from, to, status, reason)
 	}
-	return AnchorPlacement{Status: "stale", Path: path, Side: discussion.Target.Side, Reason: "anchor cannot be matched unambiguously"}
+	return AnchorPlacement{Status: "stale", Path: anchor.Path, Reason: "anchor cannot be matched unambiguously"}
 }
 
 func uniqueReviewContextPair(content []byte, beforeText, afterText string) (int, int, bool) {
@@ -635,7 +578,7 @@ func uniqueReviewContextPair(content []byte, beforeText, afterText string) (int,
 		from := before + len(beforeText)
 		for _, afterRelative := range allByteMatches(content[from:], []byte(afterText)) {
 			after := from + afterRelative
-			if after-from <= 32<<10 {
+			if after-from <= reviewSelectionLimit {
 				pairs = append(pairs, [2]int{from, after})
 			}
 		}
@@ -644,66 +587,6 @@ func uniqueReviewContextPair(content []byte, beforeText, afterText string) (int,
 		return 0, 0, false
 	}
 	return pairs[0][0], pairs[0][1], true
-}
-
-func placementFromGitLineHunks(content []byte, target ReviewTarget, path string, hunks []reviewLineHunk) (AnchorPlacement, bool) {
-	if target.Start == nil || target.End == nil {
-		return AnchorPlacement{}, false
-	}
-	startLine, endLine, delta := target.Start.Line, target.End.Line, 0
-	for _, hunk := range hunks {
-		if hunk.oldCount == 0 {
-			if hunk.oldStart < startLine {
-				delta += hunk.newCount
-			}
-			continue
-		}
-		oldEnd := hunk.oldStart + hunk.oldCount - 1
-		if oldEnd < startLine {
-			delta += hunk.newCount - hunk.oldCount
-			continue
-		}
-		if hunk.oldStart > endLine {
-			break
-		}
-		if startLine < hunk.oldStart || endLine > oldEnd {
-			return AnchorPlacement{}, false
-		}
-		if hunk.newCount == 0 {
-			return AnchorPlacement{Status: "deleted", Path: path, Side: target.Side, Reason: "Git line mapping identified a deleted fragment"}, true
-		}
-		mappedStart := hunk.newStart + min(startLine-hunk.oldStart, hunk.newCount-1)
-		mappedEnd := hunk.newStart + min(endLine-hunk.oldStart, hunk.newCount-1)
-		start := ReviewPosition{Line: mappedStart, Column: 1}
-		end := ReviewPosition{Line: mappedEnd, Column: reviewLineEndColumn(content, mappedEnd)}
-		return AnchorPlacement{Status: "moved", Path: path, Side: target.Side, Start: &start, End: &end, Reason: "unambiguous Git line mapping"}, true
-	}
-	if delta == 0 {
-		return AnchorPlacement{}, false
-	}
-	start, end := *target.Start, *target.End
-	start.Line += delta
-	end.Line += delta
-	return AnchorPlacement{Status: "moved", Path: path, Side: target.Side, Start: &start, End: &end, Reason: "unambiguous Git line mapping"}, true
-}
-
-func reviewLineEndColumn(content []byte, line int) int {
-	if line < 1 {
-		return 1
-	}
-	start := 0
-	for current := 1; current < line; current++ {
-		index := bytes.IndexByte(content[start:], '\n')
-		if index < 0 {
-			return 1
-		}
-		start += index + 1
-	}
-	end := bytes.IndexByte(content[start:], '\n')
-	if end < 0 {
-		end = len(content) - start
-	}
-	return 1 + utf8.RuneCount(content[start:start+end])
 }
 
 func allByteMatches(content, needle []byte) []int {
@@ -722,10 +605,8 @@ func allByteMatches(content, needle []byte) []int {
 	return result
 }
 
-func placementForOffsets(content []byte, path, side string, start, end int, status, reason string) AnchorPlacement {
-	startPosition := offsetReviewPosition(content, start)
-	endPosition := offsetReviewPosition(content, end)
-	return AnchorPlacement{Status: status, Path: path, Side: side, Start: &startPosition, End: &endPosition, Reason: reason}
+func placementForOffsets(content []byte, path string, start, end int, status, reason string) AnchorPlacement {
+	return AnchorPlacement{Status: status, Path: path, Range: &ReviewRange{Start: offsetReviewPosition(content, start), End: offsetReviewPosition(content, end)}, Reason: reason}
 }
 
 func offsetReviewPosition(content []byte, offset int) ReviewPosition {
@@ -733,26 +614,66 @@ func offsetReviewPosition(content []byte, offset int) ReviewPosition {
 	return ReviewPosition{Line: 1 + bytes.Count(content[:offset], []byte{'\n'}), Column: 1 + utf8.RuneCount(content[lineStart:offset])}
 }
 
-func originalStartLine(target ReviewTarget) int {
-	if target.Start != nil {
-		return target.Start.Line
+func cloneReviewRange(value *ReviewRange) *ReviewRange {
+	if value == nil {
+		return nil
 	}
-	return 0
+	copy := *value
+	return &copy
 }
 
-func validateHumanMessage(message string) error {
+func validateHumanMessage(intent, message string) error {
+	if intent != "question" && intent != "change_request" {
+		return agentFailure("AGENT_INVALID_MESSAGE", http.StatusBadRequest, "intent must be question or change_request")
+	}
 	message = strings.TrimSpace(message)
 	if message == "" {
-		return &reviewFailure{Code: "REVIEW_INVALID_REQUEST", Status: http.StatusBadRequest, Message: "message must not be empty"}
+		return agentFailure("AGENT_INVALID_MESSAGE", http.StatusBadRequest, "message must not be empty")
 	}
-	if len(message) > reviewMessageLimit {
-		return &reviewFailure{Code: "REVIEW_MESSAGE_TOO_LARGE", Status: http.StatusRequestEntityTooLarge, Message: "review message exceeds the limit"}
+	if len([]byte(message)) > reviewMessageLimit {
+		return agentFailure("AGENT_PAYLOAD_TOO_LARGE", http.StatusRequestEntityTooLarge, "human message exceeds 64 KiB")
 	}
 	return nil
 }
 
+func (service *reviewService) validateAgentResponse(response AgentResponse) error {
+	if response.SchemaVersion != reviewSchemaVersion || response.DeliveryID == "" || response.DiscussionID == "" || !validReviewOutcome(response.Outcome) || strings.TrimSpace(response.Message) == "" {
+		return agentFailure("AGENT_INVALID_MESSAGE", http.StatusBadRequest, "agent response is incomplete or invalid")
+	}
+	if len([]byte(response.Message)) > reviewMessageLimit {
+		return agentFailure("AGENT_PAYLOAD_TOO_LARGE", http.StatusRequestEntityTooLarge, "agent response exceeds 64 KiB")
+	}
+	if len(response.Evidence) > 256 || len(response.ChangedPaths) > 256 {
+		return agentFailure("AGENT_PAYLOAD_TOO_LARGE", http.StatusRequestEntityTooLarge, "agent response contains too many paths")
+	}
+	g, err := openGitRepositorySource(service.options.RepositoryRoot, 60)
+	if err != nil {
+		return err
+	}
+	for _, evidence := range response.Evidence {
+		if evidence.StartLine < 0 || evidence.EndLine < evidence.StartLine {
+			return agentFailure("AGENT_INVALID_MESSAGE", http.StatusBadRequest, "evidence line range is invalid")
+		}
+		if _, err := validateReviewPath(g, evidence.Path); err != nil {
+			return mapReviewPathError(err)
+		}
+	}
+	return nil
+}
+
+func normalizeAgentResponse(response AgentResponse) AgentResponse {
+	response.Message = strings.TrimSpace(response.Message)
+	if response.Evidence == nil {
+		response.Evidence = []AgentEvidence{}
+	}
+	if response.ChangedPaths == nil {
+		response.ChangedPaths = []string{}
+	}
+	return response
+}
+
 func validReviewOutcome(outcome string) bool {
-	return outcome == "fixed" || outcome == "notFixed" || outcome == "needsClarification"
+	return outcome == "answered" || outcome == "changed" || outcome == "no_change" || outcome == "needs_clarification" || outcome == "failed"
 }
 
 func findDiscussion(state *ReviewState, id string) *Discussion {
@@ -779,57 +700,166 @@ func removeDiscussion(state *ReviewState, id string) {
 	}
 }
 
-func findUnsentHumanMessage(discussion *Discussion, id string) *ReviewMessage {
-	unsent := []*ReviewMessage{}
-	for index := range discussion.Messages {
-		message := &discussion.Messages[index]
-		if message.Author == "human" && message.FeedbackID == "" {
-			unsent = append(unsent, message)
-		}
-	}
-	if len(unsent) != 1 || unsent[0].ID != id {
+func messageByID(discussion *Discussion, id string) *ReviewMessage {
+	if discussion == nil {
 		return nil
 	}
-	return unsent[0]
+	for index := range discussion.Messages {
+		if discussion.Messages[index].ID == id {
+			return &discussion.Messages[index]
+		}
+	}
+	return nil
 }
 
-func discussionInFlight(state ReviewState, discussionID string) bool {
-	for _, batch := range state.Feedback {
-		if !batch.RespondedAt.IsZero() {
-			continue
+func findDraftMessage(discussion *Discussion, id string) *ReviewMessage {
+	message := messageByID(discussion, id)
+	if message == nil || message.Author != "human" || message.State != "draft" {
+		return nil
+	}
+	return message
+}
+
+func draftMessage(discussion *Discussion) *ReviewMessage {
+	if discussion == nil {
+		return nil
+	}
+	for index := range discussion.Messages {
+		if discussion.Messages[index].Author == "human" && discussion.Messages[index].State == "draft" {
+			return &discussion.Messages[index]
 		}
-		for _, item := range batch.Items {
-			if item.DiscussionID == discussionID {
-				return true
-			}
+	}
+	return nil
+}
+
+func findDelivery(state *ReviewState, id string) *AgentDelivery {
+	for index := range state.Deliveries {
+		if state.Deliveries[index].ID == id {
+			return &state.Deliveries[index]
+		}
+	}
+	return nil
+}
+
+func unfinishedDeliveries(state *ReviewState) []*AgentDelivery {
+	result := []*AgentDelivery{}
+	for index := range state.Deliveries {
+		if state.Deliveries[index].State != "responded" {
+			result = append(result, &state.Deliveries[index])
+		}
+	}
+	sort.SliceStable(result, func(i, j int) bool { return result[i].Sequence < result[j].Sequence })
+	return result
+}
+
+func discussionInFlight(state ReviewState, discussionID string, _ time.Time) bool {
+	for _, delivery := range state.Deliveries {
+		if delivery.DiscussionID == discussionID && delivery.State != "responded" {
+			return true
 		}
 	}
 	return false
 }
 
-func asReviewFailure(err error, target **reviewFailure) bool {
-	failure, ok := err.(*reviewFailure)
-	if ok {
-		*target = failure
-	}
-	return ok
-}
-
 func sortReviewDiscussions(state *ReviewState) {
-	if state.Session != nil {
-		sort.SliceStable(state.Session.Discussions, func(i, j int) bool {
-			if state.Session.Discussions[i].State != state.Session.Discussions[j].State {
-				return state.Session.Discussions[i].State == "open"
-			}
-			return state.Session.Discussions[i].CreatedAt.Before(state.Session.Discussions[j].CreatedAt)
-		})
+	if state.Session == nil {
+		return
+	}
+	sort.SliceStable(state.Session.Discussions, func(i, j int) bool {
+		if state.Session.Discussions[i].State != state.Session.Discussions[j].State {
+			return state.Session.Discussions[i].State == "open"
+		}
+		return state.Session.Discussions[i].CreatedAt.Before(state.Session.Discussions[j].CreatedAt)
+	})
+}
+
+func (service *reviewService) present(state ReviewState) ReviewState {
+	sortReviewDiscussions(&state)
+	return state
+}
+
+func (service *reviewService) applyPlacements(state *ReviewState) {
+	if state.Session == nil {
+		return
+	}
+	for index := range state.Session.Discussions {
+		state.Session.Discussions[index].Placement = service.reanchor(state.Session.Discussions[index])
 	}
 }
 
-func reviewResponseSize(response AgentFeedbackResponse) error {
+func (service *reviewService) repositoryRevision(state ReviewState) string {
+	parts := []string{}
+	if g, err := openGitRepositorySource(service.options.RepositoryRoot, 60); err == nil {
+		head, _ := g.resolveCommit("HEAD")
+		parts = append(parts, head)
+	}
+	paths := map[string]bool{}
+	if state.Session != nil {
+		for _, discussion := range state.Session.Discussions {
+			paths[discussion.Target.Path] = true
+		}
+	}
+	ordered := make([]string, 0, len(paths))
+	for path := range paths {
+		ordered = append(ordered, path)
+	}
+	sort.Strings(ordered)
+	for _, path := range ordered {
+		content, err := os.ReadFile(filepath.Join(service.options.RepositoryRoot, filepath.FromSlash(path)))
+		if err != nil {
+			parts = append(parts, path+"\x00deleted")
+		} else {
+			parts = append(parts, path+"\x00"+digestBytes(content))
+		}
+	}
+	return digestBytes([]byte(strings.Join(parts, "\x00")))
+}
+
+func (service *reviewService) docsPath() string {
+	rel, err := filepath.Rel(service.options.RepositoryRoot, service.docsRoot)
+	if err != nil {
+		return "docs"
+	}
+	return filepath.ToSlash(rel)
+}
+
+func (service *reviewService) garbageCollect(state *ReviewState, now time.Time) {
+	if state.Session == nil {
+		return
+	}
+	removable := map[string]bool{}
+	for _, discussion := range state.Session.Discussions {
+		if discussion.State == "resolved" && now.Sub(discussion.UpdatedAt) >= reviewResolvedRetention && !discussionInFlight(*state, discussion.ID, now) {
+			removable[discussion.ID] = true
+		}
+	}
+	if len(removable) == 0 {
+		return
+	}
+	discussions := state.Session.Discussions[:0]
+	for _, discussion := range state.Session.Discussions {
+		if !removable[discussion.ID] {
+			discussions = append(discussions, discussion)
+		}
+	}
+	state.Session.Discussions = discussions
+	deliveries := state.Deliveries[:0]
+	for _, delivery := range state.Deliveries {
+		if !removable[delivery.DiscussionID] {
+			deliveries = append(deliveries, delivery)
+		}
+	}
+	state.Deliveries = deliveries
+}
+
+func agentFailure(code string, status int, message string) error {
+	return &reviewFailure{Code: code, Status: status, Message: message}
+}
+
+func reviewResponseSize(response AgentResponse) error {
 	data, _ := json.Marshal(response)
 	if len(data) > reviewResponseLimit {
-		return invalidReviewResponse(fmt.Sprintf("response exceeds %d bytes", reviewResponseLimit))
+		return agentFailure("AGENT_PAYLOAD_TOO_LARGE", http.StatusRequestEntityTooLarge, "agent response exceeds 64 KiB")
 	}
 	return nil
 }

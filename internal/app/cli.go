@@ -25,6 +25,7 @@ func PrintHelp(w io.Writer) {
   build       Собрать автономный read-only портал
   serve       Запустить локальный портал, редактор и live rebuild
   changes     Показать Git-backed изменения документации
+  agent       Получить запрос из локальной очереди или сохранить ответ
   search      Найти документы в исходном Markdown
   scaffold    Создать один типизированный документ
   task        Операции жизненного цикла work item
@@ -85,9 +86,6 @@ save, create и roadmap add изменяют workspace.
                   [--permanent-only] [--include-assets|--translation-input]
                   [--repository-root DIR] [--format text|json|markdown] [-o FILE]
   toudocu changes file PATH [docs-dir] [те же параметры]
-  toudocu changes feedback pending [--repository-root DIR] --json
-  toudocu changes feedback respond --input response.json [--repository-root DIR] [--json]
-
 Пример:
   toudocu changes ./docs --base main --target working-tree --format markdown
 
@@ -95,9 +93,17 @@ save, create и roadmap add изменяют workspace.
 --translation-input включает reader-facing Markdown, work artifacts и assets,
 игнорируя changes.exclude кроме generated/** и cache/** внутри docs root.
 
-Побочные эффекты: обычные changes только читают Git и workspace; -o записывает явно
-указанный отчёт. Feedback respond пишет только local user-state вне repository
-и не изменяет Git или Markdown.`,
+Побочные эффекты: changes только читает Git и workspace; -o записывает явно
+указанный отчёт.`,
+		"agent": `Читает локальную очередь Toudocu или сохраняет ответ агента разработки.
+
+Использование:
+  toudocu agent next [--repository-root DIR] --json
+  toudocu agent respond [--input response.json] [--repository-root DIR] [--json]
+
+Без --input команда respond читает JSON из стандартного ввода. Команды меняют
+только локальное пользовательское состояние вне репозитория и не запускают
+языковую модель.`,
 		"changes-file": `Показывает detail одного изменённого пути без изменения файлов.
 
 Использование:
@@ -828,7 +834,7 @@ func printCheckText(w io.Writer, model *Model) {
 
 // RunCLI executes one command and returns a process exit code.
 func RunCLI(argv []string, stdout, stderr io.Writer) int {
-	if code := runReviewFeedbackCLI(argv, stdout, stderr); code >= 0 {
+	if code := runAgentCLI(argv, os.Stdin, stdout, stderr); code >= 0 {
 		return code
 	}
 	if topic, ok := helpTopic(argv); ok {

@@ -393,6 +393,10 @@ func (s *documentationServer) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		http.NotFound(w, r)
 		return
 	}
+	if r.URL.Path == reviewAPIBase || strings.HasPrefix(r.URL.Path, reviewAPIBase+"/") {
+		s.serveReviewAPI(w, r)
+		return
+	}
 	if strings.HasPrefix(r.URL.Path, editorAPIBase+"/") {
 		s.serveEditorAPI(w, r)
 		return

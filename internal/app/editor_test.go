@@ -94,7 +94,7 @@ func TestServeSiteIncludesEditor(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, expected := range []string{"/_toudocu/editor/", "/_toudocu/api/version", `"updateCheck":true`, `"review":true`, "/_toudocu/api/changes/review", "/changes/", "assets/serve.js", "data-toudocu-serve-navigation", "data-server-rebuild", `aria-label="Open editor"`, `aria-label="Rebuild documentation"`, `meta name="toudocu-revision" content="` + server.revision + `"`} {
+	for _, expected := range []string{"/_toudocu/editor/", "/_toudocu/api/version", `"updateCheck":true`, `"review":true`, reviewAPIBase, "/changes/", "assets/serve.js", "data-toudocu-serve-navigation", "data-server-rebuild", `aria-label="Open editor"`, `aria-label="Rebuild documentation"`, `meta name="toudocu-revision" content="` + server.revision + `"`} {
 		if !strings.Contains(string(page), expected) {
 			t.Fatalf("serve page missing %q", expected)
 		}
