@@ -1,11 +1,11 @@
 # UC-TASK-03: Prepare a new work item
 
 - Identifier: UC-TASK-03
-- Status: Ready
+- Status: Completed
 - Actor: Developer or software agent
 - Module: MOD-CLI
 - Priority: High
-- Last updated: 2026-08-10
+- Last updated: 2026-08-12
 
 The assignee finds related documents, creates a semantically neutral task
 scaffold, and completes it until it can be moved manually to Ready.
@@ -52,6 +52,13 @@ scaffold, and completes it until it can be moved manually to Ready.
 
 The scaffold contains no relationships or requirements invented by Toudocu.
 Only the assignee selects documents, writes semantic fields, and changes status.
+
+## Acceptance criteria
+
+- [x] The scaffold contains no relationships or requirements invented by
+  Toudocu.
+- [x] Only the assignee selects documents, writes semantic fields, and changes
+  task status.
 
 ## Business rules
 

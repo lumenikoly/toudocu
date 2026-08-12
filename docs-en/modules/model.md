@@ -2,7 +2,7 @@
 
 - Identifier: MOD-MODEL
 - Status: Ready
-- Last updated: 2026-08-10
+- Last updated: 2026-08-12
 
 This module reads the documentation root, connects known entities, and reports
 problems with structure, identifiers, paths, and dependencies. `check`, the
@@ -25,9 +25,11 @@ in-memory file version; an ordinary model build reads a filesystem snapshot.
 
 ### BR-MODEL-001: Roadmap is the only source of global coverage
 
-Global progress counts only items from `roadmap.md`. A related `UC-*` takes its
-completion from the use-case status; `CON-*` and `DLV-*` keep their own
-checkbox state.
+Global progress counts only items from `roadmap.md`. A related `UC-*` is
+complete only when its status belongs to the `done` group, its Acceptance
+criteria section contains at least one checkbox, and every checkbox in that
+section is checked. `CON-*`, `CONTRACT-*`, `DLV-*`, and `DELIVERABLE-*` keep
+their roadmap checkbox state.
 
 ### BR-MODEL-002: Links do not go beyond repository root
 
@@ -71,6 +73,8 @@ loads external references or invents a schema for arbitrary YAML.
 - Previews and hotspots cannot escape the repository root.
 - A playable flow reaches a terminal screen or receives a graph diagnostic.
 - One `work/*.md` file contains one `TASK-*` or `BUG-*` work item.
+- A completed `UC-*` has at least one acceptance checkbox, and every checkbox
+  in that section is checked.
 - Public report lines start at one; an OpenAPI column is included when known.
 - Model construction runs no commands and never writes calculated state back
   into Markdown.
@@ -79,6 +83,8 @@ loads external references or invents a schema for arbitrary YAML.
 
 - `BuildDocumentationModel(Options)` and other exports from `api.go`;
 - `ProjectReport` schema v1;
+- `RoadmapItem.effectiveCompleted` includes the `UC-*` status and criteria,
+  while `completionSource` remains `use-case-status`;
 - `documents[].type = architecture` and optional
   `documents[].sectionType`;
 - `Issue` codes;

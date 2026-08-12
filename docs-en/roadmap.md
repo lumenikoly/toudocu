@@ -1,8 +1,9 @@
 # Roadmap
 
 The roadmap shows what Toudocu already includes and which areas continue to
-evolve. A linked `UC-*` gets its completion state from the use-case document
-itself.
+evolve. A linked `UC-*` is complete only when its document has a `done`-group
+status, at least one acceptance checkbox, and every checkbox in that section
+checked. The roadmap checkbox must match that result.
 
 ## Implemented
 

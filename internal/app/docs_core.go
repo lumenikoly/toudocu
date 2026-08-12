@@ -734,6 +734,7 @@ func buildDocumentationModel(options Options, overlay map[string][]byte) (*Model
 	buildScreenKnowledge(model)
 	model.Risks = buildRisks(model)
 	model.RoadmapStages = buildRoadmapStages(model)
+	validateRoadmapCompletion(model)
 	projectTitle := siteConfig.Title
 	if strings.TrimSpace(options.Title) != "" {
 		projectTitle = options.Title

@@ -33,6 +33,10 @@
 
 {{POSTCONDITIONS}}
 
+## Acceptance criteria
+
+- [ ] {{ACCEPTANCE_CRITERION}}
+
 ## Business rules
 
 - {{BUSINESS_RULE_ID}} — {{BUSINESS_RULE_REFERENCE}}

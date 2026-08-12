@@ -32,7 +32,7 @@ type markdownTableRow struct {
 	Line  int
 }
 
-func screenTableSection(document *Document, names ...string) (Heading, int, bool) {
+func headingSectionRange(document *Document, names ...string) (Heading, int, bool) {
 	targets := map[string]bool{}
 	for _, name := range names {
 		targets[canonicalText(name)] = true
@@ -54,7 +54,7 @@ func screenTableSection(document *Document, names ...string) (Heading, int, bool
 }
 
 func parseScreenTable(document *Document, sectionNames ...string) (markdownTable, bool) {
-	heading, end, found := screenTableSection(document, sectionNames...)
+	heading, end, found := headingSectionRange(document, sectionNames...)
 	if !found {
 		return markdownTable{}, false
 	}

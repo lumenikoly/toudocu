@@ -1,11 +1,11 @@
 # UC-TASK-01: Collect work-item context
 
 - Identifier: UC-TASK-01
-- Status: Ready
+- Status: Completed
 - Actor: Developer or software agent
 - Module: MOD-CLI
 - Priority: High
-- Last updated: 2026-08-10
+- Last updated: 2026-08-12
 
 Before changing code or documentation, the assignee retrieves a bounded context
 for one ready work item.
@@ -53,6 +53,12 @@ for one ready work item.
 
 The assignee has the selected task context. Files are unchanged and no command
 from Verification has run.
+
+## Acceptance criteria
+
+- [x] The assignee receives context for exactly one selected work item.
+- [x] Collecting context leaves files unchanged and runs no command from
+  Verification.
 
 ## Business rules
 

@@ -1,14 +1,14 @@
 # UC-DOCS-05: View documentation changes
 
 - Identifier: UC-DOCS-05
-- Status: Ready
+- Status: Completed
 - Actor: Developer
 - Module: MOD-CHANGES
 - Priority: High
 - Screens: SC-SITE-HOME, SC-CHANGES-WORKSPACE
 - Start screen: SC-SITE-HOME
 - Terminal screens: SC-CHANGES-WORKSPACE
-- Last updated: 2026-08-10
+- Last updated: 2026-08-12
 
 Before finishing work, a developer can see which files changed, how the text
 changed, and what those edits mean for the documentation model.
@@ -61,6 +61,12 @@ changed, and what those edits mean for the documentation model.
 - Browser, CLI, and CI consume the same versioned report.
 - Task-impact warnings remain prompts for human review, not automatic
   decisions.
+
+## Acceptance criteria
+
+- [x] Viewing changes leaves Git state unchanged.
+- [x] Browser, CLI, and CI consume the same versioned report.
+- [x] A task-impact warning does not make the decision for the reviewer.
 
 ## Business rules
 

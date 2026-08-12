@@ -35,14 +35,16 @@ derived representations are collected in the
 |---|---|---|---|
 | **Project overview** — `index.md` | Gives the title, concise description, and main entry points | Always: this is the documentation home page | A detailed contract, decision history, or complete roadmap |
 | **Current status** — `status.md` | Shows a verified current snapshot: stage, version, and active focus | When readers need one current status | A desired future, work checklist, or release history |
-| **Roadmap** — `roadmap.md` | Declares global outcomes and computed progress | When the project manages overall product scope through `UC-*`, `CON-*`, and `DLV-*` | A local task plan or unconfirmed ideas |
+| **Roadmap** — `roadmap.md` | Declares global outcomes and computed progress | When the project manages overall product scope through `UC-*`, `CON-*`/`CONTRACT-*`, and `DLV-*`/`DELIVERABLE-*` | A local task plan or unconfirmed ideas |
 | **Risks** — `risks.md` | Collects `RISK-*`, likelihood, impact, and mitigations | When risks need explicit management | A defect list or implementation plan |
 | **Ideas** — `ideas.md` | Keeps possible directions without promising implementation | For a capability or hypothesis not yet accepted | Roadmap, current status, or an approved requirement |
 | **Notes** — `notes.md` | Preserves observations and temporary context | When information is useful but not yet durable knowledge | Normative rules, contracts, or architectural decisions |
 | **Changelog** — root `CHANGELOG.md` | Describes changes in published versions | If the project maintains release history | Current status or a duplicate `docs/changelog.md` |
 
 `status.md` does not accept task checklists. The global completion percentage
-comes only from `roadmap.md`; a linked `UC-*` gets its state from the use case.
+comes only from `roadmap.md`; a linked `UC-*` is complete only with a
+`done`-group status, at least one acceptance checkbox, and every checkbox in
+that section checked.
 
 ## Product and architecture
 
@@ -51,7 +53,7 @@ comes only from `roadmap.md`; a linked `UC-*` gets its state from the use case.
 | **Architecture Overview** — `architecture/overview.md` | Defines the system boundary and maps architectural questions | Always; the overview links directly to every detailed architecture document | A complete account of all interactions, contracts, and local rules |
 | **Architecture** — other `architecture/**/*.md` | Briefly answers one evidence-backed architectural question | When the answer concerns system structure, boundaries, or dependencies across parts | A request sequence, API format, procedure, ADR, or one module's rules |
 | **Module** — `modules/*.md`, ID `MOD-*` | Records a stable responsibility boundary, business rules, and invariants | When that boundary matters to the product, owners, or linked scenarios | A mirror of a source directory or list of internal functions |
-| **Use case** — `use-cases/*.md`, ID `UC-*` | Describes observable actor behavior and expected result | When behavior must link to a module, rules, screens, or roadmap | An implementation call graph or step-by-step operational procedure |
+| **Use case** — `use-cases/*.md`, ID `UC-*` | Describes observable actor behavior, expected result, and verifiable acceptance criteria | When behavior must link to a module, rules, screens, or roadmap | An implementation call graph or step-by-step operational procedure |
 | **Process** — `flows/*.md`, ID `FLOW-*` | Visualizes one reusable scenario, error branch, or inter-system interaction | When a Mermaid diagram materially clarifies a use case or architecture | An exhaustive code diagram or replacement for textual requirements |
 | **Screen** — `screens/SC-*.md`, IDs `SC-*` and `TR-*` | Describes a significant screen, its states, and outgoing user transitions | When the product needs a screen catalog, Screen Map, or traceability | A technical route, layout, redirect, or internal component state |
 | **Architectural decision** — `decisions/*.md`, ID `ADR-*` | Preserves context, the decision made, and its consequences | When the decision and considered tradeoff were actually recorded | Retrospective justification of current code or a system description |

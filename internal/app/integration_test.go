@@ -1585,7 +1585,7 @@ func TestRoadmapCompletionIsDerivedAndRendered(t *testing.T) {
 		t.Fatal(err)
 	}
 	stage := model.RoadmapStages[0]
-	if stage.TaskStats.Completed != 2 || model.Stats.CompletedTasks != 2 || stage.Items[1].DeclaredCompleted || !stage.Items[1].EffectiveCompleted || stage.Items[1].CompletionSource != "use-case-status" {
+	if stage.TaskStats.Completed != 1 || model.Stats.CompletedTasks != 1 || stage.TaskStats.Remaining != 1 || stage.Items[1].DeclaredCompleted || stage.Items[1].EffectiveCompleted || stage.Items[1].CompletionSource != "use-case-status" {
 		t.Fatalf("derived roadmap: %#v %#v", stage, model.Stats)
 	}
 	if _, err := GenerateSite(model, Options{OutputDirectory: output, Clean: true}); err != nil {
@@ -1595,14 +1595,14 @@ func TestRoadmapCompletionIsDerivedAndRendered(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if strings.Contains(string(roadmapHTML), `data-task-state="open"`) {
-		t.Fatalf("roadmap HTML did not apply effective completion: %s", roadmapHTML)
+	if !strings.Contains(string(roadmapHTML), `data-task-state="open"`) {
+		t.Fatalf("roadmap HTML did not apply use-case readiness: %s", roadmapHTML)
 	}
 	report, err := json.Marshal(BuildReport(model))
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, part := range []string{`"schemaVersion":1`, `"declaredCompleted":false`, `"effectiveCompleted":true`, `"completionSource":"use-case-status"`} {
+	for _, part := range []string{`"schemaVersion":1`, `"declaredCompleted":false`, `"effectiveCompleted":false`, `"completionSource":"use-case-status"`} {
 		if !strings.Contains(string(report), part) {
 			t.Fatalf("missing %s in %s", part, report)
 		}
@@ -1612,10 +1612,11 @@ func TestRoadmapCompletionIsDerivedAndRendered(t *testing.T) {
 func TestRoadmapContractAndDeliverableRemainManual(t *testing.T) {
 	_, docs, _ := createFixture(t)
 	writeTestFile(t, docs, "contracts/auth.md", "# Auth contract\n\n- Идентификатор: CON-AUTH-API\n- Статус: В работе\n\nContract.\n")
-	writeTestFile(t, docs, "roadmap.md", "# Roadmap\n\n## MVP\n\n- [x] `CON-AUTH-API` Контракт опубликован.\n- [ ] `DLV-RELEASE-01` Релиз подготовлен.\n")
+	writeTestFile(t, docs, "contracts/session.md", "# Session contract\n\n- Идентификатор: CONTRACT-SESSION-API\n- Статус: В работе\n\nContract.\n")
+	writeTestFile(t, docs, "roadmap.md", "# Roadmap\n\n## MVP\n\n- [x] `CON-AUTH-API` Контракт опубликован.\n- [ ] `CONTRACT-SESSION-API` Контракт сессии опубликован.\n- [x] `DLV-RELEASE-01` Релиз подготовлен.\n- [ ] `DELIVERABLE-NOTES-01` Примечания подготовлены.\n")
 	model := buildFixture(t, docs)
 	items := model.RoadmapStages[0].Items
-	if len(items) != 2 || !items[0].EffectiveCompleted || items[0].CompletionSource != "roadmap-checkbox" || items[1].EffectiveCompleted {
+	if len(items) != 4 || !items[0].EffectiveCompleted || items[0].CompletionSource != "roadmap-checkbox" || items[1].EffectiveCompleted || !items[2].EffectiveCompleted || items[3].EffectiveCompleted {
 		t.Fatalf("manual roadmap items: %#v", items)
 	}
 }

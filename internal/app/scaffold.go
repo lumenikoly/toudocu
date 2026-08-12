@@ -386,7 +386,7 @@ func renderEntityScaffold(kind, id, title, language, date string) string {
 		case "module":
 			return fmt.Sprintf("# %s: %s\n\n- Идентификатор: %s\n- Статус: Черновик\n- Последнее обновление: %s\n\n## Назначение\n\n## Бизнес-правила\n\n## Инварианты\n\n## Интерфейсы\n", id, title, id, date)
 		case "use-case":
-			return fmt.Sprintf("# %s: %s\n\n- Идентификатор: %s\n- Статус: Черновик\n- Последнее обновление: %s\n\n## Основной сценарий\n\n## Альтернативные сценарии\n\n## Постусловия\n\n## Бизнес-правила\n", id, title, id, date)
+			return fmt.Sprintf("# %s: %s\n\n- Идентификатор: %s\n- Статус: Черновик\n- Последнее обновление: %s\n\n## Основной сценарий\n\n## Альтернативные сценарии\n\n## Постусловия\n\n## Критерии приёмки\n\n## Бизнес-правила\n", id, title, id, date)
 		case "flow":
 			return fmt.Sprintf("# %s: %s\n\n- Идентификатор: %s\n- Статус: Черновик\n- Последнее обновление: %s\n\n## Процесс\n", id, title, id, date)
 		case "screen":
@@ -403,7 +403,7 @@ func renderEntityScaffold(kind, id, title, language, date string) string {
 	case "module":
 		return fmt.Sprintf("# %s: %s\n\n- Identifier: %s\n- Status: Draft\n- Last updated: %s\n\n## Purpose\n\n## Business rules\n\n## Invariants\n\n## Interfaces\n", id, title, id, date)
 	case "use-case":
-		return fmt.Sprintf("# %s: %s\n\n- Identifier: %s\n- Status: Draft\n- Last updated: %s\n\n## Main scenario\n\n## Alternative scenarios\n\n## Postconditions\n\n## Business rules\n", id, title, id, date)
+		return fmt.Sprintf("# %s: %s\n\n- Identifier: %s\n- Status: Draft\n- Last updated: %s\n\n## Main scenario\n\n## Alternative scenarios\n\n## Postconditions\n\n## Acceptance criteria\n\n## Business rules\n", id, title, id, date)
 	case "flow":
 		return fmt.Sprintf("# %s: %s\n\n- Identifier: %s\n- Status: Draft\n- Last updated: %s\n\n## Process\n", id, title, id, date)
 	case "screen":

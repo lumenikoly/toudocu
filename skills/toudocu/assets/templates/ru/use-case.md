@@ -33,6 +33,10 @@
 
 {{POSTCONDITIONS}}
 
+## Критерии приёмки
+
+- [ ] {{ACCEPTANCE_CRITERION}}
+
 ## Бизнес-правила
 
 - {{BUSINESS_RULE_ID}} — {{BUSINESS_RULE_REFERENCE}}

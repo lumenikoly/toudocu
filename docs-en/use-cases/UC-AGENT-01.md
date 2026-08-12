@@ -1,11 +1,11 @@
 # UC-AGENT-01: Install the Toudocu AI skill
 
 - Identifier: UC-AGENT-01
-- Status: Ready
+- Status: Completed
 - Actor: Toudocu user
 - Module: MOD-CLI
 - Priority: High
-- Last updated: 2026-08-10
+- Last updated: 2026-08-12
 
 The user installs the embedded offline `toudocu` skill package in project or
 user scope for a supported AI host and can safely inspect, update, or remove the
@@ -43,8 +43,16 @@ managed copy.
 
 ## Postconditions
 
-On success, the target is absent or contains the exact managed copy of the
-embedded bundle and manifest schema v1. User files are preserved on conflict.
+After a successful `install`, `update`, or `uninstall`, the target is absent or
+contains the exact managed copy of the embedded bundle and manifest schema v1.
+`status` only reports state. User files are preserved on conflict.
+
+## Acceptance criteria
+
+- [x] After a successful `install`, `update`, or `uninstall`, the target is
+  absent or contains the exact managed copy of the embedded bundle and manifest
+  schema v1.
+- [x] User files are preserved on conflict.
 
 ## Business rules
 

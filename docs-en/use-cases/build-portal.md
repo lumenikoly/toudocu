@@ -1,11 +1,11 @@
 # UC-DOCS-01: Build a Static HTTP Portal
 
 - Identifier: UC-DOCS-01
-- Status: Ready
+- Status: Completed
 - Actor: Developer
 - Module: MOD-SITE
 - Priority: High
-- Last updated: 2026-08-10
+- Last updated: 2026-08-12
 
 The developer converts a project-documentation directory into a read-only
 portal that is published on ordinary HTTP(S) static hosting and requires no
@@ -48,6 +48,13 @@ Toudocu backend after the build.
 After successful generation, the output directory contains a backend-independent
 portal, static data, and `ProjectReport` schema v1. Source Markdown is unchanged.
 Opening through `file://` is unsupported; use `toudocu serve` for local work.
+
+## Acceptance criteria
+
+- [x] The output contains a backend-independent portal, static data, and
+  `ProjectReport` schema v1.
+- [x] Generation leaves source Markdown unchanged.
+- [x] Local viewing uses `toudocu serve`, not `file://`.
 
 ## Business rules
 

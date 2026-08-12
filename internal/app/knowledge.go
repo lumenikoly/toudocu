@@ -53,6 +53,66 @@ type parsedWorkItem struct {
 	Subsections map[string]workSubsection
 }
 
+type useCaseAcceptanceState struct {
+	Found         bool
+	Total         int
+	Completed     int
+	Remaining     int
+	HeadingLine   int
+	FirstOpenLine int
+}
+
+type useCaseReadiness struct {
+	StatusDone         bool
+	EffectiveCompleted bool
+	Acceptance         useCaseAcceptanceState
+}
+
+func calculateUseCaseReadiness(document *Document) useCaseReadiness {
+	state := useCaseAcceptanceState{}
+	heading, end, found := headingSectionRange(document, "критерии приёмки", "критерии приемки", "acceptance criteria")
+	if found {
+		state.Found = true
+		state.HeadingLine = heading.Line + 1
+		for _, task := range tasksInRange(document.Tasks, heading.Line+2, end) {
+			state.Total++
+			if task.Completed {
+				state.Completed++
+			} else if state.FirstOpenLine == 0 {
+				state.FirstOpenLine = task.Line
+			}
+		}
+		state.Remaining = state.Total - state.Completed
+	}
+	done := document.Status.Kind == "done"
+	return useCaseReadiness{StatusDone: done, EffectiveCompleted: done && state.Found && state.Total > 0 && state.Remaining == 0, Acceptance: state}
+}
+
+func useCaseHeadingLine(document *Document) int {
+	for _, heading := range document.Headings {
+		if heading.Level == 1 {
+			return heading.Line + 1
+		}
+	}
+	return 1
+}
+
+func validateDoneUseCaseReadiness(model *Model, document *Document) {
+	readiness := calculateUseCaseReadiness(document)
+	if !readiness.StatusDone {
+		return
+	}
+	if !readiness.Acceptance.Found || readiness.Acceptance.Total == 0 {
+		line := readiness.Acceptance.HeadingLine
+		if line == 0 {
+			line = useCaseHeadingLine(document)
+		}
+		addKnowledgeIssue(model, document, "error", "done-use-case-missing-acceptance-criteria", "A done use case must have a non-empty Acceptance criteria section.", line)
+	} else if readiness.Acceptance.Remaining > 0 {
+		addKnowledgeIssue(model, document, "error", "done-use-case-has-open-acceptance-criteria", "A done use case must not have open acceptance criteria.", readiness.Acceptance.FirstOpenLine)
+	}
+}
+
 func parseWorkItems(document *Document) []parsedWorkItem {
 	result := []parsedWorkItem{}
 	for headingIndex, heading := range document.Headings {
@@ -884,6 +944,7 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 				TerminalScreens: splitReferences(document.Metadata["terminalScreens"]),
 				AllowCycle:      containsString([]string{"да", "yes", "true", "1"}, canonicalText(document.Metadata["allowCycle"])),
 			})
+			validateDoneUseCaseReadiness(model, document)
 		case "flow":
 			flows = append(flows, KnowledgeFlow{
 				ID: stableID, Title: document.Title, ModuleID: document.Metadata["module"],
@@ -1109,7 +1170,7 @@ func buildRoadmapStages(model *Model) []RoadmapStage {
 				}
 				if useCase, exists := useCases[id]; exists {
 					status := useCase.Status
-					item.EffectiveCompleted = status.Kind == "done"
+					item.EffectiveCompleted = calculateUseCaseReadiness(model.DocByPath[useCase.Document]).EffectiveCompleted
 					item.CompletionSource = "use-case-status"
 					item.TargetDocument = useCase.Document
 					item.TargetStatus = &status
@@ -1143,6 +1204,43 @@ func buildRoadmapStages(model *Model) []RoadmapStage {
 		document.TaskStats = TaskStats{Total: total, Completed: completed, Remaining: total - completed, Percent: progress(completed, total)}
 	}
 	return result
+}
+
+func useCaseReadinessReason(readiness useCaseReadiness) string {
+	switch {
+	case !readiness.StatusDone:
+		return "the use-case status is not done"
+	case !readiness.Acceptance.Found || readiness.Acceptance.Total == 0:
+		return "acceptance criteria are missing"
+	case readiness.Acceptance.Remaining > 0:
+		return "open acceptance criteria remain"
+	default:
+		return "the use case is ready"
+	}
+}
+
+func validateRoadmapCompletion(model *Model) {
+	for _, stage := range model.RoadmapStages {
+		for _, item := range stage.Items {
+			if item.Kind != "use-case" || item.TargetDocument == "" || item.DeclaredCompleted == item.EffectiveCompleted {
+				continue
+			}
+			readiness := calculateUseCaseReadiness(model.DocByPath[item.TargetDocument])
+			message := fmt.Sprintf("Roadmap item %s completion does not match the linked use case: %s.", item.ID, useCaseReadinessReason(readiness))
+			addKnowledgeIssue(model, stage.Document, "error", "roadmap-item-completion-mismatch", message, item.Line)
+		}
+		if stage.Status.Kind != "done" || stage.TaskStats.Remaining == 0 {
+			continue
+		}
+		line := 1
+		for _, section := range stage.Document.Sections {
+			if section.ID == stage.Anchor {
+				line = section.StartLine + 1
+				break
+			}
+		}
+		addKnowledgeIssue(model, stage.Document, "error", "roadmap-section-status-mismatch", fmt.Sprintf("Done roadmap section %s contains incomplete items.", stage.Title), line)
+	}
 }
 
 func buildCurrentStatus(model *Model) CurrentStatus {

@@ -1,14 +1,14 @@
 # UC-REVIEW-01: Discuss changes and hand comments to an agent
 
 - Identifier: UC-REVIEW-01
-- Status: Ready
+- Status: Completed
 - Actor: Developer
 - Module: MOD-REVIEW
 - Priority: High
 - Screens: SC-CHANGES-WORKSPACE
 - Entry screen: SC-CHANGES-WORKSPACE
 - Exit screens: SC-CHANGES-WORKSPACE
-- Last updated: 2026-08-10
+- Last updated: 2026-08-12
 
 A developer comments on changes across the local repository, sends the prepared
 messages to an AI agent, and receives its answers in the same discussions.
@@ -59,6 +59,13 @@ messages to an AI agent, and receives its answers in the same discussions.
 - Discussions remain local and are not written into the repository.
 - Sent batches and answers cannot be changed retroactively.
 - A `fixed`, `notFixed`, or `needsClarification` result does not resolve the
+  discussion automatically.
+
+## Acceptance criteria
+
+- [x] Discussions remain local and are not written into the repository.
+- [x] Sent batches and answers cannot be changed retroactively.
+- [x] A `fixed`, `notFixed`, or `needsClarification` result does not resolve the
   discussion automatically.
 
 ## Business rules

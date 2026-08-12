@@ -1,14 +1,14 @@
 # UC-DOCS-04: Explore the Screen Map
 
 - Identifier: UC-DOCS-04
-- Status: Ready
+- Status: Completed
 - Actor: Developer
 - Module: MOD-SITE
 - Priority: High
 - Screens: SC-SITE-USE-CASE, SC-SITE-SCREEN-MAP
 - Start screen: SC-SITE-USE-CASE
 - Terminal screens: SC-SITE-SCREEN-MAP
-- Last updated: 2026-08-10
+- Last updated: 2026-08-12
 
 The developer explores user navigation and plays documented scenarios in the
 standalone portal.
@@ -54,6 +54,12 @@ standalone portal.
 
 The HTML and ProjectReport schema v1 contain consistent screens, transitions,
 playable scenarios, and traceability. The source Markdown is unchanged.
+
+## Acceptance criteria
+
+- [x] HTML and `ProjectReport` schema v1 contain consistent screens,
+  transitions, playable scenarios, and traceability.
+- [x] Building the map leaves source Markdown unchanged.
 
 ## Business rules
 

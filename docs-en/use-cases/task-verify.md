@@ -1,11 +1,11 @@
 # UC-TASK-02: Verify a work item
 
 - Identifier: UC-TASK-02
-- Status: Ready
+- Status: Completed
 - Actor: Developer or software agent
 - Module: MOD-CLI
 - Priority: High
-- Last updated: 2026-08-10
+- Last updated: 2026-08-12
 
 The assignee first reads the exact command plan without execution, then uses a
 separate explicit action to run every command or one selected target.
@@ -62,6 +62,14 @@ separate explicit action to run every command or one selected target.
 writes only the selected JSON file outside documentation. In `--run`, every
 admitted command receives a result. Final status is `planned`, `passed`,
 `failed`, or `blocked`; only `planned` and `passed` return code `0`.
+
+## Acceptance criteria
+
+- [x] `--dry-run` without `--report` changes nothing; with `--report`, it
+  atomically writes only the selected JSON file outside documentation.
+- [x] In `--run`, every admitted command receives a result.
+- [x] Final status is `planned`, `passed`, `failed`, or `blocked`; only
+  `planned` and `passed` return code `0`.
 
 ## Business rules
 

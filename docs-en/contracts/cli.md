@@ -96,6 +96,9 @@ Every public report uses `schemaVersion: 1`.
 
 - `ProjectReport` describes the project, documents, relationships, roadmap,
   risks, knowledge, screens, flows, and diagnostics.
+- For `UC-*`, `roadmap[].items[].effectiveCompleted` includes status and
+  acceptance criteria while `completionSource` remains `use-case-status`.
+  Schema version stays `1`, and no `completionBlockers` field is added.
 - `SearchReport`, `TaskInitReport`, `ScaffoldReport`, `TaskReadyReport`,
   `TaskContextReport`, `TaskMoveReport`, and `TaskVerifyReport` belong to their
   corresponding workflows.
@@ -114,6 +117,12 @@ The human-readable technical `Issue.message` field, other JSON diagnostics,
 and CLI errors and warnings are always in English regardless of `project.locale`.
 Automation must use the stable `code`, HTTP status, or exit code; user-provided
 values embedded in a message are preserved verbatim.
+
+`check` is read-only. Readiness failures use
+`done-use-case-missing-acceptance-criteria`,
+`done-use-case-has-open-acceptance-criteria`,
+`roadmap-item-completion-mismatch`, and `roadmap-section-status-mismatch`.
+They are errors, so ordinary and strict checks return exit code `1`.
 
 For every command, `task verify` records the exit code, time, duration, bounded
 stdout/stderr, and associated targets. The final status is `planned`, `passed`,

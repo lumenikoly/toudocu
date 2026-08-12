@@ -1,11 +1,11 @@
 # UC-DOCS-02: Check documentation
 
 - Identifier: UC-DOCS-02
-- Status: Ready
+- Status: Completed
 - Actor: Developer or CI process
 - Module: MOD-MODEL
 - Priority: High
-- Last updated: 2026-08-10
+- Last updated: 2026-08-12
 
 A developer or CI checks documentation structure and relationships without
 building the portal or running commands from work items.
@@ -51,6 +51,16 @@ building the portal or running commands from work items.
 Sources are unchanged, no portal was created, and no Verification command was
 run. Every diagnostic has a stable code and, when available, a path, line, and
 column.
+
+## Acceptance criteria
+
+- [x] A check does not change sources, create a portal, or run a Verification
+  command.
+- [x] Every diagnostic has a stable code and, when available, a path, line, and
+  column.
+- [x] A completed `UC-*` without fully checked acceptance criteria or a
+  mismatched roadmap produces an error and exit code `1` without changing
+  Markdown.
 
 ## Business rules
 

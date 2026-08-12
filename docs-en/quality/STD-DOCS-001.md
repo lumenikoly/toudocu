@@ -3,7 +3,7 @@
 - Identifier: STD-DOCS-001
 - Status: Active
 - Scope: Source documentation, skill templates, and generated portals
-- Last updated: 2026-08-10
+- Last updated: 2026-08-12
 
 This standard separates confirmed sources from local or generated views.
 Markdown remains the source of the document model; explicitly recognized
@@ -11,8 +11,12 @@ OpenAPI may own only the HTTP wire contract.
 
 ## Rules
 
-1. Global scope is defined by `roadmap.md`; the state of an explicitly linked
-   `UC-*` comes from its use case. Other local checklists are not aggregated.
+1. Global scope is defined by `roadmap.md`. An explicitly linked `UC-*` is
+   complete only with a `done`-group status, at least one checkbox in the
+   Acceptance criteria section, and every checkbox in that section checked.
+   Checklists outside the section do not affect readiness; `CON-*`,
+   `CONTRACT-*`, `DLV-*`, and `DELIVERABLE-*` retain their roadmap checkbox
+   state.
 2. Generated `build/`, `dist/`, and `project-docs/` directories are local or CI
    artifacts. They are not tracked by Git or edited as primary documentation.
 3. Published portals are rebuilt from Markdown in CI after semantic review and

@@ -1,7 +1,7 @@
 # UC-DOCS-03: View documentation on a local server
 
 - Identifier: UC-DOCS-03
-- Status: Ready
+- Status: Completed
 - Actor: Developer
 - Module: MOD-SITE
 - Priority: Medium
@@ -9,7 +9,7 @@
 - Start screen: SC-SITE-HOME
 - Terminal screens: SC-SITE-DOCUMENT, SC-SITE-API-DOCS
 - Allow cycle: Yes
-- Last updated: 2026-08-11
+- Last updated: 2026-08-12
 
 A developer runs the portal on their computer, reads documentation, and edits
 source files when needed. After a save, Toudocu rereads the sources and displays
@@ -88,6 +88,15 @@ separately read eligible files in the current repository for diffs, full text,
 and discussions, but it never writes Git. After `Ctrl+C`, the server and local
 APIs disappear. `/_toudocu/locales/<locale>/` is read-only and has no Editor,
 Changes, discussions, API docs, or workspace commands.
+
+## Acceptance criteria
+
+- [x] While the command runs, the portal and allowed local APIs are available
+  over HTTP; after `Ctrl+C`, they are unavailable.
+- [x] Editor reads and changes only allowed documentation files, while Changes
+  never writes Git.
+- [x] The translation URL is read-only and has no Editor, Changes,
+  discussions, API docs, or workspace commands.
 
 ## Business rules
 

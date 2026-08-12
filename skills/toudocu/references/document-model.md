@@ -13,7 +13,7 @@ Validate only promises the documentation makes:
 | Ordinary Markdown | Human-readable documentation | Render safely; report basic editorial warnings |
 | Typed path such as `modules/` or `use-cases/` | Opt-in machine-readable entity | Validate its ID and explicit relationships |
 | Stable ID or local link | Declared identity or relationship | Require uniqueness and a valid target |
-| `roadmap.md` checklist item | Declared global scope | Require one supported stable ID |
+| `roadmap.md` checklist item | Declared global scope | Require one supported stable ID and derive `UC-*` readiness |
 | `task ready` | Read-only readiness request | Require the complete task schema even for Draft |
 | `task verify --run` | Permission to execute repository commands | Apply the task-local validation gate before execution |
 
@@ -84,15 +84,28 @@ When opting into a typed entity:
 - update all references together when identity genuinely changes;
 - use relative Markdown links that remain inside repository root.
 
-For a `UC-*` roadmap item, Toudocu derives effective completion from the linked
-use-case status. `CON-*` and `DLV-*` retain their roadmap checkbox state. Other
-checklists do not contribute to global progress.
+For a `UC-*` roadmap item, Toudocu sets `effectiveCompleted` only when the
+linked use case has a `done`-group status, at least one checkbox in its
+Acceptance criteria section, and every checkbox in that section checked. Nested
+subsections count; the next heading of the same or higher level ends the section. The public
+`ProjectReport` remains schema v1 and `completionSource` remains
+`use-case-status`. `CON-*`, `CONTRACT-*`, `DLV-*`, and `DELIVERABLE-*` retain
+their roadmap checkbox state. Other checklists do not contribute to global
+progress.
+
+`check` reports these readiness errors without changing Markdown:
+
+- `done-use-case-missing-acceptance-criteria`;
+- `done-use-case-has-open-acceptance-criteria`;
+- `roadmap-item-completion-mismatch`;
+- `roadmap-section-status-mismatch`.
 
 ## Typed-document guidance
 
 The module template includes purpose, code location, boundaries, business
 rules, invariants, stable interfaces, and related use cases. The use-case
-template includes its main scenario, postconditions, rules, and implementation.
+template includes its main scenario, postconditions, an unchecked acceptance
+criterion placeholder, rules, and implementation.
 The flow and screen templates participate in the separate
 [screen and flow model](screen-model.md). The ADR template includes context,
 decision, and consequences. Work-item schemas are defined in

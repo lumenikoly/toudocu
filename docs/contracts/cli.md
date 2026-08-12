@@ -98,6 +98,9 @@ toudocu skill install|status|update|uninstall
 
 - `ProjectReport` описывает проект, документы, связи, дорожную карту, риски,
   знания, экраны, процессы и диагностические сообщения.
+- Для `UC-*` поле `roadmap[].items[].effectiveCompleted` учитывает статус и
+  критерии приёмки; `completionSource` остаётся `use-case-status`. Версия схемы
+  остаётся `1`, поле `completionBlockers` не добавляется.
 - `SearchReport`, `TaskInitReport`, `ScaffoldReport`, `TaskReadyReport`,
   `TaskContextReport`, `TaskMoveReport` и `TaskVerifyReport` принадлежат своим
   командам.
@@ -117,6 +120,12 @@ toudocu skill install|status|update|uninstall
 независимо от `project.locale`. Автоматизация должна опираться на стабильный
 `code`, HTTP-статус или код завершения; значения из пользовательского ввода
 внутри сообщения сохраняются дословно.
+
+`check` только читает исходники. Нарушения готовности используют коды
+`done-use-case-missing-acceptance-criteria`,
+`done-use-case-has-open-acceptance-criteria`,
+`roadmap-item-completion-mismatch` и `roadmap-section-status-mismatch`. Это
+ошибки: обычный и строгий `check` возвращают код `1`.
 
 `task verify` сохраняет для каждой команды код завершения, время, длительность,
 ограниченные stdout и stderr и связанные цели. Итоговый статус бывает
