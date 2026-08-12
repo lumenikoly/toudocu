@@ -335,6 +335,7 @@ toudocu agent respond --input response.json
 | Найти текст или ID | `toudocu search "запрос" ./docs` |
 | Посмотреть Git-изменения | `toudocu changes ./docs` |
 | Посмотреть изменение одного файла | `toudocu changes file PATH ./docs` |
+| Создать нейтральный каркас | `toudocu scaffold module MOD-PAYMENTS ./docs --title "Платежи"` |
 | Установить или обновить skill | `toudocu skill install\|update` |
 | Получить контекст рабочей задачи | `toudocu task context TASK-ID ./docs` |
 | Сопоставить задачу с Git diff | `toudocu task changes TASK-ID ./docs` |

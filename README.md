@@ -181,7 +181,7 @@ toudocu version
 
 The installer selects the appropriate binary for your operating system and architecture, downloads `checksums.txt`, and verifies SHA-256 before replacing the binary.
 
-See the [installation guide](docs/guides/installation.md) for details.
+See the [installation guide](docs-en/guides/installation.md) for details.
 
 ### 2. Connect Toudocu to your AI agent
 
@@ -335,13 +335,14 @@ In normal use, the installed skill handles these lower-level commands, so you do
 | Search text or IDs | `toudocu search "query" ./docs` |
 | Review Git changes | `toudocu changes ./docs` |
 | Review one changed file | `toudocu changes file PATH ./docs` |
+| Create a neutral scaffold | `toudocu scaffold module MOD-PAYMENTS ./docs --title "Payments"` |
 | Install or update the skill | `toudocu skill install\|update` |
 | Get work-item context | `toudocu task context TASK-ID ./docs` |
 | Match a task to the Git diff | `toudocu task changes TASK-ID ./docs` |
 | Verify a task without running commands | `toudocu task verify TASK-ID ./docs --dry-run` |
 | Run explicitly allowed task checks | `toudocu task verify TASK-ID ./docs --run` |
 
-See [docs/contracts/cli.md](docs/contracts/cli.md) for the complete CLI contract.
+See [docs-en/contracts/cli.md](docs-en/contracts/cli.md) for the complete CLI contract.
 
 ---
 
@@ -397,7 +398,7 @@ Supported Mermaid diagram types are:
 
 Toudocu deliberately excludes some extensions that make Markdown processing less predictable or harder to keep safe, including raw HTML, front matter, Markdown attributes, footnotes, and active SVG/XML/HTML resources.
 
-See the [Markdown module](docs/modules/markdown.md) for details.
+See the [Markdown module](docs-en/modules/markdown.md) for details.
 
 ---
 
@@ -420,7 +421,7 @@ site:
   accent: indigo
 ```
 
-See the [configuration reference](docs/reference/configuration.md) for all supported options.
+See the [configuration reference](docs-en/reference/configuration.md) for all supported options.
 
 ---
 
@@ -489,17 +490,17 @@ Node.js is only needed for development of Toudocu's browser-side code and is not
 
 ## Documentation
 
-- [Features](docs/reference/features.md)
-- [Installation](docs/guides/installation.md)
-- [CLI commands](docs/contracts/cli.md)
-- [Configuration](docs/reference/configuration.md)
-- [Local workflow](docs/guides/local-workflow.md)
-- [Documentation changes](docs/guides/documentation-changes.md)
-- [AI agent workflows](docs/guides/agent-workflows.md)
-- [Skill installation](docs/guides/skill-installation.md)
-- [Work items](docs/guides/work-items.md)
-- [Document types](docs/reference/document-types.md)
-- [Toudocu source documentation](docs/index.md)
+- [Features](docs-en/reference/features.md)
+- [Installation](docs-en/guides/installation.md)
+- [CLI commands](docs-en/contracts/cli.md)
+- [Configuration](docs-en/reference/configuration.md)
+- [Local workflow](docs-en/guides/local-workflow.md)
+- [Documentation changes](docs-en/guides/documentation-changes.md)
+- [AI agent workflows](docs-en/guides/agent-workflows.md)
+- [Skill installation](docs-en/guides/skill-installation.md)
+- [Work items](docs-en/guides/work-items.md)
+- [Document types](docs-en/reference/document-types.md)
+- [Toudocu source documentation](docs-en/index.md)
 - [Contributing](CONTRIBUTING.md)
 
 ## License
