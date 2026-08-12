@@ -560,6 +560,9 @@ import { text } from "../../core/locale";
     function discussionInFlightClient(discussionId: any) {
         return (state.review?.deliveries || []).some((delivery: any) => delivery.discussionId === discussionId && delivery.state !== 'responded');
     }
+    function messageEditableClient(message: any) {
+        return message.author === 'human' && (message.state === 'draft' || (state.review?.deliveries || []).some((delivery: any) => delivery.id === message.deliveryId && delivery.state === 'pending'));
+    }
     function reviewGuard() { return { expectedRevision: state.review?.revision || 0, expectedStateDigest: state.review?.stateDigest || '' }; }
     async function reviewMutation(endpoint: any, action: any, method: any, body: any) {
         const send: any = async (payload: any) => {
@@ -677,7 +680,7 @@ import { text } from "../../core/locale";
             article.className = `review-thread is-${discussion.state}${state.activeDiscussion === discussion.id ? ' is-active' : ''}`;
             article.dataset.discussionId = discussion.id;
             const placement: any = discussion.placement || {};
-            article.innerHTML = `<header><div><strong>${text("features.changes.index.111")}</strong><span>${escapeHTML(text(discussion.state === 'open' ? "features.changes.index.105" : "features.changes.index.106"))} · ${escapeHTML(placementLabel(placement.status || 'current'))}</span></div><div class="review-thread-actions"><button type="button" data-thread-state>${text(discussion.state === 'open' ? "features.changes.index.107" : "features.changes.index.108")}</button><button type="button" class="is-danger" data-delete-discussion>${text("features.changes.index.142")}</button></div></header><button type="button" class="review-anchor" data-open-anchor>${escapeHTML(placement.path || discussion.target.path)}${placement.range ? `:${placement.range.start.line}` : ''}</button><ol>${discussion.messages.map((message: any) => `<li class="review-message is-${message.author}"><div><strong>${message.author === 'agent' ? `${text("features.changes.index.110")} · ${escapeHTML(outcomeLabel(message.outcome || 'answered'))}` : `${text("features.changes.index.111")} · ${text(message.intent === 'change_request' ? "core.portal.094" : "core.portal.093")}`}</strong><time>${escapeHTML(new Date(message.createdAt).toLocaleString(locale))}</time></div><p>${escapeHTML(message.text)}</p>${message.changedPaths?.length ? `<button type="button" data-view-fix="${escapeHTML(message.id)}">${text("features.changes.index.112")}</button>` : ''}${message.author === 'human' && message.state === 'draft' ? `<div class="review-message-actions"><button type="button" data-edit-message="${escapeHTML(message.id)}">${text("features.changes.index.113")}</button><button type="button" data-delete-message="${escapeHTML(message.id)}">${text("features.changes.index.114")}</button><button type="button" data-submit-message="${escapeHTML(message.id)}">${text("core.portal.096")}</button></div>` : ''}</li>`).join('')}</ol><button type="button" class="review-reply" ${discussion.state !== 'open' || discussionInFlightClient(discussion.id) || discussion.messages.some((message: any) => message.state === 'draft') ? 'disabled' : ''}>${text("features.changes.index.115")}</button>`;
+            article.innerHTML = `<header><div><strong>${text("features.changes.index.111")}</strong><span>${escapeHTML(text(discussion.state === 'open' ? "features.changes.index.105" : "features.changes.index.106"))} · ${escapeHTML(placementLabel(placement.status || 'current'))}</span></div><div class="review-thread-actions"><button type="button" data-thread-state>${text(discussion.state === 'open' ? "features.changes.index.107" : "features.changes.index.108")}</button><button type="button" class="is-danger" data-delete-discussion>${text("features.changes.index.142")}</button></div></header><button type="button" class="review-anchor" data-open-anchor>${escapeHTML(placement.path || discussion.target.path)}${placement.range ? `:${placement.range.start.line}` : ''}</button><ol>${discussion.messages.map((message: any) => `<li class="review-message is-${message.author}"><div><strong>${message.author === 'agent' ? `${text("features.changes.index.110")} · ${escapeHTML(outcomeLabel(message.outcome || 'answered'))}` : `${text("features.changes.index.111")} · ${text(message.intent === 'change_request' ? "core.portal.094" : "core.portal.093")}`}</strong><time>${escapeHTML(new Date(message.createdAt).toLocaleString(locale))}</time></div><p>${escapeHTML(message.text)}</p>${message.changedPaths?.length ? `<button type="button" data-view-fix="${escapeHTML(message.id)}">${text("features.changes.index.112")}</button>` : ''}${messageEditableClient(message) ? `<div class="review-message-actions"><button type="button" data-edit-message="${escapeHTML(message.id)}">${text("features.changes.index.113")}</button><button type="button" data-delete-message="${escapeHTML(message.id)}">${text("features.changes.index.114")}</button></div>` : ''}</li>`).join('')}</ol><button type="button" class="review-reply" ${discussion.state !== 'open' || discussionInFlightClient(discussion.id) || discussion.messages.some((message: any) => message.state === 'draft') ? 'disabled' : ''}>${text("features.changes.index.115")}</button>`;
             article.querySelector('[data-thread-state]').addEventListener('click', () => updateDiscussion(discussion.id, discussion.state === 'open' ? 'resolve' : 'reopen'));
             article.querySelector('[data-delete-discussion]').addEventListener('click', () => {
                 state.pendingDelete = discussion.id;
@@ -690,16 +693,6 @@ import { text } from "../../core/locale";
                 button.addEventListener('click', () => openComposer(discussion.target, button, { operation: 'edit', discussionId: discussion.id, messageId: message.id, message: message.text, intent: message.intent }));
             });
             article.querySelectorAll('[data-delete-message]').forEach((button: any) => button.addEventListener('click', () => updateDiscussion(discussion.id, 'deleteMessage', { messageId: button.dataset.deleteMessage })));
-            article.querySelectorAll('[data-submit-message]').forEach((button: any) => button.addEventListener('click', async () => {
-                button.disabled = true;
-                try {
-                    const result: any = await reviewMutation(`/discussions/${discussion.id}/messages/${button.dataset.submitMessage}/submit`, 'agent-message-submit', 'POST', reviewGuard());
-                    state.review = result.state || result;
-                    renderReview();
-                    announce(text("core.portal.097"));
-                }
-                catch (error: any) { announce(error.message); }
-            }));
             article.querySelectorAll('[data-view-fix]').forEach((button: any) => button.addEventListener('click', () => viewFix(discussion, discussion.messages.find((item: any) => item.id === button.dataset.viewFix))));
             article.addEventListener('focusin', () => state.activeDiscussion = discussion.id);
             elements.discussionList.append(article);

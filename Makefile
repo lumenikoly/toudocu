@@ -1,10 +1,11 @@
 BINARY := toudocu
 CMD := ./cmd/toudocu
 DIST := dist
+INSTALL_DIR ?= $(HOME)/.local/bin
 TOUDOCU := go run $(CMD)
 DOCS_DIR := docs
 
-.PHONY: fmt fmt-check vet test web web-check browser-test check build docs docs-serve landing-serve clean release
+.PHONY: fmt fmt-check vet test web web-check browser-test check build update-local docs docs-serve landing-serve clean release
 
 fmt:
 	gofmt -w .
@@ -39,6 +40,9 @@ check: fmt-check test web-check
 
 build:
 	CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o $(BINARY) $(CMD)
+
+update-local: build
+	install -Dm755 "$(BINARY)" "$(INSTALL_DIR)/$(BINARY)"
 
 docs:
 	$(TOUDOCU) build ./$(DOCS_DIR) --output ./build/project-docs --repository-root . --clean

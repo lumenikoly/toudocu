@@ -65,24 +65,25 @@ func TestAgentFeedbackLifecycle(t *testing.T) {
 		t.Fatalf("create=%#v err=%v", state, err)
 	}
 	discussion := state.Session.Discussions[0]
-	draft := discussion.Messages[0]
-	if draft.State != "draft" || discussion.Anchor == nil || discussion.Anchor.SelectedText != "Rules" || discussion.Target.Range == nil {
+	message := discussion.Messages[0]
+	if message.State != "submitted" || len(state.Deliveries) != 1 || state.Deliveries[0].State != "pending" || discussion.Anchor == nil || discussion.Anchor.SelectedText != "Rules" || discussion.Target.Range == nil {
 		t.Fatalf("discussion=%#v", discussion)
 	}
-	state, err = service.updateMessage(discussion.ID, draft.ID, UpdateMessageRequest{ReviewMutationGuard: guard(state), Intent: "question", Text: "Объясни правило."})
+	state, err = service.updateMessage(discussion.ID, message.ID, UpdateMessageRequest{ReviewMutationGuard: guard(state), Intent: "question", Text: "Объясни правило."})
 	if err != nil || state.Session.Discussions[0].Messages[0].Text != "Объясни правило." {
 		t.Fatalf("edit=%#v err=%v", state, err)
 	}
-	state, delivery, err := service.submitMessage(discussion.ID, draft.ID, guard(state))
-	if err != nil || delivery == nil || delivery.Sequence != 1 || state.Deliveries[0].State != "pending" {
-		t.Fatalf("submit=%#v delivery=%#v err=%v", state, delivery, err)
-	}
-	if _, err := service.updateMessage(discussion.ID, draft.ID, UpdateMessageRequest{ReviewMutationGuard: guard(state), Intent: "question", Text: "late edit"}); reviewErrorCode(err) != "AGENT_INVALID_MESSAGE" {
-		t.Fatalf("submitted message changed: %v", err)
-	}
+	delivery := state.Deliveries[0]
 	request, err := service.claimNext()
 	if err != nil || !request.Pending || request.DeliveryID != delivery.ID || request.Target.AnchorState != "current" || request.PendingCount != 1 {
 		t.Fatalf("next=%#v err=%v", request, err)
+	}
+	state, err = service.discussions()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.updateMessage(discussion.ID, message.ID, UpdateMessageRequest{ReviewMutationGuard: guard(state), Intent: "question", Text: "late edit"}); reviewErrorCode(err) != "AGENT_INVALID_MESSAGE" {
+		t.Fatalf("claimed message changed: %v", err)
 	}
 	if _, err := service.claimNext(); reviewErrorCode(err) != "AGENT_INBOX_BUSY" {
 		t.Fatalf("second consumer error=%v", err)
@@ -110,10 +111,9 @@ func TestAgentFeedbackLifecycle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	followUp := state.Session.Discussions[0].Messages[2]
-	state, second, err := service.submitMessage(discussion.ID, followUp.ID, guard(state))
-	if err != nil || second.Sequence != 2 {
-		t.Fatalf("follow-up=%#v err=%v", second, err)
+	second := state.Deliveries[1]
+	if second.Sequence != 2 {
+		t.Fatalf("follow-up=%#v", second)
 	}
 	request, err = service.claimNext()
 	if err != nil || request.DeliveryID != second.ID || len(request.Discussion.Messages) != 3 {
@@ -137,7 +137,7 @@ func TestAgentFeedbackSelectsRepeatedTextByOccurrence(t *testing.T) {
 	root, docs := newReviewRepository(t)
 	t.Setenv("TOUDOCU_STATE_HOME", t.TempDir())
 	path := filepath.Join(docs, "modules", "MOD-CORE.md")
-	writeChangesTestFile(t, path, "# Core\n\nRepeated.\n\nRepeated.\n")
+	writeChangesTestFile(t, path, "# Core\n\nRepeated\ntext.\n\nRepeated text.\n")
 	service, err := newReviewService(reviewOptions(root, docs))
 	if err != nil {
 		t.Fatal(err)
@@ -145,9 +145,16 @@ func TestAgentFeedbackSelectsRepeatedTextByOccurrence(t *testing.T) {
 	state, _ := service.discussions()
 	state, err = service.createDiscussion(CreateDiscussionRequest{
 		ReviewMutationGuard: guard(state), Target: ReviewTarget{Kind: "document", Path: "docs/modules/MOD-CORE.md"},
-		Selection: &SelectionHint{SelectedText: "Repeated.", Occurrence: 2}, Intent: "question", Text: "Почему повтор?",
+		Selection: &SelectionHint{SelectedText: "Repeated text.", Occurrence: 2}, Intent: "question", Text: "Почему повтор?",
 	})
-	if err != nil || state.Session.Discussions[0].Target.Range.Start.Line != 5 {
+	if err != nil || state.Session.Discussions[0].Target.Range.Start.Line != 6 {
+		t.Fatalf("state=%#v err=%v", state, err)
+	}
+	state, err = service.createDiscussion(CreateDiscussionRequest{
+		ReviewMutationGuard: guard(state), Target: ReviewTarget{Kind: "document", Path: "docs/modules/MOD-CORE.md"},
+		Selection: &SelectionHint{SelectedText: "Repeated text."}, Intent: "question", Text: "Почему перенос?",
+	})
+	if err != nil || state.Session.Discussions[1].Target.Range.Start.Line != 3 || state.Session.Discussions[1].Anchor.SelectedText != "Repeated\ntext." {
 		t.Fatalf("state=%#v err=%v", state, err)
 	}
 }
@@ -166,13 +173,8 @@ func TestAgentFeedbackFIFOReanchorPersistenceAndConcurrency(t *testing.T) {
 		if createErr != nil {
 			t.Fatal(createErr)
 		}
-		discussion := state.Session.Discussions[len(state.Session.Discussions)-1]
-		var delivery *AgentDelivery
-		state, delivery, createErr = service.submitMessage(discussion.ID, discussion.Messages[0].ID, guard(state))
-		if createErr != nil {
-			t.Fatal(createErr)
-		}
-		return delivery
+		delivery := state.Deliveries[len(state.Deliveries)-1]
+		return &delivery
 	}
 	first := createAndSubmit("first")
 	second := createAndSubmit("second")
@@ -288,17 +290,6 @@ func TestAgentHTTPAndCLI(t *testing.T) {
 	}
 	if err := json.Unmarshal(createdHTTP.Body.Bytes(), &state); err != nil {
 		t.Fatal(err)
-	}
-	discussion := state.Session.Discussions[0]
-	submitBody, _ := json.Marshal(guard(state))
-	submitRequest := httptest.NewRequest(http.MethodPost, reviewAPIBase+"/discussions/"+discussion.ID+"/messages/"+discussion.Messages[0].ID+"/submit", strings.NewReader(string(submitBody)))
-	submitRequest.Header.Set("Content-Type", "application/json")
-	submitRequest.Header.Set("X-Toudocu-Action", "agent-message-submit")
-	submitRequest.Header.Set("Origin", "http://example.com")
-	submittedHTTP := httptest.NewRecorder()
-	server.ServeHTTP(submittedHTTP, submitRequest)
-	if submittedHTTP.Code != http.StatusCreated {
-		t.Fatalf("submit: %d %s", submittedHTTP.Code, submittedHTTP.Body.String())
 	}
 
 	var stdout, stderr strings.Builder

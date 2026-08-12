@@ -122,10 +122,10 @@ func TestOpenAPIContracts(t *testing.T) {
 			for _, token := range []string{
 				"const: agent-discussion-create", "const: agent-discussion-update", "const: agent-discussion-delete",
 				"const: agent-message-create", "const: agent-message-update", "const: agent-message-delete",
-				"const: agent-message-submit", "const: agent-delivery-next", "const: agent-delivery-response",
-				"additionalProperties: false", "x-maxBytes: 65536", `"201": {description: Updated state and delivery`,
+				"const: agent-delivery-next", "const: agent-delivery-response",
+				"additionalProperties: false", "x-maxBytes: 65536", "atomically queue one editable request",
 				"RequestOrigin:", "FetchMetadata:", `security: [{RequestOrigin: []}, {FetchMetadata: []}]`,
-				`$ref: "#/components/schemas/SubmitMessageResult"`, `"415": {$ref: "#/components/responses/AgentError"}`,
+				`"415": {$ref: "#/components/responses/AgentError"}`,
 			} {
 				if !strings.Contains(string(content), token) {
 					t.Fatalf("%s missing strict input contract %q", name, token)
@@ -134,7 +134,7 @@ func TestOpenAPIContracts(t *testing.T) {
 			if strings.Contains(string(content), "maxLength:") {
 				t.Fatal("agent feedback byte limits must not be represented as Unicode maxLength")
 			}
-			if got := strings.Count(string(content), `"503":`); got != 11 {
+			if got := strings.Count(string(content), `"503":`); got != 10 {
 				t.Fatalf("agent feedback must document 503 for every operation: got %d", got)
 			}
 			createStart := strings.Index(string(content), "operationId: createAgentDiscussion")

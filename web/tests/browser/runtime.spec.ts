@@ -594,20 +594,37 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await selectionMenu.getByRole("button", { name: "Копировать текст" }).click();
     await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe("Architecture");
 
-    await selectPortalElement(page.getByText("Repeated.", { exact: true }).last());
+    await selectPortalElement(page.locator(".page-header h1"));
     await selectionMenu.getByRole("button", { name: "Добавить вопрос" }).click();
     const composer = page.locator(".portal-review-dialog:not(.portal-review-confirm)");
+    await expect(composer).toBeVisible();
+    await composer.getByRole("button", { name: "Отмена" }).click();
+    await expect(composer).not.toBeVisible();
+
+    await selectPortalElement(page.locator(".page-header h1"));
+    await selectionMenu.getByRole("button", { name: "Добавить вопрос" }).click();
+    await composer.locator("[data-portal-review-question]").fill("Почему документ так называется?");
+    await composer.locator(".portal-review-submit").click();
+    const panel = page.locator(".portal-review-panel");
+    let titleThread = panel.locator(".portal-review-thread").filter({ hasText: "Почему документ так называется?" });
+    await expect(titleThread.locator("[data-portal-message-edit]")).toBeVisible();
+    await titleThread.locator("[data-portal-message-edit]").click();
+    await composer.locator("[data-portal-review-question]").fill("Почему у документа такое название?");
+    await composer.locator(".portal-review-submit").click();
+    titleThread = panel.locator(".portal-review-thread").filter({ hasText: "Почему у документа такое название?" });
+    await titleThread.locator("[data-portal-message-delete]").click();
+    await expect(titleThread).toHaveCount(0);
+    await panel.getByRole("button", { name: "Закрыть панель" }).click();
+
+    await selectPortalElement(page.getByText("Repeated.", { exact: true }).last());
+    await selectionMenu.getByRole("button", { name: "Добавить вопрос" }).dispatchEvent("click");
     await expect(composer.locator("[data-portal-review-selection]")).toHaveText("Repeated.");
     await composer.locator("[data-portal-review-question]").fill("Почему фрагмент повторяется?");
     await composer.locator(".portal-review-submit").click();
 
-    const panel = page.locator(".portal-review-panel");
     await expect(panel).toBeVisible();
     const thread = panel.locator(".portal-review-thread").filter({ hasText: "Почему фрагмент повторяется?" });
-    const queueButton = thread.locator("[data-portal-message-submit]");
-    await expect(queueButton).toBeVisible();
-    await queueButton.click();
-    await expect(queueButton).toHaveCount(0);
+    await expect(thread.locator("[data-portal-message-edit]")).toBeVisible();
 
     await panel.locator("[data-portal-review-copy-prompt]").click();
     await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe("Обработай запросы из Toudocu.");
@@ -617,6 +634,7 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     expect(request.discussion.messages[0].intent).toBe("question");
     expect(request.target.selectedText).toBe("Repeated.");
     expect(request.target.range.start.line).toBe(11);
+    await expect(thread.locator("[data-portal-message-edit]")).toHaveCount(0, { timeout: 5_000 });
     const responsePath = join(mkdtempSync(join(tmpdir(), "toudocu-agent-response-")), "response.json");
     writeFileSync(responsePath, JSON.stringify({
       schemaVersion: 1,
@@ -643,14 +661,15 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await changesComposer.locator("[data-review-message]").fill("Проверь и уточни этот документ.");
     await changesComposer.locator('button[type="submit"]').click();
     const changesThread = page.locator(".review-thread").filter({ hasText: "Проверь и уточни этот документ." });
-    await changesThread.locator("[data-submit-message]").click();
+    await expect(changesThread.locator("[data-edit-message]")).toBeVisible();
     const second = agentCLI(["next"]);
     expect(second.pending).toBe(true);
     expect(second.discussion.messages.at(-1).intent).toBe("change_request");
+    await expect(changesThread.locator("[data-edit-message]")).toHaveCount(0, { timeout: 5_000 });
 
     await page.locator("[data-send-feedback]").click();
     await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe("Обработай запросы из Toudocu.");
-    await changesThread.getByRole("button", { name: "Удалить" }).click();
+    await changesThread.locator("[data-delete-discussion]").click();
     await page.locator("[data-review-delete-confirm]").getByRole("button", { name: "Удалить" }).click();
     await expect(changesThread).toHaveCount(0);
     expect(agentCLI(["next"]).pending).toBe(false);

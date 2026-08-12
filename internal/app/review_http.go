@@ -26,7 +26,6 @@ var reviewRouteRegistry = []apiRoute{
 	{Path: reviewAPIBase + "/discussions/{discussionId}", Methods: []string{http.MethodGet, http.MethodPatch, http.MethodDelete}, Handler: (*documentationServer).serveReviewAPI},
 	{Path: reviewAPIBase + "/discussions/{discussionId}/messages", Methods: []string{http.MethodPost}, Handler: (*documentationServer).serveReviewAPI},
 	{Path: reviewAPIBase + "/discussions/{discussionId}/messages/{messageId}", Methods: []string{http.MethodPatch, http.MethodDelete}, Handler: (*documentationServer).serveReviewAPI},
-	{Path: reviewAPIBase + "/discussions/{discussionId}/messages/{messageId}/submit", Methods: []string{http.MethodPost}, Handler: (*documentationServer).serveReviewAPI},
 	{Path: reviewAPIBase + "/deliveries/next", Methods: []string{http.MethodPost}, Handler: (*documentationServer).serveReviewAPI},
 	{Path: reviewAPIBase + "/deliveries/{deliveryId}/response", Methods: []string{http.MethodPost}, Handler: (*documentationServer).serveReviewAPI},
 }
@@ -249,25 +248,9 @@ func (s *documentationServer) serveDiscussionResource(w http.ResponseWriter, req
 		writeChangesJSON(w, http.StatusCreated, state)
 		return
 	}
-	messageID, submit, ok := agentMessageTail(tail)
+	messageID, ok := agentMessageTail(tail)
 	if !ok {
 		writeReviewError(w, agentFailure("AGENT_INVALID_MESSAGE", http.StatusNotFound, "message route not found"))
-		return
-	}
-	if submit {
-		if !allowReviewMethods(w, request, http.MethodPost) || !requireReviewJSONAction(w, request, "agent-message-submit") {
-			return
-		}
-		var guard ReviewMutationGuard
-		if !decodeReviewJSON(w, request, &guard) {
-			return
-		}
-		state, delivery, err := service.submitMessage(discussionID, messageID, guard)
-		if err != nil {
-			writeReviewError(w, err)
-			return
-		}
-		writeChangesJSON(w, http.StatusCreated, map[string]any{"schemaVersion": reviewSchemaVersion, "revision": state.Revision, "stateDigest": state.StateDigest, "session": state.Session, "deliveries": state.Deliveries, "repositoryRevision": state.RepositoryRevision, "delivery": delivery})
 		return
 	}
 	switch request.Method {
@@ -321,20 +304,16 @@ func agentDiscussionPath(path string) (string, string, bool) {
 	return parts[0], tail, true
 }
 
-func agentMessageTail(tail string) (string, bool, bool) {
+func agentMessageTail(tail string) (string, bool) {
 	prefix := "/messages/"
 	if !strings.HasPrefix(tail, prefix) {
-		return "", false, false
+		return "", false
 	}
 	remainder := strings.TrimPrefix(tail, prefix)
-	submit := strings.HasSuffix(remainder, "/submit")
-	if submit {
-		remainder = strings.TrimSuffix(remainder, "/submit")
-	}
 	if strings.Contains(remainder, "/") || !validAgentID(remainder, "MSG") {
-		return "", false, false
+		return "", false
 	}
-	return remainder, submit, true
+	return remainder, true
 }
 
 func agentPathID(path, prefix, suffix, kind string) (string, bool) {

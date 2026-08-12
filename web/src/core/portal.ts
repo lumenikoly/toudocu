@@ -482,6 +482,12 @@ import { createEmptyState, selectTab, setExpanded } from "../components";
         const selectionArea: any = contextButton?.closest('.page-content');
         if (!review || !contextButton || !selectionArea)
             return;
+        const selectionSources: any[] = [
+            $('.page-header h1', selectionArea),
+            $('.metadata-grid', selectionArea),
+            $('.page-header .page-lead', selectionArea),
+            ...$$('.doc-content', selectionArea),
+        ].filter(Boolean);
         const title: any = contextButton.dataset.documentContextTitle || '';
         const path: any = contextButton.dataset.documentContextPath || '';
         if (!path)
@@ -503,7 +509,7 @@ import { createEmptyState, selectTab, setExpanded } from "../components";
         menu.innerHTML = `<button type="button" data-selection-copy>${text("core.portal.035")}</button><button type="button" data-selection-context>${text("core.portal.036")}</button><button type="button" data-selection-question>${text("core.portal.037")}</button>`;
         const dialog: any = document.createElement('dialog');
         dialog.className = 'portal-review-dialog';
-        dialog.innerHTML = `<form method="dialog"><header><h2 data-portal-review-dialog-title>${text("core.portal.042")}</h2><span data-portal-review-title></span></header><label data-portal-review-selection-wrap>${text("core.portal.043")}<pre data-portal-review-selection></pre></label><label>${text("core.portal.092")}<select data-portal-review-intent><option value="question">${text("core.portal.093")}</option><option value="change_request">${text("core.portal.094")}</option></select></label><label>${text("core.portal.044")}<textarea required maxlength="65536" rows="5" placeholder="${text("core.portal.045")}" data-portal-review-question></textarea></label><p class="portal-review-error" data-portal-review-error role="alert"></p><footer><button type="submit" value="cancel">${text("core.portal.046")}</button><button type="submit" class="portal-review-submit">${text("core.portal.047")}</button></footer></form>`;
+        dialog.innerHTML = `<form method="dialog"><header><h2 data-portal-review-dialog-title>${text("core.portal.042")}</h2><span data-portal-review-title></span></header><label data-portal-review-selection-wrap>${text("core.portal.043")}<pre data-portal-review-selection></pre></label><label>${text("core.portal.092")}<select data-portal-review-intent><option value="question">${text("core.portal.093")}</option><option value="change_request">${text("core.portal.094")}</option></select></label><label>${text("core.portal.044")}<textarea required maxlength="65536" rows="5" placeholder="${text("core.portal.045")}" data-portal-review-question></textarea></label><p class="portal-review-error" data-portal-review-error role="alert"></p><footer><button type="submit" value="cancel" formnovalidate>${text("core.portal.046")}</button><button type="submit" class="portal-review-submit">${text("core.portal.047")}</button></footer></form>`;
         $('[data-portal-review-title]', dialog).textContent = title;
         const confirmDialog: any = document.createElement('dialog');
         confirmDialog.className = 'portal-review-dialog portal-review-confirm';
@@ -568,6 +574,7 @@ import { createEmptyState, selectTab, setExpanded } from "../components";
             .filter((discussion: any) => discussion.target?.path === path || discussion.placement?.path === path)
             .sort((left: any, right: any) => Number(left.state !== 'open') - Number(right.state !== 'open') || String(left.createdAt).localeCompare(String(right.createdAt)));
         const discussionInFlight: any = (discussionId: any) => (reviewState?.deliveries || []).some((delivery: any) => delivery.discussionId === discussionId && delivery.state !== 'responded');
+        const messageEditable: any = (message: any) => message.author === 'human' && (message.state === 'draft' || (reviewState?.deliveries || []).some((delivery: any) => delivery.id === message.deliveryId && delivery.state === 'pending'));
         const renderReview: any = () => {
             const discussions: any = documentDiscussions();
             const open: any = discussions.filter((discussion: any) => discussion.state === 'open');
@@ -580,7 +587,7 @@ import { createEmptyState, selectTab, setExpanded } from "../components";
                 const placement: any = discussion.placement || {};
                 const article: any = document.createElement('article');
                 article.className = `portal-review-thread is-${discussion.state}`;
-                article.innerHTML = `<header><div><strong>${text("core.portal.070")}</strong><span>${text(discussion.state === 'open' ? "core.portal.059" : "core.portal.060")} · ${escapeHTML(placementLabel(placement.status || 'current'))}</span></div><div class="portal-review-thread-actions"><button type="button" data-portal-thread-state>${text(discussion.state === 'open' ? "core.portal.071" : "core.portal.073")}</button><button type="button" class="is-danger" data-portal-thread-delete>${text("core.portal.072")}</button></div></header><p class="portal-review-anchor">${escapeHTML(placement.path || discussion.target?.path || path)}${placement.range ? `:${placement.range.start.line}` : ''}</p><ol>${discussion.messages.map((message: any) => `<li class="is-${escapeHTML(message.author)}" data-portal-message="${escapeHTML(message.id)}"><div><strong>${message.author === 'agent' ? `${text("core.portal.061")} · ${escapeHTML(outcomeLabel(message.outcome || 'answered'))}` : `${text("core.portal.070")} · ${escapeHTML(message.intent === 'change_request' ? text("core.portal.094") : text("core.portal.093"))}`}</strong><time>${escapeHTML(new Date(message.createdAt).toLocaleString(window.ToudocuPage?.ui.locale || 'en'))}</time></div><p>${escapeHTML(message.text)}</p>${message.author === 'human' && message.state === 'draft' ? `<div class="portal-review-thread-actions"><button type="button" data-portal-message-edit>${text("core.portal.095")}</button><button type="button" class="is-danger" data-portal-message-delete>${text("core.portal.072")}</button><button type="button" data-portal-message-submit>${text("core.portal.096")}</button></div>` : ''}</li>`).join('')}</ol><button type="button" class="portal-review-reply" data-portal-thread-reply ${discussion.state !== 'open' || discussionInFlight(discussion.id) || discussion.messages.some((message: any) => message.state === 'draft') ? 'disabled' : ''}>${text("core.portal.074")}</button>`;
+                article.innerHTML = `<header><div><strong>${text("core.portal.070")}</strong><span>${text(discussion.state === 'open' ? "core.portal.059" : "core.portal.060")} · ${escapeHTML(placementLabel(placement.status || 'current'))}</span></div><div class="portal-review-thread-actions"><button type="button" data-portal-thread-state>${text(discussion.state === 'open' ? "core.portal.071" : "core.portal.073")}</button><button type="button" class="is-danger" data-portal-thread-delete>${text("core.portal.072")}</button></div></header><p class="portal-review-anchor">${escapeHTML(placement.path || discussion.target?.path || path)}${placement.range ? `:${placement.range.start.line}` : ''}</p><ol>${discussion.messages.map((message: any) => `<li class="is-${escapeHTML(message.author)}" data-portal-message="${escapeHTML(message.id)}"><div><strong>${message.author === 'agent' ? `${text("core.portal.061")} · ${escapeHTML(outcomeLabel(message.outcome || 'answered'))}` : `${text("core.portal.070")} · ${escapeHTML(message.intent === 'change_request' ? text("core.portal.094") : text("core.portal.093"))}`}</strong><time>${escapeHTML(new Date(message.createdAt).toLocaleString(window.ToudocuPage?.ui.locale || 'en'))}</time></div><p>${escapeHTML(message.text)}</p>${messageEditable(message) ? `<div class="portal-review-thread-actions"><button type="button" data-portal-message-edit>${text("core.portal.095")}</button><button type="button" class="is-danger" data-portal-message-delete>${text("core.portal.072")}</button></div>` : ''}</li>`).join('')}</ol><button type="button" class="portal-review-reply" data-portal-thread-reply ${discussion.state !== 'open' || discussionInFlight(discussion.id) || discussion.messages.some((message: any) => message.state === 'draft') ? 'disabled' : ''}>${text("core.portal.074")}</button>`;
                 $('[data-portal-thread-state]', article).addEventListener('click', async (event: any) => {
                     event.currentTarget.disabled = true;
                     try {
@@ -596,7 +603,7 @@ import { createEmptyState, selectTab, setExpanded } from "../components";
                 }, { signal });
                 $$('[data-portal-message]', article).forEach((item: any) => {
                     const message: any = discussion.messages.find((candidate: any) => candidate.id === item.dataset.portalMessage);
-                    if (!message || message.state !== 'draft')
+                    if (!message || !messageEditable(message))
                         return;
                     $('[data-portal-message-edit]', item)?.addEventListener('click', () => openComposer({ operation: 'edit', discussionId: discussion.id, message }), { signal });
                     $('[data-portal-message-delete]', item)?.addEventListener('click', async (event: any) => {
@@ -604,16 +611,6 @@ import { createEmptyState, selectTab, setExpanded } from "../components";
                         try {
                             reviewState = await reviewMutation(`/discussions/${discussion.id}/messages/${message.id}`, 'agent-message-delete', 'DELETE', reviewGuard());
                             renderReview();
-                        }
-                        catch (failure: any) { announce(failure.message); }
-                    }, { signal });
-                    $('[data-portal-message-submit]', item)?.addEventListener('click', async (event: any) => {
-                        event.currentTarget.disabled = true;
-                        try {
-                            const result: any = await reviewMutation(`/discussions/${discussion.id}/messages/${message.id}/submit`, 'agent-message-submit', 'POST', reviewGuard());
-                            reviewState = result.state || result;
-                            renderReview();
-                            announce(text("core.portal.097"));
                         }
                         catch (failure: any) { announce(failure.message); }
                     }, { signal });
@@ -671,19 +668,21 @@ import { createEmptyState, selectTab, setExpanded } from "../components";
             dialog.showModal();
             requestAnimationFrame(() => $('[data-portal-review-question]', dialog).focus());
         }
-        const selectionContent: any = (selection: any) => selectionArea.contains(selection.anchorNode) && selectionArea.contains(selection.focusNode);
         const showMenu: any = () => {
             const selection: any = window.getSelection();
-            if (!selection || selection.isCollapsed || !selection.rangeCount || !selection.toString().trim() || !selectionContent(selection))
+            if (!selection || selection.isCollapsed || !selection.rangeCount || !selection.toString().trim())
                 return hideMenu();
             const range: any = selection.getRangeAt(0);
+            const source: any = selectionSources.find((candidate: any) => candidate.contains(range.startContainer) && candidate.contains(range.endContainer));
+            if (!source)
+                return hideMenu();
             const rectangles: any = range.getClientRects();
             const rectangle: any = rectangles[rectangles.length - 1] || range.getBoundingClientRect();
             const selectedText: any = selection.toString();
             const prefixRange: any = document.createRange();
-            prefixRange.selectNodeContents(selectionArea);
+            prefixRange.selectNodeContents(source);
             prefixRange.setEnd(range.startContainer, range.startOffset);
-            const prefix: any = prefixRange.toString();
+            const prefix: any = selectionSources.slice(0, selectionSources.indexOf(source)).map((candidate: any) => candidate.textContent || '').join('') + prefixRange.toString();
             let occurrence: any = 1;
             for (let offset: any = 0; (offset = prefix.indexOf(selectedText, offset)) >= 0; offset += selectedText.length)
                 occurrence++;

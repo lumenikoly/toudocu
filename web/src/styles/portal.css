@@ -1483,6 +1483,33 @@ html[data-theme="dark"][data-accent="violet"] { --accent: #bba0ee; --accent-soft
   opacity: 0.001;
   cursor: pointer;
 }
+@supports (appearance: base-select) {
+  .header-select select,
+  .header-select select::picker(select) { appearance: base-select; }
+  .header-select select { border: 0; background: transparent; color: transparent; opacity: 1; }
+  .header-select select::picker-icon { display: none; }
+  .header-select select::picker(select) {
+    min-width: max(100%, 180px);
+    margin-block: 6px;
+    padding: 6px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+  }
+  .header-select option {
+    min-height: 40px;
+    padding: 9px 11px;
+    border-radius: 8px;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .header-select option:is(:hover, :focus) { background: var(--surface-soft); }
+  .header-select option:checked { background: var(--accent-soft); color: var(--accent-strong); font-weight: 700; }
+  .header-select option::checkmark { margin-inline-start: auto; color: var(--accent); }
+}
 .site-theme-indicator {
   min-width: 18px;
   height: 18px;

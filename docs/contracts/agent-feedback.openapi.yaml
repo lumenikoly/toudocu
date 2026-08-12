@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Toudocu Agent Feedback HTTP API
   version: "1"
-  description: Local versioned contract for documentation discussions, drafts, FIFO agent deliveries and responses. Every mutation must prove a same-origin request through either a matching Origin header or Sec-Fetch-Site set to same-origin. If both headers are present, both are checked.
+  description: Local versioned contract for documentation discussions, editable pending requests, FIFO agent deliveries and responses. Every mutation must prove a same-origin request through either a matching Origin header or Sec-Fetch-Site set to same-origin. If both headers are present, both are checked.
 servers:
   - url: /
 paths:
@@ -18,7 +18,7 @@ paths:
         "503": {$ref: "#/components/responses/AgentError"}
     post:
       operationId: createAgentDiscussion
-      summary: Create an open discussion with one editable draft
+      summary: Create an open discussion and atomically queue one editable request
       security: [{RequestOrigin: []}, {FetchMetadata: []}]
       parameters: [{$ref: "#/components/parameters/CreateDiscussionAction"}]
       requestBody:
@@ -88,7 +88,7 @@ paths:
     parameters: [{$ref: "#/components/parameters/DiscussionID"}]
     post:
       operationId: createAgentMessage
-      summary: Add one follow-up draft
+      summary: Add and atomically queue one editable follow-up request
       security: [{RequestOrigin: []}, {FetchMetadata: []}]
       parameters: [{$ref: "#/components/parameters/CreateMessageAction"}]
       requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/HumanMessageMutation"}, example: {expectedRevision: 2, expectedStateDigest: abc123, intent: change_request, text: Then update this section.}}}}
@@ -107,7 +107,7 @@ paths:
     parameters: [{$ref: "#/components/parameters/DiscussionID"}, {$ref: "#/components/parameters/MessageID"}]
     patch:
       operationId: updateAgentMessage
-      summary: Edit a draft human message
+      summary: Edit a human message before its delivery is claimed
       security: [{RequestOrigin: []}, {FetchMetadata: []}]
       parameters: [{$ref: "#/components/parameters/UpdateMessageAction"}]
       requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/HumanMessageMutation"}, example: {expectedRevision: 2, expectedStateDigest: abc123, intent: question, text: Please explain this rule.}}}}
@@ -124,31 +124,12 @@ paths:
         "503": {$ref: "#/components/responses/AgentError"}
     delete:
       operationId: deleteAgentMessage
-      summary: Delete a draft human message
+      summary: Delete a human message and delivery before it is claimed
       security: [{RequestOrigin: []}, {FetchMetadata: []}]
       parameters: [{$ref: "#/components/parameters/DeleteMessageAction"}]
       requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/MutationGuard"}, example: {expectedRevision: 2, expectedStateDigest: abc123}}}}
       responses:
         "200": {description: Updated state, content: {application/json: {schema: {$ref: "#/components/schemas/ReviewState"}}}}
-        "400": {$ref: "#/components/responses/AgentError"}
-        "403": {$ref: "#/components/responses/AgentError"}
-        "404": {$ref: "#/components/responses/AgentError"}
-        "405": {$ref: "#/components/responses/AgentError"}
-        "409": {$ref: "#/components/responses/AgentError"}
-        "413": {$ref: "#/components/responses/AgentError"}
-        "415": {$ref: "#/components/responses/AgentError"}
-        "500": {$ref: "#/components/responses/AgentError"}
-        "503": {$ref: "#/components/responses/AgentError"}
-  /_toudocu/api/agent/discussions/{discussionId}/messages/{messageId}/submit:
-    parameters: [{$ref: "#/components/parameters/DiscussionID"}, {$ref: "#/components/parameters/MessageID"}]
-    post:
-      operationId: submitAgentMessage
-      summary: Make a draft immutable and atomically create a pending delivery
-      security: [{RequestOrigin: []}, {FetchMetadata: []}]
-      parameters: [{$ref: "#/components/parameters/SubmitMessageAction"}]
-      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/MutationGuard"}, example: {expectedRevision: 2, expectedStateDigest: abc123}}}}
-      responses:
-        "201": {description: Updated state and delivery, content: {application/json: {schema: {$ref: "#/components/schemas/SubmitMessageResult"}, example: {schemaVersion: 1, revision: 3, stateDigest: def456, repositoryRevision: abc123, session: {id: SESSION-01, createdAt: 2026-08-11T20:00:00Z, discussions: []}, deliveries: [{schemaVersion: 1, id: DEL-01, sequence: 1, state: pending, discussionId: DISC-01, messageIds: [MSG-01], createdAt: 2026-08-11T20:00:03Z}], delivery: {schemaVersion: 1, id: DEL-01, sequence: 1, state: pending, discussionId: DISC-01, messageIds: [MSG-01], createdAt: 2026-08-11T20:00:03Z}}}}}
         "400": {$ref: "#/components/responses/AgentError"}
         "403": {$ref: "#/components/responses/AgentError"}
         "404": {$ref: "#/components/responses/AgentError"}
@@ -221,7 +202,6 @@ components:
     CreateMessageAction: {name: X-Toudocu-Action, in: header, required: true, schema: {const: agent-message-create}}
     UpdateMessageAction: {name: X-Toudocu-Action, in: header, required: true, schema: {const: agent-message-update}}
     DeleteMessageAction: {name: X-Toudocu-Action, in: header, required: true, schema: {const: agent-message-delete}}
-    SubmitMessageAction: {name: X-Toudocu-Action, in: header, required: true, schema: {const: agent-message-submit}}
     NextDeliveryAction: {name: X-Toudocu-Action, in: header, required: true, schema: {const: agent-delivery-next}}
     RespondDeliveryAction: {name: X-Toudocu-Action, in: header, required: true, schema: {const: agent-delivery-response}}
   responses:
@@ -260,11 +240,6 @@ components:
       type: object
       required: [schemaVersion, revision, stateDigest, deliveries]
       properties: {schemaVersion: {type: integer, const: 1}, revision: {type: integer, minimum: 0}, stateDigest: {type: string}, repositoryRevision: {type: string}, session: {type: object}, deliveries: {type: array, items: {$ref: "#/components/schemas/Delivery"}}}
-    SubmitMessageResult:
-      type: object
-      additionalProperties: false
-      required: [schemaVersion, revision, stateDigest, repositoryRevision, session, deliveries, delivery]
-      properties: {schemaVersion: {type: integer, const: 1}, revision: {type: integer, minimum: 0}, stateDigest: {type: string}, repositoryRevision: {type: string}, session: {type: object}, deliveries: {type: array, items: {$ref: "#/components/schemas/Delivery"}}, delivery: {$ref: "#/components/schemas/Delivery"}}
     CreateDiscussionRequest:
       type: object
       additionalProperties: false

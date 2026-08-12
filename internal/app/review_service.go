@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -73,6 +74,10 @@ func (service *reviewService) createDiscussion(request CreateDiscussionRequest) 
 	if err != nil {
 		return ReviewState{}, err
 	}
+	deliveryID, err := newAgentID("DEL", now.Add(2*time.Nanosecond))
+	if err != nil {
+		return ReviewState{}, err
+	}
 	result, err := service.store.mutate(request.ReviewMutationGuard, func(state *ReviewState) error {
 		if state.Session == nil {
 			sessionID, idErr := newAgentID("SESS", now)
@@ -91,6 +96,10 @@ func (service *reviewService) createDiscussion(request CreateDiscussionRequest) 
 			}},
 			CreatedAt: now, UpdatedAt: now,
 		})
+		discussion := &state.Session.Discussions[len(state.Session.Discussions)-1]
+		if err := service.queueMessage(state, discussion, &discussion.Messages[0], deliveryID, now); err != nil {
+			return err
+		}
 		service.garbageCollect(state, now)
 		return nil
 	})
@@ -103,6 +112,10 @@ func (service *reviewService) createMessage(discussionID string, request CreateM
 	}
 	now := service.now()
 	messageID, err := newAgentID("MSG", now)
+	if err != nil {
+		return ReviewState{}, err
+	}
+	deliveryID, err := newAgentID("DEL", now.Add(time.Nanosecond))
 	if err != nil {
 		return ReviewState{}, err
 	}
@@ -121,6 +134,9 @@ func (service *reviewService) createMessage(discussionID string, request CreateM
 			ID: messageID, Author: "human", Intent: request.Intent, State: "draft", Text: strings.TrimSpace(request.Text),
 			Evidence: []AgentEvidence{}, ChangedPaths: []string{}, CreatedAt: now,
 		})
+		if err := service.queueMessage(state, discussion, &discussion.Messages[len(discussion.Messages)-1], deliveryID, now); err != nil {
+			return err
+		}
 		discussion.UpdatedAt = now
 		service.garbageCollect(state, now)
 		return nil
@@ -135,14 +151,24 @@ func (service *reviewService) updateMessage(discussionID, messageID string, requ
 	now := service.now()
 	result, err := service.store.mutate(request.ReviewMutationGuard, func(state *ReviewState) error {
 		discussion := findDiscussion(state, discussionID)
-		message := findDraftMessage(discussion, messageID)
 		if discussion == nil {
 			return agentFailure("AGENT_DISCUSSION_NOT_FOUND", http.StatusNotFound, "discussion not found")
 		}
+		message := findEditableMessage(state, discussion, messageID)
 		if message == nil {
-			return agentFailure("AGENT_INVALID_MESSAGE", http.StatusConflict, "only a draft human message can be edited")
+			return agentFailure("AGENT_INVALID_MESSAGE", http.StatusConflict, "a human message can be edited only before an agent claims it")
 		}
-		message.Intent, message.Text, message.EditedAt = request.Intent, strings.TrimSpace(request.Text), &now
+		message.Intent, message.Text = request.Intent, strings.TrimSpace(request.Text)
+		if message.State == "draft" {
+			deliveryID, err := newAgentID("DEL", now)
+			if err != nil {
+				return err
+			}
+			if err := service.queueMessage(state, discussion, message, deliveryID, now); err != nil {
+				return err
+			}
+		}
+		message.EditedAt = &now
 		discussion.UpdatedAt = now
 		return nil
 	})
@@ -156,13 +182,23 @@ func (service *reviewService) deleteMessage(discussionID, messageID string, guar
 		if discussion == nil {
 			return agentFailure("AGENT_DISCUSSION_NOT_FOUND", http.StatusNotFound, "discussion not found")
 		}
-		if findDraftMessage(discussion, messageID) == nil {
-			return agentFailure("AGENT_INVALID_MESSAGE", http.StatusConflict, "only a draft human message can be deleted")
+		message := findEditableMessage(state, discussion, messageID)
+		if message == nil {
+			return agentFailure("AGENT_INVALID_MESSAGE", http.StatusConflict, "a human message can be deleted only before an agent claims it")
 		}
+		deliveryID := message.DeliveryID
 		for index := range discussion.Messages {
 			if discussion.Messages[index].ID == messageID {
 				discussion.Messages = append(discussion.Messages[:index], discussion.Messages[index+1:]...)
 				break
+			}
+		}
+		if deliveryID != "" {
+			for index := range state.Deliveries {
+				if state.Deliveries[index].ID == deliveryID {
+					state.Deliveries = append(state.Deliveries[:index], state.Deliveries[index+1:]...)
+					break
+				}
 			}
 		}
 		if len(discussion.Messages) == 0 {
@@ -175,48 +211,32 @@ func (service *reviewService) deleteMessage(discussionID, messageID string, guar
 	return service.present(result), err
 }
 
-func (service *reviewService) submitMessage(discussionID, messageID string, guard ReviewMutationGuard) (ReviewState, *AgentDelivery, error) {
-	now := service.now()
-	deliveryID, err := newAgentID("DEL", now)
-	if err != nil {
-		return ReviewState{}, nil, err
+func (service *reviewService) queueMessage(state *ReviewState, discussion *Discussion, message *ReviewMessage, deliveryID string, now time.Time) error {
+	if discussion.State != "open" {
+		return agentFailure("AGENT_INVALID_MESSAGE", http.StatusConflict, "a message can be queued only in an open discussion")
 	}
-	var delivery *AgentDelivery
-	result, err := service.store.mutate(guard, func(state *ReviewState) error {
-		discussion := findDiscussion(state, discussionID)
-		if discussion == nil {
-			return agentFailure("AGENT_DISCUSSION_NOT_FOUND", http.StatusNotFound, "discussion not found")
-		}
-		message := findDraftMessage(discussion, messageID)
-		if message == nil || discussion.State != "open" {
-			return agentFailure("AGENT_INVALID_MESSAGE", http.StatusConflict, "only a draft in an open discussion can be queued")
-		}
-		if discussionInFlight(*state, discussionID, now) {
-			return agentFailure("AGENT_INBOX_BUSY", http.StatusConflict, "this discussion already has an unfinished delivery")
-		}
-		placement := service.reanchor(*discussion)
-		if placement.Status == "deleted" {
-			return agentFailure("AGENT_INVALID_TARGET", http.StatusConflict, "the selected document or fragment was deleted")
-		}
-		if placement.Range != nil {
-			discussion.Target.Range = cloneReviewRange(placement.Range)
-		}
-		if refreshed, _, captureErr := service.captureAnchor(discussion.Target, nil); captureErr == nil {
-			discussion.Anchor = refreshed
-		}
-		discussion.Placement = placement
-		message.State, message.DeliveryID, message.SubmittedAt, message.EditedAt = "submitted", deliveryID, &now, nil
-		state.NextSequence++
-		created := AgentDelivery{
-			SchemaVersion: reviewSchemaVersion, ID: deliveryID, Sequence: state.NextSequence, State: "pending",
-			DiscussionID: discussionID, MessageIDs: []string{messageID}, CreatedAt: now,
-		}
-		state.Deliveries = append(state.Deliveries, created)
-		discussion.UpdatedAt = now
-		delivery = &created
-		return nil
+	if discussionInFlight(*state, discussion.ID, now) {
+		return agentFailure("AGENT_INBOX_BUSY", http.StatusConflict, "this discussion already has an unfinished delivery")
+	}
+	placement := service.reanchor(*discussion)
+	if placement.Status == "deleted" {
+		return agentFailure("AGENT_INVALID_TARGET", http.StatusConflict, "the selected document or fragment was deleted")
+	}
+	if placement.Range != nil {
+		discussion.Target.Range = cloneReviewRange(placement.Range)
+	}
+	if refreshed, _, err := service.captureAnchor(discussion.Target, nil); err == nil {
+		discussion.Anchor = refreshed
+	}
+	discussion.Placement = placement
+	message.State, message.DeliveryID, message.SubmittedAt = "submitted", deliveryID, &now
+	state.NextSequence++
+	state.Deliveries = append(state.Deliveries, AgentDelivery{
+		SchemaVersion: reviewSchemaVersion, ID: deliveryID, Sequence: state.NextSequence, State: "pending",
+		DiscussionID: discussion.ID, MessageIDs: []string{message.ID}, CreatedAt: now,
 	})
-	return service.present(result), delivery, err
+	discussion.UpdatedAt = now
+	return nil
 }
 
 func (service *reviewService) updateDiscussion(id string, request UpdateDiscussionRequest) (ReviewState, error) {
@@ -386,13 +406,13 @@ func (service *reviewService) captureAnchor(target ReviewTarget, selection *Sele
 		if len([]byte(selected)) > reviewSelectionLimit {
 			return nil, ReviewTarget{}, agentFailure("AGENT_PAYLOAD_TOO_LARGE", http.StatusRequestEntityTooLarge, "selectedText exceeds 32 KiB")
 		}
-		matches := allByteMatches(content, []byte(selected))
+		matches := selectionByteMatches(content, selected)
 		occurrence := max(1, selection.Occurrence)
 		if strings.TrimSpace(selected) == "" || occurrence > len(matches) {
 			return nil, ReviewTarget{}, agentFailure("AGENT_INVALID_TARGET", http.StatusConflict, "selected text occurrence was not found in the current document")
 		}
 		match := matches[occurrence-1]
-		target.Range = &ReviewRange{Start: offsetReviewPosition(content, match), End: offsetReviewPosition(content, match+len(selected))}
+		target.Range = &ReviewRange{Start: offsetReviewPosition(content, match[0]), End: offsetReviewPosition(content, match[1])}
 	}
 	selected, before, after, err := extractReviewSelection(content, target)
 	if err != nil {
@@ -605,6 +625,48 @@ func allByteMatches(content, needle []byte) []int {
 	return result
 }
 
+func selectionByteMatches(content []byte, selected string) [][2]int {
+	matches := [][2]int{}
+	for start := 0; start < len(content); {
+		contentOffset, selectedOffset := start, 0
+		for selectedOffset < len(selected) && contentOffset < len(content) {
+			selectedRune, selectedSize := utf8.DecodeRuneInString(selected[selectedOffset:])
+			contentRune, contentSize := utf8.DecodeRune(content[contentOffset:])
+			if unicode.IsSpace(selectedRune) {
+				if !unicode.IsSpace(contentRune) {
+					break
+				}
+				for selectedOffset < len(selected) {
+					r, size := utf8.DecodeRuneInString(selected[selectedOffset:])
+					if !unicode.IsSpace(r) {
+						break
+					}
+					selectedOffset += size
+				}
+				for contentOffset < len(content) {
+					r, size := utf8.DecodeRune(content[contentOffset:])
+					if !unicode.IsSpace(r) {
+						break
+					}
+					contentOffset += size
+				}
+				continue
+			}
+			if selectedRune != contentRune {
+				break
+			}
+			selectedOffset += selectedSize
+			contentOffset += contentSize
+		}
+		if selectedOffset == len(selected) {
+			matches = append(matches, [2]int{start, contentOffset})
+		}
+		_, size := utf8.DecodeRune(content[start:])
+		start += size
+	}
+	return matches
+}
+
 func placementForOffsets(content []byte, path string, start, end int, status, reason string) AnchorPlacement {
 	return AnchorPlacement{Status: status, Path: path, Range: &ReviewRange{Start: offsetReviewPosition(content, start), End: offsetReviewPosition(content, end)}, Reason: reason}
 }
@@ -712,12 +774,19 @@ func messageByID(discussion *Discussion, id string) *ReviewMessage {
 	return nil
 }
 
-func findDraftMessage(discussion *Discussion, id string) *ReviewMessage {
+func findEditableMessage(state *ReviewState, discussion *Discussion, id string) *ReviewMessage {
 	message := messageByID(discussion, id)
-	if message == nil || message.Author != "human" || message.State != "draft" {
+	if message == nil || message.Author != "human" {
 		return nil
 	}
-	return message
+	if message.State == "draft" && message.DeliveryID == "" {
+		return message
+	}
+	delivery := findDelivery(state, message.DeliveryID)
+	if delivery != nil && delivery.State == "pending" {
+		return message
+	}
+	return nil
 }
 
 func draftMessage(discussion *Discussion) *ReviewMessage {

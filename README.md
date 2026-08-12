@@ -119,10 +119,11 @@ portal you can:
 - comment on a change set, file, line, or selection;
 - add a deliverable to an existing `roadmap.md` stage.
 
-Changes does not start an agent. “Send to agent” only creates an immutable
-comment batch and displays an instruction. After a separate
-`$toudocu feedback` request, the skill retrieves the oldest pending
-batch, processes it, and returns answers to the original discussions.
+Toudocu does not start an agent. Saving a message immediately queues it; the
+message remains editable or deletable until an agent claims it. “Copy prompt”
+only copies the processing request. The installed skill retrieves one request
+at a time with `toudocu agent next --json` and returns its answer to the
+original discussion with `toudocu agent respond`.
 
 `serve` has no TLS or built-in authentication. Its loopback default keeps
 it local; do not expose it to an external network without separate protection.
