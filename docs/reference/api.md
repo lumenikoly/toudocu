@@ -1,23 +1,25 @@
 # Карта API и программных интерфейсов
 
-Страница помогает разработчику или интегратору выбрать действующий интерфейс
-Toudocu. Wire-level Editor и Changes contracts определены OpenAPI 3.1.0;
-Markdown-ссылки ведут к behavioral companions.
+Эта таблица помогает выбрать реальный интерфейс Toudocu. Точные HTTP-поля
+Editor, Changes и обратной связи с агентом находятся в OpenAPI 3.1.0, а Markdown рядом объясняет
+поведение и границы безопасности.
 
-| Интерфейс | Доступность | Назначение | Граница чтения и записи | Результат | Контракт |
-|---|---|---|---|---|---|
-| CLI | Установленный бинарник или `go run ./cmd/toudocu` в исходном репозитории | Проверка, сборка, `serve`, поиск, task workflow и Git-backed changes | Большинство команд читает документацию; `build` пишет output, `task init`, scaffold, task archive/restore меняют явно выбранные файлы, а `task verify --run` отдельно исполняет разрешённые команды | Текст, exit code или JSON schema v1; для `build` — HTML-портал и `report.json` | [CLI-контракт](../contracts/cli.md) |
-| Go API | Корневой Go-пакет; опубликованного удалённого module path пока нет | Встраивание модели, генератора, task workflow и changes без отдельного процесса | Эффекты определяются вызванной операцией; чтение, запись и исполнение не скрываются за единым неявным entrypoint; Markdown AST/parser/renderer внутренние | Go-типы моделей, отчётов и ошибок; JSON только при явной сериализации | [Обзор возможностей](features.md#публичный-go-api) |
-| JSON reports | `--format json`, `--report` и generated `report.json` у поддерживающих операций | CI, агенты и интеграции читают ту же типизированную модель, что использует портал | Отчёты не меняют Markdown; CLI может записать явно указанный report или output | Versioned JSON schema v1: `ProjectReport`, task/search/scaffold reports и change reports | [CLI-контракт и схемы отчётов](../contracts/cli.md#результаты-json) |
-| Editor HTTP API | Только canonical portal, запущенный через `toudocu serve` | Список, чтение, preview, validation, создание, roadmap add и CAS-сохранение workspace-файлов | Читает разрешённые `.md`, `.yaml`, `.yml`, `.json`; только явные guarded create, save и roadmap-add записывают внутри documentation root | JSON schema v1; raw source для отдельного read-only запроса | [OpenAPI](../contracts/editor.openapi.yaml), [поведение](../contracts/editor-http.md) |
-| Version status HTTP API | Canonical `toudocu serve`, если не задан `--no-update-check` | Сравнить текущую версию с latest stable release | Browser обращается same-origin; Go выполняет один ограниченный read-only запрос к фиксированному GitHub endpoint | JSON schema v1 со status `up-to-date`, `update-available` или `unavailable` | [OpenAPI](../contracts/editor.openapi.yaml), [поведение](../contracts/editor-http.md#проверка-версии) |
-| Changes HTTP API | `toudocu serve`, включая прямой read-only serve translation root; configured locale mounts API не получают | Read-only сравнение Git-состояний, файлов, rendered content, screen overlay и task impact | Читает локальные Git revisions и выбранный documentation root; не изменяет Git или Markdown | `ChangeSetReport` и связанные JSON schema v1, raw content либо sanitized HTML | [OpenAPI](../contracts/changes.openapi.yaml), [поведение](../contracts/changes-http.md) |
-| Review HTTP API | Только canonical `toudocu serve` | Repository-wide projection, discussions, feedback snapshots и agent responses | Просмотр любого base/target; guarded mutations только working tree; state хранится вне repository | Internal schema-v1 review DTO; не часть публичного Go API | [OpenAPI](../contracts/changes.openapi.yaml), [поведение](../contracts/changes-http.md#repository-review-и-local-state) |
-| Review feedback CLI | Установленный бинарник или исходный repository | FIFO handoff между local Changes и установленным skill | Читает/пишет только local review user-state; не запускает агента и не меняет Git | Schema-v1 pending/accepted envelopes | [CLI-контракт](../contracts/cli.md#agent-feedback) |
-| Offline API docs | `/_toudocu/api-docs/` только в canonical `serve` | Selector обоих OpenAPI contracts, просмотр operations и безопасный Try it out | Same-origin; Try it out ограничен `GET`/`HEAD`; CDN отсутствует | Vendored Swagger UI 5.32.12 | [SC-SITE-API-DOCS](../screens/SC-SITE-API-DOCS.md) |
-| Ручная пересборка | Только canonical portal в режиме `serve` | По явному запросу заново построить модель, HTML и поиск | Читает canonical documentation root и пишет generated output; Markdown не изменяет | Success JSON `{documents, pages, warnings, errors}` без `schemaVersion`; ошибки — plain text | [Editor OpenAPI](../contracts/editor.openapi.yaml), [поведение](../contracts/editor-http.md) |
+| Интерфейс | Где доступен | Для чего нужен | Что читает и меняет | Подробнее |
+|---|---|---|---|---|
+| CLI | Установленный бинарник; в исходном репозитории — `go run ./cmd/toudocu` | Проверка, сборка, `serve`, поиск, изменения и задачи | Большинство команд только читает. `build` пишет выход, создание и архив задач меняют явно выбранные файлы, `task verify --run` запускает разрешённые команды | [CLI-контракт](../contracts/cli.md) |
+| Go API | Корневой пакет этого модуля | Встраивание модели, генератора, задач и изменений без отдельного процесса | Побочные эффекты зависят от вызванной функции и не скрыты за одним универсальным входом | [Публичный Go API](features.md#публичный-go-api) |
+| JSON-отчёты | `--format json`, `--report`, `report.json` | CI, агенты и интеграции | Сам отчёт не меняет Markdown; CLI пишет только явно указанный файл или выход | [Схемы CLI](../contracts/cli.md#json-ответы) |
+| Editor HTTP API | Только основной `toudocu serve` | Список, чтение, предварительный просмотр, проверка, создание и безопасное сохранение файлов; добавление `DLV-*` | Разрешённые `.md`, `.yaml`, `.yml`, `.json` внутри основного каталога | [OpenAPI](../contracts/editor.openapi.yaml), [поведение](../contracts/editor-http.md) |
+| Version HTTP API | Основной `serve` без `--no-update-check` | Сравнение текущей версии с последним стабильным релизом | Браузер обращается к локальному серверу; Go выполняет один ограниченный запрос GitHub только для чтения | [Поведение](../contracts/editor-http.md#проверка-версии) |
+| Changes HTTP API | `serve`; при прямом запуске перевода — только для чтения | `ChangeSetReport` и специальные представления документации | Читает локальный Git и выбранные каталоги документации, ничего не меняет | [OpenAPI](../contracts/changes.openapi.yaml), [поведение](../contracts/changes-http.md) |
+| HTTP API обратной связи с агентом | Только основной `serve` | Состояние обсуждения, автоматическая постановка сообщения в очередь, редактирование до получения агентом и ответы | Меняет только локальное состояние вне репозитория; цель ограничена канонической документацией | [OpenAPI](../contracts/agent-feedback.openapi.yaml), [архитектура](../architecture/agent-feedback-delivery.md) |
+| Команды обратной связи с агентом | Бинарник или исходный репозиторий | Получение старейшей записи очереди и возврат одного структурированного ответа | Читает и пишет только локальное состояние; агента, языковую модель и Git не запускает | [CLI-контракт](../contracts/cli.md#ответ-агента-на-запрос-документации) |
+| Справка HTTP API | `/_toudocu/api-docs/` только в основном `serve` | Просмотр OpenAPI-контрактов и безопасные пробные запросы | Только тот же origin; из интерфейса разрешены `GET` и `HEAD`; CDN нет | [Экран](../screens/SC-SITE-API-DOCS.md) |
+| Ручная пересборка | Только основной `serve` | Заново прочитать документы и построить модель, HTML и поиск | Читает основной каталог, пишет только производный выход, Markdown не меняет | [Editor OpenAPI](../contracts/editor.openapi.yaml) |
 
-Editor API и API docs отсутствуют в любом translation portal. Configured locale
-mount также не получает Changes API; при прямом `serve` translation root
-Changes API остаётся доступным только для чтения. Ни один HTTP-интерфейс не
-запускает Git-команды записи, shell-команды или task verification.
+Import path `toudocu` предназначен для исходного дерева или явного локального
+`replace`. Публичным интерфейсом поставки остаётся CLI.
+
+В переводных порталах нет Editor, справки API и записи обсуждений. Ни один
+HTTP-интерфейс не записывает Git, не запускает системную оболочку и не
+выполняет проверку задачи.

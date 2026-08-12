@@ -10,7 +10,6 @@ import (
 const sampleMarkdown = `# Документ
 
 - Статус: В работе
-- Владелец: Team A
 
 Краткое описание.
 
@@ -29,7 +28,7 @@ func TestMarkdownAnalysis(t *testing.T) {
 	if doc.Title != "Документ" || doc.Description != "Краткое описание." {
 		t.Fatalf("unexpected document: %#v", doc)
 	}
-	if doc.Metadata["status"] != "В работе" || doc.Metadata["owner"] != "Team A" {
+	if doc.Metadata["status"] != "В работе" {
 		t.Fatalf("metadata: %#v", doc.Metadata)
 	}
 	if len(doc.Tasks) != 2 || !doc.Tasks[0].Completed {
@@ -146,7 +145,7 @@ func TestRenderMermaidBlockAndFallback(t *testing.T) {
 	for _, part := range []string{
 		`data-mermaid-container`, `data-mermaid-stage`, `data-mermaid-diagram`,
 		`data-mermaid-zoom-out`, `data-mermaid-fit`, `data-mermaid-zoom-in`,
-		`data-mermaid-fullscreen`, `class="mermaid-source"`, "Показать исходный код",
+		`data-mermaid-fullscreen`, `class="mermaid-source"`, "Show source code",
 		"stateDiagram-v2",
 	} {
 		if !strings.Contains(html, part) {
@@ -156,8 +155,26 @@ func TestRenderMermaidBlockAndFallback(t *testing.T) {
 
 	invalid := analyzeMarkdown("# Diagram\n\n```mermaid\njourney\n```\n")
 	html = renderMarkdown(invalid, renderContext{}, renderOptions{})
-	if strings.Contains(html, `data-mermaid-diagram`) || strings.Contains(html, `data-mermaid-stage`) || !strings.Contains(html, "Не удалось отобразить диаграмму.") {
+	if strings.Contains(html, `data-mermaid-diagram`) || strings.Contains(html, `data-mermaid-stage`) || !strings.Contains(html, "Could not render the diagram.") {
 		t.Fatalf("invalid Mermaid must use fallback: %s", html)
+	}
+}
+
+func TestRenderMarkdownUsesConfiguredUILocale(t *testing.T) {
+	document := analyzeMarkdown("# Diagram\n\n- [ ] Task\n\n```mermaid\nflowchart TD\nA-->B\n```\n")
+	for _, test := range []struct {
+		locale string
+		parts  []string
+	}{
+		{locale: "en", parts: []string{"Not completed", "Diagram zoom", "Show source code"}},
+		{locale: "ru-RU", parts: []string{"Не выполнено", "Масштаб диаграммы", "Показать исходный код"}},
+	} {
+		html := renderMarkdown(document, renderContext{}, renderOptions{InteractiveMermaid: true, Locale: test.locale})
+		for _, part := range test.parts {
+			if !strings.Contains(html, part) {
+				t.Fatalf("locale %q missing %q: %s", test.locale, part, html)
+			}
+		}
 	}
 }
 

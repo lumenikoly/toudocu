@@ -29,13 +29,18 @@ manifest and assets are deterministic: timestamps and random values are
 forbidden. After changing frontend source, commit the rebuilt
 `internal/site/assets/generated/`; CI repeats the build and fails on drift.
 
-`appearance.js` is available in both static and serve runtimes and is loaded as
-a normal blocking script before CSS so the saved theme applies in the first
-frame. `portal.js` is available in both static and serve runtimes. `serve.js`,
-`editor.js`, `changes.js`, the roadmap dialog, CodeMirror, and Swagger UI are
-serve-only. Project
-logic, classification, path guards, semantic diff, and verification must not be
-moved to TypeScript.
+`appearance.js` and `portal.js` are used by both static and `serve` portals.
+`appearance.js` loads before CSS so the saved theme is already active in the
+first frame. `serve.js`, `editor.js`, `changes.js`, the roadmap dialog,
+CodeMirror, and Swagger UI are available only in `serve`.
+
+Project modeling, document classification, path guards, semantic diff, and
+decisions about command execution remain in Go.
+
+All Changes editors use one-based Unicode coordinates. Syntax highlighting is
+pinned for Go, Java, JavaScript, JSX, TypeScript, and TSX. Other valid UTF-8
+files appear as plain text. Go validates the path, selected text, context, size
+limits, and anchor relocation.
 
 ## Related documents
 

@@ -2,7 +2,6 @@
 
 - Идентификатор: {{CONTRACT_ID}}
 - Статус: {{STATUS}}
-- Владелец: {{OWNER}}
 - Последнее обновление: {{DATE}}
 
 {{CONTRACT_SUMMARY}}

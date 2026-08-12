@@ -5,7 +5,7 @@
 - Actor: Assignee — developer or software agent
 - Module: MOD-CLI
 - Priority: Medium
-- Last updated: 2026-08-05
+- Last updated: 2026-08-12
 
 The assignee moves a completed or cancelled task out of the active list into a
 yearly archive, or returns an archived work item to the active directory without
@@ -20,7 +20,7 @@ changing its contract.
 
 ## Preconditions
 
-- the task being archived has status Done/Выполнено or Cancelled/Отменено;
+- the task being archived has status Done or Cancelled;
 - the destination path does not exist;
 - direct Markdown links will still resolve after the move.
 
@@ -50,6 +50,12 @@ changing its contract.
 On success, only the location of one work item has changed. Its Markdown,
 status, stable ID, dependencies, and history are preserved; when blocked, the
 filesystem is unchanged.
+
+## Acceptance criteria
+
+- [x] A successful operation changes only one work item's location and
+  preserves its Markdown, status, stable ID, dependencies, and history.
+- [x] A blocked operation leaves the filesystem unchanged.
 
 ## Business rules
 

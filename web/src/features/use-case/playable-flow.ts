@@ -1,6 +1,4 @@
-import { registerMessages, text } from "../../core/locale";
-import { playableFlowMessages } from "../../core/messages.ru";
-registerMessages(playableFlowMessages);
+import { text } from "../../core/locale";
 window.ToudocuInitializePlayableFlow = (scope: any, signal: any) => {
     'use strict';
     scope = scope || document;

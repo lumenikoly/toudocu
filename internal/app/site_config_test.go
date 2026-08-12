@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	frontend "toudocu/internal/site"
 )
 
 func configFixture(t *testing.T) (string, string) {
@@ -48,10 +49,10 @@ func TestSiteConfigDefaultsAndMissingFile(t *testing.T) {
 		config.Density != "comfortable" || config.ContentWidth != "standard" || !config.Hero.Enabled {
 		t.Fatalf("defaults: %#v", config)
 	}
-	if model.Project.Title != "Index title" || config.Footer.Text != "Сгенерировано Toudocu "+Version || config.Footer.URL != defaultFooterURL {
+	if model.Project.Title != "Index title" || config.Footer.Text != "" || !config.Footer.defaultText || config.Footer.URL != defaultFooterURL {
 		t.Fatalf("default title/footer: %#v / %#v", model.Project, config.Footer)
 	}
-	if got := renderFooter(config.Footer); got != `Сгенерировано <a href="https://lumenikoly.github.io/toudocu/" rel="noopener noreferrer">Toudocu</a> `+Version {
+	if got := renderFooter(frontend.NewUI("ru"), config.Footer); got != `Сгенерировано <a href="https://lumenikoly.github.io/toudocu/" rel="noopener noreferrer">Toudocu</a> `+Version {
 		t.Fatalf("rendered default footer: %q", got)
 	}
 }
@@ -64,7 +65,7 @@ func TestCustomFooterTextDoesNotInheritDefaultLink(t *testing.T) {
 	if config.Footer.URL != "" {
 		t.Fatalf("custom text inherited default footer URL: %q", config.Footer.URL)
 	}
-	if got := renderFooter(config.Footer); got != "Custom footer" {
+	if got := renderFooter(frontend.NewUI("ru"), config.Footer); got != "Custom footer" {
 		t.Fatalf("rendered custom footer: %q", got)
 	}
 }
@@ -279,7 +280,7 @@ func TestSiteConfigRejectsBrandSymlink(t *testing.T) {
 		t.Skipf("symlinks unavailable: %v", err)
 	}
 	writeSiteConfig(t, root, "site:\n  logo: assets/logo.svg\n")
-	if _, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0}); err == nil || !strings.Contains(err.Error(), "symlink") {
+	if _, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0}); err == nil || !strings.Contains(err.Error(), "symbolic link") {
 		t.Fatalf("expected symlink error, got %v", err)
 	}
 }
@@ -297,7 +298,7 @@ func TestSiteConfigRejectsAssetDirectorySymlinkEscape(t *testing.T) {
 		t.Skipf("symlinks unavailable: %v", err)
 	}
 	writeSiteConfig(t, root, "site:\n  logo: assets/logo.svg\n")
-	if _, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0}); err == nil || !strings.Contains(err.Error(), "symlink") {
+	if _, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0}); err == nil || !strings.Contains(err.Error(), "symbolic link") {
 		t.Fatalf("expected asset directory symlink error, got %v", err)
 	}
 }

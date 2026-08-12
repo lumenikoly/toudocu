@@ -104,7 +104,7 @@ func registryOperations(routes []apiRoute) map[string]map[string]struct{} {
 }
 
 func TestOpenAPIContracts(t *testing.T) {
-	for _, name := range []string{"editor.openapi.yaml", "changes.openapi.yaml"} {
+	for _, name := range []string{"editor.openapi.yaml", "changes.openapi.yaml", "agent-feedback.openapi.yaml"} {
 		content, err := os.ReadFile(filepath.Join("..", "..", "docs", "contracts", name))
 		if err != nil {
 			t.Fatal(err)
@@ -116,6 +116,34 @@ func TestOpenAPIContracts(t *testing.T) {
 		for _, token := range []string{"schemaVersion", "example:", "application/json"} {
 			if !strings.Contains(string(content), token) {
 				t.Fatalf("%s missing %s", name, token)
+			}
+		}
+		if name == "agent-feedback.openapi.yaml" {
+			for _, token := range []string{
+				"const: agent-discussion-create", "const: agent-discussion-update", "const: agent-discussion-delete",
+				"const: agent-message-create", "const: agent-message-update", "const: agent-message-delete",
+				"const: agent-delivery-next", "const: agent-delivery-response",
+				"additionalProperties: false", "x-maxBytes: 65536", "atomically queue one editable request",
+				"RequestOrigin:", "FetchMetadata:", `security: [{RequestOrigin: []}, {FetchMetadata: []}]`,
+				`"415": {$ref: "#/components/responses/AgentError"}`,
+			} {
+				if !strings.Contains(string(content), token) {
+					t.Fatalf("%s missing strict input contract %q", name, token)
+				}
+			}
+			if strings.Contains(string(content), "maxLength:") {
+				t.Fatal("agent feedback byte limits must not be represented as Unicode maxLength")
+			}
+			if got := strings.Count(string(content), `"503":`); got != 10 {
+				t.Fatalf("agent feedback must document 503 for every operation: got %d", got)
+			}
+			createStart := strings.Index(string(content), "operationId: createAgentDiscussion")
+			if createStart < 0 {
+				t.Fatal("agent feedback create discussion operation is missing")
+			}
+			createEnd := strings.Index(string(content)[createStart:], "/_toudocu/api/agent/discussions/{discussionId}")
+			if createEnd < 0 || !strings.Contains(string(content)[createStart:createStart+createEnd], `"404":`) {
+				t.Fatal("agent feedback create discussion must document a missing target")
 			}
 		}
 	}
@@ -134,13 +162,16 @@ func TestOpenAPIContractParity(t *testing.T) {
 	if got, want := registryOperations(allChangesRouteRegistry()), readContractOperations(t, "changes.openapi.yaml"); !reflect.DeepEqual(got, want) {
 		t.Fatalf("changes registry/spec mismatch\nregistry=%#v\nspec=%#v", got, want)
 	}
+	if got, want := registryOperations(reviewRouteRegistry), readContractOperations(t, "agent-feedback.openapi.yaml"); !reflect.DeepEqual(got, want) {
+		t.Fatalf("agent feedback registry/spec mismatch\nregistry=%#v\nspec=%#v", got, want)
+	}
 }
 
 func TestContractDocumentLinksToSelectedSwaggerSpecOnlyInServe(t *testing.T) {
 	document := &Document{SourcePath: "contracts/editor-http.md", Links: []Link{{Destination: "editor.openapi.yaml"}}}
 	model := &Model{serveMode: true, openAPIContracts: []OpenAPIContract{{Path: "contracts/editor.openapi.yaml", Title: "Editor"}}}
 	button := renderOpenAPIContractButton(model, document)
-	if !strings.Contains(button, "Открыть в Swagger UI") || !strings.Contains(button, "spec=contracts%2Feditor.openapi.yaml") {
+	if !strings.Contains(button, "Open in Swagger UI") || !strings.Contains(button, "spec=contracts%2Feditor.openapi.yaml") {
 		t.Fatalf("button=%q", button)
 	}
 	model.serveMode = false

@@ -2,7 +2,6 @@
 
 - Identifier: {{STANDARD_ID}}
 - Status: {{STATUS}}
-- Owner: {{OWNER}}
 - Scope: {{SCOPE}}
 - Last updated: {{YYYY-MM-DD}}
 

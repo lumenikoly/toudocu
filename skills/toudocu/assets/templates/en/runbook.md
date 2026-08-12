@@ -2,7 +2,6 @@
 
 - Identifier: {{RUNBOOK_ID}}
 - Status: {{STATUS}}
-- Owner: {{OWNER}}
 - Environment: {{ENVIRONMENT}}
 - Risk: {{RISK}}
 {{OPTIONAL_LAST_VERIFIED_METADATA}}

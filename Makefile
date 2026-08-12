@@ -1,11 +1,11 @@
 BINARY := toudocu
 CMD := ./cmd/toudocu
 DIST := dist
+INSTALL_DIR ?= $(HOME)/.local/bin
 TOUDOCU := go run $(CMD)
 DOCS_DIR := docs
-DEMO_DOCS_DIR := example/docs
 
-.PHONY: fmt fmt-check vet test web web-check browser-test check build docs docs-serve landing-serve demo demo-serve clean release
+.PHONY: fmt fmt-check vet test web web-check browser-test check build update-local docs docs-serve landing-serve clean release
 
 fmt:
 	gofmt -w .
@@ -37,10 +37,12 @@ browser-test:
 check: fmt-check test web-check
 	go mod verify
 	$(TOUDOCU) check ./$(DOCS_DIR) --repository-root . --strict --stale-days 0
-	$(TOUDOCU) check ./$(DEMO_DOCS_DIR) --repository-root ./example --strict --stale-days 0
 
 build:
 	CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o $(BINARY) $(CMD)
+
+update-local: build
+	install -Dm755 "$(BINARY)" "$(INSTALL_DIR)/$(BINARY)"
 
 docs:
 	$(TOUDOCU) build ./$(DOCS_DIR) --output ./build/project-docs --repository-root . --clean
@@ -51,13 +53,6 @@ docs-serve:
 
 landing-serve:
 	node landing/dev-server.mjs
-
-demo:
-	rm -rf example/site
-	$(TOUDOCU) build ./$(DEMO_DOCS_DIR) --output ./example/site --clean --stale-days 0
-
-demo-serve:
-	$(TOUDOCU) serve ./$(DEMO_DOCS_DIR)
 
 release: check
 	rm -rf $(DIST)
@@ -76,4 +71,4 @@ release: check
 	cd $(DIST) && sha256sum * > checksums.txt
 
 clean:
-	rm -rf $(BINARY) $(DIST) example/site
+	rm -rf $(BINARY) $(DIST)

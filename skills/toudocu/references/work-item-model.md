@@ -1,13 +1,15 @@
 # Toudocu work-item model
 
 Use this reference only for `TASK-*` or `BUG-*` contracts and lifecycle work.
-Apply the general [document model](document-model.md) and
+Apply the general [document model](document-model.md),
+[reader-first writing gate](writing-quality.md), and
 [semantic gate](semantic-gate.md) first when the operation changes sources.
 
 Use one work item per `work/TASK-*.md` or `work/BUG-*.md`. Work items are
 intentionally stricter because their commands may be executed.
 
-For `Draft`/`Черновик`, require valid Status, Type, and a non-empty Result.
+For the draft state, represented by `Draft` or `Черновик`, require a valid
+Status, Type, and non-empty Result.
 
 For every non-draft status, also require:
 
@@ -23,7 +25,7 @@ Feature tasks require an existing use case. Maintenance, Documentation, and
 Research tasks without a use case require a non-empty Use-case omission reason.
 
 Bug work items use `BUG-*` and require severity, priority, reproducibility,
-regression, module, use case, owner, and updated date. They require Symptom,
+regression, module, use case, and updated date. They require Symptom,
 Expected behavior, Actual behavior, and either Steps to reproduce or Evidence
 even in Draft. Ready+ bugs additionally require Cause, Scope, Out of scope,
 numbered Plan, Acceptance criteria, Verification, regression-test coverage,
@@ -38,10 +40,13 @@ transitions, and matching screen documents.
 
 Checkboxes are allowed in both acceptance criteria and plan. Start every
 acceptance criterion with one unique `AC-*` and give it exactly one verification
-entry. Plan items may be numbered steps, bullets, or checkboxes and need no
-`AC-*` identifiers or verification entries. Bug plans are the exception: they
-use numbered steps without checkboxes, so a bug keeps checkboxes only in
-acceptance criteria.
+entry. Write each criterion as an observable result in the document language; do
+not substitute an internal field, event, or method name for the behavior being
+accepted. Add the exact token only when the verification contract needs it.
+Plan items may be numbered steps, bullets, or checkboxes and need no `AC-*`
+identifiers or verification entries. Bug plans are the exception: they use
+numbered steps without checkboxes, so a bug keeps checkboxes only in acceptance
+criteria.
 
 ```md
 ## Acceptance criteria
@@ -57,9 +62,11 @@ Completed tasks require all criteria checked, plus `ALL` and `DOCS` targets and
 completed dependencies. Blocked tasks require a Blocker section; cancelled
 tasks require a Cancellation reason.
 
-Tasks may explicitly list `Standards`/`Стандарты` and
-`Affected runbooks`/`Затронутые runbooks`. Task context includes those `STD-*`
-and `RB-*` records and documents without matching scope globs automatically.
+Tasks may explicitly list project standards and affected operational
+procedures through the recognized metadata keys `Standards` or `Стандарты` and
+`Affected runbooks` or `Затронутые runbooks`. Task context includes those
+`STD-*` and `RB-*` records and documents without matching scope globs
+automatically.
 When Standards is non-empty, readiness and full verification also require
 exactly one `QUALITY` mapping whose command is declared by the task.
 

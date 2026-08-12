@@ -305,7 +305,7 @@ func TestMermaidBlockDiffReportsInvalidSideWithoutDroppingDiff(t *testing.T) {
 func TestSemanticAddedUntypedDocumentHasReadableSummary(t *testing.T) {
 	entity := []ChangeEntity{{Type: "guide", Title: "How to review"}}
 	changes := semanticMarkdownDiff(nil, []byte("# How to review\n"), "", "docs/guides/review.md", nil, entity)
-	if len(changes) != 1 || changes[0].Summary != "Добавлен документ «How to review»." {
+	if len(changes) != 1 || changes[0].Summary != "Added document How to review." {
 		t.Fatalf("summary: %#v", changes)
 	}
 }
@@ -869,7 +869,7 @@ func TestChangesUIAndMethodContract(t *testing.T) {
 	server, _ := changesHTTPServer(t)
 	page := httptest.NewRecorder()
 	server.ServeHTTP(page, httptest.NewRequest(http.MethodGet, changesUIPath, nil))
-	for _, marker := range []string{">Изменения<", "data-file-list", "data-discussions-panel", "data-review-composer", "data-branch-base", "data-target-revision", "/assets/changes.js", "/assets/codemirror.js"} {
+	for _, marker := range []string{">Changes<", "data-file-list", "data-discussions-panel", "data-review-composer", "data-branch-base", "data-target-revision", "/assets/changes.js", "/assets/codemirror.js"} {
 		if !strings.Contains(page.Body.String(), marker) {
 			t.Fatalf("changes UI missing %q", marker)
 		}

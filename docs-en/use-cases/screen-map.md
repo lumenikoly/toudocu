@@ -8,7 +8,7 @@
 - Screens: SC-SITE-USE-CASE, SC-SITE-SCREEN-MAP
 - Start screen: SC-SITE-USE-CASE
 - Terminal screens: SC-SITE-SCREEN-MAP
-- Last updated: 2026-08-05
+- Last updated: 2026-08-12
 
 The developer explores user navigation and plays documented scenarios in the
 standalone portal.
@@ -54,6 +54,12 @@ standalone portal.
 
 The HTML and ProjectReport schema v1 contain consistent screens, transitions,
 playable scenarios, and traceability. The source Markdown is unchanged.
+
+## Acceptance criteria
+
+- [x] HTML and `ProjectReport` schema v1 contain consistent screens,
+  transitions, playable scenarios, and traceability.
+- [x] Building the map leaves source Markdown unchanged.
 
 ## Business rules
 

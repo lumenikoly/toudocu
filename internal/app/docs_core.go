@@ -12,17 +12,6 @@ import (
 
 var defaultExcludes = []string{".git", ".hg", ".svn", "node_modules", "vendor", "dist", "build", "coverage"}
 
-var typeLabels = map[string]string{
-	"overview": "Обзор проекта", "status": "Текущее состояние", "roadmap": "Дорожная карта",
-	"risks": "Риски", "changelog": "Журнал изменений проекта", "use-case": "Пользовательский сценарий",
-	"module": "Модуль", "architecture": "Архитектура", "contract": "Контрактный каталог",
-	"decision": "Архитектурное решение", "flow": "Процесс", "guide": "Руководство", "work": "Рабочие задачи",
-	"reference": "Справочник", "screen-map": "Устаревшая карта экранов", "screen-index": "Раздел экранов", "screen": "Экран",
-	"notes": "Заметки", "ideas": "Идеи развития", "document": "Документ",
-	"standard": "Стандарт", "quality-index": "Стандарты качества",
-	"runbook": "Runbook", "runbook-index": "Runbooks",
-}
-
 var rootOrder = map[string]int{
 	"index.md": 0, "status.md": 1, "roadmap.md": 2, "risks.md": 3,
 	"ideas.md": 4, "notes.md": 5, "glossary.md": 6,
@@ -118,27 +107,27 @@ const (
 	projectChangelogOutput = "project-changelog.html"
 )
 
-func loadProjectChangelog(repositoryRoot string, staleDays int, now time.Time) (*Document, *Issue) {
+func loadProjectChangelog(repositoryRoot string, staleDays int, now time.Time, fallbackTitle string) (*Document, *Issue) {
 	filePath := filepath.Join(repositoryRoot, projectChangelogFile)
 	info, err := os.Lstat(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
 		}
-		return nil, ptrIssue(newIssue("warning", "project-changelog-unavailable", "Не удалось проверить корневой CHANGELOG.md: "+err.Error(), projectChangelogFile, 0))
+		return nil, ptrIssue(newIssue("warning", "project-changelog-unavailable", "Could not inspect the repository-root CHANGELOG.md: "+err.Error(), projectChangelogFile, 0))
 	}
 	if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() {
-		return nil, ptrIssue(newIssue("warning", "project-changelog-unavailable", "Корневой CHANGELOG.md должен быть обычным файлом; вкладка журнала скрыта.", projectChangelogFile, 0))
+		return nil, ptrIssue(newIssue("warning", "project-changelog-unavailable", "The repository-root CHANGELOG.md must be a regular file; the changelog page is hidden.", projectChangelogFile, 0))
 	}
 	contentBytes, err := os.ReadFile(filePath)
 	if err != nil {
-		return nil, ptrIssue(newIssue("warning", "project-changelog-unavailable", "Не удалось прочитать корневой CHANGELOG.md: "+err.Error(), projectChangelogFile, 0))
+		return nil, ptrIssue(newIssue("warning", "project-changelog-unavailable", "Could not read the repository-root CHANGELOG.md: "+err.Error(), projectChangelogFile, 0))
 	}
 	content := string(contentBytes)
 	parsed := analyzeMarkdown(content)
 	title := parsed.Title
 	if title == "" {
-		title = "Журнал изменений проекта"
+		title = fallbackTitle
 	}
 	updatedAt := info.ModTime().UTC()
 	if value := parsed.Metadata["updated"]; value != "" {
@@ -159,7 +148,7 @@ func loadProjectChangelog(repositoryRoot string, staleDays int, now time.Time) (
 	return &Document{
 		ID: projectChangelogFile, AbsolutePath: filePath, SourcePath: projectChangelogFile,
 		OutputPath: projectChangelogOutput, Directory: ".", FileName: projectChangelogFile,
-		Type: "changelog", TypeLabel: typeLabels["changelog"], Title: title, Description: parsed.Description,
+		Type: "changelog", TypeLabel: localizedTypeLabel(nil, "changelog"), Title: title, Description: parsed.Description,
 		Content: content, Headings: parsed.Headings,
 		Sections: parsed.Sections, Metadata: parsed.Metadata, MetadataExtras: parsed.MetadataExtras,
 		Tasks:     parsed.Tasks,
@@ -244,7 +233,7 @@ func scanMarkdownFiles(root string, customExcludes []string, issues *[]Issue) []
 	walk = func(directory string) {
 		entries, err := os.ReadDir(directory)
 		if err != nil {
-			*issues = append(*issues, Issue{Severity: "error", Code: "directory-read-failed", Message: "Не удалось прочитать каталог: " + err.Error(), DocumentPath: toPosixRelative(root, directory)})
+			*issues = append(*issues, Issue{Severity: "error", Code: "directory-read-failed", Message: "Could not read directory: " + err.Error(), DocumentPath: toPosixRelative(root, directory)})
 			return
 		}
 		sort.SliceStable(entries, func(i, j int) bool { return naturalCompare(entries[i].Name(), entries[j].Name()) < 0 })
@@ -253,12 +242,12 @@ func scanMarkdownFiles(root string, customExcludes []string, issues *[]Issue) []
 			relative := toPosixRelative(root, absolute)
 			info, err := os.Lstat(absolute)
 			if err != nil {
-				*issues = append(*issues, Issue{Severity: "warning", Code: "file-stat-failed", Message: "Не удалось проверить файл: " + err.Error(), DocumentPath: relative})
+				*issues = append(*issues, Issue{Severity: "warning", Code: "file-stat-failed", Message: "Could not inspect file: " + err.Error(), DocumentPath: relative})
 				continue
 			}
 			if info.Mode()&os.ModeSymlink != 0 {
 				if strings.EqualFold(filepath.Ext(entry.Name()), ".md") {
-					*issues = append(*issues, Issue{Severity: "warning", Code: "ignored-symlink", Message: "Символическая ссылка Markdown проигнорирована.", DocumentPath: relative})
+					*issues = append(*issues, Issue{Severity: "warning", Code: "ignored-symlink", Message: "Markdown symbolic link ignored.", DocumentPath: relative})
 				}
 				continue
 			}
@@ -308,12 +297,12 @@ func createDocument(file scannedFile, root string, staleDays int, now time.Time,
 		contentBytes, err = os.ReadFile(file.AbsolutePath)
 	}
 	if err != nil {
-		*issues = append(*issues, newIssue("error", "file-read-failed", "Не удалось прочитать файл: "+err.Error(), file.RelativePath, 0))
+		*issues = append(*issues, newIssue("error", "file-read-failed", "Could not read file: "+err.Error(), file.RelativePath, 0))
 		return nil
 	}
 	info, err := os.Stat(file.AbsolutePath)
 	if err != nil {
-		*issues = append(*issues, newIssue("error", "file-read-failed", "Не удалось получить сведения о файле: "+err.Error(), file.RelativePath, 0))
+		*issues = append(*issues, newIssue("error", "file-read-failed", "Could not inspect file: "+err.Error(), file.RelativePath, 0))
 		return nil
 	}
 	content := string(contentBytes)
@@ -352,7 +341,7 @@ func createDocument(file scannedFile, root string, staleDays int, now time.Time,
 	return &Document{
 		ID: file.RelativePath, AbsolutePath: file.AbsolutePath, SourcePath: normalizeSlashes(file.RelativePath),
 		OutputPath: outputPathForDocument(file.RelativePath), Directory: directory, FileName: path.Base(file.RelativePath),
-		Type: typeName, SectionType: section, TypeLabel: typeLabels[typeName], Title: title, Description: parsed.Description,
+		Type: typeName, SectionType: section, TypeLabel: localizedTypeLabel(nil, typeName), Title: title, Description: parsed.Description,
 		Content: content, Headings: parsed.Headings,
 		Sections: parsed.Sections, Metadata: parsed.Metadata, MetadataExtras: parsed.MetadataExtras,
 		Tasks:     parsed.Tasks,
@@ -400,7 +389,7 @@ func validateDocumentBasics(model *Model, document *Document) {
 		return
 	}
 	if strings.TrimSpace(document.Content) == "" {
-		addDocumentIssue(model, document, newIssue("warning", "empty-document", "Документ пустой.", document.SourcePath, 0))
+		addDocumentIssue(model, document, newIssue("warning", "empty-document", "The document is empty.", document.SourcePath, 0))
 	}
 	hasH1 := false
 	for _, heading := range document.Headings {
@@ -410,19 +399,19 @@ func validateDocumentBasics(model *Model, document *Document) {
 		}
 	}
 	if !hasH1 {
-		addDocumentIssue(model, document, newIssue("warning", "missing-h1", "Отсутствует заголовок первого уровня.", document.SourcePath, 0))
+		addDocumentIssue(model, document, newIssue("warning", "missing-h1", "The document has no level-one heading.", document.SourcePath, 0))
 	}
 	if document.Description == "" && containsType([]string{"overview", "module", "use-case", "architecture", "decision"}, document.Type) {
-		addDocumentIssue(model, document, newIssue("warning", "missing-description", "Отсутствует краткое вводное описание.", document.SourcePath, 0))
+		addDocumentIssue(model, document, newIssue("warning", "missing-description", "The document has no introductory description.", document.SourcePath, 0))
 	}
 	if document.Stale {
-		addDocumentIssue(model, document, newIssue("warning", "stale-document", fmt.Sprintf("Документ не обновлялся %d дн.", document.AgeDays), document.SourcePath, 0))
+		addDocumentIssue(model, document, newIssue("warning", "stale-document", fmt.Sprintf("The document has not been updated for %d days.", document.AgeDays), document.SourcePath, 0))
 	}
 	if document.Metadata["status"] != "" && !document.Status.Recognized {
-		addDocumentIssue(model, document, newIssue("warning", "unknown-status", fmt.Sprintf("Неизвестный статус «%s».", document.Metadata["status"]), document.SourcePath, 0))
+		addDocumentIssue(model, document, newIssue("warning", "unknown-status", fmt.Sprintf("Unknown status %q.", document.Metadata["status"]), document.SourcePath, 0))
 	}
 	if containsType([]string{"status", "use-case", "module", "decision"}, document.Type) && document.Metadata["status"] == "" {
-		addDocumentIssue(model, document, newIssue("warning", "missing-status", "Не указано поле «Статус».", document.SourcePath, 0))
+		addDocumentIssue(model, document, newIssue("warning", "missing-status", "The Status field is missing.", document.SourcePath, 0))
 	}
 
 	type sectionRule struct {
@@ -431,23 +420,23 @@ func validateDocumentBasics(model *Model, document *Document) {
 	}
 	rules := map[string][]sectionRule{
 		"use-case": {
-			{[]string{"основной сценарий", "main scenario", "основной поток"}, "Отсутствует раздел «Основной сценарий»."},
-			{[]string{"постусловия", "postconditions"}, "Отсутствует раздел «Постусловия»."},
-			{[]string{"бизнес-правила", "business rules"}, "Отсутствует раздел «Бизнес-правила»."},
-			{[]string{"реализация", "implementation"}, "Отсутствует раздел «Реализация»."},
+			{[]string{"основной сценарий", "main scenario", "main flow", "основной поток"}, "The Main scenario section is missing."},
+			{[]string{"постусловия", "postconditions"}, "The Postconditions section is missing."},
+			{[]string{"бизнес-правила", "business rules"}, "The Business rules section is missing."},
+			{[]string{"реализация", "implementation"}, "The Implementation section is missing."},
 		},
 		"module": {
-			{[]string{"расположение в коде", "code location"}, "Отсутствует раздел «Расположение в коде»."},
-			{[]string{"границы", "границы модуля", "module boundaries"}, "Отсутствует раздел «Границы»."},
-			{[]string{"бизнес-правила", "business rules"}, "Отсутствует раздел «Бизнес-правила»."},
-			{[]string{"инварианты", "invariants"}, "Отсутствует раздел «Инварианты»."},
-			{[]string{"стабильные интерфейсы", "stable interfaces"}, "Отсутствует раздел «Стабильные интерфейсы»."},
-			{[]string{"связанные сценарии", "related use cases"}, "Отсутствует раздел «Связанные сценарии»."},
+			{[]string{"расположение в коде", "code location", "code locations"}, "The Code location section is missing."},
+			{[]string{"границы", "границы модуля", "boundaries", "module boundaries"}, "The Boundaries section is missing."},
+			{[]string{"бизнес-правила", "business rules"}, "The Business rules section is missing."},
+			{[]string{"инварианты", "invariants"}, "The Invariants section is missing."},
+			{[]string{"стабильные интерфейсы", "stable interfaces"}, "The Stable interfaces section is missing."},
+			{[]string{"связанные сценарии", "related use cases"}, "The Related use cases section is missing."},
 		},
 		"decision": {
-			{[]string{"контекст", "context"}, "Отсутствует раздел «Контекст»."},
-			{[]string{"решение", "decision"}, "Отсутствует раздел «Решение»."},
-			{[]string{"последствия", "consequences"}, "Отсутствует раздел «Последствия»."},
+			{[]string{"контекст", "context"}, "The Context section is missing."},
+			{[]string{"решение", "decision"}, "The Decision section is missing."},
+			{[]string{"последствия", "consequences"}, "The Consequences section is missing."},
 		},
 	}
 	for _, rule := range rules[document.Type] {
@@ -495,10 +484,10 @@ func buildCollections(documents []*Document) map[string][]*Document {
 
 func validateGlobalStructure(model *Model) {
 	if model.DocByPath["index.md"] == nil {
-		model.Issues = append(model.Issues, newIssue("warning", "missing-index", "Отсутствует обязательный файл index.md.", "", 0))
+		model.Issues = append(model.Issues, newIssue("warning", "missing-index", "Required file index.md is missing.", "", 0))
 	}
 	if model.DocByPath["architecture/overview.md"] == nil {
-		model.Issues = append(model.Issues, newIssue("error", "missing-architecture-overview", "Отсутствует обязательный файл architecture/overview.md.", "architecture/overview.md", 0))
+		model.Issues = append(model.Issues, newIssue("error", "missing-architecture-overview", "Required file architecture/overview.md is missing.", "architecture/overview.md", 0))
 	}
 	titles := map[string][]*Document{}
 	for _, document := range model.Documents {
@@ -510,7 +499,7 @@ func validateGlobalStructure(model *Model) {
 	for _, group := range titles {
 		if len(group) > 1 {
 			for _, document := range group {
-				addDocumentIssue(model, document, newIssue("warning", "duplicate-title", fmt.Sprintf("Заголовок «%s» используется в нескольких документах.", document.Title), document.SourcePath, 0))
+				addDocumentIssue(model, document, newIssue("warning", "duplicate-title", fmt.Sprintf("Heading %q is used by multiple documents.", document.Title), document.SourcePath, 0))
 			}
 		}
 	}
@@ -522,7 +511,7 @@ func validateArchitectureDocuments(model *Model) {
 		addDocumentIssue(model, overview, newIssue(
 			"error",
 			"invalid-architecture-overview-type",
-			"architecture/overview.md должен содержать поле «Тип документа: Architecture Overview».",
+			"architecture/overview.md must contain the field `Document type: Architecture Overview` or its recognized locale equivalent.",
 			overview.SourcePath,
 			0,
 		))
@@ -544,7 +533,7 @@ func validateArchitectureDocuments(model *Model) {
 			addDocumentIssue(model, document, newIssue(
 				"error",
 				"missing-architecture-question",
-				"Подробный архитектурный документ должен содержать непустое поле «Архитектурный вопрос».",
+				"A detailed architecture document must contain a non-empty Architecture question field.",
 				document.SourcePath,
 				0,
 			))
@@ -553,7 +542,7 @@ func validateArchitectureDocuments(model *Model) {
 			addDocumentIssue(model, document, newIssue(
 				"error",
 				"unlisted-architecture-document",
-				"Подробный архитектурный документ должен быть указан прямой локальной ссылкой из architecture/overview.md.",
+				"A detailed architecture document must be linked directly from architecture/overview.md.",
 				document.SourcePath,
 				0,
 			))
@@ -595,7 +584,7 @@ func assignUniqueOutputPaths(model *Model) {
 				}
 			}
 			document.OutputPath = candidate
-			addDocumentIssue(model, document, newIssue("error", "output-path-collision", fmt.Sprintf("Выходной путь конфликтует с %s; назначен %s.", previous.SourcePath, candidate), document.SourcePath, 0))
+			addDocumentIssue(model, document, newIssue("error", "output-path-collision", fmt.Sprintf("Output path conflicts with %s; assigned %s.", previous.SourcePath, candidate), document.SourcePath, 0))
 		}
 		used[strings.ToLower(document.OutputPath)] = document
 	}
@@ -627,12 +616,12 @@ func buildDocumentationModel(options Options, overlay map[string][]byte) (*Model
 	info, err := os.Stat(root)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, fmt.Errorf("каталог документации не найден: %s", root)
+			return nil, fmt.Errorf("documentation directory not found: %s", root)
 		}
 		return nil, err
 	}
 	if !info.IsDir() {
-		return nil, fmt.Errorf("указанный путь не является каталогом: %s", root)
+		return nil, fmt.Errorf("the specified path is not a directory: %s", root)
 	}
 	repositoryRoot := options.RepositoryRoot
 	if repositoryRoot == "" {
@@ -711,7 +700,7 @@ func buildDocumentationModel(options Options, overlay map[string][]byte) (*Model
 		model.Documents = append(model.Documents, document)
 		model.DocByPath[document.SourcePath] = document
 	}
-	if changelog, issue := loadProjectChangelog(repositoryRoot, staleDays, now); issue != nil {
+	if changelog, issue := loadProjectChangelog(repositoryRoot, staleDays, now, portalUI(model).Text("type.changelog")); issue != nil {
 		model.Issues = append(model.Issues, *issue)
 	} else {
 		model.ProjectChangelog = changelog
@@ -745,6 +734,7 @@ func buildDocumentationModel(options Options, overlay map[string][]byte) (*Model
 	buildScreenKnowledge(model)
 	model.Risks = buildRisks(model)
 	model.RoadmapStages = buildRoadmapStages(model)
+	validateRoadmapCompletion(model)
 	projectTitle := siteConfig.Title
 	if strings.TrimSpace(options.Title) != "" {
 		projectTitle = options.Title
@@ -753,17 +743,20 @@ func buildDocumentationModel(options Options, overlay map[string][]byte) (*Model
 	model.CurrentStatus = buildCurrentStatus(model)
 	model.Stats = buildStats(model)
 	model.SearchIndex = buildSearchIndex(model)
+	for index := range model.SearchIndex {
+		model.SearchIndex[index].TypeLabel = localizedTypeLabel(model, model.SearchIndex[index].Type)
+	}
 	return model, nil
 }
 
 func validateBuiltinSectionConfiguration(model *Model) {
 	config := model.SiteConfig.Project
 	if config.Locale == "" {
-		model.Issues = append(model.Issues, newIssue("warning", "missing-project-locale", "Для локализованных встроенных разделов укажите project.locale в .toudocu/config.yml.", ".toudocu/config.yml", 0))
+		model.Issues = append(model.Issues, newIssue("warning", "missing-project-locale", "Set project.locale in .toudocu/config.yml for localized built-in sections.", ".toudocu/config.yml", 0))
 	}
 	complete := len(config.Sections) == len(BuiltinSections)
 	if !complete {
-		model.Issues = append(model.Issues, newIssue("warning", "incomplete-project-sections", "Для локализованных встроенных разделов укажите полный project.sections в .toudocu/config.yml.", ".toudocu/config.yml", 0))
+		model.Issues = append(model.Issues, newIssue("warning", "incomplete-project-sections", "Define every project.sections entry in .toudocu/config.yml for localized built-in sections.", ".toudocu/config.yml", 0))
 	}
 	if config.Locale == "" || !complete {
 		return
@@ -774,12 +767,12 @@ func validateBuiltinSectionConfiguration(model *Model) {
 			continue
 		}
 		if canonicalText(document.Title) != canonicalText(config.Sections[spec.Type]) {
-			addDocumentIssue(model, document, newIssue("warning", "builtin-section-title-mismatch", fmt.Sprintf("H1 встроенного раздела должен совпадать с project.sections.%s.", spec.Type), document.SourcePath, 0))
+			addDocumentIssue(model, document, newIssue("warning", "builtin-section-title-mismatch", fmt.Sprintf("The built-in section H1 must match project.sections.%s.", spec.Type), document.SourcePath, 0))
 		}
 	}
 }
 
-func directoryLabel(directory string) string {
+func directoryLabel(model *Model, directory string) string {
 	if section := sectionTypeForPath(directory); section != "" {
 		if spec, ok := sectionSpec(section); ok {
 			return spec.EnglishTitle
@@ -788,7 +781,7 @@ func directoryLabel(directory string) string {
 	base := path.Base(directory)
 	label := strings.ReplaceAll(strings.ReplaceAll(base, "-", " "), "_", " ")
 	if label == "" {
-		return "Документы"
+		return localizedTypeLabel(model, "document")
 	}
 	runes := []rune(label)
 	runes[0] = []rune(strings.ToUpper(string(runes[0])))[0]

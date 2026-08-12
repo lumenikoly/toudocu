@@ -67,10 +67,10 @@ func metadataSearchTerms(document *Document, includeKeys bool) []string {
 func SearchDocumentation(model *Model, query string, limit int) (SearchReport, error) {
 	terms := uniqueStrings(searchWords(query))
 	if len(terms) == 0 {
-		return SearchReport{}, fmt.Errorf("поисковый запрос не может быть пустым")
+		return SearchReport{}, fmt.Errorf("search query cannot be empty")
 	}
 	if limit < 1 || limit > 100 {
-		return SearchReport{}, fmt.Errorf("--limit должен быть числом от 1 до 100")
+		return SearchReport{}, fmt.Errorf("--limit must be a number from 1 to 100")
 	}
 	type ranked struct {
 		match SearchMatch

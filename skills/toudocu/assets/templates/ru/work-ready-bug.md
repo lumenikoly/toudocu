@@ -10,7 +10,6 @@
 - Сценарий: {{USE_CASE_ID}}
 {{OPTIONAL_SCREENS_METADATA}}
 {{OPTIONAL_TRANSITIONS_METADATA}}
-- Владелец: {{OWNER}}
 - Последнее обновление: {{DATE}}
 
 ## Симптом

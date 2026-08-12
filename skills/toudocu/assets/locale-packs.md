@@ -30,7 +30,7 @@ screens: Экраны
 decisions: Архитектурные решения
 contracts: Контракты
 quality: Стандарты качества
-runbooks: Runbooks
+runbooks: Эксплуатационные инструкции
 reference: Справочник
 work: Рабочие задачи
 guides: Руководства

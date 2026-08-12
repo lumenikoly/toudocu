@@ -117,7 +117,7 @@ func taskVerifyValidation(model *Model, taskID, target, mode string) (*WorkItem,
 	if mode == "run" && item.statusName != "ready" && item.statusName != "in-progress" && item.statusName != "blocked" && item.statusName != "done" {
 		issues = append(issues, readinessIssue(
 			"invalid-task-verify-state",
-			"task verify --run доступен только для Ready, In Progress, Blocked или Done.",
+			"task verify --run is available only for Ready, In Progress, Blocked, or Done tasks.",
 			item,
 		))
 	}
@@ -125,7 +125,7 @@ func taskVerifyValidation(model *Model, taskID, target, mode string) (*WorkItem,
 	if len(commands) == 0 {
 		issues = append(issues, Issue{
 			Severity: "error", Code: "missing-task-command",
-			Message: "У задачи отсутствуют исполняемые команды проверки.", DocumentPath: item.Document, Line: item.line,
+			Message: "The task has no executable verification commands.", DocumentPath: item.Document, Line: item.line,
 		})
 	}
 	if target != "" {
@@ -134,7 +134,7 @@ func taskVerifyValidation(model *Model, taskID, target, mode string) (*WorkItem,
 			found = found || check.Target == target
 		}
 		if !found {
-			issues = append(issues, readinessIssue("unknown-verification-target", "Неизвестный verification target: "+target+".", item))
+			issues = append(issues, readinessIssue("unknown-verification-target", "Unknown verification target: "+target+".", item))
 		}
 	}
 	return item, issues

@@ -1,7 +1,8 @@
 # Toudocu document model
 
 Use this reference when deciding whether a document should remain free-form or
-participate in Toudocu's typed knowledge model.
+participate in Toudocu's typed knowledge model. Apply the
+[reader-first writing gate](writing-quality.md) to the content of either form.
 
 ## Validation boundary
 
@@ -12,7 +13,7 @@ Validate only promises the documentation makes:
 | Ordinary Markdown | Human-readable documentation | Render safely; report basic editorial warnings |
 | Typed path such as `modules/` or `use-cases/` | Opt-in machine-readable entity | Validate its ID and explicit relationships |
 | Stable ID or local link | Declared identity or relationship | Require uniqueness and a valid target |
-| `roadmap.md` checklist item | Declared global scope | Require one supported stable ID |
+| `roadmap.md` checklist item | Declared global scope | Require one supported stable ID and derive `UC-*` readiness |
 | `task ready` | Read-only readiness request | Require the complete task schema even for Draft |
 | `task verify --run` | Permission to execute repository commands | Apply the task-local validation gate before execution |
 
@@ -53,14 +54,17 @@ is an error. All other document types are optional.
 | Any other path | Free-form documentation | Renders safely without a typed entity contract |
 
 When an unknown top-level directory contains Markdown, its `index.md` is a
-custom-section manifest with `Type: Custom`, an owner, and a description. Its
+custom-section manifest with `Type: Custom` and a description. Its
 H1 supplies the navigation title. Do not infer a typed category from filenames,
 document count, or prose.
 
 Use one H1 and a concise introduction when useful. These improve navigation but
-are not reasons to invent project metadata. Narrative content may use any
-language; recognized structural metadata and typed section aliases are Russian
-or English.
+are not reasons to invent project metadata. Reader-facing content may use any
+project-selected language and must be idiomatic in that language. Exact code
+tokens remain unchanged and receive a plain-language explanation when needed.
+Recognized structural metadata and typed section aliases are Russian or English;
+for another document language, preserve a supported structural key while writing
+the surrounding prose in the selected language.
 
 ## Stable IDs and relationships
 
@@ -80,24 +84,37 @@ When opting into a typed entity:
 - update all references together when identity genuinely changes;
 - use relative Markdown links that remain inside repository root.
 
-For a `UC-*` roadmap item, Toudocu derives effective completion from the linked
-use-case status. `CON-*` and `DLV-*` retain their roadmap checkbox state. Other
-checklists do not contribute to global progress.
+For a `UC-*` roadmap item, Toudocu sets `effectiveCompleted` only when the
+linked use case has a `done`-group status, at least one checkbox in its
+Acceptance criteria section, and every checkbox in that section checked. Nested
+subsections count; the next heading of the same or higher level ends the section. The public
+`ProjectReport` remains schema v1 and `completionSource` remains
+`use-case-status`. `CON-*`, `CONTRACT-*`, `DLV-*`, and `DELIVERABLE-*` retain
+their roadmap checkbox state. Other checklists do not contribute to global
+progress.
+
+`check` reports these readiness errors without changing Markdown:
+
+- `done-use-case-missing-acceptance-criteria`;
+- `done-use-case-has-open-acceptance-criteria`;
+- `roadmap-item-completion-mismatch`;
+- `roadmap-section-status-mismatch`.
 
 ## Typed-document guidance
 
 The module template includes purpose, code location, boundaries, business
 rules, invariants, stable interfaces, and related use cases. The use-case
-template includes its main scenario, postconditions, rules, and implementation.
+template includes its main scenario, postconditions, an unchecked acceptance
+criterion placeholder, rules, and implementation.
 The flow and screen templates participate in the separate
 [screen and flow model](screen-model.md). The ADR template includes context,
 decision, and consequences. Work-item schemas are defined in
 [work-item-model.md](work-item-model.md).
 
 Toudocu reports missing recommended sections as warnings. Use these sections
-when they add information; do not create empty or speculative prose. If the
-project does not need typed semantics, use the generic `document.md` template
-outside the reserved typed paths.
+when they add information; do not create empty, speculative, or terminology-led
+prose. If the project does not need typed semantics, use the generic
+`document.md` template outside the reserved typed paths.
 
 Common schema-driven anti-patterns include:
 

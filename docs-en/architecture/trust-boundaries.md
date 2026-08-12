@@ -1,7 +1,7 @@
 # Toudocu Trust Boundaries
 
 - Document type: Architecture
-- Architecture question: Where are the trust boundaries?
+- Architectural question: Where are the trust boundaries?
 
 Markdown, links, assets, and Mermaid source are treated as untrusted data;
 repository root and the selected output/report paths define the filesystem
@@ -44,6 +44,12 @@ protect against accidentally losing a concurrent change. An intentional,
 privileged local race that replaces a directory is outside the threat model of
 a trusted working copy.
 
+Review endpoints accept only regular paths relative to the repository.
+Absolute paths, `..`, percent-encoded remnants, `.git`, special or binary
+files, and symbolic links are rejected. A UTF-8 snapshot is limited to 2 MiB.
+State uses private `0700`/`0600` permissions; corrupt storage is not overwritten
+automatically, and concurrent writes use a lock plus a version check.
+
 ## Serve HTTP boundary
 
 An editor write requires a JSON content type, an exact action header, and a
@@ -70,6 +76,9 @@ a general-purpose URL. `--no-update-check` disables the capability and makes
 the endpoint unavailable, while static and translation portals do not create
 this boundary.
 
+Comments can be changed only when `target=working-tree`. A comparison ending at
+a commit or the index is read-only.
+
 ## Execution boundary
 
 Documentation Changes invokes the installed `git` directly as an argument
@@ -79,6 +88,10 @@ The revision is validated, the blob is read from the object database, and the
 HTTP path must match a change-set entry within documentation roots. Old
 Markdown passes through the same sanitization policy and receives no editor or
 network privileges.
+
+Discussions use the same boundary for allowed files across the repository. The
+feedback CLI reads and writes only local discussion state; it does not start an
+agent, contact an AI model, or run repository commands.
 
 Ordinary `check`, `build`, `serve`, editor API, `search`, readiness, and context
 do not run commands from Markdown. Execution appears only in

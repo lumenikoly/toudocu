@@ -14,7 +14,7 @@ import (
 
 const (
 	SkillID       = "toudocu"
-	SkillVersion  = "0.0.1"
+	SkillVersion  = "0.0.2"
 	maxFileSize   = 2 << 20
 	maxBundleSize = 10 << 20
 )

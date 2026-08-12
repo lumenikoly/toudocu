@@ -2,7 +2,6 @@
 
 - Identifier: {{MODULE_ID}}
 - Status: {{STATUS}}
-- Owner: {{OWNER}}
 - Last updated: {{DATE}}
 
 {{MODULE_SUMMARY}}

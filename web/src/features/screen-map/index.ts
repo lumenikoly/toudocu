@@ -1,6 +1,4 @@
-import { registerMessages, text } from "../../core/locale";
-import { screenMapMessages } from "../../core/messages.ru";
-registerMessages(screenMapMessages);
+import { text } from "../../core/locale";
 window.ToudocuInitializeScreenMap = (scope: any, signal: any) => {
     'use strict';
     scope = scope || document;
@@ -44,6 +42,7 @@ window.ToudocuInitializeScreenMap = (scope: any, signal: any) => {
     const search: any = workspace.querySelector('[data-map-search]');
     const changesToggle: any = workspace.querySelector('[data-map-changes]');
     const page: any = window.ToudocuPage;
+    const locale: any = page?.ui.locale || 'en';
     const changesAPI: any = page?.runtime === 'serve' && page.capabilities?.changes ? page.endpoints?.changes : '';
     if (changesToggle && !changesAPI)
         changesToggle.hidden = true;
@@ -71,7 +70,7 @@ window.ToudocuInitializeScreenMap = (scope: any, signal: any) => {
         return flows.find((flow: any) => flow.useCase === useCaseSelect?.value);
     }
     function computeVisible() {
-        const query: any = (search?.value || '').trim().toLocaleLowerCase();
+        const query: any = (search?.value || '').trim().toLocaleLowerCase(locale);
         let values: any = screens.filter((screen: any) => !screen._changeGhost || changesActive);
         if (changesActive)
             values = values.filter((screen: any) => changedNodes.has(screen.id));
@@ -88,7 +87,7 @@ window.ToudocuInitializeScreenMap = (scope: any, signal: any) => {
         if (statusSelect?.value)
             values = values.filter((screen: any) => screen.status?.kind === statusSelect.value);
         if (query) {
-            values = values.filter((screen: any) => [screen.id, screen.title, screen.route, screen.module].join(' ').toLocaleLowerCase().includes(query));
+            values = values.filter((screen: any) => [screen.id, screen.title, screen.route, screen.module].join(' ').toLocaleLowerCase(locale).includes(query));
         }
         visible = new Set(values.map((screen: any) => screen.id));
         if (mode === 'sitemap') {
@@ -119,8 +118,8 @@ window.ToudocuInitializeScreenMap = (scope: any, signal: any) => {
                 groups.get(module).push(id);
             });
             let cursorX: any = 48;
-            [...groups.entries()].sort((a: any, b: any) => a[0].localeCompare(b[0], undefined, { numeric: true })).forEach(([module, members]: any) => {
-                members.sort((a: any, b: any) => a.localeCompare(b, undefined, { numeric: true }));
+            [...groups.entries()].sort((a: any, b: any) => a[0].localeCompare(b[0], locale, { numeric: true })).forEach(([module, members]: any) => {
+                members.sort((a: any, b: any) => a.localeCompare(b, locale, { numeric: true }));
                 const columns: any = Math.min(2, members.length);
                 const rows: any = Math.ceil(members.length / columns);
                 const width: any = 64 + columns * CARD_WIDTH + Math.max(0, columns - 1) * MODULE_COLUMN_GAP;
@@ -173,7 +172,7 @@ window.ToudocuInitializeScreenMap = (scope: any, signal: any) => {
         });
         const vertical: any = mode === 'sitemap';
         [...groups.entries()].sort((a: any, b: any) => a[0] - b[0]).forEach(([level, members]: any) => {
-            members.sort((a: any, b: any) => a.localeCompare(b, undefined, { numeric: true }));
+            members.sort((a: any, b: any) => a.localeCompare(b, locale, { numeric: true }));
             members.forEach((id: any, row: any) => {
                 positions.set(id, vertical
                     ? {
@@ -446,7 +445,7 @@ window.ToudocuInitializeScreenMap = (scope: any, signal: any) => {
             });
         });
         return (candidates.length ? candidates : blockedCandidates)
-            .sort((first: any, second: any) => first.score - second.score || roundedRoute(first.points).localeCompare(roundedRoute(second.points)));
+            .sort((first: any, second: any) => first.score - second.score || roundedRoute(first.points).localeCompare(roundedRoute(second.points), locale));
     }
     function selfRouteCandidates(edge: any, obstacles: any, usedSegments: any, laneOffset: any = 0) {
         const rect: any = screenRect(edge.source);
@@ -553,7 +552,7 @@ window.ToudocuInitializeScreenMap = (scope: any, signal: any) => {
         });
         const offsets: any = new Map();
         groups.forEach((ids: any) => {
-            ids.sort((first: any, second: any) => first.localeCompare(second, undefined, { numeric: true }));
+            ids.sort((first: any, second: any) => first.localeCompare(second, locale, { numeric: true }));
             ids.forEach((id: any, index: any) => offsets.set(id, (index - (ids.length - 1) / 2) * ROUTE_LANE_OFFSET));
         });
         return offsets;
@@ -561,7 +560,7 @@ window.ToudocuInitializeScreenMap = (scope: any, signal: any) => {
     function drawEdges() {
         edgeLayer.innerHTML = `<defs><marker id="screen-map-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z"></path></marker></defs>`;
         labelsLayer.replaceChildren();
-        const edges: any = [...activeEdges].sort((first: any, second: any) => first.id.localeCompare(second.id, undefined, { numeric: true }));
+        const edges: any = [...activeEdges].sort((first: any, second: any) => first.id.localeCompare(second.id, locale, { numeric: true }));
         const obstacles: any = [...visible].map((id: any) => screenRect(id, NODE_CLEARANCE)).filter(Boolean);
         const nodeRects: any = [...visible].map((id: any) => screenRect(id)).filter(Boolean);
         const occupiedLabels: any = [];
@@ -650,7 +649,7 @@ window.ToudocuInitializeScreenMap = (scope: any, signal: any) => {
     function renderInspector(id: any) {
         const screen: any = byId.get(id);
         if (!screen) {
-            inspector.innerHTML = text("features.screen-map.index.006");
+            inspector.innerHTML = `<div class="screen-inspector-empty"><strong>${escapeText(text("screenMap.select"))}</strong><span>${escapeText(text("screenMap.selectHelp"))}</span></div>`;
             return;
         }
         const incomingRows: any = transitions.filter((transition: any) => transition.target === id)
@@ -659,10 +658,21 @@ window.ToudocuInitializeScreenMap = (scope: any, signal: any) => {
             .map((transition: any) => `<li><code>${escapeText(transition.id)}</code><span>${escapeText(transition.action)} · ${escapeText(transition.condition)} → ${escapeText(transition.target)}${transition.state ? ` @${escapeText(transition.state)}` : ''}${transition.error ? ` · ${escapeText(transition.error)}` : ''}${transition.useCase ? ` · ${escapeText(transition.useCase)}` : ''}</span></li>`).join('');
         const states: any = (screen.states || []).map((state: any) => `<span class="screen-state-chip">${escapeText(state.id)}</span>`).join('');
         const preview: any = screen.preview
-            ? text("features.screen-map.index.007", [escapeAttribute(screen.preview), escapeAttribute(screen.title)]) : text("features.screen-map.index.008", [escapeText(screen.id)]);
+            ? `<img class="screen-inspector-preview" src="${escapeAttribute(screen.preview)}" alt="${escapeAttribute(text("screenMap.previewAlt", [screen.title]))}">`
+            : `<div class="screen-inspector-preview screen-preview-placeholder"><strong>${escapeText(screen.id)}</strong><span>${escapeText(text("screenMap.noPreview"))}</span></div>`;
         const nodeChange: any = changedNodes.get(id);
-        const changeNotice: any = nodeChange ? text("features.screen-map.index.009", [escapeAttribute(nodeChange.status), escapeText(changeStatusLabel(nodeChange.status))]) : '';
-        inspector.innerHTML = text("features.screen-map.index.010", [escapeText(screen.module), escapeText(screen.id), escapeText(screen.title), preview, escapeText(screen.description || ''), escapeText(screen.status?.label || ''), escapeText(screen.route || '—'), escapeText(screen.owner || '—'), escapeText(screen.component || '—'), states, escapeText([...(screen.useCases || []), ...(screen.workItems || [])].join(' · ') || text("features.screen-map.index.023")), escapeText((screen.contracts || []).join(' · ') || text("features.screen-map.index.024")), outgoingRows || text("features.screen-map.index.025"), incomingRows || text("features.screen-map.index.026"), changeNotice, escapeAttribute(data.screenUrls?.[id] || '#')]);
+        const changeNotice: any = nodeChange ? `<p class="screen-change-notice is-${escapeAttribute(nodeChange.status)}">${escapeText(text("screenMap.changed", [changeStatusLabel(nodeChange.status)]))}</p>` : '';
+        const noTransitions: any = `<li>${escapeText(text("screenMap.noTransitions"))}</li>`;
+        inspector.innerHTML = `<div class="screen-inspector-head"><span>${escapeText(screen.module)}</span><button type="button" data-inspector-close aria-label="${escapeAttribute(text("changes.close"))}">×</button></div>
+<p class="screen-eyebrow">${escapeText(screen.id)}</p><h2>${escapeText(screen.title)}</h2>${preview}<p>${escapeText(screen.description || '')}</p>
+<dl><div><dt>${escapeText(text("field.status"))}</dt><dd>${escapeText(screen.status?.label || '')}</dd></div><div><dt>${escapeText(text("field.route"))}</dt><dd><code>${escapeText(screen.route || '—')}</code></dd></div>
+<div><dt>${escapeText(text("field.component"))}</dt><dd><code>${escapeText(screen.component || '—')}</code></dd></div></dl>
+<div class="screen-inspector-states">${states}</div>
+<h3>${escapeText(text("screenMap.useCasesTasks"))}</h3><p>${escapeText([...(screen.useCases || []), ...(screen.workItems || [])].join(' · ') || text("features.screen-map.index.023"))}</p>
+<h3>${escapeText(text("screenMap.contracts"))}</h3><p>${escapeText((screen.contracts || []).join(' · ') || text("features.screen-map.index.024"))}</p>
+<h3>${escapeText(text("screenMap.outgoingTransitions"))}</h3><ul>${outgoingRows || noTransitions}</ul>
+<h3>${escapeText(text("screenMap.incomingTransitions"))}</h3><ul>${incomingRows || noTransitions}</ul>
+${changeNotice}<a class="primary-link" href="${escapeAttribute(data.screenUrls?.[id] || '#')}">${escapeText(text("screenMap.openDocument"))}</a>`;
         inspector.querySelector('[data-inspector-close]')?.addEventListener('click', () => selectScreen(''));
     }
     function escapeText(value: any) {
@@ -702,7 +712,12 @@ window.ToudocuInitializeScreenMap = (scope: any, signal: any) => {
         selected = '';
         selectedTransition = id;
         applySelectionStyles();
-        inspector.innerHTML = text("features.screen-map.index.011", [escapeText(transition.type || 'navigation'), escapeText(transition.id), escapeText(transition.action), escapeText(transition.condition), escapeText(transition.source), escapeText(transition.target), escapeText(transition.useCase || text("features.screen-map.index.027")), escapeText(transition.state || 'DEFAULT'), escapeText(transition.error || '—'), transition.message ? `<div class="screen-transition-message"><strong>${escapeText(transition.error || text("features.screen-map.index.028"))}</strong><span>${escapeText(transition.message)}</span></div>` : '']);
+        inspector.innerHTML = `<div class="screen-inspector-head"><span>${escapeText(transition.type || 'navigation')}</span><button type="button" data-inspector-close aria-label="${escapeAttribute(text("changes.close"))}">×</button></div>
+<p class="screen-eyebrow">${escapeText(transition.id)}</p><h2>${escapeText(transition.action)}</h2>
+<dl><div><dt>${escapeText(text("screenMap.condition"))}</dt><dd>${escapeText(transition.condition)}</dd></div><div><dt>${escapeText(text("screenMap.from"))}</dt><dd><code>${escapeText(transition.source)}</code></dd></div>
+<div><dt>${escapeText(text("screenMap.to"))}</dt><dd><code>${escapeText(transition.target)}</code></dd></div><div><dt>${escapeText(text("field.useCase"))}</dt><dd>${escapeText(transition.useCase || text("features.screen-map.index.027"))}</dd></div>
+<div><dt>${escapeText(text("screenMap.state"))}</dt><dd>${escapeText(transition.state || 'DEFAULT')}</dd></div><div><dt>${escapeText(text("screenMap.error"))}</dt><dd>${escapeText(transition.error || '—')}</dd></div></dl>
+${transition.message ? `<div class="screen-transition-message"><strong>${escapeText(transition.error || text("features.screen-map.index.028"))}</strong><span>${escapeText(transition.message)}</span></div>` : ''}`;
         inspector.querySelector('[data-inspector-close]')?.addEventListener('click', () => selectScreen(''));
     }
     function measureVisibleCards() {
@@ -875,7 +890,7 @@ window.ToudocuInitializeScreenMap = (scope: any, signal: any) => {
         card.dataset.screenNode = screen.id;
         card.tabIndex = 0;
         card.setAttribute('role', 'button');
-        card.innerHTML = text("features.screen-map.index.019", [escapeText(screen.id), escapeText(screen.id), escapeText(screen.title), escapeText(screen.route), escapeText(screen.module)]);
+        card.innerHTML = `<div class="screen-preview-placeholder"><strong>${escapeText(screen.id)}</strong><span>${escapeText(text("screenMap.deletedScreen"))}</span></div><div class="screen-node-copy"><strong>${escapeText(screen.id)}</strong><span>${escapeText(screen.title)}</span><small>${escapeText(screen.route)}</small><div class="screen-node-meta"><span class="screen-module-label">${escapeText(screen.module)}</span></div></div>`;
         nodeById.set(screen.id, card);
         nodesLayer.append(card);
         card.addEventListener('click', (event: any) => { event.stopPropagation(); selectScreen(screen.id); });

@@ -173,7 +173,7 @@ func safeRemoveDirectory(directory, protectedDirectory string) error {
 		return err
 	}
 	if info, statErr := os.Lstat(requested); statErr == nil && info.Mode()&os.ModeSymlink != 0 {
-		return fmt.Errorf("отказ от очистки символической ссылки: %s", requested)
+		return fmt.Errorf("refusing to clean symbolic link: %s", requested)
 	} else if statErr != nil && !os.IsNotExist(statErr) {
 		return statErr
 	}
@@ -191,12 +191,24 @@ func safeRemoveDirectory(directory, protectedDirectory string) error {
 		root = volume + string(filepath.Separator)
 	}
 	if samePath(resolved, protected) || samePath(resolved, root) || ensureInside(resolved, protected) {
-		return fmt.Errorf("отказ от удаления защищённого каталога: %s", resolved)
+		return fmt.Errorf("refusing to remove protected directory: %s", resolved)
 	}
 	return os.RemoveAll(resolved)
 }
 
 func mkdirp(directory string) error { return os.MkdirAll(directory, 0o755) }
+
+func rejectSymlinks(root string) error {
+	return filepath.WalkDir(root, func(filePath string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.Type()&os.ModeSymlink != 0 {
+			return fmt.Errorf("output directory contains a symbolic link: %s", filePath)
+		}
+		return nil
+	})
+}
 
 func writeFileEnsured(filePath string, content []byte) error {
 	if err := mkdirp(filepath.Dir(filePath)); err != nil {
@@ -211,7 +223,7 @@ func copyFileEnsured(source, target string) error {
 		return err
 	}
 	if info.Mode()&os.ModeSymlink != 0 {
-		return fmt.Errorf("символическая ссылка не копируется: %s", source)
+		return fmt.Errorf("symbolic links are not copied: %s", source)
 	}
 	in, err := os.Open(source)
 	if err != nil {

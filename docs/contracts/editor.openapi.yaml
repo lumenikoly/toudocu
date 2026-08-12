@@ -280,7 +280,7 @@ components:
       properties:
         severity: {type: string, enum: [error, warning, info]}
         code: {type: string}
-        message: {type: string}
+        message: {type: string, description: Human-readable technical message in English; user-provided values remain verbatim}
         path: {type: string}
         line: {type: integer, minimum: 0}
         column: {type: integer, minimum: 0}
@@ -396,7 +396,7 @@ components:
           required: [code, message]
           properties:
             code: {type: string, const: roadmap_not_found}
-            message: {type: string}
+            message: {type: string, description: Human-readable technical message in English; user-provided values remain verbatim}
             details: {}
     RoadmapRequestErrorEnvelope:
       type: object
@@ -410,7 +410,7 @@ components:
           required: [code, message]
           properties:
             code: {type: string, enum: [invalid_json, invalid_roadmap_item]}
-            message: {type: string}
+            message: {type: string, description: Human-readable technical message in English; user-provided values remain verbatim}
             details: {}
     RoadmapTargetNotFoundEnvelope:
       type: object
@@ -424,7 +424,7 @@ components:
           required: [code, message]
           properties:
             code: {type: string, enum: [roadmap_not_found, stage_not_found]}
-            message: {type: string}
+            message: {type: string, description: Human-readable technical message in English; user-provided values remain verbatim}
             details: {}
     RoadmapConflictEnvelope:
       oneOf:
@@ -439,7 +439,7 @@ components:
               required: [code, message, details]
               properties:
                 code: {type: string, const: duplicate_roadmap_id}
-                message: {type: string}
+                message: {type: string, description: Human-readable technical message in English; user-provided values remain verbatim}
                 details:
                   type: object
                   additionalProperties: false
@@ -456,7 +456,7 @@ components:
               required: [code, message, details]
               properties:
                 code: {type: string, const: stale_digest}
-                message: {type: string}
+                message: {type: string, description: Human-readable technical message in English; user-provided values remain verbatim}
                 details: {$ref: "#/components/schemas/RoadmapState"}
     FileListResponse:
       type: object
@@ -525,7 +525,7 @@ components:
       required: [code, message]
       properties:
         code: {type: string}
-        message: {type: string}
+        message: {type: string, description: Human-readable technical message in English; user-provided values remain verbatim}
         details: {}
     ErrorEnvelope:
       type: object

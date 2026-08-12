@@ -209,88 +209,6 @@ paths:
         "413": {$ref: "#/components/responses/ReviewError"}
         "415": {$ref: "#/components/responses/ReviewError"}
         "503": {$ref: "#/components/responses/ReviewError"}
-  /_toudocu/api/changes/review/discussions:
-    get:
-      operationId: getReviewDiscussions
-      summary: Read the persistent review state with current placements
-      responses:
-        "200": {description: Review state, content: {application/json: {schema: {$ref: "#/components/schemas/ReviewState"}, example: {schemaVersion: 1, revision: 0, stateDigest: abc123, feedback: []}}}}
-        "304": {description: Review state ETag matches}
-        "500": {$ref: "#/components/responses/ReviewError"}
-    post:
-      operationId: createReviewDiscussion
-      summary: Create a discussion and server-owned anchor snapshot
-      parameters: [{$ref: "#/components/parameters/CreateDiscussionAction"}]
-      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/CreateDiscussionRequest"}, example: {expectedRevision: 0, expectedStateDigest: abc123, repositoryRevision: def456, target: {type: fileRange, path: server.go, start: {line: 2, column: 1}, end: {line: 2, column: 5}}, type: issue, message: Проверить условие}}}}
-      responses:
-        "201": {description: Discussion created, content: {application/json: {schema: {$ref: "#/components/schemas/ReviewState"}}}}
-        "400": {$ref: "#/components/responses/ReviewError"}
-        "403": {$ref: "#/components/responses/ReviewError"}
-        "409": {$ref: "#/components/responses/ReviewError"}
-        "413": {$ref: "#/components/responses/ReviewError"}
-        "415": {$ref: "#/components/responses/ReviewError"}
-  /_toudocu/api/changes/review/discussions/{id}:
-    patch:
-      operationId: updateReviewDiscussion
-      summary: Reply, edit or delete one unsent message, resolve, or reopen
-      parameters:
-        - {$ref: "#/components/parameters/ReviewID"}
-        - {$ref: "#/components/parameters/UpdateDiscussionAction"}
-      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/UpdateDiscussionRequest"}, example: {expectedRevision: 2, expectedStateDigest: abc123, operation: resolve}}}}
-      responses:
-        "200": {description: Updated review state, content: {application/json: {schema: {$ref: "#/components/schemas/ReviewState"}}}}
-        "400": {$ref: "#/components/responses/ReviewError"}
-        "403": {$ref: "#/components/responses/ReviewError"}
-        "404": {$ref: "#/components/responses/ReviewError"}
-        "409": {$ref: "#/components/responses/ReviewError"}
-        "413": {$ref: "#/components/responses/ReviewError"}
-        "415": {$ref: "#/components/responses/ReviewError"}
-  /_toudocu/api/changes/review/feedback:
-    post:
-      operationId: createReviewFeedback
-      summary: Snapshot all unsent messages from open discussions
-      parameters: [{$ref: "#/components/parameters/CreateFeedbackAction"}]
-      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/MutationGuard"}, example: {expectedRevision: 2, expectedStateDigest: abc123}}}}
-      responses:
-        "201": {description: Immutable feedback snapshot, content: {application/json: {schema: {$ref: "#/components/schemas/PendingFeedbackEnvelope"}}}}
-        "403": {$ref: "#/components/responses/ReviewError"}
-        "409": {$ref: "#/components/responses/ReviewError"}
-        "415": {$ref: "#/components/responses/ReviewError"}
-  /_toudocu/api/changes/review/feedback/pending:
-    get:
-      operationId: getPendingReviewFeedback
-      summary: Read the oldest uncompleted feedback snapshot without mutation
-      responses:
-        "200": {description: FIFO pending envelope; feedback is null when empty, content: {application/json: {schema: {$ref: "#/components/schemas/PendingFeedbackEnvelope"}, example: {schemaVersion: 1, revision: 0, stateDigest: abc123, feedback: null}}}}
-        "500": {$ref: "#/components/responses/ReviewError"}
-  /_toudocu/api/changes/review/feedback/{id}/response:
-    post:
-      operationId: respondToReviewFeedback
-      summary: Atomically accept one complete agent response
-      parameters:
-        - {$ref: "#/components/parameters/ReviewID"}
-        - {$ref: "#/components/parameters/RespondFeedbackAction"}
-      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/AgentFeedbackResponse"}, example: {schemaVersion: 1, reviewId: 01ARZ3NDEKTSV4RRFFQ69G5FAV, feedbackId: 01ARZ3NDEKTSV4RRFFQ69G5FAW, feedbackDigest: abc123, expectedRevision: 3, expectedStateDigest: def456, results: [{itemId: 01ARZ3NDEKTSV4RRFFQ69G5FAX, outcome: fixed, message: Исправлено, changedPaths: [server.go]}]}}}}
-      responses:
-        "200": {description: Agent messages added to original discussions, content: {application/json: {schema: {$ref: "#/components/schemas/ReviewState"}}}}
-        "400": {$ref: "#/components/responses/ReviewError"}
-        "403": {$ref: "#/components/responses/ReviewError"}
-        "404": {$ref: "#/components/responses/ReviewError"}
-        "409": {$ref: "#/components/responses/ReviewError"}
-        "413": {$ref: "#/components/responses/ReviewError"}
-        "415": {$ref: "#/components/responses/ReviewError"}
-  /_toudocu/api/changes/review/cleanup:
-    post:
-      operationId: cleanupReview
-      summary: Remove resolved discussions or confirm complete history cleanup
-      parameters: [{$ref: "#/components/parameters/CleanupReviewAction"}]
-      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/CleanupReviewRequest"}, example: {expectedRevision: 4, expectedStateDigest: abc123, mode: closed}}}}
-      responses:
-        "200": {description: Cleaned review state, content: {application/json: {schema: {$ref: "#/components/schemas/ReviewState"}}}}
-        "400": {$ref: "#/components/responses/ReviewError"}
-        "403": {$ref: "#/components/responses/ReviewError"}
-        "409": {$ref: "#/components/responses/ReviewError"}
-        "415": {$ref: "#/components/responses/ReviewError"}
 components:
   headers:
     NoStore: {schema: {type: string, const: no-store}}
@@ -307,25 +225,19 @@ components:
     TaskAlias: {name: id, in: query, description: Backward-compatible alias used when task is absent, schema: {type: string}}
     Path: {name: path, in: query, required: true, schema: {type: string, minLength: 1}, example: docs/index.md}
     Side: {name: side, in: query, required: true, schema: {type: string, enum: [before, after]}}
-    ReviewID: {name: id, in: path, required: true, schema: {type: string, minLength: 26, maxLength: 26}, example: 01ARZ3NDEKTSV4RRFFQ69G5FAV}
-    CreateDiscussionAction: {name: X-Toudocu-Action, in: header, required: true, schema: {type: string, const: review-discussion-create}}
-    UpdateDiscussionAction: {name: X-Toudocu-Action, in: header, required: true, schema: {type: string, const: review-discussion-update}}
-    CreateFeedbackAction: {name: X-Toudocu-Action, in: header, required: true, schema: {type: string, const: review-feedback-create}}
-    RespondFeedbackAction: {name: X-Toudocu-Action, in: header, required: true, schema: {type: string, const: review-feedback-response}}
-    CleanupReviewAction: {name: X-Toudocu-Action, in: header, required: true, schema: {type: string, const: review-cleanup}}
   responses:
     ChangesError:
       description: Changes API error
       headers: {Cache-Control: {$ref: "#/components/headers/NoStore"}}
-      content: {application/json: {schema: {$ref: "#/components/schemas/DiagnosticEnvelope"}, example: {schemaVersion: 1, diagnostics: [{severity: error, code: invalid-change-side, message: side должен быть before или after}]}}}
+      content: {application/json: {schema: {$ref: "#/components/schemas/DiagnosticEnvelope"}, example: {schemaVersion: 1, diagnostics: [{severity: error, code: invalid-change-side, message: side must be before or after}]}}}
     MethodNotAllowed:
       description: Method not allowed
       headers: {Allow: {schema: {type: string}}, Cache-Control: {$ref: "#/components/headers/NoStore"}}
-      content: {application/json: {schema: {$ref: "#/components/schemas/DiagnosticEnvelope"}, example: {schemaVersion: 1, diagnostics: [{severity: error, code: method_not_allowed, message: Метод не поддерживается}]}}}
+      content: {application/json: {schema: {$ref: "#/components/schemas/DiagnosticEnvelope"}, example: {schemaVersion: 1, diagnostics: [{severity: error, code: method_not_allowed, message: Method not allowed}]}}}
     ReviewError:
       description: Review error; stable codes include REVIEW_CONFLICT, REVIEW_TOO_LARGE, REVIEW_BINARY, REVIEW_NOT_FOUND, REVIEW_UNSAFE_PATH, REVIEW_GIT_UNAVAILABLE, REVIEW_STATE_CORRUPTED, REVIEW_INVALID_RESPONSE, REVIEW_MESSAGE_TOO_LARGE and REVIEW_STATE_BUSY
       headers: {Cache-Control: {$ref: "#/components/headers/NoStore"}}
-      content: {application/json: {schema: {$ref: "#/components/schemas/DiagnosticEnvelope"}, example: {schemaVersion: 1, diagnostics: [{severity: error, code: REVIEW_CONFLICT, message: review revision устарел}]}}}
+      content: {application/json: {schema: {$ref: "#/components/schemas/DiagnosticEnvelope"}, example: {schemaVersion: 1, diagnostics: [{severity: error, code: REVIEW_CONFLICT, message: review revision is stale}]}}}
   schemas:
     Issue:
       type: object
@@ -333,7 +245,7 @@ components:
       properties:
         severity: {type: string, enum: [error, warning, info]}
         code: {type: string}
-        message: {type: string}
+        message: {type: string, description: Human-readable technical message in English; user-provided values remain verbatim}
         documentPath: {type: string}
         line: {type: integer, minimum: 0}
         column: {type: integer, minimum: 0}
@@ -628,136 +540,3 @@ components:
         patch: {type: string}
         hunks: {type: array, items: {$ref: "#/components/schemas/SourceDiffHunk"}}
         documentation: {$ref: "#/components/schemas/DocumentationChange"}
-    ReviewPosition:
-      type: object
-      required: [line, column]
-      properties: {line: {type: integer, minimum: 1}, column: {type: integer, minimum: 1}}
-    ReviewTarget:
-      type: object
-      required: [type]
-      properties:
-        type: {type: string, enum: [diff, fileRange, file, global]}
-        path: {type: string}
-        side: {type: string, enum: [old, new]}
-        start: {$ref: "#/components/schemas/ReviewPosition"}
-        end: {$ref: "#/components/schemas/ReviewPosition"}
-    AnchorSnapshot:
-      type: object
-      required: [originalTarget, originalRepositoryRevision]
-      properties:
-        originalTarget: {$ref: "#/components/schemas/ReviewTarget"}
-        originalPath: {type: string}
-        originalRepositoryRevision: {type: string}
-        contentDigest: {type: string}
-        selectedText: {type: string}
-        contextBefore: {type: string, maxLength: 2048}
-        contextAfter: {type: string, maxLength: 2048}
-        snapshotRef: {type: string}
-    AnchorPlacement:
-      type: object
-      required: [status]
-      properties:
-        status: {type: string, enum: [exact, moved, stale, deleted]}
-        path: {type: string}
-        side: {type: string, enum: [old, new]}
-        start: {$ref: "#/components/schemas/ReviewPosition"}
-        end: {$ref: "#/components/schemas/ReviewPosition"}
-        reason: {type: string}
-    ReviewMessage:
-      type: object
-      required: [id, author, body, createdAt]
-      properties:
-        id: {type: string}
-        author: {type: string, enum: [human, agent]}
-        type: {type: string, enum: [question, suggestion, issue, praise]}
-        body: {type: string, minLength: 1, maxLength: 65536}
-        outcome: {type: string, enum: [fixed, notFixed, needsClarification]}
-        changedPaths: {type: array, maxItems: 256, items: {type: string}}
-        feedbackId: {type: string}
-        createdAt: {type: string, format: date-time}
-        editedAt: {type: string, format: date-time}
-    Discussion:
-      type: object
-      required: [id, state, target, placement, messages, createdAt, updatedAt]
-      properties:
-        id: {type: string}
-        state: {type: string, enum: [open, resolved]}
-        target: {$ref: "#/components/schemas/ReviewTarget"}
-        anchor: {$ref: "#/components/schemas/AnchorSnapshot"}
-        placement: {$ref: "#/components/schemas/AnchorPlacement"}
-        messages: {type: array, items: {$ref: "#/components/schemas/ReviewMessage"}}
-        createdAt: {type: string, format: date-time}
-        updatedAt: {type: string, format: date-time}
-    FeedbackItem:
-      type: object
-      required: [id, discussionId, messageId, type, body, target, anchor]
-      properties:
-        id: {type: string}
-        discussionId: {type: string}
-        messageId: {type: string}
-        type: {type: string, enum: [question, suggestion, issue, praise]}
-        body: {type: string, maxLength: 65536}
-        target: {$ref: "#/components/schemas/ReviewTarget"}
-        anchor: {$ref: "#/components/schemas/AnchorSnapshot"}
-    FeedbackBatch:
-      type: object
-      required: [schemaVersion, id, reviewId, feedbackDigest, createdAt, items]
-      properties:
-        schemaVersion: {type: integer, const: 1}
-        id: {type: string}
-        reviewId: {type: string}
-        feedbackDigest: {type: string}
-        createdAt: {type: string, format: date-time}
-        respondedAt: {type: string, format: date-time}
-        items: {type: array, minItems: 1, items: {$ref: "#/components/schemas/FeedbackItem"}}
-    ReviewState:
-      type: object
-      required: [schemaVersion, revision, stateDigest, feedback]
-      properties:
-        schemaVersion: {type: integer, const: 1}
-        revision: {type: integer, minimum: 0}
-        stateDigest: {type: string}
-        session:
-          type: object
-          required: [id, createdAt, discussions]
-          properties: {id: {type: string}, createdAt: {type: string, format: date-time}, discussions: {type: array, items: {$ref: "#/components/schemas/Discussion"}}}
-        feedback: {type: array, items: {$ref: "#/components/schemas/FeedbackBatch"}}
-    MutationGuard:
-      type: object
-      required: [expectedRevision, expectedStateDigest]
-      properties: {expectedRevision: {type: integer, minimum: 0}, expectedStateDigest: {type: string, minLength: 1}}
-    CreateDiscussionRequest:
-      allOf:
-        - {$ref: "#/components/schemas/MutationGuard"}
-        - {type: object, required: [repositoryRevision, target, type, message], properties: {repositoryRevision: {type: string}, target: {$ref: "#/components/schemas/ReviewTarget"}, type: {type: string, enum: [question, suggestion, issue, praise]}, message: {type: string, minLength: 1, maxLength: 65536}}}
-    UpdateDiscussionRequest:
-      allOf:
-        - {$ref: "#/components/schemas/MutationGuard"}
-        - {type: object, required: [operation], properties: {operation: {type: string, enum: [reply, edit, delete, resolve, reopen]}, messageId: {type: string}, type: {type: string, enum: [question, suggestion, issue, praise]}, message: {type: string, minLength: 1, maxLength: 65536}}}
-    CleanupReviewRequest:
-      allOf:
-        - {$ref: "#/components/schemas/MutationGuard"}
-        - {type: object, required: [mode], properties: {mode: {type: string, enum: [closed, all]}, confirm: {type: boolean}}}
-    AgentFeedbackResult:
-      type: object
-      required: [itemId, outcome, message, changedPaths]
-      properties: {itemId: {type: string}, outcome: {type: string, enum: [fixed, notFixed, needsClarification]}, message: {type: string, minLength: 1, maxLength: 65536}, changedPaths: {type: array, maxItems: 256, items: {type: string}}}
-    AgentFeedbackResponse:
-      type: object
-      required: [schemaVersion, reviewId, feedbackId, feedbackDigest, expectedRevision, expectedStateDigest, results]
-      properties:
-        schemaVersion: {type: integer, const: 1}
-        reviewId: {type: string}
-        feedbackId: {type: string}
-        feedbackDigest: {type: string}
-        expectedRevision: {type: integer, minimum: 0}
-        expectedStateDigest: {type: string}
-        results: {type: array, minItems: 1, items: {$ref: "#/components/schemas/AgentFeedbackResult"}}
-    PendingFeedbackEnvelope:
-      type: object
-      required: [schemaVersion, revision, stateDigest, feedback]
-      properties:
-        schemaVersion: {type: integer, const: 1}
-        revision: {type: integer, minimum: 0}
-        stateDigest: {type: string}
-        feedback: {oneOf: [{$ref: "#/components/schemas/FeedbackBatch"}, {type: "null"}]}

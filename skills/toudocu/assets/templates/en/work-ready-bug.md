@@ -10,7 +10,6 @@
 - Use case: {{USE_CASE_ID}}
 {{OPTIONAL_SCREENS_METADATA}}
 {{OPTIONAL_TRANSITIONS_METADATA}}
-- Owner: {{OWNER}}
 - Last updated: {{DATE}}
 
 ## Symptom

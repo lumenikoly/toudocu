@@ -1,7 +1,7 @@
 # Where Is the Boundary Between the Go Core and the Frontend Runtime?
 
 - Document type: Architecture
-- Architecture question: Where is the boundary between the Go core and the frontend runtime?
+- Architectural question: Where is the boundary between the Go core and the browser runtime?
 
 Go remains the sole source of the project model and the trusted boundary for
 the filesystem, Git, and task verification. The frontend receives only a
@@ -39,6 +39,10 @@ first stylesheet, validates stored preferences individually, and applies server
 defaults before the first frame. It does not parse Markdown, classify
 documents, resolve relationships, compute readiness or diffs, or decide whether
 a write is allowed.
+
+For a comment, the browser sends the anchor kind and coordinates. Go validates
+the path, reads the selected text with its context, and finds the anchor's new
+position after the file changes.
 
 Sources are located in `web/`, checked in TypeScript strict mode, and built with
 esbuild. Derived assets are located in `internal/site/assets/generated/`, are
@@ -85,6 +89,8 @@ runtime; no new preview command is needed.
 - A failed or disabled version check does not change the main content or cause
   the browser to request an external origin.
 - Browser input remains untrusted; Go makes all security decisions.
+- The `review` capability exists only in the main `serve` portal, not in static
+  or translation portals.
 
 ## Related documents
 

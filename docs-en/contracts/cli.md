@@ -1,9 +1,8 @@
 # Toudocu CLI v1
 
 - Identifier: CON-CLI-V1
-- Status: Completed
-- Owner: Toudocu Team
-- Last updated: 2026-08-08
+- Status: Done
+- Last updated: 2026-08-12
 
 This document defines CLI commands, side effects, exit codes, and versioned JSON
 results. `toudocu COMMAND --help` shows the exact flag syntax.
@@ -14,23 +13,25 @@ results. `toudocu COMMAND --help` shows the exact flag syntax.
 |---|---|---|
 | `check` | Validates documents, relationships, and OpenAPI | No |
 | `build` | Builds a backend-independent static HTTP portal and `report.json` | Writes only to output; `--clean` clears validated output |
-| `serve` | Starts the local portal, watcher, Editor API, and Changes API | Changes canonical docs only after an explicit editor save |
+| `serve` | Starts the local portal, watcher, Editor API, and Changes API | Changes canonical docs only after an explicit editor action; discussions are written only to local user state |
 | `search` | Searches the current model | No |
-| `changes`, `changes file` | Compares Git revisions, index, and working tree | No |
-| `task changes` | Shows changes and impact for the selected task | No |
+| `changes`, `changes file` | Compares Git revisions, index, and working tree | Nothing except an explicit `-o` output |
+| `agent next --json` | Retrieves and leases the oldest queue entry | Local user state outside the repository only |
+| `agent respond` | Appends one structured agent response | Local user state outside the repository only |
+| `task changes` | Shows changes and impact for the selected task | Nothing except an explicit `-o` output |
 | `task init` | Creates a draft `TASK-*` or `BUG-*` | Creates one new file without overwriting |
 | `scaffold` | Creates a typed document | Creates one new file without overwriting |
 | `task ready`, `task context` | Checks readiness or returns task context | No |
-| `task verify --dry-run` | Shows the task verification plan | No |
-| `task verify --run` | Runs commands explicitly recorded in the task | Yes, within the effects of the repository commands themselves |
+| `task verify --dry-run` | Shows the task verification plan | Nothing except an explicit `--report` output |
+| `task verify --run` | Runs commands explicitly recorded in the task | Anything those commands can change, plus an explicit `--report` output |
 | `task archive`, `task restore` | Moves a completed task to the archive or back | Moves one file without overwriting |
 | `skill install`, `skill update`, `skill uninstall` | Manages the embedded offline skill package | Writes only to the selected project/user target |
 | `skill status` | Shows the target and skill package state | No |
 | `version` | Prints the version | No |
 
 A path without a command name does not start an implicit build. There are no
-top-level `init` and `refresh` commands: the similarly named `$toudocu`
-workflows belong to the AI skill, not the Go CLI.
+top-level `init`, `refresh`, or `translate` commands: the similarly named
+`$toudocu` workflows belong to the AI skill, not the Go CLI.
 
 ## Skill lifecycle
 
@@ -78,6 +79,16 @@ partial result returns `1`. Diagnostics use stable short codes including
 - `task verify --run` is allowed only for Ready, In Progress, Blocked, and Done;
   `--dry-run` may also be used for a complete Draft.
 - `changes` reads Git directly without a shell, fetch, checkout, or index write.
+- Git refs are resolved from the outer Git root. `.toudocu/config.yml` and
+  relative settings are resolved from the explicit `--repository-root`, and
+  the documentation directory must be inside it.
+- `changes`, `changes file`, and `task changes` accept `--include-assets`.
+  Binary assets are then included regardless of `changes.includeAssets`, while
+  `changes.exclude` still applies.
+- `--translation-input` includes reader-facing Markdown, work items, and binary
+  assets regardless of other include flags or custom `changes.exclude` rules.
+  Only `generated/**` and `cache/**` inside the selected root remain excluded.
+  It cannot be combined with `--permanent-only`.
 
 ## JSON results
 
@@ -85,18 +96,60 @@ Every public report uses `schemaVersion: 1`.
 
 - `ProjectReport` describes the project, documents, relationships, roadmap,
   risks, knowledge, screens, flows, and diagnostics.
+- For `UC-*`, `roadmap[].items[].effectiveCompleted` includes status and
+  acceptance criteria while `completionSource` remains `use-case-status`.
+  Schema version stays `1`, and no `completionBlockers` field is added.
 - `SearchReport`, `TaskInitReport`, `ScaffoldReport`, `TaskReadyReport`,
   `TaskContextReport`, `TaskMoveReport`, and `TaskVerifyReport` belong to their
   corresponding workflows.
 - `ChangeSetReport` is a separate change-report schema and is not part of
   `ProjectReport`.
+- `agent next --json` returns exactly one oldest queue entry or
+  `pending=false` with exit code `0`.
+- `agent respond --input response.json --json`, or JSON read from standard
+  input, accepts one version 1 `AgentResponse`. Success returns
+  `accepted: true` with the new state revision and digest.
 
 Empty collections serialize as `[]`; line numbers start at one. New optional
 fields may be added without changing the schema version.
 
+The human-readable technical `Issue.message` field, other JSON diagnostics,
+and CLI errors and warnings are always in English regardless of `project.locale`.
+Automation must use the stable `code`, HTTP status, or exit code; user-provided
+values embedded in a message are preserved verbatim.
+
+`check` is read-only. Readiness failures use
+`done-use-case-missing-acceptance-criteria`,
+`done-use-case-has-open-acceptance-criteria`,
+`roadmap-item-completion-mismatch`, and `roadmap-section-status-mismatch`.
+They are errors, so ordinary and strict checks return exit code `1`.
+
 For every command, `task verify` records the exit code, time, duration, bounded
-stdout/stderr, and associated targets. The final status is `passed`, `failed`,
-or `blocked`.
+stdout/stderr, and associated targets. The final status is `planned`, `passed`,
+`failed`, or `blocked`.
+
+## Agent response to a documentation request
+
+```text
+toudocu agent next [--repository-root DIR] --json
+toudocu agent respond [--input response.json] \
+  [--repository-root DIR] [--json]
+```
+
+Without `--repository-root`, Git discovers the outer repository from the
+current directory. An explicit path must be that repository's exact top level.
+`next` returns only the oldest unfinished delivery and cannot advance until it
+receives a response. After its lease expires, the command returns the same
+delivery again.
+
+`respond` rejects an unknown identifier, a different response for a completed
+delivery, an outcome outside
+`answered|changed|no_change|needs_clarification|failed`, oversized text, and
+unsafe `changedPaths`. `changed` is not allowed for `question`. These commands
+do not start an agent or language model, invoke a shell, or write to Git.
+
+Stable diagnostics are listed in
+[Agent feedback JSON](../reference/agent-feedback-json.md#diagnostics).
 
 ## Exit codes
 

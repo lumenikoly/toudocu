@@ -8,14 +8,14 @@
 - Flow: FLOW-DOCS-CHANGES
 - Transitions: TR-SITE-005
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Toudocu Team
-- Last updated: 2026-08-05
+- Last updated: 2026-08-10
 
 ## Result
 
-`toudocu changes` and the `/changes` section show Git changes to source
-documentation as source, rendered, and deterministic semantic diffs, correlate
-them with task impact, and export `ChangeSetReport` schema v1.
+`toudocu changes` and `/changes/` show Git changes to source documentation as
+an exact patch, rendered Markdown, and a semantic comparison of known entity
+types. They compare changed documents with a work item's declared impact and
+can output `ChangeSetReport` schema v1.
 
 ## Behavior change
 
@@ -26,19 +26,18 @@ The portal shows only the current state, and review uses an external
 
 ### After
 
-`serve` provides a read-only Changes workspace with an explicit range,
-lazy specialized views and live invalidation. CLI and CI
-get the same report without changing Git.
+`serve` provides a read-only Changes workspace with an explicit comparison
+range. Expensive views load only when requested, and a report becomes stale
+after files change. The CLI and CI can read the same data without modifying Git.
 
 ## Scope
 
-- public facade `api.go` and `internal/app/cli.go`, `internal/app/types.go`, `internal/app/site_config.go`;
-- `internal/app/server.go`, `internal/app/site.go`, `internal/app/screen_site.go`;
-- `internal/app/assets/`, `package.json`, `package-lock.json`;
-- `go.mod`, `go.sum`, `THIRD_PARTY_NOTICES.md`;
-- tests in `internal/app/`;
-- `docs/`, `README.md`, `CHANGELOG.md`;
-- `project-docs/`, `example/project-docs/` only through rebuilding.
+- the public Go facade and CLI commands;
+- Git reading, report construction, and specialized comparisons in
+  `internal/app/`;
+- the local Changes HTTP API and browser interface;
+- pinned dependencies and their notices;
+- tests, canonical documentation, README, and changelog.
 
 ## Out of scope
 
@@ -70,8 +69,8 @@ get the same report without changing Git.
   text/JSON/Markdown/output and exit codes 0–4.
 - [x] `AC-09` Read-only HTTP API checks revisions/paths/limits, supports
   lazy detail, ETag and live digest update.
-- [x] `AC-10` Changes UI supports comparison selector, filters/search,
-  unified/merge/rendered/semantic/specialized tabs, deep links and accessibility.
+- [x] `AC-10` The initial Changes UI supported range selection, filters,
+  search, several comparison views, direct links, and keyboard access.
 - [x] `AC-11` `serve` preserves filters and the open file during invalidation,
   while unavailable Git produces a diagnostic without breaking the rest of the
   portal.
@@ -85,7 +84,7 @@ get the same report without changing Git.
 - [x] Add CLI reports and exit-code mapping.
 - [x] Implement changes service, HTTP API, cache and invalidation.
 - [x] Implement Changes UI and integration with document/task/screen pages.
-- [x] Update documentation, generated portals and run all gates.
+- [x] Update the documentation.
 
 ## Verification
 
@@ -131,3 +130,12 @@ Screen Map, configuration, security, README, and changelog were updated.
 - `docs/reference/features.md`;
 - `README.md`;
 - `CHANGELOG.md`.
+
+## Current state
+
+This is the historical task for the first Changes release. Later work
+simplified the workspace and added repository-wide discussions, full UTF-8 file
+viewing, and a change-kind filter. The current interface uses one `Diff` tab;
+the older tab names in the original criteria are no longer selectable views.
+See the [Changes guide](../guides/documentation-changes.md) for the complete
+current workflow.

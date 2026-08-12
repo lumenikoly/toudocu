@@ -7,10 +7,10 @@ Node.js, database, or CDN after generation.
 toudocu build ./docs --output ./site --clean
 ```
 
-Upload the entire `site/` directory to ordinary HTTP(S) static hosting: nginx,
-GitHub Pages, S3-compatible storage, or a corporate server. Do not select only
-the HTML: `assets/`, `data/`, `report.json`, and local project assets are part
-of the result.
+Upload the entire `site/` directory to ordinary HTTP(S) static hosting such as
+nginx, GitHub Pages, S3-compatible storage, or an internal web server. Do not
+upload HTML alone: `assets/`, `data/`, `report.json`, and local project assets
+are all part of the portal.
 
 Generated portals are not stored in Git. On every push to `main`, the GitHub
 Pages workflow strictly builds the canonical `docs/` into a temporary artifact,
@@ -44,8 +44,8 @@ or data outside the permitted documentation model.
 
 For local viewing, use `toudocu serve` and the
 [local workflow](local-workflow.md).
-Opening `index.html` directly by double-clicking is not a supported publishing
-or verification method.
+Opening `index.html` directly through `file://` is not supported. Use
+`toudocu serve` locally or publish the directory over HTTP(S).
 
 ## Verifying a deployment
 

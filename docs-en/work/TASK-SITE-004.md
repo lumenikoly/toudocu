@@ -8,8 +8,7 @@
 - Flow: FLOW-DOCS-SERVE
 - Screens: SC-SITE-DOCUMENT
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Toudocu Team
-- Last updated: 2026-08-06
+- Last updated: 2026-08-10
 
 ## Result
 
@@ -26,10 +25,11 @@ through the general editor or an external Markdown change.
 
 ### After
 
-A serve-only action obtains current stages, digest, and the suggested
-`DLV-ROADMAP-NNN`, validates a one-line deliverable on the server, atomically
-inserts the checklist item in the selected H2 stage, and synchronously rebuilds
-the portal. A CAS conflict does not overwrite the file and preserves entered form values.
+An action available only in `serve` loads the current stages, file digest, and
+suggested `DLV-ROADMAP-NNN`. The server validates the one-line text, atomically
+inserts an unchecked item into the selected H2 section, and rebuilds the portal.
+If the digest is stale, the file is not overwritten and the form keeps the
+values entered by the user.
 
 ## Scope
 
@@ -62,17 +62,15 @@ the portal. A CAS conflict does not overwrite the file and preserves entered for
   conflict it preserves the form and refreshes stages, digest, and suggestion.
 - [x] `AC-05` Static builds and locale portals contain no button, endpoint, or
   serve-only code; the generic Editor and public schemas remain intact.
-- [x] `AC-06` Editor OpenAPI, behavioral contract, local serve guide,
-  FLOW-DOCS-SERVE, MOD-SITE, UC-DOCS-03, SC-SITE-DOCUMENT, and the roadmap agree
-  and pass semantic review and ordinary/strict structural checks.
+- [x] `AC-06` The Editor OpenAPI contract and the related user documentation
+  agree with the behavior.
 
 ## Plan
 
 - [x] Add roadmap server state, validation, guarded POST, and atomic CAS insertion.
 - [x] Add the serve-only dialog and reinitialize it after soft navigation.
 - [x] Cover backend, frontend, and browser behavior, including conflict and mobile.
-- [x] Update canonical documentation sources and complete semantic gates.
-- [x] Run full repository verification and complete the roadmap item.
+- [x] Update the canonical documentation sources.
 
 ## Verification
 

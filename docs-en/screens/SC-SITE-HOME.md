@@ -6,7 +6,7 @@
 - Status: Implemented
 - Route: `/`
 - Preview: `../assets/screens/site-home.png`
-- Last updated: 2026-08-08
+- Last updated: 2026-08-10
 
 The main entry point to the built documentation is presented as a project
 passport: a cover with title, description, and metadata is followed by one

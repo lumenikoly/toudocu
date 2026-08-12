@@ -1,57 +1,80 @@
-# Changes HTTP API: Behavior and Boundaries
+# Changes HTTP API: Behavior and boundaries
 
 - Identifier: CON-CHANGES-HTTP-V1
-- Status: Completed
-- Owner: Toudocu Team
-- Last updated: 2026-08-05
+- Status: Done
+- Last updated: 2026-08-12
 
-[OpenAPI 3.1.0](changes.openapi.yaml) contains routes, parameters, response
-codes, and data schemas. In canonical `serve`, this page also provides a button
-for opening the specification in Swagger UI.
+[OpenAPI 3.1.0](changes.openapi.yaml) defines exact routes, parameters,
+response codes, and JSON schemas. This document describes what an HTTP schema
+cannot express: version sources and Git read boundaries. Documentation
+discussions have a separate
+[agent feedback API](agent-feedback.openapi.yaml).
 
-This document answers a different question: where the API obtains changes and
-which constraints it preserves while reading Git and files.
+In the main `serve`, the specification is available through the built-in
+Swagger UI.
 
 ## Availability
 
-The API operates only in `serve` mode and writes nothing. When a translation
-root is served directly, it reads that selected root; locale sections of the
-canonical portal receive no separate API. Go enables the changes UI only with
-the `changes` capability and passes a same-origin API base in the versioned page
-bootstrap; the static frontend contains no endpoint.
+The Changes API exists only under `serve` and does not write anything itself.
+When a translation root is served directly, the API compares that root, but
+translations attached to the main portal do not receive a separate API.
 
-## Version comparison
+Go includes the screen only when Changes is available and passes a same-origin
+API address to the browser in the page's JSON block. A static build contains
+neither the address nor client code.
 
-The API compares local commits, index, and working tree without `fetch`,
-`checkout`, or changes to Git state. The `branchBase` parameter computes a merge
-base with `HEAD`. If `base` is supplied with it, both references must resolve
-locally.
+The agent feedback API is available only in the main `serve` and does not
+depend on the selected Git range: its target always points to current Markdown
+in the canonical documentation root.
 
-The ETag is computed from the filtered change set. The cache includes the
-comparison, current documentation revision, `HEAD`, Git status, and resolved
-revisions, so an index or working-tree change cannot return a stale report.
+## Git comparison
 
-The summary does not contain a full patch. A detailed report, source content,
-and HTML representation are built only for the requested file.
+The API reads local commits, the index, and the working tree. It does not run
+`fetch` or `checkout` and does not change Git. `branchBase` computes the merge
+base between the selected branch and `HEAD`; when `base` is also present, both
+refs must resolve locally.
 
-## Read security
+The ETag depends on the filtered result, selected range, current documentation
+version, `HEAD`, Git status, and resolved refs. An index or working-tree change
+therefore cannot return the old report.
 
-The path must be a relative POSIX path inside an allowed documentation root.
-Absolute paths, `..`, backslashes, `.git`, symlink escapes, and paths outside the
-root are rejected.
+The summary does not contain the complete patch. Details, full content, and
+rendered Markdown are built only after a specific file is selected.
 
-Source content is returned with a server-selected media type,
-`X-Content-Type-Options: nosniff`, and a restrictive CSP. Before Markdown is
-served as `text/html`, it passes through the safe renderer. SVG receives no
-permission to run scripts, access the network, or apply embedded styles.
+## Safe file reads
 
-A failure while analyzing one representation—semantic diff, Mermaid, OpenAPI,
-screen, or asset—remains a local diagnostic and does not hide an available
-source diff.
+The ordinary Changes API accepts only a relative POSIX path inside an allowed
+documentation root. It rejects an absolute path, `..`, backslashes, `.git`,
+symbolic-link escapes, and every path outside that root.
+
+The server chooses the response type, adds `X-Content-Type-Options: nosniff`,
+and applies a strict content policy. Only the safe renderer converts Markdown
+to HTML. SVG cannot execute scripts, load external resources, or apply inline
+styles.
+
+A Semantics, Mermaid, OpenAPI, screen-map, or asset error remains a diagnostic
+for that view and does not hide the exact Git patch.
+
+## Repository projection for Changes
+
+`/_toudocu/api/changes/review/repository/` separately lists tracked and new
+non-ignored files across the repository for the Changes interface. It uses the
+same read-only Git mode but does not alter public `ChangeSetReport`, the
+ordinary `changes` command, or the Go API.
+
+Old and current full content and the patch load only on request. Go validates
+the path, regular-file type, UTF-8, absence of NUL, binary format, and 2 MiB
+limit. Known documentation files also receive the usual specialized views.
+
+These routes do not write discussions. Fields and HTTP statuses are defined in
+[Changes OpenAPI](changes.openapi.yaml), while local conversation writes use
+the [agent feedback OpenAPI](agent-feedback.openapi.yaml).
 
 ## Related documents
 
-- [Why the wire contract is separate from behavior](../decisions/ADR-004.md)
-- [Documentation Changes module](../modules/MOD-CHANGES.md)
-- [How documentation comparison works](../architecture/documentation-changes.md)
+- [Why OpenAPI is separate from behavior](../decisions/ADR-004.md)
+- [MOD-CHANGES](../modules/MOD-CHANGES.md)
+- [MOD-AGENT-FEEDBACK](../modules/MOD-AGENT-FEEDBACK.md)
+- [Delivering requests to an agent](../architecture/agent-feedback-delivery.md)
+- [Comparison architecture](../architecture/documentation-changes.md)
 - [ChangeSetReport fields](../reference/changes-report.md)

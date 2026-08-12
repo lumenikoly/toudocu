@@ -2,40 +2,39 @@
 
 - Идентификатор: CON-CLI-V1
 - Статус: Готово
-- Владелец: Команда Toudocu
-- Последнее обновление: 2026-08-09
+- Последнее обновление: 2026-08-12
 
-Документ фиксирует команды, побочные эффекты, exit codes и версионируемые
-JSON-результаты CLI. Конкретный синтаксис флагов показывает
+Этот контракт фиксирует команды, их побочные эффекты, коды завершения и
+версионируемые JSON-ответы. Полный синтаксис флагов всегда доступен через
 `toudocu COMMAND --help`.
 
-## Команды
+## Команды и запись данных
 
-| Команда | Что делает | Меняет данные |
+| Команда | Результат | Что может изменить |
 |---|---|---|
-| `check` | Проверяет документы, связи и OpenAPI | Нет |
-| `build` | Собирает backend-independent static HTTP portal и `report.json` | Пишет только в output; `--clean` очищает проверенный output |
-| `serve` | Запускает локальный портал, watcher, Editor и Changes API | Меняет canonical docs только по явному save, create или roadmap add в редакторе |
-| `search` | Ищет по актуальной модели | Нет |
-| `changes`, `changes file` | Сравнивает Git revisions, index и working tree | Нет, кроме явно указанного `-o` |
-| `changes feedback pending` | Возвращает oldest local review snapshot для агента | Нет |
-| `changes feedback respond` | Атомарно добавляет полный agent response в local review state | Да, только user-state вне repository; Git и Markdown не меняет |
-| `task changes` | Показывает изменения и влияние на выбранную задачу | Нет, кроме явно указанного `-o` |
-| `task init` | Создаёт черновик `TASK-*` или `BUG-*` | Создаёт один новый файл без перезаписи |
-| `scaffold` | Создаёт типизированный документ | Создаёт один новый файл без перезаписи |
-| `task ready`, `task context` | Проверяет готовность или возвращает контекст задачи | Нет |
-| `task verify --dry-run` | Показывает план проверок задачи | Нет, кроме явно указанного `--report` |
-| `task verify --run` | Выполняет команды, явно записанные в задаче | Да, в пределах команд репозитория и явно указанного `--report` |
-| `task archive`, `task restore` | Перемещает завершённую задачу в архив или обратно | Перемещает один файл без перезаписи |
-| `skill install`, `skill update`, `skill uninstall` | Управляет встроенным offline skill package | Пишет только в выбранный project/user target |
-| `skill status` | Показывает target и состояние skill package | Нет |
-| `version` | Печатает версию | Нет |
+| `check` | Проверяет документы, связи и OpenAPI | Ничего |
+| `build` | Создаёт статический HTTP-портал и `report.json` | Только выходной каталог; `--clean` очищает проверенный выход |
+| `serve` | Запускает локальный портал, наблюдатель, Editor и Changes | Основные документы — только после явного сохранения, создания или добавления `DLV-*`; обсуждения — только в пользовательском состоянии |
+| `search` | Ищет по текущей модели | Ничего |
+| `changes`, `changes file` | Сравнивает коммиты, индекс и рабочее дерево Git | Ничего, кроме явно указанного `-o` |
+| `agent next --json` | Получает и временно закрепляет старейшую запись очереди | Только локальное пользовательское состояние вне репозитория |
+| `agent respond` | Добавляет структурированный ответ агента | Только локальное пользовательское состояние вне репозитория |
+| `task changes` | Сопоставляет Git diff с обещаниями задачи | Ничего, кроме явно указанного `-o` |
+| `task init` | Создаёт черновик `TASK-*` или `BUG-*` | Один новый файл без перезаписи |
+| `scaffold` | Создаёт документ выбранного типа | Один новый файл без перезаписи |
+| `task ready`, `task context` | Проверяет полноту или возвращает контекст | Ничего |
+| `task verify --dry-run` | Показывает план команд | Ничего, кроме явно указанного `--report` |
+| `task verify --run` | Выполняет команды из задачи | Всё, что могут изменить эти команды, и явно указанный `--report` |
+| `task archive`, `task restore` | Перемещает задачу в архив или обратно | Один файл без перезаписи |
+| `skill install`, `skill update`, `skill uninstall` | Управляет встроенным навыком | Только выбранный каталог проекта или пользователя |
+| `skill status` | Показывает путь и состояние навыка | Ничего |
+| `version` | Печатает версию | Ничего |
 
-Путь без имени команды не запускает неявную сборку. Команд верхнего уровня
-`init` и `refresh` нет: одноимённые `$toudocu` workflows принадлежат AI-skill,
-а не Go CLI.
+Путь без команды не запускает скрытую сборку. Команд верхнего уровня `init`,
+`refresh` и `translate` нет: одноимённые `$toudocu` процессы выполняет
+агент разработки, а не Go CLI.
 
-## Skill lifecycle
+## Установка встроенного навыка
 
 ```text
 toudocu skill install|status|update|uninstall
@@ -45,107 +44,126 @@ toudocu skill install|status|update|uninstall
 ```
 
 По умолчанию используются `--agent auto` и `--scope project`.
-`--repository-root` доступен только для project scope. `auto` выбирает
-единственный обнаруженный host; при неоднозначности интерактивный terminal
-предлагает выбор, а non-TTY возвращает `SKILL_AGENT_REQUIRED`. `all` планирует
-все уникальные абсолютные targets до записи и затем обрабатывает их независимо.
+`--repository-root` допустим только для проекта. `auto` выбирает единственный
+найденный агент. Если вариантов несколько, интерактивный терминал задаёт вопрос,
+а без него команда возвращает `SKILL_AGENT_REQUIRED`. `all` сначала планирует
+все уникальные абсолютные назначения и только потом начинает запись.
 
-CLI различает состояния `not-installed`, `installed`, `outdated`,
-`newer-than-bundle`, `modified`, `unmanaged`, `invalid-manifest` и
-`unsafe-path`. `status` всегда остаётся read-only. Изменяющие операции не
-заменяют unmanaged, modified, invalid, newer или unsafe target. Форматы JSON,
-`--dry-run` и `--force` не поддерживаются.
+Состояния: `not-installed`, `installed`, `outdated`, `newer-than-bundle`,
+`modified`, `unmanaged`, `invalid-manifest`, `unsafe-path`. `status` ничего не
+пишет. Остальные операции не заменяют неизвестную, изменённую, повреждённую,
+более новую или небезопасную копию. JSON, `--dry-run` и `--force` для этих
+команд не поддерживаются.
 
-Успех или допустимый no-op возвращает `0`; конфликт, ошибка одного target или
-частичный результат — `1`. Диагностика использует стабильные краткие коды,
-включая `SKILL_AGENT_REQUIRED`, `SKILL_LOCAL_CHANGES`, `SKILL_UNMANAGED`,
+Успех и ситуация «уже сделано» возвращают `0`; конфликт, ошибка одного
+назначения или частичный результат — `1`. Используются стабильные коды
+`SKILL_AGENT_REQUIRED`, `SKILL_LOCAL_CHANGES`, `SKILL_UNMANAGED`,
 `SKILL_MANIFEST_INVALID`, `SKILL_PATH_UNSAFE`, `SKILL_DOWNGRADE_BLOCKED`,
 `SKILL_TARGET_CHANGED` и `SKILL_RESTORE_FAILED`.
 
 ## Общие правила
 
-- Входной каталог задаётся явно; по умолчанию сервер слушает
-  `127.0.0.1:8080` без TLS и аутентификации.
-- `--host 0.0.0.0` открывает `serve` для доверенной локальной сети.
-- Canonical `serve` по умолчанию один раз за процесс проверяет latest stable
-  release и может показать ссылку в portal UI. `--no-update-check` отключает
-  capability, endpoint и внешний запрос; для остальных команд флаг недопустим.
-- `build` остаётся статическим и read-only. Editor, Swagger UI и server-only
-  scripts в результат не попадают; сами OpenAPI-файлы копируются. Для
-  локального browser runtime используется существующий `serve`; команды
-  `preview` нет.
-- Configured translation root доступен для проверки, сборки, поиска,
-  просмотра изменений и read-only `serve`. Task workflow, scaffold и Editor
-  возвращают `TRANSLATION_ROOT_READ_ONLY` до изменения файлов или запуска
-  проверок.
-- `task verify --run` разрешён только для Ready, In Progress, Blocked и Done;
-  `--dry-run` можно использовать и для полного Draft.
-- `changes` читает Git напрямую без shell, fetch, checkout и записи в index.
-- Git revisions для `changes` разрешаются от enclosing Git top-level, а
-  `.toudocu/config.yml` и repository-relative config paths — от явно
-  выбранного `--repository-root`, который должен содержать documentation root.
-- `changes`, `changes file` и `task changes` принимают `--include-assets`,
-  который включает binary assets независимо от `changes.includeAssets`, но с
-  сохранением `changes.exclude`.
-- `--translation-input` включает reader-facing Markdown, work artifacts и
-  binary assets независимо от `includeTaskArtifacts`, `includeAssets` и
-  `changes.exclude`; исключениями остаются только `generated/**` и `cache/**`
-  внутри выбранного documentation root. С `--permanent-only` он несовместим.
+- Каталог документации задаётся явно.
+- `serve` по умолчанию слушает `127.0.0.1:8080` без TLS и авторизации.
+  `--host 0.0.0.0` открывает его для доверенной локальной сети.
+- Основной `serve` один раз за процесс может проверить последний стабильный
+  релиз. `--no-update-check` отключает возможность, локальный адрес и внешний
+  запрос; для других команд этот флаг неверен.
+- `build` создаёт только статический портал. Editor, Swagger UI и ресурсы
+  локальной пересборки туда не входят; найденные OpenAPI-файлы копируются как
+  обычные ресурсы. Команды `preview` нет.
+- Настроенный каталог перевода можно проверять, собирать, искать и открывать в
+  `serve` только для чтения. Команды задач, `scaffold` и запись Editor заранее
+  возвращают `TRANSLATION_ROOT_READ_ONLY`.
+- `task verify --run` допускает статусы «Готово к работе», «В работе»,
+  «Заблокировано» и «Выполнено». Полный черновик допускается только для
+  `--dry-run`.
+- `changes` вызывает Git напрямую, без системной оболочки, `fetch`, `checkout`
+  и записи в
+  индекс.
+- Ссылки Git разрешаются от внешнего корня Git, а `.toudocu/config.yml` и
+  относительные настройки — от явного `--repository-root`. Каталог
+  документации должен лежать внутри него.
+- `changes`, `changes file` и `task changes` принимают `--include-assets`:
+  двоичные ресурсы включаются независимо от `changes.includeAssets`, но
+  `changes.exclude` сохраняется.
+- `--translation-input` включает читательский Markdown, рабочие документы и
+  двоичные ресурсы независимо от прочих флагов включения и произвольных
+  `changes.exclude`. Исключаются только `generated/**` и `cache/**` внутри
+  выбранного каталога. С `--permanent-only` этот режим несовместим.
 
-## Результаты JSON
+## JSON-ответы
 
-Все публичные отчёты используют `schemaVersion: 1`.
+Все публичные отчёты содержат `schemaVersion: 1`.
 
-- `ProjectReport` описывает проект, документы, связи, roadmap, риски, знания,
-  экраны, процессы и диагностику.
+- `ProjectReport` описывает проект, документы, связи, дорожную карту, риски,
+  знания, экраны, процессы и диагностические сообщения.
+- Для `UC-*` поле `roadmap[].items[].effectiveCompleted` учитывает статус и
+  критерии приёмки; `completionSource` остаётся `use-case-status`. Версия схемы
+  остаётся `1`, поле `completionBlockers` не добавляется.
 - `SearchReport`, `TaskInitReport`, `ScaffoldReport`, `TaskReadyReport`,
-  `TaskContextReport`, `TaskMoveReport` и `TaskVerifyReport` принадлежат
-  соответствующим workflow.
-- `ChangeSetReport` — отдельная схема отчёта об изменениях и не входит в
+  `TaskContextReport`, `TaskMoveReport` и `TaskVerifyReport` принадлежат своим
+  командам.
+- `ChangeSetReport` — самостоятельный отчёт изменений и не входит в
   `ProjectReport`.
-- `changes feedback pending --json` возвращает schema-v1 envelope с revision,
-  state digest и `feedback`; пустая очередь содержит `feedback: null` и exit
-  code `0`.
-- `changes feedback respond --input response.json --json` принимает review ID,
-  feedback ID/digest, expected revision/digest и полный набор item results.
-  Успех возвращает `accepted: true` и новую пару revision/digest.
+- `agent next --json` возвращает ровно одну старейшую запись очереди либо
+  `pending=false` с кодом `0`.
+- `agent respond --input response.json --json` либо чтение JSON из стандартного ввода
+  принимает один `AgentResponse` версии 1. При успехе возвращаются
+  `accepted: true` и новые версия с хешем состояния.
 
-Пустые коллекции сериализуются как `[]`; номера строк начинаются с единицы.
-Новые необязательные поля могут добавляться без смены версии схемы.
+Пустые коллекции записываются как `[]`, номера строк начинаются с единицы. Новое
+необязательное поле может появиться без смены версии схемы.
 
-`task verify` записывает для каждой команды exit code, время, длительность,
-ограниченные stdout/stderr и связанные targets. Итоговый статус — `passed`,
-`failed` или `blocked`.
+Человекочитаемое техническое поле `Issue.message`, другие диагностические
+сообщения JSON, ошибки и предупреждения CLI всегда записываются на английском
+независимо от `project.locale`. Автоматизация должна опираться на стабильный
+`code`, HTTP-статус или код завершения; значения из пользовательского ввода
+внутри сообщения сохраняются дословно.
 
-## Agent feedback
+`check` только читает исходники. Нарушения готовности используют коды
+`done-use-case-missing-acceptance-criteria`,
+`done-use-case-has-open-acceptance-criteria`,
+`roadmap-item-completion-mismatch` и `roadmap-section-status-mismatch`. Это
+ошибки: обычный и строгий `check` возвращают код `1`.
+
+`task verify` сохраняет для каждой команды код завершения, время, длительность,
+ограниченные stdout и stderr и связанные цели. Итоговый статус бывает
+`planned`, `passed`, `failed` или `blocked`.
+
+## Ответ агента на запрос документации
 
 ```text
-toudocu changes feedback pending [--repository-root DIR] --json
-toudocu changes feedback respond --input response.json \
+toudocu agent next [--repository-root DIR] --json
+toudocu agent respond [--input response.json] \
   [--repository-root DIR] [--json]
 ```
 
-Без `--repository-root` Git определяет enclosing repository от cwd. Явный путь
-обязан быть canonical Git top-level. `pending` выдаёт batches FIFO по одному и
-повторяет oldest до успешного полного response. `respond` отклоняет неизвестные
-IDs, digest/revision conflict, missing или duplicate items, outcome вне
-`fixed|notFixed|needsClarification`, oversized text/response и unsafe
-`changedPaths`. Ни одна команда не запускает агента, LLM, shell или Git write.
+Без `--repository-root` Git ищет внешний репозиторий от текущего каталога.
+Явный путь должен быть его точным верхним уровнем. `next` выдаёт только
+старейшую незавершённую запись и не переходит к следующей до ответа. После
+истечения срока блокировки команда повторно выдаёт ту же запись.
 
-Стабильные diagnostics включают `REVIEW_INVALID_RESPONSE`,
-`REVIEW_MESSAGE_TOO_LARGE`, `REVIEW_STATE_BUSY`, `REVIEW_CONFLICT`,
-`REVIEW_UNSAFE_PATH`, `REVIEW_STATE_CORRUPTED` и связанные `REVIEW_*` коды.
+`respond` отклоняет неизвестный ID, другой ответ для завершённой записи,
+результат вне `answered|changed|no_change|needs_clarification|failed`, слишком
+большой текст и небезопасные пути в `changedPaths`. Для `question` запрещён результат
+`changed`. Команды не запускают агента или модель ИИ, не вызывают системную
+оболочку и не записывают Git.
 
-## Exit codes
+Стабильные коды перечислены в
+[JSON обратной связи с агентом](../reference/agent-feedback-json.md#диагностика).
 
-- `0` — операция завершена успешно;
+## Коды завершения
+
+- `0` — операция успешна;
 - `1` — ошибка аргументов, ввода-вывода, модели, генерации или проверки;
-- `1` при `--strict` — найдена хотя бы одна warning;
-- `changes`: `2` для ошибки аргумента или revision, `3` при недоступном Git,
-  `4` при внутренней ошибке;
-- `serve`: первоначальная ошибка сборки или listener завершает команду с `1`;
-  ошибка последующей пересборки не останавливает сервер.
-- `skill`: конфликт или частичная ошибка возвращает `1`; status и no-op — `0`.
+- `1` с `--strict` — найдено хотя бы одно предупреждение;
+- у `changes`: `2` — неверный аргумент или ссылка Git, `3` — Git недоступен,
+  `4` — внутренняя ошибка;
+- у `serve`: ошибка первой сборки или открытия адреса даёт `1`; поздняя ошибка
+  пересборки сервер не останавливает;
+- у `skill`: конфликт или частичная ошибка даёт `1`, чтение состояния и
+  отсутствие нужного изменения — `0`.
 
 ## Подробные правила
 
@@ -153,4 +171,4 @@ IDs, digest/revision conflict, missing или duplicate items, outcome вне
 - [Просмотр изменений](../guides/documentation-changes.md)
 - [Виды документов](../reference/document-types.md)
 - [Настройка](../reference/configuration.md)
-- [Установка AI-skill](../guides/skill-installation.md)
+- [Установка встроенного навыка](../guides/skill-installation.md)

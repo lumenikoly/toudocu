@@ -1,5 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Toudocu">
-  <rect width="64" height="64" fill="#09090b"/>
-  <path d="M12 15h40v9H37v25H27V24H12V15Z" fill="#fff"/>
-  <rect x="48" y="39" width="10" height="10" fill="#dff7d0"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#315fbd"/>
+  <path fill="#fff" d="M12 15h40v9H37v25H27V24H12V15Z"/>
 </svg>

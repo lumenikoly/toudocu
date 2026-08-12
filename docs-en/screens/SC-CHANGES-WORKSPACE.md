@@ -1,25 +1,127 @@
-# SC-CHANGES-WORKSPACE: Changes Viewer
+# SC-CHANGES-WORKSPACE: Changes
 
 - Identifier: SC-CHANGES-WORKSPACE
 - Type: Screen
 - Module: MOD-CHANGES
 - Status: Implemented
 - Route: `/changes/`
-- Preview: `../assets/screens/changes-workspace.png`
-- Last updated: 2026-08-06
+- Last updated: 2026-08-12
 
-A read-only workspace for comparing selected Git states of the documentation:
-summary, source, rendered and semantic diffs, screen overlay map, and task impact.
+This screen lets a developer review the current Git diff and continue a
+documentation discussion without leaving the local portal. It shows
+documentation and other changed repository files, but new messages to the agent
+are allowed only for canonical Markdown documents. The public
+`ChangeSetReport` remains limited to documentation.
 
-## Shell and states
+No current screenshot is available yet.
+`assets/screens/changes-workspace.png` shows an older layout and is therefore
+not declared as this document's Preview.
 
-The shared workspace header shows project branding, links to the portal, Editor,
-and Changes, marks Changes as active through `aria-current`, and provides
-appearance and color-scheme controls. The base, optional branch base, target
-revision, and compare action are kept in a separate context panel.
+## What the user sees
 
-Appearance changes apply immediately and persist across the other surfaces. The
-read-only CodeMirror merge view updates its theme compartment without resetting
-the selected document or tab. An active Mermaid diff is redrawn while preserving
-the report, filters, and URL state. On narrow screens, metrics, lists, and diffs
-use local scrolling only, without causing horizontal page overflow.
+The top bar links to Portal, Editor, and Changes and contains a
+“Discussions · N” button together with theme and color-scheme controls. The
+count covers every open project thread. Below it, the page shows the Git range
+and the changed file and line counts.
+
+Range settings are inside a disclosure panel. The user can choose start and end
+states and an optional base branch, then see the resolved Git refs, current
+branch, and dirty state. The panel closes after apply, on `Esc`, or after an
+outside click, and restores focus to the range control.
+
+## File list
+
+Files are sorted by path and split into two groups:
+
+- Changed — files in the current Git diff;
+- Related — files the user added for discussion context.
+
+The panel provides search, status and scope filters, plus a Kind filter for all
+files, documentation together with repository-root `CHANGELOG.md`, or other
+repository files. A related file enters local discussion state only after its
+first saved comment.
+
+The first matching file opens automatically. After a refresh, Toudocu tries to
+preserve the selected file, tab, and filters. When nothing matches, the screen
+states that the list is empty.
+
+After a file is selected, the list and URL update immediately. While Toudocu
+loads details for that file only, the main area shows its heading and a
+“Loading file…” message. Switching back to an already loaded tab reuses its
+data instead of repeating the request. A late response cannot replace a newer
+file selection. After an error, the user can select the file again.
+
+## File views
+
+Diff is the main tab and shows the exact Git patch. It supports unified and
+side-by-side layouts and patch copying. There is no Summary tab; old links with
+`tab=summary` or `tab=source` open Diff.
+
+Full file loads the current UTF-8 file only when opened. For a deleted file, it
+shows the last version before deletion. Markdown, JSON, YAML, Go, Java,
+JavaScript, and TypeScript receive syntax highlighting; other text files appear
+as plain text.
+
+Documentation gets only applicable extra tabs: Before and after, Semantics,
+Relationships, OpenAPI, Mermaid, assets, or screen map. Diagnostics remain
+collapsed until needed; an error opens them automatically.
+
+## Comments and agent responses
+
+A message can target an entire document, a new patch line, or selected content
+in Full file or unified diff. In both views, the selection menu can copy clean
+text, copy context, or add a question, and releasing the pointer does not clear
+the selection.
+
+The new side of a unified diff stores an exact document range. For the old side
+of a modified document, Toudocu creates a document anchor without a range and
+adds a visible quote containing the path and old line number to the message.
+Mixed selections and fully deleted documents still allow both copy actions, but
+their Add question action is unavailable. A separate “+” appears on hover and
+focus for lines that support an exact or document anchor and remains visible on
+touch screens. Source code and fully deleted documents do not show it.
+
+The form lets the user choose a question or change request. `Ctrl`+`Enter` or
+`Cmd`+`Enter` saves the message and immediately adds it to the queue; `Esc`
+cancels.
+
+The discussion panel opens over the workspace on the right and shows every
+project thread, open threads first. A pending message can be edited or deleted
+until the agent retrieves it through `agent next`. Any open or closed thread
+can be deleted in full after confirmation, permanently removing its messages
+and unprocessed queue entries. A message retrieved by the agent is immutable;
+the thread can continue with a new message after the agent responds.
+
+Copy prompt immediately copies the request to process the queue and does not
+change state. An agent result appears as a response, change, no change needed,
+clarification request, or error and never closes a discussion automatically.
+
+## Live updates and responsive layout
+
+Toudocu watches repository and discussion changes separately. When the open
+file changes, the screen offers to refresh it. Draft comment text is preserved,
+but the anchor must be selected again.
+
+On a wide screen, the file list and diff sit side by side while discussions
+slide over the workspace from the right with a backdrop. On phones, the
+discussion panel fills the viewport and the file list remains a separate
+drawer. `Esc` closes both panels; the discussion panel also closes when the
+backdrop is pressed and restores focus to the header button. Motion is disabled
+under `prefers-reduced-motion`, and state is always expressed with text as well
+as color.
+
+## Availability
+
+The screen and discussion writes are available only in the main portal started
+through `serve`. The Git range affects the view, but agent feedback always
+targets the current canonical document. Static builds, translation portals, and
+direct serving of a translation root do not include this capability.
+
+## Related documents
+
+- [UC-DOCS-05](../use-cases/UC-DOCS-05.md)
+- [UC-AGENT-FEEDBACK-01](../use-cases/UC-AGENT-FEEDBACK-01.md)
+- [MOD-AGENT-FEEDBACK](../modules/MOD-AGENT-FEEDBACK.md)
+- [FLOW-AGENT-FEEDBACK](../flows/FLOW-AGENT-FEEDBACK.md)
+- [Changes HTTP API](../contracts/changes-http.md)
+- [TASK-CHANGES-002](../work/TASK-CHANGES-002.md)

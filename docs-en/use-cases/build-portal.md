@@ -5,7 +5,7 @@
 - Actor: Developer
 - Module: MOD-SITE
 - Priority: High
-- Last updated: 2026-08-05
+- Last updated: 2026-08-12
 
 The developer converts a project-documentation directory into a read-only
 portal that is published on ordinary HTTP(S) static hosting and requires no
@@ -46,8 +46,15 @@ Toudocu backend after the build.
 ## Postconditions
 
 After successful generation, the output directory contains a backend-independent
-portal, static data, and `ProjectReport` schema v1. The source Markdown is
-unchanged. Local work uses `toudocu serve`; no new preview command is needed.
+portal, static data, and `ProjectReport` schema v1. Source Markdown is unchanged.
+Opening through `file://` is unsupported; use `toudocu serve` for local work.
+
+## Acceptance criteria
+
+- [x] The output contains a backend-independent portal, static data, and
+  `ProjectReport` schema v1.
+- [x] Generation leaves source Markdown unchanged.
+- [x] Local viewing uses `toudocu serve`, not `file://`.
 
 ## Business rules
 

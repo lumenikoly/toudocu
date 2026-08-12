@@ -79,7 +79,7 @@ func allowEditorMethods(w http.ResponseWriter, r *http.Request, methods ...strin
 		}
 	}
 	w.Header().Set("Allow", strings.Join(methods, ", "))
-	writeEditorError(w, http.StatusMethodNotAllowed, "method_not_allowed", "Метод не поддерживается", nil)
+	writeEditorError(w, http.StatusMethodNotAllowed, "method_not_allowed", "Method not allowed", nil)
 	return false
 }
 
@@ -106,15 +106,15 @@ func editorOriginAllowed(r *http.Request) bool {
 func requireEditorJSONAction(w http.ResponseWriter, r *http.Request, action string) bool {
 	mediaType, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
 	if err != nil || mediaType != "application/json" {
-		writeEditorError(w, http.StatusUnsupportedMediaType, "invalid_content_type", "Требуется Content-Type application/json", nil)
+		writeEditorError(w, http.StatusUnsupportedMediaType, "invalid_content_type", "Content-Type application/json is required", nil)
 		return false
 	}
 	if r.Header.Get("X-Toudocu-Action") != action {
-		writeEditorError(w, http.StatusForbidden, "action_forbidden", "Неверный X-Toudocu-Action", nil)
+		writeEditorError(w, http.StatusForbidden, "action_forbidden", "Invalid X-Toudocu-Action", nil)
 		return false
 	}
 	if !editorOriginAllowed(r) {
-		writeEditorError(w, http.StatusForbidden, "origin_forbidden", "Запрос должен быть same-origin", nil)
+		writeEditorError(w, http.StatusForbidden, "origin_forbidden", "Request must be same-origin", nil)
 		return false
 	}
 	return true
@@ -127,15 +127,15 @@ func decodeEditorJSON(w http.ResponseWriter, r *http.Request, target any) bool {
 	if err := decoder.Decode(target); err != nil {
 		var tooLarge *http.MaxBytesError
 		if errors.As(err, &tooLarge) {
-			writeEditorError(w, http.StatusRequestEntityTooLarge, "request_too_large", "JSON body превышает 3 MiB", nil)
+			writeEditorError(w, http.StatusRequestEntityTooLarge, "request_too_large", "JSON body exceeds 3 MiB", nil)
 		} else {
-			writeEditorError(w, http.StatusBadRequest, "invalid_json", "Некорректный JSON: "+err.Error(), nil)
+			writeEditorError(w, http.StatusBadRequest, "invalid_json", "Invalid JSON: "+err.Error(), nil)
 		}
 		return false
 	}
 	var trailing any
 	if err := decoder.Decode(&trailing); err != io.EOF {
-		writeEditorError(w, http.StatusBadRequest, "invalid_json", "После JSON object обнаружены дополнительные данные", nil)
+		writeEditorError(w, http.StatusBadRequest, "invalid_json", "Unexpected data after the JSON object", nil)
 		return false
 	}
 	return true
@@ -168,7 +168,7 @@ func (s *documentationServer) serveEditorAPI(w http.ResponseWriter, r *http.Requ
 			return
 		}
 	}
-	writeEditorError(w, http.StatusNotFound, "route_not_found", "Editor API route не найден", nil)
+	writeEditorError(w, http.StatusNotFound, "route_not_found", "Editor API route not found", nil)
 }
 
 func (s *documentationServer) serveEditorFiles(w http.ResponseWriter, r *http.Request) {
@@ -199,7 +199,7 @@ func (s *documentationServer) serveEditorFiles(w http.ResponseWriter, r *http.Re
 		Revision      string              `json:"revision"`
 		Files         []editorFileSummary `json:"files"`
 		Templates     []editorTemplate    `json:"templates"`
-	}{1, revision, editorFileSummaries(files), editorTemplates()})
+	}{1, revision, editorFileSummaries(files), editorTemplates(s.model)})
 }
 
 func editorFileSummaries(files []editorFile) []editorFileSummary {
@@ -253,7 +253,7 @@ func (s *documentationServer) serveEditorFile(w http.ResponseWriter, r *http.Req
 		return
 	}
 	if len(request.Content) > editorContentLimit {
-		writeEditorError(w, http.StatusRequestEntityTooLarge, "content_too_large", "Содержимое превышает 2 MiB", nil)
+		writeEditorError(w, http.StatusRequestEntityTooLarge, "content_too_large", "Content exceeds 2 MiB", nil)
 		return
 	}
 	if pendingDigest, pending := s.overwrites[request.Path]; pending {
@@ -312,7 +312,7 @@ func (s *documentationServer) writeEditorStale(w http.ResponseWriter, filePath s
 		revision = s.revision
 	}
 	s.overwrites[filePath] = current.Digest
-	writeEditorError(w, http.StatusConflict, "stale_digest", "файл изменён внешним процессом", map[string]any{
+	writeEditorError(w, http.StatusConflict, "stale_digest", "file changed by another process", map[string]any{
 		"digest": current.Digest, "content": current.Content, "revision": revision,
 	})
 }
@@ -331,7 +331,7 @@ func (s *documentationServer) decodeContentRequest(w http.ResponseWriter, r *htt
 		return editorContentRequest{}, false
 	}
 	if len(request.Content) > editorContentLimit {
-		writeEditorError(w, http.StatusRequestEntityTooLarge, "content_too_large", "Содержимое превышает 2 MiB", nil)
+		writeEditorError(w, http.StatusRequestEntityTooLarge, "content_too_large", "Content exceeds 2 MiB", nil)
 		return editorContentRequest{}, false
 	}
 	if _, _, err := s.workspace.resolve(request.Path, false); err != nil {
@@ -351,7 +351,7 @@ func (s *documentationServer) serveEditorPreview(w http.ResponseWriter, r *http.
 		return
 	}
 	if language, _ := editorLanguage(request.Path); language != "markdown" {
-		writeEditorError(w, http.StatusUnsupportedMediaType, "preview_not_supported", "Preview доступен только для Markdown", nil)
+		writeEditorError(w, http.StatusUnsupportedMediaType, "preview_not_supported", "Preview is available for Markdown only", nil)
 		return
 	}
 	model, err := buildDocumentationModel(s.options, map[string][]byte{request.Path: []byte(request.Content)})
@@ -361,10 +361,10 @@ func (s *documentationServer) serveEditorPreview(w http.ResponseWriter, r *http.
 	}
 	document := model.DocByPath[request.Path]
 	if document == nil {
-		writeEditorError(w, http.StatusNotFound, "file_not_found", "Markdown document не найден", nil)
+		writeEditorError(w, http.StatusNotFound, "file_not_found", "Markdown document not found", nil)
 		return
 	}
-	html := renderDocumentMarkdown(document, linkResolverFor(model, document), nil)
+	html := renderDocumentMarkdown(model, document, linkResolverFor(model, document), nil)
 	diagnostics := issueDiagnostics(model.Issues)
 	writeEditorJSON(w, http.StatusOK, struct {
 		SchemaVersion int                `json:"schemaVersion"`
@@ -408,7 +408,7 @@ func (s *documentationServer) serveEditorCreate(w http.ResponseWriter, r *http.R
 	}
 	template, templateExists := scaffoldTemplate(request.Template)
 	if !templateExists {
-		writeEditorError(w, http.StatusBadRequest, "invalid_template", "Неизвестный шаблон", nil)
+		writeEditorError(w, http.StatusBadRequest, "invalid_template", "Unknown template", nil)
 		return
 	}
 	createDirectory := template.spec.directory
@@ -423,7 +423,7 @@ func (s *documentationServer) serveEditorCreate(w http.ResponseWriter, r *http.R
 	createdPath, err := createFromEditorTemplate(s.options, request.Template, request.Language, request.Fields)
 	if err != nil {
 		code, status := "invalid_template", http.StatusBadRequest
-		if strings.Contains(err.Error(), "уже существует") {
+		if strings.Contains(err.Error(), "already exists") {
 			code, status = "file_exists", http.StatusConflict
 		}
 		writeEditorError(w, status, code, err.Error(), nil)
@@ -456,13 +456,14 @@ func (s *documentationServer) serveEditorUI(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	uiModel := workspaceModel(s.model)
+	ui := portalUI(uiModel)
 	locale := uiModel.SiteConfig.Project.Locale
 	if locale == "" {
 		locale = "en"
 	}
 	html, err := frontend.RenderEditor(frontend.WorkspaceView{
-		Lang: locale, HTMLAttributes: template.HTMLAttr(appearanceAttributes(uiModel.SiteConfig)),
-		Title: "Редактор — " + uiModel.Project.Title, Favicon: workspaceFavicon(uiModel),
+		UI: ui, Lang: locale, HTMLAttributes: template.HTMLAttr(appearanceAttributes(uiModel.SiteConfig)),
+		Title: ui.Text("nav.editor") + " — " + uiModel.Project.Title, Favicon: workspaceFavicon(uiModel),
 		AppearanceJS: "/assets/" + mustFrontendAsset("appearance.js"),
 		Styles:       []string{"/assets/" + mustFrontendAsset("portal.css"), "/assets/" + mustFrontendAsset("editor.css")},
 		Scripts: []frontend.ScriptAsset{
@@ -473,7 +474,7 @@ func (s *documentationServer) serveEditorUI(w http.ResponseWriter, r *http.Reque
 		Header:    template.HTML(workspaceHeader(uiModel, workspaceEditor)),
 	})
 	if err != nil {
-		http.Error(w, "Не удалось сформировать редактор", http.StatusInternalServerError)
+		http.Error(w, "Could not render editor", http.StatusInternalServerError)
 		return
 	}
 	_, _ = io.WriteString(w, html)

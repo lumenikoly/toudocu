@@ -47,3 +47,35 @@ test('editor ignores responses for another file or an older request', () => {
     assert.equal(state.editorResponseIsCurrent('docs/old.md', 'docs/current.md', 4, 4), false);
     assert.equal(state.editorResponseIsCurrent('docs/current.md', 'docs/current.md', 3, 4), false);
 });
+
+test('editor builds a file tree with root files, nested directories, and repeated names', () => {
+    const files = [
+        { path: 'index.md', language: 'markdown' },
+        { path: 'docs/guide/setup.md', language: 'markdown' },
+        { path: 'docs/reference/setup.md', language: 'markdown' },
+        { path: 'settings/config.yaml', language: 'yaml' },
+    ];
+
+    assert.deepEqual(state.buildFileTree(files), [
+        { kind: 'file', name: 'index.md', file: files[0] },
+        { kind: 'directory', name: 'docs', path: 'docs', children: [
+            { kind: 'directory', name: 'guide', path: 'docs/guide', children: [
+                { kind: 'file', name: 'setup.md', file: files[1] },
+            ] },
+            { kind: 'directory', name: 'reference', path: 'docs/reference', children: [
+                { kind: 'file', name: 'setup.md', file: files[2] },
+            ] },
+        ] },
+        { kind: 'directory', name: 'settings', path: 'settings', children: [
+            { kind: 'file', name: 'config.yaml', file: files[3] },
+        ] },
+    ]);
+});
+
+test('editor converts Go UTF-8 byte columns to CodeMirror UTF-16 offsets', () => {
+    assert.equal(state.utf16OffsetForUTF8Column('ascii', 4), 3);
+    assert.equal(state.utf16OffsetForUTF8Column('{"ключ": }', 14), 9);
+    assert.equal(state.utf16OffsetForUTF8Column('я😀x', 3), 1);
+    assert.equal(state.utf16OffsetForUTF8Column('я😀x', 7), 3);
+    assert.equal(state.utf16OffsetForUTF8Column('я😀x', 8), 4);
+});

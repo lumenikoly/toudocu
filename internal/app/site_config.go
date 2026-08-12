@@ -13,8 +13,9 @@ const defaultFooterURL = "https://lumenikoly.github.io/toudocu/"
 
 // FooterConfig configures the escaped footer text and its optional HTTPS link.
 type FooterConfig struct {
-	Text string
-	URL  string
+	Text        string
+	URL         string
+	defaultText bool
 }
 
 // HeroConfig configures the dashboard hero.
@@ -77,8 +78,8 @@ func defaultSiteConfig() SiteConfig {
 		Density:      "comfortable",
 		ContentWidth: "standard",
 		Footer: FooterConfig{
-			Text: "Сгенерировано Toudocu " + Version,
-			URL:  defaultFooterURL,
+			URL:         defaultFooterURL,
+			defaultText: true,
 		},
 		Hero:    HeroConfig{Enabled: true},
 		Changes: ChangesConfig{RenameSimilarity: 60, IncludeTaskArtifacts: true, IncludeAssets: true, SemanticDiff: true, RenderedDiff: true, MaxSourceDiffBytes: 2 * 1024 * 1024, MaxRenderedFileBytes: 1024 * 1024},
@@ -98,7 +99,7 @@ func parseConfigScalar(raw string, line int) (string, bool, error) {
 	}
 	if strings.HasPrefix(raw, "[") || strings.HasPrefix(raw, "{") || strings.HasPrefix(raw, "-") ||
 		strings.HasPrefix(raw, "&") || strings.HasPrefix(raw, "*") || raw == "|" || raw == ">" {
-		return "", false, fmt.Errorf("config.yml:%d: неподдерживаемая YAML-конструкция", line)
+		return "", false, fmt.Errorf("config.yml:%d: unsupported YAML construct", line)
 	}
 	if raw[0] == '"' || raw[0] == '\'' {
 		quote := raw[0]
@@ -116,7 +117,7 @@ func parseConfigScalar(raw string, line int) (string, bool, error) {
 			escaped = false
 		}
 		if end < 0 || strings.TrimSpace(raw[end+1:]) != "" && !strings.HasPrefix(strings.TrimSpace(raw[end+1:]), "#") {
-			return "", false, fmt.Errorf("config.yml:%d: неверная строка", line)
+			return "", false, fmt.Errorf("config.yml:%d: invalid string", line)
 		}
 		quoted := raw[:end+1]
 		if quote == '\'' {
@@ -124,7 +125,7 @@ func parseConfigScalar(raw string, line int) (string, bool, error) {
 		}
 		value, err := strconv.Unquote(quoted)
 		if err != nil {
-			return "", false, fmt.Errorf("config.yml:%d: неверная строка: %v", line, err)
+			return "", false, fmt.Errorf("config.yml:%d: invalid string: %v", line, err)
 		}
 		return value, true, nil
 	}
@@ -138,7 +139,7 @@ func parseConfigScalar(raw string, line int) (string, bool, error) {
 			break
 		}
 		if raw[i] == ':' && !inURL {
-			return "", false, fmt.Errorf("config.yml:%d: двоеточие в строке нужно заключить в кавычки", line)
+			return "", false, fmt.Errorf("config.yml:%d: a string containing a colon must be quoted", line)
 		}
 	}
 	return strings.TrimSpace(raw), false, nil
@@ -155,32 +156,32 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 			continue
 		}
 		if strings.Contains(rawLine, "\t") {
-			return config, fmt.Errorf("config.yml:%d: табуляция в отступах запрещена", line)
+			return config, fmt.Errorf("config.yml:%d: tabs are not allowed in indentation", line)
 		}
 		indent := len(rawLine) - len(strings.TrimLeft(rawLine, " "))
 		if indent%2 != 0 || indent > 6 {
-			return config, fmt.Errorf("config.yml:%d: неверный отступ", line)
+			return config, fmt.Errorf("config.yml:%d: invalid indentation", line)
 		}
 		level := indent / 2
 		if level > len(stack) {
-			return config, fmt.Errorf("config.yml:%d: неверная вложенность", line)
+			return config, fmt.Errorf("config.yml:%d: invalid nesting", line)
 		}
 		text := strings.TrimSpace(rawLine)
 		if strings.HasPrefix(text, "- ") && strings.Join(stack, ".") == "changes.exclude" {
 			value, _, err := parseConfigScalar(strings.TrimSpace(strings.TrimPrefix(text, "- ")), line)
 			if err != nil || value == "" {
-				return config, fmt.Errorf("config.yml:%d: неверный changes.exclude", line)
+				return config, fmt.Errorf("config.yml:%d: invalid changes.exclude", line)
 			}
 			changeExcludes = append(changeExcludes, value)
 			continue
 		}
 		colon := strings.IndexByte(text, ':')
 		if colon <= 0 {
-			return config, fmt.Errorf("config.yml:%d: ожидался ключ и двоеточие", line)
+			return config, fmt.Errorf("config.yml:%d: expected a key followed by a colon", line)
 		}
 		key := strings.TrimSpace(text[:colon])
 		if strings.ContainsAny(key, " {}[]&*!|>'\"") {
-			return config, fmt.Errorf("config.yml:%d: неверный ключ %q", line, key)
+			return config, fmt.Errorf("config.yml:%d: invalid key %q", line, key)
 		}
 		stack = stack[:level]
 		rawValue := strings.TrimSpace(text[colon+1:])
@@ -189,7 +190,7 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 		}
 		path := strings.Join(append(append([]string{}, stack...), key), ".")
 		if _, duplicate := values[path]; duplicate {
-			return config, fmt.Errorf("config.yml:%d: повторный ключ %q", line, path)
+			return config, fmt.Errorf("config.yml:%d: duplicate key %q", line, path)
 		}
 		if rawValue == "" {
 			values[path] = configScalar{line: line}
@@ -242,6 +243,7 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 		_ = scalar
 	}
 	if _, hasCustomText := values["site.footer.text"]; hasCustomText {
+		config.Footer.defaultText = false
 		if _, hasCustomURL := values["site.footer.url"]; !hasCustomURL {
 			config.Footer.URL = ""
 		}
@@ -256,23 +258,23 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 				// check remain independent from an unfinished locale profile.
 				continue
 			}
-			return config, fmt.Errorf("config.yml:%d: неизвестный ключ %q", scalar.line, key)
+			return config, fmt.Errorf("config.yml:%d: unknown key %q", scalar.line, key)
 		}
 		isBoolean := key == "site.hero.enabled" || strings.HasPrefix(key, "changes.include") || key == "changes.semanticDiff" || key == "changes.renderedDiff"
 		if !isBoolean && !scalar.quoted && (scalar.value == "true" || scalar.value == "false") {
-			return config, fmt.Errorf("config.yml:%d: %s должен быть строкой", scalar.line, key)
+			return config, fmt.Errorf("config.yml:%d: %s must be a string", scalar.line, key)
 		}
 		switch key {
 		case "project.locale":
 			locale, ok := normalizeLocale(scalar.value)
 			if !ok {
-				return config, fmt.Errorf("config.yml:%d: project.locale должен быть корректным BCP-47-style locale", scalar.line)
+				return config, fmt.Errorf("config.yml:%d: project.locale must be a valid BCP-47-style locale", scalar.line)
 			}
 			config.Project.Locale = locale
 		case "translations":
 		case "project.sections.architecture", "project.sections.modules", "project.sections.use-cases", "project.sections.flows", "project.sections.screens", "project.sections.decisions", "project.sections.contracts", "project.sections.quality", "project.sections.runbooks", "project.sections.reference", "project.sections.work", "project.sections.guides":
 			if strings.TrimSpace(scalar.value) == "" {
-				return config, fmt.Errorf("config.yml:%d: %s не может быть пустым", scalar.line, key)
+				return config, fmt.Errorf("config.yml:%d: %s must not be empty", scalar.line, key)
 			}
 			if config.Project.Sections == nil {
 				config.Project.Sections = map[SectionType]string{}
@@ -302,7 +304,7 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 			config.Hero.Image = scalar.value
 		case "site.hero.enabled":
 			if scalar.quoted || scalar.value != "true" && scalar.value != "false" {
-				return config, fmt.Errorf("config.yml:%d: site.hero.enabled должен быть boolean", scalar.line)
+				return config, fmt.Errorf("config.yml:%d: site.hero.enabled must be a boolean", scalar.line)
 			}
 			config.Hero.Enabled = scalar.value == "true"
 		case "changes.defaultBaseRef":
@@ -310,24 +312,24 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 		case "changes.renameSimilarity":
 			value, err := strconv.Atoi(scalar.value)
 			if err != nil || value < 1 || value > 100 {
-				return config, fmt.Errorf("config.yml:%d: changes.renameSimilarity должен быть от 1 до 100", scalar.line)
+				return config, fmt.Errorf("config.yml:%d: changes.renameSimilarity must be between 1 and 100", scalar.line)
 			}
 			config.Changes.RenameSimilarity = value
 		case "changes.maxSourceDiffBytes":
 			value, err := strconv.Atoi(scalar.value)
 			if err != nil || value < 1 {
-				return config, fmt.Errorf("config.yml:%d: changes.maxSourceDiffBytes должен быть положительным", scalar.line)
+				return config, fmt.Errorf("config.yml:%d: changes.maxSourceDiffBytes must be positive", scalar.line)
 			}
 			config.Changes.MaxSourceDiffBytes = value
 		case "changes.maxRenderedFileBytes":
 			value, err := strconv.Atoi(scalar.value)
 			if err != nil || value < 1 {
-				return config, fmt.Errorf("config.yml:%d: changes.maxRenderedFileBytes должен быть положительным", scalar.line)
+				return config, fmt.Errorf("config.yml:%d: changes.maxRenderedFileBytes must be positive", scalar.line)
 			}
 			config.Changes.MaxRenderedFileBytes = value
 		case "changes.includeTaskArtifacts", "changes.includeAssets", "changes.semanticDiff", "changes.renderedDiff":
 			if scalar.quoted || scalar.value != "true" && scalar.value != "false" {
-				return config, fmt.Errorf("config.yml:%d: %s должен быть boolean", scalar.line, key)
+				return config, fmt.Errorf("config.yml:%d: %s must be a boolean", scalar.line, key)
 			}
 			value := scalar.value == "true"
 			switch key {
@@ -363,7 +365,7 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 		if _, changesOnly := values["changes"]; changesOnly || values["project"].line > 0 || values["translations"].line > 0 {
 			return config, validateSiteConfig(config)
 		}
-		return config, fmt.Errorf("config.yml: отсутствует корневая карта site")
+		return config, fmt.Errorf("config.yml: root site map is missing")
 	}
 	return config, validateSiteConfig(config)
 }
@@ -374,7 +376,7 @@ func enumValue(field, value string, allowed ...string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("config.yml: неверное значение site.%s %q (допустимо: %s)", field, value, strings.Join(allowed, ", "))
+	return fmt.Errorf("config.yml: invalid site.%s value %q (allowed: %s)", field, value, strings.Join(allowed, ", "))
 }
 
 func validateSiteConfig(config SiteConfig) error {
@@ -396,7 +398,7 @@ func validateSiteConfig(config SiteConfig) error {
 	if config.Footer.URL != "" {
 		parsed, err := url.ParseRequestURI(config.Footer.URL)
 		if err != nil || parsed.Scheme != "https" || parsed.Host == "" || parsed.User != nil || strings.ContainsAny(config.Footer.URL, "\r\n\t <>\"'") {
-			return fmt.Errorf("config.yml: site.footer.url должен быть безопасным HTTPS URL")
+			return fmt.Errorf("config.yml: site.footer.url must be a safe HTTPS URL")
 		}
 	}
 	return nil
@@ -407,27 +409,27 @@ func validateBrandAsset(repositoryRoot, configuredPath, kind string) (string, st
 		return "", "", nil
 	}
 	if filepath.IsAbs(configuredPath) || strings.Contains(configuredPath, "\\") {
-		return "", "", fmt.Errorf("config.yml: site.%s должен быть относительным путём внутри assets/", kind)
+		return "", "", fmt.Errorf("config.yml: site.%s must be a relative path inside assets/", kind)
 	}
 	clean := filepath.Clean(filepath.FromSlash(configuredPath))
 	if clean == "." || clean == "assets" || !strings.HasPrefix(clean, "assets"+string(filepath.Separator)) {
-		return "", "", fmt.Errorf("config.yml: site.%s должен находиться внутри .toudocu/assets/", kind)
+		return "", "", fmt.Errorf("config.yml: site.%s must be inside .toudocu/assets/", kind)
 	}
 	relative := strings.TrimPrefix(clean, "assets"+string(filepath.Separator))
 	if relative == "" || relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
-		return "", "", fmt.Errorf("config.yml: site.%s выходит за пределы .toudocu/assets/", kind)
+		return "", "", fmt.Errorf("config.yml: site.%s escapes .toudocu/assets/", kind)
 	}
 	assetsRoot := filepath.Join(repositoryRoot, ".toudocu", "assets")
 	for _, directory := range []string{filepath.Join(repositoryRoot, ".toudocu"), assetsRoot} {
 		info, err := os.Lstat(directory)
 		if err != nil {
 			if os.IsNotExist(err) {
-				return "", "", fmt.Errorf("config.yml: asset site.%s не найден: %s", kind, configuredPath)
+				return "", "", fmt.Errorf("config.yml: site.%s asset not found: %s", kind, configuredPath)
 			}
 			return "", "", err
 		}
 		if info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
-			return "", "", fmt.Errorf("config.yml: symlink запрещён в пути site.%s: %s", kind, configuredPath)
+			return "", "", fmt.Errorf("config.yml: symbolic links are not allowed in site.%s path: %s", kind, configuredPath)
 		}
 	}
 	current := assetsRoot
@@ -436,17 +438,17 @@ func validateBrandAsset(repositoryRoot, configuredPath, kind string) (string, st
 		info, err := os.Lstat(current)
 		if err != nil {
 			if os.IsNotExist(err) {
-				return "", "", fmt.Errorf("config.yml: asset site.%s не найден: %s", kind, configuredPath)
+				return "", "", fmt.Errorf("config.yml: site.%s asset not found: %s", kind, configuredPath)
 			}
 			return "", "", err
 		}
 		if info.Mode()&os.ModeSymlink != 0 {
-			return "", "", fmt.Errorf("config.yml: symlink запрещён для site.%s: %s", kind, configuredPath)
+			return "", "", fmt.Errorf("config.yml: symbolic links are not allowed for site.%s: %s", kind, configuredPath)
 		}
 	}
 	info, err := os.Stat(current)
 	if err != nil || !info.Mode().IsRegular() {
-		return "", "", fmt.Errorf("config.yml: site.%s должен указывать на обычный файл", kind)
+		return "", "", fmt.Errorf("config.yml: site.%s must point to a regular file", kind)
 	}
 	extension := strings.ToLower(filepath.Ext(current))
 	if extension == "" {
@@ -462,7 +464,7 @@ func loadSiteConfig(repositoryRoot string) (SiteConfig, map[string]string, error
 		return defaultSiteConfig(), map[string]string{}, nil
 	}
 	if err != nil {
-		return SiteConfig{}, nil, fmt.Errorf("не удалось прочитать .toudocu/config.yml: %w", err)
+		return SiteConfig{}, nil, fmt.Errorf("could not read .toudocu/config.yml: %w", err)
 	}
 	config, err := parseSiteConfig(data)
 	if err != nil {
@@ -513,17 +515,17 @@ func selectTranslationProfile(config *SiteConfig, repositoryRoot, inputRoot stri
 	// it prevents an accidental multilingual tree from becoming one model.
 	canonicalRoot := filepath.Join(repositoryRoot, "docs")
 	if info, statErr := os.Stat(canonicalRoot); statErr == nil && info.IsDir() && (pathContains(canonicalRoot, root) || pathContains(root, canonicalRoot)) {
-		return nil, fmt.Errorf("TRANSLATION_ROOT_COLLISION: translations.%s пересекается с canonical docs root", selected)
+		return nil, fmt.Errorf("TRANSLATION_ROOT_COLLISION: translations.%s overlaps the canonical documentation root", selected)
 	}
 	if selected == config.Project.Locale {
-		return nil, fmt.Errorf("TRANSLATION_LOCALE_CONFLICT: locale %q совпадает с project.locale", selected)
+		return nil, fmt.Errorf("TRANSLATION_LOCALE_CONFLICT: locale %q matches project.locale", selected)
 	}
 	if len(profile.Sections) != len(BuiltinSections) {
-		return nil, fmt.Errorf("TRANSLATION_PROFILE_INCOMPLETE: translations.%s.sections должен содержать все встроенные разделы", selected)
+		return nil, fmt.Errorf("TRANSLATION_PROFILE_INCOMPLETE: translations.%s.sections must contain every built-in section", selected)
 	}
 	for _, spec := range BuiltinSections {
 		if strings.TrimSpace(profile.Sections[spec.Type]) == "" {
-			return nil, fmt.Errorf("TRANSLATION_PROFILE_INCOMPLETE: translations.%s.sections.%s пуст", selected, spec.Type)
+			return nil, fmt.Errorf("TRANSLATION_PROFILE_INCOMPLETE: translations.%s.sections.%s is empty", selected, spec.Type)
 		}
 	}
 	for otherLocale, other := range config.Translations {
@@ -535,7 +537,7 @@ func selectTranslationProfile(config *SiteConfig, repositoryRoot, inputRoot stri
 			continue
 		}
 		if filepath.Clean(otherRoot) == root || pathContains(root, otherRoot) || pathContains(otherRoot, root) {
-			return nil, fmt.Errorf("TRANSLATION_ROOT_COLLISION: translations.%s и translations.%s пересекаются", selected, otherLocale)
+			return nil, fmt.Errorf("TRANSLATION_ROOT_COLLISION: translations.%s overlaps translations.%s", selected, otherLocale)
 		}
 	}
 	config.Project = ProjectConfig{Locale: selected, Sections: profile.Sections}
@@ -556,7 +558,7 @@ func translationLocaleForRoot(config SiteConfig, repositoryRoot, inputRoot strin
 }
 
 func translationRootReadOnlyError(locale string) error {
-	return fmt.Errorf("%s: translation root %q доступен только для чтения; используйте canonical docs root", translationRootReadOnlyCode, locale)
+	return fmt.Errorf("%s: translation root %q is read-only; use the canonical documentation root", translationRootReadOnlyCode, locale)
 }
 
 func translationLocaleForOptions(options Options) (string, error) {
@@ -599,15 +601,15 @@ func rejectTranslationTaskModel(model *Model) error {
 
 func safeTranslationRoot(repositoryRoot, configured string) (string, error) {
 	if strings.TrimSpace(configured) == "" || filepath.IsAbs(configured) || strings.Contains(configured, "\\") {
-		return "", fmt.Errorf("translation root должен быть непустым относительным путём внутри repository root")
+		return "", fmt.Errorf("translation root must be a non-empty relative path inside the repository root")
 	}
 	clean := filepath.Clean(filepath.FromSlash(configured))
 	if clean == "." || clean == ".." || strings.HasPrefix(clean, ".."+string(filepath.Separator)) {
-		return "", fmt.Errorf("translation root выходит за repository root")
+		return "", fmt.Errorf("translation root escapes the repository root")
 	}
 	root := filepath.Join(repositoryRoot, clean)
 	if !pathContains(repositoryRoot, root) || filepath.Clean(root) == filepath.Clean(repositoryRoot) {
-		return "", fmt.Errorf("translation root должен быть вложен в repository root")
+		return "", fmt.Errorf("translation root must be nested inside the repository root")
 	}
 	current := repositoryRoot
 	for _, part := range strings.Split(clean, string(filepath.Separator)) {
@@ -620,7 +622,7 @@ func safeTranslationRoot(repositoryRoot, configured string) (string, error) {
 			return "", err
 		}
 		if info.Mode()&os.ModeSymlink != 0 {
-			return "", fmt.Errorf("symlink запрещён в translation root: %s", configured)
+			return "", fmt.Errorf("symbolic links are not allowed in the translation root: %s", configured)
 		}
 	}
 	return root, nil

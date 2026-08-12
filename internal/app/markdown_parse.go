@@ -8,11 +8,11 @@ import (
 
 var fieldAliases = map[string]string{
 	"status": "status", "статус": "status", "состояние": "status", "stage": "stage", "этап": "stage",
-	"version": "version", "версия": "version", "owner": "owner", "владелец": "owner", "команда": "owner", "team": "owner",
+	"version": "version", "версия": "version",
 	"author": "author", "автор": "author", "actor": "actor", "актор": "actor", "priority": "priority", "приоритет": "priority",
 	"severity": "severity", "серьёзность": "severity", "серьезность": "severity", "reproducibility": "reproducibility", "воспроизводимость": "reproducibility",
 	"regression": "regression", "регрессия": "regression", "type": "type", "тип": "type", "document type": "documentType", "тип документа": "documentType",
-	"architecture question": "architectureQuestion", "архитектурный вопрос": "architectureQuestion", "source": "source", "источник": "source",
+	"architecture question": "architectureQuestion", "architectural question": "architectureQuestion", "архитектурный вопрос": "architectureQuestion", "source": "source", "источник": "source",
 	"criticality": "criticality", "критичность": "criticality", "module": "module", "модуль": "module", "use case": "useCase", "scenario": "useCase",
 	"сценарий": "useCase", "связанный сценарий": "useCase", "flow": "flow", "process": "flow", "процесс": "flow",
 	"screens": "screens", "screens affected": "screens", "экраны": "screens", "затронутые экраны": "screens", "transitions": "transitions",
@@ -31,7 +31,7 @@ var fieldAliases = map[string]string{
 }
 
 var displayFieldNames = map[string]string{
-	"status": "Статус", "stage": "Этап", "version": "Версия", "owner": "Владелец", "author": "Автор", "actor": "Актор",
+	"status": "Статус", "stage": "Этап", "version": "Версия", "author": "Автор", "actor": "Актор",
 	"priority": "Приоритет", "criticality": "Критичность", "severity": "Серьёзность", "reproducibility": "Воспроизводимость", "regression": "Регрессия",
 	"module": "Модуль", "useCase": "Сценарий", "dependsOn": "Зависит от", "date": "Дата", "flow": "Процесс", "screens": "Экраны",
 	"transitions": "Переходы", "standards": "Стандарты", "runbooks": "Затронутые runbooks", "route": "Маршрут", "preview": "Превью",

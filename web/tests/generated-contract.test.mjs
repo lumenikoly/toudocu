@@ -114,18 +114,35 @@ test("serve navigation replaces the versioned bootstrap", async () => {
   }
 });
 
+test("changes review requests preserve the selected Git range", async () => {
+  const source = await readFile(new URL("../src/features/changes/index.ts", import.meta.url), "utf8");
+  assert.equal(source.includes("fetch(`${REVIEW}${endpoint}`"), false);
+  assert.equal(source.includes("fetch(`${REVIEW}/discussions`"), false);
+  for (const required of ["fetch(reviewURL(endpoint)", "fetch(reviewURL('/discussions')"]) {
+    assert.equal(source.includes(required), true, `review request bypasses range query: ${required}`);
+  }
+});
+
 test("browser behavior reads user-facing copy from the locale catalog", async () => {
   const root = new URL("../src/", import.meta.url);
-  const catalogSource = await readFile(new URL("../src/core/messages.ru.ts", import.meta.url), "utf8");
-  const baseSource = await readFile(new URL("../src/core/locale.ts", import.meta.url), "utf8");
-  const defined = new Set([...`${catalogSource}\n${baseSource}`.matchAll(/^\s*["']?([a-z][a-z0-9.-]+)["']?\s*:/gmi)].map((match) => match[1]));
+  const russian = JSON.parse(await readFile(new URL("../../internal/site/i18n/ru.json", import.meta.url), "utf8"));
+  const english = JSON.parse(await readFile(new URL("../../internal/site/i18n/en.json", import.meta.url), "utf8"));
+  const defined = new Set(Object.keys(english));
+  assert.deepEqual(Object.keys(english).sort(), Object.keys(russian).sort());
+  assert.equal(/[А-Яа-яЁё]/.test(JSON.stringify(english)), false, "English catalog contains Russian copy");
+  for (const [key, value] of Object.entries(russian)) {
+    const markers = (copy) => [...copy.matchAll(/\{\d+\}/g)].map((match) => match[0]).sort();
+    assert.deepEqual(markers(english[key]), markers(value), `${key} placeholders differ`);
+    assert.equal(/<\/?[a-z][^>]*>/i.test(english[key]), false, `${key} English value contains HTML`);
+    assert.equal(/<\/?[a-z][^>]*>/i.test(value), false, `${key} Russian value contains HTML`);
+  }
   async function sources(directory) {
     const entries = await readdir(directory, { withFileTypes: true });
     const files = [];
     for (const entry of entries) {
       const target = new URL(`${entry.name}${entry.isDirectory() ? "/" : ""}`, directory);
       if (entry.isDirectory()) files.push(...await sources(target));
-      else if (entry.name.endsWith(".ts") && !["locale.ts", "messages.ru.ts"].includes(entry.name)) files.push(target);
+      else if (entry.name.endsWith(".ts") && entry.name !== "locale.ts") files.push(target);
     }
     return files;
   }
@@ -136,4 +153,6 @@ test("browser behavior reads user-facing copy from the locale catalog", async ()
       assert.equal(defined.has(match[1]), true, `${file.pathname} uses missing locale key ${match[1]}`);
     }
   }
+  const localeSource = await readFile(new URL("../src/core/locale.ts", import.meta.url), "utf8");
+  assert.equal(localeSource.includes("registerMessages"), false);
 });

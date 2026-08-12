@@ -97,7 +97,7 @@ func referencedEntityIssues(model *Model, item *WorkItem) []Issue {
 	}
 	check := func(kind, id string, values []string) {
 		if id != "" && !exists(values, id) {
-			issues = append(issues, readinessIssue("missing-task-"+kind, "Связанная сущность не найдена: "+id+".", item))
+			issues = append(issues, readinessIssue("missing-task-"+kind, "Linked entity not found: "+id+".", item))
 		}
 	}
 	check("module", item.ModuleID, moduleIDs)
@@ -162,7 +162,7 @@ func documentationImpactIssues(model *Model, item *WorkItem) []Issue {
 			continue
 		}
 		if filepath.IsAbs(filepath.FromSlash(value)) {
-			issues = append(issues, readinessIssue("unsafe-documentation-impact-path", "Documentation-impact путь должен быть относительным: "+value+".", item))
+			issues = append(issues, readinessIssue("unsafe-documentation-impact-path", "Documentation-impact path must be relative: "+value+".", item))
 			continue
 		}
 		candidates := []string{
@@ -185,11 +185,11 @@ func documentationImpactIssues(model *Model, item *WorkItem) []Issue {
 			}
 		}
 		if unsafe && !found {
-			issues = append(issues, readinessIssue("unsafe-documentation-impact-path", "Documentation-impact путь выходит за repository-root: "+value+".", item))
+			issues = append(issues, readinessIssue("unsafe-documentation-impact-path", "Documentation-impact path escapes the repository root: "+value+".", item))
 			continue
 		}
 		if !found {
-			issues = append(issues, readinessIssue("missing-documentation-impact-path", "Указанный documentation-impact путь не существует: "+value+".", item))
+			issues = append(issues, readinessIssue("missing-documentation-impact-path", "Declared documentation-impact path does not exist: "+value+".", item))
 		}
 	}
 	return issues
@@ -229,22 +229,22 @@ func taskReadiness(model *Model, taskID string, strict bool) (*WorkItem, []Issue
 	}
 	for _, field := range required {
 		if strings.TrimSpace(field.value) == "" {
-			issues = append(issues, readinessIssue(field.code, "Обязательное поле задачи не заполнено: "+field.label+".", item))
+			issues = append(issues, readinessIssue(field.code, "Required task field is empty: "+field.label+".", item))
 		}
 	}
 	if strings.TrimSpace(item.ModuleID) == "" {
-		issues = append(issues, readinessIssue("missing-task-module", "Для готовой к работе задачи требуется связанный module.", item))
+		issues = append(issues, readinessIssue("missing-task-module", "A task ready for work requires a linked module.", item))
 	}
 	if item.Type == "Feature" {
 		if strings.TrimSpace(item.BehaviorChange) == "" || item.Before == "" || item.After == "" {
-			issues = append(issues, readinessIssue("missing-behavior-change", "Для Feature требуются «Изменение поведения», «Было» и «Станет».", item))
+			issues = append(issues, readinessIssue("missing-behavior-change", "A Feature requires Behavior change, Before, and After content.", item))
 		}
 		if item.UseCaseID == "" {
-			issues = append(issues, readinessIssue("missing-task-use-case", "Для Feature требуется связанный use case.", item))
+			issues = append(issues, readinessIssue("missing-task-use-case", "A Feature requires a linked use case.", item))
 		}
 	} else if item.Type == "Bug" {
 		if item.UseCaseID == "" && !item.useCaseOmitted {
-			issues = append(issues, readinessIssue("missing-task-use-case", "Для Bug требуется связанный use case либо допустимое обоснование неприменимости.", item))
+			issues = append(issues, readinessIssue("missing-task-use-case", "A Bug requires a linked use case or a valid not-applicable explanation.", item))
 		}
 	} else if item.Type != "" && item.UseCaseID == "" {
 		document := model.DocByPath[item.Document]
@@ -261,11 +261,11 @@ func taskReadiness(model *Model, taskID string, strict bool) (*WorkItem, []Issue
 			}
 		}
 		if !found {
-			issues = append(issues, readinessIssue("missing-use-case-omission-reason", "Техническая задача без use case требует обоснование отсутствия сценария.", item))
+			issues = append(issues, readinessIssue("missing-use-case-omission-reason", "A technical task without a use case requires a use-case omission reason.", item))
 		}
 	}
 	if len(item.Criteria) == 0 {
-		issues = append(issues, readinessIssue("missing-acceptance-criterion", "Требуется хотя бы один AC-*.", item))
+		issues = append(issues, readinessIssue("missing-acceptance-criterion", "At least one AC-* criterion is required.", item))
 	}
 	seen := map[string]int{}
 	for _, check := range item.Checks {
@@ -273,7 +273,7 @@ func taskReadiness(model *Model, taskID string, strict bool) (*WorkItem, []Issue
 	}
 	for _, criterion := range item.Verification {
 		if seen[criterion.CriterionID] != 1 || len(criterion.Commands) == 0 {
-			issues = append(issues, readinessIssue("invalid-criterion-verification", "Для "+criterion.CriterionID+" требуется ровно одна исполняемая verification mapping.", item))
+			issues = append(issues, readinessIssue("invalid-criterion-verification", "Criterion "+criterion.CriterionID+" requires exactly one executable verification mapping.", item))
 		}
 	}
 	requiredTargets := []string{"ALL", "DOCS"}
@@ -282,7 +282,7 @@ func taskReadiness(model *Model, taskID string, strict bool) (*WorkItem, []Issue
 	}
 	for _, target := range requiredTargets {
 		if seen[target] != 1 {
-			issues = append(issues, readinessIssue("missing-verification-target", "Требуется ровно одна verification mapping для "+target+".", item))
+			issues = append(issues, readinessIssue("missing-verification-target", "Exactly one verification mapping is required for "+target+".", item))
 		}
 	}
 	issues = append(issues, referencedEntityIssues(model, item)...)
@@ -341,7 +341,7 @@ func BuildTaskReady(model *Model, taskID string, strict bool) TaskReadyReport {
 		}
 	default:
 		report.Status = "invalid_state"
-		report.Issues = append(report.Issues, readinessIssue("invalid-task-ready-state", "task ready разрешён только для Draft или Ready.", item))
+		report.Issues = append(report.Issues, readinessIssue("invalid-task-ready-state", "task ready is allowed only for Draft or Ready tasks.", item))
 	}
 	return report
 }

@@ -20,7 +20,7 @@ Toudocu validates only explicit promises:
 | Reserved path | A special document kind | The contract for that kind |
 | Stable ID | Durable entity identity | Format, uniqueness, and allowed location |
 | ID field or local link | Explicit relationship | Existence and allowed target kind |
-| Checkbox in `roadmap.md` | Global-scope item | Supported ID and derived state for `UC-*` |
+| Checkbox in `roadmap.md` | Global-scope item | Supported ID and `UC-*` readiness derived from status and acceptance criteria |
 | `task ready` | Complete task contract | Required fields, sections, relationships, and checks |
 | `task verify --run` | Permission to execute commands | Task-local validation before execution |
 
@@ -58,7 +58,7 @@ staleness. Never invent information merely to remove a warning.
 | Any other path | Ordinary Markdown without a built-in typed contract |
 
 An unknown top-level Markdown section declares its own `index.md` with
-`Type: Custom`, an owner, a description, and a useful H1. This adds navigation,
+`Type: Custom`, a description, and a useful H1. This adds navigation,
 not new built-in semantics. See [Document Types](document-types.md) for the
 semantic boundaries between kinds.
 
@@ -137,7 +137,7 @@ portal; a derived reverse relationship needs no duplicate Markdown field.
 | Work item | `Standards` | `STD-*` | Optional list | Documents become required reads |
 | Work item | `Affected runbooks` | `RB-*` | Optional list | Documents become required reads |
 | Work item | `Depends on` | `TASK-*` or `BUG-*` | Optional list | Dependency enters the task graph |
-| `roadmap.md` | ID in a checklist item | `UC-*`, `CON-*`, or `DLV-*` | Exactly one supported ID per item | `UC-*` state comes from its use case |
+| `roadmap.md` | ID in a checklist item | `UC-*`, `CON-*`, `CONTRACT-*`, `DLV-*`, or `DELIVERABLE-*` | Exactly one supported ID per item | `UC-*` readiness is derived from its use case |
 | Architecture Overview | Direct Markdown link | Every other `architecture/**/*.md` | One or more per document | Detail is listed in overview |
 | Superseded `STD-*` | `Superseded by` | `STD-*` | Exactly one when superseded | Standard replacement chain |
 
@@ -152,8 +152,17 @@ Toudocu derives views only from canonical Markdown sources:
 - `TR-*` rows create incoming/outgoing transitions, the screen graph, and the
   playable flow for the selected `UC-*`.
 - Parent-screen relationships create the Screen Map hierarchy.
-- A roadmap `UC-*` gets state from its use case; `CON-*` and `DLV-*` retain
-  their checkbox state.
+- A roadmap `UC-*` is complete only when its status belongs to the `done`
+  group, its Acceptance criteria section contains at least one checkbox, and
+  every checkbox in that section is checked. Nested subsections are included;
+  the next heading of the same or higher level ends the section. `CON-*`,
+  `CONTRACT-*`, `DLV-*`, and `DELIVERABLE-*` retain their checkbox state.
+- A roadmap checkbox that differs from computed `UC-*` readiness produces
+  `roadmap-item-completion-mismatch`; a completed stage with an incomplete item
+  produces `roadmap-section-status-mismatch`.
+- A completed use case without criteria produces
+  `done-use-case-missing-acceptance-criteria`; an open criterion produces
+  `done-use-case-has-open-acceptance-criteria`.
 - Links, IDs, and task metadata create backlinks, task context, and
   traceability.
 - Mermaid nodes and edges are visualization only; diagram text creates no
@@ -220,10 +229,11 @@ Supported constructs are CommonMark headings, paragraphs, emphasis, links,
 safe raster images, blockquotes, lists, task lists, tables, strikethrough,
 literal autolinks, inline code, and fenced code.
 
-Raw HTML, completed leading front matter, attributes, footnotes, definition
-lists, active SVG/XML/HTML assets, and JavaScript URLs are unsupported. Local
-links and images must stay inside the repository root. Fenced code is not
-parsed as headings, links, metadata, or tasks.
+Raw HTML, front matter at the start of a file between matching `---` or `+++`
+lines, Markdown attributes, footnotes, definition lists, active SVG/XML/HTML
+assets, and JavaScript URLs are unsupported. Local links and images must stay
+inside the repository root. Fenced code is not parsed as headings, links,
+metadata, or tasks.
 
 ## Order for creating a connected model
 

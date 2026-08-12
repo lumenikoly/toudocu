@@ -1,16 +1,15 @@
-import { registerMessages, text } from "../../core/locale";
-import { editorMessages } from "../../core/messages.ru";
+import { text } from "../../core/locale";
 import { closeDialogOnEscape } from "../../components";
-import { diagnosticsForEditor, editorResponseIsCurrent } from "./state";
-registerMessages(editorMessages);
+import { buildFileTree, diagnosticsForEditor, editorResponseIsCurrent } from "./state";
 (() => {
     'use strict';
     const page: any = window.ToudocuPage;
+    const locale: any = page?.ui.locale || 'en';
     const API: any = page?.runtime === 'serve' && page.capabilities?.editor ? page.endpoints?.editor : '';
     const $: any = (selector: any, root: any = document) => root.querySelector(selector);
     const state: any = {
         files: [], templates: [], revision: '', etag: '', current: null,
-        baseline: '', dirty: false, external: null, view: 'editor', editor: null,
+        baseline: '', dirty: false, external: null, view: 'editor', editor: null, collapsedDirectories: new Set(),
     };
     let validationGeneration = 0;
     let previewGeneration = 0;
@@ -98,39 +97,51 @@ registerMessages(editorMessages);
         state.editor?.setTheme?.(event.detail.theme);
     });
     function renderTree() {
-        const query: any = elements.filter.value.trim().toLocaleLowerCase('ru');
-        const filtered: any = state.files.filter((file: any) => `${file.path} ${file.title || ''}`.toLocaleLowerCase('ru').includes(query));
+        const query: any = elements.filter.value.trim().toLocaleLowerCase(locale);
+        const filtered: any = state.files.filter((file: any) => `${file.path} ${file.title || ''}`.toLocaleLowerCase(locale).includes(query));
         elements.treeList.replaceChildren();
-        const groups: any = new Map();
-        filtered.forEach((file: any) => {
-            const parts: any = file.path.split('/');
-            const group: any = parts.length > 1 ? parts[0] : text("features.editor.index.003");
-            if (!groups.has(group))
-                groups.set(group, []);
-            groups.get(group).push(file);
-        });
-        groups.forEach((files: any, group: any) => {
-            const section: any = document.createElement('section');
-            const heading: any = document.createElement('h2');
-            heading.textContent = group;
+        function renderEntries(entries: any) {
             const list: any = document.createElement('ul');
-            files.forEach((file: any) => {
+            entries.forEach((entry: any) => {
                 const item: any = document.createElement('li');
+                if (entry.kind === 'directory') {
+                    const details: any = document.createElement('details');
+                    details.dataset.directoryPath = entry.path;
+                    details.open = Boolean(query) || !state.collapsedDirectories.has(entry.path);
+                    const summary: any = document.createElement('summary');
+                    summary.textContent = entry.name;
+                    details.append(summary, renderEntries(entry.children));
+                    details.addEventListener('toggle', () => {
+                        if (query)
+                            return;
+                        if (details.open)
+                            state.collapsedDirectories.delete(entry.path);
+                        else
+                            state.collapsedDirectories.add(entry.path);
+                    });
+                    item.append(details);
+                    list.append(item);
+                    return;
+                }
+                const file: any = entry.file;
                 const button: any = document.createElement('button');
                 button.type = 'button';
                 button.dataset.filePath = file.path;
                 button.className = file.path === state.current?.path ? 'is-active' : '';
                 const name: any = document.createElement('span');
-                name.textContent = file.path.split('/').slice(1).join('/') || file.path;
-                const meta: any = document.createElement('small');
-                meta.textContent = file.language;
-                button.append(name, meta);
+                name.textContent = entry.name;
+                button.append(name);
+                if (file.language !== 'markdown') {
+                    const meta: any = document.createElement('small');
+                    meta.textContent = file.language;
+                    button.append(meta);
+                }
                 item.append(button);
                 list.append(item);
             });
-            section.append(heading, list);
-            elements.treeList.append(section);
-        });
+            return list;
+        }
+        elements.treeList.append(renderEntries(buildFileTree(filtered)));
     }
     function showConflict(external: any) {
         state.external = external;
@@ -181,6 +192,12 @@ registerMessages(editorMessages);
         state.current = file;
         state.baseline = file.content;
         state.external = null;
+        history.replaceState(history.state, '', `?path=${encodeURIComponent(file.path)}`);
+        try {
+            sessionStorage.setItem('toudocu-editor-path', file.path);
+        }
+        catch { /* storage may be unavailable */ }
+        $('[data-workspace="editor"]')?.setAttribute('href', `${location.pathname}${location.search}`);
         elements.conflict.hidden = true;
         elements.path.textContent = file.path;
         elements.raw.hidden = false;
@@ -199,7 +216,6 @@ registerMessages(editorMessages);
         try {
             applyFile(await fetchFile(path));
             elements.tree.classList.remove('is-open');
-            history.replaceState(null, '', `?path=${encodeURIComponent(path)}`);
         }
         catch (error: any) {
             announce(error.message, true);
@@ -428,7 +444,7 @@ registerMessages(editorMessages);
     elements.template.addEventListener('change', renderTemplateForm);
     elements.form.addEventListener('submit', createDocument);
     document.addEventListener('keydown', (event: any) => {
-        if ((event.ctrlKey || event.metaKey) && event.key.toLocaleLowerCase() === 's') {
+        if ((event.ctrlKey || event.metaKey) && event.key.toLocaleLowerCase(locale) === 's') {
             event.preventDefault();
             save();
         }

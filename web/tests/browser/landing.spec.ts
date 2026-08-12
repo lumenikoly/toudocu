@@ -97,6 +97,10 @@ async function installClipboardProbe(context: BrowserContext): Promise<void> {
   });
 }
 
+test("landing reuses the documentation favicon", () => {
+  expect(readFileSync(join(landing, "favicon.svg"))).toEqual(readFileSync(join(repo, "web/public/favicon.svg")));
+});
+
 test("localized headers identify the beta release", async ({ page }) => {
   const hosted = await serveLanding();
   try {

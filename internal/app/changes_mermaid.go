@@ -18,7 +18,7 @@ func mermaidBlockDiff(oldContent, newContent []byte, oldPath, newPath string, di
 	oldBlocks, oldAmbiguous := extractMermaidBlocks(string(oldContent))
 	newBlocks, newAmbiguous := extractMermaidBlocks(string(newContent))
 	if oldAmbiguous || newAmbiguous {
-		diagnostics = append(diagnostics, Issue{Severity: "warning", Code: "mermaid-block-match-ambiguous", Message: "Mermaid-блоки невозможно сопоставить однозначно; используйте %% id: <stable-id>.", DocumentPath: newPath})
+		diagnostics = append(diagnostics, Issue{Severity: "warning", Code: "mermaid-block-match-ambiguous", Message: "Mermaid blocks cannot be matched unambiguously; use %% id: <stable-id>.", DocumentPath: newPath})
 	}
 	ids := map[string]bool{}
 	for id := range oldBlocks {
@@ -54,13 +54,13 @@ func mermaidBlockDiff(oldContent, newContent []byte, oldPath, newPath string, di
 		if oldOK {
 			change.Before, change.SourceBefore = old.source, &ChangeLocation{Path: oldPath, Line: old.line}
 			if !validMermaidSource(old.source) {
-				diagnostics = append(diagnostics, Issue{Severity: "warning", Code: "mermaid-old-version-invalid", Message: "Старая версия Mermaid-блока не распознана; исходный текст остаётся доступен.", DocumentPath: oldPath, Line: old.line})
+				diagnostics = append(diagnostics, Issue{Severity: "warning", Code: "mermaid-old-version-invalid", Message: "The old Mermaid block version is unrecognized; source text remains available.", DocumentPath: oldPath, Line: old.line})
 			}
 		}
 		if newOK {
 			change.After, change.SourceAfter = newer.source, &ChangeLocation{Path: newPath, Line: newer.line}
 			if !validMermaidSource(newer.source) {
-				diagnostics = append(diagnostics, Issue{Severity: "warning", Code: "mermaid-new-version-invalid", Message: "Новая версия Mermaid-блока не распознана; исходный текст остаётся доступен.", DocumentPath: newPath, Line: newer.line})
+				diagnostics = append(diagnostics, Issue{Severity: "warning", Code: "mermaid-new-version-invalid", Message: "The new Mermaid block version is unrecognized; source text remains available.", DocumentPath: newPath, Line: newer.line})
 			}
 		}
 		changes = append(changes, change)

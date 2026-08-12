@@ -8,54 +8,74 @@
 - Screens: SC-SITE-HOME, SC-CHANGES-WORKSPACE
 - Start screen: SC-SITE-HOME
 - Terminal screens: SC-CHANGES-WORKSPACE
-- Last updated: 2026-08-05
+- Last updated: 2026-08-12
 
-The developer considers changes to the source documentation in terms of Git,
-rendered pages and project entities before completing the task.
+Before finishing work, a developer can see which files changed, how the text
+changed, and what those edits mean for the documentation model.
 
 ## Inputs
 
 - documentation root;
-- explicit base and target or default mode `HEAD → working-tree`;
-- optional filters and associated task.
+- explicit start and end states, or default `HEAD → working-tree`;
+- optional filters, assets, complete translation input, or related work item.
 
 ## Preconditions
 
-- Git is installed and documentation root is inside the local repository;
-- selected revisions are already available locally.
+- Git is installed and the documentation root is inside a local repository;
+- selected commits or refs already exist locally.
 
-## Main scenario
+## Main flow
 
-1. The developer opens `/changes` or runs `toudocu changes`.
-2. Toudocu resolves and shows base/target without changing Git.
-3. The user receives a summary of permanent and work artifacts.
-4. The user filters documents and opens source, rendered, semantic or
-   specialized diff.
-5. For a task, the user compares the declared documentation impact with
-   actual changes.
+1. For the browser journey, the developer runs `toudocu serve ./docs` and opens
+   `/changes/`. For a terminal report, they run `toudocu changes ./docs`.
+2. By default, Toudocu compares `HEAD` with the whole working tree, including
+   staged and unstaged edits, deletions, and new files. Another range must be
+   chosen explicitly.
+3. In the browser, the developer sees file and line counts and can filter by
+   name, status, scope, and kind: all files, documentation, or other repository
+   files.
+4. They choose a file from Changed or a manually related file from Related.
+5. Diff shows the exact Git patch. Full file shows the current UTF-8 file or the
+   last version of a deleted file. Documentation may also provide Before and
+   after, Semantics, Relationships, OpenAPI, Mermaid, asset, or screen-map
+   views.
+6. For a related `TASK-*`, the developer separately runs
+   `toudocu task changes <ID> ./docs` and compares declared documentation impact
+   with the real Git diff. A warning requires review but is not proof of an
+   error.
 
-## Alternative scenarios
+## Alternative flows
 
-- Without Git, the portal continues to work, and the changes section explains the limitation.
-- A parsing error on one side leaves the source diff available.
-- A large or binary file shows metadata and a diagnostic without crashing the report.
-- When the working tree changes, the current change set becomes stale and is replaced
-  by a new one while preserving applicable filters.
+- If Git is unavailable, the rest of the portal keeps working and Changes
+  explains the limitation.
+- If one document version cannot be parsed, the exact Git patch remains
+  available and only the optional view receives the error.
+- A binary or oversized file shows known metadata and a clear diagnostic
+  instead of attempted text rendering.
+- When the working tree changes, the page receives a new report and preserves
+  applicable filters when possible.
 
 ## Postconditions
 
-- Git repository has not been changed;
-- the person and CI receive the same versioned change report;
-- task impact warnings remain an observation and not an automatic solution.
+- Git state is unchanged.
+- Browser, CLI, and CI consume the same versioned report.
+- Task-impact warnings remain prompts for human review, not automatic
+  decisions.
+
+## Acceptance criteria
+
+- [x] Viewing changes leaves Git state unchanged.
+- [x] Browser, CLI, and CI consume the same versioned report.
+- [x] A task-impact warning does not make the decision for the reviewer.
 
 ## Business rules
 
 - [BR-CHANGES-001](../modules/MOD-CHANGES.md#br-changes-001-git-is-the-only-version-source)
 - [BR-CHANGES-002](../modules/MOD-CHANGES.md#br-changes-002-original-diff-takes-precedence)
 - [BR-CHANGES-003](../modules/MOD-CHANGES.md#br-changes-003-range-is-always-explicit)
-- [BR-CHANGES-004](../modules/MOD-CHANGES.md#br-changes-004-analysis-limited-to-documentation-roots)
+- [BR-CHANGES-004](../modules/MOD-CHANGES.md#br-changes-004-public-reports-are-limited-to-documentation-roots)
 
 ## Implementation
 
-- [Documentation changes](../modules/MOD-CHANGES.md)
+- [MOD-CHANGES](../modules/MOD-CHANGES.md)
 - [FLOW-DOCS-CHANGES](../flows/FLOW-DOCS-CHANGES.md)

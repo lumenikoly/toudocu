@@ -1,100 +1,65 @@
-# FLOW-DOCS-SERVE: Локальный просмотр портала
+# FLOW-DOCS-SERVE: Локальная работа с порталом
 
 - Идентификатор: FLOW-DOCS-SERVE
 - Сценарий: UC-DOCS-03
 - Модуль: MOD-SITE
-- Последнее обновление: 2026-08-08
+- Последнее обновление: 2026-08-10
 
-Схема визуализирует жизненный цикл команды `serve`. Сетевые ограничения,
-ошибочные сценарии и постусловия определяет
+Схема показывает основной жизненный цикл `serve`. Подробные ошибки и
+дополнительные пути описаны в
 [UC-DOCS-03](../use-cases/serve-portal.md).
 
 ## Процесс
 
 ```mermaid
 flowchart TD
-    Start["toudocu serve"] --> Build["Выполнить первоначальную сборку"]
+    Start["Запустить toudocu serve ./docs"] --> Build["Собрать портал"]
     Build --> Built{"Сборка успешна?"}
-    Built -->|Нет| Stop["Вернуть код 1 и не запускать сервер"]
-    Built -->|Да| Listen["Слушать указанный адрес"]
-    Listen --> Watch["Запустить watcher workspace"]
-    Watch --> Request["Получить HTTP-запрос, browser action или внешнее изменение"]
-    Request --> Version{"Version status?"}
-    Version -->|Да| Enabled{"Проверка включена и canonical?"}
-    Enabled -->|Нет| NotFound["Вернуть 404 без внешнего запроса"]
-    NotFound --> Request
-    Enabled -->|Да| Latest["Один раз запросить latest stable release с timeout и limit"]
-    Latest --> Notice["Вернуть cached status; при новой версии показать notice"]
-    Notice --> Request
-    Version -->|Нет| Locale{"Locale route?"}
-    Locale -->|Да| LocaleSnapshot["Отдать read-only locale snapshot"]
-    LocaleSnapshot --> Request
-    Locale -->|Нет| APIDocs{"API docs?"}
-    APIDocs -->|Да| Swagger["Отдать vendored Swagger UI и same-origin specs"]
-    Swagger --> Request
-    APIDocs -->|Нет| Roadmap{"Roadmap add?"}
-    Roadmap -->|Да| RoadmapGuard["Проверить этап, DLV ID, текст, origin, action и digest"]
-    RoadmapGuard --> RoadmapAccepted{"Запись допустима?"}
-    RoadmapAccepted -->|Нет| APIError
-    RoadmapAccepted -->|Да| Atomic
-    Roadmap -->|Нет| Editor{"Editor save или create?"}
-    Editor -->|Да| Guard["Проверить origin, action, path и limits; для save — digest"]
-    Guard --> Accepted{"Запись допустима?"}
-    Accepted -->|Нет| APIError["Вернуть JSON error без изменения файла"]
-    Accepted -->|Да| Atomic["Атомарно записать или создать исходник"]
-    Atomic --> Rebuild["Перестроить модель, HTML, поиск и diagnostics"]
-    Rebuild --> Publish["Вернуть revision и rebuild result"]
-    Publish --> Request
-    APIError --> Request
-    Editor -->|Нет| External{"Workspace fingerprint изменился?"}
-    External -->|Да| Stable["Дождаться стабильного fingerprint 200 ms"]
-    Stable --> Rebuild
-    External -->|Нет| Manual{"Запрошена ручная пересборка?"}
-    Manual -->|Да| ManualRebuild["Пересобрать модель, HTML и поиск"]
-    ManualRebuild --> ManualResult{"Пересборка успешна?"}
-    ManualResult -->|Нет| ManualError["Показать ошибку и разрешить повтор"]
-    ManualResult -->|Да| Reload["Перезагрузить текущую страницу"]
-    Reload --> Request
-    ManualError --> Request
-    Manual -->|Нет| Navigate{"Canonical HTML-переход?"}
-    Navigate -->|Нет| OtherRoute["Передать переход браузеру или отдельному route handler"]
-    Navigate -->|Да| Prefetch["Запросить целевой HTML"]
-    Prefetch --> StaticSoft["Отдать последний успешный snapshot"]
-    StaticSoft --> Compatible{"HTML совместим и revision совпадает?"}
-    Compatible -->|Да| Swap["Заменить layout и восстановить history, anchor, scroll"]
-    Compatible -->|Нет| Full["Выполнить полную canonical-навигацию"]
-    Swap --> Request
-    Full --> Static["Отдать последний успешный snapshot"]
-    Static --> Request
-    Request -->|Ctrl+C| Finish["Остановить сервер и освободить порт"]
+    Built -->|Нет| Stop["Вернуть код 1, сервер не запускать"]
+    Built -->|Да| Listen["Вывести локальный адрес и начать принимать запросы"]
+    Listen --> Action{"Что делает пользователь?"}
+    Action -->|Читает| Read["Отдать последнюю успешную версию страницы"]
+    Action -->|Редактирует| Guard["Проверить путь, размер и версию файла"]
+    Guard --> Accepted{"Запись безопасна?"}
+    Accepted -->|Нет| Conflict["Показать ошибку, исходный файл не менять"]
+    Accepted -->|Да| Save["Безопасно записать файл и перестроить портал"]
+    Action -->|Проверяет diff| Changes["Открыть /changes/"]
+    Action -->|Добавляет результат| Roadmap["Проверить этап и записать один DLV-*"]
+    Action -->|Открывает API| API["Показать локальную OpenAPI-справку"]
+    Action -->|Нажимает Ctrl+C| Finish["Остановить сервер и освободить порт"]
+    Read --> Action
+    Conflict --> Action
+    Save --> Action
+    Changes --> Action
+    Roadmap --> Action
+    API --> Action
 ```
+
+## Что происходит вне явных действий
+
+- Изменение файла внешним редактором запускает повторную сборку после того, как
+  содержимое перестало меняться. При ошибке сервер сохраняет последнюю рабочую
+  версию портала.
+- Основные HTML-страницы могут переходить друг в друга без полной перезагрузки.
+  Редактор, изменения, API, переводы и внешние ссылки всегда открываются обычным
+  переходом браузера.
+- Поиск загружается при первом обращении к нему, Mermaid — когда диаграмма
+  приближается к видимой области страницы.
+- Настроенные переводы пересобираются отдельно и доступны только для чтения.
+- Проверка новой версии выполняется один раз за процесс, только для основного
+  портала и только если не указан `--no-update-check`. Её ошибка не мешает
+  локальной работе.
 
 ## Границы процесса
 
-- Обычные маршруты раздают output; editor API ограничен workspace-файлами внутри
-  docs root и не предоставляет доступ к остальному репозиторию.
-- По умолчанию используется loopback; доступ через `0.0.0.0` включается явно.
-- Проверка версии обращается только к фиксированному GitHub release endpoint,
-  кешируется на процесс, отключается `--no-update-check` и при ошибке не мешает
-  отдаче snapshot.
-- Ручная пересборка обновляет модель, HTML и поиск, но не закрывает listener и не
-  меняет его адрес.
-- HTTP navigation никогда не запускает rebuild. При configured translations
-  watcher пересобирает только изменившийся root; locale mount остаётся read-only
-  и не получает editor, changes или canonical API.
-- Мягкая навигация работает только между canonical HTML-страницами текущей
-  revision. Editor, changes, API, locale и external routes, а также любой сбой
-  проверки используют обычную полную загрузку.
-- Search index загружается при первом обращении к поиску, Mermaid — при
-  приближении диаграммы к viewport; загруженные runtime сохраняются между
-  мягкими переходами.
-- Editor, CodeMirror, API, polling и ручная пересборка существуют только в
-  `serve`; static build не содержит их markup, endpoints или assets.
-- На roadmap canonical `serve` добавляет только новый незавершённый `DLV-*` в
-  существующий этап; CAS conflict сохраняет browser form и не делает overwrite.
-- API docs существует только в canonical `serve`, не загружает CDN и разрешает
-  Try it out только для `GET`/`HEAD`; static и locale portals его не содержат.
-- Ошибка пересборки не останавливает уже запущенный сервер.
+- По умолчанию сервер доступен только на `127.0.0.1`. Режим `0.0.0.0` нужно
+  включить явно; встроенных TLS и авторизации нет.
+- Редактор видит только разрешённые файлы внутри каталога документации.
+- Статический `build` не содержит редактор, локальный API, изменения, опрос
+  файлов и ручную пересборку.
+- Страница API использует встроенные ресурсы и позволяет выполнять только
+  `GET` и `HEAD`.
+- Ошибка повторной сборки не останавливает уже запущенный сервер.
 
 ## Связанные документы
 
@@ -102,4 +67,4 @@ flowchart TD
 - [FLOW-DOCS-BUILD: Сборка статического HTTP-портала](FLOW-DOCS-BUILD.md)
 - [MOD-SITE: Статический портал](../modules/site.md)
 - [CLI-контракт](../contracts/cli.md)
-- [HTTP-контракт editor API](../contracts/editor-http.md)
+- [HTTP-контракт редактора](../contracts/editor-http.md)

@@ -1,68 +1,65 @@
-# Разделение ответственности runtime-компонентов
+# Ответственность компонентов
 
 - Тип документа: Architecture
-- Архитектурный вопрос: Как runtime-компоненты делят ответственность?
+- Архитектурный вопрос: Как компоненты программы делят ответственность?
 
-Runtime образует последовательный конвейер: CLI либо прямой вызов Go API задаёт
-операцию, document/OpenAPI слой извлекает безопасное представление, модель
-проверяет структуру и связи, а выбранный потребитель возвращает отчёт, строит
-портал или выполняет отдельно разрешённый task workflow.
+Toudocu обрабатывает запрос последовательно. CLI или публичный Go API выбирает
+операцию, слой чтения получает безопасное представление файлов, модель проверяет
+структуру и связи, а последний слой возвращает отчёт, строит портал или
+выполняет отдельно разрешённый процесс задачи.
 
 ## Область
 
-Ответ показывает крупные runtime-границы одного Go-процесса. Локальные
-инварианты и интерфейсы принадлежат соответствующим module-документам.
+Здесь показаны крупные части одного Go-процесса. Точные правила и интерфейсы
+остаются в документах соответствующих модулей.
 
-## Компоненты
+## Основные части
 
-`internal/markdown` выполняет один цикл `Parse → Analysis → Render`: Goldmark
-AST остаётся закрытым, а project model получает только нормализованные значения
-и source ranges. Все структурные потребители используют этот анализ.
+`internal/markdown` выполняет один путь `Parse → Analysis → Render`: разбирает
+Markdown, извлекает нормализованные значения с позициями и безопасно создаёт
+HTML. Внутреннее дерево Goldmark наружу не выходит, поэтому все потребители
+видят один результат разбора.
 
-`GitChangeSource` разрешает commits/index/working tree и читает status, patches
-и blobs. `ChangeSetBuilder` объединяет Git metadata с parser/knowledge model;
-source, rendered, semantic, OpenAPI и task engines деградируют независимо.
-`ChangesHTTPHandler` отдаёт read-only views, а UI опрашивает digest и сохраняет
-URL state при invalidation. Компоненты активны для `changes` и `serve`;
-статический `build` от Git не зависит.
+Для изменений `GitChangeSource` читает коммиты, индекс и рабочее дерево.
+`ChangeSetBuilder` соединяет сведения Git с моделью документов. Точный патч,
+отрисованное сравнение, семантика, OpenAPI и данные задачи анализируются
+независимо: ошибка одного дополнения не скрывает остальные. Эти части работают
+для `changes` и `serve`; обычный `build` от Git не зависит.
 
-`RepositoryReviewService` переиспользует read-only Git adapter с областью всего
-repository, не меняя `ChangeSetReport`. `ReviewService` владеет discussions,
-FIFO feedback и re-anchoring, а `ReviewStore` применяет revision/digest CAS,
-межпроцессный lock и atomic replace в user-state. HTTP и agent CLI вызывают
-одни application services. Capability `review` выдаётся только canonical
-`serve`; static и translation runtimes этого компонента не монтируют.
+Для обсуждений `RepositoryReviewService` читает весь разрешённый репозиторий,
+но не меняет публичный `ChangeSetReport`. `ReviewService` управляет
+обсуждениями, очередью сообщений и переносом привязок, а `ReviewStore` безопасно
+записывает состояние в пользовательский каталог. Статический и переводной
+порталы эту часть не подключают.
 
-| Граница | Ответственность | Источник подробностей |
+| Часть | За что отвечает | Подробнее |
 |---|---|---|
-| CLI | Разобрать команду, нормализовать пути и выбрать операцию | [MOD-CLI](../modules/cli.md) |
-| Go API | Предоставить типизированный фасад без доступа к `internal/app` | [Обзор публичного Go API](../reference/features.md#публичный-go-api) |
-| Markdown | Разобрать CommonMark/GFM в закрытый AST, нормализовать структуру и безопасно отрендерить содержимое | [MOD-MARKDOWN](../modules/markdown.md), [ADR-005](../decisions/ADR-005.md) |
-| Project model | Классифицировать документы, проверить OpenAPI, разрешить связи и сформировать diagnostics | [MOD-MODEL](../modules/model.md) |
-| Site | Создать backend-independent static HTTP portal или canonical serve workspace с editor, changes и offline API docs | [MOD-SITE](../modules/site.md) |
-| Review | Построить repository projection, сохранить локальные discussions и передать immutable FIFO feedback skill | [MOD-REVIEW](../modules/MOD-REVIEW.md) |
-| Skill bundle и installer | Проверить embedded package, разрешить host target, классифицировать managed state и атомарно выполнить lifecycle | [MOD-CLI](../modules/cli.md), [руководство](../guides/skill-installation.md) |
+| CLI | Разбирает команду, проверяет пути и выбирает операцию | [MOD-CLI](../modules/cli.md) |
+| Go API | Даёт типизированный публичный фасад, не раскрывая `internal/app` | [Публичный Go API](../reference/features.md#публичный-go-api) |
+| Markdown | Разбирает поддерживаемый синтаксис и безопасно создаёт HTML | [MOD-MARKDOWN](../modules/markdown.md), [ADR-005](../decisions/ADR-005.md) |
+| Модель проекта | Классифицирует документы, проверяет OpenAPI, разрешает связи и создаёт сообщения | [MOD-MODEL](../modules/model.md) |
+| Портал | Создаёт статический сайт или локальное рабочее пространство `serve` | [MOD-SITE](../modules/site.md) |
+| Изменения | Читает Git и создаёт единый отчёт о выбранном диапазоне | [MOD-CHANGES](../modules/MOD-CHANGES.md) |
+| Обратная связь с агентом | Хранит обсуждения документации и доставляет отдельные сообщения по порядку поступления | [MOD-AGENT-FEEDBACK](../modules/MOD-AGENT-FEEDBACK.md) |
+| Встроенный навык | Проверяет пакет, выбирает место установки и безопасно выполняет `install`, `update` или `uninstall` | [Руководство](../guides/skill-installation.md) |
 
-Статический generator и serve-вариант разделены. Serve хранит отдельные
-runtime snapshots canonical и configured translation roots: HTTP читает только
-последний успешный snapshot, а watcher перестраивает изменившийся root.
-Workspace перечисляет и атомарно записывает разрешённые canonical файлы;
-editor API применяет HTTP guards. Любая принятая запись заново
-проходит Project model и Site, поэтому browser не формирует параллельную модель.
-Декларативные Editor/Changes route registries проверяются против OpenAPI
-operations; Swagger UI читает те же specs как same-origin assets.
+Статический генератор и `serve` используют одну модель, но дают разные
+возможности. `serve` держит последний успешно собранный снимок основного
+каталога и каждого настроенного перевода. Наблюдатель перестраивает только тот
+каталог, который изменился. Любая принятая запись редактора снова проходит
+через модель и генератор, поэтому браузер не создаёт параллельную версию данных.
 
-Screen graph и task workflow расширяют модель, но не обходят её validation
-gate. Конкретные последовательности операций остаются в
+Маршруты Editor и Changes объявлены в Go и сопоставлены с операциями OpenAPI.
+Страница API читает те же контракты как локальные ресурсы.
+
+Граф экранов и процессы задач расширяют модель, но не обходят её проверку.
+Пользовательские последовательности находятся в
 [FLOW-DOCS-CHECK](../flows/FLOW-DOCS-CHECK.md),
-[FLOW-DOCS-BUILD](../flows/FLOW-DOCS-BUILD.md) и
+[FLOW-DOCS-BUILD](../flows/FLOW-DOCS-BUILD.md),
 [FLOW-DOCS-SERVE](../flows/FLOW-DOCS-SERVE.md),
 [FLOW-TASK-WORKFLOW](../flows/FLOW-TASK-WORKFLOW.md) и
-[FLOW-REVIEW-FEEDBACK](../flows/FLOW-REVIEW-FEEDBACK.md).
+[FLOW-AGENT-FEEDBACK](../flows/FLOW-AGENT-FEEDBACK.md).
 
-Skill lifecycle образует отдельную короткую ветвь CLI и не строит document
-model: `skills` возвращает проверенный immutable bundle,
-`internal/skillinstall` выполняет registry/detection, read-only planning и
-filesystem transaction, а `internal/app` отвечает только за аргументы,
-TTY-выбор и text output. Публичная сигнатура `RunCLI` не меняется;
-stdin/TTY доступны только внутреннему `Main`.
+Установка навыка — отдельная короткая ветка командной строки: она не строит модель
+документации. Встроенный пакет проверяется, состояние назначения сначала
+планируется, затем изменение файлов выполняется как одна безопасная операция.

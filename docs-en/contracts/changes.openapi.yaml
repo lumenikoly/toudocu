@@ -195,11 +195,11 @@ components:
     ChangesError:
       description: Changes API error
       headers: {Cache-Control: {$ref: "#/components/headers/NoStore"}}
-      content: {application/json: {schema: {$ref: "#/components/schemas/DiagnosticEnvelope"}, example: {schemaVersion: 1, diagnostics: [{severity: error, code: invalid-change-side, message: side должен быть before или after}]}}}
+      content: {application/json: {schema: {$ref: "#/components/schemas/DiagnosticEnvelope"}, example: {schemaVersion: 1, diagnostics: [{severity: error, code: invalid-change-side, message: side must be before or after}]}}}
     MethodNotAllowed:
       description: Method not allowed
       headers: {Allow: {schema: {type: string}}, Cache-Control: {$ref: "#/components/headers/NoStore"}}
-      content: {application/json: {schema: {$ref: "#/components/schemas/DiagnosticEnvelope"}, example: {schemaVersion: 1, diagnostics: [{severity: error, code: method_not_allowed, message: Метод не поддерживается}]}}}
+      content: {application/json: {schema: {$ref: "#/components/schemas/DiagnosticEnvelope"}, example: {schemaVersion: 1, diagnostics: [{severity: error, code: method_not_allowed, message: Method not allowed}]}}}
   schemas:
     Issue:
       type: object
@@ -207,7 +207,7 @@ components:
       properties:
         severity: {type: string, enum: [error, warning, info]}
         code: {type: string}
-        message: {type: string}
+        message: {type: string, description: Human-readable technical message in English; user-provided values remain verbatim}
         documentPath: {type: string}
         line: {type: integer, minimum: 0}
         column: {type: integer, minimum: 0}

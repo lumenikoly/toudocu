@@ -188,7 +188,6 @@ type ReportRisk struct {
 	Status      StatusInfo `json:"status"`
 	Probability string     `json:"probability"`
 	Impact      string     `json:"impact"`
-	Owner       string     `json:"owner"`
 	TaskStats   TaskStats  `json:"taskStats"`
 	Document    string     `json:"document"`
 	Anchor      string     `json:"anchor"`
@@ -200,7 +199,6 @@ type ReportProject struct {
 	Status      StatusInfo `json:"status"`
 	Stage       string     `json:"stage"`
 	Version     string     `json:"version"`
-	Owner       string     `json:"owner"`
 	Updated     string     `json:"updated"`
 	Summary     string     `json:"summary"`
 }
@@ -225,7 +223,6 @@ type ReportScreen struct {
 	Route               string        `json:"route,omitempty"`
 	Preview             string        `json:"preview,omitempty"`
 	Component           string        `json:"component,omitempty"`
-	Owner               string        `json:"owner,omitempty"`
 	Updated             string        `json:"updated,omitempty"`
 	Parent              string        `json:"parent,omitempty"`
 	States              []ScreenState `json:"states"`

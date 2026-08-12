@@ -1,7 +1,7 @@
 # Runtime Component Responsibilities
 
 - Document type: Architecture
-- Architecture question: How do runtime components divide responsibilities?
+- Architectural question: How do runtime components divide responsibilities?
 
 The runtime forms a sequential pipeline: the CLI or a direct Go API call
 selects an operation, the document/OpenAPI layer extracts a safe
@@ -27,6 +27,12 @@ independently. `ChangesHTTPHandler` serves read-only views, while the UI polls a
 digest and preserves URL state during invalidation. These components are active
 for `changes` and `serve`; static `build` does not depend on Git.
 
+For discussions, `RepositoryReviewService` reads allowed files across the
+repository without changing the public `ChangeSetReport`. `ReviewService`
+manages discussions, queued messages, responses, and anchor relocation, while
+`ReviewStore` writes state safely to the user's state directory. Static and
+translation portals do not include these services.
+
 | Boundary | Responsibility | Source of details |
 |---|---|---|
 | CLI | Parse the command, normalize paths, and select the operation | [MOD-CLI](../modules/cli.md) |
@@ -34,6 +40,8 @@ for `changes` and `serve`; static `build` does not depend on Git.
 | Markdown | Parse CommonMark/GFM into a private AST, normalize structure, and render content safely | [MOD-MARKDOWN](../modules/markdown.md), [ADR-005](../decisions/ADR-005.md) |
 | Project model | Classify documents, validate OpenAPI, resolve relationships, and produce diagnostics | [MOD-MODEL](../modules/model.md) |
 | Site | Create a backend-independent static HTTP portal or canonical serve workspace with editor, changes, and offline API docs | [MOD-SITE](../modules/site.md) |
+| Changes | Read Git and create one report for the selected range | [MOD-CHANGES](../modules/MOD-CHANGES.md) |
+| Agent feedback | Store documentation discussions and deliver individual messages in arrival order | [MOD-AGENT-FEEDBACK](../modules/MOD-AGENT-FEEDBACK.md) |
 | Skill bundle and installer | Validate the embedded package, resolve the host target, classify managed state, and execute the lifecycle atomically | [MOD-CLI](../modules/cli.md), [guide](../guides/skill-installation.md) |
 
 The static generator and serve variant are separated. Serve keeps separate
@@ -50,11 +58,9 @@ validation gate. Concrete operation sequences remain in
 [FLOW-DOCS-CHECK](../flows/FLOW-DOCS-CHECK.md),
 [FLOW-DOCS-BUILD](../flows/FLOW-DOCS-BUILD.md),
 [FLOW-DOCS-SERVE](../flows/FLOW-DOCS-SERVE.md), and
-[FLOW-TASK-WORKFLOW](../flows/FLOW-TASK-WORKFLOW.md).
+[FLOW-TASK-WORKFLOW](../flows/FLOW-TASK-WORKFLOW.md), and
+[FLOW-AGENT-FEEDBACK](../flows/FLOW-AGENT-FEEDBACK.md).
 
-The skill lifecycle forms a separate short CLI branch and does not build the
-document model: `skills` returns a validated immutable bundle,
-`internal/skillinstall` performs registry/detection, read-only planning, and a
-filesystem transaction, while `internal/app` is responsible only for arguments,
-TTY selection, and text output. The public `RunCLI` signature does not change;
-stdin/TTY are available only to the internal `Main`.
+The skill lifecycle is a separate short CLI branch and does not build the
+documentation model. Toudocu validates the embedded package, plans the target
+state without writing, and then applies one filesystem transaction.

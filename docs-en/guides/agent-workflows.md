@@ -1,8 +1,9 @@
 # Using the Toudocu AI Skill
 
 This guide explains how to invoke the installed skill from an AI agent for
-everyday CLI, portal, work-item, and source-documentation work, and when to use
-the special `init`, `refresh`, and `translate` workflows.
+everyday CLI, portal, work-item, and source-documentation work, when to use the
+special `init`, `refresh`, and `translate` workflows, and how to process the
+local documentation queue.
 
 ## Two different interfaces
 
@@ -24,12 +25,15 @@ $toudocu check the source documentation and explain the diagnostics
 $toudocu build the local portal in the output configured by the project
 $toudocu prepare context for TASK-AREA-001
 $toudocu update the installation guide from the current CLI contract
+Process requests from Toudocu
 ```
 
-The CLI provides `check`, `build`, `serve`, `search`, and `task ...`, but has no
-`init`, `refresh`, or `translate` commands. Inside the Toudocu source
-repository, the agent uses `go run ./cmd/toudocu`; in other projects it uses
-the installed `toudocu` from `PATH`.
+The CLI provides `check`, `build`, `serve`, `changes`, `agent`, `search`,
+`scaffold`, `task`, `skill`, and `version`. It has no `init`, `refresh`, or
+`translate` commands: those are agent workflows. Agent feedback instead uses
+the real `agent next|respond` commands. Inside the Toudocu source repository,
+the agent uses `go run ./cmd/toudocu`; in other projects it uses the installed
+`toudocu` from `PATH`.
 
 ## What to delegate to the skill
 
@@ -62,6 +66,8 @@ requests:
 | `$toudocu refresh` | Explicit full refresh call |
 | `$toudocu refresh diff` | Explicit diff refresh call |
 | `$toudocu translate <locale> ...` | Explicit translation request and target locale |
+| `$toudocu translate diff` | Explicit request to process the current diff for every configured locale |
+| “Process requests from Toudocu” | Explicit request to process the local documentation queue |
 | `task verify --run` | Explicit request to verify or execute the task in a trusted repository |
 
 Missing files, first skill use, ordinary documentation edits, or `check` do not
@@ -127,10 +133,10 @@ Archive and restore only through `task archive` and `task restore`.
 
 ### Ordinary documentation edits
 
-Identify the audience, useful question, and source of truth; update an existing
+Identify the audience, useful question, and repository evidence; update an existing
 document instead of duplicating it; write only supported claims. Choose a typed
 document for its meaning, not for an ID or green check. Never invent unknown
-status, owner, date, relationship, or procedure.
+status, date, relationship, or procedure.
 
 Every change passes two gates:
 
@@ -144,7 +150,24 @@ Every change passes two gates:
 Fix structural errors at their sources. Never remove a meaningful relationship
 or add unsupported prose merely to obtain a clean report.
 
+If the user forbids checks, the agent does not run them and reports that fact
+plainly.
+
 ## Special workflows
+
+### Process requests from Toudocu
+
+The agent runs `toudocu agent next --json`, retrieves only the oldest queue
+entry, and rereads the current document. For `question`, it responds without
+changing files. For `change_request`, it first validates the claim against
+documentation, code, tests, and configuration, then changes only supported
+canonical documents or returns `no_change`.
+
+One `AgentResponse` has outcome `answered`, `changed`, `no_change`,
+`needs_clarification`, or `failed` and is submitted through
+`toudocu agent respond`. After success, the agent runs `next` again until it
+receives `pending=false`. Delivery neither starts a language model, closes the
+discussion, nor applies file changes itself.
 
 ### Initialization
 

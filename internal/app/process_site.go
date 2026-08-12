@@ -74,6 +74,7 @@ func processRelations(current string, model *Model, ids []string, kind string) s
 }
 
 func renderProcessRows(model *Model, current, onlyType string) string {
+	ui := portalUI(model)
 	var rows strings.Builder
 	if onlyType == "" || onlyType == "use-case" {
 		for _, useCase := range model.Knowledge.UseCases {
@@ -81,18 +82,18 @@ func renderProcessRows(model *Model, current, onlyType string) string {
 			if document == nil {
 				continue
 			}
-			views := `<a href="` + escapeAttr(relativeURL(current, document.OutputPath)+"#overview") + `">Обзор</a>`
+			views := `<a href="` + escapeAttr(relativeURL(current, document.OutputPath)+"#overview") + `">` + escapeHTML(ui.Text("process.overview")) + `</a>`
 			if flow := findPlayableFlow(model, useCase.ID); flow != nil {
-				views += `<a href="` + escapeAttr(relativeURL(current, document.OutputPath)+"#map") + `">Карта</a>`
+				views += `<a href="` + escapeAttr(relativeURL(current, document.OutputPath)+"#map") + `">` + escapeHTML(ui.Text("process.map")) + `</a>`
 				if flow.Valid {
-					views += `<a href="` + escapeAttr(relativeURL(current, document.OutputPath)+"#play") + `">Проиграть</a>`
+					views += `<a href="` + escapeAttr(relativeURL(current, document.OutputPath)+"#play") + `">` + escapeHTML(ui.Text("process.play")) + `</a>`
 				}
 			}
 			search := strings.Join([]string{useCase.ID, useCase.Title, useCase.ModuleID, strings.Join(useCase.FlowIDs, " ")}, " ")
-			fmt.Fprintf(&rows, `<tr data-filter-item data-search="%s" data-type="use-case" data-module="%s" data-status="%s" data-usecase="%s"><td><a class="process-title" href="%s">%s</a><code>%s</code></td><td><span class="process-kind process-kind-user">Пользовательский сценарий</span></td><td><code>%s</code></td><td>%s</td><td>%s</td><td><div class="process-view-links">%s</div></td></tr>`,
+			fmt.Fprintf(&rows, `<tr data-filter-item data-search="%s" data-type="use-case" data-module="%s" data-status="%s" data-usecase="%s"><td><a class="process-title" href="%s">%s</a><code>%s</code></td><td><span class="process-kind process-kind-user">%s</span></td><td><code>%s</code></td><td>%s</td><td>%s</td><td><div class="process-view-links">%s</div></td></tr>`,
 				escapeAttr(search), escapeAttr(useCase.ModuleID), escapeAttr(useCase.Status.Kind), escapeAttr(useCase.ID),
 				escapeAttr(relativeURL(current, document.OutputPath)), escapeHTML(screenTitleForUseCase(useCase)), escapeHTML(useCase.ID),
-				escapeHTML(useCase.ModuleID), renderStatusChip(useCase.Status), processRelations(current, model, useCase.FlowIDs, "flow"), views)
+				escapeHTML(ui.Text("process.useCase")), escapeHTML(useCase.ModuleID), renderStatusChip(model, useCase.Status), processRelations(current, model, useCase.FlowIDs, "flow"), views)
 		}
 	}
 	if onlyType == "" || onlyType == "flow" {
@@ -102,45 +103,47 @@ func renderProcessRows(model *Model, current, onlyType string) string {
 				continue
 			}
 			search := strings.Join([]string{flow.ID, flow.Title, flow.ModuleID, strings.Join(flow.UseCaseIDs, " ")}, " ")
-			fmt.Fprintf(&rows, `<tr data-filter-item data-search="%s" data-type="flow" data-module="%s" data-status="%s" data-usecase="%s"><td><a class="process-title" href="%s">%s</a><code>%s</code></td><td><span class="process-kind process-kind-system">Визуальный процесс</span></td><td><code>%s</code></td><td>%s</td><td>%s</td><td><div class="process-view-links"><a href="%s">Диаграмма</a></div></td></tr>`,
+			fmt.Fprintf(&rows, `<tr data-filter-item data-search="%s" data-type="flow" data-module="%s" data-status="%s" data-usecase="%s"><td><a class="process-title" href="%s">%s</a><code>%s</code></td><td><span class="process-kind process-kind-system">%s</span></td><td><code>%s</code></td><td>%s</td><td>%s</td><td><div class="process-view-links"><a href="%s">%s</a></div></td></tr>`,
 				escapeAttr(search), escapeAttr(flow.ModuleID), escapeAttr(document.Status.Kind), escapeAttr(strings.Join(flow.UseCaseIDs, "|")),
 				escapeAttr(relativeURL(current, document.OutputPath)), escapeHTML(processTitle(flow.ID, flow.Title)), escapeHTML(flow.ID),
-				escapeHTML(flow.ModuleID), renderStatusChip(document.Status), processRelations(current, model, flow.UseCaseIDs, "use-case"),
-				escapeAttr(relativeURL(current, document.OutputPath)))
+				escapeHTML(ui.Text("process.visual")), escapeHTML(flow.ModuleID), renderStatusChip(model, document.Status), processRelations(current, model, flow.UseCaseIDs, "use-case"),
+				escapeAttr(relativeURL(current, document.OutputPath)), escapeHTML(ui.Text("process.diagram")))
 		}
 	}
 	return rows.String()
 }
 
 func renderProcessCatalogPage(model *Model, current, onlyType string) string {
+	ui := portalUI(model)
 	title := modelDirectoryLabel(model, "flows")
-	description := "Бизнес-, технические, операционные и межмодульные процессы."
+	description := ui.Text("process.description")
 	badge := title
 	badgeTarget := sectionCatalogOutput(SectionFlows)
-	summary := "FLOW связан с пользовательскими сценариями"
+	summary := ui.Text("process.flowSummary")
 	if onlyType == "use-case" {
-		title = "Пользовательские сценарии"
-		description = "Цели пользователя, экранные пути и проверяемые результаты."
-		badge = "Пользовательские сценарии"
+		title = ui.Text("process.useCases")
+		description = ui.Text("process.useCaseDescription")
+		badge = ui.Text("process.useCases")
 		badgeTarget = "use-cases/index.html"
-		summary = "UC связан с процессами и экранами"
+		summary = ui.Text("process.useCaseSummary")
 	}
 	rows := renderProcessRows(model, current, onlyType)
 	content := breadcrumbs(model, current, title) +
 		`<header class="page-header"><div class="page-kicker"><a class="badge" href="` + escapeAttr(relativeURL(current, badgeTarget)) + `">` + escapeHTML(badge) + `</a></div><h1>` +
 		escapeHTML(title) + `</h1><p class="page-lead">` + escapeHTML(description) + `</p></header>` +
 		`<section class="process-catalog" data-filter-scope><div class="process-filterbar">` +
-		`<label class="screen-filter-field process-filter-search"><span>Поиск</span><input type="search" data-filter-control="search" placeholder="ID, название или модуль"></label>` +
-		`<label class="screen-filter-field"><span>Модуль</span><select data-filter-control="module"><option value="all">Все модули</option>` + processModuleOptions(model) + `</select></label>` +
-		`<label class="screen-filter-field"><span>Связанный сценарий</span><select data-filter-control="usecase"><option value="all">Все сценарии</option>` + processUseCaseOptions(model) + `</select></label>` +
-		`<button class="toolbar-button screen-filter-reset" type="button" data-filter-reset>Сбросить</button></div>` +
-		`<div class="screen-catalog-summary" aria-live="polite"><span>Найдено: <strong data-filter-count></strong></span><span>` + escapeHTML(summary) + `</span></div>` +
-		`<div class="process-table"><table><thead><tr><th scope="col">Процесс</th><th scope="col">Тип</th><th scope="col">Модуль</th><th scope="col">Статус</th><th scope="col">Связи</th><th scope="col">Представления</th></tr></thead><tbody>` +
-		rows + `</tbody></table></div><div class="empty-state" data-filter-empty hidden>Процессы не найдены.</div></section>`
+		`<label class="screen-filter-field process-filter-search"><span>` + escapeHTML(ui.Text("process.search")) + `</span><input type="search" data-filter-control="search" placeholder="` + escapeAttr(ui.Text("process.searchPlaceholder")) + `"></label>` +
+		`<label class="screen-filter-field"><span>` + escapeHTML(ui.Text("process.module")) + `</span><select data-filter-control="module"><option value="all">` + escapeHTML(ui.Text("process.allModules")) + `</option>` + processModuleOptions(model) + `</select></label>` +
+		`<label class="screen-filter-field"><span>` + escapeHTML(ui.Text("process.relatedUseCase")) + `</span><select data-filter-control="usecase"><option value="all">` + escapeHTML(ui.Text("process.allUseCases")) + `</option>` + processUseCaseOptions(model) + `</select></label>` +
+		`<button class="toolbar-button screen-filter-reset" type="button" data-filter-reset>` + escapeHTML(ui.Text("process.reset")) + `</button></div>` +
+		`<div class="screen-catalog-summary" aria-live="polite"><span>` + escapeHTML(ui.Text("process.found")) + ` <strong data-filter-count></strong></span><span>` + escapeHTML(summary) + `</span></div>` +
+		`<div class="process-table"><table><thead><tr><th scope="col">` + escapeHTML(ui.Text("process.process")) + `</th><th scope="col">` + escapeHTML(ui.Text("process.type")) + `</th><th scope="col">` + escapeHTML(ui.Text("process.module")) + `</th><th scope="col">` + escapeHTML(ui.Text("process.status")) + `</th><th scope="col">` + escapeHTML(ui.Text("process.relations")) + `</th><th scope="col">` + escapeHTML(ui.Text("process.views")) + `</th></tr></thead><tbody>` +
+		rows + `</tbody></table></div><div class="empty-state" data-filter-empty hidden>` + escapeHTML(ui.Text("process.none")) + `</div></section>`
 	return pageShell(model, current, title, description, content, "")
 }
 
 func renderUseCaseRelations(model *Model, useCase KnowledgeUseCase, current string) string {
+	ui := portalUI(model)
 	var module, screens, activeTasks, archivedTasks, repositoryPaths, traceability strings.Builder
 	for _, candidate := range model.Knowledge.Modules {
 		if candidate.ID != useCase.ModuleID {
@@ -166,7 +169,7 @@ func renderUseCaseRelations(model *Model, useCase KnowledgeUseCase, current stri
 			if document := model.DocByPath[item.Document]; document != nil {
 				row := `<li><a href="` + escapeAttr(relativeURL(current, document.OutputPath)) + `"><code>` + escapeHTML(item.ID) + `</code> · ` + escapeHTML(item.Title) + `</a>`
 				if item.Archived {
-					row += ` <span class="badge">Архив ` + escapeHTML(item.ArchiveYear) + `</span>`
+					row += ` <span class="badge">` + escapeHTML(ui.Text("archive.year", item.ArchiveYear)) + `</span>`
 					archivedTasks.WriteString(row + `</li>`)
 				} else {
 					activeTasks.WriteString(row + `</li>`)
@@ -184,39 +187,40 @@ func renderUseCaseRelations(model *Model, useCase KnowledgeUseCase, current stri
 		}
 	}
 	processLinks := processRelations(current, model, useCase.FlowIDs, "flow")
-	return `<div class="usecase-relations-grid"><section><h2>Связанные процессы</h2>` + processLinks +
-		`</section><section><h2>Модуль</h2><ul class="related-list">` + fallbackList(module.String()) +
-		`</ul></section><section><h2>Экраны</h2><ul class="related-list">` + fallbackList(screens.String()) +
-		`</ul></section><section><h2>Рабочие задачи</h2><ul class="related-list">` + fallbackList(tasks) +
-		`</ul></section><section><h2>Расположение в коде</h2><ul class="related-list">` + fallbackList(repositoryPaths.String()) +
-		`</ul></section></div><section class="dashboard-section"><h2>Проверяемость</h2><div class="data-table"><table><thead><tr><th>Переход</th><th>Задача</th><th>Критерий</th><th>Проверка</th></tr></thead><tbody>` +
-		fallbackTraceability(traceability.String()) + `</tbody></table></div></section>`
+	return `<div class="usecase-relations-grid"><section><h2>` + escapeHTML(ui.Text("process.relatedFlows")) + `</h2>` + processLinks +
+		`</section><section><h2>` + escapeHTML(ui.Text("process.module")) + `</h2><ul class="related-list">` + fallbackList(model, module.String()) +
+		`</ul></section><section><h2>` + escapeHTML(ui.Text("process.screens")) + `</h2><ul class="related-list">` + fallbackList(model, screens.String()) +
+		`</ul></section><section><h2>` + escapeHTML(ui.Text("process.work")) + `</h2><ul class="related-list">` + fallbackList(model, tasks) +
+		`</ul></section><section><h2>` + escapeHTML(ui.Text("process.code")) + `</h2><ul class="related-list">` + fallbackList(model, repositoryPaths.String()) +
+		`</ul></section></div><section class="dashboard-section"><h2>` + escapeHTML(ui.Text("process.traceability")) + `</h2><div class="data-table"><table><thead><tr><th>` + escapeHTML(ui.Text("process.transition")) + `</th><th>` + escapeHTML(ui.Text("process.task")) + `</th><th>` + escapeHTML(ui.Text("process.criterion")) + `</th><th>` + escapeHTML(ui.Text("process.verification")) + `</th></tr></thead><tbody>` +
+		fallbackTraceability(model, traceability.String()) + `</tbody></table></div></section>`
 }
 
-func fallbackList(value string) string {
+func fallbackList(model *Model, value string) string {
 	if value == "" {
-		return `<li class="process-empty-value">Связей нет.</li>`
+		return `<li class="process-empty-value">` + escapeHTML(portalUI(model).Text("process.noRelations")) + `</li>`
 	}
 	return value
 }
 
-func fallbackTraceability(value string) string {
+func fallbackTraceability(model *Model, value string) string {
 	if value == "" {
-		return `<tr><td colspan="4" class="process-empty-value">Связи с критериями пока не описаны.</td></tr>`
+		return `<tr><td colspan="4" class="process-empty-value">` + escapeHTML(portalUI(model).Text("process.noCriteria")) + `</td></tr>`
 	}
 	return value
 }
 
 func renderUseCasePage(model *Model, document *Document) string {
+	ui := portalUI(model)
 	useCase := findUseCase(model, document.Metadata["id"])
 	if useCase == nil {
 		return renderDocumentPage(model, document)
 	}
 	current := document.OutputPath
-	body := renderDocumentMarkdown(document, linkResolverFor(model, document), nil)
+	body := renderDocumentBody(model, document, linkResolverFor(model, document), nil)
 	flow := findPlayableFlow(model, useCase.ID)
-	mapPanel := `<div class="empty-state"><strong>Карта пока недоступна</strong><p>Добавьте начальный экран и переходы этого сценария.</p></div>`
-	playPanel := `<div class="empty-state"><strong>Сценарий пока нельзя проиграть</strong><p>Опишите экранную модель и переходы.</p></div>`
+	mapPanel := `<div class="empty-state"><strong>` + escapeHTML(ui.Text("process.mapUnavailable")) + `</strong><p>` + escapeHTML(ui.Text("process.mapUnavailableHelp")) + `</p></div>`
+	playPanel := `<div class="empty-state"><strong>` + escapeHTML(ui.Text("process.playUnavailable")) + `</strong><p>` + escapeHTML(ui.Text("process.playUnavailableHelp")) + `</p></div>`
 	if flow != nil && len(model.Knowledge.Screens) > 0 {
 		mapPanel = renderScreenMapWorkspace(model, current, useCase.ID, true)
 		playPanel = renderPlayableFlowComponent(model, *flow, current, true)
@@ -225,10 +229,10 @@ func renderUseCasePage(model *Model, document *Document) string {
 		id    string
 		label string
 	}{
-		{"overview", "Обзор"},
-		{"map", "Карта"},
-		{"play", "Проиграть"},
-		{"links", "Связи"},
+		{"overview", ui.Text("process.overview")},
+		{"map", ui.Text("process.map")},
+		{"play", ui.Text("process.play")},
+		{"links", ui.Text("process.links")},
 	}
 	var tabLinks strings.Builder
 	for index, tab := range tabs {
@@ -244,9 +248,9 @@ func renderUseCasePage(model *Model, document *Document) string {
 			active, tab.id, selected, tab.id, tabIndex, tab.id, tab.id, tab.label)
 	}
 	content := breadcrumbs(model, current, useCase.ID) +
-		`<header class="page-header usecase-header"><div class="page-kicker">` + renderStatusChip(useCase.Status) + `<span class="badge">Пользовательский сценарий</span></div><h1>` +
+		`<header class="page-header usecase-header"><div class="page-kicker">` + renderStatusChip(model, useCase.Status) + `<span class="badge">` + escapeHTML(ui.Text("process.useCase")) + `</span></div><h1>` +
 		escapeHTML(useCase.ID+" · "+screenTitleForUseCase(*useCase)) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` +
-		renderMetadata(document) + `<div class="page-actions">` + renderDocumentContextButton(model, document) + `</div></header><div class="usecase-workspace" data-usecase-tabs><nav class="usecase-tabs" role="tablist" aria-label="Представления пользовательского сценария">` +
+		renderMetadata(model, document) + `<div class="page-actions">` + renderDocumentContextButton(model, document) + `</div></header><div class="usecase-workspace" data-usecase-tabs><nav class="usecase-tabs" role="tablist" aria-label="` + escapeAttr(ui.Text("process.viewsAria")) + `">` +
 		tabLinks.String() + `</nav><section class="usecase-panel" id="overview" role="tabpanel" aria-labelledby="tab-overview" data-usecase-panel><article class="doc-content">` + body +
 		`</article></section><section class="usecase-panel" id="map" role="tabpanel" aria-labelledby="tab-map" data-usecase-panel>` + mapPanel +
 		`</section><section class="usecase-panel" id="play" role="tabpanel" aria-labelledby="tab-play" data-usecase-panel>` + playPanel +
@@ -260,6 +264,6 @@ func renderFlowConnections(model *Model, document *Document) string {
 	if flow == nil {
 		return ""
 	}
-	return `<section class="dashboard-section dashboard-support-panel flow-connections"><h2>Связанные пользовательские сценарии</h2>` +
+	return `<section class="dashboard-section dashboard-support-panel flow-connections"><h2>` + escapeHTML(portalUI(model).Text("process.relatedUseCases")) + `</h2>` +
 		processRelations(document.OutputPath, model, flow.UseCaseIDs, "use-case") + `</section>`
 }

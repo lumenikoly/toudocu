@@ -73,7 +73,7 @@ func taskMoveLinkIssues(model *Model, document *Document, destinationPath, desti
 			if resolved.TargetDocument == document {
 				issues = append(issues, taskMoveIssue(
 					"task-move-incoming-link",
-					fmt.Sprintf("Ссылка %q указывает на перемещаемый файл; обновите или удалите её до перемещения.", resolved.Destination),
+					fmt.Sprintf("Link %q points to the file being moved; update or remove it before moving the task.", resolved.Destination),
 					source.SourcePath,
 					resolved.Line+1,
 				))
@@ -96,7 +96,7 @@ func taskMoveLinkIssues(model *Model, document *Document, destinationPath, desti
 		}
 		issues = append(issues, taskMoveIssue(
 			"task-move-outgoing-link",
-			fmt.Sprintf("Ссылка %q после перемещения разрешалась бы иначе.", resolved.Destination),
+			fmt.Sprintf("Link %q would resolve differently after the move.", resolved.Destination),
 			document.SourcePath,
 			resolved.Line+1,
 		))
@@ -110,10 +110,10 @@ func validateTaskMovePaths(model *Model, source, destination string) error {
 		return err
 	}
 	if sourceInfo.Mode()&os.ModeSymlink != 0 || !sourceInfo.Mode().IsRegular() {
-		return fmt.Errorf("исходная задача должна быть обычным файлом")
+		return fmt.Errorf("source task must be a regular file")
 	}
 	if _, err := os.Lstat(destination); err == nil {
-		return fmt.Errorf("файл назначения уже существует: %s", toPosixRelative(model.RootDirectory, destination))
+		return fmt.Errorf("destination file already exists: %s", toPosixRelative(model.RootDirectory, destination))
 	} else if !os.IsNotExist(err) {
 		return err
 	}
@@ -130,20 +130,20 @@ func validateTaskMovePaths(model *Model, source, destination string) error {
 		return err
 	}
 	if !ensureInside(resolvedRoot, resolvedSource) || !ensureInside(resolvedRoot, resolvedDestination) {
-		return fmt.Errorf("путь перемещения выходит за каталог документации")
+		return fmt.Errorf("move path escapes the documentation directory")
 	}
 	return nil
 }
 
 func moveFileNoReplace(source, destination string) error {
 	if err := os.Link(source, destination); err != nil {
-		return fmt.Errorf("не удалось зарезервировать файл назначения без перезаписи: %w", err)
+		return fmt.Errorf("could not reserve destination file without overwriting: %w", err)
 	}
 	if err := os.Remove(source); err != nil {
 		if cleanupErr := os.Remove(destination); cleanupErr != nil {
-			return fmt.Errorf("не удалось удалить исходный файл: %v; не удалось откатить назначение: %w", err, cleanupErr)
+			return fmt.Errorf("could not remove source file: %v; could not roll back destination: %w", err, cleanupErr)
 		}
-		return fmt.Errorf("не удалось удалить исходный файл: %w", err)
+		return fmt.Errorf("could not remove source file: %w", err)
 	}
 	return nil
 }
@@ -165,7 +165,7 @@ func MoveTask(model *Model, options Options, operation string) (TaskMoveReport, 
 	report.SourcePath = item.Document
 	document := model.DocByPath[item.Document]
 	if document == nil {
-		report.Issues = append(report.Issues, taskMoveIssue("task-move-source", "Файл задачи не найден в модели.", item.Document, 0))
+		report.Issues = append(report.Issues, taskMoveIssue("task-move-source", "Task file not found in the model.", item.Document, 0))
 		return report, nil
 	}
 	archived, archiveYear, archivePathValid := taskArchivePathInfo(item.Document)
@@ -176,11 +176,11 @@ func MoveTask(model *Model, options Options, operation string) (TaskMoveReport, 
 	switch operation {
 	case "archive":
 		if archived {
-			report.Issues = append(report.Issues, taskMoveIssue("task-already-archived", "Задача уже находится в архиве.", item.Document, item.line))
+			report.Issues = append(report.Issues, taskMoveIssue("task-already-archived", "The task is already archived.", item.Document, item.line))
 			return report, nil
 		}
 		if item.statusName != "done" && item.statusName != "cancelled" {
-			report.Issues = append(report.Issues, taskMoveIssue("task-not-terminal", "Архивировать можно только задачу Done или Cancelled.", item.Document, item.line))
+			report.Issues = append(report.Issues, taskMoveIssue("task-not-terminal", "Only a Done or Cancelled task can be archived.", item.Document, item.line))
 			return report, nil
 		}
 		archiveYear = now.Format("2006")
@@ -188,17 +188,17 @@ func MoveTask(model *Model, options Options, operation string) (TaskMoveReport, 
 		report.DestinationPath = path.Join("work", "archive", archiveYear, path.Base(item.Document))
 	case "restore":
 		if !archived {
-			report.Issues = append(report.Issues, taskMoveIssue("task-not-archived", "Задача не находится в архиве.", item.Document, item.line))
+			report.Issues = append(report.Issues, taskMoveIssue("task-not-archived", "The task is not archived.", item.Document, item.line))
 			return report, nil
 		}
 		if !archivePathValid {
-			report.Issues = append(report.Issues, taskMoveIssue("invalid-task-archive-path", "Задача находится вне структуры work/archive/YYYY/*.md.", item.Document, item.line))
+			report.Issues = append(report.Issues, taskMoveIssue("invalid-task-archive-path", "The task is outside work/archive/YYYY/*.md.", item.Document, item.line))
 			return report, nil
 		}
 		report.ArchiveYear = archiveYear
 		report.DestinationPath = path.Join("work", path.Base(item.Document))
 	default:
-		return report, fmt.Errorf("неизвестная операция перемещения задачи: %s", operation)
+		return report, fmt.Errorf("unknown task move operation: %s", operation)
 	}
 
 	if operation == "archive" {

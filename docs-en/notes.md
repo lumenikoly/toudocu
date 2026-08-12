@@ -1,5 +1,4 @@
 # Notes
 
-Free space for observations, context and work notes. Contents
-does not have a mandatory structure: if necessary, it can be divided into sections
-and arrange in lists.
+A free-form space for observations, context, and working notes. The content has
+no required structure and can be divided into sections or lists when useful.

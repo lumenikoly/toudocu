@@ -1,139 +1,136 @@
-# CLI and workflow tasks
+# CLI and work-item operations
 
 - Identifier: MOD-CLI
-- Status: Completed
-- Owner: Toudocu Team
-- Last updated: 2026-08-06
+- Status: Done
+- Last updated: 2026-08-10
 
-The module provides Toudocu commands and deterministic workflow from search and
-task framework to context and controlled execution of declared checks.
+This module provides documentation checks, portal builds, local serving,
+search, Git comparisons, and work-item operations. Results are reproducible,
+exit codes are stable, and machine-readable reports use JSON schema v1.
 
-## Purpose
+## Code locations
 
-Combine check, build, local view and task workflow operations into
-predictable CLI with stable exit codes and JSON output.
+- `api.go` and `cmd/toudocu/main.go` — public Go facade and executable entry
+  point;
+- `internal/app/cli.go` and `internal/app/server.go` — CLI and local server;
+- `internal/app/task_context.go`, `task_ready.go`, `task_verify.go`, and
+  `task_archive.go` — work-item operations;
+- `internal/app/search.go` and `scaffold.go` — search and document scaffolds;
+- `internal/app/command_process_*.go` — process startup and termination;
+- `skills/bundle.go`, `internal/skillinstall/`, and
+  `internal/app/skill_cli.go` — embedded skill, planning, and filesystem
+  operations.
 
-## Code location
+## Boundaries
 
-- public façade and entrypoint: `api.go`, `cmd/toudocu/main.go`;
-- CLI and local HTTP server: `internal/app/cli.go`, `internal/app/server.go`;
-- read-only context and readiness: `internal/app/task_context.go`, `internal/app/task_ready.go`;
-- search and frameworks: `internal/app/search.go`, `internal/app/scaffold.go`;
-- verification execution and process management: `internal/app/task_verify.go`, `internal/app/command_process_*.go`;
-- work-item archiving and restoration: `internal/app/task_archive.go`.
-- embedded skill bundle: `skills/bundle.go`;
-- registry, planner, manifest, and filesystem lifecycle: `internal/skillinstall/`;
-- text CLI and internal TTY context: `internal/app/skill_cli.go`.
+The CLI does not interpret a natural-language request. `task ready` and
+`task context` are read-only. Only `task verify --run` starts project commands,
+after validating the work item and receiving separate authorization from the
+user.
 
-## Module boundaries
-
-The CLI does not interpret the user request. `task ready` and `task context`
-only read data, and `task verify --run` runs commands after local
-validation gate. Prompt-workflows `$toudocu init`, `$toudocu refresh`
-and `$toudocu refresh diff` are outside the Go CLI boundary.
-The `skill` command manages only files from the embedded package and does not
-execute its content; the lifecycle is intentionally absent from the public Go facade.
+`$toudocu init`, `$toudocu refresh`, and `$toudocu translate` are AI-agent
+workflows, not Go CLI commands. `skill` only
+places embedded files and never executes their contents. The skill lifecycle is
+not exported through the public Go facade.
 
 ## Business rules
 
 ### BR-CLI-001: Task context does not execute commands
 
-`task context` returns the task, associated entities, documents and diagnostics,
-but does not call the system shell.
+`task context` returns the work item, required documents, relationships, and
+diagnostics without invoking the system shell.
 
 ### BR-CLI-002: Checks are only run explicitly
 
-The `AC-*`, `ALL`, and `DOCS` commands are executed only through `task verify --run`.
-The repeating command is executed once and saves all associated targets.
+`AC-*`, `ALL`, `DOCS`, and optional `QUALITY` commands run only through
+`task verify --run`. An identical command runs once, and the report keeps every
+target mapped to it.
 
 ### BR-CLI-003: Timeout terminates process tree
 
-When the timeout is exceeded, both the shell and the child processes it created
-are terminated; the report receives the status `timed_out`.
+When `--timeout` expires, Toudocu stops the system shell and every child process
+it created. The result is `timed_out`.
 
 ### BR-CLI-004: Toudocu does not interpret user request
 
-Toudocu creates neutral wireframes and checks the structure. Selecting entities
-formulation of requirements, change of status and confirmation of criteria remain
-responsibility of the performer.
+Toudocu creates a neutral scaffold and validates its format. A person or agent
+chooses relationships, writes requirements, changes status, and confirms
+acceptance criteria.
 
 ### BR-CLI-005: Browser and CLI use the same scaffold registry
 
-`task init` and seven variants of `scaffold` preserve public commands, but their
-the order, fields, validation, target path and renderer are determined by the same registry,
-which `serve` returns editor UI. Creation remains atomic `O_EXCL`.
+`task init`, the `scaffold` variants, and the editor use one registry for field
+order, validation, target paths, and templates. A new file is created atomically
+with overwrite prohibited through `O_EXCL`.
 
 ### BR-CLI-006: A translation root is not a work context
 
-A configured translation root is available to `check`, `build`, read-only
-`serve`, `search`, and ordinary changes browsing. `task init`, `task
-context`, `task ready`, `task verify`, `task changes`, `task archive`,
-`task restore`, `scaffold`, and editor writes are rejected with
-`TRANSLATION_ROOT_READ_ONLY`. Translated work items remain a reader-facing
-mirror, while agents and CI use only the canonical docs root.
+A translation root can be checked, built, searched, compared, and served
+read-only. Work-item commands, `scaffold`, and Editor writes return
+`TRANSLATION_ROOT_READ_ONLY` before changing data or running commands.
+Translated work items are reader-facing mirrors; context and CI use the
+canonical root.
 
 ### BR-CLI-007: Archiving does not change the task contract
 
-`task archive` and `task restore` move one valid work item without overwriting
-and do not change its Markdown or status. The operation is blocked if the move
-would break resolution of a direct Markdown link.
+`task archive` and `task restore` move one file without overwriting and do not
+change its Markdown or status. The operation is blocked if a direct Markdown
+link would resolve differently after the move.
 
 ### BR-CLI-008: A managed skill does not overwrite user changes
 
-The lifecycle changes only an absent or unchanged managed copy with a valid
-manifest. An extra, changed, or deleted bundled file, changed permissions, a
-symlink, unmanaged directory, damaged manifest, or newer version blocks the
-write; there is no `--force`.
+The lifecycle changes only an absent target or an exact managed copy with a
+valid manifest. Extra, changed, or removed files, incorrect permissions,
+symbolic links, unmanaged directories, corrupt manifests, and newer installed
+versions block the write. There is no `--force`.
 
 ### BR-CLI-009: The skill lifecycle works offline
 
-The only canonical package is embedded in the binary. `skill install`,
-`status`, `update`, and `uninstall` do not use the network, a shell, or a
-marketplace and do not execute scripts from the bundle.
+The canonical skill package is embedded in the binary. `skill install`,
+`status`, `update`, and `uninstall` do not use the network, a system shell, or a
+marketplace and do not run scripts from the package.
 
 ### BR-CLI-010: Multi-target operations are planned before writing
 
-For `--agent all`, the CLI first resolves and classifies every deduplicated
-target. Each target is then processed independently after an error; a conflict
-or partial result returns exit code `1`.
+With `--agent all`, the CLI resolves and classifies every unique target before
+writing. It then processes targets independently; one failure does not stop the
+others, but a partial result returns exit code `1`.
 
 ## Invariants
 
-- JSON mode does not mix the report with streaming text output;
-- commands are executed consistently even after an error;
-- each command is launched from repository root;
-- stdout and stderr are limited to the last 1 MiB of each stream;
-- building requires an explicit `toudocu build`; a path without a command is rejected;
-- reserved skill-level names `init` and `refresh` are rejected as
-  unknown Go CLI commands;
-- task workflow and entity creation never use a configured translation root;
-- `serve` listens only to loopback by default; network access is enabled explicitly;
-- `--host`, `--port`, `--open` and lack of auto-open are not changed; `--no-open`
-  is not added, and `--edit` remains an unknown parameter.
-- `skill status` does not write to the filesystem; mutating skill commands
-  recheck the snapshot after an atomic backup move and restore the prior copy
-  if publication fails.
+- JSON output is not mixed with streaming human-readable text.
+- Work-item commands run sequentially and continue after one fails.
+- Every command starts from the repository root.
+- At most the last 1 MiB of stdout and 1 MiB of stderr is retained per command.
+- A build requires explicit `toudocu build`; a bare path is rejected.
+- `init`, `refresh`, and `translate` are rejected as top-level CLI
+  commands.
+- Work-item and document creation never uses a translation root.
+- `serve` binds to loopback by default; another address must be explicit.
+- The browser opens only with `--open`; there is no `--no-open` or `--edit`.
+- `skill status` is read-only. Mutating skill commands recheck the target before
+  publication and restore the backup if publication fails.
 
 ## Stable interfaces
 
-- commands and parameters from [CLI contract](../contracts/cli.md);
-- `ProjectReport` and `TaskContextReport` schema v1;
-- `SearchReport`, `TaskInitReport`, `ScaffoldReport`, `TaskReadyReport` and
-  `TaskVerifyReport` schema v1;
-- exit code `0` only if the operation is successful.
+- commands and options in the [CLI contract](../contracts/cli.md);
+- schema-v1 `ProjectReport`, `TaskContextReport`, `SearchReport`,
+  `TaskInitReport`, `ScaffoldReport`, `TaskReadyReport`, `TaskMoveReport`, and
+  `TaskVerifyReport`;
+- exit code `0` only for success or an allowed no-op.
 
 ## Related use cases
 
-- [UC-TASK-01: Work Task Context](../use-cases/task-workflow.md)
-- [UC-TASK-02: Checking a work task](../use-cases/task-verify.md)
-- [UC-TASK-03: Preparing a work task](../use-cases/UC-TASK-03.md)
-- [UC-TASK-04: Archiving and restoring a task](../use-cases/UC-TASK-04.md)
-- [UC-DOCS-02: Documentation Check](../use-cases/check-documentation.md)
-- [UC-DOCS-03: Local Server](../use-cases/serve-portal.md)
-- [UC-AGENT-01: Installing the AI skill](../use-cases/UC-AGENT-01.md)
+- [Work-item context](../use-cases/task-workflow.md)
+- [Work-item verification](../use-cases/task-verify.md)
+- [Prepare a work item](../use-cases/UC-TASK-03.md)
+- [Archive and restore](../use-cases/UC-TASK-04.md)
+- [Check documentation](../use-cases/check-documentation.md)
+- [Local server](../use-cases/serve-portal.md)
+- [Install the AI skill](../use-cases/UC-AGENT-01.md)
 
-## Related processes
+## Related flows
 
-- [FLOW-DOCS-CHECK: Documentation contract check](../flows/FLOW-DOCS-CHECK.md)
-- [FLOW-DOCS-SERVE: Local portal browsing](../flows/FLOW-DOCS-SERVE.md)
-- [FLOW-TASK-WORKFLOW: Working with the task being checked](../flows/FLOW-TASK-WORKFLOW.md)
+- [FLOW-DOCS-CHECK](../flows/FLOW-DOCS-CHECK.md)
+- [FLOW-DOCS-SERVE](../flows/FLOW-DOCS-SERVE.md)
+- [FLOW-TASK-WORKFLOW](../flows/FLOW-TASK-WORKFLOW.md)

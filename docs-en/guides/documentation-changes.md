@@ -1,101 +1,129 @@
-# Viewing documentation changes
+# Viewing changes
 
-Toudocu uses Git as the sole source of the old and new versions. It does not
-create snapshots, fetch, or modify history, refs, the index, or the working
-tree. The section is available only in `serve` at `/changes/`; a regular
-`build` remains a self-contained view of current documentation and requires no
-Git history.
+Toudocu reads both file versions from the local Git repository. It does not
+fetch, switch branches, or change history, refs, the index, or working files.
+The interactive workspace exists only in `serve`; regular `build` output is
+static and does not depend on Git history.
 
-## Comparison modes
+## Complete journey in the local portal
 
-By default, `HEAD → working-tree` includes staged and unstaged changes,
-deletions, and untracked files. Other available comparisons are `HEAD → index`,
-revision → revision, revision → working-tree, and
-`merge-base(base-ref, HEAD) → working-tree` through `--branch-base`. The base,
-target, resolved commit, branch, and dirty state are always visible. Toudocu
-does not load remote refs or guess an ambiguous base.
+1. From the repository root, run:
 
-## Three diff levels
+   ```bash
+   toudocu serve ./docs
+   ```
 
-`Source` is a Git unified patch without external diff or textconv. The unified
-view shows old/new line numbers, transitions, copies, and deep links to hunks;
-the complete patch can be copied separately. `Side by side` uses a read-only
-CodeMirror MergeView over the contents of both Git sides. Binary and oversized
-files receive a diagnostic without blocking the change set.
+2. Open the printed address and go to Changes. Its direct path is `/changes/`.
+3. Keep `HEAD → working-tree` to review every current local change. For another
+   comparison, open the range control and choose both ends explicitly.
+4. Find a file by name or narrow the list by status, scope, and file kind. The
+   kind filter can show all files, documentation only, or other repository
+   files only.
+5. Select a file and start with Diff, the exact Git patch. Open Full file when
+   you need context beyond the changed lines.
+6. For Markdown, open Before and after, Semantics, or Relationships when useful.
+   OpenAPI, Mermaid, asset, and screen-map tabs appear only for matching files.
+7. To discuss documentation with an agent, create a question or change request
+   and follow the
+   [agent feedback scenario](../use-cases/UC-AGENT-FEEDBACK-01.md).
 
-`Before and after` passes both Markdown versions through the portal's safe
-renderer. A new or deleted side is explicitly absent. Changed Markdown sections
-are matched by anchor and marked as added/removed/modified/moved; this is not a
-DOM diff. A Mermaid error on one side does not hide the other.
+## What is compared
 
-`Semantics` deterministically compares normalized metadata, sections, task
-criteria, stable `BR-*`, `INV-*`, `TR-*`, and relations without an LLM. Changes
-preserve old/new values and source locations. Whitespace and formatting that do
-not change the project model are ignored. A parsing error disables only the
-semantic view.
+The default `HEAD → working-tree` range includes staged and unstaged edits,
+deletions, and new files. You can also compare:
 
-## Specialized views
+- `HEAD` with the index;
+- one local commit or ref with another;
+- a commit with the working tree;
+- the merge base of a selected branch and `HEAD` with the working tree, using
+  `--branch-base`.
 
-- OpenAPI is compared by info/servers/tags/webhooks, operations, parameters,
-  request body, responses and headers, security schemes/alternatives, schemas,
-  properties, required fields, and enum, with `breaking`,
-  `potentially-breaking`, `non-breaking`, or `informational` compatibility. For
-  example, a new required parameter or request body, a removed security
-  alternative, a removed schema property, and a narrowed enum are breaking; a
-  new optional property is non-breaking; client-dependent cases remain
-  potentially-breaking;
-- Mermaid blocks are matched by `%% id: <stable-id>` or by section and order,
-  rendered independently before and after, and shown with a source-line diff.
-  Zoom, pan, and fullscreen are available for large diagrams. When matching is
-  ambiguous, the report returns `mermaid-block-match-ambiguous`; a structurally
-  unrecognized old or new side receives a separate diagnostic;
-- PNG, JPEG, WebP, and SVG are shown side by side with byte sizes, dimensions,
-  and aspect ratio; an overlay slider is available for two raster sides;
-- SC/TR provide a change overlay on the main map, added/modified/removed
-  filters, and a JSON screen-map diff with old-side ghost entities.
+The workspace shows both the values entered by the user and the local Git refs
+they resolved to. Toudocu does not fetch remote branches. If a required ref is
+not available locally, retrieve it with ordinary Git first.
 
-## CLI and CI
+For a nested project, `--repository-root` selects the directory containing its
+`.toudocu/config.yml`. Paths in `changes.exclude` are relative to that
+directory.
+
+## File views
+
+| View | Use it when | What it shows |
+|---|---|---|
+| Diff | You need the exact edit | The Git patch with old and new line numbers. You can switch between unified and side-by-side layouts, move between hunks, and copy the patch |
+| Full file | You need the surrounding context | The current full UTF-8 text file, or the old version for a deleted file. A selection can be copied or commented on |
+| Before and after | You need the rendered Markdown result | Safely rendered old and new versions, with added, removed, changed, and moved sections identified |
+| Semantics | Known fields or structure changed | Differences in headings, metadata, task criteria, rules, transitions, and relationships. Formatting-only changes are omitted |
+| Relationships | The document refers to other known entities | Added and removed relationships between known documents |
+
+If one Markdown side cannot be parsed, Diff still works and the error stays in
+the optional view. A binary or oversized file receives a clear diagnostic and
+available size information instead of an attempted text rendering.
+
+Specialized views add more detail:
+
+- OpenAPI compares operations, parameters, request bodies, responses, schemas,
+  and security settings. It marks potentially incompatible changes, but the
+  developer makes the final compatibility decision.
+- Mermaid matches blocks by `%% id: <stable-id>` or by section and order,
+  renders both sides independently, and shows a source-text diff.
+- PNG, JPEG, WebP, and SVG appear side by side with size and dimensions. Two
+  raster images can be overlaid with a slider.
+- `SC-*` and `TR-*` changes appear on the screen map, including removed
+  entities from the old side.
+
+## Terminal and CI reports
+
+Common examples:
 
 ```bash
 toudocu changes ./docs --format text
 toudocu changes ./docs --base main --target working-tree --format json
 toudocu changes ./docs --branch-base main --format markdown
-toudocu changes ./docs --status modified --module MOD-AUTH --type use-case
-toudocu changes ./docs --permanent-only --format json
 toudocu changes file docs/modules/MOD-AUTH.md --base HEAD --target index
 toudocu task changes TASK-AUTH-015 ./docs --format json
 ```
 
-CLI filters are applied to an already built change set:
+After Toudocu builds the report, these flags can narrow it:
 
-| Flag | Selection |
+| Flag | What remains |
 |---|---|
-| `--status STATUS` | exact `added`, `untracked`, `modified`, `deleted`, or `renamed` state |
-| `--module VALUE` | match by path, entity ID/name, or semantic summary |
-| `--type TYPE` | normalized entity type, such as `module`, `use-case`, `flow`, `screen`, or `task` |
-| `--permanent-only` | only the `permanent-documentation` classification, excluding work artifacts, contracts, and assets |
+| `--status STATUS` | Files in `added`, `untracked`, `modified`, `deleted`, or `renamed` state |
+| `--module VALUE` | Paths, entities, or descriptions matching the module value |
+| `--type TYPE` | Entities of a selected kind, such as `module`, `use-case`, `flow`, `screen`, or `task` |
+| `--permanent-only` | Permanent project documentation, excluding work items, contracts, and assets |
+| `--include-assets` | Binary assets even when `changes.includeAssets` disables them |
+| `--translation-input` | Reader-facing Markdown, work items, and assets required by the translation workflow |
 
-Filters can be combined. Text, JSON, and Markdown receive the same filtered
-summary; `-o FILE` writes the selected format to a separate file.
+Filters can be combined. `text`, `json`, and `markdown` use the same filtered
+result; `-o FILE` writes it to a file.
 
-Exit code `1` means a report was built with an error, `2` means an invalid
-range, `3` means Git is unavailable/not found, and `4` means an internal error.
+Exit codes are:
 
-The `$toudocu translate` workflow uses this report only as input: the skill's
-`--task` parameter invokes canonical `task changes` through `working-tree`,
-while `--base` invokes `<base> → working-tree`. Its API-only override includes
-assets even when `changes.includeAssets: false`; the `ChangeSetReport` schema
-remains v1. The exact `sourceDiff` retains priority and remains available when
-rendered, semantic, OpenAPI, or Mermaid views add their own diagnostics.
+- `0` — the report was built without errors;
+- `1` — the report was built but contains an analysis error;
+- `2` — the Git range is invalid;
+- `3` — Git is unavailable or no repository was found;
+- `4` — an internal Toudocu error.
 
-## Task impact
+## Changes declared by a task
 
-A `TASK-*` change is separated as a task contract from permanent documentation.
-Explicit `Documentation impact` paths are matched against the Git change set. A
-warning about an undeclared, unchanged, or declared-but-not-created document
-requires review, but does not by itself prove an implementation error or block
-completion.
+The Documentation impact field in a `TASK-*` lists files the task promises to
+change. This command compares that list with the current Git diff:
 
-See the [HTTP contract](../contracts/changes-http.md),
-[JSON report](../reference/changes-report.md), and
-[Git snapshot architecture](../architecture/documentation-changes.md).
+```bash
+toudocu task changes TASK-AUTH-015 ./docs
+```
+
+It warns about an undeclared changed file, a declared but unchanged file, or a
+document that was promised but never created. These are reasons to review the
+task and diff, not automatic proof that the implementation is wrong.
+
+The `$toudocu translate` workflow consumes the same report without changing its
+schema. The exact Git patch remains the primary source; rendered and semantic
+views only make it easier to understand.
+
+Exact HTTP and JSON fields are defined in the
+[HTTP contract](../contracts/changes-http.md) and
+[report reference](../reference/changes-report.md). Git read boundaries are in
+the [architecture document](../architecture/documentation-changes.md).

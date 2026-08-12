@@ -159,7 +159,6 @@ func TestSearchIndexMetadataOrderIsDeterministic(t *testing.T) {
 		Type:       "status",
 		Metadata: Metadata{
 			"status":  "Ready",
-			"owner":   "Toudocu Team",
 			"version": "0.0.1",
 		},
 		MetadataExtras: []MetadataExtra{{Key: "Channel", Value: "stable"}},
@@ -171,12 +170,12 @@ func TestSearchIndexMetadataOrderIsDeterministic(t *testing.T) {
 	if len(first) != 1 || len(second) != 1 || first[0].Text != second[0].Text {
 		t.Fatalf("search index changed between builds: %#v %#v", first, second)
 	}
-	want := "release status md toudocu team ready 0 0 1 stable"
+	want := "release status md ready 0 0 1 stable"
 	if first[0].Text != want {
 		t.Fatalf("search index metadata order = %q, want %q", first[0].Text, want)
 	}
 	terms := strings.Join(metadataSearchTerms(document, true), " ")
-	if terms != "owner Toudocu Team status Ready version 0.0.1 Channel stable" {
+	if terms != "status Ready version 0.0.1 Channel stable" {
 		t.Fatalf("CLI metadata order = %q", terms)
 	}
 }

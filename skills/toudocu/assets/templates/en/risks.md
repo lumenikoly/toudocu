@@ -7,7 +7,6 @@ Current project risks and mitigation plans.
 - Status: {{STATUS}}
 - Probability: {{PROBABILITY}}
 - Impact: {{IMPACT}}
-- Owner: {{OWNER}}
 
 {{RISK_DESCRIPTION}}
 

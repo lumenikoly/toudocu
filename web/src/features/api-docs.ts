@@ -1,6 +1,4 @@
-import { registerMessages, text } from "../core/locale";
-import { apiDocsMessages } from "../core/messages.ru";
-registerMessages(apiDocsMessages);
+import { text } from "../core/locale";
 (function () {
     "use strict";
     var host: any = document.getElementById("swagger-ui");

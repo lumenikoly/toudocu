@@ -1,57 +1,73 @@
 # ChangeSetReport schema v1
 
-`toudocu changes --format json` returns a deterministic report with
-`schemaVersion`, repository/branch/HEAD/dirty, resolved base/target,
-`changeSetDigest`, file/line/entity/classification summary, `changes[]`, task
-impact and diagnostics.
+`toudocu changes --format json` returns a reproducible report with
+`schemaVersion: 1`. It contains repository and branch state, `HEAD`, the dirty
+flag, resolved range endpoints, `changeSetDigest`, file/line/entity/class
+summaries, `changes[]`, task impact, and diagnostics.
 
-`DocumentationChange` contains status/path/oldPath, staged/unstaged/untracked,
-line stats, binary and byte sizes, classification, old/new entities, availability
-submissions, exact Git patch, `sourceDiffHunks`, `renderedSections`,
-semantic/relation changes, asset metadata and diagnostics. Each hunk contains
-stable ID for current patch, header, old/new ranges and own fragment
-patch. `SourceDiff` remains the authoritative full text of the Git diff.
+## One changed file
 
-`renderedSections` contains structural match by Markdown anchor: state
-`added-section`, `removed-section`, `modified-section`, `moved-section` or
-`unchanged-section`, anchors of both sides and source locations. This is a projection
-Markdown structures, not arbitrary DOM diff. Asset metadata contains MIME,
-dimensions, aspect ratio and available transparency feature. Workers
-artifacts use `work-artifact` and do not mix with
-`permanent-documentation`; contracts and assets have their own classifications.
+`DocumentationChange` contains:
 
-`SemanticChange` contains kind, entity/subject, field, before/after, summary,
-source locations and optional OpenAPI compatibility. Relation changes have
-`relation-added` or `relation-removed` and both sides of the edge.
+- `status`, `path`, previous `oldPath`, and
+  `staged`/`unstaged`/`untracked` flags;
+- added and removed line counts, binary state, and sizes;
+- file classification and known entities before and after;
+- available views and their diagnostics;
+- the exact Git patch in `sourceDiff` and separate `sourceDiffHunks`;
+- rendered-section, semantic, and relationship changes;
+- asset, screen, OpenAPI, and Mermaid data when applicable.
 
-OpenAPI fields use stable paths, for example
-`POST /login.parameters.header:client`,
-`POST /login.responses.200.headers.X-Request-ID` and
-`components.schemas.Login.properties.role.enum`. This allows CI to choose
-specific breaking change without parsing the text summary.
+Each patch hunk has an ID stable within the current report, a header, old and
+new ranges, and its own text. The complete `sourceDiff` remains authoritative.
 
-For `SC-*`, the `screen` field stores node snapshots before/after and changed
-transitions with endpoints, action/condition and added/modified/removed state.
-The remote party remains in the report as ghost data for the Screen Map.
+## Markdown and assets
 
-`mermaidBlocks` contains ID, status, caption, before/after and source
-locations. Individual diagnostics `mermaid-old-version-invalid` and
-`mermaid-new-version-invalid` does not hide the other party's available source code.
-This is the source before/after representation; Toudocu does not intentionally build
-pixel-level image diff.
+`renderedSections` matches sections by Markdown anchor. Its states are
+`added-section`, `removed-section`, `modified-section`, `moved-section`, and
+`unchanged-section`. This compares Markdown structure, not arbitrary DOM.
 
-Basic codes: `git-repository-not-found`, `git-command-failed`,
-`git-base-not-found`, `git-target-not-found`, `git-merge-base-not-found`,
-`git-binary-diff-unavailable`, `change-file-too-large`,
-`change-old-version-missing`, `change-new-version-missing`,
-`semantic-old-version-invalid`, `semantic-new-version-invalid`,
-`mermaid-old-version-invalid`, `mermaid-new-version-invalid`,
-`rendered-old-version-failed`, `rendered-new-version-failed`,
-`openapi-old-version-invalid`, `openapi-new-version-invalid`,
-`openapi-breaking-change`, `declared-document-not-changed`,
-`declared-document-not-created`,
-`undeclared-document-change`, `undeclared-document-created` and
-`deleted-entity-still-referenced`.
+Image data includes MIME type, width, height, aspect ratio, and transparency
+when Toudocu can determine it. Work documents use `work-artifact`; permanent
+documentation uses `permanent-documentation`; contracts and assets have their
+own classifications.
 
-Digest serves as cache identity and live invalidation, but is not its own
-history of Toudocu.
+`SemanticChange` contains its kind, entity, field, before and after values,
+summary, source locations, and optional OpenAPI compatibility. A relationship
+uses `relation-added` or `relation-removed` and records both endpoints.
+
+OpenAPI paths are stable, for example
+`POST /login.parameters.header:client` and
+`components.schemas.Login.properties.role.enum`. CI can select a specific
+incompatible change without parsing its prose summary.
+
+For `SC-*`, `screen` stores before and after screen data and transitions with
+old and new endpoints, actions, conditions, and states. Removed entities remain
+as old-side data so the screen map can display them.
+
+`mermaidBlocks` contains the identifier, state, caption, source before and
+after, and locations. Failure on one side does not hide the other side's
+source. Toudocu compares diagram text, not rendered pixels.
+
+## Common diagnostic codes
+
+- Git: `git-repository-not-found`, `git-command-failed`,
+  `git-base-not-found`, `git-target-not-found`,
+  `git-merge-base-not-found`, `git-binary-diff-unavailable`;
+- files: `change-file-too-large`, `change-old-version-missing`,
+  `change-new-version-missing`;
+- specialized views: `semantic-old-version-invalid`,
+  `semantic-new-version-invalid`, `mermaid-old-version-invalid`,
+  `mermaid-new-version-invalid`, `rendered-old-version-failed`,
+  `rendered-new-version-failed`, `openapi-old-version-invalid`,
+  `openapi-new-version-invalid`, `openapi-breaking-change`;
+- tasks and relationships: `declared-document-not-changed`,
+  `declared-document-not-created`, `undeclared-document-change`,
+  `undeclared-document-created`, `deleted-entity-still-referenced`.
+
+`changeSetDigest` identifies cached data and live-page invalidation. It is not
+an independent Toudocu history of document contents.
+
+`Issue.message` and all other technical diagnostics in the report are always
+in English. Automation uses the stable codes listed above; paths and other
+user-provided values embedded in messages remain verbatim.

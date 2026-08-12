@@ -17,12 +17,12 @@ func findWorkItem(model *Model, taskID string) (*WorkItem, error) {
 			continue
 		}
 		if found != nil {
-			return nil, fmt.Errorf("идентификатор задачи %s неоднозначен", taskID)
+			return nil, fmt.Errorf("task identifier %s is ambiguous", taskID)
 		}
 		found = item
 	}
 	if found == nil {
-		return nil, fmt.Errorf("задача %s не найдена", taskID)
+		return nil, fmt.Errorf("task %s not found", taskID)
 	}
 	return found, nil
 }
@@ -103,7 +103,7 @@ func BuildTaskContext(model *Model, taskID string) (TaskContextReport, error) {
 		return TaskContextReport{}, err
 	}
 	if item.statusName != "ready" && item.statusName != "in-progress" && item.statusName != "blocked" && item.statusName != "done" {
-		return TaskContextReport{}, fmt.Errorf("task context доступен только для Ready, In Progress, Blocked или Done")
+		return TaskContextReport{}, fmt.Errorf("task context is available only for Ready, In Progress, Blocked, or Done tasks")
 	}
 	report := TaskContextReport{
 		SchemaVersion: 1, Kind: "task-context",

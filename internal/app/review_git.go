@@ -38,11 +38,11 @@ func openGitRepositorySource(repositoryRoot string, similarity int) (*gitChangeS
 	}
 	probe := execGit(canonical, "rev-parse", "--show-toplevel")
 	if probe.err != nil {
-		return nil, &reviewFailure{Code: "REVIEW_GIT_UNAVAILABLE", Status: http.StatusServiceUnavailable, Message: "repository root не находится в доступном Git repository"}
+		return nil, &reviewFailure{Code: "REVIEW_GIT_UNAVAILABLE", Status: http.StatusServiceUnavailable, Message: "repository root is not inside an available Git repository"}
 	}
 	gitRoot, err := resolvePathForSafety(strings.TrimSpace(string(probe.out)))
 	if err != nil || filepath.Clean(gitRoot) != filepath.Clean(canonical) {
-		return nil, &reviewFailure{Code: "REVIEW_UNSAFE_PATH", Status: http.StatusForbidden, Message: "--repository-root должен указывать canonical Git root"}
+		return nil, &reviewFailure{Code: "REVIEW_UNSAFE_PATH", Status: http.StatusForbidden, Message: "--repository-root must point to the canonical Git root"}
 	}
 	if similarity < 1 || similarity > 100 {
 		similarity = 60
@@ -130,7 +130,7 @@ func resolveReviewComparison(g *gitChangeSource, options Options) (ChangeSide, C
 		}
 		mergeBase, mergeErr := g.run("merge-base", branchCommit, head)
 		if mergeErr != nil {
-			return ChangeSide{}, ChangeSide{}, &reviewFailure{Code: "REVIEW_GIT_UNAVAILABLE", Status: http.StatusServiceUnavailable, Message: "merge-base недоступен"}
+			return ChangeSide{}, ChangeSide{}, &reviewFailure{Code: "REVIEW_GIT_UNAVAILABLE", Status: http.StatusServiceUnavailable, Message: "merge-base is unavailable"}
 		}
 		base.Revision, base.Resolved, base.DisplayRef = branch, strings.TrimSpace(string(mergeBase)), "merge-base("+branch+", HEAD)"
 	}
@@ -154,7 +154,7 @@ func resolveReviewComparison(g *gitChangeSource, options Options) (ChangeSide, C
 	return base, target, nil
 }
 
-func repositoryReviewRevision(g *gitChangeSource) (string, error) {
+func repositoryReviewRevision(g *gitChangeSource, base, target ChangeSide) (string, error) {
 	head, err := g.resolveCommit("HEAD")
 	if err != nil {
 		return "", err
@@ -168,8 +168,10 @@ func repositoryReviewRevision(g *gitChangeSource) (string, error) {
 		return "", err
 	}
 	hash := sha256.New()
-	_, _ = hash.Write([]byte(head))
-	_, _ = hash.Write([]byte{0})
+	for _, part := range []string{base.Type, base.Revision, base.Resolved, target.Type, target.Revision, target.Resolved, head} {
+		_, _ = hash.Write([]byte(part))
+		_, _ = hash.Write([]byte{0})
+	}
 	_, _ = hash.Write(status)
 	_, _ = hash.Write([]byte{0})
 	_, _ = hash.Write(diff)
@@ -220,7 +222,7 @@ func BuildRepositoryReview(options Options) (*RepositoryReviewReport, error) {
 	if err != nil {
 		return nil, &reviewFailure{Code: "REVIEW_GIT_UNAVAILABLE", Status: http.StatusServiceUnavailable, Message: err.Error()}
 	}
-	revision, err := repositoryReviewRevision(g)
+	revision, err := repositoryReviewRevision(g, base, target)
 	if err != nil {
 		return nil, err
 	}
@@ -235,7 +237,11 @@ func BuildRepositoryReview(options Options) (*RepositoryReviewReport, error) {
 		Files:   []RepositoryReviewFile{}, FeedbackWritable: target.Type == "working-tree", Diagnostics: []Issue{},
 	}
 	documentation := documentationChangesByPath(options)
+	requested := filepath.ToSlash(strings.TrimSpace(options.ChangeFile))
 	for _, change := range changed {
+		if requested != "" && requested != change.path && requested != change.oldPath {
+			continue
+		}
 		file := RepositoryReviewFile{Status: change.status, Path: change.path, OldPath: change.oldPath, GitState: change.state, Language: reviewLanguage(change.path)}
 		patch, patchErr := g.diff(base, target, change)
 		if patchErr == nil {
@@ -260,9 +266,11 @@ func BuildRepositoryReview(options Options) (*RepositoryReviewReport, error) {
 		if doc := documentation[file.Path]; doc != nil {
 			copy := *doc
 			file.Documentation = &copy
-		} else if doc := documentation[file.OldPath]; doc != nil {
-			copy := *doc
-			file.Documentation = &copy
+		} else if file.OldPath != "" {
+			if doc := documentation[file.OldPath]; doc != nil {
+				copy := *doc
+				file.Documentation = &copy
+			}
 		}
 		report.Files = append(report.Files, file)
 		addReviewSummary(&report.Summary, file)
@@ -281,7 +289,10 @@ func documentationChangesByPath(options Options) map[string]*DocumentationChange
 	}
 	for index := range report.Changes {
 		change := &report.Changes[index]
-		result[change.Path], result[change.OldPath] = change, change
+		result[change.Path] = change
+		if change.OldPath != "" {
+			result[change.OldPath] = change
+		}
 	}
 	return result
 }
@@ -344,6 +355,7 @@ func reviewInventory(g *gitChangeSource, query string, limit int) ([]RepositoryR
 }
 
 func BuildRepositoryReviewFile(options Options, requested string) (*RepositoryReviewFileDetail, error) {
+	options.ChangeFile = requested
 	report, err := BuildRepositoryReview(options)
 	if err != nil {
 		return nil, err
@@ -413,10 +425,10 @@ func readReviewText(g *gitChangeSource, side ChangeSide, path string) ([]byte, e
 		return nil, err
 	}
 	if len(content) > reviewSnapshotLimit {
-		return nil, &reviewFailure{Code: "REVIEW_TOO_LARGE", Status: http.StatusRequestEntityTooLarge, Message: "review source превышает 2 MiB"}
+		return nil, &reviewFailure{Code: "REVIEW_TOO_LARGE", Status: http.StatusRequestEntityTooLarge, Message: "review source exceeds 2 MiB"}
 	}
 	if isBinaryContent(content) {
-		return nil, &reviewFailure{Code: "REVIEW_BINARY", Status: http.StatusUnsupportedMediaType, Message: "binary review source не поддерживается"}
+		return nil, &reviewFailure{Code: "REVIEW_BINARY", Status: http.StatusUnsupportedMediaType, Message: "binary review source is not supported"}
 	}
 	return content, nil
 }
@@ -428,7 +440,7 @@ func readReviewContent(g *gitChangeSource, side ChangeSide, path string) ([]byte
 	content, err := g.content(side, path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, &reviewFailure{Code: "REVIEW_NOT_FOUND", Status: http.StatusNotFound, Message: "review file не найден"}
+			return nil, &reviewFailure{Code: "REVIEW_NOT_FOUND", Status: http.StatusNotFound, Message: "review file not found"}
 		}
 		return nil, err
 	}
@@ -442,7 +454,7 @@ func validateReviewPath(g *gitChangeSource, requested string) (string, error) {
 		return "", &reviewFailure{Code: "REVIEW_UNSAFE_PATH", Status: http.StatusForbidden, Message: "unsafe repository-relative path"}
 	}
 	if !pathContains(g.root, filepath.Join(g.root, filepath.FromSlash(path))) {
-		return "", &reviewFailure{Code: "REVIEW_UNSAFE_PATH", Status: http.StatusForbidden, Message: "path выходит за repository root"}
+		return "", &reviewFailure{Code: "REVIEW_UNSAFE_PATH", Status: http.StatusForbidden, Message: "path escapes the repository root"}
 	}
 	return path, nil
 }
@@ -460,17 +472,17 @@ func ensureReviewPathSafe(g *gitChangeSource, side ChangeSide, requested string)
 			info, statErr := os.Lstat(current)
 			if statErr != nil {
 				if os.IsNotExist(statErr) {
-					return &reviewFailure{Code: "REVIEW_NOT_FOUND", Status: http.StatusNotFound, Message: "review file не найден"}
+					return &reviewFailure{Code: "REVIEW_NOT_FOUND", Status: http.StatusNotFound, Message: "review file not found"}
 				}
 				return statErr
 			}
 			if info.Mode()&os.ModeSymlink != 0 {
-				return &reviewFailure{Code: "REVIEW_UNSAFE_PATH", Status: http.StatusForbidden, Message: "symlink/reparse path запрещён"}
+				return &reviewFailure{Code: "REVIEW_UNSAFE_PATH", Status: http.StatusForbidden, Message: "symbolic-link or reparse path is forbidden"}
 			}
 		}
 		info, statErr := os.Lstat(current)
 		if statErr != nil || !info.Mode().IsRegular() {
-			return &reviewFailure{Code: "REVIEW_UNSAFE_PATH", Status: http.StatusForbidden, Message: "review path должен быть regular file"}
+			return &reviewFailure{Code: "REVIEW_UNSAFE_PATH", Status: http.StatusForbidden, Message: "review path must be a regular file"}
 		}
 		return nil
 	}
@@ -484,11 +496,11 @@ func ensureReviewPathSafe(g *gitChangeSource, side ChangeSide, requested string)
 		return &reviewFailure{Code: "REVIEW_UNSAFE_PATH", Status: http.StatusForbidden, Message: "unknown review side"}
 	}
 	if err != nil || len(mode) == 0 {
-		return &reviewFailure{Code: "REVIEW_NOT_FOUND", Status: http.StatusNotFound, Message: "review file не найден"}
+		return &reviewFailure{Code: "REVIEW_NOT_FOUND", Status: http.StatusNotFound, Message: "review file not found"}
 	}
 	fields := strings.Fields(string(mode))
 	if len(fields) == 0 || fields[0] != "100644" && fields[0] != "100755" {
-		return &reviewFailure{Code: "REVIEW_UNSAFE_PATH", Status: http.StatusForbidden, Message: "symlink или non-regular Git entry запрещён"}
+		return &reviewFailure{Code: "REVIEW_UNSAFE_PATH", Status: http.StatusForbidden, Message: "symbolic-link or non-regular Git entry is forbidden"}
 	}
 	return nil
 }
@@ -510,10 +522,10 @@ func validateReviewChangedPath(g *gitChangeSource, requested string) error {
 			return statErr
 		}
 		if info.Mode()&os.ModeSymlink != 0 {
-			return &reviewFailure{Code: "REVIEW_UNSAFE_PATH", Status: http.StatusForbidden, Message: "symlink/reparse changedPath запрещён"}
+			return &reviewFailure{Code: "REVIEW_UNSAFE_PATH", Status: http.StatusForbidden, Message: "symbolic-link or reparse changedPath is forbidden"}
 		}
 		if index == len(parts)-1 && !info.Mode().IsRegular() {
-			return &reviewFailure{Code: "REVIEW_UNSAFE_PATH", Status: http.StatusForbidden, Message: "changedPath должен быть regular file или удалённым path"}
+			return &reviewFailure{Code: "REVIEW_UNSAFE_PATH", Status: http.StatusForbidden, Message: "changedPath must be a regular file or a deleted path"}
 		}
 	}
 	return nil

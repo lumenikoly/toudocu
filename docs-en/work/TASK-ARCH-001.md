@@ -1,4 +1,4 @@
-# TASK-ARCH-001: Implement Question-Driven Architectural Documentation
+# TASK-ARCH-001: Organize architecture documentation around questions
 
 - Status: Completed
 - Type: Feature
@@ -6,46 +6,34 @@
 - Module: MOD-MODEL
 - Use case: UC-DOCS-02
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Toudocu Team
-- Last updated: 2026-07-31
+- Last updated: 2026-08-10
 
 ## Result
 
-`docs/architecture/overview.md` is a required architecture map, and
-every other Markdown document in `architecture/` responds to one explicit
-architectural question and is directly listed in the overview.
+`docs/architecture/overview.md` is the required architecture map. Every other
+Markdown document under `architecture/` answers one explicit question and is
+linked directly from the overview.
 
 ## Behavior change
 
 ### Before
 
-The `architecture/` directory was an optional set of specialized
-Markdown documents without mandatory map, explicit question and increased
-strictness of local links.
+The `architecture/` directory was an optional collection of documents with no
+required map, explicit questions, or strict rules for local links.
 
 ### After
 
-Regular `check` requires a correct architecture overview, one non-empty question
-for each detailed document, a direct recursive document map and
-secure existing local links. Skill provides separate
-RU/EN templates, safe init and semantic gate `ARCH001`–`ARCH013`.
+A regular `check` requires a valid overview, one non-empty question in each
+detailed document, direct links to every document including nested ones, and
+safe local links that point to existing files. The skill provides separate
+Russian and English templates and applies semantic rules `ARCH001`–`ARCH013`.
 
 ## Scope
 
-- `internal/app/docs_core.go`;
-- `documentation_links.go`;
-- `internal/app/markdown_parse.go`;
-- `integration_test.go`;
-- `screens_test.go`;
-- `skill_templates_test.go`;
+- document and link parsing in `internal/app/`;
+- architecture-contract and template tests;
 - `skills/toudocu/`;
-- `docs/`;
-- `example/docs/`;
-- `project-docs/`;
-- `example/project-docs/`;
-- `README.md`;
-- `CHANGELOG.md`;
-- `AGENTS.md`.
+- source documentation, README, changelog, and `AGENTS.md`.
 
 ## Out of scope
 
@@ -58,30 +46,29 @@ RU/EN templates, safe init and semantic gate `ARCH001`–`ARCH013`.
 
 ## Acceptance criteria
 
-- [x] `AC-01` A regular check produces stable errors for a missing or
-  mistyped overview, missing question and document out
-  direct recursive map overview.
-- [x] `AC-02` Architectural broken/blocked links are errors, and
-  a non-punctuation non-blank question is acceptable.
+- [x] `AC-01` A regular check reports stable errors when the overview is
+  missing, has the wrong type, a question is absent, or a document is not in
+  the overview's direct map.
+- [x] `AC-02` Broken or disallowed architecture links are errors. A non-empty
+  question does not have to end with a question mark.
 - [x] `AC-03` JSON schema remains v1, and overview is serialized with
   `type: architecture`.
-- [x] `AC-04` RU/EN skill assets contain separate overview/detail templates,
-  minimal init creates `index.md` and overview, and legacy architecture
-  stops init without automatic migration.
-- [x] `AC-05` Managed guidance and semantic gate synchronously set type boundaries,
-  direct overview map and codes `ARCH001`–`ARCH013`.
-- [x] `AC-06` Toudocu and Service Desk architecture divided into confirmed
-  question-oriented documents, and both portals are reassembled only from
-  original Markdown after independent review.
+- [x] `AC-04` The skill has separate Russian and English templates for the
+  overview and detailed answers. Minimal `init` creates `index.md` and the
+  overview; legacy architecture stops initialization instead of being migrated
+  automatically.
+- [x] `AC-05` Managed guidance and semantic review use the same type boundaries,
+  direct overview map, and `ARCH001`–`ARCH013` codes.
+- [x] `AC-06` Toudocu architecture is split into evidence-backed answers, and
+  the portal is built from source Markdown.
 
 ## Plan
 
 - [x] Add metadata aliases and structural architecture diagnostics.
 - [x] Expand behavioral and schema contract tests.
-- [x] Update templates, init workflow, managed guidance and semantic gate.
-- [x] Migrate Toudocu and demo Service Desk documentation.
-- [x] Perform an independent semantic review and eliminate the comments.
-- [x] Go through full Go/Toudocu verification and rebuild portals.
+- [x] Update templates, the initialization workflow, managed guidance, and
+  semantic review rules.
+- [x] Convert Toudocu and demo documentation to the new structure.
 
 ## Verification
 
@@ -97,6 +84,6 @@ RU/EN templates, safe init and semantic gate `ARCH001`–`ARCH013`.
 
 ## Documentation impact
 
-The public architecture contract, skill init and guidance are updated,
-self-documentation Toudocu, demo Service Desk, README, CLI/reference,
-model, use case, changelog, documentation standard and monitored portals.
+The work updated the architecture contract, skill initialization and guidance,
+Toudocu documentation, README, CLI reference, model, use case, changelog, and
+documentation standard.

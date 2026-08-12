@@ -1,4 +1,4 @@
-# TASK-ARCH-001: Внедрить вопросно-ориентированную архитектурную документацию
+# TASK-ARCH-001: Перестроить архитектурную документацию вокруг вопросов
 
 - Статус: Выполнено
 - Тип: Feature
@@ -6,82 +6,67 @@
 - Модуль: MOD-MODEL
 - Сценарий: UC-DOCS-02
 - Стандарты: STD-GO-001, STD-DOCS-001
-- Владелец: Команда Toudocu
-- Последнее обновление: 2026-07-31
+- Последнее обновление: 2026-08-10
 
 ## Результат
 
-`docs/architecture/overview.md` является обязательной картой архитектуры, а
-каждый другой Markdown-документ в `architecture/` отвечает на один явный
-архитектурный вопрос и напрямую перечислен в overview.
+`docs/architecture/overview.md` стал обязательной картой архитектуры. Каждый
+другой Markdown-документ в `architecture/` отвечает на один конкретный вопрос
+и связан с обзором прямой ссылкой.
 
 ## Изменение поведения
 
 ### Было
 
-Каталог `architecture/` был необязательным набором специализированных
-Markdown-документов без обязательной карты, явного вопроса и повышенной
-строгости локальных ссылок.
+Каталог `architecture/` был необязательным набором документов без общей карты,
+явных вопросов и строгих требований к локальным ссылкам.
 
 ### Станет
 
-Обычный `check` требует корректный architecture overview, один непустой вопрос
-для каждого подробного документа, прямую рекурсивную карту документов и
-безопасные существующие локальные ссылки. Skill предоставляет раздельные
-RU/EN-шаблоны, безопасный init и semantic gate `ARCH001`–`ARCH013`.
+Обычный `check` требует корректный архитектурный обзор, непустой вопрос в
+каждом подробном документе, прямые ссылки на все документы, включая вложенные,
+и безопасные существующие локальные ссылки. Skill содержит отдельные русские и
+английские шаблоны и применяет правила смысла `ARCH001`–`ARCH013`.
 
 ## Область изменения
 
-- `internal/app/docs_core.go`;
-- `documentation_links.go`;
-- `internal/app/markdown_parse.go`;
-- `integration_test.go`;
-- `screens_test.go`;
-- `skill_templates_test.go`;
+- разбор документов и ссылок в `internal/app/`;
+- тесты архитектурного контракта и шаблонов;
 - `skills/toudocu/`;
-- `docs/`;
-- `example/docs/`;
-- `project-docs/`;
-- `example/project-docs/`;
-- `README.md`;
-- `CHANGELOG.md`;
-- `AGENTS.md`.
+- исходная документация, README, журнал изменений и `AGENTS.md`.
 
 ## Не входит в задачу
 
 - новая Go-команда `toudocu init`;
-- изменение `ProjectReport` schema v1 или типа `documents[].type`;
-- автоматическая миграция legacy-архитектуры;
-- проверка пунктуации, вопросительных слов или архитектурного смысла в CLI;
-- документы Toudocu о deployment или владении данными без подтверждённого
+- изменение `ProjectReport` schema v1 или `documents[].type`;
+- автоматическое преобразование старой архитектуры;
+- проверка вопросительных слов или архитектурного смысла самим CLI;
+- создание документов о развёртывании или владении данными без подтверждённого
   архитектурного вопроса.
 
 ## Критерии приёмки
 
-- [x] `AC-01` Обычный check выдаёт стабильные errors для отсутствующего или
-  неверно типизированного overview, отсутствующего вопроса и документа вне
-  прямой рекурсивной карты overview.
-- [x] `AC-02` Архитектурные broken/blocked links являются errors, а
-  непунктуационный непустой вопрос допустим.
-- [x] `AC-03` JSON schema остаётся v1, и overview сериализуется с
+- [x] `AC-01` Обычный `check` выдаёт стабильные ошибки, если обзора нет, он
+  имеет неправильный тип, вопрос отсутствует или документ не включён в прямую
+  карту обзора.
+- [x] `AC-02` Сломанная или запрещённая ссылка в архитектуре считается
+  ошибкой. Непустой вопрос без вопросительного знака допустим.
+- [x] `AC-03` JSON schema остаётся v1, а обзор сериализуется с
   `type: architecture`.
-- [x] `AC-04` RU/EN skill assets содержат раздельные overview/detail templates,
-  минимальный init создаёт `index.md` и overview, а legacy-архитектура
-  останавливает init без автоматической миграции.
-- [x] `AC-05` Managed guidance и semantic gate синхронно задают границы типов,
-  прямую карту overview и коды `ARCH001`–`ARCH013`.
-- [x] `AC-06` Архитектура Toudocu и Service Desk разделена на подтверждённые
-  вопросно-ориентированные документы, а оба портала пересобраны только из
-  исходного Markdown после независимого review.
+- [x] `AC-04` Русские и английские ресурсы skill имеют отдельные шаблоны обзора
+  и подробного ответа. Минимальный `init` создаёт `index.md` и обзор, а при
+  старой архитектуре останавливается без автоматической миграции.
+- [x] `AC-05` Управляемые правила и проверка смысла одинаково задают границы
+  типов, прямую карту и коды `ARCH001`–`ARCH013`.
+- [x] `AC-06` Архитектура Toudocu разделена на подтверждённые ответы на вопросы,
+  а портал строится из исходного Markdown.
 
 ## План
 
-- [x] Добавить metadata aliases и структурные architecture diagnostics.
-- [x] Расширить behavioral и schema contract tests.
-- [x] Обновить templates, init workflow, managed guidance и semantic gate.
-- [x] Мигрировать документацию Toudocu и демонстрационного Service Desk.
-- [x] Выполнить независимый semantic review и устранить замечания.
-- [x] Пройти полный Go/Toudocu verification и пересобрать portals.
+- [x] Добавить варианты метаданных и структурные сообщения архитектуры.
+- [x] Расширить поведенческие тесты и тесты JSON-схемы.
+- [x] Обновить шаблоны, `init`, управляемые правила и проверку смысла.
+- [x] Перевести документацию Toudocu на новую форму.
 
 ## Проверка
 
@@ -90,13 +75,13 @@ RU/EN-шаблоны, безопасный init и semantic gate `ARCH001`–`AR
 - `AC-03` → `go test ./... -run 'TestArchitectureSchemaContract'`
 - `AC-04` → `go test ./... -run 'TestUseToudocuArchitecture|TestUseToudocuInitContract'`
 - `AC-05` → `go test ./... -run 'TestUseToudocuArchitecture'`
-- `AC-06` → `go run ./cmd/toudocu build ./docs --output ./project-docs --repository-root . --clean --strict --stale-days 0 && go run ./cmd/toudocu build ./example/docs --output ./example/project-docs --repository-root ./example --clean --strict --stale-days 0`
+- `AC-06` → `go run ./cmd/toudocu build ./docs --output ./project-docs --repository-root . --clean --strict --stale-days 0`
 - `ALL` → `go test -count=1 ./...`
-- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0 && go run ./cmd/toudocu check ./example/docs --repository-root ./example --strict --stale-days 0`
+- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `go test ./... -run 'TestArchitectureContract|TestArchitectureSchemaContract|TestUseToudocuArchitecture'`
 
 ## Влияние на документацию
 
-Обновляются публичный архитектурный контракт, skill init и guidance,
-самодокументация Toudocu, демонстрационный Service Desk, README, CLI/reference,
-модель, use case, changelog, стандарт документации и отслеживаемые portals.
+Были обновлены архитектурный контракт, `init` и правила skill, документация
+Toudocu, README, CLI-справка, модель, пользовательский сценарий, журнал
+изменений и стандарт документации.

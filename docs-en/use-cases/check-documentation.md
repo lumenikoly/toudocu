@@ -5,76 +5,80 @@
 - Actor: Developer or CI process
 - Module: MOD-MODEL
 - Priority: High
-- Last updated: 2026-07-31
+- Last updated: 2026-08-12
 
-The developer or CI process checks the documentation contract without generating
-site and without executing work task commands.
+A developer or CI checks documentation structure and relationships without
+building the portal or running commands from work items.
 
 ## Inputs
 
-- documentation catalogue;
+- documentation root;
 - repository root;
 - optional `--strict` mode;
-- result format `text` or `json`.
+- `text` or `json` output.
 
 ## Preconditions
 
-- Toudocu is available for launch;
-- the initiator has the rights to read documentation and repository root.
+- Toudocu is available;
+- the caller can read the documentation and allowed repository files.
 
-## Main scenario
+## Main flow
 
-1. The initiator calls `toudocu check ./docs`.
-2. Toudocu reads Markdown files and builds an associated project model.
-3. Toudocu checks mandatory architecture map, detailed questions
-   architectural documents, structure, ID, links, roadmap, standards,
-   runbooks, custom manifests and work tasks.
-4. Toudocu displays diagnostics in text form or returns
-   `ProjectReport` at `--format json`.
-5. The initiator uses the exit code and the report to accept the result of the check.
+1. The caller runs `toudocu check ./docs`.
+2. Toudocu reads Markdown and builds the connected project model.
+3. It checks the required architecture overview, questions in other
+   architecture documents, structure, identifiers, links, roadmap, standards,
+   runbooks, custom sections, and work items.
+4. The default output is readable text. `--format json` returns
+   `ProjectReport` schema v1.
+5. The caller evaluates the exit code together with report diagnostics.
 
-## Error scenarios
+## Error flows
 
-- in step 2, inaccessible input directory or invalid repository root fails
-  command with code `1`;
-- errors in structure, links or connections are included in the report and give the code `1` in any
-  mode;
-- without `--strict` warnings remain in the report, but do not change the successful exit
-  code;
-- with `--strict` any warning also results in the code `1`;
-- `--stale-days 0` disables only age-based overdue runbook; absent,
-  an incorrect or future review date remains a review-required warning;
-- an error in reading a single file is reflected in diagnostics with the path to the document.
-- missing or incorrect architecture overview type, missing question,
-  indirect map and unsafe architectural link are errors of the usual
-  mode.
+- An inaccessible root or invalid repository root returns code `1`.
+- A structure, link, or relationship error appears in the report and always
+  returns code `1`.
+- Without `--strict`, warnings remain visible but do not change a successful
+  code. With `--strict`, every warning also returns code `1`.
+- `--stale-days 0` disables only age-based runbook warnings. A missing,
+  invalid, or future verification date still requires review.
+- A file read failure keeps the affected path in its diagnostic.
+- A missing or invalid `architecture/overview.md`, an architecture document
+  without a question, an indirect map, or an unsafe link is an error.
 
 ## Postconditions
 
-The source documents have not been modified, the site has not been created, the work task commands have not been
-completed. Each diagnostic contains a stable code and, when possible, a path
-and line number.
+Sources are unchanged, no portal was created, and no Verification command was
+run. Every diagnostic has a stable code and, when available, a path, line, and
+column.
+
+## Acceptance criteria
+
+- [x] A check does not change sources, create a portal, or run a Verification
+  command.
+- [x] Every diagnostic has a stable code and, when available, a path, line, and
+  column.
+- [x] A completed `UC-*` without fully checked acceptance criteria or a
+  mismatched roadmap produces an error and exit code `1` without changing
+  Markdown.
 
 ## Business rules
 
-The rules are defined in the documents of the corresponding modules:
-
-- [BR-MODEL-001](../modules/model.md#br-model-001-roadmap-is-the-only-source-of-global-coverage) - roadmap is the only source of global coverage.
-- [BR-MODEL-002](../modules/model.md#br-model-002-links-do-not-go-beyond-repository-root) - links do not go beyond the repository root.
-- [BR-MODEL-003](../modules/model.md#br-model-003-a-ready-to-run-task-has-a-full-verifiable-contract) - a task ready for work has a full verifiable contract.
-- [BR-MODEL-005](../modules/model.md#br-model-005-overview-is-a-direct-map-of-architectural-issues) - overview directly lists each architectural issue.
-- [BR-CLI-002](../modules/cli.md#br-cli-002-checks-are-only-run-explicitly) - task checks are launched only explicitly.
+- [BR-MODEL-001](../modules/model.md#br-model-001-roadmap-is-the-only-source-of-global-coverage)
+- [BR-MODEL-002](../modules/model.md#br-model-002-links-do-not-go-beyond-repository-root)
+- [BR-MODEL-003](../modules/model.md#br-model-003-a-ready-to-run-task-has-a-full-verifiable-contract)
+- [BR-MODEL-005](../modules/model.md#br-model-005-overview-is-a-direct-map-of-architectural-issues)
+- [BR-CLI-002](../modules/cli.md#br-cli-002-checks-are-only-run-explicitly)
 
 ## Implementation
 
-- [FLOW-DOCS-CHECK: Documentation contract check](../flows/FLOW-DOCS-CHECK.md)
-- [Design Model and Validation](../modules/model.md)
-- [CLI and workflow tasks](../modules/cli.md)
-- [Validation Rules](../guides/testing.md)
+- [FLOW-DOCS-CHECK](../flows/FLOW-DOCS-CHECK.md)
+- [Project model](../modules/model.md)
+- [CLI and work-item operations](../modules/cli.md)
+- [Verification rules](../guides/testing.md)
 
-## Examination
+## Scenario verification
 
-- positive fixtures of full and minimal models;
-- negative tests of rules of structure, links and connections;
-- separate test that `check` does not call the command runner;
-- checking the difference between normal and strict modes.
+Coverage includes complete and minimal models, structure and relationship
+errors, normal versus strict mode, and the guarantee that `check` does not run
+work-item commands.

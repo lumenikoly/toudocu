@@ -21,7 +21,6 @@ func completeBugFixture(status string) string {
 - Regression: Yes
 - Module: MOD-AUTH
 - Use case: UC-AUTH-01
-- Owner: Backend Team
 - Last updated: 2026-07-30
 
 ## Symptom
@@ -137,7 +136,7 @@ func TestBugWorkItemValidationAndPortalFilters(t *testing.T) {
 		t.Fatalf("valid bug verification: %#v", verify)
 	}
 	catalog := renderDirectoryPage(model, "work")
-	for _, expected := range []string{`data-work-type="bug"`, `data-cause="established"`, `data-regression-test="present"`, `data-filter-control="workType"`, `data-filter-control="severity"`, `data-filter-control="reproducibility"`, "Серьёзность: High"} {
+	for _, expected := range []string{`data-work-type="bug"`, `data-cause="established"`, `data-regression-test="present"`, `data-filter-control="workType"`, `data-filter-control="severity"`, `data-filter-control="reproducibility"`, "Severity: High"} {
 		if !strings.Contains(catalog, expected) {
 			t.Fatalf("bug catalog missing %q", expected)
 		}

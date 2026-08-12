@@ -35,14 +35,16 @@ derived representations are collected in the
 |---|---|---|---|
 | **Project overview** — `index.md` | Gives the title, concise description, and main entry points | Always: this is the documentation home page | A detailed contract, decision history, or complete roadmap |
 | **Current status** — `status.md` | Shows a verified current snapshot: stage, version, and active focus | When readers need one current status | A desired future, work checklist, or release history |
-| **Roadmap** — `roadmap.md` | Declares global outcomes and computed progress | When the project manages overall product scope through `UC-*`, `CON-*`, and `DLV-*` | A local task plan or unconfirmed ideas |
+| **Roadmap** — `roadmap.md` | Declares global outcomes and computed progress | When the project manages overall product scope through `UC-*`, `CON-*`/`CONTRACT-*`, and `DLV-*`/`DELIVERABLE-*` | A local task plan or unconfirmed ideas |
 | **Risks** — `risks.md` | Collects `RISK-*`, likelihood, impact, and mitigations | When risks need explicit management | A defect list or implementation plan |
 | **Ideas** — `ideas.md` | Keeps possible directions without promising implementation | For a capability or hypothesis not yet accepted | Roadmap, current status, or an approved requirement |
 | **Notes** — `notes.md` | Preserves observations and temporary context | When information is useful but not yet durable knowledge | Normative rules, contracts, or architectural decisions |
 | **Changelog** — root `CHANGELOG.md` | Describes changes in published versions | If the project maintains release history | Current status or a duplicate `docs/changelog.md` |
 
 `status.md` does not accept task checklists. The global completion percentage
-comes only from `roadmap.md`; a linked `UC-*` gets its state from the use case.
+comes only from `roadmap.md`; a linked `UC-*` is complete only with a
+`done`-group status, at least one acceptance checkbox, and every checkbox in
+that section checked.
 
 ## Product and architecture
 
@@ -51,7 +53,7 @@ comes only from `roadmap.md`; a linked `UC-*` gets its state from the use case.
 | **Architecture Overview** — `architecture/overview.md` | Defines the system boundary and maps architectural questions | Always; the overview links directly to every detailed architecture document | A complete account of all interactions, contracts, and local rules |
 | **Architecture** — other `architecture/**/*.md` | Briefly answers one evidence-backed architectural question | When the answer concerns system structure, boundaries, or dependencies across parts | A request sequence, API format, procedure, ADR, or one module's rules |
 | **Module** — `modules/*.md`, ID `MOD-*` | Records a stable responsibility boundary, business rules, and invariants | When that boundary matters to the product, owners, or linked scenarios | A mirror of a source directory or list of internal functions |
-| **Use case** — `use-cases/*.md`, ID `UC-*` | Describes observable actor behavior and expected result | When behavior must link to a module, rules, screens, or roadmap | An implementation call graph or step-by-step operational procedure |
+| **Use case** — `use-cases/*.md`, ID `UC-*` | Describes observable actor behavior, expected result, and verifiable acceptance criteria | When behavior must link to a module, rules, screens, or roadmap | An implementation call graph or step-by-step operational procedure |
 | **Process** — `flows/*.md`, ID `FLOW-*` | Visualizes one reusable scenario, error branch, or inter-system interaction | When a Mermaid diagram materially clarifies a use case or architecture | An exhaustive code diagram or replacement for textual requirements |
 | **Screen** — `screens/SC-*.md`, IDs `SC-*` and `TR-*` | Describes a significant screen, its states, and outgoing user transitions | When the product needs a screen catalog, Screen Map, or traceability | A technical route, layout, redirect, or internal component state |
 | **Architectural decision** — `decisions/*.md`, ID `ADR-*` | Preserves context, the decision made, and its consequences | When the decision and considered tradeoff were actually recorded | Retrospective justification of current code or a system description |
@@ -68,7 +70,7 @@ these types merely to gain an extra portal page or remove a warning.
 | Type and location | Purpose | When to create | Do not use for |
 |---|---|---|---|
 | **Contract** — `contracts/` | Defines an external interface, command, API, schema, or exchange format | When consumers need a precise, stable interaction boundary | A tutorial sequence, architectural explanation, or fact catalog |
-| **Standard** — `quality/STD-*.md`, ID `STD-*` | Defines mandatory and verifiable project rules | When a rule has a scope, owner, and verification method | Non-binding advice or a one-off procedure |
+| **Standard** — `quality/STD-*.md`, ID `STD-*` | Defines mandatory and verifiable project rules | When a rule has a scope and verification method | Non-binding advice or a one-off procedure |
 | **Runbook** — `runbooks/RB-*.md`, ID `RB-*` | Gives a safe operational procedure with verification and rollback | Only for a real operation with a known environment and risk | A general guide, product flow, or invented procedure |
 | **Guide** — `guides/` | Helps readers achieve a concrete result | For installation, setup, or a sequence of actions | An encyclopedic fact catalog or normative contract |
 | **Reference** — `reference/` | Collects facts, options, and parameters for quick lookup | When readers understand the task and need an exact value or choice | Step-by-step teaching, decision rationale, or current status |
@@ -117,12 +119,12 @@ module, guide, or other document type.
 - `screens/index.md` is the entry page for the built-in screen section and gets
   a separate machine type `screen-index`; it is not an `SC-*` entity.
 - `quality/index.md` and `runbooks/index.md` define their section entry pages.
-  An unknown section's manifest additionally declares `Type: Custom`, an owner,
-  and a description.
+  An unknown section's manifest additionally declares `Type: Custom` and a
+  description.
 - `screens/map.md` is an obsolete source. The catalog, Screen Map, and playable
   flows are built from `screens/SC-*.md`; no separate map should be maintained.
 - Generated HTML, `report.json`, and the search index are derived output. They
-  are not edited as sources of truth.
+  are not edited as primary documentation.
 
 ## Main selection rule
 

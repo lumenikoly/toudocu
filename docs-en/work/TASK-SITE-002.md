@@ -8,15 +8,13 @@
 - Flow: FLOW-DOCS-SERVE
 - Transitions: TR-SITE-001, TR-SITE-002, TR-SITE-003
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Toudocu Team
-- Last updated: 2026-08-05
+- Last updated: 2026-08-10
 
 ## Result
 
-`toudocu serve` provides a local live workspace in which a user safely edits
-and creates source documents and sees previews and diagnostics, while the portal
-synchronously updates the model, HTML, and search. `toudocu build` remains a
-self-contained read-only portal for `file://`.
+The task added a local workspace to `toudocu serve`. A user can open and create
+source documents, see previews and diagnostics, and get updated pages and
+search results after saving.
 
 ## Behavior change
 
@@ -28,9 +26,9 @@ the next view or manual rebuild.
 
 ### After
 
-`serve` always includes a protected same-origin editor API, a separate Operate
-UI, live rebuild after a write, and a watcher for external changes. Static
-generation receives no editor markup, server-only scripts, or API links.
+`serve` includes a guarded same-origin editor API, a dedicated editor
+interface, a rebuild after each write, and a watcher for external changes.
+Static output contains no editor markup, server-only scripts, or API links.
 
 ## Scope
 
@@ -131,7 +129,7 @@ generation receives no editor markup, server-only scripts, or API links.
 - [x] Extract the shared registry of scaffold/task templates.
 - [x] Build and embed CodeMirror and implement a responsive editor UI.
 - [x] Add negative, concurrency, and end-to-end tests.
-- [x] Update related sources of truth and rebuild the portals.
+- [x] Update the related source documents and rebuild the portals.
 - [x] Perform semantic, automated, and browser verification.
 
 ## Verification
@@ -165,4 +163,12 @@ generation receives no editor markup, server-only scripts, or API links.
 The serve-mode use case and flow, Site/CLI/Model contracts, runtime and trust
 boundaries, README, feature/configuration references, and changelog are updated.
 A separate editor HTTP contract is added; no new architecture page is needed
-because the new questions belong to existing sources of truth.
+because the existing architecture documents already answer the new questions.
+
+## Later change
+
+[TASK-SITE-003](TASK-SITE-003.md) replaced the earlier promise that a static
+portal would work through `file://`. The current rule is: `build` produces a
+portal for ordinary HTTP(S) hosting, while `serve` is the supported path for
+local viewing and editing. See [UC-DOCS-03](../use-cases/serve-portal.md) for
+the current end-to-end workflow.

@@ -1,4 +1,4 @@
-# UC-DOCS-03: View documentation on local server
+# UC-DOCS-03: View documentation on a local server
 
 - Identifier: UC-DOCS-03
 - Status: Completed
@@ -9,135 +9,116 @@
 - Start screen: SC-SITE-HOME
 - Terminal screens: SC-SITE-DOCUMENT, SC-SITE-API-DOCS
 - Allow cycle: Yes
-- Last updated: 2026-08-08
+- Last updated: 2026-08-12
 
-The developer views and edits documentation via a local HTTP server
-and receives an updated model and portal after saving or external changes.
+A developer runs the portal on their computer, reads documentation, and edits
+source files when needed. After a save, Toudocu rereads the sources and displays
+the updated result.
 
 ## Inputs
 
-- project-documentation directory;
-- output directory;
-- server address and port;
+- project documentation root;
+- portal output directory;
+- server host and port;
 - optional `--no-update-check` for a fully self-contained run;
-- regular `.md`, `.yaml`, `.yml`, and `.json` files inside the documentation directory.
+- `.md`, `.yaml`, `.yml`, and `.json` files inside the documentation root;
+- a local Git repository when Changes is needed.
 
 ## Preconditions
 
-- Toudocu is available for launch;
-- the developer has read and write rights to the documentation and the output directory.
+- Toudocu is available;
+- the developer can read documentation and write to the documentation and
+  output roots.
 
-## Main scenario
+## Main flow
 
 1. The developer runs `toudocu serve ./docs`.
-2. Toudocu builds the portal in the output directory.
-3. Toudocu starts an HTTP server on `127.0.0.1:8080` and reports the address.
-4. The developer opens the portal in a browser.
-5. The portal requests same-origin version status. If a stable release is
-   newer, a suggestion to open the official release appears below the header;
-   the developer may dismiss it for that version.
-6. If the developer navigates to `/_toudocu/api-docs/`, they select the Editor
-   or Changes contract, expand an operation, and optionally execute a safe
-   `GET`/`HEAD`; the scenario ends at `SC-SITE-API-DOCS`.
-7. Otherwise, on the roadmap page the developer may choose an existing stage,
-   review the suggested `DLV-ROADMAP-NNN`, change the ID, and add a one-line
-   deliverable. Toudocu performs a CAS insertion and returns the page to the stage.
-8. Or the developer opens `/_toudocu/editor/`; the Editor receives a
-   revision, a safe file list, and the shared template registry.
-9. The developer opens the source, changes the text, checks the Markdown preview
-   and positional diagnostics, and saves it.
-10. Toudocu compares the SHA-256 digest, atomically replaces the file, and synchronously
-   rebuilds model, HTML, search and diagnostics.
-11. When transitioning between canonical HTML documents, the portal can prefetch the
-   target page, check the current revision and replace the document layout without
-   rebuild. Back/Forward, anchors, scroll and keyboard focus continue to work.
-12. Browser polling receives a new revision: the normal page is reloaded,
-   a clean editor updates, while a dirty editor retains its text and shows a
+2. Toudocu reads the documentation, builds the portal, and prints
+   `http://127.0.0.1:8080`.
+3. The developer opens the address, navigates or searches, and opens a document.
+4. To edit, they select Edit or open `/_toudocu/editor/`, choose a file, and
+   change the source. Markdown has a preview and line-specific diagnostics.
+5. On save, the server confirms that no external edit has intervened, safely
+   replaces the file, and rebuilds the model, HTML, and search index.
+6. The browser displays the new page. If a file changes externally, an ordinary
+   page refreshes; an editor with unsaved text keeps that text and reports a
    conflict.
-13. HTTP navigation returns the last successful snapshot and does not start a rebuild.
-   Watcher stabilizes external changes and rebuilds only the changed
-   documentation root; a manual canonical-portal rebuild shows the scope
-   “model, HTML, and search”, progress, and the result before reloading.
-14. If `serve` is launched from canonical root with `translations.<locale>`, header
-   offers locale tags. The corresponding Markdown opens in the selected
-   locale, while a missing page leads to that locale's homepage.
-15. The developer stops the server with `Ctrl+C`.
+7. The developer presses `Ctrl+C` in the terminal to stop the server.
 
-## Error scenarios
+## Additional journeys
 
-- at step 2, a reading or generation error does not leave the server running;
-- in step 3, a busy or unavailable port terminates the command with the code `1`;
-- a timeout, malformed or oversized GitHub response, or development version
-  shows no update suggestion and does not affect other features;
-- stale digest returns `409 stale_digest`; explicit overwrite is repeated with
-  current digest and `confirmOverwrite: true`, and the request without confirmation and
-  second external conflict get `409` again;
-- a stale roadmap digest does not permit overwrite: the dialog retains the ID,
-  text, and selected stage, refreshes the stages/digest/suggestion, and requires
-  another explicit submission;
-- when a dirty file is deleted externally, the editor retains the buffer and offers to download
-  it without showing inapplicable load/overwrite actions;
-- malformed, oversized, cross-origin, and unsafe-path requests receive a JSON
-  error envelope and do not change the source;
-- a subsequent rebuild error returns HTTP 500 for the current request or is
-  written to the watcher server log, but does not stop the listener;
-- a manual rebuild error remains on the current page, clears the loading state,
-  and offers to retry the action;
-- HTML loading error, inappropriate page or mismatched revision in
-  soft transition time performs normal full navigation;
-- a translation portal whose first build fails shows a safe page
-  `Unavailable`; subsequent error does not replace last-known-good snapshot;
-- `--host 0.0.0.0` opens the server for the local network without TLS and authorization;
-  Toudocu displays an explicit warning.
+- Changes displays the local Git diff and discussions. See
+  [UC-DOCS-05](UC-DOCS-05.md) and
+  [UC-AGENT-FEEDBACK-01](UC-AGENT-FEEDBACK-01.md).
+- On the roadmap page, Add deliverable appends one `DLV-ROADMAP-NNN` line to a
+  selected existing stage after checking that the file is still current.
+- `/_toudocu/api-docs/` displays Editor, Changes, and agent feedback contracts
+  and permits only safe `GET` and `HEAD` requests from the UI.
+- Configured translations appear as locale links and remain read-only. A
+  missing translated page opens that locale's home page.
+- When a newer stable release exists, the main portal offers its official
+  release page. `--no-update-check` disables this network request completely.
+
+## Error flows
+
+- A failed initial build prevents the server from starting.
+- An unavailable host or port returns code `1`.
+- A failed, oversized, or invalid release response does not interrupt the
+  portal and shows no notice.
+- An externally changed open file returns `409 stale_digest`. The editor keeps
+  local text and asks the user to reload or deliberately overwrite. A second
+  conflict requires another decision.
+- If the roadmap changed, its dialog preserves entered fields, refreshes the
+  stages, and asks for another submission; there is no automatic overwrite.
+- If an open file is deleted externally, the editor lets the user download the
+  unsaved text.
+- An oversized, malformed, cross-origin, or unsafe-path request returns a JSON
+  error and changes no file.
+- A later rebuild failure appears in the UI or server log, while the running
+  HTTP server keeps the last successful portal.
+- A translation that fails its initial build shows `Unavailable`; a later
+  failure does not replace its last working snapshot.
+- `--host 0.0.0.0` exposes the server to the local network without TLS or
+  authentication, and Toudocu prints a warning.
 
 ## Postconditions
 
-While the command is running, ordinary routes serve output, and a separate
-editor API reads and modifies only the permitted workspace inside the docs
-root. Other repository files are unavailable. After the process stops, the API
-disappears and the port is released. The locale mount
-`/_toudocu/locales/<locale>/` is read-only: it contains no Editor, Changes,
-workspace, API docs, or canonical API.
+While the command runs, the portal is available over HTTP. The Editor API can
+read and change only allowed files inside the documentation root. Changes may
+separately read eligible files in the current repository for diffs, full text,
+and discussions, but it never writes Git. After `Ctrl+C`, the server and local
+APIs disappear. `/_toudocu/locales/<locale>/` is read-only and has no Editor,
+Changes, discussions, API docs, or workspace commands.
+
+## Acceptance criteria
+
+- [x] While the command runs, the portal and allowed local APIs are available
+  over HTTP; after `Ctrl+C`, they are unavailable.
+- [x] Editor reads and changes only allowed documentation files, while Changes
+  never writes Git.
+- [x] The translation URL is read-only and has no Editor, Changes,
+  discussions, API docs, or workspace commands.
 
 ## Business rules
 
-The rules are defined in the module document:
-
-- [BR-SITE-003](../modules/site.md#br-site-003-dev-server-does-not-expose-source-repository) - the dev server does not expose the source repository.
-- [BR-SITE-007](../modules/site.md#br-site-007-build-and-serve-have-different-capabilities) - build remains static read-only, serve provides a live workspace.
-- [BR-SITE-010](../modules/site.md#br-site-010-soft-navigation-limited-to-canonical-serve-portal) - soft transitions do not change offline/file and locale semantics.
-- [BR-SITE-014](../modules/site.md#br-site-014-roadmap-changes-use-only-a-constrained-operation) - serve adds only a new `DLV-*` with CAS and does not make the browser parse Markdown.
-- [BR-SITE-015](../modules/site.md#br-site-015-version-check-does-not-affect-portal-availability) - the update notice exists only in canonical serve and degrades without an error.
+- [BR-SITE-003](../modules/site.md#br-site-003-the-local-server-exposes-files-only-through-explicit-interfaces)
+- [BR-SITE-007](../modules/site.md#br-site-007-build-and-serve-have-different-capabilities)
+- [BR-SITE-010](../modules/site.md#br-site-010-soft-navigation-limited-to-canonical-serve-portal)
+- [BR-SITE-014](../modules/site.md#br-site-014-roadmap-changes-use-only-a-constrained-operation)
+- [BR-SITE-015](../modules/site.md#br-site-015-version-check-does-not-affect-portal-availability)
 
 ## Implementation
 
-- [FLOW-DOCS-SERVE: Local portal browsing](../flows/FLOW-DOCS-SERVE.md)
+- [FLOW-DOCS-SERVE](../flows/FLOW-DOCS-SERVE.md)
 - [Static portal](../modules/site.md)
-- [CLI and workflow tasks](../modules/cli.md)
+- [CLI and work-item operations](../modules/cli.md)
 - [CLI contract](../contracts/cli.md)
-- [HTTP contract editor API](../contracts/editor-http.md)
+- [Editor HTTP API](../contracts/editor-http.md)
 - [Editor OpenAPI](../contracts/editor.openapi.yaml)
 - [Changes OpenAPI](../contracts/changes.openapi.yaml)
 
-## Verification
+## Scenario verification
 
-- initial assembly and HTTP distribution of the portal;
-- save/create and watcher rebuild model, HTML, search and diagnostics;
-- path, symlink, body/content limits, same-origin guards and CAS conflicts;
-- Markdown preview, JSON/YAML diagnostics and raw `text/plain`;
-- desktop/mobile keyboard flow without losing dirty text;
-- roadmap happy path, changed suggested ID, progress, CAS preservation,
-  keyboard/Escape/focus behavior, and mobile layout;
-- manual rebuild from the workspace panel with visible scope, progress, result, and
-  subsequent page reload;
-- inaccessibility of the button outside `serve` and handling of manual rebuild errors;
-- HTTP 500 when rebuilding fails without stopping the process;
-- inaccessibility of the repository source files;
-- default-loopback and network-warning checks;
-- root and nested transitions, Back/Forward, anchors and keyboard navigation;
-- search, Mermaid, Screen Map and playable flow after several soft transitions;
-- full navigation for editor, changes, locale and external links, as well as
-  fallback for network error and revision mismatch;
-- absence of eager search index and Mermaid requests on a regular page.
-- update notice, per-version dismissal, `--no-update-check`, silent failure,
-  and absence of the endpoint/capability in static and translation portals.
+Coverage includes initial build and shutdown, saves and external edits, path
+and link safety, version conflicts, keyboard and mobile behavior, roadmap,
+manual rebuild, translations, Editor and Changes, and `--no-update-check`.

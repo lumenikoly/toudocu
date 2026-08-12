@@ -20,7 +20,6 @@ type reviewStore struct {
 	directory      string
 	statePath      string
 	lockPath       string
-	snapshotsPath  string
 }
 
 func openReviewStore(repositoryRoot string) (*reviewStore, error) {
@@ -33,10 +32,12 @@ func openReviewStore(repositoryRoot string) (*reviewStore, error) {
 		return nil, err
 	}
 	hash := sha256.Sum256([]byte(filepath.Clean(g.root)))
-	directory := filepath.Join(root, "toudocu", "reviews", hex.EncodeToString(hash[:]))
+	directory := filepath.Join(root, "toudocu", "agent-feedback", hex.EncodeToString(hash[:]))
 	return &reviewStore{
-		repositoryRoot: g.root, directory: directory, statePath: filepath.Join(directory, "state.json"),
-		lockPath: filepath.Join(directory, "state.lock"), snapshotsPath: filepath.Join(directory, "snapshots"),
+		repositoryRoot: g.root,
+		directory:      directory,
+		statePath:      filepath.Join(directory, "state.json"),
+		lockPath:       filepath.Join(directory, "state.lock"),
 	}, nil
 }
 
@@ -69,15 +70,86 @@ func reviewUserStateRoot() (string, error) {
 }
 
 func emptyReviewState() ReviewState {
-	state := ReviewState{SchemaVersion: reviewSchemaVersion, Feedback: []FeedbackBatch{}}
+	state := ReviewState{SchemaVersion: reviewSchemaVersion, StoreVersion: reviewStoreVersion, Deliveries: []AgentDelivery{}}
 	state.StateDigest = calculateReviewStateDigest(state)
 	return state
 }
 
 func calculateReviewStateDigest(state ReviewState) string {
 	state.StateDigest = ""
+	state.RepositoryRevision = ""
+	normalizeReviewState(&state)
 	data, _ := json.Marshal(state)
 	return digestBytes(data)
+}
+
+func normalizeReviewState(state *ReviewState) {
+	if state.Deliveries == nil {
+		state.Deliveries = []AgentDelivery{}
+	}
+	for index := range state.Deliveries {
+		if state.Deliveries[index].MessageIDs == nil {
+			state.Deliveries[index].MessageIDs = []string{}
+		}
+	}
+	if state.Session == nil {
+		return
+	}
+	if state.Session.Discussions == nil {
+		state.Session.Discussions = []Discussion{}
+	}
+	for discussionIndex := range state.Session.Discussions {
+		discussion := &state.Session.Discussions[discussionIndex]
+		if discussion.Messages == nil {
+			discussion.Messages = []ReviewMessage{}
+		}
+		for messageIndex := range discussion.Messages {
+			message := &discussion.Messages[messageIndex]
+			if message.Evidence == nil {
+				message.Evidence = []AgentEvidence{}
+			}
+			if message.ChangedPaths == nil {
+				message.ChangedPaths = []string{}
+			}
+		}
+	}
+}
+
+func validateStoredReviewState(state ReviewState) error {
+	if state.SchemaVersion != reviewSchemaVersion || state.StoreVersion != reviewStoreVersion || state.StateDigest == "" || calculateReviewStateDigest(state) != state.StateDigest {
+		return corruptedReviewState("agent feedback state digest or version is invalid")
+	}
+	discussions, messages, deliveries := map[string]bool{}, map[string]bool{}, map[string]bool{}
+	if state.Session != nil {
+		for _, discussion := range state.Session.Discussions {
+			if discussion.ID == "" || discussions[discussion.ID] || discussion.State != "open" && discussion.State != "resolved" {
+				return corruptedReviewState("agent feedback discussion is invalid: " + discussion.ID)
+			}
+			discussions[discussion.ID] = true
+			for _, message := range discussion.Messages {
+				if message.ID == "" || messages[message.ID] || message.Author != "human" && message.Author != "agent" {
+					return corruptedReviewState("agent feedback message is invalid: " + message.ID)
+				}
+				messages[message.ID] = true
+			}
+		}
+	}
+	for _, delivery := range state.Deliveries {
+		if delivery.ID == "" || deliveries[delivery.ID] || !discussions[delivery.DiscussionID] || delivery.State != "pending" && delivery.State != "claimed" && delivery.State != "responded" {
+			return corruptedReviewState("agent delivery is invalid: " + delivery.ID)
+		}
+		deliveries[delivery.ID] = true
+		for _, messageID := range delivery.MessageIDs {
+			if !messages[messageID] {
+				return corruptedReviewState("agent delivery references an unknown message: " + delivery.ID)
+			}
+		}
+	}
+	return nil
+}
+
+func corruptedReviewState(message string) error {
+	return &reviewFailure{Code: "AGENT_STATE_CORRUPTED", Status: http.StatusInternalServerError, Message: message + "; the file was not overwritten"}
 }
 
 func (store *reviewStore) load() (ReviewState, error) {
@@ -93,12 +165,13 @@ func (store *reviewStore) loadUnlocked() (ReviewState, error) {
 		return ReviewState{}, err
 	}
 	var state ReviewState
-	if err := json.Unmarshal(data, &state); err != nil || state.SchemaVersion != reviewSchemaVersion || state.StateDigest == "" || calculateReviewStateDigest(state) != state.StateDigest {
-		return ReviewState{}, &reviewFailure{Code: "REVIEW_STATE_CORRUPTED", Status: http.StatusInternalServerError, Message: "review state повреждён; файл не был перезаписан"}
+	if err := json.Unmarshal(data, &state); err != nil {
+		return ReviewState{}, corruptedReviewState("agent feedback state is not valid JSON")
 	}
-	if state.Feedback == nil {
-		state.Feedback = []FeedbackBatch{}
+	if err := validateStoredReviewState(state); err != nil {
+		return ReviewState{}, err
 	}
+	normalizeReviewState(&state)
 	return state, nil
 }
 
@@ -123,7 +196,7 @@ func (store *reviewStore) withLock(operation func() error) error {
 			return err
 		}
 		if time.Now().After(deadline) {
-			return &reviewFailure{Code: "REVIEW_STATE_BUSY", Status: http.StatusConflict, Message: "review state занят другим процессом"}
+			return &reviewFailure{Code: "AGENT_INBOX_BUSY", Status: http.StatusConflict, Message: "agent feedback state is locked by another process"}
 		}
 		time.Sleep(25 * time.Millisecond)
 	}
@@ -140,22 +213,31 @@ func (store *reviewStore) withLock(operation func() error) error {
 }
 
 func (store *reviewStore) mutate(guard ReviewMutationGuard, operation func(*ReviewState) error) (ReviewState, error) {
+	return store.update(func(state *ReviewState) (bool, error) {
+		if state.Revision != guard.ExpectedRevision || state.StateDigest != guard.ExpectedStateDigest {
+			return false, &reviewFailure{Code: "AGENT_REVISION_CONFLICT", Status: http.StatusConflict, Message: "agent feedback revision/state digest is stale"}
+		}
+		return true, operation(state)
+	})
+}
+
+func (store *reviewStore) update(operation func(*ReviewState) (bool, error)) (ReviewState, error) {
 	var result ReviewState
 	err := store.withLock(func() error {
 		state, err := store.loadUnlocked()
 		if err != nil {
 			return err
 		}
-		if state.Revision != guard.ExpectedRevision || state.StateDigest != guard.ExpectedStateDigest {
-			return &reviewFailure{Code: "REVIEW_CONFLICT", Status: http.StatusConflict, Message: "review revision/state digest устарел"}
-		}
-		if err := operation(&state); err != nil {
+		changed, err := operation(&state)
+		if err != nil {
 			return err
 		}
-		state.Revision++
-		state.StateDigest = calculateReviewStateDigest(state)
-		if err := store.writeState(state); err != nil {
-			return err
+		if changed {
+			state.Revision++
+			state.StateDigest = calculateReviewStateDigest(state)
+			if err := store.writeState(state); err != nil {
+				return err
+			}
 		}
 		result = state
 		return nil
@@ -164,6 +246,8 @@ func (store *reviewStore) mutate(guard ReviewMutationGuard, operation func(*Revi
 }
 
 func (store *reviewStore) writeState(state ReviewState) error {
+	state.RepositoryRevision = ""
+	normalizeReviewState(&state)
 	data, err := json.MarshalIndent(state, "", "  ")
 	if err != nil {
 		return err
@@ -201,84 +285,12 @@ func (store *reviewStore) writeState(state ReviewState) error {
 	return nil
 }
 
-func (store *reviewStore) saveSnapshot(content []byte) (string, error) {
-	if len(content) > reviewSnapshotLimit {
-		return "", &reviewFailure{Code: "REVIEW_TOO_LARGE", Status: http.StatusRequestEntityTooLarge, Message: "review snapshot превышает 2 MiB"}
-	}
-	digest := digestBytes(content)
-	if err := os.MkdirAll(store.snapshotsPath, 0o700); err != nil {
-		return "", err
-	}
-	_ = os.Chmod(store.snapshotsPath, 0o700)
-	destination := filepath.Join(store.snapshotsPath, digest)
-	if info, err := os.Lstat(destination); err == nil {
-		if !info.Mode().IsRegular() {
-			return "", &reviewFailure{Code: "REVIEW_STATE_CORRUPTED", Status: http.StatusInternalServerError, Message: "snapshot path не является regular file"}
-		}
-		return digest, nil
-	}
-	temporary, err := os.CreateTemp(store.snapshotsPath, ".snapshot-*.tmp")
+func newAgentID(prefix string, now time.Time) (string, error) {
+	id, err := newReviewID(now)
 	if err != nil {
 		return "", err
 	}
-	name := temporary.Name()
-	defer os.Remove(name)
-	if err := temporary.Chmod(0o600); err != nil {
-		_ = temporary.Close()
-		return "", err
-	}
-	if _, err := temporary.Write(content); err != nil {
-		_ = temporary.Close()
-		return "", err
-	}
-	if err := temporary.Sync(); err != nil {
-		_ = temporary.Close()
-		return "", err
-	}
-	if err := temporary.Close(); err != nil {
-		return "", err
-	}
-	if err := os.Rename(name, destination); err != nil && !os.IsExist(err) {
-		return "", err
-	}
-	_ = os.Chmod(destination, 0o600)
-	return digest, nil
-}
-
-func (store *reviewStore) snapshot(digest string) ([]byte, error) {
-	if len(digest) != 64 {
-		return nil, &reviewFailure{Code: "REVIEW_STATE_CORRUPTED", Status: http.StatusInternalServerError, Message: "invalid snapshot reference"}
-	}
-	for _, character := range digest {
-		if !strings.ContainsRune("0123456789abcdef", character) {
-			return nil, &reviewFailure{Code: "REVIEW_STATE_CORRUPTED", Status: http.StatusInternalServerError, Message: "invalid snapshot reference"}
-		}
-	}
-	content, err := os.ReadFile(filepath.Join(store.snapshotsPath, digest))
-	if err != nil || digestBytes(content) != digest {
-		return nil, &reviewFailure{Code: "REVIEW_STATE_CORRUPTED", Status: http.StatusInternalServerError, Message: "review snapshot повреждён"}
-	}
-	return content, nil
-}
-
-func (store *reviewStore) garbageCollectSnapshots(state ReviewState) {
-	referenced := map[string]bool{}
-	if state.Session != nil {
-		for _, discussion := range state.Session.Discussions {
-			if discussion.Anchor != nil && discussion.Anchor.SnapshotRef != "" {
-				referenced[discussion.Anchor.SnapshotRef] = true
-			}
-		}
-	}
-	entries, err := os.ReadDir(store.snapshotsPath)
-	if err != nil {
-		return
-	}
-	for _, entry := range entries {
-		if entry.Type().IsRegular() && len(entry.Name()) == 64 && !referenced[entry.Name()] {
-			_ = os.Remove(filepath.Join(store.snapshotsPath, entry.Name()))
-		}
-	}
+	return prefix + "-" + id, nil
 }
 
 func newReviewID(now time.Time) (string, error) {

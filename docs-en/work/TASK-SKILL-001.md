@@ -6,13 +6,14 @@
 - Module: MOD-CLI
 - Use case: UC-AGENT-01
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Toudocu Team
-- Last updated: 2026-08-06
+- Last updated: 2026-08-10
 
 ## Result
 
-The version `0.0.1` binary contains the canonical `toudocu` skill and provides
-a safe offline lifecycle for Codex, Claude Code, and Copilot in project/user scope.
+The prepared `0.0.1` binary contains the canonical `toudocu` skill and provides
+a safe offline lifecycle for Codex, Claude Code, and Copilot in project and
+user scope. This task prepared the capability; it does not prove that stable
+`0.0.1` was published.
 
 ## Behavior change
 
@@ -40,7 +41,7 @@ only an unchanged managed package through atomic publication and rollback.
 
 - `--force`, `--dry-run`, JSON output, or a new public Go API;
 - marketplace support or downloading the skill from the network;
-- changing translation root `docs-en`;
+- changing the `docs-en` translation root;
 - executing scripts from the embedded bundle.
 
 ## Acceptance criteria
@@ -84,6 +85,7 @@ only an unchanged managed package through atomic publication and rollback.
 
 ## Documentation impact
 
-The UC and guide are added; README, roadmap, CLI contract, MOD-CLI, feature
-reference, and existing architecture answers are updated. After semantic and
-structural gates, only the canonical part of the tracked portal is rebuilt.
+The work added the use case and guide and updated the README, roadmap, CLI
+contract, MOD-CLI, feature reference, and architecture answers. Only the
+canonical part of a tracked portal is rebuilt, after semantic review and
+structural checks.

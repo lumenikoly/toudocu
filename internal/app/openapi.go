@@ -109,12 +109,12 @@ func validateOpenAPIContract(filePath string, content []byte) []Issue {
 func parseOpenAPIContract(filePath string, content []byte) (OpenAPIContract, []Issue) {
 	contract := OpenAPIContract{Path: filepath.ToSlash(filePath)}
 	if len(content) > 4<<20 {
-		return contract, []Issue{openAPIIssue("openapi-document-too-large", "OpenAPI document превышает 4 MiB.", filePath, 0, 0)}
+		return contract, []Issue{openAPIIssue("openapi-document-too-large", "The OpenAPI document exceeds 4 MiB.", filePath, 0, 0)}
 	}
 	var document yaml.Node
 	if err := yaml.Unmarshal(content, &document); err != nil {
 		line, column := yamlErrorLocation(err)
-		return contract, []Issue{openAPIIssue("openapi-syntax-error", "Некорректный OpenAPI YAML/JSON: "+err.Error(), filePath, line, column)}
+		return contract, []Issue{openAPIIssue("openapi-syntax-error", "Invalid OpenAPI YAML/JSON: "+err.Error(), filePath, line, column)}
 	}
 	root := documentMapping(&document)
 	if root == nil {
@@ -122,7 +122,7 @@ func parseOpenAPIContract(filePath string, content []byte) (OpenAPIContract, []I
 		if len(document.Content) > 0 {
 			location = document.Content[0]
 		}
-		return contract, []Issue{openAPIIssue("openapi-invalid-root", "OpenAPI document должен быть object.", filePath, nodeLine(location), nodeColumn(location))}
+		return contract, []Issue{openAPIIssue("openapi-invalid-root", "The OpenAPI document must be an object.", filePath, nodeLine(location), nodeColumn(location))}
 	}
 	issues := []Issue{}
 	if limitIssue := validateOpenAPIStructureLimits(filePath, root); limitIssue != nil {
@@ -130,28 +130,28 @@ func parseOpenAPIContract(filePath string, content []byte) (OpenAPIContract, []I
 	}
 	openapi := mappingValue(root, "openapi")
 	if openapi == nil || openapi.Kind != yaml.ScalarNode || !openAPIVersionRE.MatchString(openapi.Value) {
-		issues = append(issues, openAPIIssue("openapi-invalid-version", "Поле openapi должно объявлять OpenAPI 3.0.x или 3.1.x.", filePath, nodeLine(openapiOrRoot(openapi, root)), nodeColumn(openapiOrRoot(openapi, root))))
+		issues = append(issues, openAPIIssue("openapi-invalid-version", "The openapi field must declare OpenAPI 3.0.x or 3.1.x.", filePath, nodeLine(openapiOrRoot(openapi, root)), nodeColumn(openapiOrRoot(openapi, root))))
 	} else {
 		contract.Version = openapi.Value
 	}
 	info := mappingValue(root, "info")
 	if info == nil || info.Kind != yaml.MappingNode {
-		issues = append(issues, openAPIIssue("openapi-missing-info", "Обязательное поле info должно быть object.", filePath, root.Line, root.Column))
+		issues = append(issues, openAPIIssue("openapi-missing-info", "Required field info must be an object.", filePath, root.Line, root.Column))
 	} else {
 		title := mappingValue(info, "title")
 		version := mappingValue(info, "version")
 		if title == nil || strings.TrimSpace(title.Value) == "" {
-			issues = append(issues, openAPIIssue("openapi-missing-info-title", "Обязательное поле info.title отсутствует.", filePath, info.Line, info.Column))
+			issues = append(issues, openAPIIssue("openapi-missing-info-title", "Required field info.title is missing.", filePath, info.Line, info.Column))
 		} else {
 			contract.Title = title.Value
 		}
 		if version == nil || strings.TrimSpace(version.Value) == "" {
-			issues = append(issues, openAPIIssue("openapi-missing-info-version", "Обязательное поле info.version отсутствует.", filePath, info.Line, info.Column))
+			issues = append(issues, openAPIIssue("openapi-missing-info-version", "Required field info.version is missing.", filePath, info.Line, info.Column))
 		}
 	}
 	paths := mappingValue(root, "paths")
 	if paths == nil || paths.Kind != yaml.MappingNode {
-		issues = append(issues, openAPIIssue("openapi-missing-paths", "Обязательное поле paths должно быть object.", filePath, root.Line, root.Column))
+		issues = append(issues, openAPIIssue("openapi-missing-paths", "Required field paths must be an object.", filePath, root.Line, root.Column))
 	} else {
 		issues = append(issues, validateOpenAPIPaths(filePath, root, paths)...)
 	}
@@ -168,7 +168,7 @@ func validateOpenAPIStructureLimits(filePath string, root *yaml.Node) *Issue {
 			aliases++
 		}
 		if depth > 100 || nodes > 100000 || aliases > 1000 {
-			issue := openAPIIssue("openapi-structure-limit", "OpenAPI document превышает допустимую глубину, число nodes или aliases.", filePath, node.Line, node.Column)
+			issue := openAPIIssue("openapi-structure-limit", "The OpenAPI document exceeds the allowed depth, node count, or alias count.", filePath, node.Line, node.Column)
 			return &issue
 		}
 		for _, child := range node.Content {
@@ -187,7 +187,7 @@ func validateOpenAPIPaths(filePath string, root, paths *yaml.Node) []Issue {
 	for i := 0; i+1 < len(paths.Content); i += 2 {
 		pathNode, item := paths.Content[i], paths.Content[i+1]
 		if !strings.HasPrefix(pathNode.Value, "/") || item.Kind != yaml.MappingNode {
-			issues = append(issues, openAPIIssue("openapi-invalid-path", "Каждый paths key должен начинаться с / и содержать Path Item object.", filePath, pathNode.Line, pathNode.Column))
+			issues = append(issues, openAPIIssue("openapi-invalid-path", "Every paths key must start with / and contain a Path Item object.", filePath, pathNode.Line, pathNode.Column))
 			continue
 		}
 		pathParams := openAPIParameters(root, item)
@@ -196,25 +196,25 @@ func validateOpenAPIPaths(filePath string, root, paths *yaml.Node) []Issue {
 			method := strings.ToLower(methodNode.Value)
 			if _, ok := openAPIHTTPMethods[method]; !ok {
 				if _, known := openAPIPathItemFields[method]; !known && !strings.HasPrefix(strings.ToLower(method), "x-") {
-					issues = append(issues, openAPIIssue("openapi-invalid-path-item-key", "Неизвестное поле Path Item: "+methodNode.Value, filePath, methodNode.Line, methodNode.Column))
+					issues = append(issues, openAPIIssue("openapi-invalid-path-item-key", "Unknown Path Item field: "+methodNode.Value, filePath, methodNode.Line, methodNode.Column))
 				}
 				continue
 			}
 			if operation.Kind != yaml.MappingNode {
-				issues = append(issues, openAPIIssue("openapi-invalid-operation", strings.ToUpper(method)+" "+pathNode.Value+" должен быть object.", filePath, operation.Line, operation.Column))
+				issues = append(issues, openAPIIssue("openapi-invalid-operation", strings.ToUpper(method)+" "+pathNode.Value+" must be an object.", filePath, operation.Line, operation.Column))
 				continue
 			}
 			operationID := mappingValue(operation, "operationId")
 			if operationID == nil || strings.TrimSpace(operationID.Value) == "" {
-				issues = append(issues, openAPIIssue("openapi-missing-operation-id", strings.ToUpper(method)+" "+pathNode.Value+" не содержит operationId.", filePath, operation.Line, operation.Column))
+				issues = append(issues, openAPIIssue("openapi-missing-operation-id", strings.ToUpper(method)+" "+pathNode.Value+" has no operationId.", filePath, operation.Line, operation.Column))
 			} else if previous := operationIDs[operationID.Value]; previous != nil {
-				issues = append(issues, openAPIIssue("openapi-duplicate-operation-id", fmt.Sprintf("operationId %q уже объявлен в строке %d.", operationID.Value, previous.Line), filePath, operationID.Line, operationID.Column))
+				issues = append(issues, openAPIIssue("openapi-duplicate-operation-id", fmt.Sprintf("operationId %q is already declared on line %d.", operationID.Value, previous.Line), filePath, operationID.Line, operationID.Column))
 			} else {
 				operationIDs[operationID.Value] = operationID
 			}
 			responses := mappingValue(operation, "responses")
 			if responses == nil || responses.Kind != yaml.MappingNode || len(responses.Content) == 0 {
-				issues = append(issues, openAPIIssue("openapi-missing-responses", strings.ToUpper(method)+" "+pathNode.Value+" не содержит responses.", filePath, operation.Line, operation.Column))
+				issues = append(issues, openAPIIssue("openapi-missing-responses", strings.ToUpper(method)+" "+pathNode.Value+" has no responses.", filePath, operation.Line, operation.Column))
 			} else {
 				issues = append(issues, validateOpenAPIResponses(filePath, method, pathNode.Value, responses)...)
 			}
@@ -222,7 +222,7 @@ func validateOpenAPIPaths(filePath string, root, paths *yaml.Node) []Issue {
 			params = append(params, openAPIParameters(root, operation)...)
 			for _, name := range pathTemplateParameters(pathNode.Value) {
 				if !openAPIContainsString(params, name) {
-					issues = append(issues, openAPIIssue("openapi-missing-path-parameter", fmt.Sprintf("Параметр path {%s} не объявлен как required in:path.", name), filePath, operation.Line, operation.Column))
+					issues = append(issues, openAPIIssue("openapi-missing-path-parameter", fmt.Sprintf("Path parameter {%s} is not declared as required in:path.", name), filePath, operation.Line, operation.Column))
 				}
 			}
 		}
@@ -235,16 +235,16 @@ func validateOpenAPIResponses(filePath, method, pathValue string, responses *yam
 	for i := 0; i+1 < len(responses.Content); i += 2 {
 		status, response := responses.Content[i], responses.Content[i+1]
 		if !openAPIResponseRE.MatchString(status.Value) {
-			issues = append(issues, openAPIIssue("openapi-invalid-response-status", "Некорректный response status "+status.Value+" для "+strings.ToUpper(method)+" "+pathValue+".", filePath, status.Line, status.Column))
+			issues = append(issues, openAPIIssue("openapi-invalid-response-status", "Invalid response status "+status.Value+" for "+strings.ToUpper(method)+" "+pathValue+".", filePath, status.Line, status.Column))
 		}
 		if response.Kind != yaml.MappingNode {
-			issues = append(issues, openAPIIssue("openapi-invalid-response", "Response "+status.Value+" должен быть object.", filePath, response.Line, response.Column))
+			issues = append(issues, openAPIIssue("openapi-invalid-response", "Response "+status.Value+" must be an object.", filePath, response.Line, response.Column))
 			continue
 		}
 		if mappingScalar(response, "$ref") == "" {
 			description := mappingValue(response, "description")
 			if description == nil || description.Kind != yaml.ScalarNode || strings.TrimSpace(description.Value) == "" {
-				issues = append(issues, openAPIIssue("openapi-missing-response-description", "Response "+status.Value+" не содержит description.", filePath, response.Line, response.Column))
+				issues = append(issues, openAPIIssue("openapi-missing-response-description", "Response "+status.Value+" has no description.", filePath, response.Line, response.Column))
 			}
 		}
 	}
@@ -281,7 +281,7 @@ func validateInternalOpenAPIRefs(filePath string, root *yaml.Node) []Issue {
 			for i := 0; i+1 < len(node.Content); i += 2 {
 				key, value := node.Content[i], node.Content[i+1]
 				if key.Value == "$ref" && value.Kind == yaml.ScalarNode && strings.HasPrefix(value.Value, "#/") && resolveYAMLPointer(root, value.Value) == nil {
-					issues = append(issues, openAPIIssue("openapi-unresolved-internal-ref", "Внутренняя $ref не разрешается: "+value.Value, filePath, value.Line, value.Column))
+					issues = append(issues, openAPIIssue("openapi-unresolved-internal-ref", "Internal $ref cannot be resolved: "+value.Value, filePath, value.Line, value.Column))
 				}
 				visit(value)
 			}

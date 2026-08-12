@@ -5,31 +5,28 @@
 - Priority: Medium
 - Module: MOD-SITE
 - Use case: UC-DOCS-01
-- Owner: Toudocu Team
-- Last updated: 2026-07-30
+- Last updated: 2026-08-10
 
 ## Result
 
-On the pages of source Markdown documents, the user can, in one action
-copy the name and repository-relative path to convey the exact context
-agent.
+On a source Markdown page, the user can copy the title and repository-relative
+path in one action and send the exact context to an AI agent.
 
 ## Behavior change
 
 ### Before
 
-The portal allowed you to copy blocks of code, but did not provide a short link to
-the original document of the open page.
+The portal could copy code blocks but offered no concise reference to the open
+source document.
 
 ### After
 
-Regular document pages, canonical use case pages and main dashboard
-for `index.md` contain a “Copy context” button. Two are written to the buffer
-lines:
+Regular document pages, use-case pages, and the `index.md` dashboard provide a
+Copy context button. It writes two lines:
 
 ```text
-Документ: <название>
-Путь: <путь от repository-root>
+Document: <title>
+Path: <path from repository root>
 ```
 
 ## Scope
@@ -53,8 +50,8 @@ lines:
 - [x] `AC-01` Regular document, use case and dashboard copy the title and
   repository-relative path in a consistent two-line format.
 - [x] `AC-02` Directories and service pages do not receive a context button.
-- [x] `AC-03` Copying works via Clipboard API and offline fallback for
-  `file://`, reports the result and is accessible from the keyboard.
+- [x] `AC-03` Copying uses the Clipboard API with a built-in fallback, reports
+  the result, and is keyboard-accessible.
 - [x] `AC-04` Path does not reveal the absolute location of the document; outside
   `repository-root` uses the secure `SourcePath`.
 
@@ -77,6 +74,5 @@ lines:
 
 ## Documentation impact
 
-[описание модуля](../modules/site.md) and
-[каталог возможностей](../reference/features.md). Tracked Portal
-rebuilt from the original Markdown after verification is complete.
+Updated [MOD-SITE](../modules/site.md) and the
+[feature catalog](../reference/features.md).

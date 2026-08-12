@@ -36,10 +36,10 @@ func TestMetadataHasOneASTBoundary(t *testing.T) {
 		name, source string
 		count        int
 	}{
-		{"first-list", "# H\n\n- Status: Active\n- Owner: Team\n\nBody\n", 2},
+		{"first-list", "# H\n\n- Status: Active\n- Category: Guides\n\nBody\n", 2},
 		{"content-before", "# H\n\nBody\n\n- Status: Active\n", 0},
 		{"ordered", "# H\n\n1. Status: Active\n", 0},
-		{"nested-block", "# H\n\n- Status: Active\n  - nested\n- Owner: Team\n", 1},
+		{"nested-block", "# H\n\n- Status: Active\n  - nested\n- Category: Guides\n", 1},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

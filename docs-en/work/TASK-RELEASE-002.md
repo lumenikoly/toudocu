@@ -4,29 +4,27 @@
 - Type: Maintenance
 - Module: MOD-CLI
 - Standards: STD-GO-001, STD-DOCS-001
-- Owner: Toudocu Team
-- Last updated: 2026-08-07
+- Last updated: 2026-08-11
 
 ## Result
 
-The `0.0.1` release bundle and workflow are ready to publish the POSIX and
-PowerShell bootstraps: a user installs or updates Toudocu with one command,
-while the bootstrap selects the supported OS/architecture artifact and verifies
-its SHA-256 before replacing the file.
+The `0.0.1` release bundle includes POSIX and PowerShell installer scripts. Each
+script selects the file for the operating system and architecture, verifies its
+SHA-256 checksum, and only then replaces the program.
 
 ## Behavior change
 
 ### Before
 
-The user manually selects a binary in GitHub Releases, verifies it, and adds it
-to `PATH`.
+The user manually selected a binary in GitHub Releases, verified it, and added
+its directory to `PATH`.
 
 ### After
 
-The POSIX and PowerShell commands download the appropriate artifact and
-`checksums.txt`, verify integrity, and atomically install it without `sudo` at
+Either command downloads the matching binary and `checksums.txt`, verifies its
+integrity, and atomically installs Toudocu without `sudo` in
 `~/.local/bin/toudocu` or
-`%LOCALAPPDATA%\Programs\toudocu\toudocu.exe`. The canonical commands are:
+`%LOCALAPPDATA%\Programs\toudocu\toudocu.exe`:
 
 ```sh
 curl -fsSL https://github.com/lumenikoly/toudocu/releases/latest/download/install.sh | sh
@@ -47,10 +45,10 @@ installer prints the exact `source`/fish command, requests a login/re-login for
 
 ## Scope
 
-- new installer scripts in the scripts directory;
+- installer scripts in `scripts/`;
 - `Makefile` and `.github/workflows/`;
 - installer contract tests in `internal/app/`;
-- `README.md`, `CHANGELOG.md`, and `docs/`.
+- the README, changelog, and canonical documentation.
 
 ## Out of scope
 
@@ -62,34 +60,31 @@ installer prints the exact `source`/fish command, requests a login/re-login for
 
 ## Acceptance criteria
 
-- [x] `AC-01` The installer unambiguously selects the six existing Linux,
-  macOS, and Windows artifacts and rejects an unsupported platform before any
-  download.
-- [x] `AC-02` The latest stable release is selected by default;
+- [x] `AC-01` The installer unambiguously selects one of six Linux, macOS, and
+  Windows files and rejects an unsupported platform before any download.
+- [x] `AC-02` The latest stable release is selected by default.
   `TOUDOCU_VERSION=X.Y.Z` pins the version and permits a downgrade,
   `TOUDOCU_INSTALL_DIR` selects a nonstandard directory, and
   `TOUDOCU_NO_MODIFY_PATH=1` prevents changes to `PATH`.
-- [x] `AC-03` The binary is replaced only after exact verification of the
-  release checksum and version; download, checksum, and filesystem failures do
-  not damage the installed version, while a matching checksum produces an
-  idempotent no-op.
-- [x] `AC-04` The release bundle contains both installer scripts, and
-  `checksums.txt` covers them together with the binaries and notices.
-- [x] `AC-05` The README and canonical documentation describe the commands,
-  matrix, update/version override, `PATH`, SHA-256 verification, the
-  bootstrap-only network boundary, and standard installation commands from a
-  stable GitHub Release.
-- [x] `AC-06` Repeated runs, upgrades, downgrades, and adding the standard user
-  install directory to the shell/user `PATH` are idempotent; a nonstandard
-  directory does not change the profile and receives a hint.
+- [x] `AC-03` The binary is replaced only after exact checksum and version
+  verification. Network, checksum, or filesystem failures do not damage the
+  installed version; a matching checksum changes nothing.
+- [x] `AC-04` The release bundle contains both installers, and `checksums.txt`
+  covers them, the binaries, licenses, and notices.
+- [x] `AC-05` The README and documentation describe commands, platforms,
+  updates, version and directory selection, `PATH`, SHA-256, and the fact that
+  only the installer needs network access.
+- [x] `AC-06` Repeated runs, updates, downgrades, and adding the standard
+  directory to `PATH` are idempotent. A nonstandard directory does not change
+  the profile and receives a clear hint.
 
 ## Plan
 
-1. Implement the same installer contract for POSIX and PowerShell.
+1. Implement the same rules for POSIX and PowerShell.
 2. Include the scripts in the release bundle and checksum generation.
-3. Add platform, integrity, replacement, and release contract tests.
+3. Add tests for platform selection, integrity, safe replacement, and release
+   bundle contents.
 4. Update the source documents and release notes.
-5. Pass the semantic gate and full check, then rebuild the portal.
 
 ## Verification
 
@@ -105,10 +100,10 @@ installer prints the exact `source`/fish command, requests a login/re-login for
 
 ## Documentation impact
 
-An installation guide is added; the README, `CHANGELOG.md`, current status,
-system/trust boundary, and tracked portal are updated.
+The work added an installation guide and updated the README, changelog, current
+status, system boundary, trust boundary, and tracked portal.
 
 ## Use-case omission reason
 
-The task changes release engineering and bootstrap delivery without adding a
-command or scenario to the main Go CLI.
+The task changes release-file delivery and installers without adding a command
+or scenario to the main Go CLI.

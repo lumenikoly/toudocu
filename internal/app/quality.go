@@ -104,38 +104,35 @@ func validateTypedKnowledge(model *Model) {
 	for _, document := range model.Collections["standard"] {
 		id := typedDocumentID(document, standardIDRE)
 		if !standardIDRE.MatchString(id) {
-			typedError(model, document, "invalid-standard-id", "Стандарт должен иметь идентификатор STD-*.")
+			typedError(model, document, "invalid-standard-id", "A standard must have an STD-* identifier.")
 		} else if previous := standardByID[id]; previous != nil {
-			typedError(model, document, "duplicate-standard-id", fmt.Sprintf("Стандарт %s уже объявлен в %s.", id, previous.SourcePath))
+			typedError(model, document, "duplicate-standard-id", fmt.Sprintf("Standard %s is already declared in %s.", id, previous.SourcePath))
 		} else {
 			standardByID[id] = document
 		}
 		statusName, statusValid := standardStatus(document.Metadata["status"])
-		if document.Metadata["owner"] == "" {
-			typedWarning(model, document, "missing-standard-owner", "У стандарта не указан владелец.")
-		}
 		if document.Metadata["scope"] == "" {
-			typedWarning(model, document, "missing-standard-scope", "У стандарта не указана область.")
+			typedWarning(model, document, "missing-standard-scope", "The standard has no scope.")
 		}
 		if !statusValid {
-			typedWarning(model, document, "invalid-standard-status", "У стандарта отсутствует или не распознан статус.")
+			typedWarning(model, document, "invalid-standard-status", "The standard status is missing or unrecognized.")
 		}
 		if _, ok := parseISODate(document.Metadata["updated"]); !ok {
-			typedWarning(model, document, "invalid-standard-updated", "У стандарта отсутствует или неверна ISO-дата обновления.")
+			typedWarning(model, document, "invalid-standard-updated", "The standard update date is missing or is not a valid ISO date.")
 		}
 		rules := sectionText(document, "Правила", "Rules")
 		checks := sectionText(document, "Автоматические проверки", "Automated checks", "Automatic checks")
 		if rules == "" {
-			typedWarning(model, document, "missing-standard-rules", "Раздел «Правила» должен быть непустым.")
+			typedWarning(model, document, "missing-standard-rules", "The Rules section must not be empty.")
 		}
 		if checks == "" {
-			typedWarning(model, document, "missing-standard-automatic-checks", "Раздел «Автоматические проверки» должен быть непустым.")
+			typedWarning(model, document, "missing-standard-automatic-checks", "The Automated checks section must not be empty.")
 		}
 		if statusName == "superseded" && !standardIDRE.MatchString(document.Metadata["supersededBy"]) {
-			typedError(model, document, "missing-standard-superseded-by", "Заменённый стандарт должен ссылаться полем «Заменён» на STD-*.")
+			typedError(model, document, "missing-standard-superseded-by", "A superseded standard must reference an STD-* identifier in its Superseded by field.")
 		}
 		standards = append(standards, KnowledgeStandard{
-			ID: id, Title: document.Title, Status: document.Status, Owner: document.Metadata["owner"],
+			ID: id, Title: document.Title, Status: document.Status,
 			Scope: document.Metadata["scope"], Updated: document.Metadata["updated"],
 			SupersededBy: document.Metadata["supersededBy"], Rules: rules, AutomaticChecks: checks,
 			Document: document.SourcePath,
@@ -144,79 +141,76 @@ func validateTypedKnowledge(model *Model) {
 	for index := range standards {
 		standard := standards[index]
 		if standard.SupersededBy == standard.ID && standard.ID != "" {
-			typedError(model, model.DocByPath[standard.Document], "self-standard-replacement", "Стандарт не может заменять сам себя.")
+			typedError(model, model.DocByPath[standard.Document], "self-standard-replacement", "A standard cannot supersede itself.")
 			continue
 		}
 		if standard.SupersededBy != "" && standardByID[standard.SupersededBy] == nil {
-			typedError(model, model.DocByPath[standard.Document], "dangling-standard-replacement", "Стандарт ссылается на неизвестную замену "+standard.SupersededBy+".")
+			typedError(model, model.DocByPath[standard.Document], "dangling-standard-replacement", "The standard references unknown replacement "+standard.SupersededBy+".")
 		}
 	}
 
 	for _, document := range model.Collections["runbook"] {
 		id := typedDocumentID(document, runbookIDRE)
 		if !runbookIDRE.MatchString(id) {
-			typedError(model, document, "invalid-runbook-id", "Runbook должен иметь идентификатор RB-*.")
+			typedError(model, document, "invalid-runbook-id", "A runbook must have an RB-* identifier.")
 		} else if previous := runbookByID[id]; previous != nil {
-			typedError(model, document, "duplicate-runbook-id", fmt.Sprintf("Runbook %s уже объявлен в %s.", id, previous.SourcePath))
+			typedError(model, document, "duplicate-runbook-id", fmt.Sprintf("Runbook %s is already declared in %s.", id, previous.SourcePath))
 		} else {
 			runbookByID[id] = document
 		}
 		statusName, statusValid := runbookStatus(document.Metadata["status"])
-		if document.Metadata["owner"] == "" {
-			typedWarning(model, document, "missing-runbook-owner", "У runbook не указан владелец.")
-		}
 		if document.Metadata["environment"] == "" {
-			typedWarning(model, document, "missing-runbook-environment", "У runbook не указана среда.")
+			typedWarning(model, document, "missing-runbook-environment", "The runbook has no environment.")
 		}
 		if !statusValid {
-			typedWarning(model, document, "invalid-runbook-status", "У runbook отсутствует или не распознан статус.")
+			typedWarning(model, document, "invalid-runbook-status", "The runbook status is missing or unrecognized.")
 		}
 		risk := canonicalText(document.Metadata["risk"])
 		validRisk := containsString([]string{"низкий", "low", "средний", "medium", "высокий", "high", "критический", "critical"}, risk)
 		if !validRisk {
-			typedWarning(model, document, "invalid-runbook-risk", "У runbook отсутствует или не распознан риск.")
+			typedWarning(model, document, "invalid-runbook-risk", "The runbook risk is missing or unrecognized.")
 		}
 		for _, required := range []struct {
 			names []string
 			label string
 		}{
-			{[]string{"Предварительные условия", "Предпосылки", "Prerequisites"}, "Предварительные условия"},
-			{[]string{"Процедура", "Procedure"}, "Процедура"},
-			{[]string{"Проверка", "Проверка результата", "Verification", "Result verification"}, "Проверка"},
-			{[]string{"Откат", "План отката", "Rollback", "Rollback plan"}, "Откат"},
+			{[]string{"Предварительные условия", "Предпосылки", "Prerequisites"}, "Prerequisites"},
+			{[]string{"Процедура", "Procedure"}, "Procedure"},
+			{[]string{"Проверка", "Проверка результата", "Verification", "Result verification"}, "Verification"},
+			{[]string{"Откат", "План отката", "Rollback", "Rollback plan"}, "Rollback"},
 		} {
 			if sectionText(document, required.names...) == "" {
-				typedWarning(model, document, "missing-runbook-section", "Runbook должен содержать непустой раздел «"+required.label+"».")
+				typedWarning(model, document, "missing-runbook-section", "The runbook must contain a non-empty "+required.label+" section.")
 			}
 		}
 		if !hasNumberedProcedure(document) {
-			typedWarning(model, document, "runbook-procedure-not-numbered", "Раздел «Процедура» должен содержать нумерованные шаги.")
+			typedWarning(model, document, "runbook-procedure-not-numbered", "The Procedure section must contain numbered steps.")
 		}
 		for _, link := range document.ResolvedLinks {
 			if link.Broken || link.Blocked {
-				typedError(model, document, "invalid-runbook-link", "Runbook содержит недоступную или небезопасную ссылку: "+link.Destination+".")
+				typedError(model, document, "invalid-runbook-link", "The runbook contains an unavailable or unsafe link: "+link.Destination+".")
 			}
 		}
 		if (risk == "высокий" || risk == "high" || risk == "критический" || risk == "critical") &&
 			sectionText(document, "Условия остановки", "Stop conditions") == "" {
-			typedWarning(model, document, "missing-runbook-stop-conditions", "Runbook высокого или критического риска должен содержать «Условия остановки».")
+			typedWarning(model, document, "missing-runbook-stop-conditions", "A high- or critical-risk runbook must contain Stop conditions.")
 		}
 		freshness := "review-required"
 		verified, dateValid := parseISODate(document.Metadata["lastVerified"])
 		switch {
 		case statusName == "review-required" || !dateValid || verified.After(model.GeneratedAt):
 			freshness = "review-required"
-			typedWarning(model, document, "runbook-review-required", "Runbook требует проверки: дата отсутствует, неверна, находится в будущем или статус требует review.")
+			typedWarning(model, document, "runbook-review-required", "The runbook requires review because its date is missing, invalid, in the future, or its status requires review.")
 		case statusName != "active":
 			freshness = "not-applicable"
 		case statusName == "active" && model.StaleDays > 0 && int(model.GeneratedAt.Sub(verified).Hours()/24) > model.StaleDays:
 			freshness = "overdue"
-			typedWarning(model, document, "stale-runbook", fmt.Sprintf("Runbook не проверялся более %d дн.", model.StaleDays))
+			typedWarning(model, document, "stale-runbook", fmt.Sprintf("The runbook has not been verified for more than %d days.", model.StaleDays))
 		default:
 			freshness = "recent"
 		}
 		runbooks = append(runbooks, KnowledgeRunbook{
-			ID: id, Title: document.Title, Status: document.Status, Owner: document.Metadata["owner"],
+			ID: id, Title: document.Title, Status: document.Status,
 			Environment: document.Metadata["environment"], Risk: document.Metadata["risk"],
 			LastVerified: document.Metadata["lastVerified"], Freshness: freshness, Document: document.SourcePath,
 		})
@@ -229,12 +223,12 @@ func validateTypedKnowledge(model *Model) {
 		item := &model.Knowledge.WorkItems[index]
 		for _, id := range item.StandardIDs {
 			if standardByID[id] == nil {
-				addKnowledgeIssue(model, item.ownerDoc, "error", "dangling-standard-reference", fmt.Sprintf("Задача %s ссылается на неизвестный стандарт %s.", item.ID, id), item.line)
+				addKnowledgeIssue(model, item.ownerDoc, "error", "dangling-standard-reference", fmt.Sprintf("Task %s references unknown standard %s.", item.ID, id), item.line)
 			}
 		}
 		for _, id := range item.RunbookIDs {
 			if runbookByID[id] == nil {
-				addKnowledgeIssue(model, item.ownerDoc, "error", "dangling-runbook-reference", fmt.Sprintf("Задача %s ссылается на неизвестный runbook %s.", item.ID, id), item.line)
+				addKnowledgeIssue(model, item.ownerDoc, "error", "dangling-runbook-reference", fmt.Sprintf("Task %s references unknown runbook %s.", item.ID, id), item.line)
 			}
 		}
 	}
@@ -257,7 +251,7 @@ func validateSectionManifests(model *Model) {
 		manifest := model.DocByPath[path.Join(directory, "index.md")]
 		if directory == "quality" || directory == "runbooks" || !official[directory] {
 			if manifest == nil {
-				model.Issues = append(model.Issues, newIssue("warning", "missing-section-manifest", "Раздел "+directory+" должен содержать index.md.", directory, 0))
+				model.Issues = append(model.Issues, newIssue("warning", "missing-section-manifest", "Section "+directory+" must contain index.md.", directory, 0))
 				continue
 			}
 		}
@@ -265,13 +259,10 @@ func validateSectionManifests(model *Model) {
 			continue
 		}
 		if canonicalText(manifest.Metadata["type"]) != "custom" {
-			typedWarning(model, manifest, "invalid-custom-manifest-type", "Манифест пользовательского раздела должен содержать «Тип: Custom».")
-		}
-		if manifest.Metadata["owner"] == "" {
-			typedWarning(model, manifest, "missing-custom-owner", "У пользовательского раздела не указан владелец.")
+			typedWarning(model, manifest, "invalid-custom-manifest-type", "A custom section manifest must contain `Type: Custom` or its recognized locale equivalent.")
 		}
 		if manifest.Description == "" {
-			typedWarning(model, manifest, "missing-custom-description", "Манифест пользовательского раздела должен содержать непустое описание.")
+			typedWarning(model, manifest, "missing-custom-description", "A custom section manifest must contain a non-empty description.")
 		}
 	}
 }

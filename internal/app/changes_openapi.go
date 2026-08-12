@@ -21,10 +21,10 @@ func parseOpenAPI(content []byte) (map[string]any, error) {
 	}
 	document, ok := value.(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("корень OpenAPI должен быть объектом")
+		return nil, fmt.Errorf("OpenAPI root must be an object")
 	}
 	if _, ok := document["openapi"]; !ok {
-		return nil, fmt.Errorf("поле openapi отсутствует")
+		return nil, fmt.Errorf("openapi field is missing")
 	}
 	return document, nil
 }
@@ -55,9 +55,9 @@ func openAPIDiff(oldContent, newContent []byte, oldPath, newPath string) ([]Sema
 		newOperation, newOK := newOperations[key]
 		switch {
 		case !oldOK:
-			changes = append(changes, openAPIChange("contract-operation-added", entity, key, nil, newOperation, "non-breaking", "Добавлена операция "+key+"."))
+			changes = append(changes, openAPIChange("contract-operation-added", entity, key, nil, newOperation, "non-breaking", "Added operation "+key+"."))
 		case !newOK:
-			changes = append(changes, openAPIChange("contract-operation-removed", entity, key, oldOperation, nil, "breaking", "Удалена операция "+key+"."))
+			changes = append(changes, openAPIChange("contract-operation-removed", entity, key, oldOperation, nil, "breaking", "Removed operation "+key+"."))
 		default:
 			changes = append(changes, compareOpenAPIOperation(entity, key, oldOperation, newOperation)...)
 		}
@@ -76,7 +76,7 @@ func openAPIDiff(oldContent, newContent []byte, oldPath, newPath string) ([]Sema
 			compatibility, kind = "breaking", "field-removed"
 		}
 		if !oldOK || !newOK {
-			changes = append(changes, openAPIChange(kind, entity, "components.schemas."+name, oldValue, newValue, compatibility, fmt.Sprintf("Изменена schema %s.", name)))
+			changes = append(changes, openAPIChange(kind, entity, "components.schemas."+name, oldValue, newValue, compatibility, fmt.Sprintf("Changed schema %s.", name)))
 			continue
 		}
 		changes = append(changes, compareOpenAPISchema(entity, "components.schemas."+name, oldValue, newValue)...)
@@ -101,7 +101,7 @@ func compareOpenAPIRoot(entity ChangeEntity, oldSpec, newSpec map[string]any) []
 		if field == "webhooks" && oldOK && !newOK {
 			compatibility = "breaking"
 		}
-		changes = append(changes, openAPIChange("field-changed", entity, field, emptyOpenAPIValue(oldValue, oldOK), emptyOpenAPIValue(newValue, newOK), compatibility, "Изменён OpenAPI элемент "+field+"."))
+		changes = append(changes, openAPIChange("field-changed", entity, field, emptyOpenAPIValue(oldValue, oldOK), emptyOpenAPIValue(newValue, newOK), compatibility, "Changed OpenAPI element "+field+"."))
 	}
 	changes = append(changes, compareNamedOpenAPIValues(entity, "components.securitySchemes", nestedMap(oldSpec, "components", "securitySchemes"), nestedMap(newSpec, "components", "securitySchemes"), "potentially-breaking")...)
 	return changes
@@ -139,7 +139,7 @@ func compareOpenAPIOperation(entity ChangeEntity, key string, oldRaw, newRaw any
 		} else if !newOK {
 			compatibility = "breaking"
 		}
-		changes = append(changes, openAPIChange("contract-operation-changed", entity, key+"."+field, oldValue, newValue, compatibility, fmt.Sprintf("%s: изменено поле %s.", key, field)))
+		changes = append(changes, openAPIChange("contract-operation-changed", entity, key+"."+field, oldValue, newValue, compatibility, fmt.Sprintf("%s: changed field %s.", key, field)))
 	}
 	changes = append(changes, compareOpenAPIParameters(entity, key, oldOperation["parameters"], newOperation["parameters"])...)
 	changes = append(changes, compareOpenAPIRequestBody(entity, key, oldOperation["requestBody"], newOperation["requestBody"])...)
@@ -154,11 +154,11 @@ func compareOpenAPIOperation(entity ChangeEntity, key string, oldRaw, newRaw any
 		}
 		compatibility := "potentially-breaking"
 		kind := "contract-operation-changed"
-		verb := "изменён"
+		verb := "changed"
 		if !oldOK {
-			compatibility, verb = "non-breaking", "добавлен"
+			compatibility, verb = "non-breaking", "added"
 		} else if !newOK {
-			compatibility, verb = "breaking", "удалён"
+			compatibility, verb = "breaking", "removed"
 		}
 		changes = append(changes, openAPIChange(kind, entity, key+".responses."+response, oldValue, newValue, compatibility, fmt.Sprintf("%s: %s response %s.", key, verb, response)))
 		if oldOK && newOK {
@@ -177,16 +177,16 @@ func compareOpenAPIParameters(entity ChangeEntity, operation string, oldRaw, new
 		if oldOK && newOK && jsonEqual(oldValue, newValue) {
 			continue
 		}
-		compatibility, verb := "potentially-breaking", "изменён"
+		compatibility, verb := "potentially-breaking", "changed"
 		if !oldOK {
-			verb = "добавлен"
+			verb = "added"
 			if !openAPIRequired(newValue) {
 				compatibility = "non-breaking"
 			} else {
 				compatibility = "breaking"
 			}
 		} else if !newOK {
-			compatibility, verb = "potentially-breaking", "удалён"
+			compatibility, verb = "potentially-breaking", "removed"
 		}
 		changes = append(changes, openAPIChange("contract-operation-changed", entity, operation+".parameters."+key, emptyOpenAPIValue(oldValue, oldOK), emptyOpenAPIValue(newValue, newOK), compatibility, fmt.Sprintf("%s: %s parameter %s.", operation, verb, key)))
 	}
@@ -207,7 +207,7 @@ func compareOpenAPIRequestBody(entity ChangeEntity, operation string, oldRaw, ne
 	} else if oldRaw != nil && newRaw == nil {
 		compatibility = "non-breaking"
 	}
-	return []SemanticChange{openAPIChange("contract-operation-changed", entity, operation+".requestBody", oldRaw, newRaw, compatibility, operation+": изменён request body.")}
+	return []SemanticChange{openAPIChange("contract-operation-changed", entity, operation+".requestBody", oldRaw, newRaw, compatibility, operation+": changed request body.")}
 }
 
 func compareOpenAPISecurity(entity ChangeEntity, operation string, oldRaw, newRaw any) []SemanticChange {
@@ -218,7 +218,7 @@ func compareOpenAPISecurity(entity ChangeEntity, operation string, oldRaw, newRa
 	if securityAlternativesRemoved(oldRaw, newRaw) {
 		compatibility = "breaking"
 	}
-	return []SemanticChange{openAPIChange("contract-operation-changed", entity, operation+".security", oldRaw, newRaw, compatibility, operation+": изменены security alternatives.")}
+	return []SemanticChange{openAPIChange("contract-operation-changed", entity, operation+".security", oldRaw, newRaw, compatibility, operation+": changed security alternatives.")}
 }
 
 func compareOpenAPIResponseHeaders(entity ChangeEntity, field string, oldRaw, newRaw any) []SemanticChange {
@@ -239,7 +239,7 @@ func compareOpenAPISchema(entity ChangeEntity, field string, oldRaw, newRaw any)
 		if key == "type" || key == "format" || (key == "additionalProperties" && newValue == false) {
 			compatibility = "breaking"
 		}
-		changes = append(changes, openAPIChange("field-changed", entity, field+"."+key, emptyOpenAPIValue(oldValue, oldOK), emptyOpenAPIValue(newValue, newOK), compatibility, "Изменено schema field "+field+"."+key+"."))
+		changes = append(changes, openAPIChange("field-changed", entity, field+"."+key, emptyOpenAPIValue(oldValue, oldOK), emptyOpenAPIValue(newValue, newOK), compatibility, "Changed schema field "+field+"."+key+"."))
 	}
 	oldEnum, newEnum := stringSet(oldSchema["enum"]), stringSet(newSchema["enum"])
 	if !stringSetEqual(oldEnum, newEnum) {
@@ -247,7 +247,7 @@ func compareOpenAPISchema(entity ChangeEntity, field string, oldRaw, newRaw any)
 		if !stringSetSubset(oldEnum, newEnum) {
 			compatibility = "breaking"
 		}
-		changes = append(changes, openAPIChange("field-changed", entity, field+".enum", oldSchema["enum"], newSchema["enum"], compatibility, "Изменён enum "+field+"."))
+		changes = append(changes, openAPIChange("field-changed", entity, field+".enum", oldSchema["enum"], newSchema["enum"], compatibility, "Changed enum "+field+"."))
 	}
 	oldProperties, newProperties := nestedMap(oldSchema, "properties"), nestedMap(newSchema, "properties")
 	oldRequired, newRequired := stringSet(oldSchema["required"]), stringSet(newSchema["required"])
@@ -257,9 +257,9 @@ func compareOpenAPISchema(entity ChangeEntity, field string, oldRaw, newRaw any)
 		propertyField := field + ".properties." + name
 		if !oldOK || !newOK {
 			compatibility, kind := "non-breaking", "field-added"
-			verb := "Добавлено"
+			verb := "Added"
 			if !newOK {
-				compatibility, kind, verb = "breaking", "field-removed", "Удалено"
+				compatibility, kind, verb = "breaking", "field-removed", "Removed"
 			}
 			changes = append(changes, openAPIChange(kind, entity, propertyField, emptyOpenAPIValue(oldValue, oldOK), emptyOpenAPIValue(newValue, newOK), compatibility, verb+" schema property "+name+"."))
 			continue
@@ -268,12 +268,12 @@ func compareOpenAPISchema(entity ChangeEntity, field string, oldRaw, newRaw any)
 	}
 	for name := range newRequired {
 		if !oldRequired[name] {
-			changes = append(changes, openAPIChange("field-changed", entity, field+".required."+name, false, true, "breaking", "Свойство "+name+" стало обязательным."))
+			changes = append(changes, openAPIChange("field-changed", entity, field+".required."+name, false, true, "breaking", "Property "+name+" became required."))
 		}
 	}
 	for name := range oldRequired {
 		if !newRequired[name] {
-			changes = append(changes, openAPIChange("field-changed", entity, field+".required."+name, true, false, "non-breaking", "Свойство "+name+" перестало быть обязательным."))
+			changes = append(changes, openAPIChange("field-changed", entity, field+".required."+name, true, false, "non-breaking", "Property "+name+" is no longer required."))
 		}
 	}
 	return changes
@@ -287,14 +287,14 @@ func compareNamedOpenAPIValues(entity ChangeEntity, prefix string, oldValues, ne
 		if oldOK && newOK && jsonEqual(oldValue, newValue) {
 			continue
 		}
-		compatibility, kind, verb := "informational", "field-changed", "Изменён"
+		compatibility, kind, verb := "informational", "field-changed", "Changed"
 		if !oldOK {
-			compatibility, kind, verb = "non-breaking", "field-added", "Добавлен"
+			compatibility, kind, verb = "non-breaking", "field-added", "Added"
 		}
 		if !newOK {
-			compatibility, kind, verb = removalCompatibility, "field-removed", "Удалён"
+			compatibility, kind, verb = removalCompatibility, "field-removed", "Removed"
 		}
-		changes = append(changes, openAPIChange(kind, entity, prefix+"."+name, emptyOpenAPIValue(oldValue, oldOK), emptyOpenAPIValue(newValue, newOK), compatibility, verb+" OpenAPI элемент "+prefix+"."+name+"."))
+		changes = append(changes, openAPIChange(kind, entity, prefix+"."+name, emptyOpenAPIValue(oldValue, oldOK), emptyOpenAPIValue(newValue, newOK), compatibility, verb+" OpenAPI element "+prefix+"."+name+"."))
 	}
 	return changes
 }

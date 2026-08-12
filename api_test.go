@@ -36,7 +36,7 @@ func TestRootDocumentationMatchesPublishedState(t *testing.T) {
 		"## Supported Markdown",
 		"scaffold module MOD-PAYMENTS",
 		"## Public Go API",
-		"[Project source documentation](docs/index.md)",
+		"[Toudocu source documentation](docs-en/index.md)",
 	} {
 		if !strings.Contains(text, expected) {
 			t.Errorf("English README does not contain %q", expected)
@@ -45,7 +45,7 @@ func TestRootDocumentationMatchesPublishedState(t *testing.T) {
 	for _, expected := range []string{
 		"## Поддерживаемый Markdown",
 		"## Публичный Go API",
-		"[Исходная документация проекта](docs/index.md)",
+		"[Исходная документация Toudocu](docs/index.md)",
 	} {
 		if !strings.Contains(string(russian), expected) {
 			t.Errorf("Russian README does not contain %q", expected)

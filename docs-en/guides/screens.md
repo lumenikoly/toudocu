@@ -24,29 +24,29 @@ a selected scenario are embedded in its canonical
 ## Screen document
 
 ```md
-# SC-AUTH-LOGIN: Вход
+# SC-AUTH-LOGIN: Sign in
 
-- Идентификатор: SC-AUTH-LOGIN
-- Тип: Экран
-- Модуль: MOD-AUTH
-- Статус: В работе
-- Маршрут: `/login`
-- Превью: `../assets/screens/login.webp`
-- Родительский экран: SC-PUBLIC-HOME
+- Identifier: SC-AUTH-LOGIN
+- Type: Screen
+- Module: MOD-AUTH
+- Status: In progress
+- Route: `/login`
+- Preview: `../assets/screens/login.webp`
+- Parent screen: SC-PUBLIC-HOME
 
-## Состояния
+## States
 
-| ID | Название | Превью |
+| ID | Name | Preview |
 |---|---|---|
-| DEFAULT | Исходное | `../assets/screens/login.webp` |
-| INVALID-CREDENTIALS | Неверные данные | — |
+| DEFAULT | Initial | `../assets/screens/login.webp` |
+| INVALID-CREDENTIALS | Invalid credentials | — |
 
-## Переходы
+## Transitions
 
-| ID | Сценарий | Действие | Условие | Результат | Состояние | Ошибка |
+| ID | Use case | Action | Condition | Result | State | Error |
 |---|---|---|---|---|---|---|
-| TR-AUTH-001 | UC-AUTH-01 | Войти | Успех | SC-ACCOUNT-HOME | DEFAULT | — |
-| TR-AUTH-002 | UC-AUTH-01 | Войти | Неверные данные | SC-AUTH-LOGIN | INVALID-CREDENTIALS | INVALID_CREDENTIALS |
+| TR-AUTH-001 | UC-AUTH-01 | Sign in | Success | SC-ACCOUNT-HOME | DEFAULT | — |
+| TR-AUTH-002 | UC-AUTH-01 | Sign in | Invalid credentials | SC-AUTH-LOGIN | INVALID-CREDENTIALS | INVALID_CREDENTIALS |
 ```
 
 ID, type, module, and status are required. Supported types are Screen, Page,
@@ -79,9 +79,9 @@ that explains the observable change.
 A screen scenario defines:
 
 ```md
-- Начальный экран: SC-AUTH-LOGIN
-- Конечные экраны: SC-ACCOUNT-HOME
-- Разрешить цикл: Да
+- Entry screen: SC-AUTH-LOGIN
+- Exit screens: SC-ACCOUNT-HOME
+- Allow cycle: Yes
 ```
 
 Toudocu adds transitions for the selected `UC-*`, then calculates reachable
@@ -89,7 +89,7 @@ screens, dead ends, cycles, and paths to terminal screens.
 
 A reachable nonterminal screen must have an outgoing transition. A cycle with
 no exit is an error unless the use case explicitly contains
-`Разрешить цикл: Да`.
+`Allow cycle: Yes`.
 
 ## Map
 
@@ -144,11 +144,11 @@ documentation and does not make real API requests.
 Error codes are declared in a contract document:
 
 ```md
-## Ошибки
+## Errors
 
-| ID | Сообщение |
+| ID | Message |
 |---|---|
-| INVALID_CREDENTIALS | Неверный email или пароль. |
+| INVALID_CREDENTIALS | The email or password is incorrect. |
 ```
 
 A preview may be PNG, JPG, JPEG, WEBP, AVIF, or GIF inside the repository root.
@@ -188,9 +188,9 @@ A task declares affected transitions, a symbolic relationship, and a command
 separately:
 
 ```md
-- Переходы: TR-AUTH-001
+- Transitions: TR-AUTH-001
 
-## Проверка
+## Verification
 
 - `AC-01` → `TR-AUTH-001` → `TestSuccessfulLogin`
 - `AC-01` → `go test ./... -run TestSuccessfulLogin`
