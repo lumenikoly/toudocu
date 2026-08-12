@@ -217,7 +217,7 @@ func renderUseCasePage(model *Model, document *Document) string {
 		return renderDocumentPage(model, document)
 	}
 	current := document.OutputPath
-	body := renderDocumentMarkdown(model, document, linkResolverFor(model, document), nil)
+	body := renderDocumentBody(model, document, linkResolverFor(model, document), nil)
 	flow := findPlayableFlow(model, useCase.ID)
 	mapPanel := `<div class="empty-state"><strong>` + escapeHTML(ui.Text("process.mapUnavailable")) + `</strong><p>` + escapeHTML(ui.Text("process.mapUnavailableHelp")) + `</p></div>`
 	playPanel := `<div class="empty-state"><strong>` + escapeHTML(ui.Text("process.playUnavailable")) + `</strong><p>` + escapeHTML(ui.Text("process.playUnavailableHelp")) + `</p></div>`

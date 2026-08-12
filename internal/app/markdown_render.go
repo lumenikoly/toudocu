@@ -1,6 +1,8 @@
 package toudocu
 
 import (
+	"strings"
+
 	markdowncore "toudocu/internal/markdown"
 	frontend "toudocu/internal/site"
 )
@@ -64,6 +66,16 @@ func renderDocumentMarkdown(model *Model, document *Document, resolver LinkResol
 		return ""
 	}
 	return html
+}
+
+func renderDocumentBody(model *Model, document *Document, resolver LinkResolver, taskCompletionByLine map[int]bool) string {
+	body := strings.TrimSpace(renderDocumentMarkdown(model, document, resolver, taskCompletionByLine))
+	if document.Description != "" && strings.HasPrefix(body, "<p>") {
+		if end := strings.Index(body, "</p>"); end >= 0 {
+			return strings.TrimSpace(body[end+4:])
+		}
+	}
+	return body
 }
 
 func renderMarkdownFragment(source string, context renderContext) string {

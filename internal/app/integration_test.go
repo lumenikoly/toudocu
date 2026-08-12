@@ -1100,6 +1100,23 @@ func TestDashboardFocusFallbacksAndAlwaysVisibleOverview(t *testing.T) {
 	}
 }
 
+func TestPortalDoesNotRepeatDocumentDescription(t *testing.T) {
+	_, docs, _ := createFixture(t)
+	writeTestFile(t, docs, "index.md", "# Test Project\n\nОписание тестового\nпроекта.\n\n## Раздел\n\nСодержимое.\n")
+	model := buildFixture(t, docs)
+
+	dashboard := renderDashboard(model)
+	dashboard = dashboard[strings.Index(dashboard, `<main id="main-content"`):]
+	if count := strings.Count(dashboard, "Описание тестового"); count != 1 {
+		t.Fatalf("dashboard description appears %d times", count)
+	}
+	document := renderDocumentPage(model, model.DocByPath["modules/auth.md"])
+	document = document[strings.Index(document, `<main id="main-content"`):]
+	if count := strings.Count(document, "Модуль входа."); count != 1 {
+		t.Fatalf("document description appears %d times", count)
+	}
+}
+
 func TestGenerateMermaidSiteAssetsAndMarkup(t *testing.T) {
 	_, docs, output := createFixture(t)
 	useCasePath := filepath.Join(docs, "use-cases", "login.md")

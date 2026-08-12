@@ -720,7 +720,7 @@ func renderDocumentPage(model *Model, document *Document) string {
 			}
 		}
 	}
-	body := renderDocumentMarkdown(model, document, resolver, taskCompletionByLine)
+	body := renderDocumentBody(model, document, resolver, taskCompletionByLine)
 	controls := ""
 	if document.TaskStats.Total > 0 {
 		label := ui.Text("tasks.checklist")
@@ -1024,19 +1024,6 @@ func renderDashboardFocus(model *Model) string {
 	return `<a class="dashboard-section dashboard-focus" aria-label="` + escapeAttr(ui.Text("focus.currentValue", nextLabel)) + `" href="` + escapeAttr(target) + `">` + content + `</a>`
 }
 
-func dashboardOverviewBody(model *Model, document *Document) string {
-	body := strings.TrimSpace(renderDocumentMarkdown(model, document, linkResolverFor(model, document), nil))
-	description := strings.TrimSpace(document.Description)
-	if description == "" {
-		return body
-	}
-	prefix := `<p>` + escapeHTML(description) + `</p>`
-	if strings.HasPrefix(body, prefix) {
-		return strings.TrimSpace(strings.TrimPrefix(body, prefix))
-	}
-	return body
-}
-
 func renderDashboard(model *Model) string {
 	ui := portalUI(model)
 	meta := ""
@@ -1045,7 +1032,7 @@ func renderDashboard(model *Model) string {
 	}
 	overview := ""
 	if document := model.Project.OverviewDocument; document != nil {
-		body := dashboardOverviewBody(model, document)
+		body := renderDocumentBody(model, document, linkResolverFor(model, document), nil)
 		if body != "" {
 			overview = `<section class="dashboard-section dashboard-overview" data-dashboard-overview aria-labelledby="dashboard-overview-title"><div class="dashboard-overview-heading"><div><h2 id="dashboard-overview-title">` + escapeHTML(ui.Text("dashboard.overview")) + `</h2><small>` + escapeHTML(ui.Text("dashboard.fullIndex")) + `</small></div><div class="page-actions dashboard-page-actions">` + renderDocumentContextButton(model, document) + `</div></div><div class="dashboard-overview-body"><article class="doc-content">` + body + `</article></div></section>`
 		}
