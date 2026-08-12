@@ -12,7 +12,7 @@ const apiDocsUIPath = "/_toudocu/api-docs/"
 func (s *documentationServer) serveAPIDocsUI(w http.ResponseWriter, request *http.Request) {
 	if request.Method != http.MethodGet && request.Method != http.MethodHead {
 		w.Header().Set("Allow", "GET, HEAD")
-		writeEditorError(w, http.StatusMethodNotAllowed, "method_not_allowed", "Метод не поддерживается", nil)
+		writeEditorError(w, http.StatusMethodNotAllowed, "method_not_allowed", "Method not allowed", nil)
 		return
 	}
 	if len(s.model.openAPIContracts) == 0 {
@@ -36,12 +36,13 @@ func (s *documentationServer) serveAPIDocsUI(w http.ResponseWriter, request *htt
 	}
 	encoded, _ := json.Marshal(specs)
 	uiModel := workspaceModel(s.model)
+	ui := portalUI(uiModel)
 	locale := uiModel.SiteConfig.Project.Locale
 	if locale == "" {
 		locale = "en"
 	}
 	html, err := frontend.RenderAPIDocs(frontend.WorkspaceView{
-		Lang: locale, Title: "HTTP API — " + uiModel.Project.Title,
+		UI: ui, Lang: locale, Title: "HTTP API — " + uiModel.Project.Title,
 		Favicon: workspaceFavicon(uiModel),
 		Styles:  []string{"/assets/" + mustFrontendAsset("swagger-ui.css")},
 		Scripts: []frontend.ScriptAsset{
@@ -53,7 +54,7 @@ func (s *documentationServer) serveAPIDocsUI(w http.ResponseWriter, request *htt
 		SpecsJSON: string(encoded),
 	})
 	if err != nil {
-		http.Error(w, "Не удалось сформировать каталог API", http.StatusInternalServerError)
+		http.Error(w, "Could not render API catalog", http.StatusInternalServerError)
 		return
 	}
 	_, _ = io.WriteString(w, html)

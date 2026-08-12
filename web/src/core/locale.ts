@@ -1,32 +1,14 @@
-const baseRussian: Record<string, string> = {
-  bootstrapUnavailable: "Данные страницы недоступны",
-  unsupportedSchema: "Версия данных страницы не поддерживается",
-  emptyCollection: "Нет данных для отображения",
-  capabilityUnavailable: "Функция недоступна в этом режиме",
-};
+import english from "../../../internal/site/i18n/en.json";
+import russian from "../../../internal/site/i18n/ru.json";
 
 export const localeCatalog: Record<string, Record<string, string>> = {
-  ru: {
-    ...baseRussian,
-  },
-  en: {
-    ...baseRussian,
-    bootstrapUnavailable: "Page data is unavailable",
-    unsupportedSchema: "The page data version is unsupported",
-    emptyCollection: "There is no data to display",
-    capabilityUnavailable: "This capability is unavailable in the current runtime",
-  },
+  en: english,
+  ru: russian,
 };
 
-export type Locale = keyof typeof localeCatalog;
-
-export function catalog(locale: string) {
-  return localeCatalog[locale as Locale] || localeCatalog.en;
-}
-
-export function registerMessages(messages: Record<string, string>, translations: Record<string, string> = {}): void {
-  Object.assign(localeCatalog.ru, messages);
-  Object.assign(localeCatalog.en, messages, translations);
+export function catalog(locale: string): Record<string, string> {
+  const language = locale.trim().toLowerCase().replaceAll("_", "-").split("-", 1)[0];
+  return localeCatalog[language] || localeCatalog.en;
 }
 
 export function text(key: string, values: unknown[] = []): string {

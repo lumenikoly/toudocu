@@ -228,7 +228,7 @@ func helpTopic(argv []string) (string, bool) {
 
 func takeArgValue(args []string, index *int, option string) (string, error) {
 	if *index+1 >= len(args) || strings.HasPrefix(args[*index+1], "-") {
-		return "", fmt.Errorf("для параметра %s требуется значение", option)
+		return "", fmt.Errorf("option %s requires a value", option)
 	}
 	*index++
 	return args[*index], nil
@@ -250,7 +250,7 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			args = args[1:]
 		case "search":
 			if len(args) < 2 {
-				return options, false, false, fmt.Errorf("использование: toudocu search \"<query>\" [каталог-документации]")
+				return options, false, false, fmt.Errorf("usage: toudocu search \"<query>\" [docs-directory]")
 			}
 			options.Command, options.Query = "search", args[1]
 			args = args[2:]
@@ -259,19 +259,19 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			args = args[1:]
 			if len(args) > 0 && args[0] == "file" {
 				if len(args) < 2 {
-					return options, false, false, fmt.Errorf("использование: toudocu changes file PATH [каталог-документации]")
+					return options, false, false, fmt.Errorf("usage: toudocu changes file PATH [docs-directory]")
 				}
 				options.Command, options.ChangeFile = "changes-file", filepath.ToSlash(args[1])
 				args = args[2:]
 			}
 		case "scaffold":
 			if len(args) < 3 {
-				return options, false, false, fmt.Errorf("использование: toudocu scaffold module|use-case|flow|screen|decision|standard|runbook ID [каталог-документации]")
+				return options, false, false, fmt.Errorf("usage: toudocu scaffold module|use-case|flow|screen|decision|standard|runbook ID [docs-directory]")
 			}
 			options.Command, options.EntityKind, options.EntityID = "scaffold", args[1], args[2]
 			args = args[3:]
 		case "init", "refresh":
-			return options, false, false, fmt.Errorf("неизвестная команда: %s", args[0])
+			return options, false, false, fmt.Errorf("unknown command: %s", args[0])
 		case "version":
 			version = true
 			args = args[1:]
@@ -280,7 +280,7 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			args = args[1:]
 		case "task":
 			if len(args) < 2 {
-				return options, false, false, fmt.Errorf("использование: toudocu task init|ready|context|verify|archive|restore ...")
+				return options, false, false, fmt.Errorf("usage: toudocu task init|ready|context|verify|archive|restore ...")
 			}
 			switch args[1] {
 			case "init":
@@ -289,22 +289,22 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 				goto parseOptions
 			case "ready", "context", "verify", "archive", "restore", "changes":
 				if len(args) < 3 {
-					return options, false, false, fmt.Errorf("для task %s требуется TASK-ID", args[1])
+					return options, false, false, fmt.Errorf("task %s requires TASK-ID", args[1])
 				}
 				options.Command = "task-" + args[1]
 			default:
-				return options, false, false, fmt.Errorf("использование: toudocu task init|ready|context|verify|archive|restore ...")
+				return options, false, false, fmt.Errorf("usage: toudocu task init|ready|context|verify|archive|restore ...")
 			}
 			options.TaskID = args[2]
 			args = args[3:]
 		default:
 			if !strings.HasPrefix(args[0], "-") {
-				return options, false, false, fmt.Errorf("неизвестная команда: %s", args[0])
+				return options, false, false, fmt.Errorf("unknown command: %s", args[0])
 			}
 		}
 	}
 	if options.Command == "" && !help && !version {
-		return options, false, false, fmt.Errorf("требуется команда; используйте toudocu --help")
+		return options, false, false, fmt.Errorf("command required; use toudocu --help")
 	}
 parseOptions:
 	for i := 0; i < len(args); i++ {
@@ -437,25 +437,25 @@ parseOptions:
 			}
 			n, e := strconv.Atoi(v)
 			if e != nil || n < 1 || n > 100 {
-				return options, false, false, fmt.Errorf("--limit должен быть числом от 1 до 100")
+				return options, false, false, fmt.Errorf("--limit must be a number from 1 to 100")
 			}
 			options.Limit = n
 			limitSpecified = true
 		case strings.HasPrefix(arg, "--limit="):
 			n, e := strconv.Atoi(strings.TrimPrefix(arg, "--limit="))
 			if e != nil || n < 1 || n > 100 {
-				return options, false, false, fmt.Errorf("--limit должен быть числом от 1 до 100")
+				return options, false, false, fmt.Errorf("--limit must be a number from 1 to 100")
 			}
 			options.Limit = n
 			limitSpecified = true
 		case arg == "--dry-run":
 			if options.VerifyMode != "" {
-				return options, false, false, fmt.Errorf("--dry-run и --run нельзя использовать вместе")
+				return options, false, false, fmt.Errorf("--dry-run and --run cannot be used together")
 			}
 			options.VerifyMode = "dry-run"
 		case arg == "--run":
 			if options.VerifyMode != "" {
-				return options, false, false, fmt.Errorf("--dry-run и --run нельзя использовать вместе")
+				return options, false, false, fmt.Errorf("--dry-run and --run cannot be used together")
 			}
 			options.VerifyMode = "run"
 		case arg == "--target":
@@ -489,13 +489,13 @@ parseOptions:
 			}
 			n, e := strconv.Atoi(v)
 			if e != nil || n < 0 {
-				return options, false, false, fmt.Errorf("--stale-days должен быть неотрицательным числом")
+				return options, false, false, fmt.Errorf("--stale-days must be a non-negative number")
 			}
 			options.StaleDays = n
 		case strings.HasPrefix(arg, "--stale-days="):
 			n, e := strconv.Atoi(strings.TrimPrefix(arg, "--stale-days="))
 			if e != nil || n < 0 {
-				return options, false, false, fmt.Errorf("--stale-days должен быть неотрицательным числом")
+				return options, false, false, fmt.Errorf("--stale-days must be a non-negative number")
 			}
 			options.StaleDays = n
 		case arg == "--repository-root":
@@ -545,14 +545,14 @@ parseOptions:
 			}
 			duration, e := time.ParseDuration(v)
 			if e != nil || duration <= 0 {
-				return options, false, false, fmt.Errorf("--timeout должен быть положительной duration, например 10m")
+				return options, false, false, fmt.Errorf("--timeout must be a positive duration, for example 10m")
 			}
 			options.Timeout = duration
 			timeoutSpecified = true
 		case strings.HasPrefix(arg, "--timeout="):
 			duration, e := time.ParseDuration(strings.TrimPrefix(arg, "--timeout="))
 			if e != nil || duration <= 0 {
-				return options, false, false, fmt.Errorf("--timeout должен быть положительной duration, например 10m")
+				return options, false, false, fmt.Errorf("--timeout must be a positive duration, for example 10m")
 			}
 			options.Timeout = duration
 			timeoutSpecified = true
@@ -573,14 +573,14 @@ parseOptions:
 			}
 			port, e := strconv.Atoi(v)
 			if e != nil || port < 1 || port > 65535 {
-				return options, false, false, fmt.Errorf("--port должен быть числом от 1 до 65535")
+				return options, false, false, fmt.Errorf("--port must be a number from 1 to 65535")
 			}
 			options.Port = port
 			portSpecified = true
 		case strings.HasPrefix(arg, "--port="):
 			port, e := strconv.Atoi(strings.TrimPrefix(arg, "--port="))
 			if e != nil || port < 1 || port > 65535 {
-				return options, false, false, fmt.Errorf("--port должен быть числом от 1 до 65535")
+				return options, false, false, fmt.Errorf("--port must be a number from 1 to 65535")
 			}
 			options.Port = port
 			portSpecified = true
@@ -592,25 +592,25 @@ parseOptions:
 			options.Strict = true
 		case arg == "--screen-map":
 			if screenMapOption == "off" {
-				return options, false, false, fmt.Errorf("--screen-map и --no-screen-map нельзя использовать вместе")
+				return options, false, false, fmt.Errorf("--screen-map and --no-screen-map cannot be used together")
 			}
 			screenMapOption = "on"
 			options.NoScreenMap = false
 		case arg == "--no-screen-map":
 			if screenMapOption == "on" {
-				return options, false, false, fmt.Errorf("--screen-map и --no-screen-map нельзя использовать вместе")
+				return options, false, false, fmt.Errorf("--screen-map and --no-screen-map cannot be used together")
 			}
 			screenMapOption = "off"
 			options.NoScreenMap = true
 		case arg == "--no-update-check":
 			options.NoUpdateCheck = true
 		case strings.HasPrefix(arg, "-"):
-			return options, false, false, fmt.Errorf("неизвестный параметр: %s", arg)
+			return options, false, false, fmt.Errorf("unknown option: %s", arg)
 		default:
 			if options.InputDirectory == "" {
 				options.InputDirectory = arg
 			} else {
-				return options, false, false, fmt.Errorf("лишний позиционный аргумент: %s", arg)
+				return options, false, false, fmt.Errorf("unexpected positional argument: %s", arg)
 			}
 		}
 	}
@@ -643,30 +643,30 @@ parseOptions:
 	}
 	options.RepositoryURL = strings.TrimRight(options.RepositoryURL, "/")
 	if options.RepositoryURL != "" && !strings.HasPrefix(strings.ToLower(options.RepositoryURL), "http://") && !strings.HasPrefix(strings.ToLower(options.RepositoryURL), "https://") {
-		return options, false, false, fmt.Errorf("--repository-url должен быть HTTP(S) URL")
+		return options, false, false, fmt.Errorf("--repository-url must be an HTTP(S) URL")
 	}
 	if strings.TrimSpace(options.RepositoryRef) == "" {
-		return options, false, false, fmt.Errorf("--repository-ref не может быть пустым")
+		return options, false, false, fmt.Errorf("--repository-ref cannot be empty")
 	}
 	if options.Format != "text" && options.Format != "json" && !((options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes") && options.Format == "markdown") {
-		return options, false, false, fmt.Errorf("--format должен быть text, json или markdown для changes")
+		return options, false, false, fmt.Errorf("--format must be text, json, or markdown for changes")
 	}
 	if strings.TrimSpace(options.Host) == "" {
-		return options, false, false, fmt.Errorf("--host не может быть пустым")
+		return options, false, false, fmt.Errorf("--host cannot be empty")
 	}
 	if options.Command != "serve" && (hostSpecified || portSpecified) {
-		return options, false, false, fmt.Errorf("--host и --port доступны только для serve")
+		return options, false, false, fmt.Errorf("--host and --port are available only for serve")
 	}
 	if screenMapOption != "" && options.Command != "build" && options.Command != "serve" {
-		return options, false, false, fmt.Errorf("--screen-map и --no-screen-map доступны только для build и serve")
+		return options, false, false, fmt.Errorf("--screen-map and --no-screen-map are available only for build and serve")
 	}
 	if options.NoUpdateCheck && options.Command != "serve" {
-		return options, false, false, fmt.Errorf("--no-update-check доступен только для serve")
+		return options, false, false, fmt.Errorf("--no-update-check is available only for serve")
 	}
 	if options.Command == "task-ready" || options.Command == "task-context" || options.Command == "task-verify" || options.Command == "task-changes" ||
 		options.Command == "task-archive" || options.Command == "task-restore" {
 		if !taskIDRE.MatchString(options.TaskID) {
-			return options, false, false, fmt.Errorf("идентификатор рабочего элемента должен иметь формат TASK-AREA-NNN или BUG-AREA-NNN")
+			return options, false, false, fmt.Errorf("work-item identifier must have the form TASK-AREA-NNN or BUG-AREA-NNN")
 		}
 	}
 	if options.Command == "task-verify" {
@@ -676,7 +676,7 @@ parseOptions:
 				return options, false, false, err
 			}
 			if !strings.EqualFold(filepath.Ext(report), ".json") {
-				return options, false, false, fmt.Errorf("--report должен указывать JSON-файл")
+				return options, false, false, fmt.Errorf("--report must point to a JSON file")
 			}
 			resolvedInput, err := resolvePathForSafety(options.InputDirectory)
 			if err != nil {
@@ -687,76 +687,76 @@ parseOptions:
 				return options, false, false, err
 			}
 			if ensureInside(options.InputDirectory, report) || ensureInside(resolvedInput, resolvedReport) {
-				return options, false, false, fmt.Errorf("--report не может перезаписывать каталог исходной документации")
+				return options, false, false, fmt.Errorf("--report cannot overwrite the source documentation directory")
 			}
 			if info, err := os.Stat(report); err == nil && info.IsDir() {
-				return options, false, false, fmt.Errorf("--report должен указывать файл, а не каталог")
+				return options, false, false, fmt.Errorf("--report must point to a file, not a directory")
 			}
 			options.ReportPath = report
 		}
 		if options.VerifyMode == "" {
-			return options, false, false, fmt.Errorf("task verify требует ровно один режим: --dry-run или --run")
+			return options, false, false, fmt.Errorf("task verify requires exactly one mode: --dry-run or --run")
 		}
 	} else if options.ReportPath != "" || timeoutSpecified || options.VerifyMode != "" || options.Target != "" {
-		return options, false, false, fmt.Errorf("--dry-run, --run, --target, --report и --timeout доступны только для task verify")
+		return options, false, false, fmt.Errorf("--dry-run, --run, --target, --report, and --timeout are available only for task verify")
 	}
 	if options.Command == "task-init" {
 		if options.Area == "" || !titleSpecified || strings.TrimSpace(options.Title) == "" || options.TaskType == "" {
-			return options, false, false, fmt.Errorf("task init требует --area, --title и --type")
+			return options, false, false, fmt.Errorf("task init requires --area, --title, and --type")
 		}
 		if !taskAreaRE.MatchString(options.Area) {
-			return options, false, false, fmt.Errorf("--area должен состоять из A-Z, 0-9 и дефисов и начинаться с буквы")
+			return options, false, false, fmt.Errorf("--area must contain A-Z, 0-9, and hyphens and start with a letter")
 		}
 		if !validTaskInitType(options.TaskType) {
-			return options, false, false, fmt.Errorf("--type должен быть Feature, Bug, Maintenance, Documentation или Research")
+			return options, false, false, fmt.Errorf("--type must be Feature, Bug, Maintenance, Documentation, or Research")
 		}
 	}
 	if options.Command == "scaffold" && (!titleSpecified || strings.TrimSpace(options.Title) == "") {
-		return options, false, false, fmt.Errorf("scaffold требует --title")
+		return options, false, false, fmt.Errorf("scaffold requires --title")
 	}
 	if (options.Command == "task-init" || options.Command == "scaffold") && strings.ContainsAny(options.Title, "\r\n") {
-		return options, false, false, fmt.Errorf("--title должен быть одной строкой")
+		return options, false, false, fmt.Errorf("--title must be a single line")
 	}
 	if options.Command == "scaffold" && !validScaffoldID(options.EntityKind, options.EntityID) {
-		return options, false, false, fmt.Errorf("некорректный %s ID: %s", options.EntityKind, options.EntityID)
+		return options, false, false, fmt.Errorf("invalid %s ID: %s", options.EntityKind, options.EntityID)
 	}
 	if options.Command == "search" && len(searchWords(options.Query)) == 0 {
-		return options, false, false, fmt.Errorf("поисковый запрос не может быть пустым")
+		return options, false, false, fmt.Errorf("search query cannot be empty")
 	}
 	if (options.Command == "task-init" || options.Command == "scaffold") && options.Language != "en" && options.Language != "ru" {
-		return options, false, false, fmt.Errorf("--lang должен быть en или ru")
+		return options, false, false, fmt.Errorf("--lang must be en or ru")
 	}
 	if languageSpecified && options.Command != "task-init" && options.Command != "scaffold" {
-		return options, false, false, fmt.Errorf("--lang доступен только для task init и scaffold")
+		return options, false, false, fmt.Errorf("--lang is available only for task init and scaffold")
 	}
 	if limitSpecified && options.Command != "search" {
-		return options, false, false, fmt.Errorf("--limit доступен только для search")
+		return options, false, false, fmt.Errorf("--limit is available only for search")
 	}
 	if options.Area != "" && options.Command != "task-init" || options.TaskType != "" && options.Command != "task-init" {
-		return options, false, false, fmt.Errorf("--area и --type доступны только для task init")
+		return options, false, false, fmt.Errorf("--area and --type are available only for task init")
 	}
 	if titleSpecified && options.Command != "build" && options.Command != "serve" && options.Command != "task-init" && options.Command != "scaffold" {
-		return options, false, false, fmt.Errorf("--title недоступен для этой команды")
+		return options, false, false, fmt.Errorf("--title is not available for this command")
 	}
 	if outputSpecified && options.Command != "build" && options.Command != "serve" && options.Command != "changes" && options.Command != "changes-file" && options.Command != "task-changes" {
-		return options, false, false, fmt.Errorf("--output доступен только для build и serve")
+		return options, false, false, fmt.Errorf("--output is available only for build and serve")
 	}
 	if (options.Clean || options.Open) && options.Command != "build" && options.Command != "serve" {
-		return options, false, false, fmt.Errorf("--clean и --open доступны только для build и serve")
+		return options, false, false, fmt.Errorf("--clean and --open are available only for build and serve")
 	}
 	if options.Strict && options.Command != "build" && options.Command != "check" && options.Command != "serve" && options.Command != "task-ready" {
-		return options, false, false, fmt.Errorf("--strict недоступен для этой команды")
+		return options, false, false, fmt.Errorf("--strict is not available for this command")
 	}
 	isChangesCommand := options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes"
 	if changesOptionSpecified && !isChangesCommand {
-		return options, false, false, fmt.Errorf("--base, --branch-base, --status, --module, --permanent-only, --include-assets и --translation-input доступны только для changes")
+		return options, false, false, fmt.Errorf("--base, --branch-base, --status, --module, --permanent-only, --include-assets, and --translation-input are available only for changes")
 	}
 	if isChangesCommand {
 		if options.ChangeTranslationInput && options.ChangePermanentOnly {
-			return options, false, false, fmt.Errorf("--translation-input и --permanent-only нельзя использовать вместе")
+			return options, false, false, fmt.Errorf("--translation-input and --permanent-only cannot be used together")
 		}
 		if options.ChangeBranchBase != "" && options.ChangeBase != "" {
-			return options, false, false, fmt.Errorf("--base и --branch-base нельзя использовать вместе")
+			return options, false, false, fmt.Errorf("--base and --branch-base cannot be used together")
 		}
 		if options.ChangeOutput != "" {
 			absolute, err := filepath.Abs(options.ChangeOutput)
@@ -844,7 +844,7 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	}
 	options, help, version, err := ParseArguments(argv)
 	if err != nil {
-		fmt.Fprintln(stderr, "Ошибка:", err)
+		fmt.Fprintln(stderr, "Error:", err)
 		if len(argv) > 0 && (argv[0] == "changes" || (argv[0] == "task" && len(argv) > 1 && argv[1] == "changes")) {
 			return 2
 		}
@@ -861,7 +861,7 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	if options.Command == "task-init" {
 		report, err := InitTask(options)
 		if err != nil {
-			fmt.Fprintln(stderr, "Ошибка:", err)
+			fmt.Fprintln(stderr, "Error:", err)
 			return 1
 		}
 		if options.Format == "json" {
@@ -875,7 +875,7 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	if options.Command == "scaffold" {
 		report, err := Scaffold(options)
 		if err != nil {
-			fmt.Fprintln(stderr, "Ошибка:", err)
+			fmt.Fprintln(stderr, "Error:", err)
 			return 1
 		}
 		if options.Format == "json" {
@@ -888,7 +888,7 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	}
 	if options.Command == "serve" {
 		if err := serveDocumentation(options, stdout, stderr); err != nil {
-			fmt.Fprintln(stderr, "Ошибка:", err)
+			fmt.Fprintln(stderr, "Error:", err)
 			return 1
 		}
 		return 0
@@ -896,7 +896,7 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	if options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes" {
 		report, err := BuildDocumentationChanges(options)
 		if err != nil {
-			fmt.Fprintln(stderr, "Ошибка:", err)
+			fmt.Fprintln(stderr, "Error:", err)
 			var failure *changeFailure
 			if errors.As(err, &failure) {
 				return failure.Code
@@ -905,7 +905,7 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 		}
 		filterDocumentationChanges(report, options)
 		if err := outputChangesReport(options, report, stdout); err != nil {
-			fmt.Fprintln(stderr, "Ошибка:", err)
+			fmt.Fprintln(stderr, "Error:", err)
 			return 4
 		}
 		for _, diagnostic := range report.Diagnostics {
@@ -924,13 +924,13 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	}
 	model, err := BuildDocumentationModel(options)
 	if err != nil {
-		fmt.Fprintln(stderr, "Ошибка:", err)
+		fmt.Fprintln(stderr, "Error:", err)
 		return 1
 	}
 	if options.Command == "search" {
 		report, err := SearchDocumentation(model, options.Query, options.Limit)
 		if err != nil {
-			fmt.Fprintln(stderr, "Ошибка:", err)
+			fmt.Fprintln(stderr, "Error:", err)
 			return 1
 		}
 		if options.Format == "json" {
@@ -945,13 +945,13 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 		operation := strings.TrimPrefix(options.Command, "task-")
 		report, err := MoveTask(model, options, operation)
 		if err != nil {
-			fmt.Fprintln(stderr, "Ошибка:", err)
+			fmt.Fprintln(stderr, "Error:", err)
 			return 1
 		}
 		if options.Format == "json" {
 			data, marshalErr := json.MarshalIndent(report, "", "  ")
 			if marshalErr != nil {
-				fmt.Fprintln(stderr, "Ошибка:", marshalErr)
+				fmt.Fprintln(stderr, "Error:", marshalErr)
 				return 1
 			}
 			fmt.Fprintln(stdout, string(data))
@@ -967,13 +967,13 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 		report := executeTaskVerify(model, options, stdout, stderr, osCommandRunner{})
 		data, marshalErr := marshalTaskVerifyReport(report)
 		if marshalErr != nil {
-			fmt.Fprintln(stderr, "Ошибка:", marshalErr)
+			fmt.Fprintln(stderr, "Error:", marshalErr)
 			return 1
 		}
 		reportWriteFailed := false
 		if options.ReportPath != "" {
 			if err := writeReportAtomically(options.ReportPath, data); err != nil {
-				fmt.Fprintln(stderr, "Не удалось сохранить отчёт:", err)
+				fmt.Fprintln(stderr, "Failed to save report:", err)
 				reportWriteFailed = true
 			}
 		}
@@ -1003,13 +1003,13 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	if options.Command == "task-context" {
 		report, err := BuildTaskContext(model, options.TaskID)
 		if err != nil {
-			fmt.Fprintln(stderr, "Ошибка:", err)
+			fmt.Fprintln(stderr, "Error:", err)
 			return 1
 		}
 		if options.Format == "json" {
 			data, marshalErr := json.MarshalIndent(report, "", "  ")
 			if marshalErr != nil {
-				fmt.Fprintln(stderr, "Ошибка:", marshalErr)
+				fmt.Fprintln(stderr, "Error:", marshalErr)
 				return 1
 			}
 			fmt.Fprintln(stdout, string(data))
@@ -1032,13 +1032,13 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	}
 	result, err := GenerateSite(model, options)
 	if err != nil {
-		fmt.Fprintln(stderr, "Ошибка:", err)
+		fmt.Fprintln(stderr, "Error:", err)
 		return 1
 	}
 	fmt.Fprintf(stdout, "\nДокументация создана.\nКаталог:        %s\nСтраниц:        %d\nДокументов:     %d\nЗадач roadmap:  %d\nВыполнено:      %d\nПредупреждений: %d\nОшибок:         %d\nГлавная:        %s\n", result.OutputDirectory, result.Pages, model.Stats.Documents, model.Stats.TotalTasks, model.Stats.CompletedTasks, model.Stats.Warnings, model.Stats.Errors, filepath.Join(result.OutputDirectory, "index.html"))
 	if options.Open {
 		if err := openGeneratedSite(filepath.Join(result.OutputDirectory, "index.html")); err != nil {
-			fmt.Fprintln(stderr, "Не удалось открыть браузер автоматически:", err)
+			fmt.Fprintln(stderr, "Failed to open the browser automatically:", err)
 		}
 	}
 	if model.Stats.Errors > 0 || (options.Strict && model.Stats.Warnings > 0) {

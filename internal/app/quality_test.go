@@ -387,7 +387,7 @@ func TestStandardAndRunbookScaffoldsAndCatalogs(t *testing.T) {
 	if !strings.Contains(string(quality), `data-filter-control="status"`) {
 		t.Fatalf("quality catalog status filter missing")
 	}
-	for _, expected := range []string{"Всего", "Recent", "Review required", "Overdue", `data-filter-control="freshness"`} {
+	for _, expected := range []string{"Total", "Recent", "Review required", "Overdue", `data-filter-control="freshness"`} {
 		if !strings.Contains(string(runbooks), expected) {
 			t.Fatalf("runbook catalog missing %q", expected)
 		}

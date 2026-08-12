@@ -16,6 +16,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	frontend "toudocu/internal/site"
 )
 
 const rebuildEndpoint = "/__toudocu/rebuild"
@@ -140,7 +141,7 @@ func (s *documentationServer) rebuildRegistry() error {
 		}
 		model, buildErr := BuildDocumentationModel(state.options)
 		if buildErr != nil {
-			fmt.Fprintln(s.stderr, "Не удалось подготовить locale portal", locale+":", buildErr)
+			fmt.Fprintln(s.stderr, "Could not prepare locale portal", locale+":", buildErr)
 			continue
 		}
 		state.model = model
@@ -156,7 +157,7 @@ func (s *documentationServer) rebuildRegistry() error {
 			continue
 		}
 		if _, genErr := s.generatePortal(state, false); genErr != nil {
-			fmt.Fprintln(s.stderr, "Не удалось собрать locale portal", locale+":", genErr)
+			fmt.Fprintln(s.stderr, "Could not build locale portal", locale+":", genErr)
 			state.Status = portalUnavailable
 		}
 	}
@@ -424,17 +425,17 @@ func (s *documentationServer) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 func (s *documentationServer) serveRebuild(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
-		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 	if r.Header.Get("X-Toudocu-Action") != "rebuild" {
-		http.Error(w, "Запрос на пересборку отклонён", http.StatusForbidden)
+		http.Error(w, "Rebuild request rejected", http.StatusForbidden)
 		return
 	}
 	model, result, err := s.rebuild()
 	if err != nil {
-		fmt.Fprintln(s.stderr, "Не удалось пересобрать документацию:", err)
-		http.Error(w, "Не удалось пересобрать документацию: "+err.Error(), http.StatusInternalServerError)
+		fmt.Fprintln(s.stderr, "Could not rebuild documentation:", err)
+		http.Error(w, "Could not rebuild documentation: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -484,7 +485,8 @@ func (s *documentationServer) serveUnavailableLocale(w http.ResponseWriter, stat
 		target := s.portals[key]
 		targets = append(targets, LanguageTarget{Locale: target.Locale, URL: target.BaseURL, Active: target == state, Available: target.Status != portalUnavailable && target.model != nil})
 	}
-	_, _ = io.WriteString(w, `<!doctype html><html><head><meta charset="utf-8"><title>`+escapeHTML(state.Locale)+` unavailable</title></head><body><main><h1>`+escapeHTML(state.Locale)+`</h1><p>Unavailable</p><p>Локализованный портал сейчас недоступен.</p>`+renderLanguageSelect(targets)+`</main></body></html>`)
+	ui := frontend.NewUI(state.Locale)
+	_, _ = io.WriteString(w, `<!doctype html><html><head><meta charset="utf-8"><title>`+escapeHTML(ui.Text("locale.unavailableTitle", state.Locale))+`</title></head><body><main><h1>`+escapeHTML(state.Locale)+`</h1><p>`+escapeHTML(ui.Text("locale.unavailableStatus"))+`</p><p>`+escapeHTML(ui.Text("locale.unavailable"))+`</p>`+renderLanguageSelect(ui, targets)+`</main></body></html>`)
 }
 
 func (s *documentationServer) watch(ctx context.Context) {
@@ -498,7 +500,7 @@ func (s *documentationServer) watch(ctx context.Context) {
 			s.mu.Lock()
 			if digest := s.currentConfigDigest(); digest != s.configDigest {
 				if err := s.rebuildRegistry(); err != nil {
-					fmt.Fprintln(s.stderr, "Не удалось обновить locale registry:", err)
+					fmt.Fprintln(s.stderr, "Could not update locale registry:", err)
 				}
 				s.mu.Unlock()
 				continue
@@ -526,18 +528,18 @@ func (s *documentationServer) watch(ctx context.Context) {
 				}
 				if key == canonicalPortalKey() {
 					if _, _, err = s.rebuild(); err != nil {
-						fmt.Fprintln(s.stderr, "Не удалось пересобрать документацию после внешнего изменения:", err)
+						fmt.Fprintln(s.stderr, "Could not rebuild documentation after an external change:", err)
 					}
 				} else {
 					model, buildErr := BuildDocumentationModel(state.options)
 					if buildErr != nil {
-						fmt.Fprintln(s.stderr, "Не удалось пересобрать locale portal", state.Locale+":", buildErr)
+						fmt.Fprintln(s.stderr, "Could not rebuild locale portal", state.Locale+":", buildErr)
 						continue
 					}
 					state.model = model
 					populateLanguageTargets(s.portals)
 					if _, genErr := s.generatePortal(state, false); genErr != nil {
-						fmt.Fprintln(s.stderr, "Не удалось пересобрать locale portal", state.Locale+":", genErr)
+						fmt.Fprintln(s.stderr, "Could not rebuild locale portal", state.Locale+":", genErr)
 					}
 				}
 			}
@@ -577,7 +579,7 @@ func serveDocumentation(options Options, stdout, stderr io.Writer) error {
 	}
 	if options.Open {
 		if err := openGeneratedSite(localURL); err != nil {
-			fmt.Fprintln(stderr, "Не удалось открыть браузер автоматически:", err)
+			fmt.Fprintln(stderr, "Failed to open the browser automatically:", err)
 		}
 	}
 	server := &http.Server{Handler: handler, ReadHeaderTimeout: 5 * time.Second}

@@ -57,10 +57,10 @@ func (service *reviewService) createDiscussion(request CreateDiscussionRequest) 
 		return ReviewState{}, err
 	}
 	if !report.FeedbackWritable {
-		return ReviewState{}, &reviewFailure{Code: "REVIEW_READ_ONLY", Status: http.StatusForbidden, Message: "review target доступен только для чтения"}
+		return ReviewState{}, &reviewFailure{Code: "REVIEW_READ_ONLY", Status: http.StatusForbidden, Message: "review target is read-only"}
 	}
 	if request.RepositoryRevision != report.RepositoryRevision {
-		return ReviewState{}, &reviewFailure{Code: "REVIEW_CONFLICT", Status: http.StatusConflict, Message: "repository revision устарел"}
+		return ReviewState{}, &reviewFailure{Code: "REVIEW_CONFLICT", Status: http.StatusConflict, Message: "repository revision is stale"}
 	}
 	anchor, snapshot, err := service.captureAnchor(report, request.Target)
 	if err != nil {
@@ -111,20 +111,20 @@ func (service *reviewService) updateDiscussion(id string, request UpdateDiscussi
 	result, err := service.store.mutate(request.ReviewMutationGuard, func(state *ReviewState) error {
 		discussion := findDiscussion(state, id)
 		if discussion == nil {
-			return &reviewFailure{Code: "REVIEW_NOT_FOUND", Status: http.StatusNotFound, Message: "discussion не найден"}
+			return &reviewFailure{Code: "REVIEW_NOT_FOUND", Status: http.StatusNotFound, Message: "discussion not found"}
 		}
 		now := service.now()
 		switch request.Operation {
 		case "reply":
 			if discussion.State != "open" {
-				return &reviewFailure{Code: "REVIEW_INVALID_STATE", Status: http.StatusConflict, Message: "reply доступен только в open discussion"}
+				return &reviewFailure{Code: "REVIEW_INVALID_STATE", Status: http.StatusConflict, Message: "reply is available only in an open discussion"}
 			}
 			if discussionInFlight(*state, discussion.ID) {
-				return &reviewFailure{Code: "REVIEW_CONFLICT", Status: http.StatusConflict, Message: "discussion ожидает ответ агента"}
+				return &reviewFailure{Code: "REVIEW_CONFLICT", Status: http.StatusConflict, Message: "discussion is waiting for an agent response"}
 			}
 			for _, message := range discussion.Messages {
 				if message.Author == "human" && message.FeedbackID == "" {
-					return &reviewFailure{Code: "REVIEW_CONFLICT", Status: http.StatusConflict, Message: "сначала отправьте или измените существующее unsent сообщение"}
+					return &reviewFailure{Code: "REVIEW_CONFLICT", Status: http.StatusConflict, Message: "send or edit the existing unsent message first"}
 				}
 			}
 			if err := validateHumanMessage(request.Message); err != nil {
@@ -141,13 +141,13 @@ func (service *reviewService) updateDiscussion(id string, request UpdateDiscussi
 			}
 			message := findUnsentHumanMessage(discussion, request.MessageID)
 			if message == nil {
-				return &reviewFailure{Code: "REVIEW_INVALID_STATE", Status: http.StatusConflict, Message: "редактировать можно только unsent human message"}
+				return &reviewFailure{Code: "REVIEW_INVALID_STATE", Status: http.StatusConflict, Message: "only an unsent human message can be edited"}
 			}
 			message.Body, message.EditedAt = strings.TrimSpace(request.Message), now
 		case "delete":
 			message := findUnsentHumanMessage(discussion, request.MessageID)
 			if message == nil {
-				return &reviewFailure{Code: "REVIEW_INVALID_STATE", Status: http.StatusConflict, Message: "удалить можно только unsent human message"}
+				return &reviewFailure{Code: "REVIEW_INVALID_STATE", Status: http.StatusConflict, Message: "only an unsent human message can be deleted"}
 			}
 			for index := range discussion.Messages {
 				if discussion.Messages[index].ID == message.ID {
@@ -210,7 +210,7 @@ func (service *reviewService) createFeedback(guard ReviewMutationGuard) (ReviewS
 	var created *FeedbackBatch
 	state, err := service.store.mutate(guard, func(state *ReviewState) error {
 		if state.Session == nil {
-			return &reviewFailure{Code: "REVIEW_NO_FEEDBACK", Status: http.StatusConflict, Message: "нет новых сообщений для отправки"}
+			return &reviewFailure{Code: "REVIEW_NO_FEEDBACK", Status: http.StatusConflict, Message: "there are no new messages to send"}
 		}
 		items := []FeedbackItem{}
 		for discussionIndex := range state.Session.Discussions {
@@ -235,7 +235,7 @@ func (service *reviewService) createFeedback(guard ReviewMutationGuard) (ReviewS
 			}
 		}
 		if len(items) == 0 {
-			return &reviewFailure{Code: "REVIEW_NO_FEEDBACK", Status: http.StatusConflict, Message: "нет новых сообщений для отправки"}
+			return &reviewFailure{Code: "REVIEW_NO_FEEDBACK", Status: http.StatusConflict, Message: "there are no new messages to send"}
 		}
 		feedbackID, idErr := newReviewID(service.now())
 		if idErr != nil {
@@ -314,7 +314,7 @@ func (service *reviewService) respond(response AgentFeedbackResponse) (ReviewSta
 				return invalidReviewResponse("invalid outcome or empty message")
 			}
 			if len(result.Message) > reviewMessageLimit {
-				return &reviewFailure{Code: "REVIEW_MESSAGE_TOO_LARGE", Status: http.StatusRequestEntityTooLarge, Message: "agent message превышает лимит"}
+				return &reviewFailure{Code: "REVIEW_MESSAGE_TOO_LARGE", Status: http.StatusRequestEntityTooLarge, Message: "agent message exceeds the limit"}
 			}
 			if len(result.ChangedPaths) > 256 {
 				return invalidReviewResponse("too many changedPaths")
@@ -374,7 +374,7 @@ func (service *reviewService) cleanup(request CleanupReviewRequest) (ReviewState
 			state.Session.Discussions = kept
 		case "all":
 			if !request.Confirm {
-				return &reviewFailure{Code: "REVIEW_CONFIRMATION_REQUIRED", Status: http.StatusBadRequest, Message: "full cleanup требует confirm=true"}
+				return &reviewFailure{Code: "REVIEW_CONFIRMATION_REQUIRED", Status: http.StatusBadRequest, Message: "full cleanup requires confirm=true"}
 			}
 			now := service.now()
 			id, idErr := newReviewID(now)
@@ -384,7 +384,7 @@ func (service *reviewService) cleanup(request CleanupReviewRequest) (ReviewState
 			state.Session = &ReviewSession{ID: id, CreatedAt: now, Discussions: []Discussion{}}
 			state.Feedback = []FeedbackBatch{}
 		default:
-			return &reviewFailure{Code: "REVIEW_INVALID_REQUEST", Status: http.StatusBadRequest, Message: "cleanup mode должен быть closed или all"}
+			return &reviewFailure{Code: "REVIEW_INVALID_REQUEST", Status: http.StatusBadRequest, Message: "cleanup mode must be closed or all"}
 		}
 		return nil
 	})
@@ -420,7 +420,7 @@ func (service *reviewService) captureAnchor(report *RepositoryReviewReport, targ
 			}
 		}
 		if changed == nil {
-			return nil, nil, &reviewFailure{Code: "REVIEW_NOT_FOUND", Status: http.StatusNotFound, Message: "diff target не найден"}
+			return nil, nil, &reviewFailure{Code: "REVIEW_NOT_FOUND", Status: http.StatusNotFound, Message: "diff target not found"}
 		}
 		if target.Side == "old" {
 			side = report.Comparison.Base
@@ -449,23 +449,23 @@ func validateReviewTarget(target ReviewTarget) error {
 	switch target.Type {
 	case "global":
 		if target.Path != "" || target.Start != nil || target.End != nil || target.Side != "" {
-			return &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "global target не принимает path/range/side"}
+			return &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "global target does not accept path, range, or side"}
 		}
 		return nil
 	case "file":
 		if target.Path == "" || target.Start != nil || target.End != nil || target.Side != "" {
-			return &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "file target принимает только path"}
+			return &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "file target accepts only path"}
 		}
 	case "fileRange":
 		if target.Path == "" || target.Start == nil || target.End == nil || target.Side != "" {
-			return &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "fileRange требует path и range"}
+			return &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "fileRange requires path and range"}
 		}
 	case "diff":
 		if target.Path == "" || target.Start == nil || target.End == nil || target.Side != "old" && target.Side != "new" {
-			return &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "diff требует path, one side и range"}
+			return &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "diff requires path, one side, and range"}
 		}
 	default:
-		return &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "target type должен быть diff, fileRange, file или global"}
+		return &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "target type must be diff, fileRange, file, or global"}
 	}
 	return nil
 }
@@ -480,20 +480,20 @@ func extractReviewSelection(content []byte, target ReviewTarget) (string, string
 	}
 	end, err := reviewPositionOffset(content, *target.End)
 	if err != nil || end <= start {
-		return "", "", "", &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "review range пуст или выходит за файл"}
+		return "", "", "", &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "review range is empty or outside the file"}
 	}
 	return string(content[start:end]), truncateUTF8Start(content[max(0, start-reviewContextByteSize):start], reviewContextByteSize), truncateUTF8End(content[end:min(len(content), end+reviewContextByteSize)], reviewContextByteSize), nil
 }
 
 func reviewPositionOffset(content []byte, position ReviewPosition) (int, error) {
 	if position.Line < 1 || position.Column < 1 {
-		return 0, &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "line/column должны быть 1-based"}
+		return 0, &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "line and column must be 1-based"}
 	}
 	line, offset := 1, 0
 	for line < position.Line {
 		newline := bytes.IndexByte(content[offset:], '\n')
 		if newline < 0 {
-			return 0, &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "line выходит за файл"}
+			return 0, &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "line is outside the file"}
 		}
 		offset += newline + 1
 		line++
@@ -508,7 +508,7 @@ func reviewPositionOffset(content []byte, position ReviewPosition) (int, error) 
 	}
 	runes := []rune(string(lineContent))
 	if position.Column > len(runes)+1 {
-		return 0, &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "column выходит за строку"}
+		return 0, &reviewFailure{Code: "REVIEW_INVALID_TARGET", Status: http.StatusBadRequest, Message: "column is outside the line"}
 	}
 	return offset + len([]byte(string(runes[:position.Column-1]))), nil
 }
@@ -556,7 +556,7 @@ func (service *reviewService) reanchor(discussion Discussion, report *Repository
 	}
 	g, err := openGitRepositorySource(service.options.RepositoryRoot, service.options.ChangeRenameSimilarity)
 	if err != nil {
-		return placementFromTarget(discussion.Target, "stale", "Git недоступен")
+		return placementFromTarget(discussion.Target, "stale", "Git is unavailable")
 	}
 	side := ChangeSide{Type: "working-tree"}
 	if discussion.Target.Type == "diff" && discussion.Target.Side == "old" {
@@ -566,31 +566,31 @@ func (service *reviewService) reanchor(discussion Discussion, report *Repository
 	if err != nil {
 		var failure *reviewFailure
 		if os.IsNotExist(err) || asReviewFailure(err, &failure) && failure.Code == "REVIEW_NOT_FOUND" {
-			return AnchorPlacement{Status: "deleted", Path: path, Side: discussion.Target.Side, Reason: "anchor file удалён"}
+			return AnchorPlacement{Status: "deleted", Path: path, Side: discussion.Target.Side, Reason: "anchor file was deleted"}
 		}
 		return AnchorPlacement{Status: "stale", Path: path, Side: discussion.Target.Side, Reason: err.Error()}
 	}
 	if discussion.Target.Type == "file" {
 		status, reason := "exact", ""
 		if renamed {
-			status, reason = "moved", "однозначный Git rename"
+			status, reason = "moved", "unambiguous Git rename"
 		}
 		return AnchorPlacement{Status: status, Path: path, Side: discussion.Target.Side, Reason: reason}
 	}
 	if digestBytes(content) == anchor.ContentDigest {
 		status, reason := "exact", ""
 		if renamed {
-			status, reason = "moved", "однозначный Git rename"
+			status, reason = "moved", "unambiguous Git rename"
 		}
 		placement := placementFromTarget(discussion.Target, status, reason)
 		placement.Path = path
 		return placement
 	}
 	if anchor.SelectedText == "" {
-		return AnchorPlacement{Status: "stale", Path: path, Side: discussion.Target.Side, Reason: "file content изменён"}
+		return AnchorPlacement{Status: "stale", Path: path, Side: discussion.Target.Side, Reason: "file content changed"}
 	}
 	if from, to, unique := uniqueReviewContextPair(content, anchor.ContextBefore, anchor.ContextAfter); unique && from == to {
-		return placementForOffsets(content, path, discussion.Target.Side, from, to, "deleted", "anchor fragment удалён")
+		return placementForOffsets(content, path, discussion.Target.Side, from, to, "deleted", "anchor fragment was deleted")
 	}
 	if anchor.SnapshotRef != "" && side.Type == "working-tree" {
 		snapshotPath := filepath.Join(service.store.snapshotsPath, anchor.SnapshotRef)
@@ -598,7 +598,7 @@ func (service *reviewService) reanchor(discussion Discussion, report *Repository
 		if hunks, mapErr := gitReviewLineHunks(g.root, snapshotPath, currentPath); mapErr == nil {
 			if placement, mapped := placementFromGitLineHunks(content, discussion.Target, path, hunks); mapped {
 				if renamed {
-					placement.Reason = "однозначный Git rename/line mapping"
+					placement.Reason = "unambiguous Git rename and line mapping"
 				}
 				return placement
 			}
@@ -614,16 +614,16 @@ func (service *reviewService) reanchor(discussion Discussion, report *Repository
 			}
 		}
 		if len(window) == 1 {
-			return placementForOffsets(content, path, discussion.Target.Side, window[0], window[0]+len(anchor.SelectedText), "moved", "exact text в окне ±20 строк")
+			return placementForOffsets(content, path, discussion.Target.Side, window[0], window[0]+len(anchor.SelectedText), "moved", "exact text within a ±20-line window")
 		}
 	}
 	if len(matches) == 1 {
-		return placementForOffsets(content, path, discussion.Target.Side, matches[0], matches[0]+len(anchor.SelectedText), "moved", "единственный exact text")
+		return placementForOffsets(content, path, discussion.Target.Side, matches[0], matches[0]+len(anchor.SelectedText), "moved", "unique exact text")
 	}
 	if from, to, unique := uniqueReviewContextPair(content, anchor.ContextBefore, anchor.ContextAfter); unique {
-		return placementForOffsets(content, path, discussion.Target.Side, from, to, "moved", "единственная context boundary pair")
+		return placementForOffsets(content, path, discussion.Target.Side, from, to, "moved", "unique context boundary pair")
 	}
-	return AnchorPlacement{Status: "stale", Path: path, Side: discussion.Target.Side, Reason: "anchor невозможно сопоставить однозначно"}
+	return AnchorPlacement{Status: "stale", Path: path, Side: discussion.Target.Side, Reason: "anchor cannot be matched unambiguously"}
 }
 
 func uniqueReviewContextPair(content []byte, beforeText, afterText string) (int, int, bool) {
@@ -670,13 +670,13 @@ func placementFromGitLineHunks(content []byte, target ReviewTarget, path string,
 			return AnchorPlacement{}, false
 		}
 		if hunk.newCount == 0 {
-			return AnchorPlacement{Status: "deleted", Path: path, Side: target.Side, Reason: "Git line mapping определил удалённый fragment"}, true
+			return AnchorPlacement{Status: "deleted", Path: path, Side: target.Side, Reason: "Git line mapping identified a deleted fragment"}, true
 		}
 		mappedStart := hunk.newStart + min(startLine-hunk.oldStart, hunk.newCount-1)
 		mappedEnd := hunk.newStart + min(endLine-hunk.oldStart, hunk.newCount-1)
 		start := ReviewPosition{Line: mappedStart, Column: 1}
 		end := ReviewPosition{Line: mappedEnd, Column: reviewLineEndColumn(content, mappedEnd)}
-		return AnchorPlacement{Status: "moved", Path: path, Side: target.Side, Start: &start, End: &end, Reason: "однозначный Git line mapping"}, true
+		return AnchorPlacement{Status: "moved", Path: path, Side: target.Side, Start: &start, End: &end, Reason: "unambiguous Git line mapping"}, true
 	}
 	if delta == 0 {
 		return AnchorPlacement{}, false
@@ -684,7 +684,7 @@ func placementFromGitLineHunks(content []byte, target ReviewTarget, path string,
 	start, end := *target.Start, *target.End
 	start.Line += delta
 	end.Line += delta
-	return AnchorPlacement{Status: "moved", Path: path, Side: target.Side, Start: &start, End: &end, Reason: "однозначный Git line mapping"}, true
+	return AnchorPlacement{Status: "moved", Path: path, Side: target.Side, Start: &start, End: &end, Reason: "unambiguous Git line mapping"}, true
 }
 
 func reviewLineEndColumn(content []byte, line int) int {
@@ -743,10 +743,10 @@ func originalStartLine(target ReviewTarget) int {
 func validateHumanMessage(message string) error {
 	message = strings.TrimSpace(message)
 	if message == "" {
-		return &reviewFailure{Code: "REVIEW_INVALID_REQUEST", Status: http.StatusBadRequest, Message: "message не может быть пустым"}
+		return &reviewFailure{Code: "REVIEW_INVALID_REQUEST", Status: http.StatusBadRequest, Message: "message must not be empty"}
 	}
 	if len(message) > reviewMessageLimit {
-		return &reviewFailure{Code: "REVIEW_MESSAGE_TOO_LARGE", Status: http.StatusRequestEntityTooLarge, Message: "review message превышает лимит"}
+		return &reviewFailure{Code: "REVIEW_MESSAGE_TOO_LARGE", Status: http.StatusRequestEntityTooLarge, Message: "review message exceeds the limit"}
 	}
 	return nil
 }

@@ -139,9 +139,14 @@ await buildAll();
 
 if (process.argv.includes("--watch")) {
   let pending;
-  const watcher = watch(join(webRoot, "src"), { recursive: true });
-  for await (const _event of watcher) {
-    clearTimeout(pending);
-    pending = setTimeout(() => buildAll().catch((error) => process.stderr.write(`${error.stack || error}\n`)), 75);
-  }
+  const rebuild = async (watcher) => {
+    for await (const _event of watcher) {
+      clearTimeout(pending);
+      pending = setTimeout(() => buildAll().catch((error) => process.stderr.write(`${error.stack || error}\n`)), 75);
+    }
+  };
+  await Promise.all([
+    rebuild(watch(join(webRoot, "src"), { recursive: true })),
+    rebuild(watch(join(repositoryRoot, "internal", "site", "i18n"), { recursive: true })),
+  ]);
 }

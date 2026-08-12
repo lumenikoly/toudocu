@@ -326,7 +326,7 @@ func TestScreenValidationAndHotspots(t *testing.T) {
 		t.Fatalf("only valid hotspot should survive: %#v", model.Knowledge.Hotspots)
 	}
 	page := renderScreenMapPage(model, "screens/index.html")
-	if !strings.Contains(page, "Карта экранов не построена") || !strings.Contains(page, "Экран SC-AUTH-LOGIN уже объявлен") {
+	if !strings.Contains(page, "Screen map was not built") || !strings.Contains(page, "Screen SC-AUTH-LOGIN is already declared") {
 		t.Fatalf("blocking map diagnostics missing: %s", page)
 	}
 }
@@ -463,11 +463,11 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	}
 	for file, expected := range map[string]string{
 		"screens/index.html":        `data-screen-map`,
-		"screens/catalog.html":      `Каталог экранов`,
+		"screens/catalog.html":      `Screen catalog`,
 		"processes/index.html":      `Documented Processes`,
-		"use-cases/index.html":      `Пользовательские сценарии`,
+		"use-cases/index.html":      `Use cases`,
 		"use-cases/UC-AUTH-01.html": `data-playable-flow`,
-		"traceability.html":         `Матрица трассируемости`,
+		"traceability.html":         `Traceability matrix`,
 	} {
 		data, err := os.ReadFile(filepath.Join(output, filepath.FromSlash(file)))
 		if err != nil || !strings.Contains(string(data), expected) {
@@ -489,11 +489,11 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 	}
 	for _, expected := range []string{
 		`class="screen-catalog-filterbar"`,
-		`<span>Сценарий</span>`,
+		`<span>Use case</span>`,
 		`data-filter-reset`,
 		`class="screen-catalog-screen"`,
-		`<small>Входящие</small>`,
-		`<small>Исходящие</small>`,
+		`<small>Incoming</small>`,
+		`<small>Outgoing</small>`,
 	} {
 		if !strings.Contains(string(catalogData), expected) {
 			t.Fatalf("screen catalog missing %q", expected)
@@ -504,7 +504,7 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 		t.Fatal(err)
 	}
 	mapPage := string(mapData)
-	if !strings.Contains(mapPage, "3 вход.") || !strings.Contains(mapPage, "3 исх.") {
+	if !strings.Contains(mapPage, "3 in") || !strings.Contains(mapPage, "3 out") {
 		t.Fatalf("screen cards must expose incoming and outgoing transition counts: %s", mapData)
 	}
 	if !strings.Contains(mapPage, `data-map-labels`) {
@@ -546,12 +546,12 @@ func TestScreenPortalAndReportV1(t *testing.T) {
 		`href="#links"`,
 		`data-map-initial-usecase="UC-AUTH-01"`,
 		`data-playable-flow`,
-		`Открыть use case`,
+		`Open use case`,
 		`data-nav-folder="use-cases"`,
 		`data-nav-folder="processes"`,
 		`Use Cases`,
 		`FLOW-AUTH-LOGIN`,
-		`Расположение в коде`,
+		`Code locations`,
 	} {
 		if !strings.Contains(useCasePage, expected) {
 			t.Fatalf("use case workspace missing %q", expected)
@@ -703,7 +703,7 @@ func TestServeScreenMapExposesChangesToggleOnlyInServe(t *testing.T) {
 	}
 	model.serveRevision = "test-revision"
 	servePage := renderScreenMapPage(model, "screens/index.html")
-	if !strings.Contains(servePage, "data-map-changes") || !strings.Contains(servePage, "Показать изменения") {
+	if !strings.Contains(servePage, "data-map-changes") || !strings.Contains(servePage, "Show changes") {
 		t.Fatal("serve screen map missing changes toggle")
 	}
 }

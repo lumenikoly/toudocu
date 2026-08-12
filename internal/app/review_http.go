@@ -225,7 +225,7 @@ func (s *documentationServer) serveReviewAPI(w http.ResponseWriter, request *htt
 		writeChangesJSON(w, http.StatusOK, state)
 		return
 	}
-	writeReviewError(w, &reviewFailure{Code: "REVIEW_NOT_FOUND", Status: http.StatusNotFound, Message: "review route не найден"})
+	writeReviewError(w, &reviewFailure{Code: "REVIEW_NOT_FOUND", Status: http.StatusNotFound, Message: "review route not found"})
 }
 
 func requireReviewWritable(w http.ResponseWriter, service *reviewService) bool {
@@ -235,7 +235,7 @@ func requireReviewWritable(w http.ResponseWriter, service *reviewService) bool {
 		return false
 	}
 	if !report.FeedbackWritable {
-		writeReviewError(w, &reviewFailure{Code: "REVIEW_READ_ONLY", Status: http.StatusForbidden, Message: "review target доступен только для чтения"})
+		writeReviewError(w, &reviewFailure{Code: "REVIEW_READ_ONLY", Status: http.StatusForbidden, Message: "review target is read-only"})
 		return false
 	}
 	return true
@@ -248,22 +248,22 @@ func allowReviewMethods(w http.ResponseWriter, request *http.Request, methods ..
 		}
 	}
 	w.Header().Set("Allow", strings.Join(methods, ", "))
-	writeReviewError(w, &reviewFailure{Code: "REVIEW_METHOD_NOT_ALLOWED", Status: http.StatusMethodNotAllowed, Message: "метод не поддерживается"})
+	writeReviewError(w, &reviewFailure{Code: "REVIEW_METHOD_NOT_ALLOWED", Status: http.StatusMethodNotAllowed, Message: "method not allowed"})
 	return false
 }
 
 func requireReviewJSONAction(w http.ResponseWriter, request *http.Request, action string) bool {
 	mediaType, _, err := mime.ParseMediaType(request.Header.Get("Content-Type"))
 	if err != nil || mediaType != "application/json" {
-		writeReviewError(w, &reviewFailure{Code: "REVIEW_INVALID_CONTENT_TYPE", Status: http.StatusUnsupportedMediaType, Message: "требуется Content-Type application/json"})
+		writeReviewError(w, &reviewFailure{Code: "REVIEW_INVALID_CONTENT_TYPE", Status: http.StatusUnsupportedMediaType, Message: "Content-Type application/json is required"})
 		return false
 	}
 	if request.Header.Get("X-Toudocu-Action") != action {
-		writeReviewError(w, &reviewFailure{Code: "REVIEW_ACTION_FORBIDDEN", Status: http.StatusForbidden, Message: "неверный X-Toudocu-Action"})
+		writeReviewError(w, &reviewFailure{Code: "REVIEW_ACTION_FORBIDDEN", Status: http.StatusForbidden, Message: "invalid X-Toudocu-Action"})
 		return false
 	}
 	if !editorOriginAllowed(request) {
-		writeReviewError(w, &reviewFailure{Code: "REVIEW_ACTION_FORBIDDEN", Status: http.StatusForbidden, Message: "mutation должна быть same-origin"})
+		writeReviewError(w, &reviewFailure{Code: "REVIEW_ACTION_FORBIDDEN", Status: http.StatusForbidden, Message: "mutation must be same-origin"})
 		return false
 	}
 	return true
@@ -283,7 +283,7 @@ func decodeReviewJSON(w http.ResponseWriter, request *http.Request, target any) 
 		return false
 	}
 	if err := decoder.Decode(&struct{}{}); err != io.EOF {
-		writeReviewError(w, &reviewFailure{Code: "REVIEW_INVALID_REQUEST", Status: http.StatusBadRequest, Message: "request body должен содержать один JSON object"})
+		writeReviewError(w, &reviewFailure{Code: "REVIEW_INVALID_REQUEST", Status: http.StatusBadRequest, Message: "request body must contain one JSON object"})
 		return false
 	}
 	return true
@@ -315,7 +315,7 @@ func reviewQueryLimit(raw string) (int, error) {
 	}
 	value, err := strconv.Atoi(raw)
 	if err != nil || value < 1 || value > 200 {
-		return 0, &reviewFailure{Code: "REVIEW_INVALID_REQUEST", Status: http.StatusBadRequest, Message: "limit должен быть от 1 до 200"}
+		return 0, &reviewFailure{Code: "REVIEW_INVALID_REQUEST", Status: http.StatusBadRequest, Message: "limit must be between 1 and 200"}
 	}
 	return value, nil
 }

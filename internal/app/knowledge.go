@@ -162,11 +162,11 @@ func taskType(value string) (name string, valid bool) {
 
 func workSectionContentRequired(model *Model, document *Document, item parsedWorkItem, section workSubsection, found bool, label string) {
 	if !found {
-		addKnowledgeIssue(model, document, "error", "missing-work-section", fmt.Sprintf("Задача %s не содержит раздел «%s».", item.Heading.Title, label), item.Heading.Line+1)
+		addKnowledgeIssue(model, document, "error", "missing-work-section", fmt.Sprintf("Task %s has no %s section.", item.Heading.Title, label), item.Heading.Line+1)
 		return
 	}
 	if strings.TrimSpace(section.Text) == "" {
-		addKnowledgeIssue(model, document, "error", "empty-work-section", fmt.Sprintf("Раздел «%s» задачи %s не может быть пустым.", label, item.Heading.Title), section.Heading.Line+1)
+		addKnowledgeIssue(model, document, "error", "empty-work-section", fmt.Sprintf("Section %s in task %s must not be empty.", label, item.Heading.Title), section.Heading.Line+1)
 	}
 }
 
@@ -241,7 +241,7 @@ func parseCriteriaAndVerification(model *Model, document *Document, item parsedW
 		return []Task{}, []CriterionVerification{}, []VerificationCheck{}
 	}
 	if required && len(criteriaSection.Tasks) == 0 {
-		addKnowledgeIssue(model, document, "error", "missing-acceptance-criterion", "Задача должна содержать хотя бы один критерий приёмки.", criteriaSection.Heading.Line+1)
+		addKnowledgeIssue(model, document, "error", "missing-acceptance-criterion", "The task must contain at least one acceptance criterion.", criteriaSection.Heading.Line+1)
 	}
 	type criterionData struct {
 		task Task
@@ -252,12 +252,12 @@ func parseCriteriaAndVerification(model *Model, document *Document, item parsedW
 	for _, task := range criteriaSection.Tasks {
 		ids := criterionIDRE.FindAllString(strings.ToUpper(task.Text), -1)
 		if len(ids) != 1 || !strings.HasPrefix(strings.ToUpper(strings.TrimSpace(task.Text)), ids[0]) {
-			addKnowledgeIssue(model, document, "error", "invalid-acceptance-criterion-id", "Каждый критерий приёмки должен начинаться с уникального идентификатора AC-*.", task.Line)
+			addKnowledgeIssue(model, document, "error", "invalid-acceptance-criterion-id", "Every acceptance criterion must start with a unique AC-* identifier.", task.Line)
 			continue
 		}
 		id := ids[0]
 		if _, exists := byID[id]; exists {
-			addKnowledgeIssue(model, document, "error", "duplicate-acceptance-criterion-id", "Идентификатор критерия "+id+" повторяется внутри задачи.", task.Line)
+			addKnowledgeIssue(model, document, "error", "duplicate-acceptance-criterion-id", "Criterion identifier "+id+" is duplicated within the task.", task.Line)
 			continue
 		}
 		data := criterionData{task: task, id: id}
@@ -279,13 +279,13 @@ func parseCriteriaAndVerification(model *Model, document *Document, item parsedW
 				continue
 			}
 			if len(targets) > 1 {
-				addKnowledgeIssue(model, document, "error", "ambiguous-verification-target", "Одна запись проверки должна ссылаться ровно на один target AC-*, ALL, DOCS или QUALITY.", lineIndex+1)
+				addKnowledgeIssue(model, document, "error", "ambiguous-verification-target", "A verification entry must reference exactly one AC-*, ALL, DOCS, or QUALITY target.", lineIndex+1)
 				continue
 			}
 			target := targets[0]
 			if strings.HasPrefix(target, "AC-") {
 				if _, exists := byID[target]; !exists {
-					addKnowledgeIssue(model, document, "error", "unknown-criterion-verification", "Проверка ссылается на неизвестный критерий "+target+".", lineIndex+1)
+					addKnowledgeIssue(model, document, "error", "unknown-criterion-verification", "Verification references unknown criterion "+target+".", lineIndex+1)
 					continue
 				}
 			}
@@ -293,7 +293,7 @@ func parseCriteriaAndVerification(model *Model, document *Document, item parsedW
 				if transitionIDs, reference, trace := traceabilityForVerificationLine(line, target); trace {
 					transitionsByID[target] = append(transitionsByID[target], transitionIDs...)
 					if reference == "" {
-						addKnowledgeIssue(model, document, "error", "empty-traceability-verification", "Для связи "+target+" с переходом не указана проверка.", lineIndex+1)
+						addKnowledgeIssue(model, document, "error", "empty-traceability-verification", "No verification is defined for the relationship between "+target+" and the transition.", lineIndex+1)
 					} else {
 						referencesByID[target] = append(referencesByID[target], reference)
 					}
@@ -302,7 +302,7 @@ func parseCriteriaAndVerification(model *Model, document *Document, item parsedW
 			}
 			commands := commandsForVerificationLine(line, target)
 			if len(commands) == 0 {
-				addKnowledgeIssue(model, document, "error", "empty-criterion-verification", "Для target "+target+" не указана команда проверки.", lineIndex+1)
+				addKnowledgeIssue(model, document, "error", "empty-criterion-verification", "No verification command is defined for target "+target+".", lineIndex+1)
 				continue
 			}
 			if seenTargets[target] {
@@ -310,7 +310,7 @@ func parseCriteriaAndVerification(model *Model, document *Document, item parsedW
 				if strings.HasPrefix(target, "AC-") {
 					code = "duplicate-criterion-verification"
 				}
-				addKnowledgeIssue(model, document, "error", code, "Для target "+target+" указано несколько записей проверки.", lineIndex+1)
+				addKnowledgeIssue(model, document, "error", code, "Multiple verification entries are defined for target "+target+".", lineIndex+1)
 			}
 			seenTargets[target] = true
 			checks = append(checks, VerificationCheck{Target: target, Commands: commands, Line: lineIndex + 1})
@@ -326,7 +326,7 @@ func parseCriteriaAndVerification(model *Model, document *Document, item parsedW
 		tasks = append(tasks, criterion.task)
 		commands := append([]string{}, uniqueStrings(commandsByID[criterion.id])...)
 		if required && len(commands) == 0 {
-			addKnowledgeIssue(model, document, "error", "missing-criterion-verification", "Для критерия "+criterion.id+" отсутствует команда в разделе «Проверка».", criterion.task.Line)
+			addKnowledgeIssue(model, document, "error", "missing-criterion-verification", "Criterion "+criterion.id+" has no command in the Verification section.", criterion.task.Line)
 		}
 		text := strings.TrimSpace(criterionIDRE.ReplaceAllString(criterion.task.Text, ""))
 		matrix = append(matrix, CriterionVerification{
@@ -349,18 +349,18 @@ func validateScopePaths(model *Model, document *Document, item parsedWorkItem, t
 			continue
 		}
 		if filepath.IsAbs(filepath.FromSlash(value)) {
-			addKnowledgeIssue(model, document, "error", "unsafe-scope-path", "Путь scope должен быть относительным корню репозитория: "+value+".", scope.Heading.Line+1)
+			addKnowledgeIssue(model, document, "error", "unsafe-scope-path", "Scope path must be relative to the repository root: "+value+".", scope.Heading.Line+1)
 			continue
 		}
 		absolute := filepath.Clean(filepath.Join(model.RepositoryRoot, filepath.FromSlash(value)))
 		if !ensureInside(model.RepositoryRoot, absolute) {
-			addKnowledgeIssue(model, document, "error", "unsafe-scope-path", "Путь scope выходит за пределы repository-root: "+value+".", scope.Heading.Line+1)
+			addKnowledgeIssue(model, document, "error", "unsafe-scope-path", "Scope path escapes the repository root: "+value+".", scope.Heading.Line+1)
 			continue
 		}
 		resolvedRoot, rootErr := resolvePathForSafety(model.RepositoryRoot)
 		resolvedPath, pathErr := resolvePathForSafety(absolute)
 		if rootErr != nil || pathErr != nil || !ensureInside(resolvedRoot, resolvedPath) {
-			addKnowledgeIssue(model, document, "error", "unsafe-scope-path", "Путь scope выходит за пределы repository-root через символическую ссылку: "+value+".", scope.Heading.Line+1)
+			addKnowledgeIssue(model, document, "error", "unsafe-scope-path", "Scope path escapes the repository root through a symbolic link: "+value+".", scope.Heading.Line+1)
 			continue
 		}
 		if strings.ContainsAny(value, "*?[") {
@@ -370,7 +370,7 @@ func validateScopePaths(model *Model, document *Document, item parsedWorkItem, t
 					result = append(result, value)
 					continue
 				}
-				addKnowledgeIssue(model, document, "error", "missing-scope-path", "Путь scope не существует: "+value+".", scope.Heading.Line+1)
+				addKnowledgeIssue(model, document, "error", "missing-scope-path", "Scope path does not exist: "+value+".", scope.Heading.Line+1)
 				continue
 			}
 			unsafe := false
@@ -382,7 +382,7 @@ func validateScopePaths(model *Model, document *Document, item parsedWorkItem, t
 				}
 			}
 			if unsafe {
-				addKnowledgeIssue(model, document, "error", "unsafe-scope-path", "Совпадение scope выходит за пределы repository-root: "+value+".", scope.Heading.Line+1)
+				addKnowledgeIssue(model, document, "error", "unsafe-scope-path", "Scope match escapes the repository root: "+value+".", scope.Heading.Line+1)
 				continue
 			}
 		} else if _, err := os.Stat(absolute); err != nil {
@@ -391,13 +391,13 @@ func validateScopePaths(model *Model, document *Document, item parsedWorkItem, t
 				continue
 			}
 			if os.IsNotExist(err) && strings.HasSuffix(value, "/") {
-				addKnowledgeIssue(model, document, "error", "missing-scope-path", "Новый отсутствующий scope-путь должен быть файлом, а не каталогом: "+value+".", scope.Heading.Line+1)
+				addKnowledgeIssue(model, document, "error", "missing-scope-path", "A new missing scope path must be a file, not a directory: "+value+".", scope.Heading.Line+1)
 				continue
 			}
 			parent := filepath.Dir(absolute)
 			info, parentErr := os.Stat(parent)
 			if !os.IsNotExist(err) || parentErr != nil || !info.IsDir() {
-				addKnowledgeIssue(model, document, "error", "missing-scope-path", "Родительский каталог нового файла scope не существует: "+value+".", scope.Heading.Line+1)
+				addKnowledgeIssue(model, document, "error", "missing-scope-path", "The parent directory of the new scope file does not exist: "+value+".", scope.Heading.Line+1)
 				continue
 			}
 		}
@@ -469,17 +469,17 @@ func validateRequiredBugMetadata(model *Model, document *Document, item parsedWo
 		key   string
 		label string
 	}{
-		{"severity", "Серьёзность"},
-		{"priority", "Приоритет"},
-		{"reproducibility", "Воспроизводимость"},
-		{"regression", "Регрессия"},
-		{"module", "Модуль"},
-		{"useCase", "Сценарий"},
-		{"updated", "Последнее обновление"},
+		{"severity", "Severity"},
+		{"priority", "Priority"},
+		{"reproducibility", "Reproducibility"},
+		{"regression", "Regression"},
+		{"module", "Module"},
+		{"useCase", "Use case"},
+		{"updated", "Updated"},
 	}
 	for _, field := range fields {
 		if strings.TrimSpace(item.Metadata[field.key]) == "" {
-			addKnowledgeIssue(model, document, "error", "missing-bug-field", "Для бага требуется поле «"+field.label+"».", item.Heading.Line+1)
+			addKnowledgeIssue(model, document, "error", "missing-bug-field", "A bug requires the "+field.label+" field.", item.Heading.Line+1)
 		}
 	}
 
@@ -489,7 +489,7 @@ func validateRequiredBugMetadata(model *Model, document *Document, item parsedWo
 		"средняя": "medium", "medium": "medium",
 		"низкая": "low", "low": "low",
 	}); item.Metadata["severity"] != "" && !ok {
-		addKnowledgeIssue(model, document, "error", "invalid-bug-severity", "Серьёзность бага должна быть Критическая, Высокая, Средняя или Низкая.", item.Heading.Line+1)
+		addKnowledgeIssue(model, document, "error", "invalid-bug-severity", "Bug severity must be Critical, High, Medium, or Low.", item.Heading.Line+1)
 	}
 	if _, ok := normalizedEnum(item.Metadata["priority"], map[string]string{
 		"срочный": "urgent", "urgent": "urgent",
@@ -497,7 +497,7 @@ func validateRequiredBugMetadata(model *Model, document *Document, item parsedWo
 		"обычный": "normal", "normal": "normal",
 		"низкий": "low", "low": "low",
 	}); item.Metadata["priority"] != "" && !ok {
-		addKnowledgeIssue(model, document, "error", "invalid-bug-priority", "Приоритет бага должен быть Срочный, Высокий, Обычный или Низкий.", item.Heading.Line+1)
+		addKnowledgeIssue(model, document, "error", "invalid-bug-priority", "Bug priority must be Urgent, High, Normal, or Low.", item.Heading.Line+1)
 	}
 	if _, ok := normalizedEnum(item.Metadata["reproducibility"], map[string]string{
 		"всегда": "always", "always": "always",
@@ -507,18 +507,18 @@ func validateRequiredBugMetadata(model *Model, document *Document, item parsedWo
 		"не воспроизводится": "not-reproduced", "not reproduced": "not-reproduced",
 		"неизвестно": "unknown", "unknown": "unknown",
 	}); item.Metadata["reproducibility"] != "" && !ok {
-		addKnowledgeIssue(model, document, "error", "invalid-bug-reproducibility", "Указано недопустимое значение воспроизводимости бага.", item.Heading.Line+1)
+		addKnowledgeIssue(model, document, "error", "invalid-bug-reproducibility", "Invalid bug reproducibility value.", item.Heading.Line+1)
 	}
 	regression, regressionValid := normalizedEnum(item.Metadata["regression"], map[string]string{
 		"да": "yes", "yes": "yes", "true": "yes",
 		"нет": "no", "no": "no", "false": "no",
 	})
 	if item.Metadata["regression"] != "" && !regressionValid {
-		addKnowledgeIssue(model, document, "error", "invalid-bug-regression", "Поле «Регрессия» должно иметь значение Да или Нет.", item.Heading.Line+1)
+		addKnowledgeIssue(model, document, "error", "invalid-bug-regression", "The Regression field must be Yes or No.", item.Heading.Line+1)
 	}
 	if item.Metadata["updated"] != "" {
 		if _, ok := parseDate(item.Metadata["updated"]); !ok {
-			addKnowledgeIssue(model, document, "error", "invalid-bug-updated-date", "Поле «Последнее обновление» должно содержать дату YYYY-MM-DD.", item.Heading.Line+1)
+			addKnowledgeIssue(model, document, "error", "invalid-bug-updated-date", "The Updated field must contain a YYYY-MM-DD date.", item.Heading.Line+1)
 		}
 	}
 	if regression == "yes" {
@@ -529,7 +529,7 @@ func validateRequiredBugMetadata(model *Model, document *Document, item parsedWo
 		body := strings.ToLower(strings.Join(bodyParts, "\n"))
 		versionOrPeriod := regexp.MustCompile(`(?m)^\s*[-*+]\s*(?:версия|version|период|period)\s*[:：]\s*\S+`).MatchString(body)
 		if !versionOrPeriod {
-			addKnowledgeIssue(model, document, "error", "missing-regression-version", "Для регрессии требуется версия или период, где наблюдался дефект.", item.Heading.Line+1)
+			addKnowledgeIssue(model, document, "error", "missing-regression-version", "A regression requires the version or period in which the defect was observed.", item.Heading.Line+1)
 		}
 	}
 }
@@ -563,18 +563,18 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 	match := workItemHeadingRE.FindStringSubmatch(item.Heading.Title)
 	statusName, statusValid := taskStatus(item.Metadata["status"])
 	if !statusValid {
-		addKnowledgeIssue(model, document, "error", "invalid-task-status", "Недопустимый статус задачи: "+fallbackDash(item.Metadata["status"])+".", item.Heading.Line+1)
+		addKnowledgeIssue(model, document, "error", "invalid-task-status", "Invalid task status: "+fallbackDash(item.Metadata["status"])+".", item.Heading.Line+1)
 	}
 	typeName, typeValid := taskType(item.Metadata["type"])
 	if !typeValid {
-		addKnowledgeIssue(model, document, "error", "invalid-task-type", "Тип задачи должен быть Feature, Bug, Maintenance, Documentation или Research.", item.Heading.Line+1)
+		addKnowledgeIssue(model, document, "error", "invalid-task-type", "Task type must be Feature, Bug, Maintenance, Documentation, or Research.", item.Heading.Line+1)
 	}
 	isBug := typeValid && typeName == "Bug"
 	if isBug && !strings.HasPrefix(match[1], "BUG-") {
-		addKnowledgeIssue(model, document, "error", "invalid-bug-id", "Идентификатор рабочего элемента типа Bug должен начинаться с BUG-.", item.Heading.Line+1)
+		addKnowledgeIssue(model, document, "error", "invalid-bug-id", "A Bug work item identifier must start with BUG-.", item.Heading.Line+1)
 	}
 	if !isBug && strings.HasPrefix(match[1], "BUG-") {
-		addKnowledgeIssue(model, document, "error", "bug-id-type-mismatch", "Идентификатор BUG-* требует поле «Тип: Bug».", item.Heading.Line+1)
+		addKnowledgeIssue(model, document, "error", "bug-id-type-mismatch", "A BUG-* identifier requires `Type: Bug`.", item.Heading.Line+1)
 	}
 	if isBug {
 		validateRequiredBugMetadata(model, document, item)
@@ -587,30 +587,30 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 	requiredSections := []requiredWorkSection{}
 	if isBug {
 		requiredSections = append(requiredSections,
-			requiredWorkSection{[]string{"симптом", "symptom"}, "Симптом"},
-			requiredWorkSection{[]string{"ожидаемое поведение", "expected behavior"}, "Ожидаемое поведение"},
-			requiredWorkSection{[]string{"фактическое поведение", "actual behavior"}, "Фактическое поведение"},
+			requiredWorkSection{[]string{"симптом", "symptom"}, "Symptom"},
+			requiredWorkSection{[]string{"ожидаемое поведение", "expected behavior"}, "Expected behavior"},
+			requiredWorkSection{[]string{"фактическое поведение", "actual behavior"}, "Actual behavior"},
 		)
 	} else {
-		requiredSections = append(requiredSections, requiredWorkSection{[]string{"результат", "result", "outcome"}, "Результат"})
+		requiredSections = append(requiredSections, requiredWorkSection{[]string{"результат", "result", "outcome"}, "Result"})
 	}
 	strictWorkflow := statusValid && statusName != "draft"
 	if strictWorkflow {
 		requiredSections = append(requiredSections,
-			requiredWorkSection{[]string{"область изменения", "scope"}, "Область изменения"},
-			requiredWorkSection{[]string{"не входит в задачу", "не входит в исправление", "out of scope"}, "Не входит в исправление"},
-			requiredWorkSection{[]string{"критерии приёмки", "критерии приемки", "acceptance criteria"}, "Критерии приёмки"},
-			requiredWorkSection{[]string{"план", "plan"}, "План"},
-			requiredWorkSection{[]string{"проверка", "verification"}, "Проверка"},
-			requiredWorkSection{[]string{"влияние на документацию", "documentation impact"}, "Влияние на документацию"},
+			requiredWorkSection{[]string{"область изменения", "scope"}, "Scope"},
+			requiredWorkSection{[]string{"не входит в задачу", "не входит в исправление", "out of scope"}, "Out of scope"},
+			requiredWorkSection{[]string{"критерии приёмки", "критерии приемки", "acceptance criteria"}, "Acceptance criteria"},
+			requiredWorkSection{[]string{"план", "plan"}, "Plan"},
+			requiredWorkSection{[]string{"проверка", "verification"}, "Verification"},
+			requiredWorkSection{[]string{"влияние на документацию", "documentation impact"}, "Documentation impact"},
 		)
 		if isBug {
 			requiredSections = append(requiredSections,
-				requiredWorkSection{[]string{"причина", "cause", "root cause"}, "Причина"},
+				requiredWorkSection{[]string{"причина", "cause", "root cause"}, "Root cause"},
 			)
 		} else if typeValid && typeName == "Feature" {
 			requiredSections = append(requiredSections,
-				requiredWorkSection{[]string{"изменение поведения", "behavior change"}, "Изменение поведения"},
+				requiredWorkSection{[]string{"изменение поведения", "behavior change"}, "Behavior change"},
 			)
 		}
 	}
@@ -624,7 +624,7 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 		behavior, found := workSection(item, "изменение поведения", "behavior change")
 		if found {
 			if nestedWorkSection(behavior, "было", "before") == "" || nestedWorkSection(behavior, "станет", "after") == "" {
-				addKnowledgeIssue(model, document, "error", "incomplete-behavior-change", "Раздел изменения поведения должен содержать непустые «Было» и «Станет».", behavior.Heading.Line+1)
+				addKnowledgeIssue(model, document, "error", "incomplete-behavior-change", "The Behavior change section must contain non-empty Before and After subsections.", behavior.Heading.Line+1)
 			}
 		}
 	}
@@ -637,16 +637,16 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 	if planSection, found := workSection(item, "план", "plan"); found {
 		for _, step := range planSection.Tasks {
 			if isBug {
-				addKnowledgeIssue(model, document, "error", "bug-plan-checkbox", "План бага должен быть нумерованным списком без чекбоксов.", step.Line)
+				addKnowledgeIssue(model, document, "error", "bug-plan-checkbox", "A bug plan must be a numbered list without checkboxes.", step.Line)
 			}
 			checklistLines[step.Line] = struct{}{}
 		}
 	}
 	for _, task := range tasksInRange(document.Tasks, item.Heading.Line+2, item.EndLine) {
 		if _, allowed := checklistLines[task.Line]; !allowed {
-			message := "Чекбоксы задачи разрешены только в разделах «Критерии приёмки» и «План»."
+			message := "Task checkboxes are allowed only in the Acceptance criteria and Plan sections."
 			if isBug {
-				message = "В документе бага чекбоксы разрешены только в разделе «Критерии приёмки»."
+				message = "In a bug document, checkboxes are allowed only in the Acceptance criteria section."
 			}
 			addKnowledgeIssue(model, document, "error", "task-checkbox-outside-criteria", message, task.Line)
 		}
@@ -656,27 +656,27 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 		steps, stepsFound := workSection(item, "шаги воспроизведения", "steps to reproduce", "reproduction steps")
 		evidence, evidenceFound := workSection(item, "доказательства", "evidence", "подтверждение", "confirmation")
 		if (!stepsFound || strings.TrimSpace(steps.Text) == "") && (!evidenceFound || strings.TrimSpace(evidence.Text) == "") {
-			addKnowledgeIssue(model, document, "error", "missing-bug-reproduction-evidence", "Баг должен содержать шаги воспроизведения либо непустые доказательства.", item.Heading.Line+1)
+			addKnowledgeIssue(model, document, "error", "missing-bug-reproduction-evidence", "A bug must contain reproduction steps or non-empty evidence.", item.Heading.Line+1)
 		}
 		if strictWorkflow && !bugHasRegressionCoverage(item, criteria) {
-			addKnowledgeIssue(model, document, "error", "missing-bug-regression-test", "Для бага требуется критерий регрессионного теста либо раздел «Регрессионный тест» с объяснением невозможности автоматизации.", item.Heading.Line+1)
+			addKnowledgeIssue(model, document, "error", "missing-bug-regression-test", "A bug requires a regression-test criterion or a Regression test section explaining why automation is not possible.", item.Heading.Line+1)
 		}
 		if statusName == "done" {
 			cause, found := workSection(item, "причина", "cause", "root cause")
 			unknown := canonicalText(cause.Text)
 			if !found || unknown == "" || unknown == "не установлена" || unknown == "unknown" || unknown == "not established" {
-				addKnowledgeIssue(model, document, "error", "missing-completed-bug-cause", "Для выполненного бага должна быть установлена первопричина.", item.Heading.Line+1)
+				addKnowledgeIssue(model, document, "error", "missing-completed-bug-cause", "A completed bug must have an established root cause.", item.Heading.Line+1)
 			}
 		}
 	}
 
 	if statusName == "blocked" {
 		blocker, found := workSection(item, "блокер", "blocker")
-		workSectionContentRequired(model, document, item, blocker, found, "Блокер")
+		workSectionContentRequired(model, document, item, blocker, found, "Blocker")
 	}
 	if statusName == "cancelled" {
 		reason, found := workSection(item, "причина отмены", "cancellation reason")
-		workSectionContentRequired(model, document, item, reason, found, "Причина отмены")
+		workSectionContentRequired(model, document, item, reason, found, "Cancellation reason")
 	}
 	if strictWorkflow {
 		declared := map[string]bool{}
@@ -693,7 +693,7 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 				if statusName == "done" {
 					code = "missing-completed-task-check"
 				}
-				addKnowledgeIssue(model, document, "error", code, "Задача должна содержать проверку "+target+".", item.Heading.Line+1)
+				addKnowledgeIssue(model, document, "error", code, "The task must contain verification for "+target+".", item.Heading.Line+1)
 			}
 		}
 	}
@@ -704,7 +704,7 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 			for _, criterion := range criteriaSection.Tasks {
 				if !criterion.Completed {
 					terminalScopeHistory = false
-					addKnowledgeIssue(model, document, "error", "incomplete-completed-task", "У выполненной задачи все критерии приёмки должны быть отмечены [x].", criterion.Line)
+					addKnowledgeIssue(model, document, "error", "incomplete-completed-task", "Every acceptance criterion in a completed task must be marked [x].", criterion.Line)
 				}
 			}
 		} else {
@@ -718,18 +718,18 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 		useCaseID = ""
 		relation, found := workSection(item, "связь с пользовательским поведением", "relationship to user behavior")
 		if !found || strings.TrimSpace(relation.Text) == "" {
-			addKnowledgeIssue(model, document, "error", "missing-bug-use-case-explanation", "Для значения «Сценарий: Не применяется» требуется раздел «Связь с пользовательским поведением».", item.Heading.Line+1)
+			addKnowledgeIssue(model, document, "error", "missing-bug-use-case-explanation", "A not-applicable Use case value requires a Relationship to user behavior section.", item.Heading.Line+1)
 		}
 	}
 	if strictWorkflow && typeValid && (typeName == "Feature" || typeName == "Bug") && useCaseID == "" {
 		if !useCaseOmitted {
-			addKnowledgeIssue(model, document, "error", "missing-task-use-case", "Для задачи типа "+typeName+" требуется связанный пользовательский сценарий.", item.Heading.Line+1)
+			addKnowledgeIssue(model, document, "error", "missing-task-use-case", "A "+typeName+" task requires a linked use case.", item.Heading.Line+1)
 		}
 	}
 	if strictWorkflow && typeValid && typeName != "Feature" && typeName != "Bug" && useCaseID == "" {
 		reason, found := workSection(item, "обоснование отсутствия сценария", "use case omission reason")
 		if !found || strings.TrimSpace(reason.Text) == "" {
-			addKnowledgeIssue(model, document, "error", "missing-use-case-omission-reason", "Техническая задача без сценария должна содержать раздел «Обоснование отсутствия сценария».", item.Heading.Line+1)
+			addKnowledgeIssue(model, document, "error", "missing-use-case-omission-reason", "A technical task without a use case must contain a Use case omission reason section.", item.Heading.Line+1)
 		}
 	}
 
@@ -772,7 +772,7 @@ func validateStatusDocument(model *Model) {
 		return
 	}
 	for _, task := range document.Tasks {
-		addKnowledgeIssue(model, document, "error", "status-requirement-checklist", "status.md не должен содержать собственный чек-лист требований; используйте ссылки на roadmap или work item.", task.Line)
+		addKnowledgeIssue(model, document, "error", "status-requirement-checklist", "status.md must not contain its own requirements checklist; link to the roadmap or a work item instead.", task.Line)
 	}
 }
 
@@ -785,12 +785,12 @@ func validateRoadmap(model *Model, documentIDs map[string]*Document) {
 	for _, task := range document.Tasks {
 		id, valid := roadmapItemID(task.Text)
 		if !valid {
-			addKnowledgeIssue(model, document, "error", "invalid-roadmap-item-id", "Каждый элемент roadmap должен содержать ровно один стабильный ID сценария, контракта или deliverable.", task.Line)
+			addKnowledgeIssue(model, document, "error", "invalid-roadmap-item-id", "Every roadmap item must contain exactly one stable use-case, contract, or deliverable ID.", task.Line)
 			continue
 		}
 		if strings.HasPrefix(id, "DLV-") || strings.HasPrefix(id, "DELIVERABLE-") {
 			if previousLine := seenDeliverables[id]; previousLine > 0 {
-				addKnowledgeIssue(model, document, "error", "duplicate-roadmap-id", fmt.Sprintf("Deliverable %s уже объявлен в строке %d.", id, previousLine), task.Line)
+				addKnowledgeIssue(model, document, "error", "duplicate-roadmap-id", fmt.Sprintf("Deliverable %s is already declared on line %d.", id, previousLine), task.Line)
 			} else {
 				seenDeliverables[id] = task.Line
 			}
@@ -798,7 +798,7 @@ func validateRoadmap(model *Model, documentIDs map[string]*Document) {
 		}
 		target := documentIDs[id]
 		if target == nil || (target.Type != "use-case" && target.Type != "contract") {
-			addKnowledgeIssue(model, document, "error", "dangling-roadmap-reference", "Roadmap ссылается на неизвестный сценарий или контракт "+id+".", task.Line)
+			addKnowledgeIssue(model, document, "error", "dangling-roadmap-reference", "The roadmap references unknown use case or contract "+id+".", task.Line)
 			continue
 		}
 	}
@@ -833,7 +833,7 @@ func detectTaskDependencyCycles(model *Model, workItems []WorkItem, workByID map
 				}
 			}
 			cycle := append(append([]string{}, stack[start:]...), item.ID)
-			addKnowledgeIssue(model, item.ownerDoc, "error", "task-dependency-cycle", "Циклическая зависимость задач: "+strings.Join(cycle, " → ")+".", item.line)
+			addKnowledgeIssue(model, item.ownerDoc, "error", "task-dependency-cycle", "Task dependency cycle: "+strings.Join(cycle, " → ")+".", item.line)
 			return
 		}
 		visiting[item.ID] = true
@@ -862,13 +862,13 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 		requiredPrefix := map[string]string{"module": "MOD-", "use-case": "UC-", "decision": "ADR-", "flow": "FLOW-", "screen": "SC-"}[document.Type]
 		stableID := document.Metadata["id"]
 		if requiredPrefix != "" && stableID == "" {
-			addKnowledgeIssue(model, document, "error", "missing-document-id", fmt.Sprintf("Для типа «%s» требуется поле «Идентификатор».", document.TypeLabel), 0)
+			addKnowledgeIssue(model, document, "error", "missing-document-id", fmt.Sprintf("Document type %s requires an Identifier field.", document.Type), 0)
 		} else if requiredPrefix != "" && !strings.HasPrefix(stableID, requiredPrefix) {
-			addKnowledgeIssue(model, document, "error", "invalid-document-id", "Идентификатор должен начинаться с "+requiredPrefix+".", 0)
+			addKnowledgeIssue(model, document, "error", "invalid-document-id", "The identifier must start with "+requiredPrefix+".", 0)
 		}
 		if stableID != "" {
 			if previous := documentIDs[stableID]; previous != nil {
-				addKnowledgeIssue(model, document, "error", "duplicate-id", fmt.Sprintf("Идентификатор %s уже используется в %s.", stableID, previous.SourcePath), 0)
+				addKnowledgeIssue(model, document, "error", "duplicate-id", fmt.Sprintf("Identifier %s is already used in %s.", stableID, previous.SourcePath), 0)
 			} else {
 				documentIDs[stableID] = document
 			}
@@ -901,7 +901,7 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 		if document.Type == "work" {
 			items := parseWorkItems(document)
 			if len(items) != 1 {
-				addKnowledgeIssue(model, document, "error", "work-item-count", fmt.Sprintf("Документ work должен содержать ровно один рабочий элемент TASK-* или BUG-*; найдено: %d.", len(items)), 0)
+				addKnowledgeIssue(model, document, "error", "work-item-count", fmt.Sprintf("A work document must contain exactly one TASK-* or BUG-* work item; found %d.", len(items)), 0)
 			}
 			for _, item := range items {
 				validated := validateWorkItem(model, document, item)
@@ -909,10 +909,10 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 				validated.Archived = archived
 				validated.ArchiveYear = archiveYear
 				if archived && !archivePathValid {
-					addKnowledgeIssue(model, document, "error", "invalid-task-archive-path", "Архивная задача должна находиться в work/archive/YYYY/*.md.", item.Heading.Line+1)
+					addKnowledgeIssue(model, document, "error", "invalid-task-archive-path", "An archived task must be stored under work/archive/YYYY/*.md.", item.Heading.Line+1)
 				}
 				if archived && validated.statusName != "done" && validated.statusName != "cancelled" {
-					addKnowledgeIssue(model, document, "error", "nonterminal-archived-task", "В архиве разрешены только задачи Done и Cancelled.", item.Heading.Line+1)
+					addKnowledgeIssue(model, document, "error", "nonterminal-archived-task", "Only Done and Cancelled tasks may be archived.", item.Heading.Line+1)
 				}
 				workItems = append(workItems, validated)
 			}
@@ -923,7 +923,7 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 	for i := range businessRules {
 		rule := &businessRules[i]
 		if previous := ruleByID[rule.ID]; previous != nil {
-			addKnowledgeIssue(model, rule.ownerDoc, "error", "duplicate-id", fmt.Sprintf("Бизнес-правило %s уже объявлено в %s.", rule.ID, previous.Document), rule.Line)
+			addKnowledgeIssue(model, rule.ownerDoc, "error", "duplicate-id", fmt.Sprintf("Business rule %s is already declared in %s.", rule.ID, previous.Document), rule.Line)
 		} else {
 			ruleByID[rule.ID] = rule
 		}
@@ -944,7 +944,7 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 	for i := range workItems {
 		item := &workItems[i]
 		if previous := workByID[item.ID]; previous != nil {
-			addKnowledgeIssue(model, item.ownerDoc, "error", "duplicate-id", fmt.Sprintf("Рабочая задача %s уже объявлена в %s.", item.ID, previous.Document), item.line)
+			addKnowledgeIssue(model, item.ownerDoc, "error", "duplicate-id", fmt.Sprintf("Work item %s is already declared in %s.", item.ID, previous.Document), item.line)
 		} else {
 			workByID[item.ID] = item
 		}
@@ -959,14 +959,14 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 		document := model.DocByPath[useCase.Document]
 		module := moduleByID[useCase.ModuleID]
 		if module == nil {
-			addKnowledgeIssue(model, document, "error", "dangling-module-reference", fmt.Sprintf("Сценарий ссылается на неизвестный модуль %s.", fallbackDash(useCase.ModuleID)), 0)
+			addKnowledgeIssue(model, document, "error", "dangling-module-reference", fmt.Sprintf("The use case references unknown module %s.", fallbackDash(useCase.ModuleID)), 0)
 		} else if useCase.ID != "" {
 			module.UseCaseIDs = append(module.UseCaseIDs, useCase.ID)
 		}
 		useCase.BusinessRuleIDs = uniqueStrings(businessRuleReferenceRE.FindAllString(document.Content, -1))
 		for _, ruleID := range useCase.BusinessRuleIDs {
 			if ruleByID[ruleID] == nil {
-				addKnowledgeIssue(model, document, "error", "dangling-rule-reference", "Сценарий ссылается на неизвестное правило "+ruleID+".", 0)
+				addKnowledgeIssue(model, document, "error", "dangling-rule-reference", "The use case references unknown rule "+ruleID+".", 0)
 			}
 		}
 		sort.SliceStable(useCase.BusinessRuleIDs, func(i, j int) bool { return naturalCompare(useCase.BusinessRuleIDs[i], useCase.BusinessRuleIDs[j]) < 0 })
@@ -992,28 +992,28 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 	for i := range workItems {
 		item := &workItems[i]
 		if item.ModuleID == "" && item.statusName != "draft" {
-			addKnowledgeIssue(model, item.ownerDoc, "error", "dangling-module-reference", fmt.Sprintf("Задача %s ссылается на неизвестный модуль %s.", item.ID, fallbackDash(item.ModuleID)), item.line)
+			addKnowledgeIssue(model, item.ownerDoc, "error", "dangling-module-reference", fmt.Sprintf("Task %s references unknown module %s.", item.ID, fallbackDash(item.ModuleID)), item.line)
 		} else if item.ModuleID != "" && moduleByID[item.ModuleID] == nil {
-			addKnowledgeIssue(model, item.ownerDoc, "error", "dangling-module-reference", fmt.Sprintf("Задача %s ссылается на неизвестный модуль %s.", item.ID, fallbackDash(item.ModuleID)), item.line)
+			addKnowledgeIssue(model, item.ownerDoc, "error", "dangling-module-reference", fmt.Sprintf("Task %s references unknown module %s.", item.ID, fallbackDash(item.ModuleID)), item.line)
 		}
 		if item.UseCaseID != "" && useCaseByID[item.UseCaseID] == nil {
-			addKnowledgeIssue(model, item.ownerDoc, "error", "dangling-use-case-reference", fmt.Sprintf("Задача %s ссылается на неизвестный сценарий %s.", item.ID, fallbackDash(item.UseCaseID)), item.line)
+			addKnowledgeIssue(model, item.ownerDoc, "error", "dangling-use-case-reference", fmt.Sprintf("Task %s references unknown use case %s.", item.ID, fallbackDash(item.UseCaseID)), item.line)
 		}
 		if item.FlowID != "" {
 			target := documentIDs[item.FlowID]
 			if target == nil || target.Type != "flow" {
-				addKnowledgeIssue(model, item.ownerDoc, "error", "dangling-flow-reference", fmt.Sprintf("Задача %s ссылается на неизвестный процесс %s.", item.ID, fallbackDash(item.FlowID)), item.line)
+				addKnowledgeIssue(model, item.ownerDoc, "error", "dangling-flow-reference", fmt.Sprintf("Task %s references unknown flow %s.", item.ID, fallbackDash(item.FlowID)), item.line)
 			}
 		}
 		for _, dependencyID := range item.DependsOn {
 			if workByID[dependencyID] == nil {
-				addKnowledgeIssue(model, item.ownerDoc, "error", "dangling-task-reference", fmt.Sprintf("Задача %s зависит от неизвестной задачи %s.", item.ID, dependencyID), item.line)
+				addKnowledgeIssue(model, item.ownerDoc, "error", "dangling-task-reference", fmt.Sprintf("Task %s depends on unknown task %s.", item.ID, dependencyID), item.line)
 			}
 		}
 		if item.statusName == "done" {
 			for _, dependencyID := range item.DependsOn {
 				if dependency := workByID[dependencyID]; dependency != nil && dependency.statusName != "done" {
-					addKnowledgeIssue(model, item.ownerDoc, "error", "incomplete-task-dependency", fmt.Sprintf("Выполненная задача %s зависит от незавершённой задачи %s.", item.ID, dependencyID), item.line)
+					addKnowledgeIssue(model, item.ownerDoc, "error", "incomplete-task-dependency", fmt.Sprintf("Completed task %s depends on incomplete task %s.", item.ID, dependencyID), item.line)
 				}
 			}
 		}

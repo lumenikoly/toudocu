@@ -329,7 +329,7 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await expect(page.locator("[data-file-list]")).toBeVisible();
     await expect(page.locator("body")).toContainText("notes.md");
     await expect(page.locator('[data-tab="source"]')).toHaveAttribute("aria-selected", "true");
-    await expect(page.locator('[data-tab="source"]')).toHaveText("Diff");
+    await expect(page.locator('[data-tab="source"]')).toHaveText("Изменения");
     await expect(page.locator('[data-tab="file"]')).toHaveText("Файл целиком");
     await expect(page.locator('[data-tab="summary"]')).toHaveCount(0);
     await expect(page).not.toHaveURL(/[?&](?:type|group)=|[?&]tab=summary/);
@@ -386,7 +386,7 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await expect(page.locator("[data-review-target-summary]")).toContainText("docs/notes.md");
     await page.locator("[data-review-composer]").getByRole("button", { name: "Отмена" }).click();
     await page.locator('[data-tab="rendered"]').click();
-    await expect(page.locator("[data-tab-panel]")).toContainText("Rendered diff недоступен");
+    await expect(page.locator("[data-tab-panel]")).toContainText("Сравнение отрисованных версий недоступно");
     await page.locator('[data-tab="source"]').click();
     await expect(page.locator("[data-source-view]")).toContainText("External edit");
     await page.locator("[data-site-theme-select]").selectOption("terminal");

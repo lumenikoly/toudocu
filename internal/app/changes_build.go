@@ -88,7 +88,7 @@ func BuildDocumentationChanges(options Options) (*ChangeSetReport, error) {
 		}
 		mergeBase, err := g.run("merge-base", branchCommit, headCommit)
 		if err != nil {
-			return nil, &changeFailure{Code: 2, IssueCode: "git-merge-base-not-found", Err: fmt.Errorf("merge-base для %q и HEAD не найден", options.ChangeBranchBase)}
+			return nil, &changeFailure{Code: 2, IssueCode: "git-merge-base-not-found", Err: fmt.Errorf("merge-base for %q and HEAD not found", options.ChangeBranchBase)}
 		}
 		baseCommit, baseRef = strings.TrimSpace(string(mergeBase)), "merge-base("+options.ChangeBranchBase+", HEAD)"
 	}
@@ -164,7 +164,7 @@ func resolveChangeConfigurationRoot(repositoryRoot string, g *gitChangeSource) (
 		return "", err
 	}
 	if !pathContains(g.root, root) || !pathContains(root, g.docsRoot) {
-		return "", fmt.Errorf("repository root должен находиться внутри Git root и содержать documentation root")
+		return "", fmt.Errorf("repository root must be inside the Git root and contain the documentation root")
 	}
 	return root, nil
 }
@@ -228,9 +228,9 @@ func buildDocumentationChange(g *gitChangeSource, base, target ChangeSide, file 
 		maxBytes = 2 * 1024 * 1024
 	}
 	if change.Binary {
-		change.Diagnostics = append(change.Diagnostics, Issue{Severity: "info", Code: "git-binary-diff-unavailable", Message: "Текстовый diff недоступен для binary-файла.", DocumentPath: file.path})
+		change.Diagnostics = append(change.Diagnostics, Issue{Severity: "info", Code: "git-binary-diff-unavailable", Message: "Text diff is unavailable for a binary file.", DocumentPath: file.path})
 	} else if len(oldContent)+len(newContent) > maxBytes {
-		change.Diagnostics = append(change.Diagnostics, Issue{Severity: "warning", Code: "change-file-too-large", Message: "Полный diff отключён лимитом размера.", DocumentPath: file.path})
+		change.Diagnostics = append(change.Diagnostics, Issue{Severity: "warning", Code: "change-file-too-large", Message: "Full diff is disabled by the size limit.", DocumentPath: file.path})
 	} else if patch, err := g.diff(base, target, file); err == nil {
 		change.SourceDiffAvailable = true
 		change.Lines = countPatchLines(string(patch))
@@ -244,20 +244,20 @@ func buildDocumentationChange(g *gitChangeSource, base, target ChangeSide, file 
 	ext := strings.ToLower(filepath.Ext(file.path))
 	if ext == ".md" && !change.Binary {
 		change.RenderedDiffAvailable = options.ChangeRenderedDiff && len(oldContent)+len(newContent) <= options.ChangeMaxRenderedFileBytes
-		change.Diagnostics = append(change.Diagnostics, markdownChangePolicyDiagnostics(oldContent, oldPath, "Старая версия")...)
-		change.Diagnostics = append(change.Diagnostics, markdownChangePolicyDiagnostics(newContent, file.path, "Новая версия")...)
+		change.Diagnostics = append(change.Diagnostics, markdownChangePolicyDiagnostics(oldContent, oldPath, "Old version")...)
+		change.Diagnostics = append(change.Diagnostics, markdownChangePolicyDiagnostics(newContent, file.path, "New version")...)
 		change.EntitiesBefore = entitiesFromMarkdown(oldContent, oldPath)
 		change.EntitiesAfter = entitiesFromMarkdown(newContent, file.path)
 		oldSemanticValid := markdownSemanticValid(oldContent)
 		newSemanticValid := markdownSemanticValid(newContent)
 		if !oldSemanticValid {
-			change.Diagnostics = append(change.Diagnostics, Issue{Severity: "warning", Code: "semantic-old-version-invalid", Message: "Старая версия Markdown не подходит для semantic diff; source diff остаётся доступен.", DocumentPath: oldPath})
+			change.Diagnostics = append(change.Diagnostics, Issue{Severity: "warning", Code: "semantic-old-version-invalid", Message: "The old Markdown version is invalid for semantic diff; source diff remains available.", DocumentPath: oldPath})
 		}
 		if !newSemanticValid {
-			change.Diagnostics = append(change.Diagnostics, Issue{Severity: "warning", Code: "semantic-new-version-invalid", Message: "Новая версия Markdown не подходит для semantic diff; source diff остаётся доступен.", DocumentPath: file.path})
+			change.Diagnostics = append(change.Diagnostics, Issue{Severity: "warning", Code: "semantic-new-version-invalid", Message: "The new Markdown version is invalid for semantic diff; source diff remains available.", DocumentPath: file.path})
 		}
 		if len(change.EntitiesBefore) > 0 && len(change.EntitiesAfter) > 0 && change.EntitiesBefore[0].ID != "" && change.EntitiesAfter[0].ID != "" && change.EntitiesBefore[0].ID != change.EntitiesAfter[0].ID {
-			change.Diagnostics = append(change.Diagnostics, Issue{Severity: "info", Code: "possible-entity-id-change", Message: "Изменён стабильный ID: сущности считаются разными, пока связь не указана явно.", DocumentPath: file.path})
+			change.Diagnostics = append(change.Diagnostics, Issue{Severity: "info", Code: "possible-entity-id-change", Message: "A stable ID changed; the entities are distinct until a relationship is declared explicitly.", DocumentPath: file.path})
 		}
 		if firstEntityType(change.EntitiesBefore, change.EntitiesAfter) == "screen" {
 			change.Screen = buildScreenDiffMetadata(oldContent, newContent, oldPath, file.path)
@@ -386,7 +386,7 @@ func renderedSectionDiff(oldContent, newContent []byte, oldPath, newPath string,
 	for _, id := range ordered {
 		olds, news := oldByID[id], newByID[id]
 		if len(olds) > 1 || len(news) > 1 {
-			diagnostics = append(diagnostics, Issue{Severity: "warning", Code: "rendered-section-match-ambiguous", Message: "Раздел с anchor " + id + " невозможно сопоставить однозначно.", DocumentPath: newPath})
+			diagnostics = append(diagnostics, Issue{Severity: "warning", Code: "rendered-section-match-ambiguous", Message: "Section with anchor " + id + " cannot be matched unambiguously.", DocumentPath: newPath})
 			continue
 		}
 		var old, newer indexedSection
@@ -458,14 +458,14 @@ func semanticMarkdownDiff(oldContent, newContent []byte, oldPath, newPath string
 		entity = before[0]
 	}
 	if len(oldContent) == 0 && len(newContent) > 0 {
-		return []SemanticChange{{Kind: "entity-added", Entity: entity, After: entity, Summary: "Добавлен " + semanticEntityName(entity) + ".", SourceAfter: &ChangeLocation{Path: newPath, Line: 1}}}
+		return []SemanticChange{{Kind: "entity-added", Entity: entity, After: entity, Summary: "Added " + semanticEntityName(entity) + ".", SourceAfter: &ChangeLocation{Path: newPath, Line: 1}}}
 	}
 	if len(newContent) == 0 && len(oldContent) > 0 {
-		return []SemanticChange{{Kind: "entity-removed", Entity: entity, Before: entity, Summary: "Удалён " + semanticEntityName(entity) + ".", SourceBefore: &ChangeLocation{Path: oldPath, Line: 1}}}
+		return []SemanticChange{{Kind: "entity-removed", Entity: entity, Before: entity, Summary: "Removed " + semanticEntityName(entity) + ".", SourceBefore: &ChangeLocation{Path: oldPath, Line: 1}}}
 	}
 	oldParsed, newParsed := analyzeMarkdown(string(oldContent)), analyzeMarkdown(string(newContent))
 	if oldParsed.Title != newParsed.Title {
-		changes = append(changes, SemanticChange{Kind: "field-changed", Entity: entity, Field: "title", Before: oldParsed.Title, After: newParsed.Title, Summary: "Изменено название сущности.", SourceBefore: &ChangeLocation{Path: oldPath, Line: 1}, SourceAfter: &ChangeLocation{Path: newPath, Line: 1}})
+		changes = append(changes, SemanticChange{Kind: "field-changed", Entity: entity, Field: "title", Before: oldParsed.Title, After: newParsed.Title, Summary: "Changed entity title.", SourceBefore: &ChangeLocation{Path: oldPath, Line: 1}, SourceAfter: &ChangeLocation{Path: newPath, Line: 1}})
 	}
 	keys := map[string]bool{}
 	for k := range oldParsed.Metadata {
@@ -517,11 +517,11 @@ func semanticMarkdownDiff(oldContent, newContent []byte, oldPath, newPath string
 		o, ook := oldSections[id]
 		n, nok := newSections[id]
 		kind := typedSectionChangeKind(entity.Type, n.Title, o.Title, "changed")
-		summary := "Изменён раздел "
+		summary := "Changed section "
 		if !ook {
-			kind, summary = typedSectionChangeKind(entity.Type, n.Title, "", "added"), "Добавлен раздел "
+			kind, summary = typedSectionChangeKind(entity.Type, n.Title, "", "added"), "Added section "
 		} else if !nok {
-			kind, summary = typedSectionChangeKind(entity.Type, "", o.Title, "removed"), "Удалён раздел "
+			kind, summary = typedSectionChangeKind(entity.Type, "", o.Title, "removed"), "Removed section "
 		} else if normalizeSemanticText(o.Markdown) == normalizeSemanticText(n.Markdown) {
 			continue
 		}
@@ -540,12 +540,12 @@ func semanticMarkdownDiff(oldContent, newContent []byte, oldPath, newPath string
 
 func semanticEntityName(entity ChangeEntity) string {
 	if entity.ID != "" {
-		return "документ " + entity.ID
+		return "document " + entity.ID
 	}
 	if entity.Title != "" {
-		return "документ «" + entity.Title + "»"
+		return "document " + entity.Title
 	}
-	return "документ"
+	return "document"
 }
 
 func semanticFieldSummary(kind, key string) string {
@@ -555,13 +555,13 @@ func semanticFieldSummary(kind, key string) string {
 	}
 	switch kind {
 	case "field-added":
-		return "Добавлено поле " + label + "."
+		return "Added field " + label + "."
 	case "field-removed":
-		return "Удалено поле " + label + "."
+		return "Removed field " + label + "."
 	case "status-changed":
-		return "Изменён статус."
+		return "Changed status."
 	default:
-		return "Изменено поле " + label + "."
+		return "Changed field " + label + "."
 	}
 }
 
@@ -666,8 +666,8 @@ func semanticStableSubjectDiff(oldParsed, newParsed markdownAnalysis, oldPath, n
 }
 
 func semanticSubjectSummary(prefix, operation, id string) string {
-	labels := map[string]string{"rule": "правило", "transition": "переход", "field": "элемент"}
-	actions := map[string]string{"added": "Добавлено", "removed": "Удалено", "changed": "Изменено"}
+	labels := map[string]string{"rule": "rule", "transition": "transition", "field": "item"}
+	actions := map[string]string{"added": "Added", "removed": "Removed", "changed": "Changed"}
 	return actions[operation] + " " + labels[prefix] + " " + id + "."
 }
 
@@ -728,7 +728,7 @@ func semanticVerificationDiff(oldParsed, newParsed markdownAnalysis, oldPath, ne
 		if newOK {
 			after = map[string]any{"completed": newer.completed, "text": newer.text}
 		}
-		change := SemanticChange{Kind: "verification-changed", Entity: entity, Subject: &ChangeEntity{ID: id, Type: "acceptance-criterion"}, Field: "acceptanceCriteria", Before: before, After: after, Summary: "Изменён критерий " + id + "."}
+		change := SemanticChange{Kind: "verification-changed", Entity: entity, Subject: &ChangeEntity{ID: id, Type: "acceptance-criterion"}, Field: "acceptanceCriteria", Before: before, After: after, Summary: "Changed criterion " + id + "."}
 		if oldOK {
 			change.SourceBefore = &ChangeLocation{Path: oldPath, Line: old.line}
 		}
@@ -906,7 +906,7 @@ func coalesceEntityRenames(report *ChangeSetReport) {
 		} else {
 			newer.SemanticChanges = []SemanticChange{}
 		}
-		newer.SemanticChanges = append([]SemanticChange{{Kind: "entity-moved", Entity: newer.EntitiesAfter[0], Before: old.Path, After: newer.Path, Summary: "Сущность " + id + " перемещена."}}, newer.SemanticChanges...)
+		newer.SemanticChanges = append([]SemanticChange{{Kind: "entity-moved", Entity: newer.EntitiesAfter[0], Before: old.Path, After: newer.Path, Summary: "Entity " + id + " moved."}}, newer.SemanticChanges...)
 		report.Changes[newIndex] = newer
 		drop[oldIndex] = true
 	}
@@ -975,9 +975,9 @@ func buildTaskImpact(report *ChangeSetReport, taskID string) *TaskImpactReport {
 		}
 		impact.Declared = append(impact.Declared, entry)
 		if !ok {
-			code, message := "declared-document-not-changed", path+" заявлен задачей, но не изменён."
+			code, message := "declared-document-not-changed", path+" is declared by the task but was not changed."
 			if !taskTargetPathExists(report, path) {
-				code, message = "declared-document-not-created", path+" заявлен как новый документ, но не создан."
+				code, message = "declared-document-not-created", path+" is declared as a new document but was not created."
 			}
 			impact.Diagnostics = append(impact.Diagnostics, Issue{Severity: "warning", Code: code, Message: message, DocumentPath: path})
 		}
@@ -992,16 +992,16 @@ func buildTaskImpact(report *ChangeSetReport, taskID string) *TaskImpactReport {
 			if entry.Created {
 				code = "undeclared-document-created"
 			}
-			impact.Diagnostics = append(impact.Diagnostics, Issue{Severity: "warning", Code: code, Message: entry.Path + " изменён, но не заявлен задачей.", DocumentPath: entry.Path})
+			impact.Diagnostics = append(impact.Diagnostics, Issue{Severity: "warning", Code: code, Message: entry.Path + " changed but is not declared by the task.", DocumentPath: entry.Path})
 		}
 		if len(scope) > 0 && !pathMatchesTaskScope(entry.Path, scope) {
-			impact.Diagnostics = append(impact.Diagnostics, Issue{Severity: "warning", Code: "documentation-change-outside-task-scope", Message: entry.Path + " находится вне task scope.", DocumentPath: entry.Path})
+			impact.Diagnostics = append(impact.Diagnostics, Issue{Severity: "warning", Code: "documentation-change-outside-task-scope", Message: entry.Path + " is outside task scope.", DocumentPath: entry.Path})
 		}
 	}
 	if len(declared) == 0 {
 		for _, change := range report.Changes {
 			if change.Classification == "permanent-documentation" {
-				impact.Diagnostics = append(impact.Diagnostics, Issue{Severity: "warning", Code: "missing-documentation-impact-entry", Message: "Задача изменяет постоянную документацию без явного documentation impact.", DocumentPath: change.Path})
+				impact.Diagnostics = append(impact.Diagnostics, Issue{Severity: "warning", Code: "missing-documentation-impact-entry", Message: "The task changes durable documentation without an explicit documentation impact entry.", DocumentPath: change.Path})
 				break
 			}
 		}

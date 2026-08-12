@@ -113,7 +113,7 @@ func screenTableColumns(model *Model, document *Document, table markdownTable, r
 		if _, exists := columns[key]; exists {
 			continue
 		}
-		addDocumentIssue(model, document, newIssue("error", "invalid-screen-table-columns", "В таблице отсутствует обязательная колонка "+key+".", document.SourcePath, 0))
+		addDocumentIssue(model, document, newIssue("error", "invalid-screen-table-columns", "The table is missing required column "+key+".", document.SourcePath, 0))
 		valid = false
 	}
 	return columns, valid
@@ -197,38 +197,38 @@ func resolveScreenPreview(model *Model, document *Document, value string, line i
 		return ""
 	}
 	if filepath.IsAbs(filepath.FromSlash(value)) || destinationHasScheme(value) || strings.ContainsAny(value, "?#") {
-		addDocumentIssue(model, document, newIssue("error", "unsafe-screen-preview", "Preview должен быть локальным относительным путём.", document.SourcePath, line))
+		addDocumentIssue(model, document, newIssue("error", "unsafe-screen-preview", "Preview must be a local relative path.", document.SourcePath, line))
 		return ""
 	}
 	absolute := filepath.Clean(filepath.Join(filepath.Dir(document.AbsolutePath), filepath.FromSlash(value)))
 	if info, statErr := os.Lstat(absolute); statErr == nil && info.Mode()&os.ModeSymlink != 0 {
-		addDocumentIssue(model, document, newIssue("error", "unsafe-screen-preview", "Preview не может быть символической ссылкой.", document.SourcePath, line))
+		addDocumentIssue(model, document, newIssue("error", "unsafe-screen-preview", "Preview must not be a symbolic link.", document.SourcePath, line))
 		return ""
 	}
 	resolved, err := resolvePathForSafety(absolute)
 	if err != nil || !ensureInside(model.RepositoryRoot, resolved) {
-		addDocumentIssue(model, document, newIssue("error", "unsafe-screen-preview", "Preview выходит за пределы repository-root.", document.SourcePath, line))
+		addDocumentIssue(model, document, newIssue("error", "unsafe-screen-preview", "Preview escapes the repository root.", document.SourcePath, line))
 		return ""
 	}
 	extension := strings.ToLower(filepath.Ext(resolved))
 	if !safePreviewExtensions[extension] {
-		addDocumentIssue(model, document, newIssue("error", "unsafe-screen-preview-format", "Недопустимый формат preview: "+fallbackDash(extension)+".", document.SourcePath, line))
+		addDocumentIssue(model, document, newIssue("error", "unsafe-screen-preview-format", "Unsupported preview format: "+fallbackDash(extension)+".", document.SourcePath, line))
 		return ""
 	}
 	info, statErr := os.Lstat(resolved)
 	if statErr != nil {
-		addDocumentIssue(model, document, newIssue("warning", "missing-screen-preview", "Файл preview не найден: "+value+".", document.SourcePath, line))
+		addDocumentIssue(model, document, newIssue("warning", "missing-screen-preview", "Preview file not found: "+value+".", document.SourcePath, line))
 		return ""
 	}
 	if !info.Mode().IsRegular() || info.Mode()&os.ModeSymlink != 0 {
-		addDocumentIssue(model, document, newIssue("error", "unsafe-screen-preview", "Preview должен быть обычным файлом, а не symlink.", document.SourcePath, line))
+		addDocumentIssue(model, document, newIssue("error", "unsafe-screen-preview", "Preview must be a regular file, not a symbolic link.", document.SourcePath, line))
 		return ""
 	}
 	output, insideDocumentation := relativePathInside(model.RootDirectory, resolved)
 	if !insideDocumentation {
 		repositoryPath, insideRepository := relativePathInside(model.RepositoryRoot, resolved)
 		if !insideRepository {
-			addDocumentIssue(model, document, newIssue("error", "unsafe-screen-preview", "Preview выходит за пределы repository-root.", document.SourcePath, line))
+			addDocumentIssue(model, document, newIssue("error", "unsafe-screen-preview", "Preview escapes the repository root.", document.SourcePath, line))
 			return ""
 		}
 		output = path.Join("_screen-assets", repositoryPath)
@@ -253,20 +253,20 @@ func parseScreenStates(model *Model, document *Document, defaultPreview string) 
 	for _, row := range table.Rows {
 		id := strings.ToUpper(tableCell(row, columns, "id"))
 		if !stateIDRE.MatchString(id) {
-			addDocumentIssue(model, document, newIssue("error", "invalid-screen-state-id", "Некорректный идентификатор состояния "+fallbackDash(id)+".", document.SourcePath, row.Line))
+			addDocumentIssue(model, document, newIssue("error", "invalid-screen-state-id", "Invalid state identifier "+fallbackDash(id)+".", document.SourcePath, row.Line))
 			continue
 		}
 		preview := resolveScreenPreview(model, document, tableCell(row, columns, "preview"), row.Line)
 		if index, exists := seen[id]; exists {
 			if id == "DEFAULT" && index == 0 {
 				if defaultPreview != "" && preview != "" && defaultPreview != preview {
-					addDocumentIssue(model, document, newIssue("error", "screen-default-preview-mismatch", "Preview экрана и состояния DEFAULT должны совпадать.", document.SourcePath, row.Line))
+					addDocumentIssue(model, document, newIssue("error", "screen-default-preview-mismatch", "The screen preview and DEFAULT state preview must match.", document.SourcePath, row.Line))
 				}
 				states[0] = ScreenState{ID: "DEFAULT", Title: tableCell(row, columns, "title"), Preview: fallbackValue(preview, defaultPreview)}
 				seen[id] = row.Line
 				continue
 			}
-			addDocumentIssue(model, document, newIssue("error", "duplicate-screen-state-id", "Состояние "+id+" объявлено повторно.", document.SourcePath, row.Line))
+			addDocumentIssue(model, document, newIssue("error", "duplicate-screen-state-id", "State "+id+" is declared more than once.", document.SourcePath, row.Line))
 			continue
 		}
 		seen[id] = row.Line
@@ -291,14 +291,14 @@ func parseErrorDefinitions(model *Model) []ErrorDefinition {
 			id := strings.ToUpper(tableCell(row, columns, "id"))
 			message := tableCell(row, columns, "message")
 			if !errorIDRE.MatchString(id) {
-				addDocumentIssue(model, document, newIssue("error", "invalid-error-id", "Некорректный код ошибки "+fallbackDash(id)+".", document.SourcePath, row.Line))
+				addDocumentIssue(model, document, newIssue("error", "invalid-error-id", "Invalid error code "+fallbackDash(id)+".", document.SourcePath, row.Line))
 				continue
 			}
 			if message == "" {
-				addDocumentIssue(model, document, newIssue("error", "missing-error-message", "Для ошибки "+id+" не указано сообщение.", document.SourcePath, row.Line))
+				addDocumentIssue(model, document, newIssue("error", "missing-error-message", "Error "+id+" has no message.", document.SourcePath, row.Line))
 			}
 			if previous, exists := seen[id]; exists {
-				addDocumentIssue(model, document, newIssue("error", "duplicate-error-id", "Ошибка "+id+" уже объявлена в "+previous.Document+".", document.SourcePath, row.Line))
+				addDocumentIssue(model, document, newIssue("error", "duplicate-error-id", "Error "+id+" is already declared in "+previous.Document+".", document.SourcePath, row.Line))
 				continue
 			}
 			definition := ErrorDefinition{ID: id, Message: message, Document: document.SourcePath, Line: row.Line}
@@ -313,19 +313,19 @@ func parseScreenDocument(model *Model, document *Document) KnowledgeScreen {
 	id := strings.TrimSpace(document.Metadata["id"])
 	kind, kindValid := normalizeScreenKind(document.Metadata["type"])
 	if !screenIDRE.MatchString(id) {
-		addDocumentIssue(model, document, newIssue("error", "invalid-screen-id", "Идентификатор экрана должен соответствовать SC-<ОБЛАСТЬ>-<НАЗВАНИЕ>.", document.SourcePath, 0))
+		addDocumentIssue(model, document, newIssue("error", "invalid-screen-id", "The screen identifier must match SC-<AREA>-<NAME>.", document.SourcePath, 0))
 	}
 	for _, key := range []string{"id", "type", "module", "status"} {
 		if strings.TrimSpace(document.Metadata[key]) == "" {
-			addDocumentIssue(model, document, newIssue("error", "missing-screen-field", "Для экрана обязательно поле «"+displayFieldNames[key]+"».", document.SourcePath, 0))
+			addDocumentIssue(model, document, newIssue("error", "missing-screen-field", "The screen requires field "+key+".", document.SourcePath, 0))
 		}
 	}
 	if !kindValid {
-		addDocumentIssue(model, document, newIssue("error", "invalid-screen-kind", "Недопустимый тип экрана.", document.SourcePath, 0))
+		addDocumentIssue(model, document, newIssue("error", "invalid-screen-kind", "Invalid screen kind.", document.SourcePath, 0))
 	}
 	allowedStatus := map[string]bool{"done": true, "in-progress": true, "planned": true, "blocked": true, "obsolete": true}
 	if !document.Status.Recognized || !allowedStatus[document.Status.Kind] {
-		addDocumentIssue(model, document, newIssue("error", "invalid-screen-status", "Недопустимый статус экрана «"+document.Metadata["status"]+"».", document.SourcePath, 0))
+		addDocumentIssue(model, document, newIssue("error", "invalid-screen-status", "Invalid screen status "+document.Metadata["status"]+".", document.SourcePath, 0))
 	}
 	preview := resolveScreenPreview(model, document, document.Metadata["preview"], 0)
 	states := parseScreenStates(model, document, preview)
@@ -333,21 +333,21 @@ func parseScreenDocument(model *Model, document *Document) KnowledgeScreen {
 	if kind == "external" {
 		lower := strings.ToLower(route)
 		if !strings.HasPrefix(lower, "https://") && !strings.HasPrefix(lower, "http://") {
-			addDocumentIssue(model, document, newIssue("error", "invalid-external-screen-route", "Внешняя страница требует маршрут HTTP(S).", document.SourcePath, 0))
+			addDocumentIssue(model, document, newIssue("error", "invalid-external-screen-route", "An external page requires an HTTP(S) route.", document.SourcePath, 0))
 		}
 	} else if destinationHasScheme(route) {
-		addDocumentIssue(model, document, newIssue("error", "invalid-screen-route", "Локальный экран не может использовать внешний URL как маршрут.", document.SourcePath, 0))
+		addDocumentIssue(model, document, newIssue("error", "invalid-screen-route", "A local screen cannot use an external URL as its route.", document.SourcePath, 0))
 	}
 	component := strings.TrimSpace(strings.Trim(document.Metadata["component"], "`"))
 	if component != "" {
 		if filepath.IsAbs(filepath.FromSlash(component)) {
-			addDocumentIssue(model, document, newIssue("error", "unsafe-screen-component", "Путь компонента должен быть относительным repository-root.", document.SourcePath, 0))
+			addDocumentIssue(model, document, newIssue("error", "unsafe-screen-component", "Component path must be relative to the repository root.", document.SourcePath, 0))
 		} else {
 			target := filepath.Clean(filepath.Join(model.RepositoryRoot, filepath.FromSlash(component)))
 			if !ensureInside(model.RepositoryRoot, target) {
-				addDocumentIssue(model, document, newIssue("error", "unsafe-screen-component", "Путь компонента выходит за пределы repository-root.", document.SourcePath, 0))
+				addDocumentIssue(model, document, newIssue("error", "unsafe-screen-component", "Component path escapes the repository root.", document.SourcePath, 0))
 			} else if _, err := os.Stat(target); err != nil {
-				addDocumentIssue(model, document, newIssue("warning", "missing-screen-component", "Путь компонента не существует: "+component+".", document.SourcePath, 0))
+				addDocumentIssue(model, document, newIssue("warning", "missing-screen-component", "Component path does not exist: "+component+".", document.SourcePath, 0))
 			}
 		}
 	}
@@ -374,7 +374,7 @@ func resolveTransitionContract(model *Model, document *Document, value string, l
 				return contract.SourcePath
 			}
 		}
-		addDocumentIssue(model, document, newIssue("error", "unknown-transition-contract", "Переход ссылается на неизвестный контракт "+plain+".", document.SourcePath, line))
+		addDocumentIssue(model, document, newIssue("error", "unknown-transition-contract", "The transition references unknown contract "+plain+".", document.SourcePath, line))
 		return ""
 	}
 	open := strings.Index(value, "](")
@@ -386,7 +386,7 @@ func resolveTransitionContract(model *Model, document *Document, value string, l
 			}
 		}
 	}
-	addDocumentIssue(model, document, newIssue("error", "unknown-transition-contract", "Контракт перехода должен быть CON-* или ссылкой на contract document.", document.SourcePath, line))
+	addDocumentIssue(model, document, newIssue("error", "unknown-transition-contract", "A transition contract must be a CON-* identifier or a link to a contract document.", document.SourcePath, line))
 	return ""
 }
 
@@ -415,17 +415,17 @@ func parseTransitionsForScreen(model *Model, document *Document, screen Knowledg
 		message := tableCell(row, columns, "message")
 		contract := resolveTransitionContract(model, document, tableCell(row, columns, "contract"), row.Line)
 		if !transitionIDRE.MatchString(id) {
-			addDocumentIssue(model, document, newIssue("error", "invalid-transition-id", "Идентификатор перехода должен соответствовать TR-<ОБЛАСТЬ>-<НОМЕР>.", document.SourcePath, row.Line))
+			addDocumentIssue(model, document, newIssue("error", "invalid-transition-id", "The transition identifier must match TR-<AREA>-<NUMBER>.", document.SourcePath, row.Line))
 		}
 		if action == "" || condition == "" || targetID == "" {
-			addDocumentIssue(model, document, newIssue("error", "incomplete-screen-transition", "Для перехода обязательны ID, действие, условие и результат.", document.SourcePath, row.Line))
+			addDocumentIssue(model, document, newIssue("error", "incomplete-screen-transition", "A transition requires ID, action, condition, and target.", document.SourcePath, row.Line))
 		}
 		if useCaseID == "" {
-			addDocumentIssue(model, document, newIssue("error", "transition-without-use-case", "Для перехода "+fallbackDash(id)+" не указан use case.", document.SourcePath, row.Line))
+			addDocumentIssue(model, document, newIssue("error", "transition-without-use-case", "Transition "+fallbackDash(id)+" has no use case.", document.SourcePath, row.Line))
 		}
 		target := screensByID[targetID]
 		if target == nil {
-			addDocumentIssue(model, document, newIssue("error", "dangling-screen-reference", "Переход ссылается на неизвестный экран "+fallbackDash(targetID)+".", document.SourcePath, row.Line))
+			addDocumentIssue(model, document, newIssue("error", "dangling-screen-reference", "The transition references unknown screen "+fallbackDash(targetID)+".", document.SourcePath, row.Line))
 		}
 		if stateID != "" {
 			targetStates := map[string]bool{}
@@ -435,14 +435,14 @@ func parseTransitionsForScreen(model *Model, document *Document, screen Knowledg
 				}
 			}
 			if !targetStates[stateID] {
-				addDocumentIssue(model, document, newIssue("error", "unknown-screen-state", "Переход ссылается на неизвестное состояние "+stateID+" целевого экрана.", document.SourcePath, row.Line))
+				addDocumentIssue(model, document, newIssue("error", "unknown-screen-state", "The transition references unknown state "+stateID+" on the target screen.", document.SourcePath, row.Line))
 			}
 		}
 		if errorID != "" {
 			if !errorIDRE.MatchString(errorID) {
-				addDocumentIssue(model, document, newIssue("error", "invalid-error-id", "Некорректный код ошибки "+errorID+".", document.SourcePath, row.Line))
+				addDocumentIssue(model, document, newIssue("error", "invalid-error-id", "Invalid error code "+errorID+".", document.SourcePath, row.Line))
 			} else if _, exists := errorsByID[errorID]; !exists {
-				addDocumentIssue(model, document, newIssue("error", "unknown-transition-error", "Ошибка "+errorID+" не объявлена в contracts.", document.SourcePath, row.Line))
+				addDocumentIssue(model, document, newIssue("error", "unknown-transition-error", "Error "+errorID+" is not declared in contracts.", document.SourcePath, row.Line))
 			} else if message == "" {
 				message = errorsByID[errorID].Message
 			}
@@ -453,10 +453,10 @@ func parseTransitionsForScreen(model *Model, document *Document, screen Knowledg
 		}
 		kind, kindValid := normalizeTransitionKind(tableCell(row, columns, "kind"), errorID != "", targetKind)
 		if !kindValid {
-			addDocumentIssue(model, document, newIssue("error", "invalid-screen-transition-kind", "Недопустимый тип перехода.", document.SourcePath, row.Line))
+			addDocumentIssue(model, document, newIssue("error", "invalid-screen-transition-kind", "Invalid transition kind.", document.SourcePath, row.Line))
 		}
 		if targetID == screen.ID && stateID == "" && errorID == "" && message == "" {
-			addDocumentIssue(model, document, newIssue("error", "unexplained-self-transition", "Переход в тот же экран требует состояния, ошибки или сообщения.", document.SourcePath, row.Line))
+			addDocumentIssue(model, document, newIssue("error", "unexplained-self-transition", "A transition to the same screen requires a state, error, or message.", document.SourcePath, row.Line))
 		}
 		result = append(result, ScreenTransition{
 			ID: id, UseCaseID: useCaseID, FromID: screen.ID, ToID: targetID, Action: action, Condition: condition,
@@ -474,7 +474,7 @@ func validateScreenParents(model *Model, screens []KnowledgeScreen, byID map[str
 		}
 		document := model.DocByPath[screen.Document]
 		if screen.ParentID == screen.ID || byID[screen.ParentID] == nil {
-			addDocumentIssue(model, document, newIssue("error", "invalid-screen-parent", "Родительский экран "+screen.ParentID+" не существует или совпадает с экраном.", screen.Document, 0))
+			addDocumentIssue(model, document, newIssue("error", "invalid-screen-parent", "Parent screen "+screen.ParentID+" does not exist or is the screen itself.", screen.Document, 0))
 		}
 	}
 	visiting, visited := map[string]bool{}, map[string]bool{}
@@ -482,7 +482,7 @@ func validateScreenParents(model *Model, screens []KnowledgeScreen, byID map[str
 	visit = func(id string, stack []string) {
 		if visiting[id] {
 			screen := byID[id]
-			addDocumentIssue(model, model.DocByPath[screen.Document], newIssue("error", "screen-parent-cycle", "Цикл sitemap: "+strings.Join(append(stack, id), " → ")+".", screen.Document, 0))
+			addDocumentIssue(model, model.DocByPath[screen.Document], newIssue("error", "screen-parent-cycle", "Sitemap cycle: "+strings.Join(append(stack, id), " → ")+".", screen.Document, 0))
 			return
 		}
 		if visited[id] || byID[id] == nil {
@@ -645,14 +645,14 @@ func buildPlayableFlows(model *Model, screensByID map[string]*KnowledgeScreen, t
 			issueCodes = append(issueCodes, code)
 		}
 		if screensByID[useCase.StartScreenID] == nil {
-			addFlowError("missing-flow-start-screen", "Для сценария не указан существующий начальный экран.")
+			addFlowError("missing-flow-start-screen", "The use case has no existing start screen.")
 		}
 		if len(useCase.TerminalScreens) == 0 {
-			addFlowError("missing-flow-terminal-screen", "Для сценария не указаны конечные экраны.")
+			addFlowError("missing-flow-terminal-screen", "The use case has no terminal screens.")
 		}
 		for _, id := range useCase.TerminalScreens {
 			if screensByID[id] == nil {
-				addFlowError("unknown-flow-terminal-screen", "Сценарий ссылается на неизвестный конечный экран "+id+".")
+				addFlowError("unknown-flow-terminal-screen", "The use case references unknown terminal screen "+id+".")
 			}
 		}
 		reachable := map[string]bool{}
@@ -664,13 +664,13 @@ func buildPlayableFlows(model *Model, screensByID map[string]*KnowledgeScreen, t
 			terminalReachable = terminalReachable || reachable[id]
 		}
 		if len(reachable) > 0 && !terminalReachable {
-			addFlowError("unreachable-flow-terminal", "Из начального экрана нельзя достичь ни одного конечного экрана.")
+			addFlowError("unreachable-flow-terminal", "No terminal screen is reachable from the start screen.")
 		}
 		for _, id := range useCase.ScreenIDs {
 			if screensByID[id] == nil {
-				addFlowError("dangling-screen-reference", "Сценарий ссылается на неизвестный экран "+id+".")
+				addFlowError("dangling-screen-reference", "The use case references unknown screen "+id+".")
 			} else if !reachable[id] {
-				addFlowError("unreachable-use-case-screen", "Экран "+id+" недостижим в сценарии.")
+				addFlowError("unreachable-use-case-screen", "Screen "+id+" is unreachable in the use case.")
 			}
 		}
 		outgoing := map[string]int{}
@@ -685,7 +685,7 @@ func buildPlayableFlows(model *Model, screensByID map[string]*KnowledgeScreen, t
 				}
 				label := canonicalText(transition.Action + " " + transition.Condition)
 				if branchLabels[transition.FromID][label] {
-					addFlowError("duplicate-flow-branch-label", "У экрана "+transition.FromID+" повторяется подпись ветки «"+transition.Action+" · "+transition.Condition+"».")
+					addFlowError("duplicate-flow-branch-label", "Screen "+transition.FromID+" repeats branch label "+transition.Action+" · "+transition.Condition+".")
 				}
 				branchLabels[transition.FromID][label] = true
 			}
@@ -696,12 +696,12 @@ func buildPlayableFlows(model *Model, screensByID map[string]*KnowledgeScreen, t
 		}
 		for id := range reachable {
 			if !terminalSet[id] && outgoing[id] == 0 {
-				addFlowError("flow-dead-end", "Неконечный экран "+id+" не имеет исходящего перехода.")
+				addFlowError("flow-dead-end", "Non-terminal screen "+id+" has no outgoing transition.")
 			}
 		}
 		cyclic := cycleNodes(flowTransitions)
 		if len(cyclic) > 0 && !useCase.AllowCycle {
-			addFlowError("forbidden-flow-cycle", "Сценарий содержит цикл без «Разрешить цикл: Да».")
+			addFlowError("forbidden-flow-cycle", "The use case contains a cycle without Allow cycle set to Yes.")
 		}
 		reversed := make([]ScreenTransition, 0, len(flowTransitions))
 		for _, transition := range flowTransitions {
@@ -710,7 +710,7 @@ func buildPlayableFlows(model *Model, screensByID map[string]*KnowledgeScreen, t
 		canReachTerminal := reachableFromMany(useCase.TerminalScreens, reversed)
 		for id := range cyclic {
 			if reachable[id] && !canReachTerminal[id] {
-				addFlowError("flow-cycle-without-exit", "Цикл с экраном "+id+" не имеет выхода к конечному экрану.")
+				addFlowError("flow-cycle-without-exit", "The cycle containing screen "+id+" has no path to a terminal screen.")
 			}
 		}
 		for _, transition := range flowTransitions {
@@ -724,7 +724,7 @@ func buildPlayableFlows(model *Model, screensByID map[string]*KnowledgeScreen, t
 				}
 			}
 			if !hasExit {
-				addFlowError("error-state-without-exit", "После ошибки "+transition.ErrorID+" на экране "+transition.ToID+" нет выхода.")
+				addFlowError("error-state-without-exit", "Error "+transition.ErrorID+" on screen "+transition.ToID+" has no exit.")
 			}
 		}
 		screenIDs := []string{}
@@ -785,7 +785,7 @@ func parseHotspots(model *Model, transitionsByID map[string]ScreenTransition, sc
 		AllowDuplicate bool    `json:"allowDuplicate"`
 	}
 	if err := json.Unmarshal(data, &raw); err != nil {
-		addStandaloneIssue(model, newIssue("error", "invalid-hotspots-json", "Некорректный hotspots.json: "+err.Error(), "screens/hotspots.json", 0))
+		addStandaloneIssue(model, newIssue("error", "invalid-hotspots-json", "Invalid hotspots.json: "+err.Error(), "screens/hotspots.json", 0))
 		return []Hotspot{}
 	}
 	result := []Hotspot{}
@@ -797,7 +797,7 @@ func parseHotspots(model *Model, transitionsByID map[string]ScreenTransition, sc
 	for _, screenID := range screenIDs {
 		items := raw[screenID]
 		if screensByID[screenID] == nil {
-			addStandaloneIssue(model, newIssue("error", "unknown-hotspot-screen", "Hotspot ссылается на неизвестный экран "+screenID+".", "screens/hotspots.json", 0))
+			addStandaloneIssue(model, newIssue("error", "unknown-hotspot-screen", "Hotspot references unknown screen "+screenID+".", "screens/hotspots.json", 0))
 			continue
 		}
 		seen := map[string]bool{}
@@ -805,15 +805,15 @@ func parseHotspots(model *Model, transitionsByID map[string]ScreenTransition, sc
 			transition := transitionsByID[item.Transition]
 			valid := true
 			if transition.ID == "" || transition.FromID != screenID {
-				addStandaloneIssue(model, newIssue("error", "unknown-hotspot-transition", "Hotspot ссылается на неизвестный или чужой переход "+item.Transition+".", "screens/hotspots.json", 0))
+				addStandaloneIssue(model, newIssue("error", "unknown-hotspot-transition", "Hotspot references unknown transition or a transition from another screen: "+item.Transition+".", "screens/hotspots.json", 0))
 				valid = false
 			}
 			if item.X < 0 || item.Y < 0 || item.Width <= 0 || item.Height <= 0 || item.X+item.Width > 100 || item.Y+item.Height > 100 {
-				addStandaloneIssue(model, newIssue("error", "invalid-hotspot-bounds", "Координаты hotspot должны оставаться внутри 0–100.", "screens/hotspots.json", 0))
+				addStandaloneIssue(model, newIssue("error", "invalid-hotspot-bounds", "Hotspot coordinates must remain within 0–100.", "screens/hotspots.json", 0))
 				valid = false
 			}
 			if seen[item.Transition] && !item.AllowDuplicate {
-				addStandaloneIssue(model, newIssue("error", "duplicate-hotspot-transition", "Hotspot перехода "+item.Transition+" повторяется без allowDuplicate.", "screens/hotspots.json", 0))
+				addStandaloneIssue(model, newIssue("error", "duplicate-hotspot-transition", "Hotspot for transition "+item.Transition+" is repeated without allowDuplicate.", "screens/hotspots.json", 0))
 				valid = false
 			}
 			seen[item.Transition] = true
@@ -837,7 +837,7 @@ func buildTraceability(model *Model, transitionsByID map[string]ScreenTransition
 		for _, transitionID := range item.TransitionIDs {
 			declared[transitionID] = true
 			if transitionsByID[transitionID].ID == "" {
-				addDocumentIssue(model, item.ownerDoc, newIssue("error", "dangling-transition-reference", "Задача "+item.ID+" ссылается на неизвестный переход "+transitionID+".", item.Document, item.line))
+				addDocumentIssue(model, item.ownerDoc, newIssue("error", "dangling-transition-reference", "Task "+item.ID+" references unknown transition "+transitionID+".", item.Document, item.line))
 			}
 		}
 		traced := map[string]bool{}
@@ -845,11 +845,11 @@ func buildTraceability(model *Model, transitionsByID map[string]ScreenTransition
 			for index, transitionID := range criterion.Transitions {
 				transition := transitionsByID[transitionID]
 				if transition.ID == "" {
-					addDocumentIssue(model, item.ownerDoc, newIssue("error", "unknown-criterion-transition", "Критерий "+criterion.CriterionID+" ссылается на неизвестный переход "+transitionID+".", item.Document, item.line))
+					addDocumentIssue(model, item.ownerDoc, newIssue("error", "unknown-criterion-transition", "Criterion "+criterion.CriterionID+" references unknown transition "+transitionID+".", item.Document, item.line))
 					continue
 				}
 				if !declared[transitionID] {
-					addDocumentIssue(model, item.ownerDoc, newIssue("error", "undeclared-task-transition", "Переход "+transitionID+" из traceability не указан в metadata задачи.", item.Document, item.line))
+					addDocumentIssue(model, item.ownerDoc, newIssue("error", "undeclared-task-transition", "Transition "+transitionID+" from traceability is not declared in task metadata.", item.Document, item.line))
 				}
 				reference := ""
 				if index < len(criterion.References) {
@@ -858,7 +858,7 @@ func buildTraceability(model *Model, transitionsByID map[string]ScreenTransition
 					reference = criterion.References[0]
 				}
 				if reference == "" {
-					addDocumentIssue(model, item.ownerDoc, newIssue("error", "missing-traceability-verification", "Для "+criterion.CriterionID+" и "+transitionID+" не указана проверка.", item.Document, item.line))
+					addDocumentIssue(model, item.ownerDoc, newIssue("error", "missing-traceability-verification", "No verification is defined for "+criterion.CriterionID+" and "+transitionID+".", item.Document, item.line))
 				}
 				traced[transitionID], covered[transitionID] = true, true
 				rows = append(rows, TraceabilityRow{
@@ -869,12 +869,12 @@ func buildTraceability(model *Model, transitionsByID map[string]ScreenTransition
 		}
 		for transitionID := range declared {
 			if transitionsByID[transitionID].ID != "" && !traced[transitionID] {
-				addDocumentIssue(model, item.ownerDoc, newIssue("error", "task-transition-without-criterion", "Переход "+transitionID+" не связан с критерием приёмки.", item.Document, item.line))
+				addDocumentIssue(model, item.ownerDoc, newIssue("error", "task-transition-without-criterion", "Transition "+transitionID+" is not linked to an acceptance criterion.", item.Document, item.line))
 			}
 		}
 		for _, screenID := range item.ScreenIDs {
 			if screensByID[screenID] == nil {
-				addDocumentIssue(model, item.ownerDoc, newIssue("error", "dangling-screen-reference", "Задача "+item.ID+" ссылается на неизвестный экран "+screenID+".", item.Document, item.line))
+				addDocumentIssue(model, item.ownerDoc, newIssue("error", "dangling-screen-reference", "Task "+item.ID+" references unknown screen "+screenID+".", item.Document, item.line))
 			} else {
 				screensByID[screenID].WorkItemIDs = append(screensByID[screenID].WorkItemIDs, item.ID)
 			}
@@ -889,7 +889,7 @@ func buildTraceability(model *Model, transitionsByID map[string]ScreenTransition
 		transition := transitionsByID[transitionID]
 		if !covered[transition.ID] {
 			document := model.DocByPath[transition.Document]
-			addDocumentIssue(model, document, newIssue("warning", "transition-without-test", "Переход "+transition.ID+" не связан с проверкой.", transition.Document, transition.Line))
+			addDocumentIssue(model, document, newIssue("warning", "transition-without-test", "Transition "+transition.ID+" is not linked to a verification.", transition.Document, transition.Line))
 		}
 	}
 	return rows
@@ -897,7 +897,7 @@ func buildTraceability(model *Model, transitionsByID map[string]ScreenTransition
 
 func buildScreenKnowledge(model *Model) {
 	if legacy := model.DocByPath["screens/map.md"]; legacy != nil {
-		addDocumentIssue(model, legacy, newIssue("error", "legacy-screen-map-not-supported", "screens/map.md больше не поддерживается; перенесите экраны и переходы в SC-*.md.", legacy.SourcePath, 0))
+		addDocumentIssue(model, legacy, newIssue("error", "legacy-screen-map-not-supported", "screens/map.md is no longer supported; move screens and transitions into SC-*.md.", legacy.SourcePath, 0))
 	}
 	if len(model.Collections["screen"]) == 0 {
 		hasReferences := false
@@ -908,7 +908,7 @@ func buildScreenKnowledge(model *Model) {
 			hasReferences = hasReferences || len(item.ScreenIDs) > 0 || len(item.TransitionIDs) > 0
 		}
 		if hasReferences {
-			addStandaloneIssue(model, newIssue("error", "missing-screen-documents", "Ссылки на экраны требуют документов screens/SC-*.md.", "", 0))
+			addStandaloneIssue(model, newIssue("error", "missing-screen-documents", "Screen references require screens/SC-*.md documents.", "", 0))
 		}
 		return
 	}
@@ -923,7 +923,7 @@ func buildScreenKnowledge(model *Model) {
 	for _, document := range model.Collections["screen"] {
 		screen := parseScreenDocument(model, document)
 		if previous := screensByID[screen.ID]; screen.ID != "" && previous != nil {
-			addDocumentIssue(model, document, newIssue("error", "duplicate-screen-id", "Экран "+screen.ID+" уже объявлен в "+previous.Document+".", document.SourcePath, 0))
+			addDocumentIssue(model, document, newIssue("error", "duplicate-screen-id", "Screen "+screen.ID+" is already declared in "+previous.Document+".", document.SourcePath, 0))
 		}
 		screens = append(screens, screen)
 		if screen.ID != "" {
@@ -931,7 +931,7 @@ func buildScreenKnowledge(model *Model) {
 		}
 		if screen.Route != "" {
 			if previous := routes[screen.Route]; previous != "" {
-				addDocumentIssue(model, document, newIssue("error", "duplicate-screen-route", "Маршрут "+screen.Route+" уже используется экраном "+previous+".", document.SourcePath, 0))
+				addDocumentIssue(model, document, newIssue("error", "duplicate-screen-route", "Route "+screen.Route+" is already used by screen "+previous+".", document.SourcePath, 0))
 			}
 			routes[screen.Route] = screen.ID
 		}
@@ -947,7 +947,7 @@ func buildScreenKnowledge(model *Model) {
 		if module := moduleByID[screen.ModuleID]; module != nil {
 			module.ScreenIDs = append(module.ScreenIDs, screen.ID)
 		} else {
-			addDocumentIssue(model, model.DocByPath[screen.Document], newIssue("error", "dangling-module-reference", "Экран "+screen.ID+" ссылается на неизвестный модуль "+screen.ModuleID+".", screen.Document, 0))
+			addDocumentIssue(model, model.DocByPath[screen.Document], newIssue("error", "dangling-module-reference", "Screen "+screen.ID+" references unknown module "+screen.ModuleID+".", screen.Document, 0))
 		}
 	}
 	validateScreenParents(model, screens, screensByID)
@@ -961,10 +961,10 @@ func buildScreenKnowledge(model *Model) {
 		document := model.DocByPath[screen.Document]
 		for _, transition := range parseTransitionsForScreen(model, document, screen, screensByID, errorsByID) {
 			if previous := transitionsByID[transition.ID]; transition.ID != "" && previous.ID != "" {
-				addDocumentIssue(model, document, newIssue("error", "duplicate-transition-id", "Переход "+transition.ID+" уже объявлен в "+previous.Document+".", document.SourcePath, transition.Line))
+				addDocumentIssue(model, document, newIssue("error", "duplicate-transition-id", "Transition "+transition.ID+" is already declared in "+previous.Document+".", document.SourcePath, transition.Line))
 			}
 			if transition.UseCaseID != "" && !useCasesByID[transition.UseCaseID] {
-				addDocumentIssue(model, document, newIssue("error", "dangling-use-case-reference", "Переход ссылается на неизвестный сценарий "+transition.UseCaseID+".", document.SourcePath, transition.Line))
+				addDocumentIssue(model, document, newIssue("error", "dangling-use-case-reference", "The transition references unknown use case "+transition.UseCaseID+".", document.SourcePath, transition.Line))
 			}
 			transitions = append(transitions, transition)
 			transitionsByID[transition.ID] = transition
@@ -993,10 +993,10 @@ func buildScreenKnowledge(model *Model) {
 	for index := range model.Knowledge.Screens {
 		screen := &model.Knowledge.Screens[index]
 		if len(screen.IncomingTransitionIDs) == 0 && len(screen.OutgoingTransitionIDs) == 0 {
-			addDocumentIssue(model, model.DocByPath[screen.Document], newIssue("warning", "isolated-screen", "Экран "+screen.ID+" изолирован от карты.", screen.Document, 0))
+			addDocumentIssue(model, model.DocByPath[screen.Document], newIssue("warning", "isolated-screen", "Screen "+screen.ID+" is isolated from the map.", screen.Document, 0))
 		}
 		if len(model.Knowledge.PlayableFlows) > 0 && !screen.Reachable {
-			addDocumentIssue(model, model.DocByPath[screen.Document], newIssue("warning", "unreachable-screen", "Экран "+screen.ID+" недостижим ни в одном playable flow.", screen.Document, 0))
+			addDocumentIssue(model, model.DocByPath[screen.Document], newIssue("warning", "unreachable-screen", "Screen "+screen.ID+" is unreachable in every playable flow.", screen.Document, 0))
 		}
 		screen.UseCaseIDs = uniqueStrings(screen.UseCaseIDs)
 		screen.WorkItemIDs = uniqueStrings(screen.WorkItemIDs)

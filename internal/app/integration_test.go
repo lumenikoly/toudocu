@@ -54,7 +54,7 @@ func TestArchivedTasksAreFilteredFromDefaultPortalSurfaces(t *testing.T) {
 		t.Fatal("dashboard focus bounds are missing")
 	}
 	focus := dashboard[focusStart:focusEnd]
-	if strings.Contains(focus, "Active portal task") || strings.Contains(focus, "Archived portal task") || !strings.Contains(focus, "Ближайший результат") {
+	if strings.Contains(focus, "Active portal task") || strings.Contains(focus, "Archived portal task") || !strings.Contains(focus, "Nearest outcome") {
 		t.Fatalf("dashboard must keep focus compact without listing task names")
 	}
 }
@@ -91,23 +91,20 @@ func TestNavigationIconsReflectDocumentStatus(t *testing.T) {
 
 	navigation := renderNavigation(model, "index.html")
 	for _, expected := range []string{
-		`class="nav-icon status-done" aria-hidden="true" title="Статус: Выполнено">☑`,
-		`class="nav-icon status-not-started" aria-hidden="true" title="Статус: Черновик">☐`,
-		`class="nav-icon status-blocked" aria-hidden="true" title="Статус: Заблокировано">☐`,
-		`class="nav-icon status-cancelled" aria-hidden="true" title="Статус: Отменено">☐`,
-		`class="nav-icon status-done" aria-hidden="true" title="Статус: Готово">▦`,
-		`class="nav-icon status-accepted" aria-hidden="true" title="Статус: Принято">◆`,
-		`class="nav-icon" aria-hidden="true" title="Статус: Новый статус">≡`,
-		`<span class="visually-hidden"> · Статус: Выполнено</span>`,
+		`class="nav-icon status-done" aria-hidden="true" title="Status: Done">☑`,
+		`class="nav-icon status-not-started" aria-hidden="true" title="Status: Not started">☐`,
+		`class="nav-icon status-blocked" aria-hidden="true" title="Status: Blocked">☐`,
+		`class="nav-icon status-cancelled" aria-hidden="true" title="Status: Cancelled">☐`,
+		`class="nav-icon status-done" aria-hidden="true" title="Status: Done">▦`,
+		`class="nav-icon status-accepted" aria-hidden="true" title="Status: Accepted">◆`,
+		`class="nav-icon" aria-hidden="true" title="Status: Not specified">≡`,
+		`<span class="visually-hidden"> · Status: Done</span>`,
+		`<span class="nav-icon" aria-hidden="true">◇</span><span>No status</span>`,
 	} {
 		if !strings.Contains(navigation, expected) {
 			t.Fatalf("status navigation missing %q: %s", expected, navigation)
 		}
 	}
-	if strings.Contains(navigation, `title="Статус: Не указан"`) {
-		t.Fatal("documents without declared status must keep a neutral icon without status annotation")
-	}
-
 	style, err := os.ReadFile(filepath.Join("..", "..", "web", "src", "styles", "portal.css"))
 	if err != nil {
 		t.Fatal(err)
@@ -544,7 +541,7 @@ func TestNotesAndIdeasAreUnvalidatedFreeFormDocuments(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(ideasHTML), "<ol>") || !strings.Contains(string(ideasHTML), "Идеи развития") {
+	if !strings.Contains(string(ideasHTML), "<ol>") || !strings.Contains(string(ideasHTML), "Ideas") {
 		t.Fatal("ideas page must render ordered plans and its document type")
 	}
 }
@@ -822,12 +819,12 @@ func TestGenerateSite(t *testing.T) {
 	}
 	htmlBytes, _ := os.ReadFile(filepath.Join(output, "modules/auth.html"))
 	html := string(htmlBytes)
-	for _, part := range []string{"Готовность документа", "../use-cases/UC-AUTH-01.html", `class="metadata-grid"`, "<dt>Статус</dt>", `class="document-toolbar task-toolbar"`, `role="group"`, `class="toolbar-button"`, `data-task-filter="open"`, `class="collapse-all-button"`, `data-collapse-label`} {
+	for _, part := range []string{"Document readiness", "../use-cases/UC-AUTH-01.html", `class="metadata-grid"`, "<dt>Status</dt>", `class="document-toolbar task-toolbar"`, `role="group"`, `class="toolbar-button"`, `data-task-filter="open"`, `class="collapse-all-button"`, `data-collapse-label`} {
 		if !strings.Contains(html, part) {
 			t.Fatalf("missing %s", part)
 		}
 	}
-	collapseAllMarkup := `<span class="collapse-all-icon" aria-hidden="true"><span class="collapse-icon collapse-icon-up">↑</span><span class="collapse-icon collapse-icon-down">↓</span></span><span data-collapse-label>Свернуть разделы</span>`
+	collapseAllMarkup := `<span class="collapse-all-icon" aria-hidden="true"><span class="collapse-icon collapse-icon-up">↑</span><span class="collapse-icon collapse-icon-down">↓</span></span><span data-collapse-label>Collapse sections</span>`
 	if !strings.Contains(html, collapseAllMarkup) {
 		t.Fatal("collapse-all icons must remain inside their positioning container")
 	}
@@ -882,7 +879,7 @@ func TestDocumentContextCopyMarkupAndAssets(t *testing.T) {
 		`data-document-context-title="Авторизация"`,
 		`data-document-context-path="docs/modules/auth.md"`,
 		`data-copy-document-context-label`,
-		`Копировать контекст`,
+		`Copy context`,
 	} {
 		if !strings.Contains(moduleHTML, part) {
 			t.Fatalf("document context markup missing %q", part)
@@ -967,22 +964,22 @@ func TestRiskPageExplainsRiskStatusesAndMitigationProgress(t *testing.T) {
 	}
 	html := renderDocumentPage(model, model.DocByPath["risks.md"])
 	for _, expected := range []string{
-		"Статус рисков",
-		"Незакрытых рисков: 2 из 3",
-		"1 открыт",
-		"1 снижается",
-		"1 риск принят",
-		"Открыт</strong> — требует решения.",
-		"Снижается</strong> — меры выполняются, риск ещё не закрыт.",
-		"Риск принят</strong> — команда осознанно принимает риск; в незакрытые не входит.",
-		"Выполнение мер снижения",
-		">Меры снижения</span>",
+		"Risk status",
+		"Open risks: 2 of 3",
+		"1 open",
+		"1 mitigating",
+		"1 accepted risk",
+		"Open</strong> — requires a decision.",
+		"Mitigating</strong> — measures are in progress; the risk is not closed yet.",
+		"Accepted risk</strong> — the team consciously accepts the risk; it is not counted as open.",
+		"Mitigation progress",
+		">Mitigation measures</span>",
 	} {
 		if !strings.Contains(html, expected) {
 			t.Fatalf("risk page missing %q: %s", expected, html)
 		}
 	}
-	if strings.Contains(html, "Готовность документа") || strings.Contains(html, ">Чек-лист</span>") {
+	if strings.Contains(html, "Document readiness") || strings.Contains(html, ">Checklist</span>") {
 		t.Fatal("risk page must not present mitigation tasks as document readiness")
 	}
 	dashboard := renderDashboard(model)
@@ -998,7 +995,7 @@ func TestPortalSimplifiedNavigationAndAccessibleHeadings(t *testing.T) {
 	if count := strings.Count(dashboard, `class="recommended-entry"`); count < 3 || count > 5 {
 		t.Fatalf("recommended entry count = %d", count)
 	}
-	for _, expected := range []string{"Текущий фокус", "Ближайший результат", "С чего начать", "Обзор проекта", "Матрица трассируемости"} {
+	for _, expected := range []string{"Current focus", "Nearest outcome", "Where to start", "Project overview", "Traceability matrix"} {
 		if !strings.Contains(dashboard+renderTraceabilityPage(model, "traceability.html"), expected) {
 			t.Fatalf("portal missing %q", expected)
 		}
@@ -1022,7 +1019,7 @@ func TestPortalSimplifiedNavigationAndAccessibleHeadings(t *testing.T) {
 			t.Fatalf("navigation still contains noisy or untranslated label %q", forbidden)
 		}
 	}
-	if !strings.Contains(renderNavigation(model, "index.html"), "Обзор архитектуры") {
+	if !strings.Contains(renderNavigation(model, "index.html"), "Architecture overview") {
 		t.Fatal("architecture overview must have a distinct navigation label")
 	}
 
@@ -1054,9 +1051,9 @@ func TestDashboardFocusFallbacksAndAlwaysVisibleOverview(t *testing.T) {
 	model := buildFixture(t, docs)
 	html := renderDashboard(model)
 	for _, expected := range []string{
-		`class="dashboard-section dashboard-focus" aria-label="Текущий фокус: UC-AUTH-01 · Пользователь входит." href="status.html"`,
+		`class="dashboard-section dashboard-focus" aria-label="Current focus: UC-AUTH-01 · Пользователь входит." href="status.html"`,
 		`class="recommended-entry" href="architecture/overview.html"`,
-		"Ближайший результат",
+		"Nearest outcome",
 	} {
 		if !strings.Contains(html, expected) {
 			t.Fatalf("dashboard focus missing %q", expected)
@@ -1074,7 +1071,7 @@ func TestDashboardFocusFallbacksAndAlwaysVisibleOverview(t *testing.T) {
 	model.Knowledge.WorkItems = append(model.Knowledge.WorkItems, WorkItem{})
 	html = renderDashboard(model)
 	for _, expected := range []string{
-		"Следующий результат не определён.",
+		"The next outcome is not defined.",
 		`href="work/index.html"`,
 	} {
 		if !strings.Contains(html, expected) {
@@ -1127,7 +1124,7 @@ func TestGenerateMermaidSiteAssetsAndMarkup(t *testing.T) {
 		t.Fatal(err)
 	}
 	html := string(htmlBytes)
-	for _, part := range []string{`data-mermaid-diagram`, `class="mermaid-source"`, `../assets/portal.js`, `id="toudocu-page"`, "Показать исходный код"} {
+	for _, part := range []string{`data-mermaid-diagram`, `class="mermaid-source"`, `../assets/portal.js`, `id="toudocu-page"`, "Show source code"} {
 		if !strings.Contains(html, part) {
 			t.Fatalf("Mermaid page missing %q: %s", part, html)
 		}
@@ -1223,16 +1220,16 @@ func TestCLIArguments(t *testing.T) {
 	if options.Title != "Проект" || options.StaleDays != 30 || len(options.Excludes) != 2 || !options.Clean || !options.Strict || options.RepositoryRef != "abc123" || !filepath.IsAbs(options.InputDirectory) {
 		t.Fatalf("options: %#v", options)
 	}
-	if _, _, _, err := ParseArguments([]string{"./docs"}); err == nil || !strings.Contains(err.Error(), "неизвестная команда") {
+	if _, _, _, err := ParseArguments([]string{"./docs"}); err == nil || !strings.Contains(err.Error(), "unknown command") {
 		t.Fatalf("implicit build must be rejected, got %v", err)
 	}
-	if _, _, _, err := ParseArguments([]string{"init"}); err == nil || !strings.Contains(err.Error(), "неизвестная команда") {
+	if _, _, _, err := ParseArguments([]string{"init"}); err == nil || !strings.Contains(err.Error(), "unknown command") {
 		t.Fatalf("init must be rejected as an unknown command, got %v", err)
 	}
-	if _, _, _, err := ParseArguments([]string{"refresh"}); err == nil || !strings.Contains(err.Error(), "неизвестная команда") {
+	if _, _, _, err := ParseArguments([]string{"refresh"}); err == nil || !strings.Contains(err.Error(), "unknown command") {
 		t.Fatalf("refresh must be rejected as an unknown command, got %v", err)
 	}
-	if _, _, _, err := ParseArguments([]string{"build", "./docs", "--force"}); err == nil || !strings.Contains(err.Error(), "неизвестный параметр") {
+	if _, _, _, err := ParseArguments([]string{"build", "./docs", "--force"}); err == nil || !strings.Contains(err.Error(), "unknown option") {
 		t.Fatalf("--force must be rejected as an unknown option, got %v", err)
 	}
 	noMap, _, _, err := ParseArguments([]string{"build", "./docs", "--no-screen-map"})
@@ -1278,7 +1275,7 @@ func TestChangeFlagsRejectedOutsideChanges(t *testing.T) {
 	for _, option := range options {
 		for _, command := range nonChangesCommands {
 			args := append(append([]string{}, command...), option...)
-			if _, _, _, err := ParseArguments(args); err == nil || !strings.Contains(err.Error(), "только для changes") {
+			if _, _, _, err := ParseArguments(args); err == nil || !strings.Contains(err.Error(), "only for changes") {
 				t.Fatalf("changes-only option %v must be rejected by %v, got %v", option, command, err)
 			}
 		}
@@ -1533,7 +1530,7 @@ func TestSpecialTaskStatusesAndSingleTaskFile(t *testing.T) {
 		messages.WriteString(issue.Message)
 		messages.WriteByte('\n')
 	}
-	if !strings.Contains(messages.String(), "Блокер") || !strings.Contains(messages.String(), "Причина отмены") {
+	if !strings.Contains(messages.String(), "Blocker") || !strings.Contains(messages.String(), "Cancellation reason") {
 		t.Fatalf("special status sections not validated: %s", messages.String())
 	}
 }
@@ -1643,7 +1640,7 @@ func TestComputedStatusIsSummarizedOnDashboardAndDetailedOnStatusPage(t *testing
 		t.Fatal(err)
 	}
 	dashboard := string(dashboardData)
-	for _, part := range []string{"Текущий фокус", "Ближайший результат", "UC-AUTH-01"} {
+	for _, part := range []string{"Current focus", "Nearest outcome", "UC-AUTH-01"} {
 		if !strings.Contains(dashboard, part) {
 			t.Fatalf("index.html missing %q", part)
 		}
@@ -1654,7 +1651,7 @@ func TestComputedStatusIsSummarizedOnDashboardAndDetailedOnStatusPage(t *testing
 		t.Fatal("dashboard focus bounds are missing")
 	}
 	focus := dashboard[focusStart:focusEnd]
-	for _, detail := range []string{"TASK-AUTH-020", "Ожидается решение ADR-014", "Вычисляемое состояние"} {
+	for _, detail := range []string{"TASK-AUTH-020", "Ожидается решение ADR-014", "Computed status"} {
 		if strings.Contains(focus, detail) {
 			t.Fatalf("dashboard focus must not list detail %q", detail)
 		}
@@ -1663,7 +1660,7 @@ func TestComputedStatusIsSummarizedOnDashboardAndDetailedOnStatusPage(t *testing
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, part := range []string{"Вычисляемое состояние", "TASK-AUTH-020", "Ожидается решение ADR-014", "UC-AUTH-01"} {
+	for _, part := range []string{"Computed status", "TASK-AUTH-020", "Ожидается решение ADR-014", "UC-AUTH-01"} {
 		if !strings.Contains(string(statusData), part) {
 			t.Fatalf("status.html missing %q", part)
 		}
@@ -1807,7 +1804,7 @@ func TestHealthCollision(t *testing.T) {
 func TestOutputSafety(t *testing.T) {
 	root, docs, _ := createFixture(t)
 	model := buildFixture(t, docs)
-	if _, err := GenerateSite(model, Options{OutputDirectory: root, Clean: true}); err == nil || !strings.Contains(err.Error(), "родительским") {
+	if _, err := GenerateSite(model, Options{OutputDirectory: root, Clean: true}); err == nil || !strings.Contains(err.Error(), "parent") {
 		t.Fatalf("expected safety error, got %v", err)
 	}
 
@@ -1830,7 +1827,7 @@ func TestOutputSafety(t *testing.T) {
 	if err := os.Symlink(unrelated, directAlias); err != nil {
 		t.Skipf("symlinks unavailable: %v", err)
 	}
-	if _, err := GenerateSite(model, Options{OutputDirectory: directAlias, Clean: true}); err == nil || !strings.Contains(err.Error(), "символической ссылки") {
+	if _, err := GenerateSite(model, Options{OutputDirectory: directAlias, Clean: true}); err == nil || !strings.Contains(err.Error(), "symbolic link") {
 		t.Fatalf("direct output symlink must be rejected, got %v", err)
 	}
 }

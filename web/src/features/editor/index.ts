@@ -1,11 +1,10 @@
-import { registerMessages, text } from "../../core/locale";
-import { editorMessages } from "../../core/messages.ru";
+import { text } from "../../core/locale";
 import { closeDialogOnEscape } from "../../components";
 import { buildFileTree, diagnosticsForEditor, editorResponseIsCurrent } from "./state";
-registerMessages(editorMessages);
 (() => {
     'use strict';
     const page: any = window.ToudocuPage;
+    const locale: any = page?.ui.locale || 'en';
     const API: any = page?.runtime === 'serve' && page.capabilities?.editor ? page.endpoints?.editor : '';
     const $: any = (selector: any, root: any = document) => root.querySelector(selector);
     const state: any = {
@@ -98,8 +97,8 @@ registerMessages(editorMessages);
         state.editor?.setTheme?.(event.detail.theme);
     });
     function renderTree() {
-        const query: any = elements.filter.value.trim().toLocaleLowerCase('ru');
-        const filtered: any = state.files.filter((file: any) => `${file.path} ${file.title || ''}`.toLocaleLowerCase('ru').includes(query));
+        const query: any = elements.filter.value.trim().toLocaleLowerCase(locale);
+        const filtered: any = state.files.filter((file: any) => `${file.path} ${file.title || ''}`.toLocaleLowerCase(locale).includes(query));
         elements.treeList.replaceChildren();
         function renderEntries(entries: any) {
             const list: any = document.createElement('ul');
@@ -445,7 +444,7 @@ registerMessages(editorMessages);
     elements.template.addEventListener('change', renderTemplateForm);
     elements.form.addEventListener('submit', createDocument);
     document.addEventListener('keydown', (event: any) => {
-        if ((event.ctrlKey || event.metaKey) && event.key.toLocaleLowerCase() === 's') {
+        if ((event.ctrlKey || event.metaKey) && event.key.toLocaleLowerCase(locale) === 's') {
             event.preventDefault();
             save();
         }

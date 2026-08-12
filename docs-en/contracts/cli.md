@@ -110,6 +110,11 @@ Every public report uses `schemaVersion: 1`.
 Empty collections serialize as `[]`; line numbers start at one. New optional
 fields may be added without changing the schema version.
 
+The human-readable technical `Issue.message` field, other JSON diagnostics,
+and CLI errors and warnings are always in English regardless of `project.locale`.
+Automation must use the stable `code`, HTTP status, or exit code; user-provided
+values embedded in a message are preserved verbatim.
+
 For every command, `task verify` records the exit code, time, duration, bounded
 stdout/stderr, and associated targets. The final status is `planned`, `passed`,
 `failed`, or `blocked`.

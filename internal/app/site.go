@@ -19,6 +19,18 @@ var fieldOrder = []string{"status", "type", "stage", "version", "author", "actor
 
 var typeIcons = map[string]string{"overview": "⌂", "status": "◐", "roadmap": "→", "risks": "!", "ideas": "✦", "notes": "✎", "changelog": "↻", "use-case": "◎", "module": "▦", "architecture": "◇", "contract": "⇄", "decision": "◆", "flow": "⇢", "screen-map": "⌗", "screen-index": "⌗", "screen": "▣", "guide": "◫", "work": "☐", "reference": "≡", "standard": "✓", "quality-index": "✓", "runbook": "↻", "runbook-index": "↻", "document": "•"}
 
+func portalUI(model *Model) frontend.UI {
+	locale := ""
+	if model != nil {
+		locale = model.SiteConfig.Project.Locale
+	}
+	return frontend.NewUI(locale)
+}
+
+func localizedTypeLabel(model *Model, documentType string) string {
+	return portalUI(model).Text("type." + documentType)
+}
+
 func navigationDocumentIcon(document *Document) (glyph, statusClass, statusLabel string) {
 	glyph = typeIcons[document.Type]
 	if glyph == "" {
@@ -38,11 +50,15 @@ func navigationDocumentIcon(document *Document) (glyph, statusClass, statusLabel
 	return glyph, statusClass, statusLabel
 }
 
-func renderStatusChip(status StatusInfo) string {
-	return fmt.Sprintf(`<span class="status-chip status-%s" title="%s"><span aria-hidden="true">%s</span><span>%s</span></span>`, escapeAttr(status.Kind), escapeAttr(status.Label), escapeHTML(status.Symbol), escapeHTML(status.Label))
+func renderStatusChip(model *Model, status StatusInfo) string {
+	label := portalUI(model).Text("status." + status.Kind)
+	if strings.HasPrefix(label, "status.") {
+		label = status.Label
+	}
+	return fmt.Sprintf(`<span class="status-chip status-%s" title="%s"><span aria-hidden="true">%s</span><span>%s</span></span>`, escapeAttr(status.Kind), escapeAttr(label), escapeHTML(status.Symbol), escapeHTML(label))
 }
 
-func renderProgress(stats TaskStats, label string) string {
+func renderProgress(ui frontend.UI, stats TaskStats, label string) string {
 	if stats.Total == 0 {
 		return ""
 	}
@@ -51,7 +67,7 @@ func renderProgress(stats TaskStats, label string) string {
 	if percent == 100 {
 		complete = " is-complete"
 	}
-	return fmt.Sprintf(`<div class="progress-block"><div class="progress-header"><span class="progress-label">%s · %d из %d</span><span class="progress-value">%d%%</span></div><div class="progress-track%s" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="%d"><div class="progress-fill" style="width:%d%%"></div></div></div>`, escapeHTML(label), stats.Completed, stats.Total, percent, complete, percent, percent)
+	return fmt.Sprintf(`<div class="progress-block"><div class="progress-header"><span class="progress-label">%s · %s</span><span class="progress-value">%d%%</span></div><div class="progress-track%s" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="%d"><div class="progress-fill" style="width:%d%%"></div></div></div>`, escapeHTML(label), escapeHTML(ui.Text("label.countOf", stats.Completed, stats.Total)), percent, complete, percent, percent)
 }
 
 func documentContextPath(model *Model, document *Document) string {
@@ -65,17 +81,18 @@ func renderDocumentContextButton(model *Model, document *Document) string {
 	if document == nil || document == model.ProjectChangelog {
 		return ""
 	}
+	ui := portalUI(model)
 	copyButton := `<button class="document-context-button" type="button" data-copy-document-context data-document-context-title="` +
 		escapeAttr(document.Title) + `" data-document-context-path="` + escapeAttr(documentContextPath(model, document)) +
-		`"><span class="document-context-icon" aria-hidden="true">⧉</span><span data-copy-document-context-label aria-live="polite">Копировать контекст</span></button>`
+		`"><span class="document-context-icon" aria-hidden="true">⧉</span><span data-copy-document-context-label aria-live="polite">` + escapeHTML(ui.Text("action.copyContext")) + `</span></button>`
 	if !model.serveMode {
 		return copyButton
 	}
 	encoded := url.QueryEscape(document.SourcePath)
 	return `<div class="document-context-actions">` + copyButton +
-		`<a class="document-context-button" href="/_toudocu/editor/?path=` + escapeAttr(encoded) + `">Редактировать</a>` +
-		`<a class="document-context-button" href="` + escapeAttr(changesDocumentURL(documentContextPath(model, document))) + `">Показать изменения</a>` +
-		`<a class="document-context-button" href="/_toudocu/api/editor/file?raw=1&amp;path=` + escapeAttr(encoded) + `" target="_blank" rel="noopener">Открыть исходник</a></div>`
+		`<a class="document-context-button" href="/_toudocu/editor/?path=` + escapeAttr(encoded) + `">` + escapeHTML(ui.Text("action.edit")) + `</a>` +
+		`<a class="document-context-button" href="` + escapeAttr(changesDocumentURL(documentContextPath(model, document))) + `">` + escapeHTML(ui.Text("action.showChanges")) + `</a>` +
+		`<a class="document-context-button" href="/_toudocu/api/editor/file?raw=1&amp;path=` + escapeAttr(encoded) + `" target="_blank" rel="noopener">` + escapeHTML(ui.Text("action.openSource")) + `</a></div>`
 }
 
 func renderOpenAPIContractButton(model *Model, document *Document) string {
@@ -90,7 +107,7 @@ func renderOpenAPIContractButton(model *Model, document *Document) string {
 		candidate := path.Clean(path.Join(path.Dir(document.SourcePath), destination))
 		for _, contract := range model.openAPIContracts {
 			if candidate == contract.Path {
-				return `<a class="document-context-button" href="` + apiDocsUIPath + `?spec=` + escapeAttr(url.QueryEscape(contract.Path)) + `">Открыть в Swagger UI</a>`
+				return `<a class="document-context-button" href="` + apiDocsUIPath + `?spec=` + escapeAttr(url.QueryEscape(contract.Path)) + `">` + escapeHTML(portalUI(model).Text("action.openSwagger")) + `</a>`
 			}
 		}
 	}
@@ -101,7 +118,7 @@ func renderRoadmapAddButton(model *Model, document *Document) string {
 	if !model.serveMode || document == nil || document.Type != "roadmap" {
 		return ""
 	}
-	return `<button class="document-context-button roadmap-add-button" type="button" data-roadmap-add>Добавить результат</button><span class="visually-hidden" data-roadmap-add-status role="status" aria-live="polite"></span>`
+	return `<button class="document-context-button roadmap-add-button" type="button" data-roadmap-add>` + escapeHTML(portalUI(model).Text("action.addOutcome")) + `</button><span class="visually-hidden" data-roadmap-add-status role="status" aria-live="polite"></span>`
 }
 
 func metricCard(label string, value any, detail string) string {
@@ -142,12 +159,13 @@ func modelDirectoryLabel(model *Model, directory string) string {
 	if manifest := model.DocByPath[path.Join(directory, "index.md")]; manifest != nil && manifest.Title != "" {
 		return manifest.Title
 	}
-	return directoryLabel(directory)
+	return directoryLabel(model, directory)
 }
 
 func renderNavigation(model *Model, current string) string {
 	var b strings.Builder
-	b.WriteString(`<nav aria-label="Документация"><div class="nav-title">Проект</div><ul class="nav-tree">`)
+	ui := portalUI(model)
+	b.WriteString(`<nav aria-label="` + escapeAttr(ui.Text("nav.documentation")) + `"><div class="nav-title">` + escapeHTML(ui.Text("nav.project")) + `</div><ul class="nav-tree">`)
 	rootDocs := []*Document{}
 	sectionGroups := map[SectionType][]*Document{}
 	customGroups := map[string][]*Document{}
@@ -184,11 +202,16 @@ func renderNavigation(model *Model, current string) string {
 			aria = ` aria-current="page"`
 		}
 		glyph, statusClass, statusLabel := navigationDocumentIcon(document)
+		if statusLabel != "" {
+			if localized := ui.Text("status." + document.Status.Kind); !strings.HasPrefix(localized, "status.") {
+				statusLabel = localized
+			}
+		}
 		statusTitle := ""
 		accessibleStatus := ""
 		if statusLabel != "" {
-			statusTitle = ` title="` + escapeAttr("Статус: "+statusLabel) + `"`
-			accessibleStatus = `<span class="visually-hidden"> · Статус: ` + escapeHTML(statusLabel) + `</span>`
+			statusTitle = ` title="` + escapeAttr(ui.Text("label.statusValue", statusLabel)) + `"`
+			accessibleStatus = `<span class="visually-hidden"> · ` + escapeHTML(ui.Text("label.statusValue", statusLabel)) + `</span>`
 		}
 		if label == "" {
 			label = document.Title
@@ -199,7 +222,7 @@ func renderNavigation(model *Model, current string) string {
 		writeDoc(doc, "")
 	}
 	if model.ProjectChangelog != nil {
-		writeDoc(model.ProjectChangelog, "Журнал изменений проекта")
+		writeDoc(model.ProjectChangelog, ui.Text("type.changelog"))
 	}
 	writeGroup := func(section SectionType, directory, groupKey string, docs []*Document) {
 		target := outputForDirectory(model, directory)
@@ -233,7 +256,7 @@ func renderNavigation(model *Model, current string) string {
 				return
 			}
 		}
-		fmt.Fprintf(&b, `<li class="nav-item nav-folder" data-nav-folder="%s"><div class="nav-folder-row"><button class="nav-folder-toggle" type="button" data-nav-folder-toggle aria-expanded="true" aria-controls="%s" aria-label="Свернуть раздел %s"><span aria-hidden="true">▾</span></button><a class="nav-folder-link%s" href="%s"><span>%s</span></a></div><ul id="%s">`, escapeAttr(groupKey), escapeAttr(groupID), escapeAttr(label), active, escapeAttr(relativeURL(current, target)), escapeHTML(label), escapeAttr(groupID))
+		fmt.Fprintf(&b, `<li class="nav-item nav-folder" data-nav-folder="%s"><div class="nav-folder-row"><button class="nav-folder-toggle" type="button" data-nav-folder-toggle aria-expanded="true" aria-controls="%s" aria-label="%s"><span aria-hidden="true">▾</span></button><a class="nav-folder-link%s" href="%s"><span>%s</span></a></div><ul id="%s">`, escapeAttr(groupKey), escapeAttr(groupID), escapeAttr(ui.Text("nav.collapseSection", label)), active, escapeAttr(relativeURL(current, target)), escapeHTML(label), escapeAttr(groupID))
 		if section == SectionScreens && model.ScreenMapEnabled {
 			activeClass := ""
 			aria := ""
@@ -241,8 +264,8 @@ func renderNavigation(model *Model, current string) string {
 				activeClass = " is-active"
 				aria = ` aria-current="page"`
 			}
-			fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"%s><span class="nav-icon" aria-hidden="true">⌗</span><span>Карта экранов</span></a></li>`,
-				activeClass, escapeAttr(relativeURL(current, "screens/index.html")), aria)
+			fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"%s><span class="nav-icon" aria-hidden="true">⌗</span><span>%s</span></a></li>`,
+				activeClass, escapeAttr(relativeURL(current, "screens/index.html")), aria, escapeHTML(ui.Text("nav.screenMap")))
 		}
 		if section == SectionFlows {
 			for _, doc := range docs {
@@ -258,7 +281,7 @@ func renderNavigation(model *Model, current string) string {
 				continue
 			}
 			if section == SectionArchitecture && strings.EqualFold(doc.FileName, "overview.md") {
-				writeDoc(doc, "Обзор архитектуры")
+				writeDoc(doc, ui.Text("nav.architectureOverview"))
 				continue
 			}
 			if section == SectionWork {
@@ -286,14 +309,14 @@ func renderNavigation(model *Model, current string) string {
 	for _, key := range keys {
 		writeGroup("", key, key, customGroups[key])
 	}
-	b.WriteString(`</ul><div class="nav-title">Контроль</div><ul class="nav-tree">`)
+	b.WriteString(`</ul><div class="nav-title">` + escapeHTML(ui.Text("nav.control")) + `</div><ul class="nav-tree">`)
 	active := ""
 	if current == model.HealthOutputPath {
 		active = " is-active"
 	}
-	fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span>Качество документации</span></a></li>`, active, escapeAttr(relativeURL(current, model.HealthOutputPath)))
+	fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span>%s</span></a></li>`, active, escapeAttr(relativeURL(current, model.HealthOutputPath)), escapeHTML(ui.Text("nav.quality")))
 	if model.serveMode {
-		fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link" href="/changes/"><span>Изменения</span></a></li>`)
+		fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link" href="/changes/"><span>%s</span></a></li>`, escapeHTML(ui.Text("nav.changes")))
 		if len(model.openAPIContracts) > 0 {
 			fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link" href="/_toudocu/api-docs/"><span>HTTP API</span></a></li>`)
 		}
@@ -303,20 +326,20 @@ func renderNavigation(model *Model, current string) string {
 		if current == "traceability.html" {
 			active = " is-active"
 		}
-		fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span>Трассируемость</span></a></li>`, active, escapeAttr(relativeURL(current, "traceability.html")))
+		fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span>%s</span></a></li>`, active, escapeAttr(relativeURL(current, "traceability.html")), escapeHTML(ui.Text("nav.traceability")))
 	}
 	b.WriteString(`</ul></nav>`)
 	return b.String()
 }
 
-func projectChangelogSearchItem(document *Document) SearchItem {
+func projectChangelogSearchItem(model *Model, document *Document) SearchItem {
 	description := document.Description
 	if description == "" {
 		description = document.PlainText
 	}
 	return SearchItem{
 		Title: document.Title, Path: projectChangelogFile, URL: document.OutputPath,
-		Type: document.Type, TypeLabel: document.TypeLabel, Description: truncate(description, 220),
+		Type: document.Type, TypeLabel: localizedTypeLabel(model, document.Type), Description: truncate(description, 220),
 		Text: canonicalText(strings.Join([]string{document.Title, projectChangelogFile, document.PlainText}, " ")),
 	}
 }
@@ -403,6 +426,7 @@ func stableDocumentID(model *Model, sourcePath string) string {
 func pageShell(model *Model, current, title, description, content, toc string) string {
 	prefix := rootPrefix(current)
 	config := model.SiteConfig
+	ui := portalUI(model)
 	fullTitle := title + " — " + model.Project.Title
 	if current == "index.html" {
 		fullTitle = model.Project.Title
@@ -410,7 +434,7 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 	tocHTML := ""
 	gridClass := " no-toc"
 	if toc != "" {
-		tocHTML = `<aside class="page-toc" aria-label="Оглавление"><div class="page-toc-title">На странице</div>` + toc + `</aside>`
+		tocHTML = `<aside class="page-toc" aria-label="` + escapeAttr(ui.Text("toc.label")) + `"><div class="page-toc-title">` + escapeHTML(ui.Text("toc.title")) + `</div>` + toc + `</aside>`
 		gridClass = ""
 	}
 	extraStyles := ""
@@ -429,15 +453,15 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 	if logo := brandingOutput(model, "logo"); logo != "" {
 		brandMark = `<img class="brand-logo" src="` + escapeAttr(relativeURL(current, logo)) + `" alt="">`
 	}
-	footer := renderFooter(config.Footer)
-	themeLabel, themeIndicator := siteThemePresentation(config.Theme)
-	schemeLabel := colorSchemeLabel(config.ColorScheme)
-	themeSelect := `<label class="header-select site-theme-select"><span class="header-select-visual" aria-hidden="true"><span class="site-theme-indicator" data-site-theme-indicator>` + escapeHTML(themeIndicator) + `</span><span data-site-theme-label>` + escapeHTML(themeLabel) + `</span></span><select data-site-theme-select aria-label="Тема оформления">` + selectOptions(config.Theme, []selectOption{{"classic", "Классика"}, {"paper", "Бумага"}, {"terminal", "Терминал"}}) + `</select></label>`
-	schemeSelect := `<label class="header-select scheme-select"><span class="header-select-visual" aria-hidden="true"><span class="scheme-toggle-indicator"></span><span data-theme-label>` + escapeHTML(schemeLabel) + `</span></span><select data-color-scheme-select aria-label="Цветовая схема">` + selectOptions(config.ColorScheme, []selectOption{{"system", "Система"}, {"light", "Светлая"}, {"dark", "Тёмная"}}) + `</select></label>`
-	languageSelect := renderLanguageSelect(model.languageTargets[current])
+	footer := renderFooter(ui, config.Footer)
+	themeLabel, themeIndicator := siteThemePresentation(ui, config.Theme)
+	schemeLabel := colorSchemeLabel(ui, config.ColorScheme)
+	themeSelect := `<label class="header-select site-theme-select"><span class="header-select-visual" aria-hidden="true"><span class="site-theme-indicator" data-site-theme-indicator>` + escapeHTML(themeIndicator) + `</span><span data-site-theme-label>` + escapeHTML(themeLabel) + `</span></span><select data-site-theme-select aria-label="` + escapeAttr(ui.Text("header.theme")) + `">` + selectOptions(config.Theme, []selectOption{{"classic", ui.Text("theme.classic")}, {"paper", ui.Text("theme.paper")}, {"terminal", ui.Text("theme.terminal")}}) + `</select></label>`
+	schemeSelect := `<label class="header-select scheme-select"><span class="header-select-visual" aria-hidden="true"><span class="scheme-toggle-indicator"></span><span data-theme-label>` + escapeHTML(schemeLabel) + `</span></span><select data-color-scheme-select aria-label="` + escapeAttr(ui.Text("header.scheme")) + `">` + selectOptions(config.ColorScheme, []selectOption{{"system", ui.Text("scheme.system")}, {"light", ui.Text("scheme.light")}, {"dark", ui.Text("scheme.dark")}}) + `</select></label>`
+	languageSelect := renderLanguageSelect(ui, model.languageTargets[current])
 	serveControls, serveCSS, serveJS, serveRevision := "", "", "", ""
 	if model.serveMode {
-		serveControls = workspaceNavigation(workspacePortal) + `<button class="icon-button server-rebuild" type="button" data-server-rebuild aria-label="Пересобрать документацию" title="Пересобрать документацию"><svg class="server-rebuild-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 5v6h-6"/></svg></button><span class="visually-hidden" data-server-rebuild-status role="status" aria-live="polite"></span>`
+		serveControls = workspaceNavigation(ui, workspacePortal) + `<button class="icon-button server-rebuild" type="button" data-server-rebuild aria-label="` + escapeAttr(ui.Text("header.rebuild")) + `" title="` + escapeAttr(ui.Text("header.rebuild")) + `"><svg class="server-rebuild-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 5v6h-6"/></svg></button><span class="visually-hidden" data-server-rebuild-status role="status" aria-live="polite"></span>`
 		serveCSS = prefix + "assets/" + mustFrontendAsset("serve.css")
 		serveJS = prefix + "assets/" + mustFrontendAsset("serve.js")
 		serveRevision = model.serveRevision
@@ -478,9 +502,9 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 	if err != nil {
 		panic(err)
 	}
-	header := `<header class="site-header"><div class="brand-area"><button class="icon-button sidebar-toggle" type="button" data-sidebar-toggle aria-label="Открыть навигацию">☰</button><a class="brand" href="` + escapeAttr(relativeURL(current, "index.html")) + `">` + brandMark + `<span class="brand-text">` + escapeHTML(model.Project.Title) + `</span></a></div><div class="global-search" role="search"><div class="search-input-wrap"><input type="search" data-global-search placeholder="Поиск по документации" aria-label="Поиск по документации" aria-expanded="false" aria-controls="global-search-results"><span class="search-shortcut">/</span></div><div class="search-results" id="global-search-results" data-search-results role="listbox" hidden></div></div><div class="header-actions"><button class="icon-button" type="button" data-print aria-label="Печать">⎙</button>` + serveControls + languageSelect + themeSelect + schemeSelect + `</div></header>`
+	header := `<header class="site-header"><div class="brand-area"><button class="icon-button sidebar-toggle" type="button" data-sidebar-toggle aria-label="` + escapeAttr(ui.Text("nav.openNavigation")) + `">☰</button><a class="brand" href="` + escapeAttr(relativeURL(current, "index.html")) + `">` + brandMark + `<span class="brand-text">` + escapeHTML(model.Project.Title) + `</span></a></div><div class="global-search" role="search"><div class="search-input-wrap"><input type="search" data-global-search placeholder="` + escapeAttr(ui.Text("header.search")) + `" aria-label="` + escapeAttr(ui.Text("header.search")) + `" aria-expanded="false" aria-controls="global-search-results"><span class="search-shortcut">/</span></div><div class="search-results" id="global-search-results" data-search-results role="listbox" hidden></div></div><div class="header-actions"><button class="icon-button" type="button" data-print aria-label="` + escapeAttr(ui.Text("header.print")) + `">⎙</button>` + serveControls + languageSelect + themeSelect + schemeSelect + `</div></header>`
 	rendered, err := frontend.RenderShell(frontend.ShellView{
-		Lang: locale, HTMLAttributes: template.HTMLAttr(attributes), Revision: serveRevision,
+		UI: ui, Lang: locale, HTMLAttributes: template.HTMLAttr(attributes), Revision: serveRevision,
 		Description: description, Title: fullTitle, Favicon: relativeURL(current, favicon),
 		AppearanceJS: prefix + "assets/" + mustFrontendAsset("appearance.js"),
 		PortalCSS:    prefix + "assets/" + mustFrontendAsset("portal.css"), ServeCSS: serveCSS,
@@ -495,9 +519,13 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 	return rendered
 }
 
-func renderFooter(config FooterConfig) string {
-	if config.Text == "Сгенерировано Toudocu "+Version && config.URL == defaultFooterURL {
-		return `Сгенерировано <a href="` + escapeAttr(config.URL) + `" rel="noopener noreferrer">Toudocu</a> ` + escapeHTML(Version)
+func renderFooter(ui frontend.UI, config FooterConfig) string {
+	if config.defaultText {
+		brand := "Toudocu"
+		if config.URL != "" {
+			brand = `<a href="` + escapeAttr(config.URL) + `" rel="noopener noreferrer">Toudocu</a>`
+		}
+		return escapeHTML(ui.Text("footer.generated")) + " " + brand + " " + escapeHTML(Version)
 	}
 	footer := escapeHTML(config.Text)
 	if config.URL != "" {
@@ -506,12 +534,12 @@ func renderFooter(config FooterConfig) string {
 	return footer
 }
 
-func renderLanguageSelect(targets []LanguageTarget) string {
+func renderLanguageSelect(ui frontend.UI, targets []LanguageTarget) string {
 	if len(targets) < 2 {
 		return ""
 	}
 	var b strings.Builder
-	b.WriteString(`<label class="header-select language-select"><span class="header-select-visual" aria-hidden="true">⌘</span><select aria-label="Язык документации" onchange="location.href=this.value">`)
+	b.WriteString(`<label class="header-select language-select"><span class="header-select-visual" aria-hidden="true">⌘</span><select aria-label="` + escapeAttr(ui.Text("header.language")) + `" onchange="location.href=this.value">`)
 	for _, target := range targets {
 		selected := ""
 		if target.Active {
@@ -540,25 +568,25 @@ func selectOptions(current string, options []selectOption) string {
 	return b.String()
 }
 
-func siteThemePresentation(theme string) (string, string) {
+func siteThemePresentation(ui frontend.UI, theme string) (string, string) {
 	switch theme {
 	case "paper":
-		return "Бумага", "P"
+		return ui.Text("theme.paper"), "P"
 	case "terminal":
-		return "Терминал", "T"
+		return ui.Text("theme.terminal"), "T"
 	default:
-		return "Классика", "C"
+		return ui.Text("theme.classic"), "C"
 	}
 }
 
-func colorSchemeLabel(scheme string) string {
+func colorSchemeLabel(ui frontend.UI, scheme string) string {
 	switch scheme {
 	case "light":
-		return "Светлая"
+		return ui.Text("scheme.light")
 	case "dark":
-		return "Тёмная"
+		return ui.Text("scheme.dark")
 	default:
-		return "Система"
+		return ui.Text("scheme.system")
 	}
 }
 
@@ -573,10 +601,10 @@ func brandingOutput(model *Model, kind string) string {
 }
 
 func breadcrumbs(model *Model, current, title string) string {
-	return `<nav class="breadcrumbs" aria-label="Хлебные крошки"><a href="` + escapeAttr(relativeURL(current, "index.html")) + `">` + escapeHTML(model.Project.Title) + `</a><span>›</span><span>` + escapeHTML(title) + `</span></nav>`
+	return `<nav class="breadcrumbs" aria-label="` + escapeAttr(portalUI(model).Text("breadcrumbs")) + `"><a href="` + escapeAttr(relativeURL(current, "index.html")) + `">` + escapeHTML(model.Project.Title) + `</a><span>›</span><span>` + escapeHTML(title) + `</span></nav>`
 }
 
-func renderMetadata(document *Document) string {
+func renderMetadata(model *Model, document *Document) string {
 	if len(document.Metadata) == 0 && len(document.MetadataExtras) == 0 {
 		return ""
 	}
@@ -586,8 +614,8 @@ func renderMetadata(document *Document) string {
 	for _, key := range fieldOrder {
 		if value := document.Metadata[key]; value != "" {
 			seen[key] = true
-			label := displayFieldNames[key]
-			if label == "" {
+			label := portalUI(model).Text("field." + key)
+			if strings.HasPrefix(label, "field.") {
 				label = key
 			}
 			b.WriteString(`<div><dt>` + escapeHTML(label) + `</dt><dd>` + escapeHTML(value) + `</dd></div>`)
@@ -633,18 +661,19 @@ func renderRelated(model *Model, document *Document) string {
 			continue
 		}
 		seen[item.SourcePath] = true
-		b.WriteString(`<li><a href="` + escapeAttr(relativeURL(document.OutputPath, item.OutputPath)) + `">` + escapeHTML(item.Title) + `</a><span class="table-subtext">` + escapeHTML(item.TypeLabel) + `</span></li>`)
+		b.WriteString(`<li><a href="` + escapeAttr(relativeURL(document.OutputPath, item.OutputPath)) + `">` + escapeHTML(item.Title) + `</a><span class="table-subtext">` + escapeHTML(localizedTypeLabel(model, item.Type)) + `</span></li>`)
 	}
 	if b.Len() == 0 {
 		return ""
 	}
-	return `<section class="dashboard-section dashboard-support-panel"><h2>Связанные документы</h2><ul class="related-list">` + b.String() + `</ul></section>`
+	return `<section class="dashboard-section dashboard-support-panel"><h2>` + escapeHTML(portalUI(model).Text("related.title")) + `</h2><ul class="related-list">` + b.String() + `</ul></section>`
 }
 
 func renderRiskStatus(model *Model, document *Document) string {
 	if document == nil || document.Type != "risks" {
 		return ""
 	}
+	ui := portalUI(model)
 	counts := map[string]int{}
 	labels := []string{}
 	total := 0
@@ -652,7 +681,15 @@ func renderRiskStatus(model *Model, document *Document) string {
 		if risk.Document != document {
 			continue
 		}
-		label := risk.Status.Label
+		label := ui.Text("status." + risk.Status.Kind)
+		switch risk.Status.Kind {
+		case "open":
+			label = ui.Text("risk.open")
+		case "in-progress":
+			label = ui.Text("risk.reducing")
+		case "risk-accepted":
+			label = ui.Text("risk.accepted")
+		}
 		if counts[label] == 0 {
 			labels = append(labels, label)
 		}
@@ -666,10 +703,11 @@ func renderRiskStatus(model *Model, document *Document) string {
 	for _, label := range labels {
 		statusCounts = append(statusCounts, fmt.Sprintf(`<span>%d %s</span>`, counts[label], escapeHTML(strings.ToLower(label))))
 	}
-	return `<section class="risk-status" aria-labelledby="risk-status-title"><div><h2 id="risk-status-title">Статус рисков</h2><p class="risk-status-total">Незакрытых рисков: ` + fmt.Sprintf(`%d из %d`, model.Stats.OpenRisks, total) + `</p><p class="risk-status-counts">` + strings.Join(statusCounts, ` <span aria-hidden="true">·</span> `) + `</p></div><ul class="risk-status-explanations"><li><strong>Открыт</strong> — требует решения.</li><li><strong>Снижается</strong> — меры выполняются, риск ещё не закрыт.</li><li><strong>Риск принят</strong> — команда осознанно принимает риск; в незакрытые не входит.</li></ul></section>`
+	return `<section class="risk-status" aria-labelledby="risk-status-title"><div><h2 id="risk-status-title">` + escapeHTML(ui.Text("risk.title")) + `</h2><p class="risk-status-total">` + escapeHTML(ui.Text("risk.openCount", model.Stats.OpenRisks, total)) + `</p><p class="risk-status-counts">` + strings.Join(statusCounts, ` <span aria-hidden="true">·</span> `) + `</p></div><ul class="risk-status-explanations"><li><strong>` + escapeHTML(ui.Text("risk.open")) + `</strong> — ` + escapeHTML(ui.Text("risk.openHelp")) + `</li><li><strong>` + escapeHTML(ui.Text("risk.reducing")) + `</strong> — ` + escapeHTML(ui.Text("risk.reducingHelp")) + `</li><li><strong>` + escapeHTML(ui.Text("risk.accepted")) + `</strong> — ` + escapeHTML(ui.Text("risk.acceptedHelp")) + `</li></ul></section>`
 }
 
 func renderDocumentPage(model *Model, document *Document) string {
+	ui := portalUI(model)
 	resolver := linkResolverFor(model, document)
 	taskCompletionByLine := map[int]bool{}
 	if document.Type == "roadmap" {
@@ -682,18 +720,18 @@ func renderDocumentPage(model *Model, document *Document) string {
 			}
 		}
 	}
-	body := renderDocumentMarkdown(document, resolver, taskCompletionByLine)
+	body := renderDocumentMarkdown(model, document, resolver, taskCompletionByLine)
 	controls := ""
 	if document.TaskStats.Total > 0 {
-		label := "Чек-лист"
+		label := ui.Text("tasks.checklist")
 		if document.Type == "risks" {
-			label = "Меры снижения"
+			label = ui.Text("tasks.mitigation")
 		}
-		controls = `<div class="document-toolbar task-toolbar"><span class="toolbar-label" id="task-filter-label">` + label + `</span><div class="task-filter-group" role="group" aria-labelledby="task-filter-label"><button class="toolbar-button" type="button" data-task-filter="all">Все</button><button class="toolbar-button" type="button" data-task-filter="open">Невыполненные</button><button class="toolbar-button" type="button" data-task-filter="complete">Выполненные</button></div></div>`
+		controls = `<div class="document-toolbar task-toolbar"><span class="toolbar-label" id="task-filter-label">` + escapeHTML(label) + `</span><div class="task-filter-group" role="group" aria-labelledby="task-filter-label"><button class="toolbar-button" type="button" data-task-filter="all">` + escapeHTML(ui.Text("tasks.all")) + `</button><button class="toolbar-button" type="button" data-task-filter="open">` + escapeHTML(ui.Text("tasks.open")) + `</button><button class="toolbar-button" type="button" data-task-filter="complete">` + escapeHTML(ui.Text("tasks.complete")) + `</button></div></div>`
 	}
 	issues := ""
 	if len(document.Warnings)+len(document.Errors) > 0 {
-		issues = fmt.Sprintf(`<a class="badge" href="%s">Замечания: %d</a>`, escapeAttr(relativeURL(document.OutputPath, model.HealthOutputPath)), len(document.Warnings)+len(document.Errors))
+		issues = fmt.Sprintf(`<a class="badge" href="%s">%s</a>`, escapeAttr(relativeURL(document.OutputPath, model.HealthOutputPath)), escapeHTML(ui.Text("issues.count", len(document.Warnings)+len(document.Errors))))
 	}
 	computedStatus := ""
 	if document.Type == "status" {
@@ -716,28 +754,29 @@ func renderDocumentPage(model *Model, document *Document) string {
 	}
 	if model.serveMode && document.Type == "work" {
 		id := stableEntityIDRE.FindString(document.Title)
-		computedStatus = `<nav class="task-page-tabs" aria-label="Представления задачи"><span aria-current="page">Контракт задачи</span><a href="/changes/?task=` + escapeAttr(url.QueryEscape(id)) + `&amp;path=` + escapeAttr(url.QueryEscape(documentContextPath(model, document))) + `">Изменения</a></nav>` + computedStatus
+		computedStatus = `<nav class="task-page-tabs" aria-label="` + escapeAttr(ui.Text("task.views")) + `"><span aria-current="page">` + escapeHTML(ui.Text("task.contract")) + `</span><a href="/changes/?task=` + escapeAttr(url.QueryEscape(id)) + `&amp;path=` + escapeAttr(url.QueryEscape(documentContextPath(model, document))) + `">` + escapeHTML(ui.Text("nav.changes")) + `</a></nav>` + computedStatus
 	}
 	statusChip := ""
 	if strings.TrimSpace(document.Metadata["status"]) != "" {
-		statusChip = renderStatusChip(displayStatus)
+		statusChip = renderStatusChip(model, displayStatus)
 	}
-	progressLabel := "Готовность документа"
+	progressLabel := ui.Text("progress.document")
 	if document.Type == "risks" {
-		progressLabel = "Выполнение мер снижения"
+		progressLabel = ui.Text("progress.mitigation")
 	}
-	content := breadcrumbs(model, document.OutputPath, document.Title) + `<header class="page-header"><div class="page-kicker">` + statusChip + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + issues + `</div><h1>` + escapeHTML(document.Title) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` + renderMetadata(document) + renderRiskStatus(model, document) + renderProgress(document.TaskStats, progressLabel) + controls + `<div class="page-actions">` + renderRoadmapAddButton(model, document) + renderDocumentContextButton(model, document) + renderOpenAPIContractButton(model, document) + `<button class="collapse-all-button" type="button" data-collapse-all data-collapse-state="expanded" aria-expanded="true"><span class="collapse-all-icon" aria-hidden="true"><span class="collapse-icon collapse-icon-up">↑</span><span class="collapse-icon collapse-icon-down">↓</span></span><span data-collapse-label>Свернуть разделы</span></button></div></header>` + computedStatus + `<article class="doc-content">` + body + `</article>` + screenConnections + renderRelated(model, document)
+	content := breadcrumbs(model, document.OutputPath, document.Title) + `<header class="page-header"><div class="page-kicker">` + statusChip + `<span class="badge">` + escapeHTML(localizedTypeLabel(model, document.Type)) + `</span>` + issues + `</div><h1>` + escapeHTML(document.Title) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` + renderMetadata(model, document) + renderRiskStatus(model, document) + renderProgress(ui, document.TaskStats, progressLabel) + controls + `<div class="page-actions">` + renderRoadmapAddButton(model, document) + renderDocumentContextButton(model, document) + renderOpenAPIContractButton(model, document) + `<button class="collapse-all-button" type="button" data-collapse-all data-collapse-state="expanded" aria-expanded="true"><span class="collapse-all-icon" aria-hidden="true"><span class="collapse-icon collapse-icon-up">↑</span><span class="collapse-icon collapse-icon-down">↓</span></span><span data-collapse-label>` + escapeHTML(ui.Text("action.collapseSections")) + `</span></button></div></header>` + computedStatus + `<article class="doc-content">` + body + `</article>` + screenConnections + renderRelated(model, document)
 	content += flowConnections
 	return pageShell(model, document.OutputPath, document.Title, document.Description, content, renderTOC(document))
 }
 
-func docCard(current string, document *Document) string {
+func docCard(model *Model, current string, document *Document) string {
+	ui := portalUI(model)
 	archived, archiveYear, _ := taskArchivePathInfo(document.SourcePath)
 	archiveState := "active"
 	archiveBadge := ""
 	if archived {
 		archiveState = "archived"
-		archiveBadge = `<span class="badge">Архив ` + escapeHTML(archiveYear) + `</span>`
+		archiveBadge = `<span class="badge">` + escapeHTML(ui.Text("archive.year", archiveYear)) + `</span>`
 	}
 	workType := ""
 	workDetails := ""
@@ -746,11 +785,11 @@ func docCard(current string, document *Document) string {
 			workType = strings.ToLower(normalized)
 		}
 		if workType == "bug" {
-			workDetails = `<p class="table-subtext">Серьёзность: ` + escapeHTML(fallbackDash(document.Metadata["severity"])) +
-				` · Приоритет: ` + escapeHTML(fallbackDash(document.Metadata["priority"])) +
-				` · Воспроизводимость: ` + escapeHTML(fallbackDash(document.Metadata["reproducibility"])) +
-				` · Регрессия: ` + escapeHTML(fallbackDash(document.Metadata["regression"])) +
-				` · Модуль: ` + escapeHTML(fallbackDash(document.Metadata["module"])) + `</p>`
+			workDetails = `<p class="table-subtext">` + escapeHTML(ui.Text("work.severity")) + `: ` + escapeHTML(fallbackDash(document.Metadata["severity"])) +
+				` · ` + escapeHTML(ui.Text("work.priority")) + `: ` + escapeHTML(fallbackDash(document.Metadata["priority"])) +
+				` · ` + escapeHTML(ui.Text("work.reproducibility")) + `: ` + escapeHTML(fallbackDash(document.Metadata["reproducibility"])) +
+				` · ` + escapeHTML(ui.Text("work.regression")) + `: ` + escapeHTML(fallbackDash(document.Metadata["regression"])) +
+				` · ` + escapeHTML(ui.Text("work.module")) + `: ` + escapeHTML(fallbackDash(document.Metadata["module"])) + `</p>`
 		}
 	}
 	searchText := strings.Join([]string{document.Title, document.Description, document.SourcePath, document.Metadata["module"], document.Metadata["useCase"], document.Metadata["screens"]}, " ")
@@ -776,37 +815,37 @@ func docCard(current string, document *Document) string {
 	}
 	statusChip := ""
 	if strings.TrimSpace(document.Metadata["status"]) != "" {
-		statusChip = renderStatusChip(document.Status)
+		statusChip = renderStatusChip(model, document.Status)
 	}
-	return `<article class="document-card" data-filter-item data-search="` + escapeAttr(searchText) + `" data-status="` + escapeAttr(document.Status.Kind) + `" data-type="` + escapeAttr(document.Type) + `" data-work-type="` + escapeAttr(workType) + `" data-severity="` + escapeAttr(severity) + `" data-regression="` + escapeAttr(regression) + `" data-reproducibility="` + escapeAttr(reproducibility) + `" data-cause="` + escapeAttr(causeState) + `" data-regression-test="` + escapeAttr(regressionTestState) + `" data-archive="` + archiveState + `"><div class="card-kicker">` + statusChip + `<span class="badge">` + escapeHTML(document.TypeLabel) + `</span>` + archiveBadge + `</div><h3><a href="` + escapeAttr(relativeURL(current, document.OutputPath)) + `">` + escapeHTML(document.Title) + `</a></h3><p>` + escapeHTML(truncate(document.Description, 180)) + `</p>` + workDetails + renderProgress(document.TaskStats, "Задачи") + `<div class="card-path">` + escapeHTML(document.SourcePath) + `</div></article>`
+	return `<article class="document-card" data-filter-item data-search="` + escapeAttr(searchText) + `" data-status="` + escapeAttr(document.Status.Kind) + `" data-type="` + escapeAttr(document.Type) + `" data-work-type="` + escapeAttr(workType) + `" data-severity="` + escapeAttr(severity) + `" data-regression="` + escapeAttr(regression) + `" data-reproducibility="` + escapeAttr(reproducibility) + `" data-cause="` + escapeAttr(causeState) + `" data-regression-test="` + escapeAttr(regressionTestState) + `" data-archive="` + archiveState + `"><div class="card-kicker">` + statusChip + `<span class="badge">` + escapeHTML(localizedTypeLabel(model, document.Type)) + `</span>` + archiveBadge + `</div><h3><a href="` + escapeAttr(relativeURL(current, document.OutputPath)) + `">` + escapeHTML(document.Title) + `</a></h3><p>` + escapeHTML(truncate(document.Description, 180)) + `</p>` + workDetails + renderProgress(ui, document.TaskStats, ui.Text("progress.tasks")) + `<div class="card-path">` + escapeHTML(document.SourcePath) + `</div></article>`
 }
 
-func filterControls(includeStatus, includeType bool) string {
+func filterControls(ui frontend.UI, includeStatus, includeType bool) string {
 	statusControl := ""
 	if includeStatus {
-		statusControl = `<select data-filter-control="status"><option value="all">Все статусы</option><option value="not-started">Черновик</option><option value="done">Готово</option><option value="in-progress">В работе</option><option value="planned">Запланировано</option><option value="blocked">Заблокировано</option><option value="cancelled">Отменено</option></select>`
+		statusControl = `<select data-filter-control="status"><option value="all">` + escapeHTML(ui.Text("filter.allStatuses")) + `</option><option value="not-started">` + escapeHTML(ui.Text("filter.draft")) + `</option><option value="done">` + escapeHTML(ui.Text("filter.done")) + `</option><option value="in-progress">` + escapeHTML(ui.Text("filter.inProgress")) + `</option><option value="planned">` + escapeHTML(ui.Text("filter.planned")) + `</option><option value="blocked">` + escapeHTML(ui.Text("filter.blocked")) + `</option><option value="cancelled">` + escapeHTML(ui.Text("filter.cancelled")) + `</option></select>`
 	}
 	typeControl := ""
 	if includeType {
-		typeControl = `<select data-filter-control="type"><option value="all">Все типы</option><option value="module">Модули</option><option value="use-case">Сценарии</option><option value="screen-map">Карты экранов</option><option value="screen">Экраны</option><option value="flow">Процессы</option><option value="architecture">Архитектура</option><option value="decision">Решения</option><option value="work">Задачи</option></select>`
+		typeControl = `<select data-filter-control="type"><option value="all">` + escapeHTML(ui.Text("filter.allTypes")) + `</option><option value="module">` + escapeHTML(ui.Text("filter.modules")) + `</option><option value="use-case">` + escapeHTML(ui.Text("filter.useCases")) + `</option><option value="screen-map">` + escapeHTML(ui.Text("filter.screenMaps")) + `</option><option value="screen">` + escapeHTML(ui.Text("filter.screens")) + `</option><option value="flow">` + escapeHTML(ui.Text("filter.flows")) + `</option><option value="architecture">` + escapeHTML(ui.Text("filter.architecture")) + `</option><option value="decision">` + escapeHTML(ui.Text("filter.decisions")) + `</option><option value="work">` + escapeHTML(ui.Text("filter.work")) + `</option></select>`
 	}
-	return `<div class="collection-controls"><input type="search" data-filter-control="search" placeholder="Фильтр" aria-label="Фильтр">` + statusControl + typeControl + `</div>`
+	return `<div class="collection-controls"><input type="search" data-filter-control="search" placeholder="` + escapeAttr(ui.Text("filter.placeholder")) + `" aria-label="` + escapeAttr(ui.Text("filter.placeholder")) + `">` + statusControl + typeControl + `</div>`
 }
 
-func workFilterControls(includeStatus bool) string {
+func workFilterControls(ui frontend.UI, includeStatus bool) string {
 	statusControl := ""
 	if includeStatus {
-		statusControl = `<select data-filter-control="status"><option value="all">Все статусы</option><option value="not-started">Черновик</option><option value="done">Готово</option><option value="in-progress">В работе</option><option value="planned">Запланировано</option><option value="blocked">Заблокировано</option><option value="cancelled">Отменено</option></select>`
+		statusControl = `<select data-filter-control="status"><option value="all">` + escapeHTML(ui.Text("filter.allStatuses")) + `</option><option value="not-started">` + escapeHTML(ui.Text("filter.draft")) + `</option><option value="done">` + escapeHTML(ui.Text("filter.done")) + `</option><option value="in-progress">` + escapeHTML(ui.Text("filter.inProgress")) + `</option><option value="planned">` + escapeHTML(ui.Text("filter.planned")) + `</option><option value="blocked">` + escapeHTML(ui.Text("filter.blocked")) + `</option><option value="cancelled">` + escapeHTML(ui.Text("filter.cancelled")) + `</option></select>`
 	}
-	return `<div class="collection-controls"><input type="search" data-filter-control="search" placeholder="Фильтр" aria-label="Фильтр">` +
+	return `<div class="collection-controls"><input type="search" data-filter-control="search" placeholder="` + escapeAttr(ui.Text("filter.placeholder")) + `" aria-label="` + escapeAttr(ui.Text("filter.placeholder")) + `">` +
 		statusControl +
-		`<select data-filter-control="workType"><option value="all">Все</option><option value="feature">Features</option><option value="bug">Bugs</option><option value="maintenance">Maintenance</option><option value="documentation">Documentation</option><option value="research">Research</option></select>` +
-		`<select data-filter-control="severity"><option value="all">Любая серьёзность</option><option value="critical">Критические</option><option value="high">Высокой серьёзности</option></select>` +
-		`<select data-filter-control="regression"><option value="all">Любая регрессия</option><option value="yes">Регрессии</option></select>` +
-		`<select data-filter-control="reproducibility"><option value="all">Любая воспроизводимость</option><option value="always">Воспроизводятся всегда</option><option value="missing">Без воспроизведения</option></select>` +
-		`<select data-filter-control="cause"><option value="all">Любая причина</option><option value="missing">Без установленной причины</option></select>` +
-		`<select data-filter-control="regressionTest"><option value="all">Любой регрессионный тест</option><option value="missing">Без регрессионного теста</option></select>` +
-		`<select data-filter-control="archive" data-filter-default="active"><option value="active" selected>Активные</option><option value="archived">Архив</option><option value="all">Все</option></select></div>`
+		`<select data-filter-control="workType"><option value="all">` + escapeHTML(ui.Text("filter.all")) + `</option><option value="feature">` + escapeHTML(ui.Text("filter.feature")) + `</option><option value="bug">` + escapeHTML(ui.Text("filter.bug")) + `</option><option value="maintenance">` + escapeHTML(ui.Text("filter.maintenance")) + `</option><option value="documentation">` + escapeHTML(ui.Text("filter.documentation")) + `</option><option value="research">` + escapeHTML(ui.Text("filter.research")) + `</option></select>` +
+		`<select data-filter-control="severity"><option value="all">` + escapeHTML(ui.Text("filter.anySeverity")) + `</option><option value="critical">` + escapeHTML(ui.Text("filter.critical")) + `</option><option value="high">` + escapeHTML(ui.Text("filter.high")) + `</option></select>` +
+		`<select data-filter-control="regression"><option value="all">` + escapeHTML(ui.Text("filter.anyRegression")) + `</option><option value="yes">` + escapeHTML(ui.Text("filter.regressions")) + `</option></select>` +
+		`<select data-filter-control="reproducibility"><option value="all">` + escapeHTML(ui.Text("filter.anyReproducibility")) + `</option><option value="always">` + escapeHTML(ui.Text("filter.alwaysReproduced")) + `</option><option value="missing">` + escapeHTML(ui.Text("filter.notReproduced")) + `</option></select>` +
+		`<select data-filter-control="cause"><option value="all">` + escapeHTML(ui.Text("filter.anyCause")) + `</option><option value="missing">` + escapeHTML(ui.Text("filter.noCause")) + `</option></select>` +
+		`<select data-filter-control="regressionTest"><option value="all">` + escapeHTML(ui.Text("filter.anyRegressionTest")) + `</option><option value="missing">` + escapeHTML(ui.Text("filter.noRegressionTest")) + `</option></select>` +
+		`<select data-filter-control="archive" data-filter-default="active"><option value="active" selected>` + escapeHTML(ui.Text("filter.active")) + `</option><option value="archived">` + escapeHTML(ui.Text("filter.archive")) + `</option><option value="all">` + escapeHTML(ui.Text("filter.all")) + `</option></select></div>`
 }
 
 func documentsHaveDifferentStatuses(documents []*Document) bool {
@@ -823,17 +862,18 @@ func documentsHaveDifferentStatuses(documents []*Document) bool {
 }
 
 func renderComputedStatus(model *Model, current string) string {
+	ui := portalUI(model)
 	var active strings.Builder
 	for _, item := range model.CurrentStatus.ActiveWork {
 		href := "#"
 		if document := model.DocByPath[item.Document]; document != nil {
 			href = relativeURL(current, document.OutputPath) + "#" + item.Anchor
 		}
-		active.WriteString(`<tr><td><a href="` + escapeAttr(href) + `">` + escapeHTML(item.ID) + `</a></td><td>` + escapeHTML(item.Title) + `</td><td>` + renderStatusChip(item.Status) + `</td><td>` + escapeHTML(item.ModuleID) + `</td></tr>`)
+		active.WriteString(`<tr><td><a href="` + escapeAttr(href) + `">` + escapeHTML(item.ID) + `</a></td><td>` + escapeHTML(item.Title) + `</td><td>` + renderStatusChip(model, item.Status) + `</td><td>` + escapeHTML(item.ModuleID) + `</td></tr>`)
 	}
-	activeHTML := `<p class="empty-state">Активных задач нет.</p>`
+	activeHTML := `<p class="empty-state">` + escapeHTML(ui.Text("status.noActive")) + `</p>`
 	if active.Len() > 0 {
-		activeHTML = `<div class="data-table"><table><thead><tr><th>ID</th><th>Задача</th><th>Статус</th><th>Модуль</th></tr></thead><tbody>` + active.String() + `</tbody></table></div>`
+		activeHTML = `<div class="data-table"><table><thead><tr><th>ID</th><th>` + escapeHTML(ui.Text("status.task")) + `</th><th>` + escapeHTML(ui.Text("field.status")) + `</th><th>` + escapeHTML(ui.Text("field.module")) + `</th></tr></thead><tbody>` + active.String() + `</tbody></table></div>`
 	}
 
 	var blockers strings.Builder
@@ -844,16 +884,16 @@ func renderComputedStatus(model *Model, current string) string {
 		}
 		text := blocker.Text
 		if text == "" {
-			text = "Причина блокировки не указана."
+			text = ui.Text("status.noBlockerReason")
 		}
 		blockers.WriteString(`<li><a href="` + escapeAttr(href) + `">` + escapeHTML(blocker.TaskID) + `</a> — ` + escapeHTML(text) + `</li>`)
 	}
-	blockersHTML := `<p>Критических блокеров нет.</p>`
+	blockersHTML := `<p>` + escapeHTML(ui.Text("status.noBlockers")) + `</p>`
 	if blockers.Len() > 0 {
 		blockersHTML = `<ul class="related-list">` + blockers.String() + `</ul>`
 	}
 
-	nextHTML := `<p>Все результаты roadmap выполнены.</p>`
+	nextHTML := `<p>` + escapeHTML(ui.Text("status.roadmapComplete")) + `</p>`
 	if next := model.CurrentStatus.NextResult; next != nil {
 		target := next.TargetDocument
 		if target == "" {
@@ -863,18 +903,19 @@ func renderComputedStatus(model *Model, current string) string {
 		if document := model.DocByPath[target]; document != nil {
 			href = relativeURL(current, document.OutputPath)
 		}
-		status := StatusFor("Запланировано")
+		status := StatusFor(ui.Text("filter.planned"))
 		if next.CompletionSource == "use-case-status" && next.TargetStatus != nil {
 			status = *next.TargetStatus
 		}
 		text := strings.TrimSpace(strings.TrimLeft(strings.TrimPrefix(next.Text, next.ID), " :—-"))
-		nextHTML = `<div class="card-kicker">` + renderStatusChip(status) + `</div><p><a href="` + escapeAttr(href) + `"><strong>` + escapeHTML(next.ID) + `</strong></a> — ` + escapeHTML(text) + `</p>`
+		nextHTML = `<div class="card-kicker">` + renderStatusChip(model, status) + `</div><p><a href="` + escapeAttr(href) + `"><strong>` + escapeHTML(next.ID) + `</strong></a> — ` + escapeHTML(text) + `</p>`
 	}
 
-	return `<section class="dashboard-section dashboard-support-panel"><div class="section-heading"><div><h2>Вычисляемое состояние</h2><p>Формируется из активных work items и эффективного состояния roadmap.</p></div></div><h3>Сейчас в работе</h3>` + activeHTML + `<h3>Блокеры</h3>` + blockersHTML + `<h3>Следующий результат</h3>` + nextHTML + `</section>`
+	return `<section class="dashboard-section dashboard-support-panel"><div class="section-heading"><div><h2>` + escapeHTML(ui.Text("status.computed")) + `</h2><p>` + escapeHTML(ui.Text("status.computedHelp")) + `</p></div></div><h3>` + escapeHTML(ui.Text("status.active")) + `</h3>` + activeHTML + `<h3>` + escapeHTML(ui.Text("status.blockers")) + `</h3>` + blockersHTML + `<h3>` + escapeHTML(ui.Text("status.next")) + `</h3>` + nextHTML + `</section>`
 }
 
 func renderRecommendedEntries(model *Model) string {
+	ui := portalUI(model)
 	type entry struct{ title, description, href string }
 	entries := []entry{}
 	seen := map[string]bool{}
@@ -886,10 +927,10 @@ func renderRecommendedEntries(model *Model) string {
 		entries = append(entries, entry{title: title, description: description, href: href})
 	}
 	if overview := model.DocByPath["architecture/overview.md"]; overview != nil {
-		add("Архитектура", "Граница системы и карта архитектурных вопросов.", overview.OutputPath)
+		add(ui.Text("start.architecture"), ui.Text("start.architectureHelp"), overview.OutputPath)
 	}
 	if len(model.Knowledge.UseCases) > 0 {
-		add("Пользовательские сценарии", "Наблюдаемое поведение и критерии результата.", "use-cases/index.html")
+		add(ui.Text("start.useCases"), ui.Text("start.useCasesHelp"), "use-cases/index.html")
 	}
 	hasGuides := false
 	for _, document := range model.Documents {
@@ -899,12 +940,12 @@ func renderRecommendedEntries(model *Model) string {
 		}
 	}
 	if hasGuides {
-		add("Руководства", "Практические пути выполнения типовых задач.", outputForDirectory(model, "guides"))
+		add(ui.Text("start.guides"), ui.Text("start.guidesHelp"), outputForDirectory(model, "guides"))
 	}
 	if len(model.Knowledge.WorkItems) > 0 {
-		add("Рабочие задачи", "Текущий scope, критерии и проверки work items.", "work/index.html")
+		add(ui.Text("start.work"), ui.Text("start.workHelp"), "work/index.html")
 	}
-	add("Качество документации", "Ошибки, warnings и структурная целостность.", model.HealthOutputPath)
+	add(ui.Text("start.quality"), ui.Text("start.qualityHelp"), model.HealthOutputPath)
 	for _, document := range model.Documents {
 		if len(entries) >= 3 {
 			break
@@ -917,10 +958,11 @@ func renderRecommendedEntries(model *Model) string {
 	for _, item := range entries {
 		cards.WriteString(`<a class="recommended-entry" href="` + escapeAttr(item.href) + `"><strong>` + escapeHTML(item.title) + `</strong><span>` + escapeHTML(item.description) + `</span></a>`)
 	}
-	return `<section class="dashboard-section recommended-entries"><div class="section-heading"><div><h2>С чего начать</h2><p>До пяти рекомендуемых точек входа в документацию проекта.</p></div></div><div class="recommended-entry-grid">` + cards.String() + `</div></section>`
+	return `<section class="dashboard-section recommended-entries"><div class="section-heading"><div><h2>` + escapeHTML(ui.Text("start.title")) + `</h2><p>` + escapeHTML(ui.Text("start.help")) + `</p></div></div><div class="recommended-entry-grid">` + cards.String() + `</div></section>`
 }
 
 func renderDashboardFocus(model *Model) string {
+	ui := portalUI(model)
 	roadmap := model.DocByPath["roadmap.md"]
 	risksDocument := model.DocByPath["risks.md"]
 	statusDocument := model.Project.StatusDocument
@@ -928,7 +970,7 @@ func renderDashboardFocus(model *Model) string {
 		return ""
 	}
 
-	nextLabel := "Следующий результат не определён."
+	nextLabel := ui.Text("focus.noNext")
 	nextHref := ""
 	if next := model.CurrentStatus.NextResult; next != nil {
 		target := next.TargetDocument
@@ -973,17 +1015,17 @@ func renderDashboardFocus(model *Model) string {
 	}
 	statusLabel := strings.TrimSpace(model.Project.Status.Label)
 	if statusLabel == "" {
-		statusLabel = "Состояние проекта"
+		statusLabel = ui.Text("focus.projectStatus")
 	}
-	content := `<span class="focus-status">` + escapeHTML(statusLabel) + `</span><span class="focus-result"><span>Ближайший результат</span><strong>` + escapeHTML(nextLabel) + `</strong></span><span class="focus-arrow" aria-hidden="true">→</span>`
+	content := `<span class="focus-status">` + escapeHTML(statusLabel) + `</span><span class="focus-result"><span>` + escapeHTML(ui.Text("focus.next")) + `</span><strong>` + escapeHTML(nextLabel) + `</strong></span><span class="focus-arrow" aria-hidden="true">→</span>`
 	if target == "" {
-		return `<div class="dashboard-section dashboard-focus" aria-label="Текущий фокус">` + content + `</div>`
+		return `<div class="dashboard-section dashboard-focus" aria-label="` + escapeAttr(ui.Text("focus.current")) + `">` + content + `</div>`
 	}
-	return `<a class="dashboard-section dashboard-focus" aria-label="Текущий фокус: ` + escapeAttr(nextLabel) + `" href="` + escapeAttr(target) + `">` + content + `</a>`
+	return `<a class="dashboard-section dashboard-focus" aria-label="` + escapeAttr(ui.Text("focus.currentValue", nextLabel)) + `" href="` + escapeAttr(target) + `">` + content + `</a>`
 }
 
 func dashboardOverviewBody(model *Model, document *Document) string {
-	body := strings.TrimSpace(renderDocumentMarkdown(document, linkResolverFor(model, document), nil))
+	body := strings.TrimSpace(renderDocumentMarkdown(model, document, linkResolverFor(model, document), nil))
 	description := strings.TrimSpace(document.Description)
 	if description == "" {
 		return body
@@ -996,6 +1038,7 @@ func dashboardOverviewBody(model *Model, document *Document) string {
 }
 
 func renderDashboard(model *Model) string {
+	ui := portalUI(model)
 	meta := ""
 	if values := nonEmpty([]string{model.Project.Stage, model.Project.Version, model.Project.Updated}); len(values) > 0 {
 		meta = `<div class="hero-meta">` + escapeHTML(strings.Join(values, " · ")) + `</div>`
@@ -1004,7 +1047,7 @@ func renderDashboard(model *Model) string {
 	if document := model.Project.OverviewDocument; document != nil {
 		body := dashboardOverviewBody(model, document)
 		if body != "" {
-			overview = `<section class="dashboard-section dashboard-overview" data-dashboard-overview aria-labelledby="dashboard-overview-title"><div class="dashboard-overview-heading"><div><h2 id="dashboard-overview-title">Обзор проекта</h2><small>Полное содержание index.md</small></div><div class="page-actions dashboard-page-actions">` + renderDocumentContextButton(model, document) + `</div></div><div class="dashboard-overview-body"><article class="doc-content">` + body + `</article></div></section>`
+			overview = `<section class="dashboard-section dashboard-overview" data-dashboard-overview aria-labelledby="dashboard-overview-title"><div class="dashboard-overview-heading"><div><h2 id="dashboard-overview-title">` + escapeHTML(ui.Text("dashboard.overview")) + `</h2><small>` + escapeHTML(ui.Text("dashboard.fullIndex")) + `</small></div><div class="page-actions dashboard-page-actions">` + renderDocumentContextButton(model, document) + `</div></div><div class="dashboard-overview-body"><article class="doc-content">` + body + `</article></div></section>`
 		}
 	}
 	title := `<div class="dashboard-title"><h1>` + escapeHTML(model.Project.Title) + `</h1><span class="beta-badge">Beta</span></div>`
@@ -1037,6 +1080,7 @@ func nonEmpty(values []string) []string {
 }
 
 func renderDirectoryPage(model *Model, directory string) string {
+	ui := portalUI(model)
 	current := path.Join(directory, "index.html")
 	docs := []*Document{}
 	prefix := directory + "/"
@@ -1047,21 +1091,23 @@ func renderDirectoryPage(model *Model, directory string) string {
 	}
 	var cards strings.Builder
 	for _, doc := range docs {
-		cards.WriteString(docCard(current, doc))
+		cards.WriteString(docCard(model, current, doc))
 	}
 	collection := `<div class="card-grid">` + cards.String() + `</div>`
 	if len(docs) > 1 || directory == "work" && len(docs) > 0 {
-		controls := filterControls(documentsHaveDifferentStatuses(docs), false)
+		controls := filterControls(ui, documentsHaveDifferentStatuses(docs), false)
 		if directory == "work" {
-			controls = workFilterControls(documentsHaveDifferentStatuses(docs))
+			controls = workFilterControls(ui, documentsHaveDifferentStatuses(docs))
 		}
-		collection = `<section data-filter-scope>` + controls + `<div class="collection-summary">Показано: <strong data-filter-count></strong></div>` + collection + `<div class="empty-state" data-filter-empty hidden>Ничего не найдено.</div></section>`
+		collection = `<section data-filter-scope>` + controls + `<div class="collection-summary">` + escapeHTML(ui.Text("collection.shown")) + ` <strong data-filter-count></strong></div>` + collection + `<div class="empty-state" data-filter-empty hidden>` + escapeHTML(ui.Text("collection.empty")) + `</div></section>`
 	}
-	content := breadcrumbs(model, current, directoryLabel(directory)) + `<header class="page-header"><h1>` + escapeHTML(directoryLabel(directory)) + `</h1><p class="page-lead">Документы раздела: ` + fmt.Sprint(len(docs)) + `.</p></header>` + collection
-	return pageShell(model, current, directoryLabel(directory), directoryLabel(directory), content, "")
+	title := modelDirectoryLabel(model, directory)
+	content := breadcrumbs(model, current, title) + `<header class="page-header"><h1>` + escapeHTML(title) + `</h1><p class="page-lead">` + escapeHTML(ui.Text("directory.count", len(docs))) + `</p></header>` + collection
+	return pageShell(model, current, title, title, content, "")
 }
 
 func renderKnowledgeCatalogPage(model *Model, kind string) string {
+	ui := portalUI(model)
 	current := path.Join(kind, "index.html")
 	title := modelDirectoryLabel(model, kind)
 	var cards strings.Builder
@@ -1069,13 +1115,13 @@ func renderKnowledgeCatalogPage(model *Model, kind string) string {
 		for _, standard := range model.Knowledge.Standards {
 			document := model.DocByPath[standard.Document]
 			if document != nil {
-				cards.WriteString(docCard(current, document))
+				cards.WriteString(docCard(model, current, document))
 			}
 		}
 		content := breadcrumbs(model, current, title) +
-			`<header class="page-header"><h1>` + escapeHTML(title) + `</h1><p class="page-lead">Версионируемые стандарты проекта и их автоматические проверки.</p></header>` +
-			`<section data-filter-scope>` + filterControls(true, false) + `<div class="collection-summary">Показано: <strong data-filter-count></strong></div><div class="card-grid">` +
-			cards.String() + `</div><div class="empty-state" data-filter-empty hidden>Стандарты не найдены.</div></section>`
+			`<header class="page-header"><h1>` + escapeHTML(title) + `</h1><p class="page-lead">` + escapeHTML(ui.Text("quality.description")) + `</p></header>` +
+			`<section data-filter-scope>` + filterControls(ui, true, false) + `<div class="collection-summary">` + escapeHTML(ui.Text("collection.shown")) + ` <strong data-filter-count></strong></div><div class="card-grid">` +
+			cards.String() + `</div><div class="empty-state" data-filter-empty hidden>` + escapeHTML(ui.Text("quality.none")) + `</div></section>`
 		return pageShell(model, current, title, title, content, "")
 	}
 	for _, runbook := range model.Knowledge.Runbooks {
@@ -1086,25 +1132,26 @@ func renderKnowledgeCatalogPage(model *Model, kind string) string {
 		searchText := strings.Join([]string{runbook.ID, runbook.Title, runbook.Environment, runbook.Risk}, " ")
 		cards.WriteString(`<article class="document-card" data-filter-item data-search="` + escapeAttr(searchText) +
 			`" data-status="` + escapeAttr(document.Status.Kind) + `" data-freshness="` + escapeAttr(runbook.Freshness) +
-			`"><div class="card-kicker">` + renderStatusChip(document.Status) + `<span class="badge">` + escapeHTML(runbook.Freshness) +
+			`"><div class="card-kicker">` + renderStatusChip(model, document.Status) + `<span class="badge">` + escapeHTML(runbook.Freshness) +
 			`</span></div><h3><a href="` + escapeAttr(relativeURL(current, document.OutputPath)) + `">` + escapeHTML(runbook.Title) +
-			`</a></h3><p>` + escapeHTML(truncate(document.Description, 180)) + `</p><p class="table-subtext">Среда: ` +
-			escapeHTML(fallbackDash(runbook.Environment)) + ` · Риск: ` + escapeHTML(fallbackDash(runbook.Risk)) +
-			` · Последняя проверка: ` + escapeHTML(fallbackDash(runbook.LastVerified)) + `</p><div class="card-path">` +
+			`</a></h3><p>` + escapeHTML(truncate(document.Description, 180)) + `</p><p class="table-subtext">` + escapeHTML(ui.Text("runbooks.environment")) + `: ` +
+			escapeHTML(fallbackDash(runbook.Environment)) + ` · ` + escapeHTML(ui.Text("runbooks.risk")) + `: ` + escapeHTML(fallbackDash(runbook.Risk)) +
+			` · ` + escapeHTML(ui.Text("runbooks.lastVerified")) + `: ` + escapeHTML(fallbackDash(runbook.LastVerified)) + `</p><div class="card-path">` +
 			escapeHTML(runbook.Document) + `</div></article>`)
 	}
-	controls := `<div class="collection-controls"><input type="search" data-filter-control="search" placeholder="Фильтр" aria-label="Фильтр runbooks">` +
-		`<select data-filter-control="freshness"><option value="all">Любая свежесть</option><option value="recent">Recent</option><option value="review-required">Review required</option><option value="overdue">Overdue</option></select></div>`
+	controls := `<div class="collection-controls"><input type="search" data-filter-control="search" placeholder="` + escapeAttr(ui.Text("filter.placeholder")) + `" aria-label="` + escapeAttr(ui.Text("filter.placeholder")) + `">` +
+		`<select data-filter-control="freshness"><option value="all">` + escapeHTML(ui.Text("runbooks.anyFreshness")) + `</option><option value="recent">` + escapeHTML(ui.Text("runbooks.recent")) + `</option><option value="review-required">` + escapeHTML(ui.Text("runbooks.reviewRequired")) + `</option><option value="overdue">` + escapeHTML(ui.Text("runbooks.overdue")) + `</option></select></div>`
 	content := breadcrumbs(model, current, title) +
-		`<header class="page-header"><h1>` + escapeHTML(title) + `</h1><p class="page-lead">Эксплуатационные процедуры и состояние их проверки.</p></header>` +
-		`<section class="metric-grid">` + metricCard("Всего", model.Stats.RunbooksTotal, "") + metricCard("Recent", model.Stats.RunbooksRecent, "") +
-		metricCard("Review required", model.Stats.RunbooksReviewRequired, "") + metricCard("Overdue", model.Stats.RunbooksOverdue, "") + `</section>` +
-		`<section data-filter-scope>` + controls + `<div class="collection-summary">Показано: <strong data-filter-count></strong></div><div class="card-grid">` +
-		cards.String() + `</div><div class="empty-state" data-filter-empty hidden>Runbooks не найдены.</div></section>`
+		`<header class="page-header"><h1>` + escapeHTML(title) + `</h1><p class="page-lead">` + escapeHTML(ui.Text("runbooks.description")) + `</p></header>` +
+		`<section class="metric-grid">` + metricCard(ui.Text("metric.total"), model.Stats.RunbooksTotal, "") + metricCard(ui.Text("runbooks.recent"), model.Stats.RunbooksRecent, "") +
+		metricCard(ui.Text("runbooks.reviewRequired"), model.Stats.RunbooksReviewRequired, "") + metricCard(ui.Text("runbooks.overdue"), model.Stats.RunbooksOverdue, "") + `</section>` +
+		`<section data-filter-scope>` + controls + `<div class="collection-summary">` + escapeHTML(ui.Text("collection.shown")) + ` <strong data-filter-count></strong></div><div class="card-grid">` +
+		cards.String() + `</div><div class="empty-state" data-filter-empty hidden>` + escapeHTML(ui.Text("runbooks.none")) + `</div></section>`
 	return pageShell(model, current, title, title, content, "")
 }
 
 func renderHealthPage(model *Model) string {
+	ui := portalUI(model)
 	current := model.HealthOutputPath
 	var rows strings.Builder
 	for _, issue := range model.Issues {
@@ -1112,15 +1159,15 @@ func renderHealthPage(model *Model) string {
 		if doc := model.DocByPath[issue.DocumentPath]; doc != nil {
 			location = `<a href="` + escapeAttr(relativeURL(current, doc.OutputPath)) + `">` + escapeHTML(issue.DocumentPath) + `</a>`
 		}
-		fmt.Fprintf(&rows, `<div class="issue-row" data-filter-item data-search="%s" data-severity="%s" data-code="%s"><div class="issue-severity">%s</div><div><strong>%s</strong><span class="table-subtext">%s</span></div><div class="issue-location">%s%s</div></div>`, escapeAttr(issue.Message+" "+issue.Code+" "+issue.DocumentPath), escapeAttr(issue.Severity), escapeAttr(issue.Code), map[bool]string{true: "Ошибка", false: "Предупреждение"}[issue.Severity == "error"], escapeHTML(issue.Message), escapeHTML(issue.Code), location, func() string {
+		fmt.Fprintf(&rows, `<div class="issue-row" data-filter-item data-search="%s" data-severity="%s" data-code="%s"><div class="issue-severity">%s</div><div><strong>%s</strong><span class="table-subtext">%s</span></div><div class="issue-location">%s%s</div></div>`, escapeAttr(issue.Message+" "+issue.Code+" "+issue.DocumentPath), escapeAttr(issue.Severity), escapeAttr(issue.Code), ui.Text(map[bool]string{true: "health.error", false: "health.warning"}[issue.Severity == "error"]), escapeHTML(issue.Message), escapeHTML(issue.Code), location, func() string {
 			if issue.Line > 0 {
-				return fmt.Sprintf(" · строка %d", issue.Line)
+				return " · " + escapeHTML(ui.Text("health.line", issue.Line))
 			}
 			return ""
 		}())
 	}
-	content := breadcrumbs(model, current, "Качество документации") + `<header class="page-header"><h1>Качество документации</h1><p class="page-lead">Проверка структуры, идентификаторов, связей, безопасности и актуальности.</p></header><section class="metric-grid">` + metricCard("Документы", model.Stats.Documents, "") + metricCard("Предупреждения", model.Stats.Warnings, "") + metricCard("Ошибки", model.Stats.Errors, "") + metricCard("Битые ссылки", model.Stats.BrokenLinks, "") + `</section><section class="dashboard-section"><div class="section-heading"><h2>Замечания</h2><a href="` + escapeAttr(relativeURL(current, model.ReportOutputPath)) + `">report.json →</a></div><div data-filter-scope><div class="collection-controls"><input type="search" data-filter-control="search" placeholder="Поиск"><select data-filter-control="severity"><option value="all">Все уровни</option><option value="warning">Предупреждения</option><option value="error">Ошибки</option></select></div><div class="collection-summary">Показано: <strong data-filter-count></strong></div><div class="issue-list">` + rows.String() + `</div><div class="empty-state" data-filter-empty hidden>Замечаний нет.</div></div></section>`
-	return pageShell(model, current, "Качество документации", "Проверка проектной документации", content, "")
+	content := breadcrumbs(model, current, ui.Text("health.title")) + `<header class="page-header"><h1>` + escapeHTML(ui.Text("health.title")) + `</h1><p class="page-lead">` + escapeHTML(ui.Text("health.description")) + `</p></header><section class="metric-grid">` + metricCard(ui.Text("metric.documents"), model.Stats.Documents, "") + metricCard(ui.Text("metric.warnings"), model.Stats.Warnings, "") + metricCard(ui.Text("metric.errors"), model.Stats.Errors, "") + metricCard(ui.Text("metric.brokenLinks"), model.Stats.BrokenLinks, "") + `</section><section class="dashboard-section"><div class="section-heading"><h2>` + escapeHTML(ui.Text("health.issues")) + `</h2><a href="` + escapeAttr(relativeURL(current, model.ReportOutputPath)) + `">report.json →</a></div><div data-filter-scope><div class="collection-controls"><input type="search" data-filter-control="search" placeholder="` + escapeAttr(ui.Text("health.search")) + `"><select data-filter-control="severity"><option value="all">` + escapeHTML(ui.Text("health.allLevels")) + `</option><option value="warning">` + escapeHTML(ui.Text("metric.warnings")) + `</option><option value="error">` + escapeHTML(ui.Text("metric.errors")) + `</option></select></div><div class="collection-summary">` + escapeHTML(ui.Text("collection.shown")) + ` <strong data-filter-count></strong></div><div class="issue-list">` + rows.String() + `</div><div class="empty-state" data-filter-empty hidden>` + escapeHTML(ui.Text("health.none")) + `</div></div></section>`
+	return pageShell(model, current, ui.Text("health.title"), ui.Text("health.description"), content, "")
 }
 
 func BuildReport(model *Model) ProjectReport {
@@ -1233,7 +1280,7 @@ func ensureOutputSafety(inputDirectory, outputDirectory string) error {
 		return err
 	}
 	if samePath(resolvedInput, resolvedOutput) {
-		return fmt.Errorf("выходной каталог не может совпадать с каталогом исходной документации")
+		return fmt.Errorf("output directory cannot match the source documentation directory")
 	}
 	volume := filepath.VolumeName(resolvedOutput)
 	root := string(filepath.Separator)
@@ -1241,10 +1288,10 @@ func ensureOutputSafety(inputDirectory, outputDirectory string) error {
 		root = volume + string(filepath.Separator)
 	}
 	if samePath(resolvedOutput, root) {
-		return fmt.Errorf("корневой каталог нельзя использовать как выходной")
+		return fmt.Errorf("filesystem root cannot be used as the output directory")
 	}
 	if ensureInside(resolvedOutput, resolvedInput) {
-		return fmt.Errorf("выходной каталог не может быть родительским для каталога исходной документации")
+		return fmt.Errorf("output directory cannot be a parent of the source documentation directory")
 	}
 	return nil
 }
@@ -1319,7 +1366,7 @@ func generateSite(model *Model, options Options, serve bool) (GenerateResult, er
 	}
 	searchIndex := append([]SearchItem{}, model.SearchIndex...)
 	if model.ProjectChangelog != nil {
-		searchIndex = append(searchIndex, projectChangelogSearchItem(model.ProjectChangelog))
+		searchIndex = append(searchIndex, projectChangelogSearchItem(model, model.ProjectChangelog))
 	}
 	if err = writeStaticData(output, model, searchIndex); err != nil {
 		return GenerateResult{}, err

@@ -59,39 +59,40 @@ func workspaceBrand(model *Model, href string) string {
 	return `<a class="workspace-brand brand" href="` + escapeAttr(href) + `">` + mark + `<span class="brand-text">` + escapeHTML(model.Project.Title) + `</span></a>`
 }
 
-func workspaceNavigation(active workspaceSurface) string {
+func workspaceNavigation(ui frontend.UI, active workspaceSurface) string {
 	items := []struct {
 		surface workspaceSurface
 		href    string
 		label   string
 		icon    string
 	}{
-		{workspacePortal, "/", "Портал", "⌂"},
-		{workspaceEditor, "/_toudocu/editor/", "Редактор", "✎"},
-		{workspaceChanges, "/changes/", "Изменения", "⇄"},
+		{workspacePortal, "/", ui.Text("nav.portal"), "⌂"},
+		{workspaceEditor, "/_toudocu/editor/", ui.Text("nav.editor"), "✎"},
+		{workspaceChanges, "/changes/", ui.Text("nav.changes"), "⇄"},
 	}
 	var b strings.Builder
-	b.WriteString(`<nav class="workspace-nav" aria-label="Рабочие поверхности">`)
+	b.WriteString(`<nav class="workspace-nav" aria-label="` + escapeAttr(ui.Text("nav.workspaces")) + `">`)
 	for _, item := range items {
 		current := ""
 		if item.surface == active {
 			current = ` aria-current="page"`
 		}
-		b.WriteString(`<a class="workspace-nav-link" href="` + item.href + `" aria-label="Открыть ` + strings.ToLower(item.label) + `"` + current + ` data-workspace="` + string(item.surface) + `"><span aria-hidden="true">` + item.icon + `</span><span class="workspace-nav-label">` + item.label + `</span></a>`)
+		b.WriteString(`<a class="workspace-nav-link" href="` + item.href + `" aria-label="` + escapeAttr(ui.Text("nav.open", strings.ToLower(item.label))) + `"` + current + ` data-workspace="` + string(item.surface) + `"><span aria-hidden="true">` + item.icon + `</span><span class="workspace-nav-label">` + escapeHTML(item.label) + `</span></a>`)
 	}
 	b.WriteString(`</nav>`)
 	return b.String()
 }
 
-func workspaceAppearanceControls(config SiteConfig) string {
-	themeLabel, themeIndicator := siteThemePresentation(config.Theme)
-	return `<div class="workspace-appearance" aria-label="Оформление">` +
-		`<label class="header-select site-theme-select"><span class="header-select-visual" aria-hidden="true"><span class="site-theme-indicator" data-site-theme-indicator>` + escapeHTML(themeIndicator) + `</span><span data-site-theme-label>` + escapeHTML(themeLabel) + `</span></span><select data-site-theme-select aria-label="Тема оформления">` + selectOptions(config.Theme, []selectOption{{"classic", "Классика"}, {"paper", "Бумага"}, {"terminal", "Терминал"}}) + `</select></label>` +
-		`<label class="header-select scheme-select"><span class="header-select-visual" aria-hidden="true"><span class="scheme-toggle-indicator"></span><span data-theme-label>` + escapeHTML(colorSchemeLabel(config.ColorScheme)) + `</span></span><select data-color-scheme-select aria-label="Цветовая схема">` + selectOptions(config.ColorScheme, []selectOption{{"system", "Система"}, {"light", "Светлая"}, {"dark", "Тёмная"}}) + `</select></label></div>`
+func workspaceAppearanceControls(ui frontend.UI, config SiteConfig) string {
+	themeLabel, themeIndicator := siteThemePresentation(ui, config.Theme)
+	return `<div class="workspace-appearance" aria-label="` + escapeAttr(ui.Text("header.appearance")) + `">` +
+		`<label class="header-select site-theme-select"><span class="header-select-visual" aria-hidden="true"><span class="site-theme-indicator" data-site-theme-indicator>` + escapeHTML(themeIndicator) + `</span><span data-site-theme-label>` + escapeHTML(themeLabel) + `</span></span><select data-site-theme-select aria-label="` + escapeAttr(ui.Text("header.theme")) + `">` + selectOptions(config.Theme, []selectOption{{"classic", ui.Text("theme.classic")}, {"paper", ui.Text("theme.paper")}, {"terminal", ui.Text("theme.terminal")}}) + `</select></label>` +
+		`<label class="header-select scheme-select"><span class="header-select-visual" aria-hidden="true"><span class="scheme-toggle-indicator"></span><span data-theme-label>` + escapeHTML(colorSchemeLabel(ui, config.ColorScheme)) + `</span></span><select data-color-scheme-select aria-label="` + escapeAttr(ui.Text("header.scheme")) + `">` + selectOptions(config.ColorScheme, []selectOption{{"system", ui.Text("scheme.system")}, {"light", ui.Text("scheme.light")}, {"dark", ui.Text("scheme.dark")}}) + `</select></label></div>`
 }
 
 func workspaceHeader(model *Model, active workspaceSurface) string {
-	return `<header class="workspace-header">` + workspaceBrand(model, "/") + workspaceNavigation(active) + workspaceAppearanceControls(model.SiteConfig) + `</header>`
+	ui := portalUI(model)
+	return `<header class="workspace-header">` + workspaceBrand(model, "/") + workspaceNavigation(ui, active) + workspaceAppearanceControls(ui, model.SiteConfig) + `</header>`
 }
 
 func workspaceFavicon(model *Model) string {

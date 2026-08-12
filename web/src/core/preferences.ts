@@ -1,6 +1,4 @@
-import { registerMessages, text } from "./locale";
-import { preferenceMessages } from "./messages.ru";
-registerMessages(preferenceMessages);
+import { text } from "./locale";
 (() => {
     'use strict';
     const root: any = document.documentElement;

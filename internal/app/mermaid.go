@@ -45,13 +45,13 @@ func analyzeMermaidBlock(openingLine, closingLine int, source string, closed boo
 	if !closed {
 		block.Problems = append(block.Problems, mermaidProblem{
 			Code:    "unterminated-mermaid-diagram",
-			Message: "Блок Mermaid не закрыт.",
+			Message: "The Mermaid block is not closed.",
 		})
 	}
 	if strings.TrimSpace(source) == "" {
 		block.Problems = append(block.Problems, mermaidProblem{
 			Code:    "empty-mermaid-diagram",
-			Message: "Блок Mermaid не должен быть пустым.",
+			Message: "The Mermaid block must not be empty.",
 		})
 		return block
 	}
@@ -59,13 +59,13 @@ func analyzeMermaidBlock(openingLine, closingLine int, source string, closed boo
 	if policy.TooLarge {
 		block.Problems = append(block.Problems, mermaidProblem{
 			Code:    "mermaid-diagram-too-large",
-			Message: fmt.Sprintf("Размер блока Mermaid превышает %d байт.", mermaidMaxBytes),
+			Message: fmt.Sprintf("The Mermaid block exceeds %d bytes.", mermaidMaxBytes),
 		})
 	}
 	if containsMermaidConfiguration(source) {
 		block.Problems = append(block.Problems, mermaidProblem{
 			Code:    "forbidden-mermaid-configuration",
-			Message: "Mermaid front matter и directives %%{...}%% запрещены.",
+			Message: "Mermaid front matter and %%{...}%% directives are forbidden.",
 		})
 		return block
 	}
@@ -73,7 +73,7 @@ func analyzeMermaidBlock(openingLine, closingLine int, source string, closed boo
 	if block.DiagramType == "" {
 		block.Problems = append(block.Problems, mermaidProblem{
 			Code:    "unsupported-mermaid-diagram-type",
-			Message: "Первая строка Mermaid должна объявлять flowchart, stateDiagram-v2 или sequenceDiagram.",
+			Message: "The first Mermaid line must declare flowchart, stateDiagram-v2, or sequenceDiagram.",
 		})
 	}
 	return block
@@ -142,7 +142,7 @@ func validateFlowReferences(model *Model, document *Document, byID map[string]*D
 		if target == nil || target.Type != "use-case" {
 			addDocumentIssue(model, document, newIssue(
 				"error", "dangling-use-case-reference",
-				"Процесс ссылается на неизвестный пользовательский сценарий "+fallbackDash(id)+".",
+				"The flow references unknown use case "+fallbackDash(id)+".",
 				document.SourcePath, 0,
 			))
 		}
@@ -152,7 +152,7 @@ func validateFlowReferences(model *Model, document *Document, byID map[string]*D
 		if target == nil || target.Type != "module" {
 			addDocumentIssue(model, document, newIssue(
 				"error", "dangling-module-reference",
-				"Процесс ссылается на неизвестный модуль "+fallbackDash(moduleID)+".",
+				"The flow references unknown module "+fallbackDash(moduleID)+".",
 				document.SourcePath, 0,
 			))
 		}
@@ -168,7 +168,7 @@ func validateMermaidDocuments(model *Model) {
 			if len(blocks) == 0 {
 				addDocumentIssue(model, document, newIssue(
 					"error", "missing-flow-diagram",
-					"Документ процесса должен содержать блок Mermaid.",
+					"The flow document must contain a Mermaid block.",
 					document.SourcePath, 0,
 				))
 			}
@@ -191,7 +191,7 @@ func validateMermaidDocuments(model *Model) {
 		if !requirementsLinked {
 			addDocumentIssue(model, document, newIssue(
 				"error", "unlinked-mermaid-diagram",
-				"Документ с Mermaid должен быть связан с пользовательским сценарием или архитектурой.",
+				"A document containing Mermaid must be linked to a use case or an architecture document.",
 				document.SourcePath, blocks[0].OpeningLine+1,
 			))
 		}

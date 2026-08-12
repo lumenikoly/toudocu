@@ -140,7 +140,7 @@ func TestContractDocumentLinksToSelectedSwaggerSpecOnlyInServe(t *testing.T) {
 	document := &Document{SourcePath: "contracts/editor-http.md", Links: []Link{{Destination: "editor.openapi.yaml"}}}
 	model := &Model{serveMode: true, openAPIContracts: []OpenAPIContract{{Path: "contracts/editor.openapi.yaml", Title: "Editor"}}}
 	button := renderOpenAPIContractButton(model, document)
-	if !strings.Contains(button, "Открыть в Swagger UI") || !strings.Contains(button, "spec=contracts%2Feditor.openapi.yaml") {
+	if !strings.Contains(button, "Open in Swagger UI") || !strings.Contains(button, "spec=contracts%2Feditor.openapi.yaml") {
 		t.Fatalf("button=%q", button)
 	}
 	model.serveMode = false

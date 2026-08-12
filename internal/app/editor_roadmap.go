@@ -53,12 +53,12 @@ func suggestedRoadmapID(content string) string {
 func (s *documentationServer) roadmapState() (editorRoadmapState, editorFile, error) {
 	document := s.model.DocByPath[roadmapSourcePath]
 	if document == nil || document.Type != "roadmap" {
-		return editorRoadmapState{}, editorFile{}, workspaceFailure("roadmap_not_found", "roadmap.md не найден")
+		return editorRoadmapState{}, editorFile{}, workspaceFailure("roadmap_not_found", "roadmap.md not found")
 	}
 	file, err := s.workspace.read(roadmapSourcePath, s.model, false)
 	if err != nil {
 		if workspaceErrorCode(err) == "file_not_found" {
-			return editorRoadmapState{}, editorFile{}, workspaceFailure("roadmap_not_found", "roadmap.md не найден")
+			return editorRoadmapState{}, editorFile{}, workspaceFailure("roadmap_not_found", "roadmap.md not found")
 		}
 		return editorRoadmapState{}, editorFile{}, err
 	}
@@ -138,7 +138,7 @@ func sourceLineEnding(content string) string {
 func insertRoadmapItem(content string, document *Document, anchor, id, text string) (string, error) {
 	section, ok := stageSection(document, anchor)
 	if !ok {
-		return "", workspaceFailure("stage_not_found", "этап roadmap не найден")
+		return "", workspaceFailure("stage_not_found", "roadmap stage not found")
 	}
 	eol := sourceLineEnding(content)
 	offset := len(content)
@@ -191,7 +191,7 @@ func (s *documentationServer) serveEditorRoadmapItems(w http.ResponseWriter, r *
 	request.ID = strings.ToUpper(strings.TrimSpace(request.ID))
 	request.Text = strings.TrimSpace(request.Text)
 	if !validRoadmapDeliverable(request.ID, request.Text) {
-		writeEditorError(w, http.StatusBadRequest, "invalid_roadmap_item", "Результат должен содержать корректный уникальный DLV-* ID и непустую однострочную формулировку", nil)
+		writeEditorError(w, http.StatusBadRequest, "invalid_roadmap_item", "Outcome must contain a valid unique DLV-* ID and a non-empty one-line description", nil)
 		return
 	}
 	state, file, err := s.roadmapState()
@@ -205,13 +205,13 @@ func (s *documentationServer) serveEditorRoadmapItems(w http.ResponseWriter, r *
 		return
 	}
 	if request.ExpectedDigest == "" || request.ExpectedDigest != file.Digest {
-		writeEditorError(w, http.StatusConflict, "stale_digest", "roadmap.md изменён внешним процессом", state)
+		writeEditorError(w, http.StatusConflict, "stale_digest", "roadmap.md changed by another process", state)
 		return
 	}
 	analysis := analyzeMarkdown(file.Content)
 	for _, task := range analysis.Tasks {
 		if existing, ok := roadmapItemID(task.Text); ok && strings.EqualFold(existing, request.ID) {
-			writeEditorError(w, http.StatusConflict, "duplicate_roadmap_id", "ID roadmap уже существует", map[string]string{"id": request.ID})
+			writeEditorError(w, http.StatusConflict, "duplicate_roadmap_id", "roadmap ID already exists", map[string]string{"id": request.ID})
 			return
 		}
 	}
@@ -226,7 +226,7 @@ func (s *documentationServer) serveEditorRoadmapItems(w http.ResponseWriter, r *
 		if errors.As(err, &stale) {
 			currentState, _, stateErr := s.roadmapState()
 			if stateErr == nil {
-				writeEditorError(w, http.StatusConflict, "stale_digest", "roadmap.md изменён внешним процессом", currentState)
+				writeEditorError(w, http.StatusConflict, "stale_digest", "roadmap.md changed by another process", currentState)
 				return
 			}
 		}

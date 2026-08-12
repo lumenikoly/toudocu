@@ -94,7 +94,7 @@ func (store *reviewStore) loadUnlocked() (ReviewState, error) {
 	}
 	var state ReviewState
 	if err := json.Unmarshal(data, &state); err != nil || state.SchemaVersion != reviewSchemaVersion || state.StateDigest == "" || calculateReviewStateDigest(state) != state.StateDigest {
-		return ReviewState{}, &reviewFailure{Code: "REVIEW_STATE_CORRUPTED", Status: http.StatusInternalServerError, Message: "review state повреждён; файл не был перезаписан"}
+		return ReviewState{}, &reviewFailure{Code: "REVIEW_STATE_CORRUPTED", Status: http.StatusInternalServerError, Message: "review state is corrupted; the file was not overwritten"}
 	}
 	migrateLegacyMessageTypes(&state)
 	if state.Feedback == nil {
@@ -141,7 +141,7 @@ func (store *reviewStore) withLock(operation func() error) error {
 			return err
 		}
 		if time.Now().After(deadline) {
-			return &reviewFailure{Code: "REVIEW_STATE_BUSY", Status: http.StatusConflict, Message: "review state занят другим процессом"}
+			return &reviewFailure{Code: "REVIEW_STATE_BUSY", Status: http.StatusConflict, Message: "review state is locked by another process"}
 		}
 		time.Sleep(25 * time.Millisecond)
 	}
@@ -165,7 +165,7 @@ func (store *reviewStore) mutate(guard ReviewMutationGuard, operation func(*Revi
 			return err
 		}
 		if state.Revision != guard.ExpectedRevision || state.StateDigest != guard.ExpectedStateDigest {
-			return &reviewFailure{Code: "REVIEW_CONFLICT", Status: http.StatusConflict, Message: "review revision/state digest устарел"}
+			return &reviewFailure{Code: "REVIEW_CONFLICT", Status: http.StatusConflict, Message: "review revision/state digest is stale"}
 		}
 		if err := operation(&state); err != nil {
 			return err
@@ -221,7 +221,7 @@ func (store *reviewStore) writeState(state ReviewState) error {
 
 func (store *reviewStore) saveSnapshot(content []byte) (string, error) {
 	if len(content) > reviewSnapshotLimit {
-		return "", &reviewFailure{Code: "REVIEW_TOO_LARGE", Status: http.StatusRequestEntityTooLarge, Message: "review snapshot превышает 2 MiB"}
+		return "", &reviewFailure{Code: "REVIEW_TOO_LARGE", Status: http.StatusRequestEntityTooLarge, Message: "review snapshot exceeds 2 MiB"}
 	}
 	digest := digestBytes(content)
 	if err := os.MkdirAll(store.snapshotsPath, 0o700); err != nil {
@@ -231,7 +231,7 @@ func (store *reviewStore) saveSnapshot(content []byte) (string, error) {
 	destination := filepath.Join(store.snapshotsPath, digest)
 	if info, err := os.Lstat(destination); err == nil {
 		if !info.Mode().IsRegular() {
-			return "", &reviewFailure{Code: "REVIEW_STATE_CORRUPTED", Status: http.StatusInternalServerError, Message: "snapshot path не является regular file"}
+			return "", &reviewFailure{Code: "REVIEW_STATE_CORRUPTED", Status: http.StatusInternalServerError, Message: "snapshot path is not a regular file"}
 		}
 		return digest, nil
 	}
@@ -274,7 +274,7 @@ func (store *reviewStore) snapshot(digest string) ([]byte, error) {
 	}
 	content, err := os.ReadFile(filepath.Join(store.snapshotsPath, digest))
 	if err != nil || digestBytes(content) != digest {
-		return nil, &reviewFailure{Code: "REVIEW_STATE_CORRUPTED", Status: http.StatusInternalServerError, Message: "review snapshot повреждён"}
+		return nil, &reviewFailure{Code: "REVIEW_STATE_CORRUPTED", Status: http.StatusInternalServerError, Message: "review snapshot is corrupted"}
 	}
 	return content, nil
 }

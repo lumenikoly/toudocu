@@ -151,12 +151,12 @@ func (s *documentationServer) serveChangesAPI(w http.ResponseWriter, request *ht
 	}
 	route, methodAllowed := matchAPIRoute(changesRouteRegistry, request)
 	if route == nil {
-		writeChangesDiagnostic(w, http.StatusNotFound, "route_not_found", "Changes API route не найден")
+		writeChangesDiagnostic(w, http.StatusNotFound, "route_not_found", "Changes API route not found")
 		return
 	}
 	if !methodAllowed {
 		w.Header().Set("Allow", strings.Join(route.Methods, ", "))
-		writeChangesDiagnostic(w, http.StatusMethodNotAllowed, "method_not_allowed", "Метод не поддерживается")
+		writeChangesDiagnostic(w, http.StatusMethodNotAllowed, "method_not_allowed", "Method not allowed")
 		return
 	}
 	route.Handler(s, w, request)
@@ -197,7 +197,7 @@ func (s *documentationServer) serveChangesFile(w http.ResponseWriter, request *h
 	}
 	change := findRequestedChange(report, request.URL.Query().Get("path"))
 	if change == nil {
-		writeChangesDiagnostic(w, http.StatusNotFound, "change-new-version-missing", "Изменение файла не найдено.")
+		writeChangesDiagnostic(w, http.StatusNotFound, "change-new-version-missing", "File change not found.")
 		return
 	}
 	writeChangesJSON(w, http.StatusOK, change)
@@ -209,7 +209,7 @@ func (s *documentationServer) serveChangesTask(w http.ResponseWriter, request *h
 		return
 	}
 	if report.TaskImpact == nil {
-		writeChangesDiagnostic(w, http.StatusBadRequest, "task-not-found", "Параметр task или id обязателен.")
+		writeChangesDiagnostic(w, http.StatusBadRequest, "task-not-found", "The task or id parameter is required.")
 		return
 	}
 	writeChangesJSON(w, http.StatusOK, report.TaskImpact)
@@ -252,7 +252,7 @@ func findRequestedChange(report *ChangeSetReport, requested string) *Documentati
 func (s *documentationServer) serveChangedContent(w http.ResponseWriter, request *http.Request, report *ChangeSetReport, render bool) {
 	change := findRequestedChange(report, request.URL.Query().Get("path"))
 	if change == nil {
-		writeChangesDiagnostic(w, http.StatusNotFound, "change-new-version-missing", "Изменение файла не найдено.")
+		writeChangesDiagnostic(w, http.StatusNotFound, "change-new-version-missing", "File change not found.")
 		return
 	}
 	sideName := request.URL.Query().Get("side")
@@ -264,7 +264,7 @@ func (s *documentationServer) serveChangedContent(w http.ResponseWriter, request
 			path = change.OldPath
 		}
 	} else if sideName != "after" {
-		writeChangesDiagnostic(w, http.StatusBadRequest, "invalid-change-side", "side должен быть before или after")
+		writeChangesDiagnostic(w, http.StatusBadRequest, "invalid-change-side", "side must be before or after")
 		return
 	}
 	if sideName == "before" && (change.Status == "added" || change.Status == "untracked") || sideName == "after" && change.Status == "deleted" {
@@ -286,16 +286,20 @@ func (s *documentationServer) serveChangedContent(w http.ResponseWriter, request
 		limit = 2 * 1024 * 1024
 	}
 	if len(content) > limit {
-		writeChangesJSON(w, http.StatusRequestEntityTooLarge, map[string]any{"schemaVersion": 1, "diagnostics": []Issue{{Severity: "warning", Code: "change-file-too-large", Message: "Содержимое превышает лимит changes API.", DocumentPath: path}}})
+		writeChangesJSON(w, http.StatusRequestEntityTooLarge, map[string]any{"schemaVersion": 1, "diagnostics": []Issue{{Severity: "warning", Code: "change-file-too-large", Message: "Content exceeds the Changes API limit.", DocumentPath: path}}})
 		return
 	}
 	if render {
 		if strings.ToLower(filepath.Ext(path)) != ".md" {
-			writeChangesDiagnostic(w, http.StatusUnsupportedMediaType, "render-not-supported", "Rendered diff поддерживает Markdown")
+			writeChangesDiagnostic(w, http.StatusUnsupportedMediaType, "render-not-supported", "Rendered diff supports Markdown only")
 			return
 		}
 		parsed := analyzeMarkdown(string(content))
-		html := renderMarkdown(parsed, renderContext{}, renderOptions{SkipH1: false, SuppressMetadata: false, InteractiveMermaid: true})
+		locale := ""
+		if s.model != nil {
+			locale = s.model.SiteConfig.Project.Locale
+		}
+		html := renderMarkdown(parsed, renderContext{}, renderOptions{SkipH1: false, SuppressMetadata: false, InteractiveMermaid: true, Locale: locale})
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		_, _ = fmt.Fprint(w, html)
 		return

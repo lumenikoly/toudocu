@@ -92,6 +92,11 @@ failure is returned to the current request but does not stop the listener.
 Manual rebuild uses the same OpenAPI contract, reads canonical sources, and
 does not change Markdown.
 
+Every technical `message` returned by Editor, rebuild, and version-check
+responses is in English regardless of the interface locale. The stable `code`
+remains the machine contract; user paths and other input values embedded in a
+message are not translated.
+
 ## Related documents
 
 - [Why the wire contract is separate from behavior](../decisions/ADR-004.md)

@@ -198,21 +198,21 @@ func (w *editorWorkspace) scan(model *Model) ([]editorFile, string, error) {
 
 func validateEditorPath(value string) error {
 	if value == "" || value == "." || path.IsAbs(value) || filepath.IsAbs(value) {
-		return workspaceFailure("invalid_path", "путь должен быть относительным")
+		return workspaceFailure("invalid_path", "path must be relative")
 	}
 	if strings.Contains(value, "\\") || strings.ContainsRune(value, 0) || strings.Contains(value, "%") {
-		return workspaceFailure("invalid_path", "путь содержит запрещённые символы")
+		return workspaceFailure("invalid_path", "path contains forbidden characters")
 	}
 	if path.Clean(value) != value {
-		return workspaceFailure("invalid_path", "путь не является каноническим")
+		return workspaceFailure("invalid_path", "path is not canonical")
 	}
 	for _, part := range strings.Split(value, "/") {
 		if part == "" || part == "." || part == ".." {
-			return workspaceFailure("invalid_path", "путь содержит запрещённый segment")
+			return workspaceFailure("invalid_path", "path contains a forbidden segment")
 		}
 	}
 	if _, supported := editorLanguage(value); !supported {
-		return workspaceFailure("unsupported_extension", "расширение файла не поддерживается")
+		return workspaceFailure("unsupported_extension", "file extension is not supported")
 	}
 	return nil
 }
@@ -222,7 +222,7 @@ func (w *editorWorkspace) resolve(value string, allowMissingFinal bool) (string,
 		return "", nil, err
 	}
 	if filepath.Clean(w.root) == filepath.Clean(w.repositoryRoot) && value == projectChangelogFile {
-		return "", nil, workspaceFailure("path_forbidden", "корневой CHANGELOG.md доступен только как portal journal")
+		return "", nil, workspaceFailure("path_forbidden", "the repository-root CHANGELOG.md is available only as the portal changelog")
 	}
 	current := w.root
 	parts := strings.Split(value, "/")
@@ -230,34 +230,34 @@ func (w *editorWorkspace) resolve(value string, allowMissingFinal bool) (string,
 		current = filepath.Join(current, filepath.FromSlash(part))
 		relative := strings.Join(parts[:index+1], "/")
 		if w.excluded(relative, part) {
-			return "", nil, workspaceFailure("path_forbidden", "путь исключён из workspace")
+			return "", nil, workspaceFailure("path_forbidden", "path is excluded from the workspace")
 		}
 		info, err := os.Lstat(current)
 		if err != nil {
 			if os.IsNotExist(err) && allowMissingFinal && index == len(parts)-1 {
 				return current, nil, nil
 			}
-			return "", nil, workspaceFailure("file_not_found", "файл не найден: %s", value)
+			return "", nil, workspaceFailure("file_not_found", "file not found: %s", value)
 		}
 		if info.Mode()&os.ModeSymlink != 0 {
-			return "", nil, workspaceFailure("path_forbidden", "symlink запрещён в workspace path")
+			return "", nil, workspaceFailure("path_forbidden", "symbolic links are forbidden in workspace paths")
 		}
 		if index < len(parts)-1 && !info.IsDir() {
-			return "", nil, workspaceFailure("invalid_path", "компонент пути не является каталогом")
+			return "", nil, workspaceFailure("invalid_path", "path component is not a directory")
 		}
 		if index == len(parts)-1 {
 			if !info.Mode().IsRegular() {
-				return "", nil, workspaceFailure("path_forbidden", "workspace entry должен быть обычным файлом")
+				return "", nil, workspaceFailure("path_forbidden", "workspace entry must be a regular file")
 			}
 			return current, info, nil
 		}
 	}
-	return "", nil, workspaceFailure("invalid_path", "некорректный путь")
+	return "", nil, workspaceFailure("invalid_path", "invalid path")
 }
 
 func (w *editorWorkspace) validateCreateDirectory(relative string) error {
 	if relative == "" || relative == "." || path.Clean(relative) != relative {
-		return workspaceFailure("invalid_path", "каталог создания не является каноническим")
+		return workspaceFailure("invalid_path", "creation directory is not canonical")
 	}
 	current := w.root
 	parts := strings.Split(relative, "/")
@@ -265,7 +265,7 @@ func (w *editorWorkspace) validateCreateDirectory(relative string) error {
 		current = filepath.Join(current, filepath.FromSlash(part))
 		partial := strings.Join(parts[:index+1], "/")
 		if w.excluded(partial, part) {
-			return workspaceFailure("path_forbidden", "каталог исключён из workspace")
+			return workspaceFailure("path_forbidden", "directory is excluded from the workspace")
 		}
 		info, err := os.Lstat(current)
 		if os.IsNotExist(err) {
@@ -275,7 +275,7 @@ func (w *editorWorkspace) validateCreateDirectory(relative string) error {
 			return err
 		}
 		if info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
-			return workspaceFailure("path_forbidden", "каталог создания содержит symlink или не является каталогом")
+			return workspaceFailure("path_forbidden", "creation directory contains a symbolic link or is not a directory")
 		}
 	}
 	return nil
@@ -350,7 +350,7 @@ func jsonSyntaxDiagnostic(filePath string, content []byte) []editorDiagnostic {
 	if lastNewline >= 0 {
 		column = len(prefix) - lastNewline
 	}
-	return []editorDiagnostic{{Severity: "error", Code: "invalid-json", Message: "Некорректный JSON: " + err.Error(), Path: filePath, Line: line, Column: column}}
+	return []editorDiagnostic{{Severity: "error", Code: "invalid-json", Message: "Invalid JSON: " + err.Error(), Path: filePath, Line: line, Column: column}}
 }
 
 func (w *editorWorkspace) diagnostics(filePath string, content []byte) ([]editorDiagnostic, error) {
@@ -387,12 +387,12 @@ type staleFileError struct {
 }
 
 func (e *staleFileError) Error() string {
-	return "файл изменён внешним процессом"
+	return "file changed by another process"
 }
 
 func (w *editorWorkspace) save(filePath string, content []byte, expectedDigest string) (editorFile, error) {
 	if len(content) > editorContentLimit {
-		return editorFile{}, workspaceFailure("content_too_large", "содержимое превышает 2 MiB")
+		return editorFile{}, workspaceFailure("content_too_large", "content exceeds 2 MiB")
 	}
 	absolute, info, err := w.resolve(filePath, false)
 	if err != nil {

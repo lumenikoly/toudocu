@@ -195,6 +195,12 @@ Without a locale or complete section list, Toudocu uses English fallback labels
 and reports a warning; strict mode treats it as a failure. HTML defaults to
 `lang="en"` when no locale is configured.
 
+`project.locale` also selects the portal's built-in interface language. `ru`
+and regional `ru-*` variants select the Russian catalog; `en`, any other valid
+tag, and a missing setting select English. The same rule applies to server HTML
+and browser states. Toudocu does not translate `project.sections`, a custom
+footer, or the contents of the selected documentation root.
+
 Without explicit `--lang`, `task init` and `scaffold` use `ru` or `en` from
 `project.locale`, including regional variants. Another or missing locale falls
 back to `en`; explicit `--lang` takes precedence.

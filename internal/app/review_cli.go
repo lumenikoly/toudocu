@@ -19,7 +19,7 @@ func runReviewFeedbackCLI(argv []string, stdout, stderr io.Writer) int {
 		return 0
 	}
 	if operation != "pending" && operation != "respond" {
-		fmt.Fprintln(stderr, "Ошибка: changes feedback поддерживает pending или respond")
+		fmt.Fprintln(stderr, "Error: changes feedback supports pending or respond")
 		return 1
 	}
 	repositoryRoot, inputPath, jsonOutput := "", "", false
@@ -30,7 +30,7 @@ func runReviewFeedbackCLI(argv []string, stdout, stderr io.Writer) int {
 			jsonOutput = true
 		case argument == "--repository-root":
 			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return writeReviewCLIError(stderr, jsonOutput, "REVIEW_INVALID_REQUEST", "--repository-root требует DIR")
+				return writeReviewCLIError(stderr, jsonOutput, "REVIEW_INVALID_REQUEST", "--repository-root requires DIR")
 			}
 			index++
 			repositoryRoot = args[index]
@@ -38,7 +38,7 @@ func runReviewFeedbackCLI(argv []string, stdout, stderr io.Writer) int {
 			repositoryRoot = strings.TrimPrefix(argument, "--repository-root=")
 		case argument == "--input":
 			if index+1 >= len(args) || strings.HasPrefix(args[index+1], "-") {
-				return writeReviewCLIError(stderr, jsonOutput, "REVIEW_INVALID_REQUEST", "--input требует JSON file")
+				return writeReviewCLIError(stderr, jsonOutput, "REVIEW_INVALID_REQUEST", "--input requires a JSON file")
 			}
 			index++
 			inputPath = args[index]
@@ -48,14 +48,14 @@ func runReviewFeedbackCLI(argv []string, stdout, stderr io.Writer) int {
 			printReviewFeedbackHelp(stdout)
 			return 0
 		default:
-			return writeReviewCLIError(stderr, jsonOutput, "REVIEW_INVALID_REQUEST", "неизвестный параметр: "+argument)
+			return writeReviewCLIError(stderr, jsonOutput, "REVIEW_INVALID_REQUEST", "unknown option: "+argument)
 		}
 	}
 	if operation == "pending" && !jsonOutput {
-		return writeReviewCLIError(stderr, false, "REVIEW_INVALID_REQUEST", "pending требует --json")
+		return writeReviewCLIError(stderr, false, "REVIEW_INVALID_REQUEST", "pending requires --json")
 	}
 	if operation == "pending" && inputPath != "" || operation == "respond" && inputPath == "" {
-		return writeReviewCLIError(stderr, jsonOutput, "REVIEW_INVALID_REQUEST", "respond требует --input; pending его не принимает")
+		return writeReviewCLIError(stderr, jsonOutput, "REVIEW_INVALID_REQUEST", "respond requires --input; pending does not accept it")
 	}
 	root, err := resolveReviewCLIRoot(repositoryRoot)
 	if err != nil {
@@ -80,10 +80,10 @@ func runReviewFeedbackCLI(argv []string, stdout, stderr io.Writer) int {
 	}
 	info, err := os.Lstat(inputAbsolute)
 	if err != nil || !info.Mode().IsRegular() || info.Mode()&os.ModeSymlink != 0 {
-		return writeReviewCLIError(stderr, jsonOutput, "REVIEW_INVALID_RESPONSE", "--input должен быть regular non-symlink JSON file")
+		return writeReviewCLIError(stderr, jsonOutput, "REVIEW_INVALID_RESPONSE", "--input must be a regular non-symlink JSON file")
 	}
 	if info.Size() > reviewResponseLimit {
-		return writeReviewCLIError(stderr, jsonOutput, "REVIEW_INVALID_RESPONSE", "response превышает 1 MiB")
+		return writeReviewCLIError(stderr, jsonOutput, "REVIEW_INVALID_RESPONSE", "response exceeds 1 MiB")
 	}
 	content, err := os.ReadFile(inputAbsolute)
 	if err != nil {
@@ -97,7 +97,7 @@ func runReviewFeedbackCLI(argv []string, stdout, stderr io.Writer) int {
 	}
 	var trailing any
 	if err := decoder.Decode(&trailing); err != io.EOF {
-		return writeReviewCLIError(stderr, jsonOutput, "REVIEW_INVALID_RESPONSE", "response JSON должен содержать ровно один object")
+		return writeReviewCLIError(stderr, jsonOutput, "REVIEW_INVALID_RESPONSE", "response JSON must contain exactly one object")
 	}
 	if err := reviewResponseSize(response); err != nil {
 		return writeReviewCLIError(stderr, jsonOutput, reviewErrorCode(err), err.Error())
@@ -123,7 +123,7 @@ func resolveReviewCLIRoot(requested string) (string, error) {
 		}
 		probe := execGit(cwd, "rev-parse", "--show-toplevel")
 		if probe.err != nil {
-			return "", &reviewFailure{Code: "REVIEW_GIT_UNAVAILABLE", Status: 503, Message: "cwd не находится в доступном Git repository"}
+			return "", &reviewFailure{Code: "REVIEW_GIT_UNAVAILABLE", Status: 503, Message: "current directory is not inside an available Git repository"}
 		}
 		requested = strings.TrimSpace(string(probe.out))
 	}
@@ -158,7 +158,7 @@ func writeReviewCLIError(w io.Writer, jsonOutput bool, code, message string) int
 		data, _ := json.Marshal(map[string]any{"schemaVersion": reviewSchemaVersion, "diagnostics": []Issue{{Severity: "error", Code: code, Message: message}}})
 		fmt.Fprintln(w, string(data))
 	} else {
-		fmt.Fprintf(w, "Ошибка %s: %s\n", code, message)
+		fmt.Fprintf(w, "Error %s: %s\n", code, message)
 	}
 	return 1
 }

@@ -1,13 +1,13 @@
-import { registerMessages, text } from "../../core/locale";
-import { changesMessages } from "../../core/messages.ru";
-registerMessages(changesMessages);
+import { text } from "../../core/locale";
 (() => {
     'use strict';
     const page: any = window.ToudocuPage;
+    const locale: any = page?.ui.locale || 'en';
     const API: any = page?.runtime === 'serve' && page.capabilities?.changes ? page.endpoints?.changes : '';
     const REVIEW: any = page?.runtime === 'serve' && page.capabilities?.review ? page.endpoints?.review : '';
     const EDITOR_WORKSPACE: any = page?.runtime === 'serve' && page.capabilities?.editor ? page.endpoints?.editorWorkspace : '';
     const $: any = (selector: any, root: any = document) => root.querySelector(selector);
+    const escapeHTML: any = (value: any) => String(value ?? '').replace(/[&<>"']/g, (character: any) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } as Record<string, string>)[character]);
     const state: any = { report: null, repository: null, files: [], linked: [], linkedPaths: new Set(), selected: null, tab: 'source', merge: null, etag: '', repositoryEtag: '', reviewEtag: '', review: null, composerTarget: null, composerReturn: null, pendingDelete: '', activeDiscussion: '', discussionScroll: 0, detailRequest: 0 };
     const elements: any = {
         base: $('[data-base]'), branchBase: $('[data-branch-base]'), target: $('[data-target]'), targetRevision: $('[data-target-revision]'), targetRevisionWrap: $('[data-target-revision-wrap]'), apply: $('[data-apply-range]'), range: $('[data-range-summary]'), rangeMeta: $('[data-range-meta]'),
@@ -20,7 +20,7 @@ registerMessages(changesMessages);
     if (!REVIEW)
         document.querySelectorAll('[data-global-comment], [data-discussions-toggle], [data-linked-file-open]').forEach((element: any) => element.hidden = true);
     if (!API) {
-        elements.detail.innerHTML = text("features.changes.index.001");
+        elements.detail.innerHTML = `<div class="changes-error" data-ui-state="capability-unavailable">${escapeHTML(text("changes.viewerUnavailable"))}</div>`;
         return;
     }
     document.addEventListener('toudocu:themechange', async (event: any) => {
@@ -28,8 +28,7 @@ registerMessages(changesMessages);
         if (state.selected && (state.tab === 'mermaid' || state.tab === 'rendered'))
             await renderDetail();
     });
-    const escapeHTML: any = (value: any) => String(value ?? '').replace(/[&<>"']/g, (character: any) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } as Record<string, string>)[character]);
-    const statusLabel: any = (status: any) => ({ added: text("features.changes.index.002"), untracked: 'Untracked', modified: text("features.changes.index.003"), deleted: text("features.changes.index.004"), renamed: text("features.changes.index.005"), copied: text("features.changes.index.006"), 'type-changed': text("features.changes.index.007"), linked: text("features.changes.index.091") } as Record<string, string>)[status] || status;
+    const statusLabel: any = (status: any) => ({ added: text("features.changes.index.002"), untracked: text("features.changes.index.153"), modified: text("features.changes.index.003"), deleted: text("features.changes.index.004"), renamed: text("features.changes.index.005"), copied: text("features.changes.index.006"), 'type-changed': text("features.changes.index.007"), linked: text("features.changes.index.091") } as Record<string, string>)[status] || status;
     const outcomeLabel: any = (outcome: any) => ({ fixed: text("features.changes.index.128"), notFixed: text("features.changes.index.129"), needsClarification: text("features.changes.index.130") } as Record<string, string>)[outcome] || outcome;
     const placementLabel: any = (status: any) => ({ exact: text("features.changes.index.145"), moved: text("features.changes.index.146"), stale: text("features.changes.index.147"), deleted: text("features.changes.index.148") } as Record<string, string>)[status] || status;
     const selectedTarget: any = () => elements.target.value === 'revision' ? elements.targetRevision.value.trim() : elements.target.value;
@@ -47,7 +46,7 @@ registerMessages(changesMessages);
     const apiURL: any = (endpoint: any = '', extra: any = {}) => { const params: any = query(); Object.entries(extra).forEach(([key, value]: any) => value != null && params.set(key, value)); return `${API}${endpoint}?${params}`; };
     const reviewURL: any = (endpoint: any = '', extra: any = {}) => { const params: any = query(); Object.entries(extra).forEach(([key, value]: any) => value != null && params.set(key, value)); return `${REVIEW}${endpoint}?${params}`; };
     const languageFor: any = (path: any) => path.endsWith('.json') ? 'json' : /\.ya?ml$/i.test(path) ? 'yaml' : path.endsWith('.go') ? 'go' : path.endsWith('.java') ? 'java' : /\.(js|jsx|mjs|cjs)$/i.test(path) ? 'javascript' : /\.(ts|tsx|mts|cts)$/i.test(path) ? 'typescript' : /\.md$/i.test(path) ? 'markdown' : 'text';
-    const changeText: any = (change: any) => [change.path, change.oldPath].join(' ').toLocaleLowerCase('ru');
+    const changeText: any = (change: any) => [change.path, change.oldPath].join(' ').toLocaleLowerCase(locale);
     const isDocumentationFile: any = (change: any) => !!change.documentation || change.path === 'CHANGELOG.md' || change.oldPath === 'CHANGELOG.md';
     function normalizedReviewFile(file: any) {
         const documentation: any = file.documentation || {};
@@ -89,11 +88,11 @@ registerMessages(changesMessages);
         const report: any = state.repository || state.report;
         const summary: any = report.summary;
         elements.range.textContent = `${report.comparison.base.displayRef} → ${report.comparison.target.displayRef}`;
-        elements.rangeMeta.textContent = `Base ${report.comparison.base.resolved.slice(0, 7)} · Target ${report.comparison.target.resolved ? report.comparison.target.resolved.slice(0, 7) : report.comparison.target.displayRef} · Branch ${report.repository.branch || 'detached HEAD'} · ${report.repository.dirty ? 'dirty' : 'clean'}`;
+        elements.rangeMeta.textContent = text("features.changes.index.149", [report.comparison.base.resolved.slice(0, 7), report.comparison.target.resolved ? report.comparison.target.resolved.slice(0, 7) : report.comparison.target.displayRef, report.repository.branch || text("features.changes.index.150"), text(report.repository.dirty ? "features.changes.index.151" : "features.changes.index.152")]);
         elements.summary.textContent = text("features.changes.index.131", [state.files.length, summary.lines.added, summary.lines.deleted]);
     }
     function matches(change: any) {
-        const search: any = elements.search.value.trim().toLocaleLowerCase('ru');
+        const search: any = elements.search.value.trim().toLocaleLowerCase(locale);
         if (search && !changeText(change).includes(search))
             return false;
         if (elements.status.value && change.status !== elements.status.value)
@@ -105,8 +104,8 @@ registerMessages(changesMessages);
         return true;
     }
     function renderList() {
-        const changed: any = state.files.filter(matches).sort((left: any, right: any) => left.path.localeCompare(right.path));
-        const linked: any = state.linked.filter(matches).sort((left: any, right: any) => left.path.localeCompare(right.path));
+        const changed: any = state.files.filter(matches).sort((left: any, right: any) => left.path.localeCompare(right.path, locale));
+        const linked: any = state.linked.filter(matches).sort((left: any, right: any) => left.path.localeCompare(right.path, locale));
         elements.count.textContent = text("features.changes.index.013", [changed.length + linked.length, state.files.length + state.linked.length]);
         elements.list.replaceChildren();
         const appendSection: any = (label: any, items: any) => {
@@ -134,12 +133,12 @@ registerMessages(changesMessages);
         appendSection(text("features.changes.index.093"), changed);
         appendSection(text("features.changes.index.094"), linked);
         if (!changed.length && !linked.length)
-            elements.list.innerHTML = text("features.changes.index.020");
+            elements.list.innerHTML = `<div class="changes-list-empty"><strong>${escapeHTML(text("changes.noMatches"))}</strong><p>${escapeHTML(text("changes.resetFilters"))}</p></div>`;
         return [...changed, ...linked];
     }
     const tabsFor: any = (change: any) => {
         const documentation: any = !REVIEW || !!change.documentation;
-        return [['source', text("features.changes.index.022")], ...(!change.binary && !change.asset ? [['file', text("features.changes.index.133")]] : []), ...(documentation && change.renderedDiffAvailable ? [['rendered', text("features.changes.index.023")]] : []), ...(documentation && change.semanticDiffAvailable ? [['semantic', text("features.changes.index.024")]] : []), ...(documentation ? [['relations', text("features.changes.index.025")]] : []), ...(change.classification === 'contract' ? [['openapi', 'OpenAPI']] : []), ...(change.mermaidBlocks?.length ? [['mermaid', 'Mermaid']] : []), ...(change.classification === 'asset' ? [['assets', 'Assets']] : []), ...([...(change.entitiesBefore || []), ...(change.entitiesAfter || [])].some((item: any) => item.type === 'screen' || item.type === 'transition') ? [['map', text("features.changes.index.026")]] : [])];
+        return [['source', text("features.changes.index.022")], ...(!change.binary && !change.asset ? [['file', text("features.changes.index.133")]] : []), ...(documentation && change.renderedDiffAvailable ? [['rendered', text("features.changes.index.023")]] : []), ...(documentation && change.semanticDiffAvailable ? [['semantic', text("features.changes.index.024")]] : []), ...(documentation ? [['relations', text("features.changes.index.025")]] : []), ...(change.classification === 'contract' ? [['openapi', 'OpenAPI']] : []), ...(change.mermaidBlocks?.length ? [['mermaid', 'Mermaid']] : []), ...(change.classification === 'asset' ? [['assets', text("features.changes.index.154")]] : []), ...([...(change.entitiesBefore || []), ...(change.entitiesAfter || [])].some((item: any) => item.type === 'screen' || item.type === 'transition') ? [['map', text("features.changes.index.026")]] : [])];
     };
     async function selectChange(change: any, tab: any = state.tab) {
         const request: any = ++state.detailRequest;
@@ -156,7 +155,7 @@ registerMessages(changesMessages);
             elements.detail.innerHTML = detailHeader(change);
             elements.detail.setAttribute('aria-busy', 'true');
             elements.detail.querySelectorAll('[data-tab], [data-file-comment]').forEach((button: any) => button.disabled = true);
-            $('[data-tab-panel]', elements.detail).innerHTML = text("features.changes.index.134");
+            $('[data-tab-panel]', elements.detail).innerHTML = `<div class="changes-loading" data-ui-state="loading" role="status">${escapeHTML(text("changes.loadingFile"))}</div>`;
             try {
                 const response: any = await fetch(reviewURL('/repository/file', { path: change.path }), { cache: 'no-store' });
                 const detail: any = await response.json();
@@ -170,7 +169,7 @@ registerMessages(changesMessages);
                 if (request !== state.detailRequest || state.selected !== change)
                     return;
                 elements.detail.removeAttribute('aria-busy');
-                $('[data-tab-panel]', elements.detail).innerHTML = text("features.changes.index.135", [escapeHTML(error.message)]);
+                $('[data-tab-panel]', elements.detail).innerHTML = `<div class="changes-error">${escapeHTML(text("changes.loadFileFailed", [error.message]))}</div>`;
                 announce(error.message);
                 return;
             }
@@ -181,10 +180,11 @@ registerMessages(changesMessages);
         await renderDetail();
     }
     function detailHeader(change: any) {
-        const editorLink: any = EDITOR_WORKSPACE && change.path.startsWith('docs/') ? text("features.changes.index.027", [escapeHTML(EDITOR_WORKSPACE), encodeURIComponent(change.path.replace(/^docs\//, ''))]) : '';
+        const editorLink: any = EDITOR_WORKSPACE && change.path.startsWith('docs/') ? `<a class="changes-button secondary" href="${escapeHTML(EDITOR_WORKSPACE)}?path=${encodeURIComponent(change.path.replace(/^docs\//, ''))}">${escapeHTML(text("changes.editCurrentFile"))}</a>` : '';
         const comment: any = REVIEW ? `<button type="button" class="changes-button secondary" data-file-comment ${state.repository?.feedbackWritable ? '' : 'disabled'}>${text("features.changes.index.095")}</button>` : '';
-        const diagnostics: any = change.diagnostics?.length ? `<details class="changes-diagnostics" ${change.diagnostics.some((item: any) => item.severity === 'error') ? 'open' : ''}><summary>Diagnostics · ${change.diagnostics.length}</summary><ul>${change.diagnostics.map((item: any) => `<li class="is-${escapeHTML(item.severity)}"><code>${escapeHTML(item.code)}</code> ${escapeHTML(item.message)}</li>`).join('')}</ul></details>` : '';
-        return text("features.changes.index.028", [escapeHTML(change.status), escapeHTML(statusLabel(change.status)), escapeHTML(change.path.split('/').pop()), escapeHTML(change.oldPath ? `${change.oldPath} → ${change.path}` : change.path), change.lines.added, change.lines.deleted, `<div class="changes-detail-actions">${comment}${editorLink}</div>`, diagnostics, tabsFor(change).map(([id, label]: any) => `<button type="button" role="tab" aria-selected="${state.tab === id}" data-tab="${id}">${label}</button>`).join('')]);
+        const diagnostics: any = change.diagnostics?.length ? `<details class="changes-diagnostics" ${change.diagnostics.some((item: any) => item.severity === 'error') ? 'open' : ''}><summary>${text("features.changes.index.155")} · ${change.diagnostics.length}</summary><ul>${change.diagnostics.map((item: any) => `<li class="is-${escapeHTML(item.severity)}"><code>${escapeHTML(item.code)}</code> ${escapeHTML(item.message)}</li>`).join('')}</ul></details>` : '';
+        const tabs: any = tabsFor(change).map(([id, label]: any) => `<button type="button" role="tab" aria-selected="${state.tab === id}" data-tab="${id}">${escapeHTML(label)}</button>`).join('');
+        return `<header class="changes-detail-header"><div><span class="changes-file-status status-${escapeHTML(change.status)}">${escapeHTML(statusLabel(change.status))}</span><h2>${escapeHTML(change.path.split('/').pop())}</h2><p>${escapeHTML(change.oldPath ? `${change.oldPath} → ${change.path}` : change.path)} · +${change.lines.added} −${change.lines.deleted}</p></div><div class="changes-detail-actions">${comment}${editorLink}</div></header>${diagnostics}<nav class="changes-tabs" role="tablist" aria-label="${escapeHTML(text("changes.changeViews"))}">${tabs}</nav><div class="changes-tab-panel" data-tab-panel></div>`;
     }
     async function renderDetail() {
         const change: any = state.selected;
@@ -224,7 +224,8 @@ registerMessages(changesMessages);
         return response.text();
     }
     async function renderSource(panel: any, change: any) {
-        panel.innerHTML = text("features.changes.index.030", [change.sourceDiffHunks?.length > 1 ? text("features.changes.index.080") : '']);
+        const hunkNavigation: any = change.sourceDiffHunks?.length > 1 ? `<button type="button" class="changes-button secondary" data-hunk-previous>${escapeHTML(text("changes.previousHunk"))}</button><button type="button" class="changes-button secondary" data-hunk-next>${escapeHTML(text("changes.nextHunk"))}</button>` : '';
+        panel.innerHTML = `<div class="source-actions"><div class="source-mode-toggle" role="group" aria-label="${escapeHTML(text("changes.comparisonMode"))}"><button type="button" data-source-mode="unified" aria-pressed="true">${escapeHTML(text("changes.unified"))}</button><button type="button" data-source-mode="merge" aria-pressed="false">${escapeHTML(text("changes.sideBySide"))}</button></div><button type="button" class="changes-button tertiary" data-copy-diff>${escapeHTML(text("changes.copyDiff"))}</button>${hunkNavigation}</div><div data-source-view></div>`;
         const host: any = $('[data-source-view]', panel);
         let activeHunk: any = 0;
         const setMode: any = (mode: any) => panel.querySelectorAll('[data-source-mode]').forEach((button: any) => button.setAttribute('aria-pressed', String(button.dataset.sourceMode === mode)));
@@ -281,7 +282,7 @@ registerMessages(changesMessages);
                 if (lines.at(-1) === '')
                     lines.pop();
                 const counters: any = { old: hunk.oldStart, new: hunk.newStart };
-                article.innerHTML = text("features.changes.index.032", [escapeHTML(hunk.id), index + 1, escapeHTML(header), hunk.oldStart, hunk.oldLines, hunk.newStart, hunk.newLines, lines.map((line: any) => renderHunkLine(line, counters)).join('')]);
+                article.innerHTML = `<header><a href="#${escapeHTML(hunk.id)}" aria-label="${escapeHTML(text("changes.hunkLink", [index + 1]))}">${escapeHTML(header)}</a><span>−${hunk.oldStart},${hunk.oldLines} +${hunk.newStart},${hunk.newLines}</span><button type="button" class="changes-button secondary" data-copy-hunk>${escapeHTML(text("changes.copyHunk"))}</button></header><pre>${lines.map((line: any) => renderHunkLine(line, counters)).join('')}</pre>`;
                 article.querySelector('a').addEventListener('click', (event: any) => { event.preventDefault(); activeHunk = index; history.replaceState(null, '', `${location.pathname}${location.search}#${hunk.id}`); article.focus(); });
                 article.querySelector('[data-copy-hunk]').addEventListener('click', async () => { await navigator.clipboard.writeText(hunk.patch); announce(text("features.changes.index.033")); });
                 host.append(article);
@@ -299,7 +300,7 @@ registerMessages(changesMessages);
         };
         const showMerge: any = async () => {
             setMode('merge');
-            host.innerHTML = text("features.changes.index.034");
+            host.innerHTML = `<div class="changes-loading">${escapeHTML(text("changes.loadingVersions"))}</div>`;
             try {
                 const [before, after]: any = await Promise.all([fetchSide(change, 'before'), fetchSide(change, 'after')]);
                 host.replaceChildren();
@@ -310,7 +311,7 @@ registerMessages(changesMessages);
                 }
             }
             catch (error: any) {
-                host.innerHTML = text("features.changes.index.035", [escapeHTML(error.message)]);
+                host.innerHTML = `<div class="changes-error">${escapeHTML(text("changes.loadVersionsFailed", [error.message]))}</div>`;
             }
         };
         panel.querySelector('[data-source-mode="unified"]').addEventListener('click', showUnified);
@@ -321,11 +322,11 @@ registerMessages(changesMessages);
         showUnified();
     }
     async function renderFile(panel: any, change: any) {
-        panel.innerHTML = text("features.changes.index.134");
+        panel.innerHTML = `<div class="changes-loading" data-ui-state="loading" role="status">${escapeHTML(text("changes.loadingFile"))}</div>`;
         try {
             const deleted: any = change.status === 'deleted';
             const content: any = await fetchSide(change, deleted ? 'before' : 'after');
-            panel.innerHTML = `${deleted ? text("features.changes.index.136") : ''}<div data-file-view></div>`;
+            panel.innerHTML = `${deleted ? `<p class="changes-absence">${escapeHTML(text("changes.showingDeletedVersion"))}</p>` : ''}<div data-file-view></div>`;
             const host: any = $('[data-file-view]', panel);
             if (window.ToudocuCodeMirror?.createViewer) {
                 const menu: any = document.createElement('div');
@@ -394,14 +395,16 @@ registerMessages(changesMessages);
             }
         }
         catch (error: any) {
-            panel.innerHTML = text("features.changes.index.135", [escapeHTML(error.message)]);
+            panel.innerHTML = `<div class="changes-error">${escapeHTML(text("changes.loadFileFailed", [error.message]))}</div>`;
         }
     }
     async function renderBeforeAfter(panel: any, change: any) {
-        panel.innerHTML = text("features.changes.index.037");
+        panel.innerHTML = `<div class="changes-loading">${escapeHTML(text("changes.renderingVersions"))}</div>`;
         try {
             const [before, after]: any = await Promise.all([fetchSide(change, 'before', true), fetchSide(change, 'after', true)]);
-            panel.innerHTML = text("features.changes.index.038", [before || text("features.changes.index.081"), after || text("features.changes.index.082")]);
+            const beforeDocument: any = before || `<p class="changes-absence">${escapeHTML(text("changes.documentMissing"))}</p>`;
+            const afterDocument: any = after || `<p class="changes-absence">${escapeHTML(text("changes.documentDeleted"))}</p>`;
+            panel.innerHTML = `<div class="rendered-columns"><section><h3>${escapeHTML(text("changes.before"))}</h3><div class="rendered-document">${beforeDocument}</div></section><section><h3>${escapeHTML(text("changes.after"))}</h3><div class="rendered-document">${afterDocument}</div></section></div>`;
             const markSections: any = (root: any, side: any) => {
                 (change.renderedSections || []).forEach((section: any) => {
                     const anchor: any = side === 'before' ? section.anchorBefore : section.anchorAfter;
@@ -431,22 +434,22 @@ registerMessages(changesMessages);
                         await window.mermaid.run({ nodes: [diagram] });
                     }
                     catch {
-                        diagram.insertAdjacentHTML('afterend', text("features.changes.index.039"));
+                        diagram.insertAdjacentHTML('afterend', `<p class="changes-error">${escapeHTML(text("changes.mermaidSideFailed"))}</p>`);
                     }
                 }
             }
         }
         catch (error: any) {
-            panel.innerHTML = text("features.changes.index.040", [escapeHTML(error.message)]);
+            panel.innerHTML = `<div class="changes-error">${escapeHTML(text("changes.renderedDiffFailed", [error.message]))}</div>`;
         }
     }
     async function renderMermaid(panel: any, change: any) {
         const blocks: any = change.mermaidBlocks || [];
         if (!blocks.length) {
-            panel.innerHTML = text("features.changes.index.041");
+            panel.innerHTML = `<div class="changes-empty"><h3>${escapeHTML(text("changes.noMermaidChanges"))}</h3><p>${escapeHTML(text("changes.noMermaidChangesHelp"))}</p></div>`;
             return;
         }
-        panel.innerHTML = blocks.map((block: any) => text("features.changes.index.042", [escapeHTML(block.caption || block.id), escapeHTML(block.status), escapeHTML(statusLabel(block.status)), block.before ? `<div class="mermaid-canvas" data-mermaid-canvas><pre class="mermaid">${escapeHTML(block.before)}</pre></div>` : text("features.changes.index.083"), block.after ? `<div class="mermaid-canvas" data-mermaid-canvas><pre class="mermaid">${escapeHTML(block.after)}</pre></div>` : text("features.changes.index.084"), mermaidSourceDiff(block.before || '', block.after || '')])).join('');
+        panel.innerHTML = blocks.map((block: any) => `<section class="mermaid-change"><header><strong>${escapeHTML(block.caption || block.id)}</strong><span class="changes-file-status status-${escapeHTML(block.status)}">${escapeHTML(statusLabel(block.status))}</span></header><div class="mermaid-controls" role="group" aria-label="${escapeHTML(text("changes.diagramControls"))}"><button type="button" class="changes-button secondary" data-mermaid-zoom="out">−</button><button type="button" class="changes-button secondary" data-mermaid-zoom="reset">100%</button><button type="button" class="changes-button secondary" data-mermaid-zoom="in">+</button><button type="button" class="changes-button secondary" data-mermaid-fullscreen>${escapeHTML(text("changes.fullscreen"))}</button></div><div class="rendered-columns"><section><h3>${escapeHTML(text("changes.diagramBefore"))}</h3>${block.before ? `<div class="mermaid-canvas" data-mermaid-canvas><pre class="mermaid">${escapeHTML(block.before)}</pre></div>` : `<p class="changes-absence">${escapeHTML(text("changes.diagramMissing"))}</p>`}</section><section><h3>${escapeHTML(text("changes.diagramAfter"))}</h3>${block.after ? `<div class="mermaid-canvas" data-mermaid-canvas><pre class="mermaid">${escapeHTML(block.after)}</pre></div>` : `<p class="changes-absence">${escapeHTML(text("changes.diagramDeleted"))}</p>`}</section></div><h3>${escapeHTML(text("changes.mermaidSourceDiff"))}</h3><pre class="changes-diff mermaid-source-diff">${mermaidSourceDiff(block.before || '', block.after || '')}</pre></section>`).join('');
         if (!window.mermaid)
             return;
         window.mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default' });
@@ -455,7 +458,7 @@ registerMessages(changesMessages);
                 await window.mermaid.run({ nodes: [diagram] });
             }
             catch {
-                diagram.insertAdjacentHTML('afterend', text("features.changes.index.043"));
+                diagram.insertAdjacentHTML('afterend', `<p class="changes-error">${escapeHTML(text("changes.mermaidVersionFailed"))}</p>`);
             }
         }
         panel.querySelectorAll('.mermaid-change').forEach((section: any) => setupMermaidControls(section));
@@ -517,17 +520,20 @@ registerMessages(changesMessages);
         });
     }
     function renderSemantic(panel: any, change: any) {
-        panel.innerHTML = change.semanticChanges.length ? `<ol class="semantic-list">${change.semanticChanges.map((item: any) => `<li><div><strong>${escapeHTML(item.kind)}</strong>${item.compatibility ? `<span class="compatibility ${item.compatibility}">${escapeHTML(item.compatibility)}</span>` : ''}</div><p>${escapeHTML(item.summary)}</p>${item.before !== undefined || item.after !== undefined ? `<div class="semantic-values"><pre>${escapeHTML(JSON.stringify(item.before, null, 2) || '—')}</pre><pre>${escapeHTML(JSON.stringify(item.after, null, 2) || '—')}</pre></div>` : ''}</li>`).join('')}</ol>` : text("features.changes.index.045");
+        panel.innerHTML = change.semanticChanges.length ? `<ol class="semantic-list">${change.semanticChanges.map((item: any) => `<li><div><strong>${escapeHTML(item.kind)}</strong>${item.compatibility ? `<span class="compatibility ${item.compatibility}">${escapeHTML(item.compatibility)}</span>` : ''}</div><p>${escapeHTML(item.summary)}</p>${item.before !== undefined || item.after !== undefined ? `<div class="semantic-values"><pre>${escapeHTML(JSON.stringify(item.before, null, 2) || '—')}</pre><pre>${escapeHTML(JSON.stringify(item.after, null, 2) || '—')}</pre></div>` : ''}</li>`).join('')}</ol>` : `<div class="changes-empty"><h3>${escapeHTML(text("changes.noSemanticChanges"))}</h3><p>${escapeHTML(text("changes.noSemanticChangesHelp"))}</p></div>`;
     }
-    function renderRelations(panel: any, change: any) { panel.innerHTML = change.relationChanges.length ? `<ul>${change.relationChanges.map((item: any) => `<li>${escapeHTML(item.kind)}: ${escapeHTML(item.source.id)} → ${escapeHTML(item.target.id)}</li>`).join('')}</ul>` : text("features.changes.index.046"); }
+    function renderRelations(panel: any, change: any) { panel.innerHTML = change.relationChanges.length ? `<ul>${change.relationChanges.map((item: any) => `<li>${escapeHTML(item.kind)}: ${escapeHTML(item.source.id)} → ${escapeHTML(item.target.id)}</li>`).join('')}</ul>` : `<div class="changes-empty"><h3>${escapeHTML(text("changes.noRelationChanges"))}</h3><p>${escapeHTML(text("changes.noRelationChangesHelp"))}</p></div>`; }
     function renderAssets(panel: any, change: any) {
         const before: any = apiURL('/content', { side: 'before', path: change.path });
         const after: any = apiURL('/content', { side: 'after', path: change.path });
-        const meta: any = (side: any, bytes: any) => side ? `${side.width || '?'}×${side.height || '?'} · ratio ${side.aspectRatio || '?'} · ${bytes} bytes${side.transparency == null ? '' : side.transparency ? ' · alpha' : ' · opaque'}` : `${bytes} bytes`;
+        const meta: any = (side: any, bytes: any) => side ? text("changes.assetMeta", [side.width || '?', side.height || '?', side.aspectRatio || '?', bytes, side.transparency == null ? '' : ` · ${text(side.transparency ? "changes.alpha" : "changes.opaque")}`]) : text("changes.assetBytes", [bytes]);
         const beforePresent: any = change.status !== 'added' && change.status !== 'untracked';
         const afterPresent: any = change.status !== 'deleted';
         const overlay: any = beforePresent && afterPresent && change.asset?.before?.mediaType !== 'image/svg+xml' && change.asset?.after?.mediaType !== 'image/svg+xml';
-        panel.innerHTML = text("features.changes.index.047", [escapeHTML(meta(change.asset?.before, change.oldSize)), beforePresent ? text("features.changes.index.085", [escapeHTML(before), escapeHTML(change.path)]) : text("features.changes.index.086"), escapeHTML(meta(change.asset?.after, change.newSize)), afterPresent ? text("features.changes.index.087", [escapeHTML(after), escapeHTML(change.path)]) : text("features.changes.index.088"), overlay ? text("features.changes.index.089", [escapeHTML(before), escapeHTML(after)]) : '']);
+        const beforeAsset: any = beforePresent ? `<img src="${escapeHTML(before)}" alt="${escapeHTML(text("changes.oldVersion", [change.path]))}">` : `<p class="changes-absence">${escapeHTML(text("changes.assetMissing"))}</p>`;
+        const afterAsset: any = afterPresent ? `<img src="${escapeHTML(after)}" alt="${escapeHTML(text("changes.newVersion", [change.path]))}">` : `<p class="changes-absence">${escapeHTML(text("changes.assetDeleted"))}</p>`;
+        const overlayView: any = overlay ? `<section class="asset-overlay"><h3>${escapeHTML(text("changes.overlay"))}</h3><div class="asset-overlay-stage"><img src="${escapeHTML(before)}" alt="${escapeHTML(text("changes.oldVersionShort"))}"><div data-overlay-after><img src="${escapeHTML(after)}" alt="${escapeHTML(text("changes.newVersionShort"))}"></div><span data-overlay-divider></span></div><label><span>${escapeHTML(text("changes.dividerPosition"))}</span><input type="range" min="0" max="100" value="50" data-overlay-range></label></section>` : '';
+        panel.innerHTML = `<div class="rendered-columns asset-columns"><section><h3>${escapeHTML(text("changes.before"))} · ${escapeHTML(meta(change.asset?.before, change.oldSize))}</h3>${beforeAsset}</section><section><h3>${escapeHTML(text("changes.after"))} · ${escapeHTML(meta(change.asset?.after, change.newSize))}</h3>${afterAsset}</section></div>${overlayView}`;
         const range: any = panel.querySelector('[data-overlay-range]');
         if (range)
             range.addEventListener('input', () => { const value: any = `${range.value}%`; panel.querySelector('[data-overlay-after]').style.clipPath = `inset(0 0 0 ${value})`; panel.querySelector('[data-overlay-divider]').style.left = value; });
@@ -535,14 +541,15 @@ registerMessages(changesMessages);
     function renderMap(panel: any, change: any) {
         const screen: any = change.screen;
         if (!screen) {
-            panel.innerHTML = text("features.changes.index.048");
+            panel.innerHTML = `<div class="changes-empty"><h3>${escapeHTML(text("changes.screenDiffUnavailable"))}</h3><p>${escapeHTML(text("changes.screenDiffUnavailableHelp"))}</p></div>`;
             return;
         }
         const before: any = screen.before;
         const after: any = screen.after;
         const node: any = after || before;
         const edge: any = (transition: any) => { const oldValue: any = transition.before; const newValue: any = transition.after; return `<li class="map-change-edge status-${escapeHTML(transition.status)}"><header><strong>${escapeHTML(transition.id)}</strong><span>${escapeHTML(statusLabel(transition.status))}</span></header><div class="map-edge-values"><span>${oldValue ? `${escapeHTML(oldValue.source)} → ${escapeHTML(oldValue.target)}` : text("features.changes.index.049")}</span><span>${newValue ? `${escapeHTML(newValue.source)} → ${escapeHTML(newValue.target)}` : text("features.changes.index.050")}</span></div>${newValue?.action || oldValue?.action ? `<p>${escapeHTML(newValue?.action || oldValue?.action)} · ${escapeHTML(newValue?.condition || oldValue?.condition || '')}</p>` : ''}</li>`; };
-        panel.innerHTML = text("features.changes.index.051", [escapeHTML(change.status), after ? '' : 'is-ghost', escapeHTML(node?.id), escapeHTML(statusLabel(change.status)), escapeHTML(node?.title || ''), node?.route ? ` · ${escapeHTML(node.route)}` : '', screen.transitions.length ? `<ol class="map-change-edges">${screen.transitions.map(edge).join('')}</ol>` : text("features.changes.index.090"), apiURL('/screen-map')]);
+        const transitions: any = screen.transitions.length ? `<ol class="map-change-edges">${screen.transitions.map(edge).join('')}</ol>` : `<p>${escapeHTML(text("changes.transitionsUnchanged"))}</p>`;
+        panel.innerHTML = `<div class="map-change-preview"><h3>${escapeHTML(text("changes.screenMapChanges"))}</h3><div class="map-change-node status-${escapeHTML(change.status)} ${after ? '' : 'is-ghost'}"><strong>${escapeHTML(node?.id)}</strong><span>${escapeHTML(statusLabel(change.status))}</span><small>${escapeHTML(node?.title || '')}${node?.route ? ` · ${escapeHTML(node.route)}` : ''}</small></div><h4>${escapeHTML(text("changes.transitions"))}</h4>${transitions}<p><a href="${escapeHTML(apiURL('/screen-map'))}">${escapeHTML(text("changes.openChangedMapJSON"))}</a></p></div>`;
     }
     function discussionsForPath(path: any) {
         return state.review?.session?.discussions?.filter((discussion: any) => discussion.target?.path === path || discussion.placement?.path === path) || [];
@@ -648,7 +655,7 @@ registerMessages(changesMessages);
             article.className = `review-thread is-${discussion.state}${state.activeDiscussion === discussion.id ? ' is-active' : ''}`;
             article.dataset.discussionId = discussion.id;
             const placement: any = discussion.placement || {};
-            article.innerHTML = `<header><div><strong>${text("features.changes.index.111")}</strong><span>${escapeHTML(text(discussion.state === 'open' ? "features.changes.index.105" : "features.changes.index.106"))} · ${escapeHTML(placementLabel(placement.status || 'exact'))}</span></div><div class="review-thread-actions"><button type="button" data-thread-state ${state.repository?.feedbackWritable ? '' : 'disabled'}>${text(discussion.state === 'open' ? "features.changes.index.107" : "features.changes.index.108")}</button><button type="button" class="is-danger" data-delete-discussion ${state.repository?.feedbackWritable ? '' : 'disabled'}>${text("features.changes.index.142")}</button></div></header><button type="button" class="review-anchor" data-open-anchor>${escapeHTML(placement.path || discussion.target.path || text("features.changes.index.109"))}${placement.start ? `:${placement.start.line}` : ''}${placement.reason ? ` · ${escapeHTML(placement.reason)}` : ''}</button><ol>${discussion.messages.map((message: any) => `<li class="review-message is-${message.author}"><div><strong>${message.author === 'agent' ? `${text("features.changes.index.110")} · ${escapeHTML(outcomeLabel(message.outcome || 'response'))}` : text("features.changes.index.111")}</strong><time>${escapeHTML(new Date(message.createdAt).toLocaleString())}</time></div><p>${escapeHTML(message.body)}</p>${message.changedPaths?.length ? `<button type="button" data-view-fix="${escapeHTML(message.id)}">${text("features.changes.index.112")}</button>` : ''}${message.author === 'human' && !message.feedbackId && state.repository?.feedbackWritable ? `<div class="review-message-actions"><button type="button" data-edit-message="${escapeHTML(message.id)}">${text("features.changes.index.113")}</button><button type="button" data-delete-message="${escapeHTML(message.id)}">${text("features.changes.index.114")}</button></div>` : ''}</li>`).join('')}</ol><button type="button" class="review-reply" ${discussion.state !== 'open' || discussionInFlightClient(discussion.id) || !state.repository?.feedbackWritable ? 'disabled' : ''}>${text("features.changes.index.115")}</button>`;
+            article.innerHTML = `<header><div><strong>${text("features.changes.index.111")}</strong><span>${escapeHTML(text(discussion.state === 'open' ? "features.changes.index.105" : "features.changes.index.106"))} · ${escapeHTML(placementLabel(placement.status || 'exact'))}</span></div><div class="review-thread-actions"><button type="button" data-thread-state ${state.repository?.feedbackWritable ? '' : 'disabled'}>${text(discussion.state === 'open' ? "features.changes.index.107" : "features.changes.index.108")}</button><button type="button" class="is-danger" data-delete-discussion ${state.repository?.feedbackWritable ? '' : 'disabled'}>${text("features.changes.index.142")}</button></div></header><button type="button" class="review-anchor" data-open-anchor>${escapeHTML(placement.path || discussion.target.path || text("features.changes.index.109"))}${placement.start ? `:${placement.start.line}` : ''}${placement.reason ? ` · ${escapeHTML(placement.reason)}` : ''}</button><ol>${discussion.messages.map((message: any) => `<li class="review-message is-${message.author}"><div><strong>${message.author === 'agent' ? `${text("features.changes.index.110")} · ${escapeHTML(outcomeLabel(message.outcome || 'response'))}` : text("features.changes.index.111")}</strong><time>${escapeHTML(new Date(message.createdAt).toLocaleString(locale))}</time></div><p>${escapeHTML(message.body)}</p>${message.changedPaths?.length ? `<button type="button" data-view-fix="${escapeHTML(message.id)}">${text("features.changes.index.112")}</button>` : ''}${message.author === 'human' && !message.feedbackId && state.repository?.feedbackWritable ? `<div class="review-message-actions"><button type="button" data-edit-message="${escapeHTML(message.id)}">${text("features.changes.index.113")}</button><button type="button" data-delete-message="${escapeHTML(message.id)}">${text("features.changes.index.114")}</button></div>` : ''}</li>`).join('')}</ol><button type="button" class="review-reply" ${discussion.state !== 'open' || discussionInFlightClient(discussion.id) || !state.repository?.feedbackWritable ? 'disabled' : ''}>${text("features.changes.index.115")}</button>`;
             article.querySelector('[data-thread-state]').addEventListener('click', () => updateDiscussion(discussion.id, discussion.state === 'open' ? 'resolve' : 'reopen'));
             article.querySelector('[data-delete-discussion]').addEventListener('click', () => {
                 state.pendingDelete = discussion.id;
@@ -666,7 +673,7 @@ registerMessages(changesMessages);
             elements.discussionList.append(article);
         });
         if (!discussions.length)
-            elements.discussionList.innerHTML = text("features.changes.index.116");
+            elements.discussionList.innerHTML = `<div class="changes-empty"><p>${escapeHTML(text("changes.noDiscussions"))}</p></div>`;
         elements.discussionList.scrollTop = state.discussionScroll;
     }
     async function openDiscussionAnchor(discussion: any) {
@@ -732,7 +739,7 @@ registerMessages(changesMessages);
         const data: any = await response.json();
         if (!response.ok)
             throw new Error(data.diagnostics?.[0]?.message || `HTTP ${response.status}`);
-        elements.filePickerResults.innerHTML = data.files.map((file: any) => `<button type="button" data-link-path="${escapeHTML(file.path)}"><strong>${escapeHTML(file.path.split('/').pop())}</strong><span>${escapeHTML(file.path)}</span></button>`).join('') || text("features.changes.index.119");
+        elements.filePickerResults.innerHTML = data.files.map((file: any) => `<button type="button" data-link-path="${escapeHTML(file.path)}"><strong>${escapeHTML(file.path.split('/').pop())}</strong><span>${escapeHTML(file.path)}</span></button>`).join('') || `<p>${escapeHTML(text("changes.noMatches"))}</p>`;
         elements.filePickerResults.querySelectorAll('[data-link-path]').forEach((button: any) => button.addEventListener('click', async () => {
             const path: any = button.dataset.linkPath;
             state.linkedPaths.add(path);
@@ -756,7 +763,7 @@ registerMessages(changesMessages);
         state.merge?.destroy?.();
         state.merge = null;
         elements.detail.removeAttribute('aria-busy');
-        elements.detail.innerHTML = text("features.changes.index.132");
+        elements.detail.innerHTML = `<div class="changes-empty" data-ui-state="empty"><h2>${escapeHTML(text("changes.none"))}</h2><p>${escapeHTML(text("changes.adjustFilters"))}</p></div>`;
         updateURL();
     }
     async function load(preserve: any = true) {
@@ -892,7 +899,7 @@ registerMessages(changesMessages);
                 await selectChange(requested, requestedTab);
         }
         catch (error: any) {
-            elements.detail.innerHTML = text("features.changes.index.071", [escapeHTML(error.message)]);
+            elements.detail.innerHTML = `<div class="changes-error"><h2>${escapeHTML(text("changes.unavailable"))}</h2><p>${escapeHTML(error.message)}</p><p>${escapeHTML(text("changes.unavailableHelp"))}</p></div>`;
         }
         setInterval(async () => {
             try {

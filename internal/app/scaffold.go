@@ -30,10 +30,10 @@ func validTaskInitType(value string) bool {
 
 func validateScaffoldTitle(value string) error {
 	if strings.TrimSpace(value) == "" {
-		return fmt.Errorf("--title не может быть пустым")
+		return fmt.Errorf("--title must not be empty")
 	}
 	if strings.ContainsAny(value, "\r\n") {
-		return fmt.Errorf("--title должен быть одной строкой")
+		return fmt.Errorf("--title must be one line")
 	}
 	return nil
 }
@@ -45,7 +45,7 @@ func atomicCreateFile(target, content string) error {
 	file, err := os.OpenFile(target, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0644)
 	if err != nil {
 		if os.IsExist(err) {
-			return fmt.Errorf("файл уже существует: %s", target)
+			return fmt.Errorf("file already exists: %s", target)
 		}
 		return err
 	}
@@ -261,10 +261,10 @@ func InitTask(options Options) (TaskInitReport, error) {
 		return TaskInitReport{}, err
 	}
 	if info, err := os.Stat(options.InputDirectory); err != nil || !info.IsDir() {
-		return TaskInitReport{}, fmt.Errorf("каталог документации не найден: %s", options.InputDirectory)
+		return TaskInitReport{}, fmt.Errorf("documentation directory not found: %s", options.InputDirectory)
 	}
 	if !taskAreaRE.MatchString(options.Area) {
-		return TaskInitReport{}, fmt.Errorf("--area должен состоять из A-Z, 0-9 и дефисов и начинаться с буквы")
+		return TaskInitReport{}, fmt.Errorf("--area must contain A-Z, 0-9, and hyphens and start with a letter")
 	}
 	if err := validateScaffoldTitle(options.Title); err != nil {
 		return TaskInitReport{}, err
@@ -273,10 +273,10 @@ func InitTask(options Options) (TaskInitReport, error) {
 		options.Language = "en"
 	}
 	if options.Language != "en" && options.Language != "ru" {
-		return TaskInitReport{}, fmt.Errorf("--lang должен быть en или ru")
+		return TaskInitReport{}, fmt.Errorf("--lang must be en or ru")
 	}
 	if !validTaskInitType(options.TaskType) {
-		return TaskInitReport{}, fmt.Errorf("--type должен быть Feature, Bug, Maintenance, Documentation или Research")
+		return TaskInitReport{}, fmt.Errorf("--type must be Feature, Bug, Maintenance, Documentation, or Research")
 	}
 	taskType := options.TaskType
 	prefix := "TASK"
@@ -292,7 +292,7 @@ func InitTask(options Options) (TaskInitReport, error) {
 		relative := filepath.ToSlash(filepath.Join("work", id+".md"))
 		target := filepath.Join(options.InputDirectory, filepath.FromSlash(relative))
 		err = atomicCreateFile(target, renderTaskScaffold(id, options.Title, taskType, options.Language, scaffoldDate(options.Now)))
-		if err != nil && strings.Contains(err.Error(), "уже существует") {
+		if err != nil && strings.Contains(err.Error(), "already exists") {
 			continue
 		}
 		if err != nil {
@@ -303,7 +303,7 @@ func InitTask(options Options) (TaskInitReport, error) {
 			ID: id, Title: options.Title, Type: taskType, Language: options.Language, Path: relative,
 		}, nil
 	}
-	return TaskInitReport{}, fmt.Errorf("не удалось выделить свободный идентификатор рабочего элемента после конкурентных изменений")
+	return TaskInitReport{}, fmt.Errorf("could not allocate a free work-item identifier after concurrent changes")
 }
 
 type scaffoldSpec struct {
@@ -358,9 +358,17 @@ func scaffoldTemplate(key string) (editorTemplate, bool) {
 	return editorTemplate{}, false
 }
 
-func editorTemplates() []editorTemplate {
+func editorTemplates(model *Model) []editorTemplate {
+	ui := portalUI(model)
 	out := make([]editorTemplate, len(scaffoldRegistry))
-	copy(out, scaffoldRegistry)
+	for index, item := range scaffoldRegistry {
+		out[index] = item
+		out[index].Label = ui.Text("template." + item.Key)
+		out[index].Fields = append([]editorTemplateField{}, item.Fields...)
+		for fieldIndex := range out[index].Fields {
+			out[index].Fields[fieldIndex].Label = ui.Text("template.field." + out[index].Fields[fieldIndex].Name)
+		}
+	}
 	return out
 }
 
@@ -414,11 +422,11 @@ func Scaffold(options Options) (ScaffoldReport, error) {
 		return ScaffoldReport{}, err
 	}
 	if info, err := os.Stat(options.InputDirectory); err != nil || !info.IsDir() {
-		return ScaffoldReport{}, fmt.Errorf("каталог документации не найден: %s", options.InputDirectory)
+		return ScaffoldReport{}, fmt.Errorf("documentation directory not found: %s", options.InputDirectory)
 	}
 	template, ok := scaffoldTemplate(options.EntityKind)
 	if !ok || template.spec.prefix == "" || !validScaffoldID(options.EntityKind, options.EntityID) {
-		return ScaffoldReport{}, fmt.Errorf("некорректный %s ID: %s", options.EntityKind, options.EntityID)
+		return ScaffoldReport{}, fmt.Errorf("invalid %s ID: %s", options.EntityKind, options.EntityID)
 	}
 	if err := validateScaffoldTitle(options.Title); err != nil {
 		return ScaffoldReport{}, err
@@ -427,7 +435,7 @@ func Scaffold(options Options) (ScaffoldReport, error) {
 		options.Language = "en"
 	}
 	if options.Language != "en" && options.Language != "ru" {
-		return ScaffoldReport{}, fmt.Errorf("--lang должен быть en или ru")
+		return ScaffoldReport{}, fmt.Errorf("--lang must be en or ru")
 	}
 	relative := filepath.ToSlash(filepath.Join(template.spec.directory, options.EntityID+".md"))
 	target := filepath.Join(options.InputDirectory, filepath.FromSlash(relative))
@@ -443,13 +451,13 @@ func Scaffold(options Options) (ScaffoldReport, error) {
 func createFromEditorTemplate(options Options, key, language string, fields map[string]string) (string, error) {
 	template, ok := scaffoldTemplate(key)
 	if !ok {
-		return "", fmt.Errorf("неизвестный шаблон: %s", key)
+		return "", fmt.Errorf("unknown template: %s", key)
 	}
 	if language == "" {
 		language = "ru"
 	}
 	if !containsString(template.Languages, language) {
-		return "", fmt.Errorf("язык шаблона должен быть ru или en")
+		return "", fmt.Errorf("template language must be ru or en")
 	}
 	allowedFields := map[string]struct{}{}
 	for _, field := range template.Fields {
@@ -457,16 +465,16 @@ func createFromEditorTemplate(options Options, key, language string, fields map[
 	}
 	for field := range fields {
 		if _, ok := allowedFields[field]; !ok {
-			return "", fmt.Errorf("неизвестное поле шаблона: %s", field)
+			return "", fmt.Errorf("unknown template field: %s", field)
 		}
 	}
 	for _, field := range template.Fields {
 		value := strings.TrimSpace(fields[field.Name])
 		if field.Required && value == "" {
-			return "", fmt.Errorf("поле %s обязательно", field.Name)
+			return "", fmt.Errorf("field %s is required", field.Name)
 		}
 		if field.Type == "select" && !containsString(field.Options, value) {
-			return "", fmt.Errorf("некорректное значение поля %s", field.Name)
+			return "", fmt.Errorf("invalid value for field %s", field.Name)
 		}
 	}
 	options.Language = language

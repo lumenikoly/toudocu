@@ -35,7 +35,7 @@ func TestProjectChangelogBuildsPortalPageAndSearchEntry(t *testing.T) {
 		t.Fatal(err)
 	}
 	page, err := os.ReadFile(filepath.Join(output, projectChangelogOutput))
-	if err != nil || !strings.Contains(string(page), "Added OpenAPI compatibility reports.") || !strings.Contains(string(page), "Журнал изменений проекта") {
+	if err != nil || !strings.Contains(string(page), "Added OpenAPI compatibility reports.") || !strings.Contains(string(page), "Project changelog") {
 		t.Fatalf("project changelog page: %v\n%s", err, page)
 	}
 	localPage, err := os.ReadFile(filepath.Join(output, "changelog.html"))
@@ -52,6 +52,29 @@ func TestProjectChangelogBuildsPortalPageAndSearchEntry(t *testing.T) {
 	servePage, err := os.ReadFile(filepath.Join(output, projectChangelogOutput))
 	if err != nil || strings.Contains(string(servePage), `path=CHANGELOG.md`) || strings.Contains(string(servePage), `data-copy-document-context`) || strings.Contains(string(servePage), "Открыть исходник") {
 		t.Fatalf("project changelog must not expose editor controls: %v\n%s", err, servePage)
+	}
+}
+
+func TestProjectChangelogFallbackTitleUsesUILocale(t *testing.T) {
+	for _, test := range []struct {
+		locale string
+		title  string
+	}{
+		{locale: "en", title: "Project changelog"},
+		{locale: "ru-RU", title: "Журнал изменений проекта"},
+	} {
+		t.Run(test.locale, func(t *testing.T) {
+			root, docs, _ := createFixture(t)
+			writeSiteConfig(t, root, "project:\n  locale: "+test.locale+"\n")
+			writeTestFile(t, root, projectChangelogFile, "- Entry.\n")
+			model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if model.ProjectChangelog == nil || model.ProjectChangelog.Title != test.title {
+				t.Fatalf("fallback title = %q, want %q", model.ProjectChangelog.Title, test.title)
+			}
+		})
 	}
 }
 

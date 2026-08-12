@@ -67,3 +67,7 @@ source. Toudocu compares diagram text, not rendered pixels.
 
 `changeSetDigest` identifies cached data and live-page invalidation. It is not
 an independent Toudocu history of document contents.
+
+`Issue.message` and all other technical diagnostics in the report are always
+in English. Automation uses the stable codes listed above; paths and other
+user-provided values embedded in messages remain verbatim.

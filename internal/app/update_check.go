@@ -110,7 +110,7 @@ func (checker *updateChecker) check() versionCheckResponse {
 func (s *documentationServer) serveVersion(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet && r.Method != http.MethodHead {
 		w.Header().Set("Allow", "GET, HEAD")
-		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 	result := s.updateChecker.check()

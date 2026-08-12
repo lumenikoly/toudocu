@@ -1,6 +1,4 @@
-import { registerMessages, text } from "./locale";
-import { serveRuntimeMessages } from "./messages.ru";
-registerMessages(serveRuntimeMessages);
+import { text } from "./locale";
 (() => {
     'use strict';
     const page: any = window.ToudocuPage;

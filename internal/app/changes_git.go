@@ -42,9 +42,9 @@ func openGitChangeSource(docsRoot string, similarity int) (*gitChangeSource, err
 	out, err := cmd.Output()
 	if err != nil {
 		if errors.Is(err, exec.ErrNotFound) {
-			return nil, &changeFailure{Code: 3, IssueCode: "git-command-failed", Err: fmt.Errorf("Git недоступен")}
+			return nil, &changeFailure{Code: 3, IssueCode: "git-command-failed", Err: fmt.Errorf("Git is unavailable")}
 		}
-		return nil, &changeFailure{Code: 3, IssueCode: "git-repository-not-found", Err: fmt.Errorf("каталог документации не находится в Git-репозитории")}
+		return nil, &changeFailure{Code: 3, IssueCode: "git-repository-not-found", Err: fmt.Errorf("documentation directory is not inside a Git repository")}
 	}
 	root := strings.TrimSpace(string(out))
 	canonicalRoot, err := resolvePathForSafety(root)
@@ -57,7 +57,7 @@ func openGitChangeSource(docsRoot string, similarity int) (*gitChangeSource, err
 	}
 	rel, err := filepath.Rel(canonicalRoot, canonicalDocs)
 	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
-		return nil, &changeFailure{Code: 2, IssueCode: "git-path-outside-documentation-root", Err: fmt.Errorf("каталог документации находится вне корня Git")}
+		return nil, &changeFailure{Code: 2, IssueCode: "git-path-outside-documentation-root", Err: fmt.Errorf("documentation directory is outside the Git root")}
 	}
 	if similarity < 1 || similarity > 100 {
 		similarity = 60
@@ -68,7 +68,7 @@ func openGitChangeSource(docsRoot string, similarity int) (*gitChangeSource, err
 func (g *gitChangeSource) run(args ...string) ([]byte, error) {
 	commandArgs := []string{"-C", g.root, "-c", "core.hooksPath=/dev/null", "-c", "core.fsmonitor=false"}
 	cmd := exec.Command("git", append(commandArgs, args...)...)
-	cmd.Env = append(os.Environ(), "GIT_OPTIONAL_LOCKS=0", "GIT_TERMINAL_PROMPT=0")
+	cmd.Env = append(os.Environ(), "GIT_OPTIONAL_LOCKS=0", "GIT_TERMINAL_PROMPT=0", "LC_ALL=C", "LANG=C")
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	out, err := cmd.Output()
@@ -91,11 +91,11 @@ func validChangeRevision(value string) bool {
 
 func (g *gitChangeSource) resolveCommit(ref string) (string, error) {
 	if !validChangeRevision(ref) {
-		return "", &changeFailure{Code: 2, IssueCode: "git-base-not-found", Err: fmt.Errorf("некорректная Git revision: %q", ref)}
+		return "", &changeFailure{Code: 2, IssueCode: "git-base-not-found", Err: fmt.Errorf("invalid Git revision: %q", ref)}
 	}
 	out, err := g.run("rev-parse", "--verify", "--end-of-options", ref+"^{commit}")
 	if err != nil {
-		return "", &changeFailure{Code: 2, IssueCode: "git-base-not-found", Err: fmt.Errorf("Git revision %q не найдена", ref)}
+		return "", &changeFailure{Code: 2, IssueCode: "git-base-not-found", Err: fmt.Errorf("Git revision %q not found", ref)}
 	}
 	return strings.TrimSpace(string(out)), nil
 }
@@ -185,7 +185,7 @@ func parseNameStatus(data []byte) ([]gitFileChange, error) {
 				return filepath.ToSlash(p), nil
 			}
 			if i >= len(tokens) || len(tokens[i]) == 0 {
-				return "", fmt.Errorf("неполный NUL-separated name-status")
+				return "", fmt.Errorf("incomplete NUL-separated name-status")
 			}
 			p := filepath.ToSlash(string(tokens[i]))
 			i++
@@ -238,7 +238,7 @@ func (g *gitChangeSource) listChanges(base ChangeSide, target ChangeSide) ([]git
 	case "commit":
 		args = append(args, base.Resolved, target.Resolved)
 	default:
-		return nil, fmt.Errorf("неподдерживаемый target %q", target.Type)
+		return nil, fmt.Errorf("unsupported target %q", target.Type)
 	}
 	args = append(args, "--", g.docsRel)
 	out, err := g.run(args...)
@@ -352,7 +352,7 @@ func (g *gitChangeSource) content(side ChangeSide, path string) ([]byte, error) 
 		return nil, os.ErrNotExist
 	}
 	if filepath.IsAbs(path) || strings.Contains(path, "\\") || path == ".." || strings.HasPrefix(path, "../") || strings.Contains(path, "/../") {
-		return nil, fmt.Errorf("некорректный путь")
+		return nil, fmt.Errorf("invalid path")
 	}
 	switch side.Type {
 	case "working-tree":
@@ -362,7 +362,7 @@ func (g *gitChangeSource) content(side ChangeSide, path string) ([]byte, error) 
 	case "commit":
 		return g.run("cat-file", "blob", side.Resolved+":"+path)
 	default:
-		return nil, fmt.Errorf("неподдерживаемая сторона %q", side.Type)
+		return nil, fmt.Errorf("unsupported side %q", side.Type)
 	}
 }
 
@@ -422,7 +422,7 @@ func (g *gitChangeSource) taskDocumentContent(side ChangeSide, taskID string) (s
 			}
 		}
 	default:
-		return "", nil, fmt.Errorf("неподдерживаемая сторона %q", side.Type)
+		return "", nil, fmt.Errorf("unsupported side %q", side.Type)
 	}
 	sort.Strings(paths)
 	foundPath := ""
@@ -431,7 +431,7 @@ func (g *gitChangeSource) taskDocumentContent(side ChangeSide, taskID string) (s
 		content, err := g.content(side, path)
 		if err == nil && taskIDFromContent(content) == taskID {
 			if foundPath != "" {
-				return "", nil, fmt.Errorf("идентификатор задачи %s неоднозначен", taskID)
+				return "", nil, fmt.Errorf("task identifier %s is ambiguous", taskID)
 			}
 			foundPath, foundContent = path, content
 			continue

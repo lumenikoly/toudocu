@@ -27,9 +27,33 @@ type RenderConfig struct {
 	SkipH1               bool
 	SuppressMetadata     bool
 	InteractiveMermaid   bool
+	TaskUncheckedLabel   string
+	TaskCheckedLabel     string
+	UnsafeLinkTitle      string
+	ExternalImageLabel   string
+	MermaidZoomLabel     string
+	MermaidZoomOut       string
+	MermaidFit           string
+	MermaidZoomIn        string
+	MermaidFullscreen    string
+	MermaidLabel         string
+	MermaidError         string
+	MermaidSource        string
 }
 
 func Render(document *Document, config RenderConfig) (string, error) {
+	defaults := map[*string]string{
+		&config.TaskUncheckedLabel: "Not completed", &config.TaskCheckedLabel: "Completed",
+		&config.UnsafeLinkTitle: "Unsafe link blocked", &config.ExternalImageLabel: "Image: %s",
+		&config.MermaidZoomLabel: "Diagram zoom", &config.MermaidZoomOut: "Zoom out", &config.MermaidFit: "Fit",
+		&config.MermaidZoomIn: "Zoom in", &config.MermaidFullscreen: "Fullscreen", &config.MermaidLabel: "Mermaid diagram",
+		&config.MermaidError: "Could not render the diagram.", &config.MermaidSource: "Show source code",
+	}
+	for target, value := range defaults {
+		if *target == "" {
+			*target = value
+		}
+	}
 	r := &nodeRenderer{document: document, config: config, headingIDs: map[ast.Node]string{}, suppressed: map[ast.Node]bool{}, skippedHeadings: map[ast.Node]bool{}, blockedLinks: map[ast.Node]bool{}, taskTextOpen: map[ast.Node]bool{}, frontMatterNodes: map[ast.Node]bool{}}
 	if frontMatter, ok := frontMatterRange(document.source, document.lineIndex); ok {
 		r.frontMatterEnd = frontMatter.End.Offset
@@ -223,7 +247,7 @@ func (r *nodeRenderer) fencedCodeBlock(w util.BufWriter, source []byte, n ast.No
 	}
 	body := linesValue(f, source)
 	if strings.EqualFold(info, "mermaid") {
-		_, _ = io.WriteString(w, renderMermaid(body, mermaidValid(body), r.config.InteractiveMermaid))
+		_, _ = io.WriteString(w, renderMermaid(body, mermaidValid(body), r.config.InteractiveMermaid, r.config))
 		return ast.WalkSkipChildren, nil
 	}
 	language := sanitizeLanguage(info)
@@ -326,9 +350,15 @@ func (r *nodeRenderer) taskCheckbox(w util.BufWriter, _ []byte, n ast.Node, ente
 	if entering {
 		item := ancestor(n, ast.KindListItem)
 		checked := r.taskChecked(item, n.(*extast.TaskCheckBox).IsChecked)
-		label, mark := "Не выполнено", ""
+		label, mark := r.config.TaskUncheckedLabel, ""
+		if label == "" {
+			label = "Not completed"
+		}
 		if checked {
-			label, mark = "Выполнено", "✓"
+			label, mark = r.config.TaskCheckedLabel, "✓"
+			if label == "" {
+				label = "Completed"
+			}
 		}
 		fmt.Fprintf(w, `<span class="task-checkbox" role="img" aria-label="%s">%s</span><span class="task-text">`, label, mark)
 		if item != nil {
@@ -466,7 +496,7 @@ func (r *nodeRenderer) openLink(w util.BufWriter, dest, title string, image bool
 
 func (r *nodeRenderer) openResolvedLink(w util.BufWriter, res LinkResolution) (ast.WalkStatus, error) {
 	if res.Blocked {
-		_, _ = io.WriteString(w, `<span class="unsafe-link" title="Небезопасная ссылка заблокирована">`)
+		_, _ = io.WriteString(w, `<span class="unsafe-link" title="`+attr(r.config.UnsafeLinkTitle)+`">`)
 		return ast.WalkContinue, nil
 	}
 	classes := ""
@@ -484,12 +514,12 @@ func (r *nodeRenderer) openResolvedLink(w util.BufWriter, res LinkResolution) (a
 func (r *nodeRenderer) writeLink(w util.BufWriter, dest, label, title string, image bool) {
 	res := r.resolve(dest, image, title)
 	if res.Blocked {
-		_, _ = io.WriteString(w, `<span class="unsafe-link" title="Небезопасная ссылка заблокирована">`+html.EscapeString(label)+`</span>`)
+		_, _ = io.WriteString(w, `<span class="unsafe-link" title="`+attr(r.config.UnsafeLinkTitle)+`">`+html.EscapeString(label)+`</span>`)
 		return
 	}
 	if image {
 		if res.External {
-			_, _ = io.WriteString(w, `<span class="external-image-placeholder">Изображение: `+html.EscapeString(label)+`</span>`)
+			_, _ = io.WriteString(w, `<span class="external-image-placeholder">`+html.EscapeString(fmt.Sprintf(r.config.ExternalImageLabel, label))+`</span>`)
 			return
 		}
 		broken := ""
@@ -547,21 +577,21 @@ func containsStringValue(values []string, target string) bool {
 	}
 	return false
 }
-func renderMermaid(source string, valid, interactive bool) string {
+func renderMermaid(source string, valid, interactive bool, config RenderConfig) string {
 	escaped := html.EscapeString(source)
 	var b strings.Builder
 	b.WriteString(`<figure class="mermaid-diagram" data-mermaid-container>`)
 	if valid {
 		if interactive {
-			b.WriteString(`<div class="mermaid-stage" data-mermaid-stage><div class="diagram-tools" role="group" aria-label="Масштаб диаграммы"><button type="button" data-mermaid-zoom-out aria-label="Уменьшить">−</button><button type="button" data-mermaid-fit>Вписать</button><button type="button" data-mermaid-zoom-in aria-label="Увеличить">+</button><button type="button" data-mermaid-fullscreen>На весь экран</button></div>`)
+			b.WriteString(`<div class="mermaid-stage" data-mermaid-stage><div class="diagram-tools" role="group" aria-label="` + attr(config.MermaidZoomLabel) + `"><button type="button" data-mermaid-zoom-out aria-label="` + attr(config.MermaidZoomOut) + `">−</button><button type="button" data-mermaid-fit>` + html.EscapeString(config.MermaidFit) + `</button><button type="button" data-mermaid-zoom-in aria-label="` + attr(config.MermaidZoomIn) + `">+</button><button type="button" data-mermaid-fullscreen>` + html.EscapeString(config.MermaidFullscreen) + `</button></div>`)
 		}
-		b.WriteString(`<pre class="mermaid" data-mermaid-diagram aria-label="Диаграмма Mermaid">` + escaped + `</pre><p class="mermaid-error" data-mermaid-error role="alert" hidden>Не удалось отобразить диаграмму.</p>`)
+		b.WriteString(`<pre class="mermaid" data-mermaid-diagram aria-label="` + attr(config.MermaidLabel) + `">` + escaped + `</pre><p class="mermaid-error" data-mermaid-error role="alert" hidden>` + html.EscapeString(config.MermaidError) + `</p>`)
 		if interactive {
 			b.WriteString(`</div>`)
 		}
 	} else {
-		b.WriteString(`<p class="mermaid-error" role="alert">Не удалось отобразить диаграмму.</p>`)
+		b.WriteString(`<p class="mermaid-error" role="alert">` + html.EscapeString(config.MermaidError) + `</p>`)
 	}
-	b.WriteString(`<details class="mermaid-source"><summary>Показать исходный код</summary><div class="code-block"><span class="code-language">mermaid</span><pre><code class="language-mermaid">` + escaped + `</code></pre></div></details></figure>`)
+	b.WriteString(`<details class="mermaid-source"><summary>` + html.EscapeString(config.MermaidSource) + `</summary><div class="code-block"><span class="code-language">mermaid</span><pre><code class="language-mermaid">` + escaped + `</code></pre></div></details></figure>`)
 	return b.String()
 }

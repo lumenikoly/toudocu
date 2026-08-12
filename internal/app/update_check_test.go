@@ -16,7 +16,7 @@ func TestParseUpdateCheckFlag(t *testing.T) {
 	if err != nil || !options.NoUpdateCheck {
 		t.Fatalf("options=%#v err=%v", options, err)
 	}
-	if _, _, _, err := ParseArguments([]string{"build", "./docs", "--no-update-check"}); err == nil || !strings.Contains(err.Error(), "только для serve") {
+	if _, _, _, err := ParseArguments([]string{"build", "./docs", "--no-update-check"}); err == nil || !strings.Contains(err.Error(), "only for serve") {
 		t.Fatalf("build accepted --no-update-check: %v", err)
 	}
 }

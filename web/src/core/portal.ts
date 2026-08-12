@@ -1,13 +1,11 @@
-import { registerMessages, text } from "./locale";
-import { portalMessages } from "./messages.ru";
+import { text } from "./locale";
 import { createEmptyState, selectTab, setExpanded } from "../components";
-registerMessages(portalMessages);
 (() => {
     'use strict';
     const $: any = (selector: any, root: any = document) => root.querySelector(selector);
     const $$: any = (selector: any, root: any = document) => [...root.querySelectorAll(selector)];
     const normalize: any = (value: any) => String(value || '')
-        .toLocaleLowerCase('ru-RU')
+        .toLocaleLowerCase(window.ToudocuPage?.ui.locale || 'en')
         .replace(/\u0451/g, '\u0435')
         .replace(/[^\p{L}\p{N}]+/gu, ' ')
         .trim();
@@ -211,7 +209,7 @@ registerMessages(portalMessages);
             currentItems = index
                 .map((item: any) => ({ item, score: score(item, query, terms) }))
                 .filter((entry: any) => entry.score >= 0)
-                .sort((a: any, b: any) => b.score - a.score || a.item.title.localeCompare(b.item.title, 'ru'))
+                .sort((a: any, b: any) => b.score - a.score || a.item.title.localeCompare(b.item.title, window.ToudocuPage?.ui.locale || 'en'))
                 .slice(0, 12)
                 .map((entry: any) => entry.item);
             if (!currentItems.length) {
@@ -579,7 +577,7 @@ registerMessages(portalMessages);
                 const placement: any = discussion.placement || {};
                 const article: any = document.createElement('article');
                 article.className = `portal-review-thread is-${discussion.state}`;
-                article.innerHTML = `<header><div><strong>${text("core.portal.070")}</strong><span>${text(discussion.state === 'open' ? "core.portal.059" : "core.portal.060")} · ${escapeHTML(placementLabel(placement.status || 'exact'))}</span></div><div class="portal-review-thread-actions"><button type="button" data-portal-thread-state>${text(discussion.state === 'open' ? "core.portal.071" : "core.portal.073")}</button><button type="button" class="is-danger" data-portal-thread-delete>${text("core.portal.072")}</button></div></header><p class="portal-review-anchor">${escapeHTML(placement.path || discussion.target?.path || path)}${placement.start ? `:${placement.start.line}` : ''}${placement.reason ? ` · ${escapeHTML(placement.reason)}` : ''}</p><ol>${discussion.messages.map((message: any) => `<li class="is-${escapeHTML(message.author)}"><div><strong>${message.author === 'agent' ? `${text("core.portal.061")} · ${escapeHTML(outcomeLabel(message.outcome || 'response'))}` : text("core.portal.070")}</strong><time>${escapeHTML(new Date(message.createdAt).toLocaleString('ru-RU'))}</time></div><p>${escapeHTML(message.body)}</p></li>`).join('')}</ol><button type="button" class="portal-review-reply" data-portal-thread-reply ${discussion.state !== 'open' || discussionInFlight(discussion.id) ? 'disabled' : ''}>${text("core.portal.074")}</button>`;
+                article.innerHTML = `<header><div><strong>${text("core.portal.070")}</strong><span>${text(discussion.state === 'open' ? "core.portal.059" : "core.portal.060")} · ${escapeHTML(placementLabel(placement.status || 'exact'))}</span></div><div class="portal-review-thread-actions"><button type="button" data-portal-thread-state>${text(discussion.state === 'open' ? "core.portal.071" : "core.portal.073")}</button><button type="button" class="is-danger" data-portal-thread-delete>${text("core.portal.072")}</button></div></header><p class="portal-review-anchor">${escapeHTML(placement.path || discussion.target?.path || path)}${placement.start ? `:${placement.start.line}` : ''}${placement.reason ? ` · ${escapeHTML(placement.reason)}` : ''}</p><ol>${discussion.messages.map((message: any) => `<li class="is-${escapeHTML(message.author)}"><div><strong>${message.author === 'agent' ? `${text("core.portal.061")} · ${escapeHTML(outcomeLabel(message.outcome || 'response'))}` : text("core.portal.070")}</strong><time>${escapeHTML(new Date(message.createdAt).toLocaleString(window.ToudocuPage?.ui.locale || 'en'))}</time></div><p>${escapeHTML(message.body)}</p></li>`).join('')}</ol><button type="button" class="portal-review-reply" data-portal-thread-reply ${discussion.state !== 'open' || discussionInFlight(discussion.id) ? 'disabled' : ''}>${text("core.portal.074")}</button>`;
                 $('[data-portal-thread-state]', article).addEventListener('click', async (event: any) => {
                     event.currentTarget.disabled = true;
                     try {

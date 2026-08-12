@@ -223,14 +223,14 @@ func resolveLinks(model *Model) {
 			resolved := resolveLocalLink(model, document, link)
 			document.ResolvedLinks = append(document.ResolvedLinks, resolved)
 			if resolved.Blocked {
-				reason := "Небезопасная ссылка заблокирована."
+				reason := "Unsafe link was blocked."
 				switch {
 				case resolved.ActiveAsset:
-					reason = "Ссылка на активный HTML/JavaScript-файл заблокирована."
+					reason = "Link to an active HTML/JavaScript file was blocked."
 				case resolved.UnsafeImage:
-					reason = "Формат изображения не разрешён для безопасного встраивания."
+					reason = "Image format is not allowed for safe embedding."
 				case resolved.RepositoryAsset:
-					reason = "Ресурс за пределами документации нельзя встраивать или открыть без repository URL."
+					reason = "A resource outside the documentation cannot be embedded or opened without a repository URL."
 				}
 				severity := "warning"
 				if document.Type == "architecture" {
@@ -240,13 +240,13 @@ func resolveLinks(model *Model) {
 			} else if resolved.Broken {
 				suffix := ""
 				if resolved.BrokenAnchor {
-					suffix = " (не найден якорь)"
+					suffix = " (anchor not found)"
 				}
 				severity := "warning"
 				if document.Type == "architecture" {
 					severity = "error"
 				}
-				addDocumentIssue(model, document, newIssue(severity, "broken-link", "Неработающая ссылка: "+link.Destination+suffix, document.SourcePath, link.Line+1))
+				addDocumentIssue(model, document, newIssue(severity, "broken-link", "Broken link: "+link.Destination+suffix, document.SourcePath, link.Line+1))
 			}
 			if resolved.TargetDocument != nil && resolved.TargetDocument != document && !link.Image {
 				key := document.SourcePath + "->" + resolved.TargetDocument.SourcePath
@@ -320,7 +320,7 @@ func connectUseCasesAndModules(model *Model) {
 	for _, module := range modules {
 		sort.SliceStable(module.LinkedUseCases, func(i, j int) bool { return documentLess(module.LinkedUseCases[i], module.LinkedUseCases[j]) })
 		if len(module.LinkedUseCases) == 0 {
-			addDocumentIssue(model, module, newIssue("warning", "module-without-use-case", "Модуль не связан ни с одним пользовательским сценарием.", module.SourcePath, 0))
+			addDocumentIssue(model, module, newIssue("warning", "module-without-use-case", "Module is not linked to any use case.", module.SourcePath, 0))
 		}
 	}
 }

@@ -10,7 +10,7 @@ import (
 func (s *documentationServer) serveChangesUI(w http.ResponseWriter, request *http.Request) {
 	if request.Method != http.MethodGet && request.Method != http.MethodHead {
 		w.Header().Set("Allow", "GET, HEAD")
-		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -18,13 +18,14 @@ func (s *documentationServer) serveChangesUI(w http.ResponseWriter, request *htt
 		return
 	}
 	uiModel := workspaceModel(s.model)
+	ui := portalUI(uiModel)
 	locale := uiModel.SiteConfig.Project.Locale
 	if locale == "" {
 		locale = "en"
 	}
 	html, err := frontend.RenderChanges(frontend.WorkspaceView{
-		Lang: locale, HTMLAttributes: template.HTMLAttr(appearanceAttributes(uiModel.SiteConfig)),
-		Title: "Изменения — " + uiModel.Project.Title, Favicon: workspaceFavicon(uiModel),
+		UI: ui, Lang: locale, HTMLAttributes: template.HTMLAttr(appearanceAttributes(uiModel.SiteConfig)),
+		Title: ui.Text("changes.title") + " — " + uiModel.Project.Title, Favicon: workspaceFavicon(uiModel),
 		AppearanceJS: "/assets/" + mustFrontendAsset("appearance.js"),
 		Styles: []string{
 			"/assets/" + mustFrontendAsset("portal.css"),
@@ -40,7 +41,7 @@ func (s *documentationServer) serveChangesUI(w http.ResponseWriter, request *htt
 		Header:    template.HTML(workspaceHeader(uiModel, workspaceChanges)),
 	})
 	if err != nil {
-		http.Error(w, "Не удалось сформировать просмотр изменений", http.StatusInternalServerError)
+		http.Error(w, "Could not render changes viewer", http.StatusInternalServerError)
 		return
 	}
 	_, _ = io.WriteString(w, html)
