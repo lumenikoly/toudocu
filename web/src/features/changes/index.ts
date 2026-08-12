@@ -233,6 +233,7 @@ import { text } from "../../core/locale";
         menu.setAttribute('role', 'toolbar');
         menu.setAttribute('aria-label', text("features.changes.index.137"));
         menu.innerHTML = `<button type="button" data-selection-copy>${text("core.portal.035")}</button><button type="button" data-selection-context>${text("core.portal.036")}</button><button type="button" data-selection-question>${text("core.portal.037")}</button>`;
+        menu.addEventListener('mousedown', (event: any) => event.preventDefault());
         panel.append(menu);
         return menu;
     }
@@ -246,7 +247,7 @@ import { text } from "../../core/locale";
             const gap: any = 8;
             const left: any = Math.min(innerWidth - bounds.width - gap, Math.max(gap, rectangle.left + rectangle.width / 2 - bounds.width / 2));
             const above: any = rectangle.top - bounds.height - gap;
-            const top: any = above >= gap ? above : Math.min(innerHeight - bounds.height - gap, rectangle.bottom + gap);
+            const top: any = Math.min(innerHeight - bounds.height - gap, Math.max(gap, above >= gap ? above : rectangle.bottom + gap));
             menu.style.left = `${left}px`;
             menu.style.top = `${top}px`;
             menu.style.visibility = '';

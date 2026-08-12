@@ -7,12 +7,30 @@ import { dirname, extname, join, normalize, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
+let cliPath = "";
 
 function run(command: string, args: string[], cwd = repo): void {
   const result = spawnSync(command, args, { cwd, encoding: "utf8" });
   if (result.status !== 0) {
     throw new Error(`${command} ${args.join(" ")} failed\n${result.stdout}\n${result.stderr}`);
   }
+}
+
+function testCLI(): string {
+  if (!cliPath) {
+    cliPath = join(mkdtempSync(join(tmpdir(), "toudocu-browser-cli-")), process.platform === "win32" ? "toudocu.exe" : "toudocu");
+    run("go", ["build", "-o", cliPath, "./cmd/toudocu"]);
+  }
+  return cliPath;
+}
+
+async function stopChild(child: ChildProcess): Promise<void> {
+  if (child.exitCode !== null || child.signalCode !== null) return;
+  await new Promise<void>((resolveExit, rejectExit) => {
+    child.once("exit", () => resolveExit());
+    child.once("error", rejectExit);
+    child.kill("SIGTERM");
+  });
 }
 
 function mime(path: string): string {
@@ -93,12 +111,13 @@ async function exerciseStaticPortal(page: Page, origin: string): Promise<void> {
 }
 
 test("static portal works over HTTP at root and nested paths", async ({ browser }) => {
+  test.slow();
   const fixture = mkdtempSync(join(tmpdir(), "toudocu-static-"));
   cpSync(join(repo, "docs"), join(fixture, "docs"), { recursive: true });
   writeFileSync(join(fixture, "docs", "notes.md"), "# Заметки\n\nТестовая заметка.\n");
   cpSync(join(repo, ".toudocu"), join(fixture, ".toudocu"), { recursive: true });
   const output = join(fixture, "site");
-  run("go", ["run", "./cmd/toudocu", "build", join(fixture, "docs"), "--repository-root", fixture, "-o", output, "--clean"]);
+  run(testCLI(), ["build", join(fixture, "docs"), "--repository-root", fixture, "-o", output, "--clean"]);
   const notesPage = join(output, "notes.html");
   writeFileSync(notesPage, readFileSync(notesPage, "utf8").replace("</article>", '<figure data-mermaid-container><pre class="mermaid" data-mermaid-diagram>graph TD\nbroken[</pre><p data-mermaid-error hidden>Не удалось отобразить диаграмму.</p></figure></article>'));
   for (const mount of ["/", "/docs/"]) {
@@ -130,7 +149,8 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
   if (!address || typeof address === "string") throw new Error("failed to reserve port");
   const port = address.port;
   await new Promise<void>((resolveClose) => portServer.close(() => resolveClose()));
-  const child: ChildProcess = spawn("go", ["run", "./cmd/toudocu", "serve", join(fixture, "docs"), "--repository-root", fixture, "-o", join(fixture, "site"), "--host", "127.0.0.1", "--port", String(port)], { cwd: repo, stdio: "pipe" });
+  const output = mkdtempSync(join(tmpdir(), "toudocu-serve-site-"));
+  const child: ChildProcess = spawn(testCLI(), ["serve", join(fixture, "docs"), "--repository-root", fixture, "-o", output, "--host", "127.0.0.1", "--port", String(port)], { cwd: repo, stdio: "pipe" });
   const origin = `http://127.0.0.1:${port}`;
   let latestVersion = "0.0.2";
   try {
@@ -448,8 +468,7 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await page.goto(`${origin}/_toudocu/editor/?disabled=1`);
     await expect(page.locator('[data-ui-state="capability-unavailable"]')).toContainText("Редактор недоступен");
   } finally {
-    child.kill("SIGTERM");
-    await new Promise<void>((resolveExit) => child.once("exit", () => resolveExit()));
+    await stopChild(child);
   }
 });
 
@@ -475,7 +494,7 @@ test("Changes loads only the selected file detail and ignores stale responses", 
   if (!address || typeof address === "string") throw new Error("failed to reserve detail port");
   const port = address.port;
   await new Promise<void>((resolveClose) => portServer.close(() => resolveClose()));
-  const child = spawn("go", ["run", "./cmd/toudocu", "serve", join(fixture, "docs"), "--repository-root", fixture, "-o", output, "--host", "127.0.0.1", "--port", String(port), "--no-update-check"], { cwd: repo, stdio: "pipe" });
+  const child = spawn(testCLI(), ["serve", join(fixture, "docs"), "--repository-root", fixture, "-o", output, "--host", "127.0.0.1", "--port", String(port), "--no-update-check"], { cwd: repo, stdio: "pipe" });
   const origin = `http://127.0.0.1:${port}`;
   const pending: Array<{ release: () => void }> = [];
   let requests = 0;
@@ -540,8 +559,7 @@ test("Changes loads only the selected file detail and ignores stale responses", 
     await expect(page.locator("[data-source-view]")).toContainText("current-b");
   } finally {
     for (const request of pending) request.release();
-    child.kill("SIGTERM");
-    await new Promise<void>((resolveExit) => child.once("exit", () => resolveExit()));
+    await stopChild(child);
   }
 });
 
@@ -569,10 +587,10 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
   await new Promise<void>((resolveClose) => portServer.close(() => resolveClose()));
   const environment = { ...process.env, TOUDOCU_STATE_HOME: stateRoot };
   const output = mkdtempSync(join(tmpdir(), "toudocu-agent-feedback-site-"));
-  const child = spawn("go", ["run", "./cmd/toudocu", "serve", join(fixture, "docs"), "--repository-root", fixture, "-o", output, "--host", "127.0.0.1", "--port", String(port), "--no-update-check"], { cwd: repo, env: environment, stdio: "pipe" });
+  const child = spawn(testCLI(), ["serve", join(fixture, "docs"), "--repository-root", fixture, "-o", output, "--host", "127.0.0.1", "--port", String(port), "--no-update-check"], { cwd: repo, env: environment, stdio: "pipe" });
   const origin = "http://127.0.0.1:" + port;
   const agentCLI = (args: string[]) => {
-    const result = spawnSync("go", ["run", "./cmd/toudocu", "agent", ...args, "--repository-root", fixture, "--json"], { cwd: repo, env: environment, encoding: "utf8" });
+    const result = spawnSync(testCLI(), ["agent", ...args, "--repository-root", fixture, "--json"], { cwd: repo, env: environment, encoding: "utf8" });
     if (result.status !== 0) throw new Error("agent CLI failed\n" + result.stdout + "\n" + result.stderr);
     return JSON.parse(result.stdout);
   };
@@ -631,7 +649,7 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await panel.getByRole("button", { name: "Закрыть панель" }).click();
 
     await selectPortalElement(page.getByText("Repeated.", { exact: true }).last());
-    await selectionMenu.getByRole("button", { name: "Добавить вопрос" }).dispatchEvent("click");
+    await selectionMenu.getByRole("button", { name: "Добавить вопрос" }).click();
     await expect(composer.locator("[data-portal-review-selection]")).toHaveText("Repeated.");
     await composer.locator("[data-portal-review-question]").fill("Почему фрагмент повторяется?");
     await composer.locator(".portal-review-submit").click();
@@ -771,7 +789,6 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
       await touchContext.close();
     }
   } finally {
-    child.kill("SIGTERM");
-    await new Promise<void>((resolveExit) => child.once("exit", () => resolveExit()));
+    await stopChild(child);
   }
 });
