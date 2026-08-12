@@ -388,18 +388,6 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     const fileContent = page.locator('[data-file-view] .cm-content');
     await expect(fileContent).toContainText("External edit.");
     await expect(page).toHaveURL(/tab=file/);
-    const firstLine = page.locator('[data-file-view] .cm-line').first();
-    await expect(page.locator("[data-review-composer]")).not.toHaveAttribute("open", "");
-    await firstLine.selectText();
-    await expect.poll(() => page.evaluate(() => window.getSelection()?.toString())).toBe("# Заметки");
-    const selectionMenu = page.locator("[data-tab-panel] .review-selection-menu");
-    await expect(selectionMenu).toBeVisible();
-    await expect(selectionMenu.locator("[data-selection-copy]")).toBeAttached();
-    await expect(selectionMenu.locator("[data-selection-context]")).toBeAttached();
-    await selectionMenu.locator("[data-selection-question]").click();
-    await expect(page.locator("[data-review-composer]")).toHaveAttribute("open", "");
-    await expect(page.locator("[data-review-target-summary]")).toContainText("docs/notes.md");
-    await page.locator("[data-review-composer]").getByRole("button", { name: "Отмена" }).click();
     await page.locator('[data-tab="rendered"]').click();
     await expect(page.locator("[data-tab-panel]")).toContainText("Сравнение отрисованных версий недоступно");
     await page.locator('[data-tab="source"]').click();
@@ -691,6 +679,19 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await page.locator('[data-workspace="changes"]').click();
     await page.locator('[data-file-list] [data-path="docs/architecture/overview.md"]').click();
     await expect(page.locator(".workspace-header [data-discussions-toggle]")).toHaveAttribute("aria-controls", "project-discussions-panel");
+    await page.locator('[data-tab="file"]').click();
+    const fullFileLine = page.locator('[data-file-view] .cm-line').filter({ hasText: "Updated now." });
+    await fullFileLine.selectText();
+    await expect.poll(() => page.evaluate(() => window.getSelection()?.toString())).toBe("Updated now.");
+    const fullFileMenu = page.locator("[data-tab-panel] .review-selection-menu");
+    await expect(fullFileMenu).toBeVisible();
+    await expect(fullFileMenu.locator("[data-selection-copy]")).toBeAttached();
+    await expect(fullFileMenu.locator("[data-selection-context]")).toBeAttached();
+    await fullFileMenu.locator("[data-selection-question]").click();
+    const changesComposer = page.locator("[data-review-composer]");
+    await expect(changesComposer.locator("[data-review-target-summary]")).toContainText("docs/architecture/overview.md");
+    await changesComposer.getByRole("button", { name: "Отмена" }).click();
+    await page.locator('[data-tab="source"]').click();
     const removedContent = page.locator(".diff-line-removed .diff-line-content").filter({ hasText: "Updated." });
     const addedContent = page.locator(".diff-line-added .diff-line-content").filter({ hasText: "Updated now." });
     await addedContent.evaluate((element) => {
@@ -711,7 +712,6 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe("Updated now.");
     await addedContent.dispatchEvent("pointerup");
     await diffMenu.getByRole("button", { name: "Добавить вопрос" }).click();
-    const changesComposer = page.locator("[data-review-composer]");
     await expect(changesComposer.locator("[data-review-target-summary]")).toContainText(/docs\/architecture\/overview\.md · \d+:1–\d+:\d+/);
     await changesComposer.getByRole("button", { name: "Отмена" }).click();
 
