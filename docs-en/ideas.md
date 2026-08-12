@@ -18,3 +18,18 @@ Before implementation, the project must select authoritative sources for Go
 modules, browser packages, and embedded assets and decide which version and
 license facts readers need. Until then, `go.mod`, `web/package.json`, and
 `THIRD_PARTY_NOTICES.md` remain the sources.
+
+## Improve prompts for the agent
+
+Refine the prompts that help the agent make documentation clearer, more
+precise, and more consistent.
+
+## Improve the portal design
+
+Make the portal interface more cohesive, easier to understand, and more
+comfortable for everyday work.
+
+## Interactive plan review
+
+Add interactive collaboration with an AI agent for reviewing documentation and
+plans.

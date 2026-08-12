@@ -27,15 +27,21 @@ schema v1.
 - **End-to-end traceability.** A use case and screen can be traced to a work
   item, an acceptance criterion, and the command that verifies the result.
 - **Meaningful change review.** The local Changes workspace shows the exact Git
-  patch, complete UTF-8 files, rendered pages, and changes to known document
-  entities. Repository-wide discussions live alongside the diff.
+  patch, rendered pages before and after a change, and differences between
+  documented entities.
+- **Local documentation discussions.** In the main portal running under
+  `serve`, a user can attach a question or change request to an entire canonical
+  Markdown document or a selected range. Toudocu stores the thread and queue
+  outside the repository but does not start an AI agent; messages are delivered
+  only after an explicit user request.
 - **Focused context for an AI agent.** A compact read-only package contains the
   requirements, rules, screens, dependencies, and checks that belong to one
   selected task.
 - **An embedded documentation skill.** The offline package connects Toudocu to
-  Codex, Claude Code, and Copilot. It provides explicit processes for project
-  initialization, full or diff-scoped documentation refresh, translation, and
-  processing comments from Changes. Start with the
+  Codex, Claude Code, and Copilot and adds explicit workflows for project
+  initialization, full or scoped documentation refresh, and translation. The
+  CLI installs, checks, updates, and removes its managed copy offline without
+  overwriting user changes. Start with the
   [skill installation guide](guides/skill-installation.md), then read the
   [agent workflow guide](guides/agent-workflows.md).
 - **Verifiable work items.** A task combines its allowed scope, acceptance
