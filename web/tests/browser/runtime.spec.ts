@@ -390,12 +390,8 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await expect(page).toHaveURL(/tab=file/);
     const firstLine = page.locator('[data-file-view] .cm-line').first();
     await expect(page.locator("[data-review-composer]")).not.toHaveAttribute("open", "");
-    const lineBox = await firstLine.boundingBox();
-    expect(lineBox).not.toBeNull();
-    await page.mouse.move(lineBox!.x + 2, lineBox!.y + lineBox!.height / 2);
-    await page.mouse.down();
-    await page.mouse.move(lineBox!.x + lineBox!.width - 2, lineBox!.y + lineBox!.height / 2);
-    await page.mouse.up();
+    await firstLine.selectText();
+    await expect.poll(() => page.evaluate(() => window.getSelection()?.toString())).toBe("# Заметки");
     const selectionMenu = page.locator("[data-tab-panel] .review-selection-menu");
     await expect(selectionMenu).toBeVisible();
     await expect(selectionMenu.locator("[data-selection-copy]")).toBeAttached();
