@@ -1,39 +1,41 @@
-# TASK-REVIEW-001: Discuss local changes with an AI agent
+# TASK-REVIEW-001: Discuss local changes with a development agent
 
 - Status: Done
 - Type: Feature
 - Priority: High
-- Module: MOD-REVIEW
-- Use case: UC-REVIEW-01
-- Screens: SC-CHANGES-WORKSPACE
+- Module: MOD-AGENT-FEEDBACK
+- Use case: UC-AGENT-FEEDBACK-01
+- Screens: SC-SITE-DOCUMENT, SC-CHANGES-WORKSPACE
+- Transitions: TR-SITE-007
 - Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-10
+- Last updated: 2026-08-12
 
 ## Outcome
 
-The canonical Changes workspace shows a repository-wide diff, keeps discussion
-threads across runs, and passes new comments to an installed AI skill through
-CLI schema v1. Toudocu does not start the agent or modify Git.
+The canonical Changes workspace shows a repository-wide diff, while the Portal
+opens discussions beside a document. Threads survive restarts and deliver new
+comments to the installed skill through the version 1 command-line contract.
+Toudocu neither starts an agent nor changes Git.
 
 ## Behavior change
 
 ### Before
 
-Changes displayed documentation roots only and did not store comments. A local
-review could not be handed to an AI agent.
+Changes showed documentation roots only and did not store comments. A local
+review result could not be passed to a development agent.
 
 ### After
 
-The existing workspace covers the whole repository, stores durable comment
-anchors and discussions, and queues immutable batches for an agent. Agent
-answers are saved beside the original discussion. The regular `changes`
-command, public Go facade, static portal, and translations keep their previous
-behavior.
+The existing screen provides a repository-wide view, durable comment anchors,
+discussions, and an agent delivery queue. An agent response is stored beside
+the discussion. The ordinary `changes` command, public Go facade, static
+portal, and translations retain their previous behavior.
 
 ## Scope
 
-- repository view, discussion storage, HTTP API, and CLI in `internal/app/`;
-- the Changes interface and browser assets generated from `web/`;
+- discussion services, HTTP API, CLI, and local state in `internal/app/`;
+- the Changes interface and assets generated from `web/`;
+- the responsive discussion panel in the main `serve` Portal;
 - the bundled skill;
 - OpenAPI, canonical documentation, README, changelog, and dependency notices;
 - Go, TypeScript, and browser tests.
@@ -45,81 +47,93 @@ behavior.
   automatically;
 - Git writes, a remote review service, or repository-hosted discussion files;
 - changes to `ChangeSetReport` schema v1 or the public `api.go` facade;
-- discussions in static portals or translations;
+- discussions in static portals and translations;
 - reading or updating translation roots.
 
 ## Acceptance criteria
 
-- [x] `AC-01` The repository view includes tracked files and new non-ignored
-  files for every supported comparison. Writes are allowed only when the end
-  state is `working-tree`.
-- [x] `AC-02` Schema-v1 storage survives restarts and `HEAD` changes, uses an
-  inter-process lock, compare-and-swap, atomic replacement, and safe file
+- [x] `AC-01` Changes still shows the repository for a supported range, while
+  discussions accept only current canonical Markdown and do not depend on the
+  Git range.
+- [x] `AC-02` Version 1 storage survives restarts and `HEAD` changes, uses an
+  inter-process lock, expected-revision checks, atomic replacement, and safe
   permissions, and never overwrites corrupt state.
-- [x] `AC-03` `diff`, `fileRange`, `file`, and `global` targets validate safe
-  paths and Unicode coordinates. Go reads the selected text and context and
-  stores a snapshot only for commented content up to 2 MiB.
-- [x] `AC-04` A discussion can be created, replied to, resolved, reopened, and
-  cleaned up. An unsent message can be edited or deleted; a sent message is
-  immutable.
-- [x] `AC-05` Agent batches are immutable and delivered in order. Until a full
-  response is stored atomically, the CLI returns the oldest batch again. A
-  response contains exactly one result for every message.
-- [x] `AC-06` The discussion HTTP API follows OpenAPI, accepts JSON, a precise
-  action, and expected version and hash values, and returns stable statuses and
+- [x] `AC-03` A `document` target validates a safe path, one-based lines, and
+  Unicode character columns. The server extracts selected text and bounded
+  context from current Markdown.
+- [x] `AC-04` A discussion supports creating a thread, replying, editing or
+  deleting a pending message, closing, reopening, deleting any thread, and
+  cleaning old state. A message cannot be edited after the agent retrieves it.
+- [x] `AC-05` Messages retrieved by the agent and queue entries are immutable
+  and processed in arrival order. The command cannot advance before a response,
+  returns the same delivery after lease expiry, and treats an identical repeated
+  response as idempotent.
+- [x] `AC-06` The discussion HTTP API follows OpenAPI, accepts JSON, an exact
+  action, and the expected revision and digest, and returns stable statuses and
   diagnostics.
-- [x] `AC-07` `changes feedback pending|respond` discovers the repository from
-  the current directory or an option. An empty queue returns schema v1 and exit
-  code `0`; a response is fully validated before any write.
-- [x] `AC-08` Anchors relocate through the documented deterministic order or
-  become explicitly `stale` or `deleted`.
-- [x] `AC-09` The workspace keeps existing Changes views, adds changed and
-  related files, clear comment entry points, a responsive discussion panel,
-  live-update notice, and correct focus order.
-- [x] `AC-10` The bundled skill handles `$toudocu feedback`, validates targets,
-  changes only justified files, runs relevant commands, and submits one
-  complete response.
-- [x] `AC-11` `ChangeSetReport`, regular `changes`, the public Go facade, static
-  manifest, and translation behavior remain unchanged.
+- [x] `AC-07` `toudocu agent next|respond` discovers the repository from the
+  current directory or an option. An empty queue returns `pending=false` and
+  exit code `0`, while an invalid response leaves state unchanged.
+- [x] `AC-08` An anchor relocates through the defined reproducible order or is
+  explicitly marked stale or deleted.
+- [x] `AC-09` The screen preserves existing Changes views and adds changed and
+  related files, clear comment entry points, a responsive discussion panel, a
+  watcher notice, and correct focus order.
+- [x] `AC-10` The bundled skill handles “Process requests from Toudocu,”
+  rereads current sources, does not change documentation for `question`, and
+  limits `change_request` changes to documentation.
+- [x] `AC-11` `ChangeSetReport`, ordinary `changes`, the public Go facade,
+  static manifest, and translation behavior remain unchanged.
+- [x] `AC-12` On a document page, selection including headings and repeated
+  text offers text copying, context copying, and a message form. The panel on
+  the same tab manages drafts, thread state, deletion, the queue, and prompt
+  copying.
 
 ## Plan
 
 - [x] Implement the repository view and discussion storage.
-- [x] Add discussions, batch queueing, responses, cleanup, and anchor
+- [x] Add discussions, the delivery queue, responses, cleanup, and anchor
   relocation.
-- [x] Connect the CLI, local HTTP API, and OpenAPI contract.
+- [x] Connect the CLI, local HTTP API, and OpenAPI.
 - [x] Extend Changes and CodeMirror language support.
-- [x] Update the skill and canonical documentation without reading
+- [x] Add discussion entry through selection on a document page.
+- [x] Update the bundled skill and canonical documentation without reading
   translations.
 
 ## Verification
 
 - `AC-01` → `go test ./internal/app -run 'TestRepositoryReview'`
-- `AC-02` → `go test ./internal/app -run 'TestReview(Store|CAS|Conflict|Cleanup)'`
-- `AC-03` → `go test ./internal/app -run 'TestReview(Unsafe|StoreDiscussion)'`
-- `AC-04` → `go test ./internal/app -run 'TestReview(StoreDiscussion|Cleanup)'`
-- `AC-05` → `go test ./internal/app -run 'TestReviewStoreDiscussionFeedbackResponseAndReanchor'`
-- `AC-06` → `go test ./internal/app -run 'TestReviewHTTPAndCLI|TestOpenAPIContract'`
-- `AC-07` → `go test ./internal/app -run 'TestReviewHTTPAndCLI'`
-- `AC-08` → `go test ./internal/app -run 'TestReviewStoreDiscussionFeedbackResponseAndReanchor'`
+- `AC-02` → `go test ./internal/app -run 'TestAgentFeedbackFIFOReanchorPersistenceAndConcurrency'`
+- `AC-03` → `go test ./internal/app -run 'TestAgentFeedbackSelectsRepeatedTextByOccurrence'`
+- `AC-04` → `go test ./internal/app -run 'TestAgentFeedbackLifecycle'`
+- `AC-05` → `go test ./internal/app -run 'TestAgentFeedback(Lifecycle|FIFOReanchorPersistenceAndConcurrency)'`
+- `AC-06` → `go test ./internal/app -run 'TestAgentHTTPAndCLI|TestOpenAPIContractParity'`
+- `AC-07` → `go test ./internal/app -run 'TestAgentHTTPAndCLI'`
+- `AC-08` → `go test ./internal/app -run 'TestAgentFeedbackFIFOReanchorPersistenceAndConcurrency'`
 - `AC-09` → `npm --prefix web test && make browser-test`
-- `AC-10` → `go test ./internal/app -run 'TestToudocuFeedbackContract'`
-- `AC-11` → `go test ./internal/app -run 'TestStaticSiteExcludesChanges|TestTranslation|TestChangesCLI'`
+- `AC-10` → `go test ./internal/app -run 'TestToudocuAgentFeedbackContract'`
+- `AC-11` → `go test ./internal/app -run 'TestStaticSiteExcludesEditor|TestTranslation|TestChangesCLI'`
+- `AC-12` → `TR-SITE-007` → `Portal and Changes share documentation discussions with the agent CLI`
+- `AC-12` → `npm --prefix web run test:browser -- --grep 'Portal and Changes share documentation discussions'`
 - `ALL` → `go test ./...`
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `make check`
 
 ## Documentation impact
 
-This task added MOD-REVIEW, UC-REVIEW-01, FLOW-REVIEW-FEEDBACK,
-`architecture/review-anchoring.md`, ADR-007, and the OpenAPI discussion
-contract. It updated the Changes screen, architectural boundaries, Changes and
-CLI contracts, references, guides, roadmap, changelog, and dependency notices.
+The earlier implementation added MOD-REVIEW, UC-REVIEW-01,
+FLOW-REVIEW-FEEDBACK, `architecture/review-anchoring.md`, ADR-007, and the
+discussion OpenAPI contract. MOD-AGENT-FEEDBACK later replaced them. The
+Changes screen, architecture boundaries, Changes and CLI contracts,
+references, guides, roadmap, changelog, and dependency notices were updated.
 Generated browser files still come only from `web/`.
 
-## Current behavior
+## Current state
 
-Comments now contain text only; there is no selectable type. “Send to agent”
-creates a pending batch and displays “Process comments from Toudocu Changes,”
-but does not start an AI agent. The agent must separately run `$toudocu
-feedback` or the corresponding CLI commands.
+A message has `question` or `change_request` intent. Saving immediately creates
+a durable `AgentDelivery`, and the message remains editable until the agent
+retrieves it. Copy prompt immediately copies “Process requests from Toudocu.”
+without changing state. The agent separately runs `toudocu agent next|respond`.
+On a document page, a question can start from selected content; the responsive
+panel on the same page shows responses and manages messages, thread state, and
+deletion without a trip to Changes.

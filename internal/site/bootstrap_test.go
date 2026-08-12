@@ -31,12 +31,12 @@ func TestWorkspaceTemplatesRenderSemanticContent(t *testing.T) {
 			t.Fatalf("changes includes removed %s: %s", removed, changes)
 		}
 	}
-	for _, required := range []string{"data-range-details", "changes-list-filters", "data-search", "data-status", "data-scope", "data-global-comment"} {
+	for _, required := range []string{"data-range-details", "changes-list-filters", "data-search", "data-status", "data-scope", "data-discussions-scrim", `id="project-discussions-panel"`} {
 		if !strings.Contains(changes, required) {
 			t.Fatalf("changes missing %s: %s", required, changes)
 		}
 	}
-	if strings.Index(changes, "data-global-comment") < strings.Index(changes, "data-discussions-panel") || strings.Count(changes, "formnovalidate") != 2 {
+	if strings.Contains(changes, "data-global-comment") || strings.Count(changes, "formnovalidate") != 2 {
 		t.Fatalf("changes filters or composer cancellation regressed: %s", changes)
 	}
 	editor, err := RenderEditor(view)

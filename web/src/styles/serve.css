@@ -47,6 +47,12 @@
 .update-notice-actions :is(a, button):hover { filter: brightness(.96); }
 .update-notice-actions :is(a, button):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .update-notice-actions :is(a, button):active { transform: scale(.96); }
+.workspace-header-actions { justify-self: end; display: flex; align-items: center; gap: 8px; }
+.header-review-toggle { min-height: 40px; padding: 7px 12px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); color: var(--accent); cursor: pointer; font: 700 12px/1.2 var(--font-interface); white-space: nowrap; }
+.header-review-toggle:hover { background: var(--accent-soft); color: var(--accent-strong); }
+.header-review-toggle:active { transform: scale(.96); }
+.header-review-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.header-review-toggle span { font-variant-numeric: tabular-nums; }
 .document-context-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .review-selection-menu { position: fixed; z-index: 80; display: flex; gap: 2px; padding: 4px; border-radius: 12px; background: var(--surface); box-shadow: 0 0 0 1px color-mix(in srgb, var(--text) 14%, transparent), 0 10px 28px rgb(0 0 0 / 18%); }
 .review-selection-menu[hidden] { display: none; }
@@ -76,7 +82,8 @@
 .portal-review-confirm form { gap: 16px; }
 .portal-review-confirm form > p { margin: 0; color: var(--muted); line-height: 1.5; }
 .portal-review-confirm .portal-review-delete { border-color: var(--danger); background: var(--danger); color: white; }
-.portal-review-scrim { display: none; }
+.portal-review-scrim { position: fixed; z-index: 75; inset: 64px 0 0; display: block; width: 100%; border: 0; background: rgb(0 0 0 / 24%); cursor: default; }
+.portal-review-scrim[hidden] { display: none; }
 .portal-review-panel { position: fixed; z-index: 76; inset: 64px 0 0 auto; width: min(440px, calc(100vw - 40px)); min-width: 0; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; overflow: hidden; background: var(--surface-soft); color: var(--text); box-shadow: -18px 0 52px rgb(0 0 0 / 20%); transform: translateX(105%); transition: transform 180ms cubic-bezier(.2, .8, .2, 1); font-family: var(--font-interface); }
 .portal-review-panel[hidden] { display: none; }
 .portal-review-panel.is-open { transform: translateX(0); }
@@ -146,16 +153,19 @@
 @keyframes server-rebuild-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) {
   .server-rebuild.is-rebuilding .server-rebuild-icon { animation: none; }
+  .portal-review-panel { transition: none; }
 }
 @media (max-width: 560px) {
+  .workspace-header-actions { min-width: 0; grid-column: 1 / -1; justify-self: stretch; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); }
+  .workspace-header-actions > *, .workspace-header-actions .workspace-appearance { min-width: 0; }
+  .site-header .header-actions > .workspace-nav { display: none; }
   .review-selection-menu { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); width: calc(100vw - 16px); }
   .review-selection-menu button { min-width: 0; min-height: 44px; white-space: normal; }
   .portal-review-dialog { width: calc(100vw - 20px); margin: auto; }
   .portal-review-dialog form { padding: 16px; }
   .portal-review-dialog footer { display: grid; grid-template-columns: 1fr 1fr; }
   .portal-review-toast { right: 10px; bottom: 10px; left: 10px; max-width: none; justify-content: space-between; }
-  .portal-review-scrim { position: fixed; z-index: 75; inset: 0; display: block; width: 100%; border: 0; background: rgb(0 0 0 / 38%); }
-  .portal-review-scrim[hidden] { display: none; }
+  .portal-review-scrim { inset: 0; background: rgb(0 0 0 / 38%); }
   .portal-review-panel { z-index: 76; inset: 0; width: 100%; }
   .portal-review-panel > header { padding-block: 10px; }
   .portal-review-panel button { min-height: 44px; }
@@ -173,7 +183,7 @@
   .portal-review-panel > header > div:last-child { display: grid; grid-template-columns: 1fr 1fr; }
 }
 @media print {
-  .update-notice, .portal-review-toggle, .portal-review-panel, .portal-review-scrim, .review-selection-menu, .portal-review-toast { display: none; }
+  .update-notice, .header-review-toggle, .portal-review-panel, .portal-review-scrim, .review-selection-menu, .portal-review-toast { display: none; }
 }
 .is-soft-navigating::before {
   content: "";

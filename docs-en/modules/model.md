@@ -1,7 +1,7 @@
 # Project model and validation
 
 - Identifier: MOD-MODEL
-- Status: Ready
+- Status: Done
 - Last updated: 2026-08-12
 
 This module reads the documentation root, connects known entities, and reports

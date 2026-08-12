@@ -1,8 +1,8 @@
 # Static portal
 
 - Identifier: MOD-SITE
-- Status: Ready
-- Last updated: 2026-08-10
+- Status: Done
+- Last updated: 2026-08-11
 
 The module produces backend-independent HTML pages, navigation, static JSON
 resources, and a typed `report.json` from the completed project model.

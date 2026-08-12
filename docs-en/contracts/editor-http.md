@@ -1,7 +1,7 @@
 # Editor HTTP API: Behavior and Boundaries
 
 - Identifier: CON-EDITOR-HTTP-V1
-- Status: Ready
+- Status: Done
 - Last updated: 2026-08-10
 
 [OpenAPI 3.1.0](editor.openapi.yaml) contains routes, parameters, response codes,

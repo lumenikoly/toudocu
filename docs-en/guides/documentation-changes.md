@@ -23,8 +23,9 @@ static and does not depend on Git history.
    you need context beyond the changed lines.
 6. For Markdown, open Before and after, Semantics, or Relationships when useful.
    OpenAPI, Mermaid, asset, and screen-map tabs appear only for matching files.
-7. To discuss a change with an agent, leave a comment and follow the
-   [local discussion journey](../use-cases/UC-REVIEW-01.md).
+7. To discuss documentation with an agent, create a question or change request
+   and follow the
+   [agent feedback scenario](../use-cases/UC-AGENT-FEEDBACK-01.md).
 
 ## What is compared
 

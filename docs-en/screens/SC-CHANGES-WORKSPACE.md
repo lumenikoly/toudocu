@@ -5,12 +5,13 @@
 - Module: MOD-CHANGES
 - Status: Implemented
 - Route: `/changes/`
-- Last updated: 2026-08-10
+- Last updated: 2026-08-12
 
-This screen lets a developer review the current Git diff and discuss it with an
-agent without leaving the local portal. It includes documentation and other
-changed or manually related repository files. The public `ChangeSetReport`
-still remains limited to documentation.
+This screen lets a developer review the current Git diff and continue a
+documentation discussion without leaving the local portal. It shows
+documentation and other changed repository files, but new messages to the agent
+are allowed only for canonical Markdown documents. The public
+`ChangeSetReport` remains limited to documentation.
 
 No current screenshot is available yet.
 `assets/screens/changes-workspace.png` shows an older layout and is therefore
@@ -18,9 +19,10 @@ not declared as this document's Preview.
 
 ## What the user sees
 
-The top bar links to Portal, Editor, and Changes and contains theme and color
-scheme controls. Below it, the page shows the Git range, changed file and line
-counts, and a Discussions button.
+The top bar links to Portal, Editor, and Changes and contains a
+“Discussions · N” button together with theme and color-scheme controls. The
+count covers every open project thread. Below it, the page shows the Git range
+and the changed file and line counts.
 
 Range settings are inside a disclosure panel. The user can choose start and end
 states and an optional base branch, then see the resolved Git refs, current
@@ -43,6 +45,12 @@ The first matching file opens automatically. After a refresh, Toudocu tries to
 preserve the selected file, tab, and filters. When nothing matches, the screen
 states that the list is empty.
 
+After a file is selected, the list and URL update immediately. While Toudocu
+loads details for that file only, the main area shows its heading and a
+“Loading file…” message. Switching back to an already loaded tab reuses its
+data instead of repeating the request. A late response cannot replace a newer
+file selection. After an error, the user can select the file again.
+
 ## File views
 
 Diff is the main tab and shows the exact Git patch. It supports unified and
@@ -60,19 +68,33 @@ collapsed until needed; an error opens them automatically.
 
 ## Comments and agent responses
 
-A comment can target the whole change set, an entire file, a patch line, or a
-selection in Full file. The form has one field: message text.
-`Ctrl`+`Enter` or `Cmd`+`Enter` saves it; `Esc` cancels. A selection crossing
-both old and new patch sides is rejected.
+A message can target an entire document, a new patch line, or selected content
+in Full file or unified diff. In both views, the selection menu can copy clean
+text, copy context, or add a question, and releasing the pointer does not clear
+the selection.
 
-The discussion panel stays hidden until a message exists. It then shows open
-and resolved discussions. An unsent message can be edited or deleted. Once its
-agent batch is created, it becomes immutable; later conversation is a new
-reply.
+The new side of a unified diff stores an exact document range. For the old side
+of a modified document, Toudocu creates a document anchor without a range and
+adds a visible quote containing the path and old line number to the message.
+Mixed selections and fully deleted documents still allow both copy actions, but
+their Add question action is unavailable. A separate “+” appears on hover and
+focus for lines that support an exact or document anchor and remains visible on
+touch screens. Source code and fully deleted documents do not show it.
 
-“Send to agent” does not start an agent. It creates a pending batch and displays
-an instruction for the user to send separately. Agent results appear as Fixed,
-Not fixed, or Needs clarification and never resolve a discussion automatically.
+The form lets the user choose a question or change request. `Ctrl`+`Enter` or
+`Cmd`+`Enter` saves the message and immediately adds it to the queue; `Esc`
+cancels.
+
+The discussion panel opens over the workspace on the right and shows every
+project thread, open threads first. A pending message can be edited or deleted
+until the agent retrieves it through `agent next`. Any open or closed thread
+can be deleted in full after confirmation, permanently removing its messages
+and unprocessed queue entries. A message retrieved by the agent is immutable;
+the thread can continue with a new message after the agent responds.
+
+Copy prompt immediately copies the request to process the queue and does not
+change state. An agent result appears as a response, change, no change needed,
+clarification request, or error and never closes a discussion automatically.
 
 ## Live updates and responsive layout
 
@@ -80,24 +102,26 @@ Toudocu watches repository and discussion changes separately. When the open
 file changes, the screen offers to refresh it. Draft comment text is preserved,
 but the anchor must be selected again.
 
-On a wide screen, the file list, diff, and open discussions sit side by side.
-On tablets, discussions open on the right. On phones, files and discussions use
-separate drawers. `Esc` closes them, and state is always expressed with text as
-well as color.
+On a wide screen, the file list and diff sit side by side while discussions
+slide over the workspace from the right with a backdrop. On phones, the
+discussion panel fills the viewport and the file list remains a separate
+drawer. `Esc` closes both panels; the discussion panel also closes when the
+backdrop is pressed and restores focus to the header button. Motion is disabled
+under `prefers-reduced-motion`, and state is always expressed with text as well
+as color.
 
 ## Availability
 
-The screen and comment writes exist only in the main portal started through
-`serve`. Comparisons ending at a commit or the index are readable, but comments
-are writable only when the end state is `working-tree`. Static builds,
-translation portals, and direct serving of a translation root do not include
-this screen.
+The screen and discussion writes are available only in the main portal started
+through `serve`. The Git range affects the view, but agent feedback always
+targets the current canonical document. Static builds, translation portals, and
+direct serving of a translation root do not include this capability.
 
 ## Related documents
 
 - [UC-DOCS-05](../use-cases/UC-DOCS-05.md)
-- [UC-REVIEW-01](../use-cases/UC-REVIEW-01.md)
-- [MOD-REVIEW](../modules/MOD-REVIEW.md)
-- [FLOW-REVIEW-FEEDBACK](../flows/FLOW-REVIEW-FEEDBACK.md)
+- [UC-AGENT-FEEDBACK-01](../use-cases/UC-AGENT-FEEDBACK-01.md)
+- [MOD-AGENT-FEEDBACK](../modules/MOD-AGENT-FEEDBACK.md)
+- [FLOW-AGENT-FEEDBACK](../flows/FLOW-AGENT-FEEDBACK.md)
 - [Changes HTTP API](../contracts/changes-http.md)
 - [TASK-CHANGES-002](../work/TASK-CHANGES-002.md)

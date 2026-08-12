@@ -1,7 +1,7 @@
 # MOD-CHANGES: Documentation changes
 
 - Identifier: MOD-CHANGES
-- Status: Ready
+- Status: Done
 - Last updated: 2026-08-10
 
 This module compares two explicitly selected states in the local Git
@@ -62,8 +62,9 @@ views cover only configured documentation roots. Every path is relative to the
 repository root and cannot read `.git` or escape the allowed roots.
 
 Repository-wide file listing and discussions belong to
-[MOD-REVIEW](MOD-REVIEW.md). They do not expand the public `ChangeSetReport`
-schema or add source code to documentation reports from the CLI.
+[MOD-AGENT-FEEDBACK](MOD-AGENT-FEEDBACK.md). They do not expand the public
+`ChangeSetReport` schema or add source code to documentation reports from the
+CLI.
 
 ## Invariants
 

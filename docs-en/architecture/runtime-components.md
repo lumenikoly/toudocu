@@ -29,7 +29,7 @@ for `changes` and `serve`; static `build` does not depend on Git.
 
 For discussions, `RepositoryReviewService` reads allowed files across the
 repository without changing the public `ChangeSetReport`. `ReviewService`
-manages discussions, queued batches, responses, and anchor relocation, while
+manages discussions, queued messages, responses, and anchor relocation, while
 `ReviewStore` writes state safely to the user's state directory. Static and
 translation portals do not include these services.
 
@@ -41,7 +41,7 @@ translation portals do not include these services.
 | Project model | Classify documents, validate OpenAPI, resolve relationships, and produce diagnostics | [MOD-MODEL](../modules/model.md) |
 | Site | Create a backend-independent static HTTP portal or canonical serve workspace with editor, changes, and offline API docs | [MOD-SITE](../modules/site.md) |
 | Changes | Read Git and create one report for the selected range | [MOD-CHANGES](../modules/MOD-CHANGES.md) |
-| Discussions | Store local discussions and hand immutable batches to an agent | [MOD-REVIEW](../modules/MOD-REVIEW.md) |
+| Agent feedback | Store documentation discussions and deliver individual messages in arrival order | [MOD-AGENT-FEEDBACK](../modules/MOD-AGENT-FEEDBACK.md) |
 | Skill bundle and installer | Validate the embedded package, resolve the host target, classify managed state, and execute the lifecycle atomically | [MOD-CLI](../modules/cli.md), [guide](../guides/skill-installation.md) |
 
 The static generator and serve variant are separated. Serve keeps separate
@@ -59,7 +59,7 @@ validation gate. Concrete operation sequences remain in
 [FLOW-DOCS-BUILD](../flows/FLOW-DOCS-BUILD.md),
 [FLOW-DOCS-SERVE](../flows/FLOW-DOCS-SERVE.md), and
 [FLOW-TASK-WORKFLOW](../flows/FLOW-TASK-WORKFLOW.md), and
-[FLOW-REVIEW-FEEDBACK](../flows/FLOW-REVIEW-FEEDBACK.md).
+[FLOW-AGENT-FEEDBACK](../flows/FLOW-AGENT-FEEDBACK.md).
 
 The skill lifecycle is a separate short CLI branch and does not build the
 documentation model. Toudocu validates the embedded package, plans the target

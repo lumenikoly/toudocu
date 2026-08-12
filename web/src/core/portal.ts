@@ -478,29 +478,23 @@ import { createEmptyState, selectTab, setExpanded } from "../components";
     function initializeDocumentReview(signal: any) {
         const page: any = pageContract();
         const review: any = page?.runtime === 'serve' && page.capabilities?.review ? page.endpoints?.review : '';
+        const toggle: any = $('[data-discussions-toggle]');
         const contextButton: any = $('[data-copy-document-context]');
         const selectionArea: any = contextButton?.closest('.page-content');
-        if (!review || !contextButton || !selectionArea)
+        if (!review || !toggle)
             return;
         const selectionSources: any[] = [
-            $('.page-header h1', selectionArea),
-            $('.metadata-grid', selectionArea),
-            $('.page-header .page-lead', selectionArea),
-            ...$$('.doc-content', selectionArea),
+            selectionArea && $('.page-header h1', selectionArea),
+            selectionArea && $('.metadata-grid', selectionArea),
+            selectionArea && $('.page-header .page-lead', selectionArea),
+            ...(selectionArea ? $$('.doc-content', selectionArea) : []),
         ].filter(Boolean);
-        const title: any = contextButton.dataset.documentContextTitle || '';
-        const path: any = contextButton.dataset.documentContextPath || '';
-        if (!path)
-            return;
+        const title: any = contextButton?.dataset.documentContextTitle || '';
+        const path: any = contextButton?.dataset.documentContextPath || '';
+        const canCreate: any = Boolean(path);
         const escapeHTML: any = (value: any) => String(value ?? '').replace(/[&<>"']/g, (character: any) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } as Record<string, string>)[character]);
         const placementLabel: any = (status: any) => ({ current: text("core.portal.063"), moved: text("core.portal.064"), stale: text("core.portal.065"), deleted: text("core.portal.066") } as Record<string, string>)[status] || status;
         const outcomeLabel: any = (outcome: any) => ({ answered: text("core.portal.067"), changed: text("core.portal.090"), no_change: text("core.portal.068"), needs_clarification: text("core.portal.069"), failed: text("core.portal.091") } as Record<string, string>)[outcome] || outcome;
-        const toggle: any = document.createElement('button');
-        toggle.type = 'button';
-        toggle.className = 'document-context-button portal-review-toggle';
-        toggle.setAttribute('aria-expanded', 'false');
-        toggle.innerHTML = `${text("core.portal.054")} · <span data-portal-review-count>0</span>`;
-        contextButton.insertAdjacentElement('afterend', toggle);
         const menu: any = document.createElement('div');
         menu.className = 'review-selection-menu';
         menu.hidden = true;
@@ -521,9 +515,11 @@ import { createEmptyState, selectTab, setExpanded } from "../components";
         scrim.setAttribute('aria-label', text("core.portal.057"));
         const panel: any = document.createElement('aside');
         panel.className = 'portal-review-panel';
+        panel.id = 'project-discussions-panel';
         panel.hidden = true;
+        panel.setAttribute('role', 'complementary');
         panel.setAttribute('aria-label', text("core.portal.054"));
-        panel.innerHTML = `<header><div><strong>${text("core.portal.054")}</strong><span>${escapeHTML(path)}</span></div><div><button type="button" data-portal-review-new>${text("core.portal.056")}</button><button type="button" data-portal-review-close>${text("core.portal.057")}</button></div></header><p class="portal-review-summary" data-portal-review-summary></p><div class="portal-review-list" data-portal-review-list></div><footer><button type="button" class="portal-review-send" data-portal-review-copy-prompt>${text("core.portal.075")}</button><small>${text("core.portal.076")}</small></footer>`;
+        panel.innerHTML = `<header><div><strong>${text("core.portal.054")}</strong><span ${path ? '' : 'hidden'}>${escapeHTML(path)}</span></div><div><button type="button" data-portal-review-new ${canCreate ? '' : 'hidden'}>${text("core.portal.056")}</button><button type="button" data-portal-review-close>${text("core.portal.057")}</button></div></header><p class="portal-review-summary" data-portal-review-summary></p><div class="portal-review-list" data-portal-review-list></div><footer><button type="button" class="portal-review-send" data-portal-review-copy-prompt>${text("core.portal.075")}</button><small>${text("core.portal.076")}</small></footer>`;
         const toast: any = document.createElement('div');
         toast.className = 'portal-review-toast';
         toast.hidden = true;
@@ -570,15 +566,14 @@ import { createEmptyState, selectTab, setExpanded } from "../components";
                 throw new Error(attempt.result.diagnostics?.[0]?.message || `HTTP ${attempt.response.status}`);
             return attempt.result;
         };
-        const documentDiscussions: any = () => [...(reviewState?.session?.discussions || [])]
-            .filter((discussion: any) => discussion.target?.path === path || discussion.placement?.path === path)
+        const projectDiscussions: any = () => [...(reviewState?.session?.discussions || [])]
             .sort((left: any, right: any) => Number(left.state !== 'open') - Number(right.state !== 'open') || String(left.createdAt).localeCompare(String(right.createdAt)));
         const discussionInFlight: any = (discussionId: any) => (reviewState?.deliveries || []).some((delivery: any) => delivery.discussionId === discussionId && delivery.state !== 'responded');
         const messageEditable: any = (message: any) => message.author === 'human' && (message.state === 'draft' || (reviewState?.deliveries || []).some((delivery: any) => delivery.id === message.deliveryId && delivery.state === 'pending'));
         const renderReview: any = () => {
-            const discussions: any = documentDiscussions();
+            const discussions: any = projectDiscussions();
             const open: any = discussions.filter((discussion: any) => discussion.state === 'open');
-            $('[data-portal-review-count]', toggle).textContent = String(open.length);
+            $('[data-open-discussion-count]', toggle).textContent = String(open.length);
             $('[data-portal-review-summary]', panel).textContent = text("core.portal.055", [open.length, discussions.length - open.length]);
             const list: any = $('[data-portal-review-list]', panel);
             const scrollTop: any = list.scrollTop;
@@ -619,7 +614,7 @@ import { createEmptyState, selectTab, setExpanded } from "../components";
                 list.append(article);
             });
             if (!discussions.length)
-                list.innerHTML = `<div class="portal-review-empty"><p>${text("core.portal.058")}</p><button type="button" data-portal-review-empty-new>${text("core.portal.056")}</button></div>`;
+                list.innerHTML = `<div class="portal-review-empty"><p>${text("core.portal.058")}</p>${canCreate ? `<button type="button" data-portal-review-empty-new>${text("core.portal.056")}</button>` : ''}</div>`;
             $('[data-portal-review-empty-new]', list)?.addEventListener('click', () => openComposer({ operation: 'create' }), { signal });
             list.scrollTop = scrollTop;
         };
@@ -640,6 +635,10 @@ import { createEmptyState, selectTab, setExpanded } from "../components";
             panel.hidden = false;
             scrim.hidden = false;
             toggle.setAttribute('aria-expanded', 'true');
+            if (matchMedia('(max-width: 560px)').matches) {
+                panel.setAttribute('role', 'dialog');
+                panel.setAttribute('aria-modal', 'true');
+            }
             requestAnimationFrame(() => panel.classList.add('is-open'));
             $('[data-portal-review-close]', panel).focus();
             try { if (refresh) await loadReview(); }
@@ -652,6 +651,8 @@ import { createEmptyState, selectTab, setExpanded } from "../components";
             panel.classList.remove('is-open');
             scrim.hidden = true;
             toggle.setAttribute('aria-expanded', 'false');
+            panel.setAttribute('role', 'complementary');
+            panel.removeAttribute('aria-modal');
             panelCloseTimer = window.setTimeout(() => { panel.hidden = true; }, 180);
             panelReturn?.focus?.();
         };
@@ -778,15 +779,15 @@ import { createEmptyState, selectTab, setExpanded } from "../components";
         scrim.addEventListener('click', closePanel, { signal });
         $('[data-portal-review-copy-prompt]', panel).addEventListener('click', async () => announce(await copyText(text("core.portal.087")) ? text("core.portal.088") : text("core.portal.041")), { signal });
         toastAction.addEventListener('click', () => toastCallback?.(), { signal });
-        selectionArea.addEventListener('pointerup', showMenu, { signal });
-        selectionArea.addEventListener('keyup', (event: any) => { if (event.key === 'Shift' || !event.shiftKey) showMenu(); }, { signal });
+        selectionArea?.addEventListener('pointerup', showMenu, { signal });
+        selectionArea?.addEventListener('keyup', (event: any) => { if (event.key === 'Shift' || !event.shiftKey) showMenu(); }, { signal });
         document.addEventListener('pointerdown', (event: any) => { if (!menu.contains(event.target)) hideMenu(); }, { signal });
         document.addEventListener('scroll', hideMenu, { capture: true, signal });
         window.addEventListener('resize', hideMenu, { signal });
         document.addEventListener('keydown', (event: any) => { if (event.key !== 'Escape') return; if (!menu.hidden) { event.preventDefault(); hideMenu(); } else if (panel.classList.contains('is-open') && !dialog.open && !confirmDialog.open) closePanel(); }, { capture: true, signal });
         const pollTimer: any = window.setInterval(() => { if (panel.classList.contains('is-open') && !document.hidden && !dialog.open && !confirmDialog.open) loadReview().catch(() => { }); }, 2000);
         loadReview().catch(() => { });
-        signal.addEventListener('abort', () => { window.clearTimeout(toastTimer); window.clearTimeout(panelCloseTimer); window.clearInterval(pollTimer); toggle.remove(); menu.remove(); dialog.remove(); confirmDialog.remove(); scrim.remove(); panel.remove(); toast.remove(); }, { once: true });
+        signal.addEventListener('abort', () => { window.clearTimeout(toastTimer); window.clearTimeout(panelCloseTimer); window.clearInterval(pollTimer); menu.remove(); dialog.remove(); confirmDialog.remove(); scrim.remove(); panel.remove(); toast.remove(); }, { once: true });
     }
     function initializeCodeCopy() {
         $$('.code-block').forEach((block: any) => {

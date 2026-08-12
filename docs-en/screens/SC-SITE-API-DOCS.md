@@ -6,11 +6,11 @@
 - Status: Implemented
 - Route: `/_toudocu/api-docs/`
 - Preview: `../assets/screens/site-api-docs.png`
-- Last updated: 2026-08-10
+- Last updated: 2026-08-12
 
-A serve-only catalog of the wire-level Editor and Changes API contracts. The
-user selects an OpenAPI source, expands operations, and may execute only safe
-`GET`/`HEAD` requests against the canonical local server.
+A `serve`-only catalog of the wire-level Editor, Changes, and agent feedback API
+contracts. The user selects an OpenAPI source, expands operations, and may
+execute only safe `GET`/`HEAD` requests against the canonical local server.
 
 ## Transitions
 

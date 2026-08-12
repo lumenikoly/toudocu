@@ -90,9 +90,19 @@ func workspaceAppearanceControls(ui frontend.UI, config SiteConfig) string {
 		`<label class="header-select scheme-select"><span class="header-select-visual" aria-hidden="true"><span class="scheme-toggle-indicator"></span><span data-theme-label>` + escapeHTML(colorSchemeLabel(ui, config.ColorScheme)) + `</span></span><select data-color-scheme-select aria-label="` + escapeAttr(ui.Text("header.scheme")) + `">` + selectOptions(config.ColorScheme, []selectOption{{"system", ui.Text("scheme.system")}, {"light", ui.Text("scheme.light")}, {"dark", ui.Text("scheme.dark")}}) + `</select></label></div>`
 }
 
+func discussionToggle(ui frontend.UI) string {
+	return `<button class="header-review-toggle" type="button" data-discussions-toggle aria-expanded="false" aria-controls="project-discussions-panel">` +
+		escapeHTML(ui.Text("core.portal.054")) + ` · <span data-open-discussion-count>0</span></button>`
+}
+
 func workspaceHeader(model *Model, active workspaceSurface) string {
 	ui := portalUI(model)
-	return `<header class="workspace-header">` + workspaceBrand(model, "/") + workspaceNavigation(ui, active) + workspaceAppearanceControls(ui, model.SiteConfig) + `</header>`
+	review := ""
+	if active == workspaceChanges && model.translationLocale == "" {
+		review = discussionToggle(ui)
+	}
+	return `<header class="workspace-header">` + workspaceBrand(model, "/") + workspaceNavigation(ui, active) +
+		`<div class="workspace-header-actions">` + review + workspaceAppearanceControls(ui, model.SiteConfig) + `</div></header>`
 }
 
 func workspaceFavicon(model *Model) string {

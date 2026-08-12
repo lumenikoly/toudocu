@@ -4,10 +4,10 @@
 - Type: Feature
 - Priority: Normal
 - Module: MOD-CHANGES
-- Use case: UC-REVIEW-01
+- Use case: UC-AGENT-FEEDBACK-01
 - Screens: SC-CHANGES-WORKSPACE
 - Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-10
+- Last updated: 2026-08-12
 
 ## Outcome
 
@@ -92,10 +92,11 @@ The current interface has moved beyond this historical task:
 
 - the main tab is now Diff;
 - full UTF-8 file viewing and a file-kind filter were added;
-- comments no longer have a selectable type;
-- “Send to agent” only creates a pending batch and displays the instruction for
-  an AI agent; it does not start the agent.
+- questions and change requests apply only to canonical documentation;
+- saving immediately creates a queue entry that remains editable until the
+  agent retrieves it, while Copy prompt neither changes state nor starts an
+  agent.
 
 The current user journey is documented in
 [SC-CHANGES-WORKSPACE](../screens/SC-CHANGES-WORKSPACE.md) and
-[UC-REVIEW-01](../use-cases/UC-REVIEW-01.md).
+[UC-AGENT-FEEDBACK-01](../use-cases/UC-AGENT-FEEDBACK-01.md).

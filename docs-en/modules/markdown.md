@@ -1,7 +1,7 @@
 # Secure Markdown
 
 - Identifier: MOD-MARKDOWN
-- Status: Ready
+- Status: Done
 - Last updated: 2026-08-10
 
 This module parses the supported CommonMark and GFM syntax once, produces one

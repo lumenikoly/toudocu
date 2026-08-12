@@ -334,6 +334,8 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await expect(page.locator('[data-tab="summary"]')).toHaveCount(0);
     await expect(page).not.toHaveURL(/[?&](?:type|group)=|[?&]tab=summary/);
     await expect(page.locator(".changes-diagnostics")).toHaveAttribute("open", "");
+    await expect(page.locator(".workspace-header [data-discussions-toggle]")).toHaveAttribute("aria-controls", "project-discussions-panel");
+    await expect(page.locator(".changes-overview [data-discussions-toggle]")).toHaveCount(0);
     await page.locator("[data-scope]").selectOption("documents");
     await expect(page.locator('[data-file-list] [data-path="docs/notes.md"]')).toBeVisible();
     await expect(page.locator('[data-file-list] [data-path="server.go"]')).toHaveCount(0);
@@ -381,6 +383,7 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     const selectionMenu = page.locator("[data-tab-panel] .review-selection-menu");
     await expect(selectionMenu).toBeVisible();
     await expect(selectionMenu.locator("[data-selection-copy]")).toBeAttached();
+    await expect(selectionMenu.locator("[data-selection-context]")).toBeAttached();
     await selectionMenu.locator("[data-selection-question]").dispatchEvent("click");
     await expect(page.locator("[data-review-composer]")).toHaveAttribute("open", "");
     await expect(page.locator("[data-review-target-summary]")).toContainText("docs/notes.md");
@@ -401,9 +404,12 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await expect(page.locator("[data-mobile-files]")).toBeFocused();
     await page.locator("[data-discussions-toggle]").click();
     await expect(page.locator("[data-discussions-panel]")).toHaveClass(/is-open/);
-    await expect(page.locator("[data-global-comment]")).toBeHidden();
+    await expect(page.locator("[data-discussions-panel]")).toHaveAttribute("role", "dialog");
+    await expect(page.locator("[data-discussions-panel]")).toHaveAttribute("aria-modal", "true");
+    await expect(page.locator("[data-discussions-scrim]")).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(page.locator("[data-discussions-toggle]")).toBeFocused();
+    await expect(page.locator("[data-discussions-scrim]")).toBeHidden();
     await page.setViewportSize({ width: 1280, height: 720 });
 
     const fallbackContext = await page.context().browser()!.newContext();
@@ -543,8 +549,8 @@ test("Changes loads only the selected file detail and ignores stale responses", 
   }
 });
 
-test("Portal and Changes share documentation discussions with the agent CLI", async ({ page }) => {
-  test.setTimeout(90_000);
+test("Portal and Changes share documentation discussions with the agent CLI", async ({ page, browser }) => {
+  test.setTimeout(150_000);
   const fixture = mkdtempSync(join(tmpdir(), "toudocu-agent-feedback-browser-"));
   const stateRoot = mkdtempSync(join(tmpdir(), "toudocu-agent-feedback-state-"));
   mkdirSync(join(fixture, "docs", "architecture"), { recursive: true });
@@ -557,7 +563,7 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
   run("git", ["config", "user.name", "Review Browser"], fixture);
   run("git", ["add", "."], fixture);
   run("git", ["commit", "-qm", "baseline"], fixture);
-  writeFileSync(join(fixture, "docs", "architecture", "overview.md"), "# Architecture\n\n- Тип документа: Architecture Overview\n\n## Boundary\n\nUpdated.\n\nRepeated.\n\nRepeated.\n\nChanged.\n");
+  writeFileSync(join(fixture, "docs", "architecture", "overview.md"), "# Architecture\n\n- Тип документа: Architecture Overview\n\n## Boundary\n\nUpdated now.\n\nRepeated.\n\nRepeated.\n\nChanged.\n");
 
   const portServer = createServer();
   await new Promise<void>((resolveListen) => portServer.listen(0, "127.0.0.1", resolveListen));
@@ -578,7 +584,19 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
   try {
     await waitForHTTP(origin);
     await page.context().grantPermissions(["clipboard-read", "clipboard-write"], { origin });
+    await page.goto(origin);
+    const homeToggle = page.locator(".site-header [data-discussions-toggle]");
+    await expect(homeToggle).toBeVisible();
+    await expect(homeToggle).toHaveAttribute("aria-expanded", "false");
+    await expect(homeToggle).toHaveAttribute("aria-controls", "project-discussions-panel");
+    await homeToggle.click();
+    await expect(page.locator(".portal-review-panel")).toBeVisible();
+    await expect(page.locator("[data-portal-review-new]")).toBeHidden();
+    await page.keyboard.press("Escape");
+    await expect(homeToggle).toBeFocused();
     await page.goto(origin + "/architecture/overview.html");
+    await expect(page.locator(".site-header [data-discussions-toggle]")).toBeVisible();
+    await expect(page.locator(".document-context-actions [data-discussions-toggle]")).toHaveCount(0);
 
     const selectPortalElement = (element: any) => element.evaluate((target: HTMLElement) => {
       const range = document.createRange();
@@ -653,10 +671,74 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await thread.getByRole("button", { name: "Открыть снова" }).click();
 
     await panel.getByRole("button", { name: "Закрыть панель" }).click();
-    await page.getByRole("link", { name: "Показать изменения" }).click();
+    await page.goto(origin);
+    await expect(page.locator("[data-open-discussion-count]")).toHaveText("1");
+    await page.locator(".site-header [data-discussions-toggle]").click();
+    await expect(page.locator(".portal-review-thread")).toContainText("Почему фрагмент повторяется?");
+    await expect(page.locator("[data-portal-review-new]")).toBeHidden();
+    await page.keyboard.press("Escape");
+    await expect(page.locator(".site-header [data-discussions-toggle]")).toBeFocused();
+    await page.locator('[data-workspace="changes"]').click();
     await page.locator('[data-file-list] [data-path="docs/architecture/overview.md"]').click();
-    await page.locator("[data-detail] [data-file-comment]").click();
+    await expect(page.locator(".workspace-header [data-discussions-toggle]")).toHaveAttribute("aria-controls", "project-discussions-panel");
+    const removedContent = page.locator(".diff-line-removed .diff-line-content").filter({ hasText: "Updated." });
+    const addedContent = page.locator(".diff-line-added .diff-line-content").filter({ hasText: "Updated now." });
+    await addedContent.evaluate((element) => {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+      element.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
+    });
+    const diffMenu = page.locator("[data-tab-panel] .review-selection-menu");
+    await expect(diffMenu).toBeVisible();
+    await expect.poll(() => page.evaluate(() => window.getSelection()?.toString())).toBe("Updated now.");
+    await expect(diffMenu.getByRole("button", { name: "Копировать текст" })).toBeEnabled();
+    await expect(diffMenu.getByRole("button", { name: "Копировать контекст" })).toBeEnabled();
+    await expect(diffMenu.getByRole("button", { name: "Добавить вопрос" })).toBeEnabled();
+    await diffMenu.getByRole("button", { name: "Копировать текст" }).click();
+    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe("Updated now.");
+    await addedContent.dispatchEvent("pointerup");
+    await diffMenu.getByRole("button", { name: "Добавить вопрос" }).click();
     const changesComposer = page.locator("[data-review-composer]");
+    await expect(changesComposer.locator("[data-review-target-summary]")).toContainText(/docs\/architecture\/overview\.md · \d+:1–\d+:\d+/);
+    await changesComposer.getByRole("button", { name: "Отмена" }).click();
+
+    await page.evaluate(() => {
+      const start = [...document.querySelectorAll<HTMLElement>(".diff-line-removed .diff-line-content")].find((element) => element.textContent?.includes("Updated."));
+      const end = [...document.querySelectorAll<HTMLElement>(".diff-line-added .diff-line-content")].find((element) => element.textContent?.includes("Updated now."));
+      if (!start?.firstChild || !end?.firstChild) throw new Error("diff rows not found");
+      const range = document.createRange();
+      range.setStart(start.firstChild, 0);
+      range.setEnd(end.firstChild, end.textContent?.length ?? 0);
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+      end.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
+    });
+    await expect(diffMenu.getByRole("button", { name: "Добавить вопрос" })).toBeDisabled();
+    await diffMenu.getByRole("button", { name: "Копировать контекст" }).click();
+    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain("Updated.\nUpdated now.");
+
+    const oldPlus = removedContent.locator("..").locator(".diff-comment");
+    await oldPlus.hover();
+    await expect(oldPlus).toHaveCSS("opacity", "1");
+    await oldPlus.focus();
+    await expect(oldPlus).toBeFocused();
+    await oldPlus.click();
+    await expect(changesComposer.locator("[data-review-target-summary]")).toHaveText("docs/architecture/overview.md");
+    await changesComposer.locator("[data-review-message]").fill("Сохрани старый фрагмент.");
+    await changesComposer.locator('button[type="submit"]').click();
+    const quotedThread = page.locator(".review-thread").filter({ hasText: "Сохрани старый фрагмент." });
+    await expect(quotedThread).toContainText(/> docs\/architecture\/overview\.md:\d+/);
+    await expect(quotedThread).toContainText("> Updated.");
+    await quotedThread.locator("[data-delete-discussion]").click();
+    await page.locator("[data-review-delete-confirm]").getByRole("button", { name: "Удалить" }).click();
+    await expect(quotedThread).toHaveCount(0);
+    await page.locator("[data-discussions-close]").click();
+
+    await page.locator("[data-detail] [data-file-comment]").click();
     await changesComposer.locator("[data-review-intent]").selectOption("change_request");
     await changesComposer.locator("[data-review-message]").fill("Проверь и уточни этот документ.");
     await changesComposer.locator('button[type="submit"]').click();
@@ -673,6 +755,25 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await page.locator("[data-review-delete-confirm]").getByRole("button", { name: "Удалить" }).click();
     await expect(changesThread).toHaveCount(0);
     expect(agentCLI(["next"]).pending).toBe(false);
+
+    const touchContext = await browser.newContext({ hasTouch: true, viewport: { width: 390, height: 844 } });
+    const touchPage = await touchContext.newPage();
+    try {
+      await touchPage.goto(origin + "/changes/?path=docs%2Farchitecture%2Foverview.md");
+      const touchPlus = touchPage.locator(".diff-line-added .diff-comment").first();
+      await expect(touchPlus).toBeVisible();
+      await expect(touchPlus).toHaveCSS("opacity", "1");
+      await touchPage.locator("[data-discussions-toggle]").click();
+      const mobilePanel = touchPage.locator("[data-discussions-panel]");
+      await expect(mobilePanel).toHaveAttribute("role", "dialog");
+      await expect(mobilePanel).toHaveAttribute("aria-modal", "true");
+      await expect.poll(async () => {
+        const box = await mobilePanel.boundingBox();
+        return box && { x: box.x, y: box.y, width: box.width, height: box.height };
+      }).toEqual({ x: 0, y: 0, width: 390, height: 844 });
+    } finally {
+      await touchContext.close();
+    }
   } finally {
     child.kill("SIGTERM");
     await new Promise<void>((resolveExit) => child.once("exit", () => resolveExit()));

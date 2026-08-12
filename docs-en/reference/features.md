@@ -28,10 +28,11 @@ database, or package installation.
 | Compare a task with the diff | `toudocu task changes TASK-ID ./docs` | Report and declared-document warnings |
 | Archive or restore | `toudocu task archive|restore TASK-ID ./docs` | Move one file |
 | Manage the AI skill | `toudocu skill install|status|update|uninstall` | State of the embedded offline package |
+| Process a local documentation request | `toudocu agent next|respond` | One queue entry or a structured response |
 | Show the version | `toudocu version` | Generator version |
 
-A bare path is rejected. There are no top-level `init`, `refresh`, `translate`,
-or `feedback` commands; those are prompts to the installed AI skill.
+A bare path is rejected. There are no top-level `init`, `refresh`, or
+`translate` commands; those are prompts to the installed AI skill.
 
 All options and exit codes are in the [CLI contract](../contracts/cli.md).
 
@@ -42,16 +43,17 @@ base. The browser provides the exact patch, full file, rendered Markdown before
 and after, semantics, relationships, and applicable OpenAPI, Mermaid, asset,
 and screen-map views.
 
-The main `serve` portal also exposes other repository files and local
-discussions. A comment can target the whole change set, a file, a line, or
-selected text. “Send to agent” only commits a batch; the user must ask the agent
-separately. An agent response does not resolve the discussion automatically.
+The main `serve` also shows local documentation discussions on document pages
+and in Changes. A message can target a whole Markdown document or a range.
+Saving immediately creates a queue entry; the message can be edited or deleted
+until the agent retrieves it. Copy prompt only copies the request for the
+agent. A response does not close the discussion automatically.
 
 Details:
 
 - [changes guide](../guides/documentation-changes.md);
 - [Changes workspace](../screens/SC-CHANGES-WORKSPACE.md);
-- [discussion journey](../use-cases/UC-REVIEW-01.md).
+- [agent request flow](../use-cases/UC-AGENT-FEEDBACK-01.md).
 
 ## Public Go API
 
@@ -76,8 +78,8 @@ The installed skill adds workflows that do not exist in the Go CLI:
 - `$toudocu translate <locale>` synchronizes one configured translation;
 - `$toudocu translate diff` processes the current diff for every configured
   translation in sequence;
-- `$toudocu feedback` receives Changes comment batches and returns one result
-  for every message.
+- “Process requests from Toudocu” runs `agent next|respond` until the local
+  documentation queue is empty.
 
 The canonical root is the sole source for ordinary analysis and work-item
 context. Translations are read only on an explicit locale request and remain

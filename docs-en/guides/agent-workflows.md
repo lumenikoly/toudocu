@@ -1,8 +1,9 @@
 # Using the Toudocu AI Skill
 
 This guide explains how to invoke the installed skill from an AI agent for
-everyday CLI, portal, work-item, and source-documentation work, and when to use
-the special `init`, `refresh`, and `translate` workflows.
+everyday CLI, portal, work-item, and source-documentation work, when to use the
+special `init`, `refresh`, and `translate` workflows, and how to process the
+local documentation queue.
 
 ## Two different interfaces
 
@@ -24,14 +25,15 @@ $toudocu check the source documentation and explain the diagnostics
 $toudocu build the local portal in the output configured by the project
 $toudocu prepare context for TASK-AREA-001
 $toudocu update the installation guide from the current CLI contract
-$toudocu feedback
+Process requests from Toudocu
 ```
 
-The CLI provides `check`, `build`, `serve`, `changes`, `search`, `scaffold`,
-`task`, `skill`, and `version`. It has no `init`, `refresh`, `translate`, or
-top-level `feedback` command: those are agent workflows. Inside the Toudocu
-source repository, the agent uses `go run ./cmd/toudocu`; in other projects it
-uses the installed `toudocu` from `PATH`.
+The CLI provides `check`, `build`, `serve`, `changes`, `agent`, `search`,
+`scaffold`, `task`, `skill`, and `version`. It has no `init`, `refresh`, or
+`translate` commands: those are agent workflows. Agent feedback instead uses
+the real `agent next|respond` commands. Inside the Toudocu source repository,
+the agent uses `go run ./cmd/toudocu`; in other projects it uses the installed
+`toudocu` from `PATH`.
 
 ## What to delegate to the skill
 
@@ -65,7 +67,7 @@ requests:
 | `$toudocu refresh diff` | Explicit diff refresh call |
 | `$toudocu translate <locale> ...` | Explicit translation request and target locale |
 | `$toudocu translate diff` | Explicit request to process the current diff for every configured locale |
-| `$toudocu feedback` | Explicit request to process comments from Changes |
+| “Process requests from Toudocu” | Explicit request to process the local documentation queue |
 | `task verify --run` | Explicit request to verify or execute the task in a trusted repository |
 
 Missing files, first skill use, ordinary documentation edits, or `check` do not
@@ -153,22 +155,19 @@ plainly.
 
 ## Special workflows
 
-### Processing Changes comments
+### Process requests from Toudocu
 
-`$toudocu feedback` retrieves the oldest pending batch through
-`changes feedback pending --json`. The agent validates each anchor and the
-current Git diff, evaluates the comment against the actual repository, and
-changes only justified files.
+The agent runs `toudocu agent next --json`, retrieves only the oldest queue
+entry, and rereads the current document. For `question`, it responds without
+changing files. For `change_request`, it first validates the claim against
+documentation, code, tests, and configuration, then changes only supported
+canonical documents or returns `no_change`.
 
-For every message it returns one result—`fixed`, `notFixed`, or
-`needsClarification`—with a short explanation and only relevant
-`changedPaths`. The whole response is accepted atomically against the previous
-hash, version, and discussion state. On conflict, the agent retrieves and
-reviews the batch again instead of substituting expected values.
-
-After success, it continues with the next batch until the queue is empty.
-Neither the UI button nor the transport CLI starts the agent or resolves a
-discussion.
+One `AgentResponse` has outcome `answered`, `changed`, `no_change`,
+`needs_clarification`, or `failed` and is submitted through
+`toudocu agent respond`. After success, the agent runs `next` again until it
+receives `pending=false`. Delivery neither starts a language model, closes the
+discussion, nor applies file changes itself.
 
 ### Initialization
 

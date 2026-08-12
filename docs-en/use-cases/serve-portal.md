@@ -48,11 +48,12 @@ the updated result.
 ## Additional journeys
 
 - Changes displays the local Git diff and discussions. See
-  [UC-DOCS-05](UC-DOCS-05.md) and [UC-REVIEW-01](UC-REVIEW-01.md).
+  [UC-DOCS-05](UC-DOCS-05.md) and
+  [UC-AGENT-FEEDBACK-01](UC-AGENT-FEEDBACK-01.md).
 - On the roadmap page, Add deliverable appends one `DLV-ROADMAP-NNN` line to a
   selected existing stage after checking that the file is still current.
-- `/_toudocu/api-docs/` displays Editor and Changes contracts and permits only
-  safe `GET` and `HEAD` requests from the UI.
+- `/_toudocu/api-docs/` displays Editor, Changes, and agent feedback contracts
+  and permits only safe `GET` and `HEAD` requests from the UI.
 - Configured translations appear as locale links and remain read-only. A
   missing translated page opens that locale's home page.
 - When a newer stable release exists, the main portal offers its official

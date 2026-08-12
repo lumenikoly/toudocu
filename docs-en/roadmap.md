@@ -32,6 +32,6 @@ checked. The roadmap checkbox must match that result.
 - [x] `UC-AGENT-01` Install and maintain the embedded AI skill.
 - [x] `DLV-ROADMAP-001` Add an outcome to an existing roadmap stage from
   canonical `serve`.
-- [x] `UC-REVIEW-01` Discuss repository changes and package comments for a
-  local AI skill.
+- [x] `UC-AGENT-FEEDBACK-01` Discuss documentation and deliver separate
+  requests to a local development agent in arrival order.
 - [x] `DLV-RELEASE-02` Build and document the stable `0.0.1` release bundle.

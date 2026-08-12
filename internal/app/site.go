@@ -461,7 +461,11 @@ func pageShell(model *Model, current, title, description, content, toc string) s
 	languageSelect := renderLanguageSelect(ui, model.languageTargets[current])
 	serveControls, serveCSS, serveJS, serveRevision := "", "", "", ""
 	if model.serveMode {
-		serveControls = workspaceNavigation(ui, workspacePortal) + `<button class="icon-button server-rebuild" type="button" data-server-rebuild aria-label="` + escapeAttr(ui.Text("header.rebuild")) + `" title="` + escapeAttr(ui.Text("header.rebuild")) + `"><svg class="server-rebuild-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 5v6h-6"/></svg></button><span class="visually-hidden" data-server-rebuild-status role="status" aria-live="polite"></span>`
+		review := ""
+		if model.translationLocale == "" {
+			review = discussionToggle(ui)
+		}
+		serveControls = workspaceNavigation(ui, workspacePortal) + review + `<button class="icon-button server-rebuild" type="button" data-server-rebuild aria-label="` + escapeAttr(ui.Text("header.rebuild")) + `" title="` + escapeAttr(ui.Text("header.rebuild")) + `"><svg class="server-rebuild-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 5v6h-6"/></svg></button><span class="visually-hidden" data-server-rebuild-status role="status" aria-live="polite"></span>`
 		serveCSS = prefix + "assets/" + mustFrontendAsset("serve.css")
 		serveJS = prefix + "assets/" + mustFrontendAsset("serve.js")
 		serveRevision = model.serveRevision

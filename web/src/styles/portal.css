@@ -1489,7 +1489,7 @@ html[data-theme="dark"][data-accent="violet"] { --accent: #bba0ee; --accent-soft
   .header-select select { border: 0; background: transparent; color: transparent; opacity: 1; }
   .header-select select::picker-icon { display: none; }
   .header-select select::picker(select) {
-    min-width: max(100%, 180px);
+    max-inline-size: calc(100vw - 16px);
     margin-block: 6px;
     padding: 6px;
     border: 1px solid var(--border);
@@ -1498,6 +1498,9 @@ html[data-theme="dark"][data-accent="violet"] { --accent: #bba0ee; --accent-soft
     color: var(--text);
     box-shadow: var(--shadow);
   }
+  .language-select select::picker(select) { inline-size: max(anchor-size(self-inline), 50px); }
+  .site-theme-select select::picker(select) { inline-size: max(anchor-size(self-inline), 115px); }
+  .scheme-select select::picker(select) { inline-size: max(anchor-size(self-inline), 104px); }
   .header-select option {
     min-height: 40px;
     padding: 9px 11px;
@@ -1506,9 +1509,10 @@ html[data-theme="dark"][data-accent="violet"] { --accent: #bba0ee; --accent-soft
     cursor: pointer;
     font-size: 13px;
   }
+  .language-select option { padding-inline: 5px; }
   .header-select option:is(:hover, :focus) { background: var(--surface-soft); }
   .header-select option:checked { background: var(--accent-soft); color: var(--accent-strong); font-weight: 700; }
-  .header-select option::checkmark { margin-inline-start: auto; color: var(--accent); }
+  .header-select option::checkmark { color: var(--accent); }
 }
 .site-theme-indicator {
   min-width: 18px;

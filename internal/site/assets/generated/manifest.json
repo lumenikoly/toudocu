@@ -3,19 +3,19 @@
   "assets": {
     "api-docs.js": {
       "file": "api-docs.js",
-      "sha256": "f005dbaf8c3c0aa5fb073e7d620d5f5d46c50b517aefc9ba5ba6783fae5afd2c"
+      "sha256": "0bb198123d865c698cfe85a5499ee8d3439eb81e8554749f2b57aecab09bcce6"
     },
     "appearance.js": {
       "file": "appearance.js",
-      "sha256": "f07425b7bd5f226827f8c407319db29d452465b935dc8a78d5067f20e6c9ae35"
+      "sha256": "fed35c662615a69adecd442414a7fad47ce4e3ea4182c829e4e891ddefa253cf"
     },
     "changes.css": {
       "file": "changes.css",
-      "sha256": "a95de73086135bb179d972b93d33e9a0c1f277836b8d185cd84cab5256d069b2"
+      "sha256": "5aafce3505687e67f69be0204821f174535016e96c62f4ee0ced2ad0e44f8cc3"
     },
     "changes.js": {
       "file": "changes.js",
-      "sha256": "a9353b93814662bd6bc2d530e8c5a839e5a7b307e6270feb0562feecc383035c"
+      "sha256": "26d514bc91ac6d18d75710f901852ba7472041f36e6caa850f750aed19e7e96a"
     },
     "codemirror.checksums.txt": {
       "file": "codemirror.checksums.txt",
@@ -35,7 +35,7 @@
     },
     "editor.js": {
       "file": "editor.js",
-      "sha256": "b8cbf6bf7757f83a116e59b8f52b0f7e0f53a698de7fe2c55aa780c9c6a6f6c7"
+      "sha256": "d2d9d1f23d773ec98e4a24a9b254aa3f04dca1ddc757c2ca6c5c4d23cee6a6ae"
     },
     "favicon.svg": {
       "file": "favicon.svg",
@@ -55,15 +55,15 @@
     },
     "playable-flow.js": {
       "file": "playable-flow.js",
-      "sha256": "e22a53b24251c7e862ee5a8bb7b79250fcd4f2a6a53c9f5929c3ee0a7000017a"
+      "sha256": "174252f4e4c8e526eaf61747b94f2a69eb7d8fca0cf0b6d7e59056f608d309c2"
     },
     "portal.css": {
       "file": "portal.css",
-      "sha256": "63d0d3c9f55547c183ce59e7d56c3fb0605783810ef0c8d116ec544fa85d2b1c"
+      "sha256": "fc6427c5c17973a0235a1bbc2f4e0b999773438dda61650231e59d1f5ee575c6"
     },
     "portal.js": {
       "file": "portal.js",
-      "sha256": "f36651b9827e65579038ac23bf6cef46bb61e232b994e90388666d1269750855"
+      "sha256": "b3ec3d913e253ec27b67a4f9ce912ce17eb9e751da385887f2fc0eabfd4ea8a4"
     },
     "screen-map.css": {
       "file": "screen-map.css",
@@ -71,15 +71,15 @@
     },
     "screen-map.js": {
       "file": "screen-map.js",
-      "sha256": "9123c85b86f55113fb96f5e14252ce08410da88f80c4f3f0bafabf09b7022159"
+      "sha256": "a35f49bacb6ab414939e3b2561a4d334ee55e1560a0185794131e38b0a5196ed"
     },
     "serve.css": {
       "file": "serve.css",
-      "sha256": "d93cfcab7bc5883e51b8ee0f9f1c129bf50e1a2281cccacbcfdaecaf26051a8a"
+      "sha256": "81b7b6ad967c7817e8ce07ba42aac116385335d1f8715b10585eed24108fdf77"
     },
     "serve.js": {
       "file": "serve.js",
-      "sha256": "0bdeee25770a2cc2bcae635c4e717c73b2a9f6b70a5bd974e13ac7c4041df4b0"
+      "sha256": "46fb081c5129db96266b31986cc7c923be4846c80e969c91129127b0b213e75e"
     },
     "swagger-ui-bundle.js": {
       "file": "swagger-ui-bundle.js",

@@ -34,7 +34,8 @@ finishes.
 - `/` — the main portal;
 - `/_toudocu/editor/` — editor for allowed source files;
 - `/changes/` — Git changes and local discussions;
-- `/_toudocu/api-docs/` — Editor and Changes HTTP API reference;
+- `/_toudocu/api-docs/` — Editor, Changes, and agent feedback HTTP API
+  reference;
 - `/_toudocu/locales/<locale>/` — a configured read-only translation.
 
 A translation portal has no editor, Changes workspace, discussions, API docs,
@@ -61,6 +62,6 @@ no local API, editor, Git view, discussions, or roadmap writes.
 
 - [UC-DOCS-03: Local server](../use-cases/serve-portal.md)
 - [Viewing changes](documentation-changes.md)
-- [Local discussions](../use-cases/UC-REVIEW-01.md)
+- [Local discussions](../use-cases/UC-AGENT-FEEDBACK-01.md)
 - [Editor HTTP API](../contracts/editor-http.md)
 - [Changes HTTP API](../contracts/changes-http.md)

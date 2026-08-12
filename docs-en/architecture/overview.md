@@ -18,8 +18,8 @@ documentation directory and an explicitly selected repository root. Toudocu
 reads Markdown, local assets, and recognized OpenAPI contracts, validates
 declared relationships and wire structure, and either returns diagnostics or
 builds derived HTML and JSON files. After `build`, the browser reads a finished,
-read-only portal. With `serve`, it may submit an allowed file edit or local
-review comment, after which the Go process rebuilds the affected view. Only a
+read-only portal. With `serve`, it may submit an allowed file edit, after which
+the Go process rebuilds the affected view. Only a
 separate, explicitly authorized task verification may run repository commands.
 Release metadata checking can be disabled, downloads no executable code, and
 is absent from static and translation portals.
@@ -32,4 +32,4 @@ is absent from static and translation portals.
 - [Where are the trust boundaries?](trust-boundaries.md)
 - [How are documentation and verification failures isolated?](failure-isolation.md)
 - [How do Git states become a consistent documentation change set?](documentation-changes.md)
-- [How does a comment remain attached when its file changes?](review-anchoring.md)
+- [How does a message from local documentation reach an external development agent without a direct AI integration?](agent-feedback-delivery.md)

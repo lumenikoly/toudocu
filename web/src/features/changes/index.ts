@@ -9,12 +9,12 @@ import { text } from "../../core/locale";
     const EDITOR_WORKSPACE: any = page?.runtime === 'serve' && page.capabilities?.editor ? page.endpoints?.editorWorkspace : '';
     const $: any = (selector: any, root: any = document) => root.querySelector(selector);
     const escapeHTML: any = (value: any) => String(value ?? '').replace(/[&<>"']/g, (character: any) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } as Record<string, string>)[character]);
-    const state: any = { report: null, repository: null, files: [], linked: [], linkedPaths: new Set(), selected: null, tab: 'source', merge: null, etag: '', repositoryEtag: '', reviewEtag: '', review: null, composerTarget: null, composerReturn: null, pendingDelete: '', activeDiscussion: '', discussionScroll: 0, detailRequest: 0 };
+    const state: any = { report: null, repository: null, files: [], linked: [], linkedPaths: new Set(), selected: null, tab: 'source', merge: null, etag: '', repositoryEtag: '', reviewEtag: '', review: null, composerTarget: null, composerQuote: '', composerReturn: null, discussionsReturn: null, pendingDelete: '', activeDiscussion: '', discussionScroll: 0, detailRequest: 0 };
     const elements: any = {
         base: $('[data-base]'), branchBase: $('[data-branch-base]'), target: $('[data-target]'), targetRevision: $('[data-target-revision]'), targetRevisionWrap: $('[data-target-revision-wrap]'), apply: $('[data-apply-range]'), range: $('[data-range-summary]'), rangeMeta: $('[data-range-meta]'),
         summary: $('[data-summary]'), rangeDetails: $('[data-range-details]'), stale: $('[data-stale]'), search: $('[data-search]'), status: $('[data-status]'), scope: $('[data-scope]'), list: $('[data-file-list]'),
         count: $('[data-result-count]'), detail: $('[data-detail]'), toast: $('[data-changes-toast]'), toastMessage: $('[data-toast-message]'),
-        discussions: $('[data-discussions-panel]'), discussionList: $('[data-discussion-list]'), openDiscussionCount: $('[data-open-discussion-count]'), sendFeedback: $('[data-send-feedback]'), reviewSummary: $('[data-review-summary]'),
+        discussions: $('[data-discussions-panel]'), discussionsScrim: $('[data-discussions-scrim]'), discussionList: $('[data-discussion-list]'), openDiscussionCount: $('[data-open-discussion-count]'), sendFeedback: $('[data-send-feedback]'), reviewSummary: $('[data-review-summary]'),
         composer: $('[data-review-composer]'), composerForm: $('[data-review-form]'), composerMessage: $('[data-review-message]'), composerIntent: $('[data-review-intent]'), composerError: $('[data-review-error]'), composerTarget: $('[data-review-target-summary]'), deleteConfirm: $('[data-review-delete-confirm]'), deleteForm: $('[data-review-delete-form]'),
         filesPanel: $('[data-files-panel]'), filePicker: $('[data-file-picker]'), filePickerQuery: $('[data-file-picker-query]'), filePickerResults: $('[data-file-picker-results]'), openFileStale: $('[data-open-file-stale]'),
     };
@@ -226,11 +226,114 @@ import { text } from "../../core/locale";
             throw new Error(`HTTP ${response.status}`);
         return response.text();
     }
+    function createSelectionMenu(panel: any) {
+        const menu: any = document.createElement('div');
+        menu.className = 'review-selection-menu';
+        menu.hidden = true;
+        menu.setAttribute('role', 'toolbar');
+        menu.setAttribute('aria-label', text("features.changes.index.137"));
+        menu.innerHTML = `<button type="button" data-selection-copy>${text("core.portal.035")}</button><button type="button" data-selection-context>${text("core.portal.036")}</button><button type="button" data-selection-question>${text("core.portal.037")}</button>`;
+        panel.append(menu);
+        return menu;
+    }
+    function positionSelectionMenu(menu: any, rectangle: any) {
+        menu.style.visibility = 'hidden';
+        menu.hidden = false;
+        requestAnimationFrame(() => {
+            if (menu.hidden)
+                return;
+            const bounds: any = menu.getBoundingClientRect();
+            const gap: any = 8;
+            const left: any = Math.min(innerWidth - bounds.width - gap, Math.max(gap, rectangle.left + rectangle.width / 2 - bounds.width / 2));
+            const above: any = rectangle.top - bounds.height - gap;
+            const top: any = above >= gap ? above : Math.min(innerHeight - bounds.height - gap, rectangle.bottom + gap);
+            menu.style.left = `${left}px`;
+            menu.style.top = `${top}px`;
+            menu.style.visibility = '';
+        });
+    }
+    function oldSelectionQuote(change: any, startLine: any, endLine: any, selectedText: any) {
+        const path: any = change.oldPath || change.path;
+        const lines: any = startLine === endLine ? `${startLine}` : `${startLine}–${endLine}`;
+        return `> ${path}:${lines}\n> ${selectedText.replace(/\n/g, '\n> ')}`;
+    }
+    function unifiedSelection(change: any, host: any) {
+        const selection: any = window.getSelection();
+        if (!selection || selection.isCollapsed || !selection.rangeCount)
+            return null;
+        const range: any = selection.getRangeAt(0);
+        const nodeElement: any = (node: any) => node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
+        const startRow: any = nodeElement(range.startContainer)?.closest?.('[data-review-line]');
+        const endRow: any = nodeElement(range.endContainer)?.closest?.('[data-review-line]');
+        if (!startRow || !endRow || !host.contains(startRow) || !host.contains(endRow))
+            return null;
+        const rows: any[] = [...host.querySelectorAll('[data-review-line]')];
+        const startIndex: any = rows.indexOf(startRow);
+        const endIndex: any = rows.indexOf(endRow);
+        if (startIndex < 0 || endIndex < startIndex)
+            return null;
+        const selectedRows: any[] = rows.slice(startIndex, endIndex + 1);
+        const textOffset: any = (content: any, node: any, offset: any, fallback: any) => {
+            if (!content.contains(node))
+                return fallback;
+            const prefix: any = document.createRange();
+            prefix.selectNodeContents(content);
+            prefix.setEnd(node, offset);
+            return Array.from(prefix.toString()).length;
+        };
+        const parts: any[] = selectedRows.map((row: any, index: any) => {
+            const content: any = row.querySelector('.diff-line-content');
+            const characters: any[] = Array.from(content?.textContent || '');
+            const start: any = index === 0 ? textOffset(content, range.startContainer, range.startOffset, 0) : 0;
+            const end: any = index === selectedRows.length - 1 ? textOffset(content, range.endContainer, range.endOffset, characters.length) : characters.length;
+            return characters.slice(start, end).join('');
+        });
+        const selectedText: any = parts.join('\n');
+        if (!selectedText.trim())
+            return null;
+        const sides: any = new Set(selectedRows.map((row: any) => row.dataset.reviewSide));
+        const side: any = sides.size === 1 ? selectedRows[0].dataset.reviewSide : 'mixed';
+        const firstLine: any = Number(startRow.dataset.reviewLine);
+        const lastLine: any = Number(endRow.dataset.reviewLine);
+        const startColumn: any = textOffset(startRow.querySelector('.diff-line-content'), range.startContainer, range.startOffset, 0) + 1;
+        const endColumn: any = textOffset(endRow.querySelector('.diff-line-content'), range.endContainer, range.endOffset, Array.from(endRow.querySelector('.diff-line-content')?.textContent || '').length) + 1;
+        let target: any = null;
+        if (REVIEW && isDocumentationFile(change) && change.status !== 'deleted' && side === 'new')
+            target = { type: 'diff', path: change.path, side, start: { line: firstLine, column: startColumn }, end: { line: lastLine, column: endColumn } };
+        if (REVIEW && isDocumentationFile(change) && change.status !== 'deleted' && side === 'old')
+            target = { kind: 'document', path: change.path, quote: oldSelectionQuote(change, firstLine, lastLine, selectedText) };
+        const rectangles: any = range.getClientRects();
+        return { text: selectedText, target, returnElement: startRow.querySelector('.diff-line-content'), rectangle: rectangles[rectangles.length - 1] || range.getBoundingClientRect() };
+    }
     async function renderSource(panel: any, change: any) {
         const hunkNavigation: any = change.sourceDiffHunks?.length > 1 ? `<button type="button" class="changes-button secondary" data-hunk-previous>${escapeHTML(text("changes.previousHunk"))}</button><button type="button" class="changes-button secondary" data-hunk-next>${escapeHTML(text("changes.nextHunk"))}</button>` : '';
         panel.innerHTML = `<div class="source-actions"><div class="source-mode-toggle" role="group" aria-label="${escapeHTML(text("changes.comparisonMode"))}"><button type="button" data-source-mode="unified" aria-pressed="true">${escapeHTML(text("changes.unified"))}</button><button type="button" data-source-mode="merge" aria-pressed="false">${escapeHTML(text("changes.sideBySide"))}</button></div><button type="button" class="changes-button tertiary" data-copy-diff>${escapeHTML(text("changes.copyDiff"))}</button>${hunkNavigation}</div><div data-source-view></div>`;
         const host: any = $('[data-source-view]', panel);
+        const menu: any = createSelectionMenu(panel);
+        let pendingSelection: any = null;
+        let unifiedController: any = null;
         let activeHunk: any = 0;
+        const hideMenu: any = () => { menu.hidden = true; pendingSelection = null; };
+        $('[data-selection-copy]', menu).addEventListener('click', async () => {
+            if (!pendingSelection)
+                return;
+            try { await navigator.clipboard.writeText(pendingSelection.text); announce(text("core.portal.039")); hideMenu(); }
+            catch { announce(text("core.portal.041")); }
+        });
+        $('[data-selection-context]', menu).addEventListener('click', async () => {
+            if (!pendingSelection)
+                return;
+            const filename: any = change.path.split('/').pop();
+            try { await navigator.clipboard.writeText(text("core.portal.038", [filename, change.path, pendingSelection.text])); announce(text("core.portal.040")); hideMenu(); }
+            catch { announce(text("core.portal.041")); }
+        });
+        $('[data-selection-question]', menu).addEventListener('click', () => {
+            if (!pendingSelection?.target)
+                return;
+            const pending: any = pendingSelection;
+            hideMenu();
+            openComposer(pending.target, pending.returnElement);
+        });
         const setMode: any = (mode: any) => panel.querySelectorAll('[data-source-mode]').forEach((button: any) => button.setAttribute('aria-pressed', String(button.dataset.sourceMode === mode)));
         const renderHunkLine: any = (line: any, counters: any) => {
             let oldLine: any = '', newLine: any = '';
@@ -247,7 +350,7 @@ import { text } from "../../core/locale";
                 newLine = counters.new++;
             const side: any = marker === '-' ? 'old' : 'new';
             const selectedLine: any = marker === '-' ? oldLine : newLine;
-            const comment: any = REVIEW && isDocumentationFile(change) ? `<button type="button" class="diff-comment" aria-label="${escapeHTML(text(side === 'old' ? "features.changes.index.096" : "features.changes.index.097", [selectedLine]))}">+</button>` : '<span></span>';
+            const comment: any = REVIEW && isDocumentationFile(change) && change.status !== 'deleted' ? `<button type="button" class="diff-comment" aria-label="${escapeHTML(text(side === 'old' ? "features.changes.index.096" : "features.changes.index.097", [selectedLine]))}">+</button>` : '<span></span>';
             return `<span class="diff-line diff-line-${marker === '+' ? 'added' : marker === '-' ? 'removed' : 'context'}" data-review-side="${side}" data-review-line="${selectedLine}">${comment}<span class="diff-line-number">${oldLine}</span><span class="diff-line-number">${newLine}</span><span class="diff-line-marker">${escapeHTML(marker)}</span><span class="diff-line-content">${escapeHTML(line.slice(1))}</span></span>`;
         };
         const focusHunk: any = (index: any) => {
@@ -261,6 +364,9 @@ import { text } from "../../core/locale";
         };
         const showUnified: any = () => {
             setMode('unified');
+            hideMenu();
+            unifiedController?.abort();
+            unifiedController = new AbortController();
             state.merge?.destroy?.();
             state.merge = null;
             host.replaceChildren();
@@ -294,9 +400,26 @@ import { text } from "../../core/locale";
             host.querySelectorAll('[data-review-line] .diff-comment').forEach((button: any) => button.addEventListener('click', () => {
                 const row: any = button.closest('[data-review-line]');
                 const content: any = row.querySelector('.diff-line-content').textContent || '';
-                openComposer({ type: 'diff', path: change.path, side: row.dataset.reviewSide, start: { line: Number(row.dataset.reviewLine), column: 1 }, end: { line: Number(row.dataset.reviewLine), column: Array.from(content).length + 1 } }, button);
+                const target: any = row.dataset.reviewSide === 'old'
+                    ? { kind: 'document', path: change.path, quote: oldSelectionQuote(change, Number(row.dataset.reviewLine), Number(row.dataset.reviewLine), content) }
+                    : { type: 'diff', path: change.path, side: 'new', start: { line: Number(row.dataset.reviewLine), column: 1 }, end: { line: Number(row.dataset.reviewLine), column: Array.from(content).length + 1 } };
+                openComposer(target, button);
             }));
-            host.addEventListener('pointerup', () => openUnifiedSelection(change, host));
+            const showSelectionMenu: any = (focus = false) => {
+                pendingSelection = unifiedSelection(change, host);
+                if (!pendingSelection)
+                    return hideMenu();
+                $('[data-selection-question]', menu).disabled = !pendingSelection.target;
+                positionSelectionMenu(menu, pendingSelection.rectangle);
+                if (focus)
+                    requestAnimationFrame(() => $('[data-selection-copy]', menu).focus());
+            };
+            host.addEventListener('pointerup', () => showSelectionMenu(), { signal: unifiedController.signal });
+            host.addEventListener('keyup', (event: any) => { if (event.key === 'Shift' || !event.shiftKey) showSelectionMenu(true); }, { signal: unifiedController.signal });
+            document.addEventListener('pointerdown', (event: any) => { if (!menu.contains(event.target)) hideMenu(); }, { signal: unifiedController.signal });
+            document.addEventListener('scroll', hideMenu, { capture: true, signal: unifiedController.signal });
+            window.addEventListener('resize', hideMenu, { signal: unifiedController.signal });
+            document.addEventListener('keydown', (event: any) => { if (event.key === 'Escape' && !menu.hidden) { event.preventDefault(); event.stopPropagation(); hideMenu(); host.focus(); } }, { capture: true, signal: unifiedController.signal });
             const requested: any = decodeURIComponent(location.hash.slice(1));
             const requestedIndex: any = change.sourceDiffHunks.findIndex((hunk: any) => hunk.id === requested);
             if (requestedIndex >= 0)
@@ -304,6 +427,8 @@ import { text } from "../../core/locale";
         };
         const showMerge: any = async () => {
             setMode('merge');
+            hideMenu();
+            unifiedController?.abort();
             host.innerHTML = `<div class="changes-loading">${escapeHTML(text("changes.loadingVersions"))}</div>`;
             try {
                 const [before, after]: any = await Promise.all([fetchSide(change, 'before'), fetchSide(change, 'after')]);
@@ -333,13 +458,8 @@ import { text } from "../../core/locale";
             panel.innerHTML = `${deleted ? `<p class="changes-absence">${escapeHTML(text("changes.showingDeletedVersion"))}</p>` : ''}<div data-file-view></div>`;
             const host: any = $('[data-file-view]', panel);
             if (window.ToudocuCodeMirror?.createViewer) {
-                const menu: any = document.createElement('div');
-                menu.className = 'review-selection-menu';
-                menu.hidden = true;
-                menu.setAttribute('role', 'toolbar');
-                menu.setAttribute('aria-label', text("features.changes.index.137"));
-                menu.innerHTML = `<button type="button" data-selection-copy>${text("features.changes.index.138")}</button>${REVIEW && isDocumentationFile(change) ? `<button type="button" data-selection-question>${text("features.changes.index.139")}</button>` : ''}`;
-                panel.append(menu);
+                const menu: any = createSelectionMenu(panel);
+                $('[data-selection-question]', menu).disabled = !(REVIEW && isDocumentationFile(change) && !deleted);
                 const controller: any = new AbortController();
                 let pendingSelection: any = null;
                 let pendingText: any = '';
@@ -351,25 +471,12 @@ import { text } from "../../core/locale";
                     const rectangles: any = selected.getRangeAt(0).getClientRects();
                     const rectangle: any = rectangles[rectangles.length - 1] || selected.getRangeAt(0).getBoundingClientRect();
                     pendingText = selected.toString();
-                    menu.style.visibility = 'hidden';
-                    menu.hidden = false;
-                    requestAnimationFrame(() => {
-                        if (menu.hidden)
-                            return;
-                        const bounds: any = menu.getBoundingClientRect();
-                        const gap: any = 8;
-                        const left: any = Math.min(innerWidth - bounds.width - gap, Math.max(gap, rectangle.left + rectangle.width / 2 - bounds.width / 2));
-                        const above: any = rectangle.top - bounds.height - gap;
-                        const top: any = above >= gap ? above : Math.min(innerHeight - bounds.height - gap, rectangle.bottom + gap);
-                        menu.style.left = `${left}px`;
-                        menu.style.top = `${top}px`;
-                        menu.style.visibility = '';
-                    });
+                    positionSelectionMenu(menu, rectangle);
                 };
                 const viewer: any = window.ToudocuCodeMirror.createViewer({ parent: host, doc: content, language: change.language || languageFor(change.path), onSelect: (selection: any) => { hideMenu(); pendingSelection = selection; } });
                 state.merge = { ...viewer, destroy() { controller.abort(); menu.remove(); viewer.destroy(); } };
                 host.addEventListener('pointerup', showMenu, { signal: controller.signal });
-                host.addEventListener('keyup', (event: any) => { if (event.key === 'Shift' || !event.shiftKey) showMenu(); }, { signal: controller.signal });
+                host.addEventListener('keyup', (event: any) => { if (event.key === 'Shift' || !event.shiftKey) { showMenu(); requestAnimationFrame(() => $('[data-selection-copy]', menu).focus()); } }, { signal: controller.signal });
                 document.addEventListener('pointerdown', (event: any) => { if (!menu.contains(event.target)) hideMenu(); }, { signal: controller.signal });
                 document.addEventListener('scroll', hideMenu, { capture: true, signal: controller.signal });
                 window.addEventListener('resize', hideMenu, { signal: controller.signal });
@@ -377,11 +484,20 @@ import { text } from "../../core/locale";
                 $('[data-selection-copy]', menu).addEventListener('click', async () => {
                     try {
                         await navigator.clipboard.writeText(pendingText);
-                        announce(text("features.changes.index.140"));
+                        announce(text("core.portal.039"));
                         hideMenu();
                         viewer.focus();
                     }
-                    catch { announce(text("features.changes.index.141")); }
+                    catch { announce(text("core.portal.041")); }
+                });
+                $('[data-selection-context]', menu).addEventListener('click', async () => {
+                    try {
+                        await navigator.clipboard.writeText(text("core.portal.038", [change.path.split('/').pop(), change.path, pendingText]));
+                        announce(text("core.portal.040"));
+                        hideMenu();
+                        viewer.focus();
+                    }
+                    catch { announce(text("core.portal.041")); }
                 });
                 $('[data-selection-question]', menu)?.addEventListener('click', () => {
                     const selection: any = pendingSelection;
@@ -578,6 +694,31 @@ import { text } from "../../core/locale";
             throw new Error(result.data.diagnostics?.[0]?.message || `HTTP ${result.response.status}`);
         return result.data;
     }
+    function openDiscussions(returnElement: any = document.activeElement, focus = true) {
+        clearTimeout(state.discussionsTimer);
+        state.discussionsReturn = returnElement;
+        elements.discussions.hidden = false;
+        elements.discussionsScrim.hidden = false;
+        elements.discussions.setAttribute('role', 'complementary');
+        elements.discussions.removeAttribute('aria-modal');
+        if (matchMedia('(max-width: 560px)').matches) {
+            elements.discussions.setAttribute('role', 'dialog');
+            elements.discussions.setAttribute('aria-modal', 'true');
+        }
+        $('[data-discussions-toggle]')?.setAttribute('aria-expanded', 'true');
+        requestAnimationFrame(() => elements.discussions.classList.add('is-open'));
+        if (focus)
+            $('[data-discussions-close]')?.focus();
+    }
+    function closeDiscussions() {
+        elements.discussions.classList.remove('is-open');
+        elements.discussionsScrim.hidden = true;
+        elements.discussions.setAttribute('role', 'complementary');
+        elements.discussions.removeAttribute('aria-modal');
+        $('[data-discussions-toggle]')?.setAttribute('aria-expanded', 'false');
+        state.discussionsTimer = setTimeout(() => { elements.discussions.hidden = true; }, 180);
+        state.discussionsReturn?.focus?.();
+    }
     function openComposer(target: any, returnElement: any, mode: any = { operation: 'create' }) {
         if (!REVIEW) {
             announce(text("features.changes.index.098"));
@@ -589,6 +730,7 @@ import { text } from "../../core/locale";
         if (target.start && !(target.type === 'diff' && target.side === 'old'))
             normalized.range = { start: target.start, end: target.end };
         state.composerTarget = normalized;
+        state.composerQuote = mode.operation === 'create' ? target.quote || '' : '';
         state.composerReturn = returnElement || document.activeElement;
         state.composerMode = mode;
         elements.composerMessage.value = mode.message || '';
@@ -597,25 +739,6 @@ import { text } from "../../core/locale";
         elements.composerTarget.textContent = `${normalized.path}${normalized.range ? ` · ${normalized.range.start.line}:${normalized.range.start.column}–${normalized.range.end.line}:${normalized.range.end.column}` : ''}`;
         elements.composer.showModal();
         requestAnimationFrame(() => elements.composerMessage.focus());
-    }
-    function openUnifiedSelection(change: any, host: any) {
-        const selection: any = window.getSelection();
-        if (!selection || selection.isCollapsed || !selection.rangeCount)
-            return;
-        const range: any = selection.getRangeAt(0);
-        const startContent: any = (range.startContainer.nodeType === Node.TEXT_NODE ? range.startContainer.parentElement : range.startContainer).closest?.('.diff-line-content');
-        const endContent: any = (range.endContainer.nodeType === Node.TEXT_NODE ? range.endContainer.parentElement : range.endContainer).closest?.('.diff-line-content');
-        const startRow: any = startContent?.closest('[data-review-line]');
-        const endRow: any = endContent?.closest('[data-review-line]');
-        if (!startRow || !endRow || !host.contains(startRow) || startRow.dataset.reviewSide !== endRow.dataset.reviewSide) {
-            if (startRow || endRow)
-                announce(text("features.changes.index.100"));
-            return;
-        }
-        const startColumn: any = Array.from((startContent.textContent || '').slice(0, range.startOffset)).length + 1;
-        const endColumn: any = Array.from((endContent.textContent || '').slice(0, range.endOffset)).length + 1;
-        openComposer({ type: 'diff', path: change.path, side: startRow.dataset.reviewSide, start: { line: Number(startRow.dataset.reviewLine), column: startColumn }, end: { line: Number(endRow.dataset.reviewLine), column: endColumn } }, startContent);
-        selection.removeAllRanges();
     }
     async function submitComposer() {
         const mode: any = state.composerMode || { operation: 'create' };
@@ -630,7 +753,8 @@ import { text } from "../../core/locale";
         try {
             let updated: any;
             if (mode.operation === 'create') {
-                updated = await reviewMutation('/discussions', 'agent-discussion-create', 'POST', { ...reviewGuard(), target: state.composerTarget, intent, text: message });
+                const savedText: any = state.composerQuote ? `${message}\n\n${state.composerQuote}` : message;
+                updated = await reviewMutation('/discussions', 'agent-discussion-create', 'POST', { ...reviewGuard(), target: state.composerTarget, intent, text: savedText });
             }
             else if (mode.operation === 'reply') {
                 updated = await reviewMutation(`/discussions/${mode.discussionId}/messages`, 'agent-message-create', 'POST', { ...reviewGuard(), intent, text: message });
@@ -640,12 +764,7 @@ import { text } from "../../core/locale";
             }
             state.review = updated;
             elements.composer.close();
-            elements.discussions.hidden = false;
-            elements.discussions.classList.add('is-open');
-            elements.discussions.setAttribute('role', matchMedia('(max-width: 1050px)').matches ? 'dialog' : 'complementary');
-            if (matchMedia('(max-width: 1050px)').matches)
-                elements.discussions.setAttribute('aria-modal', 'true');
-            $('[data-discussions-toggle]')?.setAttribute('aria-expanded', 'true');
+            openDiscussions(state.composerReturn, false);
             renderReview();
             renderList();
             announce(text(mode.operation === 'create' ? "features.changes.index.102" : "features.changes.index.103"));
@@ -677,10 +796,10 @@ import { text } from "../../core/locale";
         elements.discussionList.replaceChildren();
         discussions.forEach((discussion: any) => {
             const article: any = document.createElement('article');
-            article.className = `review-thread is-${discussion.state}${state.activeDiscussion === discussion.id ? ' is-active' : ''}`;
+            article.className = `portal-review-thread review-thread is-${discussion.state}${state.activeDiscussion === discussion.id ? ' is-active' : ''}`;
             article.dataset.discussionId = discussion.id;
             const placement: any = discussion.placement || {};
-            article.innerHTML = `<header><div><strong>${text("features.changes.index.111")}</strong><span>${escapeHTML(text(discussion.state === 'open' ? "features.changes.index.105" : "features.changes.index.106"))} · ${escapeHTML(placementLabel(placement.status || 'current'))}</span></div><div class="review-thread-actions"><button type="button" data-thread-state>${text(discussion.state === 'open' ? "features.changes.index.107" : "features.changes.index.108")}</button><button type="button" class="is-danger" data-delete-discussion>${text("features.changes.index.142")}</button></div></header><button type="button" class="review-anchor" data-open-anchor>${escapeHTML(placement.path || discussion.target.path)}${placement.range ? `:${placement.range.start.line}` : ''}</button><ol>${discussion.messages.map((message: any) => `<li class="review-message is-${message.author}"><div><strong>${message.author === 'agent' ? `${text("features.changes.index.110")} · ${escapeHTML(outcomeLabel(message.outcome || 'answered'))}` : `${text("features.changes.index.111")} · ${text(message.intent === 'change_request' ? "core.portal.094" : "core.portal.093")}`}</strong><time>${escapeHTML(new Date(message.createdAt).toLocaleString(locale))}</time></div><p>${escapeHTML(message.text)}</p>${message.changedPaths?.length ? `<button type="button" data-view-fix="${escapeHTML(message.id)}">${text("features.changes.index.112")}</button>` : ''}${messageEditableClient(message) ? `<div class="review-message-actions"><button type="button" data-edit-message="${escapeHTML(message.id)}">${text("features.changes.index.113")}</button><button type="button" data-delete-message="${escapeHTML(message.id)}">${text("features.changes.index.114")}</button></div>` : ''}</li>`).join('')}</ol><button type="button" class="review-reply" ${discussion.state !== 'open' || discussionInFlightClient(discussion.id) || discussion.messages.some((message: any) => message.state === 'draft') ? 'disabled' : ''}>${text("features.changes.index.115")}</button>`;
+            article.innerHTML = `<header><div><strong>${text("features.changes.index.111")}</strong><span>${escapeHTML(text(discussion.state === 'open' ? "features.changes.index.105" : "features.changes.index.106"))} · ${escapeHTML(placementLabel(placement.status || 'current'))}</span></div><div class="portal-review-thread-actions review-thread-actions"><button type="button" data-thread-state>${text(discussion.state === 'open' ? "features.changes.index.107" : "features.changes.index.108")}</button><button type="button" class="is-danger" data-delete-discussion>${text("features.changes.index.142")}</button></div></header><button type="button" class="portal-review-anchor review-anchor" data-open-anchor>${escapeHTML(placement.path || discussion.target.path)}${placement.range ? `:${placement.range.start.line}` : ''}</button><ol>${discussion.messages.map((message: any) => `<li class="review-message is-${message.author}"><div><strong>${message.author === 'agent' ? `${text("features.changes.index.110")} · ${escapeHTML(outcomeLabel(message.outcome || 'answered'))}` : `${text("features.changes.index.111")} · ${text(message.intent === 'change_request' ? "core.portal.094" : "core.portal.093")}`}</strong><time>${escapeHTML(new Date(message.createdAt).toLocaleString(locale))}</time></div><p>${escapeHTML(message.text)}</p>${message.changedPaths?.length ? `<button type="button" data-view-fix="${escapeHTML(message.id)}">${text("features.changes.index.112")}</button>` : ''}${messageEditableClient(message) ? `<div class="portal-review-thread-actions review-message-actions"><button type="button" data-edit-message="${escapeHTML(message.id)}">${text("features.changes.index.113")}</button><button type="button" class="is-danger" data-delete-message="${escapeHTML(message.id)}">${text("features.changes.index.114")}</button></div>` : ''}</li>`).join('')}</ol><button type="button" class="portal-review-reply review-reply" ${discussion.state !== 'open' || discussionInFlightClient(discussion.id) || discussion.messages.some((message: any) => message.state === 'draft') ? 'disabled' : ''}>${text("features.changes.index.115")}</button>`;
             article.querySelector('[data-thread-state]').addEventListener('click', () => updateDiscussion(discussion.id, discussion.state === 'open' ? 'resolve' : 'reopen'));
             article.querySelector('[data-delete-discussion]').addEventListener('click', () => {
                 state.pendingDelete = discussion.id;
@@ -698,7 +817,7 @@ import { text } from "../../core/locale";
             elements.discussionList.append(article);
         });
         if (!discussions.length)
-            elements.discussionList.innerHTML = `<div class="changes-empty"><p>${escapeHTML(text("changes.noDiscussions"))}</p></div>`;
+            elements.discussionList.innerHTML = `<div class="portal-review-empty"><p>${escapeHTML(text("changes.noDiscussions"))}</p></div>`;
         elements.discussionList.scrollTop = state.discussionScroll;
     }
     async function openDiscussionAnchor(discussion: any) {
@@ -891,9 +1010,9 @@ import { text } from "../../core/locale";
                 announce(text("features.changes.index.144"));
             }
         });
-        const closeDiscussions: any = () => { elements.discussions.classList.remove('is-open'); elements.discussions.hidden = true; elements.discussions.setAttribute('role', 'complementary'); elements.discussions.removeAttribute('aria-modal'); $('[data-discussions-toggle]')?.setAttribute('aria-expanded', 'false'); $('[data-discussions-toggle]')?.focus(); };
-        $('[data-discussions-toggle]')?.addEventListener('click', () => { elements.discussions.hidden = false; elements.discussions.classList.add('is-open'); elements.discussions.setAttribute('role', matchMedia('(max-width: 1050px)').matches ? 'dialog' : 'complementary'); if (matchMedia('(max-width: 1050px)').matches) elements.discussions.setAttribute('aria-modal', 'true'); $('[data-discussions-toggle]')?.setAttribute('aria-expanded', 'true'); elements.discussions.querySelector('button')?.focus(); });
+        $('[data-discussions-toggle]')?.addEventListener('click', (event: any) => openDiscussions(event.currentTarget));
         $('[data-discussions-close]')?.addEventListener('click', closeDiscussions);
+        elements.discussionsScrim?.addEventListener('click', closeDiscussions);
         const closeFiles: any = () => { elements.filesPanel.classList.remove('is-open'); elements.filesPanel.setAttribute('role', 'navigation'); elements.filesPanel.removeAttribute('aria-modal'); $('[data-mobile-files]')?.setAttribute('aria-expanded', 'false'); $('[data-mobile-files]')?.focus(); };
         $('[data-mobile-files]')?.addEventListener('click', () => { elements.filesPanel.classList.add('is-open'); elements.filesPanel.setAttribute('role', 'dialog'); elements.filesPanel.setAttribute('aria-modal', 'true'); $('[data-mobile-files]')?.setAttribute('aria-expanded', 'true'); elements.filesPanel.querySelector('button')?.focus(); });
         $('[data-files-close]')?.addEventListener('click', closeFiles);
