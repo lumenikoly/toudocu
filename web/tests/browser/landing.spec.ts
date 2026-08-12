@@ -220,6 +220,7 @@ test("both locale pages expose localized metadata, content, aria and proof image
 });
 
 test("Pages artifact serves searchable Russian and English documentation under the repository path", async ({ page }) => {
+  test.slow();
   const artifact = buildPagesArtifact();
   expect(existsSync(join(artifact, "dev-server.mjs"))).toBe(false);
   const hosted = await serveLanding(artifact);
@@ -235,6 +236,8 @@ test("Pages artifact serves searchable Russian and English documentation under t
     await expect(page.locator("[data-search-results]")).not.toBeEmpty();
     await page.goto(`${hosted.origin}project-docs/architecture/overview.html`);
     await expect(page.locator("main article.doc-content").first()).toContainText("Граница системы");
+    await page.goto(`${hosted.origin}project-docs/project-changelog.html`);
+    await expect(page.locator("main article.doc-content").first()).toContainText("Документация и портал");
 
     await page.goto(`${hosted.origin}en/`);
     await page.locator('a[href="../project-docs/en/"]').first().click();
@@ -243,6 +246,8 @@ test("Pages artifact serves searchable Russian and English documentation under t
     await expect(page.locator("[data-search-results]")).not.toBeEmpty();
     await page.goto(`${hosted.origin}project-docs/en/architecture/overview.html`);
     await expect(page.locator("main article.doc-content").first()).toContainText("System boundary");
+    await page.goto(`${hosted.origin}project-docs/en/project-changelog.html`);
+    await expect(page.locator("main article.doc-content").first()).toContainText("Documentation and portal");
     await expect.poll(() => failed).toEqual([]);
   } finally {
     await closeServer(hosted.server);
