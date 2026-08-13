@@ -785,7 +785,7 @@ import { createEmptyState, selectTab, setExpanded } from "../components";
         document.addEventListener('pointerdown', (event: any) => { if (!menu.contains(event.target)) hideMenu(); }, { signal });
         document.addEventListener('scroll', hideMenu, { capture: true, signal });
         window.addEventListener('resize', hideMenu, { signal });
-        document.addEventListener('keydown', (event: any) => { if (event.key !== 'Escape') return; if (!menu.hidden) { event.preventDefault(); hideMenu(); } else if (panel.classList.contains('is-open') && !dialog.open && !confirmDialog.open) closePanel(); }, { capture: true, signal });
+        document.addEventListener('keydown', (event: any) => { if (event.key !== 'Escape') return; if (!menu.hidden) { event.preventDefault(); hideMenu(); } else if (toggle.getAttribute('aria-expanded') === 'true' && !dialog.open && !confirmDialog.open) closePanel(); }, { capture: true, signal });
         const pollTimer: any = window.setInterval(() => { if (panel.classList.contains('is-open') && !document.hidden && !dialog.open && !confirmDialog.open) loadReview().catch(() => { }); }, 2000);
         loadReview().catch(() => { });
         signal.addEventListener('abort', () => { window.clearTimeout(toastTimer); window.clearTimeout(panelCloseTimer); window.clearInterval(pollTimer); menu.remove(); dialog.remove(); confirmDialog.remove(); scrim.remove(); panel.remove(); toast.remove(); }, { once: true });

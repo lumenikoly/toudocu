@@ -787,17 +787,22 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await page.locator("[data-review-delete-confirm]").getByRole("button", { name: "Удалить" }).click();
     await expect(changesThread).toHaveCount(0);
     expect(agentCLI(["next"]).pending).toBe(false);
+    await page.locator("[data-discussions-close]").click();
 
     await page.locator('[data-file-list] [data-path="server.go"]').click();
+    await expect(page.locator("[data-detail] h2")).toHaveText("server.go");
+    await expect(page.locator("[data-detail]")).not.toHaveAttribute("aria-busy", "true");
     await page.locator("[data-detail] [data-file-comment]").click();
     await changesComposer.locator("[data-review-message]").fill("Почему переименована функция?");
     await changesComposer.locator('button[type="submit"]').click();
+    await expect(page.locator(".review-thread").filter({ hasText: "Почему переименована функция?" })).toBeVisible();
     const codeQuestion = agentCLI(["next"]);
     expect(codeQuestion.target.kind).toBe("file");
     expect(codeQuestion.target.path).toBe("server.go");
     const codeResponse = join(mkdtempSync(join(tmpdir(), "toudocu-agent-response-")), "response.json");
     writeFileSync(codeResponse, JSON.stringify({ schemaVersion: 1, deliveryId: codeQuestion.deliveryId, discussionId: codeQuestion.discussion.id, outcome: "answered", message: "Имя отражает новое поведение.", evidence: [{ path: "server.go" }], changedPaths: [] }));
     agentCLI(["respond", "--input", codeResponse]);
+    await page.locator("[data-discussions-close]").click();
 
     await page.locator('[data-file-list] [data-path="image.bin"]').click();
     await expect(page.locator("[data-detail] [data-file-comment]")).toBeVisible();
