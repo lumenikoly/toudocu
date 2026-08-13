@@ -13,11 +13,11 @@ import (
 	frontend "toudocu/internal/site"
 )
 
-const Version = "0.0.1"
+const Version = "0.0.2"
 
 var fieldOrder = []string{"status", "type", "stage", "version", "author", "actor", "priority", "criticality", "module", "useCase", "flow", "screens", "transitions", "standards", "runbooks", "startScreen", "terminalScreens", "allowCycle", "route", "preview", "parentScreen", "component", "environment", "risk", "lastVerified", "supersededBy", "errors", "dependsOn", "source", "date", "plannedDate", "updated", "probability", "impact", "scope", "id", "tags"}
 
-var typeIcons = map[string]string{"overview": "⌂", "status": "◐", "roadmap": "→", "risks": "!", "ideas": "✦", "notes": "✎", "changelog": "↻", "use-case": "◎", "module": "▦", "architecture": "◇", "contract": "⇄", "decision": "◆", "flow": "⇢", "screen-map": "⌗", "screen-index": "⌗", "screen": "▣", "guide": "◫", "work": "☐", "reference": "≡", "standard": "✓", "quality-index": "✓", "runbook": "↻", "runbook-index": "↻", "document": "•"}
+var typeIcons = map[string]string{"overview": "⌂", "status": "◐", "roadmap": "→", "risks": "!", "ideas": "✦", "notes": "✎", "changelog": "↻", "use-case": "◎", "module": "▦", "architecture": "◇", "contract": "⇄", "decision": "◆", "flow": "⇢", "screen-map": "⌗", "screen-index": "⌗", "screen": "▣", "guide": "◫", "work": "☐", "draft": "✎", "reference": "≡", "standard": "✓", "quality-index": "✓", "runbook": "↻", "runbook-index": "↻", "document": "•"}
 
 func portalUI(model *Model) frontend.UI {
 	locale := ""
@@ -131,6 +131,9 @@ func metricCard(label string, value any, detail string) string {
 
 func outputForDirectory(model *Model, directory string) string {
 	section := sectionTypeForPath(directory)
+	if section == SectionDrafts {
+		return sectionCatalogOutput(section)
+	}
 	if sectionRoute(section) != "" && sectionRoute(section) != directory {
 		return sectionCatalogOutput(section)
 	}
@@ -1383,7 +1386,7 @@ func generateSite(model *Model, options Options, serve bool) (GenerateResult, er
 	pages := 1
 	for _, document := range model.Documents {
 		directory := strings.Split(document.SourcePath, "/")[0]
-		typedCatalogIndex := strings.EqualFold(document.FileName, "index.md") && (directory == "use-cases" || directory == "flows" || directory == "quality" || directory == "runbooks")
+		typedCatalogIndex := strings.EqualFold(document.FileName, "index.md") && (directory == "use-cases" || directory == "flows" || directory == "quality" || directory == "runbooks" || directory == "drafts")
 		if document.SourcePath == "index.md" || document.Type == "screen-index" || typedCatalogIndex {
 			continue
 		}
@@ -1441,13 +1444,20 @@ func generateSite(model *Model, options Options, serve bool) (GenerateResult, er
 		}
 		pages++
 	}
+	if _, exists := model.Directories["drafts"]; exists {
+		target := sectionCatalogOutput(SectionDrafts)
+		if err = writeFileEnsured(filepath.Join(output, filepath.FromSlash(target)), []byte(renderDirectoryPage(model, "drafts"))); err != nil {
+			return GenerateResult{}, err
+		}
+		pages++
+	}
 	directories := make([]string, 0, len(model.Directories))
 	for d := range model.Directories {
 		directories = append(directories, d)
 	}
 	sort.SliceStable(directories, func(i, j int) bool { return naturalCompare(directories[i], directories[j]) < 0 })
 	for _, directory := range directories {
-		if directory == "use-cases" || directory == "flows" || directory == "quality" || directory == "runbooks" {
+		if directory == "use-cases" || directory == "flows" || directory == "quality" || directory == "runbooks" || directory == "drafts" {
 			continue
 		}
 		if directoryHasSourceIndex(model, directory) {

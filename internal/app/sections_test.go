@@ -6,7 +6,7 @@ import (
 )
 
 func TestBuiltinSectionsStableOrderAndLookups(t *testing.T) {
-	want := []SectionType{SectionArchitecture, SectionModules, SectionUseCases, SectionFlows, SectionScreens, SectionDecisions, SectionContracts, SectionQuality, SectionRunbooks, SectionReference, SectionWork, SectionGuides}
+	want := []SectionType{SectionArchitecture, SectionModules, SectionUseCases, SectionFlows, SectionScreens, SectionDecisions, SectionContracts, SectionQuality, SectionRunbooks, SectionReference, SectionWork, SectionDrafts, SectionGuides}
 	if len(BuiltinSections) != len(want) {
 		t.Fatalf("sections: %#v", BuiltinSections)
 	}
@@ -23,6 +23,9 @@ func TestBuiltinSectionsStableOrderAndLookups(t *testing.T) {
 	}
 	if BuiltinSections[3].Route != "processes" || BuiltinSections[3].EnglishTitle != "Processes" {
 		t.Fatal("flows section contract changed")
+	}
+	if BuiltinSections[11].Route != "drafts" || BuiltinSections[11].EnglishTitle != "Drafts" {
+		t.Fatal("drafts section contract changed")
 	}
 }
 
@@ -41,6 +44,9 @@ func TestProjectLocaleConfiguration(t *testing.T) {
 	config, err := parseSiteConfig([]byte("project:\n  locale: en\n  sections:\n    architecture: Architecture\n    modules: Modules\n    use-cases: Use Cases\n    flows: Processes\n    screens: Screens\n    decisions: Decisions\n    contracts: Contracts\n    quality: Quality\n    runbooks: Runbooks\n    reference: Reference\n    work: Work\n    guides: Guides\n"))
 	if err != nil || len(config.Project.Sections) != len(BuiltinSections) {
 		t.Fatalf("project-only config: %#v, %v", config, err)
+	}
+	if config.Project.Sections[SectionDrafts] != "Drafts" {
+		t.Fatalf("legacy config did not receive default drafts title: %#v", config.Project.Sections)
 	}
 }
 

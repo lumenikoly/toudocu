@@ -133,6 +133,27 @@ func TestAgentFeedbackLifecycle(t *testing.T) {
 	}
 }
 
+func TestAgentFeedbackAcceptsDraftDocument(t *testing.T) {
+	root, docs := newReviewRepository(t)
+	writeChangesTestFile(t, filepath.Join(docs, "drafts", "entry.md"), "# Draft\n\nText.\n")
+	t.Setenv("TOUDOCU_STATE_HOME", t.TempDir())
+	service, err := newReviewService(reviewOptions(root, docs))
+	if err != nil {
+		t.Fatal(err)
+	}
+	state, err := service.discussions()
+	if err != nil {
+		t.Fatal(err)
+	}
+	state, err = service.createDiscussion(CreateDiscussionRequest{
+		ReviewMutationGuard: guard(state), Target: ReviewTarget{Kind: "document", Path: "docs/drafts/entry.md"},
+		Intent: "question", Text: "Нужно уточнение.",
+	})
+	if err != nil || len(state.Session.Discussions) != 1 || state.Session.Discussions[0].Target.Path != "docs/drafts/entry.md" {
+		t.Fatalf("draft discussion: %#v %v", state, err)
+	}
+}
+
 func TestAgentFeedbackSelectsRepeatedTextByOccurrence(t *testing.T) {
 	root, docs := newReviewRepository(t)
 	t.Setenv("TOUDOCU_STATE_HOME", t.TempDir())

@@ -504,7 +504,7 @@ func TestEditorPreviewAndRaw(t *testing.T) {
 }
 
 func TestScaffoldRegistryParity(t *testing.T) {
-	expected := []string{"task-init", "module", "use-case", "flow", "screen", "decision", "standard", "runbook"}
+	expected := []string{"task-init", "module", "use-case", "flow", "screen", "decision", "standard", "runbook", "draft"}
 	templates := editorTemplates(nil)
 	if len(templates) != len(expected) {
 		t.Fatalf("templates: %#v", templates)
@@ -513,9 +513,30 @@ func TestScaffoldRegistryParity(t *testing.T) {
 		if templates[index].Key != key {
 			t.Fatalf("template %d = %s", index, templates[index].Key)
 		}
-		if key != "task-init" && !validScaffoldID(key, templates[index].spec.prefix+"AREA-001") {
+		if key != "task-init" && key != "draft" && !validScaffoldID(key, templates[index].spec.prefix+"AREA-001") {
 			t.Fatalf("registry ID rejected for %s", key)
 		}
+	}
+}
+
+func TestEditorCreateDraft(t *testing.T) {
+	server, _, docs := editorTestServer(t)
+	body := map[string]any{"template": "draft", "language": "ru", "fields": map[string]string{"title": "Черновик Ёж"}}
+	first := performEditorRequest(server, editorRequest(http.MethodPost, editorAPIBase+"/create", "create", body))
+	if first.Code != http.StatusCreated || !strings.Contains(first.Body.String(), `"path":"drafts/черновик-ёж.md"`) {
+		t.Fatalf("first draft: status=%d body=%s", first.Code, first.Body.String())
+	}
+	content, err := os.ReadFile(filepath.Join(docs, "drafts", "черновик-ёж.md"))
+	if err != nil || string(content) != "# Черновик Ёж\n" {
+		t.Fatalf("draft content: %q %v", content, err)
+	}
+	second := performEditorRequest(server, editorRequest(http.MethodPost, editorAPIBase+"/create", "create", body))
+	if second.Code != http.StatusCreated || !strings.Contains(second.Body.String(), `"path":"drafts/черновик-ёж-2.md"`) {
+		t.Fatalf("second draft: status=%d body=%s", second.Code, second.Body.String())
+	}
+	invalid := map[string]any{"template": "draft", "language": "ru", "fields": map[string]string{"title": "Safe", "id": "DRAFT-1"}}
+	if response := performEditorRequest(server, editorRequest(http.MethodPost, editorAPIBase+"/create", "create", invalid)); response.Code != http.StatusBadRequest {
+		t.Fatalf("draft accepted unexpected field: %d %s", response.Code, response.Body.String())
 	}
 }
 

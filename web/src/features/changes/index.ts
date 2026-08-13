@@ -1014,7 +1014,7 @@ import { text } from "../../core/locale";
                 announce(text("features.changes.index.144"));
             }
         });
-        $('[data-discussions-toggle]')?.addEventListener('click', (event: any) => openDiscussions(event.currentTarget));
+        $('[data-discussions-toggle]')?.addEventListener('click', (event: any) => event.currentTarget.getAttribute('aria-expanded') === 'true' ? closeDiscussions() : openDiscussions(event.currentTarget));
         $('[data-discussions-close]')?.addEventListener('click', closeDiscussions);
         elements.discussionsScrim?.addEventListener('click', closeDiscussions);
         const closeFiles: any = () => { elements.filesPanel.classList.remove('is-open'); elements.filesPanel.setAttribute('role', 'navigation'); elements.filesPanel.removeAttribute('aria-modal'); $('[data-mobile-files]')?.setAttribute('aria-expanded', 'false'); $('[data-mobile-files]')?.focus(); };

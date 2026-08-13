@@ -75,6 +75,8 @@ func ClassifyDocument(relativePath string) string {
 		return "guide"
 	case SectionWork:
 		return "work"
+	case SectionDrafts:
+		return "draft"
 	case SectionReference:
 		return "reference"
 	case SectionQuality:

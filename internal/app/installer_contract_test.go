@@ -77,7 +77,7 @@ func TestInstallerDocumentationContract(t *testing.T) {
 			t.Errorf("%s does not describe both installers", name)
 		}
 	}
-	for _, expected := range []string{"Сопровождение версии 0.0.1", "Текущая стабильная версия — `0.0.1`", "Установщики GitHub Release"} {
+	for _, expected := range []string{"Сопровождение версии " + Version, "Текущая стабильная версия — `" + Version + "`", "Установщики GitHub Release"} {
 		if !strings.Contains(status, expected) {
 			t.Errorf("status does not describe the stable release: missing %q", expected)
 		}

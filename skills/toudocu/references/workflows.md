@@ -121,6 +121,20 @@ Replace every template placeholder before validation. Write headings, prose,
 table cells, and visible diagram labels in the selected document language. A
 map or flow never replaces prose requirements or acceptance criteria.
 
+### Free-form drafts
+
+Use `drafts/**/*.md` for provisional text that does not yet belong in a
+permanent section. A draft needs only useful Markdown content: do not invent a
+stable ID, metadata, required sections, relationships, status, or lifecycle.
+Create it with the Editor `draft` template or an ordinary safe file operation;
+the CLI `scaffold` command does not create drafts. `drafts/index.md` is
+optional. If it exists, its H1 must match the configured `drafts` section
+title.
+
+Do not confuse a document in `drafts/` with a `TASK-*` or `BUG-*` whose status
+is Draft. Do not create a work item merely to hold provisional text, and do not
+move accepted text into a permanent section unless the user explicitly asks.
+
 Do not let the template select the entities or topology. In a flow template,
 replace `OPTIONAL_USE_CASES_METADATA` with the complete `Scenario` metadata line
 containing one or more `UC-*`, or with an empty value for an architectural

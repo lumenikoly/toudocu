@@ -12,6 +12,7 @@ project:
     runbooks: Runbooks
     reference: Справочник
     work: Рабочие задачи
+    drafts: Черновики
     guides: Руководства
 translations:
   en:
@@ -28,4 +29,5 @@ translations:
       runbooks: Runbooks
       reference: Reference
       work: Work Items
+      drafts: Drafts
       guides: Guides

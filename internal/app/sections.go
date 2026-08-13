@@ -20,6 +20,7 @@ const (
 	SectionRunbooks     SectionType = "runbooks"
 	SectionReference    SectionType = "reference"
 	SectionWork         SectionType = "work"
+	SectionDrafts       SectionType = "drafts"
 	SectionGuides       SectionType = "guides"
 )
 
@@ -45,6 +46,7 @@ var BuiltinSections = []SectionSpec{
 	{SectionRunbooks, "runbooks", "index.md", "runbooks", "Runbooks"},
 	{SectionReference, "reference", "index.md", "reference", "Reference"},
 	{SectionWork, "work", "index.md", "work", "Work Items"},
+	{SectionDrafts, "drafts", "index.md", "drafts", "Drafts"},
 	{SectionGuides, "guides", "index.md", "guides", "Guides"},
 }
 
@@ -144,6 +146,17 @@ func asciiAlphaNumeric(value string) bool {
 }
 
 var builtinSectionLocalePacks = map[string]map[SectionType]string{
-	"en": {SectionArchitecture: "Architecture", SectionModules: "Modules", SectionUseCases: "Use Cases", SectionFlows: "Processes", SectionScreens: "Screens", SectionDecisions: "Architecture Decisions", SectionContracts: "Contracts", SectionQuality: "Quality Standards", SectionRunbooks: "Runbooks", SectionReference: "Reference", SectionWork: "Work Items", SectionGuides: "Guides"},
-	"ru": {SectionArchitecture: "Архитектура", SectionModules: "Модули", SectionUseCases: "Пользовательские сценарии", SectionFlows: "Процессы", SectionScreens: "Экраны", SectionDecisions: "Архитектурные решения", SectionContracts: "Контракты", SectionQuality: "Стандарты качества", SectionRunbooks: "Runbooks", SectionReference: "Справочник", SectionWork: "Рабочие задачи", SectionGuides: "Руководства"},
+	"en": {SectionArchitecture: "Architecture", SectionModules: "Modules", SectionUseCases: "Use Cases", SectionFlows: "Processes", SectionScreens: "Screens", SectionDecisions: "Architecture Decisions", SectionContracts: "Contracts", SectionQuality: "Quality Standards", SectionRunbooks: "Runbooks", SectionReference: "Reference", SectionWork: "Work Items", SectionDrafts: "Drafts", SectionGuides: "Guides"},
+	"ru": {SectionArchitecture: "Архитектура", SectionModules: "Модули", SectionUseCases: "Пользовательские сценарии", SectionFlows: "Процессы", SectionScreens: "Экраны", SectionDecisions: "Архитектурные решения", SectionContracts: "Контракты", SectionQuality: "Стандарты качества", SectionRunbooks: "Runbooks", SectionReference: "Справочник", SectionWork: "Рабочие задачи", SectionDrafts: "Черновики", SectionGuides: "Руководства"},
+}
+
+func defaultSectionTitle(locale string, section SectionType) string {
+	base := strings.Split(locale, "-")[0]
+	if pack, ok := builtinSectionLocalePacks[base]; ok && pack[section] != "" {
+		return pack[section]
+	}
+	if spec, ok := sectionSpec(section); ok {
+		return spec.EnglishTitle
+	}
+	return ""
 }

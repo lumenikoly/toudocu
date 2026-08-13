@@ -185,6 +185,23 @@ site:
 	}
 }
 
+func TestDraftsIndexUsesConfiguredTitle(t *testing.T) {
+	root, docs := configFixture(t)
+	writeArchitectureOverview(t, docs, "")
+	writeTestFile(t, docs, "drafts/index.md", "# Other title\n")
+	writeSiteConfig(t, root, "project:\n  locale: en\n  sections:\n    architecture: Architecture\n    modules: Modules\n    use-cases: Use Cases\n    flows: Processes\n    screens: Screens\n    decisions: Decisions\n    contracts: Contracts\n    quality: Quality\n    runbooks: Runbooks\n    reference: Reference\n    work: Work\n    drafts: Drafts\n    guides: Guides\n")
+	model := buildConfigFixture(t, root, docs, "")
+	if modelDirectoryLabel(model, "drafts") != "Drafts" {
+		t.Fatalf("drafts title: %q", modelDirectoryLabel(model, "drafts"))
+	}
+	for _, issue := range model.Issues {
+		if issue.Code == "builtin-section-title-mismatch" && issue.DocumentPath == "drafts/index.md" {
+			return
+		}
+	}
+	t.Fatalf("drafts index mismatch was not reported: %#v", model.Issues)
+}
+
 func TestSiteConfigEnums(t *testing.T) {
 	tests := map[string][]string{
 		"theme":        {"classic", "paper", "terminal"},

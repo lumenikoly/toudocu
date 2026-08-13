@@ -228,6 +228,8 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
 
     const roadmapPath = join(fixture, "docs", "roadmap.md");
     await page.goto(`${origin}/roadmap.html`);
+    const initialRoadmapTotal = Number((await page.locator(".progress-label").textContent())?.match(/из (\d+)/)?.[1]);
+    expect(initialRoadmapTotal).toBeGreaterThan(0);
     const roadmapTrigger = page.locator("[data-roadmap-add]");
     await roadmapTrigger.focus();
     await roadmapTrigger.press("Enter");
@@ -260,7 +262,7 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await expect(roadmapDialog.locator("[data-state='success']")).toContainText("DLV-BROWSER-001");
     await page.waitForURL("**/roadmap.html#browser-stage");
     await expect(page.locator("#browser-stage").locator("xpath=..")).toContainText("DLV-BROWSER-001");
-    await expect(page.locator(".progress-label")).toContainText("из 19");
+    await expect(page.locator(".progress-label")).toContainText(`из ${initialRoadmapTotal + 2}`);
 
     await page.goto(`${origin}/_toudocu/editor/`);
     await expect.poll(() => page.evaluate(() => (window as any).__toudocuFirstFrame)).toEqual({ siteTheme: "paper", colorScheme: "dark", theme: "dark", accent: "violet" });
@@ -411,6 +413,11 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await expect(page.locator("[data-discussions-toggle]")).toBeFocused();
     await expect(page.locator("[data-discussions-scrim]")).toBeHidden();
     await page.setViewportSize({ width: 1280, height: 720 });
+    await page.locator("[data-discussions-toggle]").click();
+    await expect(page.locator("[data-discussions-panel]")).toHaveClass(/is-open/);
+    await page.locator("[data-discussions-toggle]").click();
+    await expect(page.locator("[data-discussions-panel]")).not.toHaveClass(/is-open/);
+    await expect(page.locator("[data-discussions-toggle]")).toHaveAttribute("aria-expanded", "false");
 
     const fallbackContext = await page.context().browser()!.newContext();
     const fallbackPage = await fallbackContext.newPage();
@@ -590,6 +597,10 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await homeToggle.click();
     await expect(page.locator(".portal-review-panel")).toBeVisible();
     await expect(page.locator("[data-portal-review-new]")).toBeHidden();
+    await homeToggle.click();
+    await expect(page.locator(".portal-review-panel")).toBeHidden();
+    await expect(homeToggle).toHaveAttribute("aria-expanded", "false");
+    await homeToggle.click();
     await page.keyboard.press("Escape");
     await expect(homeToggle).toBeFocused();
     await page.goto(origin + "/architecture/overview.html");

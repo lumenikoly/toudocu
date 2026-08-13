@@ -774,7 +774,7 @@ import { createEmptyState, selectTab, setExpanded } from "../components";
             catch (failure: any) { error.textContent = failure.message; }
             finally { submit.disabled = false; }
         }, { signal });
-        toggle.addEventListener('click', openPanel, { signal });
+        toggle.addEventListener('click', () => toggle.getAttribute('aria-expanded') === 'true' ? closePanel() : openPanel(), { signal });
         $('[data-portal-review-new]', panel).addEventListener('click', () => openComposer({ operation: 'create' }), { signal });
         $('[data-portal-review-close]', panel).addEventListener('click', closePanel, { signal });
         scrim.addEventListener('click', closePanel, { signal });
