@@ -104,6 +104,19 @@ func TestDocumentationServerServesAndRebuilds(t *testing.T) {
 	assertRequestContains(http.MethodGet, "/", "Первая версия.")
 }
 
+func TestDocumentationServerRendersNotFoundPage(t *testing.T) {
+	options, _ := serveTestOptions(t)
+	handler, _, _, err := newDocumentationServer(options, &strings.Builder{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/missing/nested-page", nil))
+	if response.Code != http.StatusNotFound || !strings.Contains(response.Body.String(), "Page not found") || !strings.Contains(response.Body.String(), `href="../index.html"`) {
+		t.Fatalf("status=%d body=%s", response.Code, response.Body.String())
+	}
+}
+
 func TestDocumentationServerRebuildEndpointRegeneratesSite(t *testing.T) {
 	options, docs := serveTestOptions(t)
 	var stderr strings.Builder

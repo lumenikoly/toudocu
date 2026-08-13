@@ -806,7 +806,7 @@ func TestGenerateSite(t *testing.T) {
 	if result.Pages < 10 {
 		t.Fatalf("pages=%d", result.Pages)
 	}
-	for _, name := range []string{"index.html", "health.html", "report.json", "assets/manifest.json", "assets/portal.css", "assets/portal.js", "data/search-index.json", "data/navigation.json", "data/relations.json", "data/screens.json", "data/use-cases/index.json", "modules/auth.html", "modules/index.html", "processes/index.html", "use-cases/UC-AUTH-01.html", "use-cases/index.html"} {
+	for _, name := range []string{"index.html", "404.html", "health.html", "report.json", "assets/manifest.json", "assets/portal.css", "assets/portal.js", "data/search-index.json", "data/navigation.json", "data/relations.json", "data/screens.json", "data/use-cases/index.json", "modules/auth.html", "modules/index.html", "processes/index.html", "use-cases/UC-AUTH-01.html", "use-cases/index.html"} {
 		if _, err := os.Stat(filepath.Join(output, filepath.FromSlash(name))); err != nil {
 			t.Fatalf("missing %s: %v", name, err)
 		}

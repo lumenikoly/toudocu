@@ -1063,6 +1063,12 @@ func renderDashboard(model *Model) string {
 	return pageShell(model, "index.html", model.Project.Title, model.Project.Description, content, "")
 }
 
+func renderNotFoundPage(model *Model, current string) string {
+	ui := portalUI(model)
+	content := `<section class="not-found" aria-labelledby="not-found-title"><div class="not-found-code" aria-hidden="true">404</div><div class="not-found-copy"><h1 id="not-found-title">` + escapeHTML(ui.Text("notFound.title")) + `</h1><p>` + escapeHTML(ui.Text("notFound.description")) + `</p><a class="button primary" href="` + escapeAttr(relativeURL(current, "index.html")) + `">` + escapeHTML(ui.Text("notFound.action")) + ` <span aria-hidden="true">→</span></a></div></section>`
+	return pageShell(model, current, ui.Text("notFound.title"), ui.Text("notFound.description"), content, "")
+}
+
 func nonEmpty(values []string) []string {
 	out := []string{}
 	for _, v := range values {
@@ -1383,7 +1389,10 @@ func generateSite(model *Model, options Options, serve bool) (GenerateResult, er
 	if err = writeFileEnsured(filepath.Join(output, "index.html"), []byte(renderDashboard(model))); err != nil {
 		return GenerateResult{}, err
 	}
-	pages := 1
+	if err = writeFileEnsured(filepath.Join(output, "404.html"), []byte(renderNotFoundPage(model, "404.html"))); err != nil {
+		return GenerateResult{}, err
+	}
+	pages := 2
 	for _, document := range model.Documents {
 		directory := strings.Split(document.SourcePath, "/")[0]
 		typedCatalogIndex := strings.EqualFold(document.FileName, "index.md") && (directory == "use-cases" || directory == "flows" || directory == "quality" || directory == "runbooks" || directory == "drafts")
