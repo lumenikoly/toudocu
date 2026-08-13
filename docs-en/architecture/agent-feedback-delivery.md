@@ -17,8 +17,8 @@ flowchart LR
     Core --> Store[(OS user state)]
     CLI[agent next / respond commands] --> Core
     Skill[Toudocu skill] --> CLI
-    Skill -->|reads as evidence| Code[Code and checks]
-    Skill -->|reads; changes within the file or document target boundary| Sources[Safe repository files]
+    Skill -->|reads minimum context| Code[Code and Git diff]
+    Skill -->|changes the target and explicitly named paths| Sources[Safe repository files]
     Sources --> Watcher[Ordinary watch and rebuild]
     Watcher --> Portal[Current portal model]
 ```
@@ -41,6 +41,10 @@ The queue belongs to one repository and is processed in strict arrival order.
 `agent next` works only with the oldest unfinished delivery. An active lease
 prevents a second handler from advancing to the next delivery; after the lease
 expires, the same delivery can be retrieved again.
+Every retrieved delivery requires `agent respond` before the next request or
+exit. A successful response moves the delivery to `responded`; an open thread
+is not returned to the queue by itself. A new human message creates a new
+delivery.
 
 ## Target anchor
 
@@ -66,9 +70,12 @@ disappearance does not prevent a response or a follow-up in an existing thread.
 
 The agent response is appended to history and is content-idempotent for its
 `deliveryId`. `changedPaths` helps the interface open a result but does not
-prove a change. A `document` target limits the agent to canonical
-documentation, while a `file` target permits changes to related safe repository
-paths. The watcher and rebuild then reread the actual files.
+prove a change. The agent may change `target.path` and additional paths
+explicitly named in the message when they remain within the target-kind safe
+boundary. It does not expand the work to related documents, a changelog,
+generated files, or neighboring code, and it does not run validation commands.
+The watcher and rebuild reread the actual files independently of request
+processing.
 
 ## Storage and recovery
 

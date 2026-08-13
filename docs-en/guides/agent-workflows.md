@@ -158,16 +158,24 @@ plainly.
 ### Process requests from Toudocu
 
 The agent runs `toudocu agent next --json`, retrieves only the oldest queue
-entry, and rereads the current document. For `question`, it responds without
-changing files. For `change_request`, it first validates the claim against
-documentation, code, tests, and configuration, then changes only supported
-canonical documents or returns `no_change`.
+entry, and rereads the target, discussion history, needed Git diff, and minimum
+context for the request. For `question`, it responds without changing files.
+For `change_request`, it changes `target.path` and only additional paths the
+human unambiguously named when those paths remain within the target kind's safe
+boundary. An ambiguous additional path requires `needs_clarification`.
 
 One `AgentResponse` has outcome `answered`, `changed`, `no_change`,
 `needs_clarification`, or `failed` and is submitted through
-`toudocu agent respond`. After success, the agent runs `next` again until it
-receives `pending=false`. Delivery neither starts a language model, closes the
-discussion, nor applies file changes itself.
+`toudocu agent respond`. The response is mandatory before moving to the next
+entry or exiting. For `changed`, the message explicitly confirms the edits and
+lists every `changedPaths` entry. After a successful response, delivery is
+complete even when the discussion remains open; only a new human message
+creates new work. The agent then runs `next` again until it receives
+`pending=false`.
+
+Inside this workflow, the agent does not run `check`, tests, lint, build, or any
+other validation command. It also does not update related documents, a
+changelog, generated files, or neighboring code on its own initiative.
 
 ### Initialization
 

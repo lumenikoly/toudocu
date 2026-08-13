@@ -33,9 +33,10 @@ structured response to the same discussion.
 The Portal creates a `document` target only for canonical Markdown. Changes
 also creates a `file` target for a regular file in the current working diff. A
 range is available only for UTF-8 text up to 2 MiB; a binary, large, or deleted
-file receives a whole-file target. A `change_request` for `document` is limited
-to canonical documentation, while one for `file` permits related safe
-repository paths. The feedback API does not accept patches or write files.
+file receives a whole-file target. A `change_request` may change `target.path`
+and additional paths the human explicitly and unambiguously named: for a
+`document`, only canonical documentation paths; for a `file`, safe repository
+paths. The feedback API does not accept patches or write files.
 
 State lives in the operating system's user-data directory and is keyed by the
 canonical repository root. It is not stored in Git and remains available to
@@ -54,7 +55,8 @@ therefore be added without changing discussion history.
 
 For `intent=question`, the agent responds without changing files. Only
 `intent=change_request` permits the agent to validate the request and change
-paths within the target-kind boundary. The user's claim is not considered
+`target.path` plus additional paths the human explicitly and unambiguously
+named within the target-kind boundary. The user's claim is not considered
 proven in either case.
 
 ### BR-AGENT-FEEDBACK-003: A pending message is editable
@@ -70,7 +72,9 @@ a new message in the same discussion.
 response, the next delivery is not returned. After the lease expires, the
 agent receives the same oldest delivery again. Repeating an identical response
 succeeds, while a different response for a completed delivery is rejected as a
-conflict.
+conflict. After a response, the delivery is `responded` and is not returned
+again, even when the discussion remains open. A new human message creates a new
+delivery.
 
 ### BR-AGENT-FEEDBACK-005: A human controls the discussion
 
@@ -82,6 +86,10 @@ delete any discussion. Closed threads appear after open threads.
 - A saved message appears in the queue immediately.
 - A message can be edited only before the agent atomically retrieves it.
 - A question does not grant permission to change files.
+- Every retrieved delivery is completed with a response before the next one is
+  retrieved.
+- Request processing does not run validation commands or expand changes to
+  related files the human did not name.
 - The feedback API neither writes repository files nor starts an agent.
 - Open discussions and unfinished queue entries are never removed
   automatically.

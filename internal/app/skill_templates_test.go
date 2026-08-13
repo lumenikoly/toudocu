@@ -337,7 +337,10 @@ func TestToudocuAgentFeedbackContract(t *testing.T) {
 	for _, expected := range []string{
 		"Обработай запросы из Toudocu",
 		"[references/agent-feedback.md](references/agent-feedback.md)",
-		"a verified `change_request` may edit paths allowed by its target kind",
+		"every delivery requires `agent respond`",
+		"only its target plus unambiguously named safe paths",
+		"Outside the Agent Feedback workflow",
+		"The Agent Feedback workflow is the exception to this section",
 	} {
 		if !containsNormalized(skill, expected) {
 			t.Errorf("SKILL.md does not define agent feedback contract %q", expected)
@@ -347,10 +350,18 @@ func TestToudocuAgentFeedbackContract(t *testing.T) {
 	for _, expected := range []string{
 		"toudocu agent next",
 		"until the queue is empty",
+		"always complete the current one with `toudocu agent respond`",
+		"An open discussion is not pending work",
 		"`question`: answer from current evidence and do not change documentation",
-		"a `document` target permits",
-		"a `file` target permits",
+		"change `target.path`",
+		"unambiguously named in that message",
+		"Do not infer a related path",
+		"A `document` target permits canonical documentation paths",
+		"a `file` target permits safe repository paths",
 		"`needs_clarification`",
+		"Do not run `check`, tests, lint, build or any other validation command",
+		"For `changed`, the message must explicitly say that the requested edits were made",
+		"list every path from `changedPaths`",
 		"toudocu agent respond",
 		"AGENT_RESPONSE_CONFLICT",
 		"Never resolve the discussion for the user",

@@ -42,15 +42,18 @@ local command and returns a response to the original discussion.
 5. Copy prompt immediately copies “Process requests from Toudocu.” and does not
    change the queue.
 6. After receiving that request, the development agent runs
-   `toudocu agent next --json`, reads the complete request and current document,
-   and gathers necessary evidence from code, tests, or configuration.
+   `toudocu agent next --json`, reads the complete request, target, discussion
+   history, needed Git diff, and minimum context.
 7. For `question`, the agent responds without changing files. For
-   `change_request`, it validates the facts first and then changes canonical
-   documents for a `document` target or related safe paths for a `file` target,
-   or explains why no change is needed.
-8. The agent runs relevant checks and submits `AgentResponse` through
-   `toudocu agent respond`. The response appears in the original thread, which
-   remains open.
+   `change_request`, it changes `target.path` and only additional files the
+   human unambiguously named when they remain inside the target kind's safe
+   boundary. If an additional path is ambiguous, the agent returns
+   `needs_clarification`.
+8. Without running validation commands, the agent must submit `AgentResponse`
+   through `toudocu agent respond` before moving to the next request or exiting.
+   For `changed`, the message confirms the edits and lists `changedPaths`. The
+   response appears in the original thread, and the delivery becomes
+   `responded`.
 9. The developer closes the discussion or sends a follow-up. A follow-up creates
    a new queue entry in the same thread.
 
@@ -58,6 +61,8 @@ local command and returns a response to the original discussion.
 
 - If the queue is empty, `agent next --json` returns `pending=false` and exit
   code `0`.
+- An open thread without a new message is not pending work: after a response,
+  the next `agent next` returns `pending=false`.
 - If a delivery is already leased to a handler, a second handler receives
   `AGENT_INBOX_BUSY`. After the lease expires, the oldest delivery becomes
   available again.
