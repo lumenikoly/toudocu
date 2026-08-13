@@ -563,12 +563,16 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
   writeFileSync(join(fixture, ".toudocu", "config.yml"), "project:\n  locale: ru\n");
   writeFileSync(join(fixture, "docs", "index.md"), "# Review\n");
   writeFileSync(join(fixture, "docs", "architecture", "overview.md"), "# Architecture\n\n- Тип документа: Architecture Overview\n\n## Boundary\n\nUpdated.\n\nRepeated.\n\nRepeated.\n");
+  writeFileSync(join(fixture, "server.go"), "package main\n\nfunc oldName() {}\n");
+  writeFileSync(join(fixture, "image.bin"), Buffer.from([0, 1]));
   run("git", ["init", "-q"], fixture);
   run("git", ["config", "user.email", "review@example.invalid"], fixture);
   run("git", ["config", "user.name", "Review Browser"], fixture);
   run("git", ["add", "."], fixture);
   run("git", ["commit", "-qm", "baseline"], fixture);
   writeFileSync(join(fixture, "docs", "architecture", "overview.md"), "# Architecture\n\n- Тип документа: Architecture Overview\n\n## Boundary\n\nUpdated now.\n\nRepeated.\n\nRepeated.\n\nChanged.\n");
+  writeFileSync(join(fixture, "server.go"), "package main\n\nfunc newName() {}\n");
+  writeFileSync(join(fixture, "image.bin"), Buffer.from([0, 2]));
 
   const portServer = createServer();
   await new Promise<void>((resolveListen) => portServer.listen(0, "127.0.0.1", resolveListen));
@@ -773,6 +777,7 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await expect(changesThread.locator("[data-edit-message]")).toBeVisible();
     const second = agentCLI(["next"]);
     expect(second.pending).toBe(true);
+    expect(second.target.kind).toBe("file");
     expect(second.discussion.messages.at(-1).intent).toBe("change_request");
     await expect(changesThread.locator("[data-edit-message]")).toHaveCount(0, { timeout: 5_000 });
 
@@ -782,6 +787,25 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await page.locator("[data-review-delete-confirm]").getByRole("button", { name: "Удалить" }).click();
     await expect(changesThread).toHaveCount(0);
     expect(agentCLI(["next"]).pending).toBe(false);
+
+    await page.locator('[data-file-list] [data-path="server.go"]').click();
+    await page.locator("[data-detail] [data-file-comment]").click();
+    await changesComposer.locator("[data-review-message]").fill("Почему переименована функция?");
+    await changesComposer.locator('button[type="submit"]').click();
+    const codeQuestion = agentCLI(["next"]);
+    expect(codeQuestion.target.kind).toBe("file");
+    expect(codeQuestion.target.path).toBe("server.go");
+    const codeResponse = join(mkdtempSync(join(tmpdir(), "toudocu-agent-response-")), "response.json");
+    writeFileSync(codeResponse, JSON.stringify({ schemaVersion: 1, deliveryId: codeQuestion.deliveryId, discussionId: codeQuestion.discussion.id, outcome: "answered", message: "Имя отражает новое поведение.", evidence: [{ path: "server.go" }], changedPaths: [] }));
+    agentCLI(["respond", "--input", codeResponse]);
+
+    await page.locator('[data-file-list] [data-path="image.bin"]').click();
+    await expect(page.locator("[data-detail] [data-file-comment]")).toBeVisible();
+    await expect(page.locator("[data-tab-panel] .changes-error")).toBeVisible();
+
+    await page.goto(origin + "/changes/?target=HEAD");
+    await expect(page.locator("[data-discussions-toggle]")).toBeHidden();
+    await expect(page.locator("[data-file-comment]")).toHaveCount(0);
 
     const touchContext = await browser.newContext({ hasTouch: true, viewport: { width: 390, height: 844 } });
     const touchPage = await touchContext.newPage();

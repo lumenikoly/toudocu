@@ -20,7 +20,7 @@ or review references only when the request meets their conditions below.
 | `$toudocu refresh diff` | [references/refresh.md](references/refresh.md) | May | Only when the user explicitly invokes `$toudocu refresh diff` |
 | `$toudocu translate <locale>` | [references/translate.md](references/translate.md) | Yes | Only for an explicit translation request and selected target locale |
 | `$toudocu translate diff` | [references/translate.md](references/translate.md) | Yes | Only when explicitly invoked; selects every configured target locale |
-| `Обработай запросы из Toudocu` or equivalent | [references/agent-feedback.md](references/agent-feedback.md) | May | Explicitly process the local documentation queue; edit documentation only for verified `change_request` |
+| `Обработай запросы из Toudocu` or equivalent | [references/agent-feedback.md](references/agent-feedback.md) | May | Explicitly process the local queue; a verified `change_request` may edit paths allowed by its target kind |
 | CLI, portal, task, or ordinary documentation work | [references/workflows.md](references/workflows.md) | Depends on request | Follow the requested mutation; `task verify --run` requires an explicit verification request |
 
 Init, refresh, refresh diff, and translate are agent

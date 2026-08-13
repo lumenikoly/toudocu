@@ -219,7 +219,7 @@ func (service *reviewService) queueMessage(state *ReviewState, discussion *Discu
 		return agentFailure("AGENT_INBOX_BUSY", http.StatusConflict, "this discussion already has an unfinished delivery")
 	}
 	placement := service.reanchor(*discussion)
-	if placement.Status == "deleted" {
+	if placement.Status == "deleted" && discussion.Target.Kind != "file" {
 		return agentFailure("AGENT_INVALID_TARGET", http.StatusConflict, "the selected document or fragment was deleted")
 	}
 	if placement.Range != nil {
@@ -343,14 +343,20 @@ func (service *reviewService) respond(response AgentResponse) (ReviewState, erro
 		if human == nil {
 			return false, corruptedReviewState("delivery message disappeared")
 		}
-		if human.Intent == "question" && response.Outcome == "changed" {
-			return false, agentFailure("AGENT_INVALID_MESSAGE", http.StatusBadRequest, "a question cannot report a documentation change")
+		if human.Intent == "question" && (response.Outcome == "changed" || len(response.ChangedPaths) != 0) {
+			return false, agentFailure("AGENT_INVALID_MESSAGE", http.StatusBadRequest, "a question cannot report a repository change")
 		}
 		if response.Outcome == "changed" && len(response.ChangedPaths) == 0 {
 			return false, agentFailure("AGENT_INVALID_MESSAGE", http.StatusBadRequest, "changed requires at least one changedPaths entry")
 		}
 		for _, path := range response.ChangedPaths {
-			if err := service.validateDocumentationPath(path, true); err != nil {
+			var err error
+			if discussion.Target.Kind == "file" {
+				err = service.validateRepositoryChangedPath(path)
+			} else {
+				err = service.validateDocumentationPath(path, true)
+			}
+			if err != nil {
 				return false, err
 			}
 		}
@@ -393,8 +399,11 @@ func (service *reviewService) captureAnchor(target ReviewTarget, selection *Sele
 	if target.Kind == "" {
 		target.Kind = "document"
 	}
-	if target.Kind != "document" {
-		return nil, ReviewTarget{}, agentFailure("AGENT_INVALID_TARGET", http.StatusBadRequest, "MVP accepts only target.kind=document")
+	if target.Kind != "document" && target.Kind != "file" {
+		return nil, ReviewTarget{}, agentFailure("AGENT_INVALID_TARGET", http.StatusBadRequest, "target.kind must be document or file")
+	}
+	if target.Kind == "file" {
+		return service.captureFileAnchor(target, selection)
 	}
 	path, content, err := service.readDocumentation(target.Path)
 	if err != nil {
@@ -425,6 +434,79 @@ func (service *reviewService) captureAnchor(target ReviewTarget, selection *Sele
 		Kind: "document", Path: path, DocumentID: target.DocumentID, SourceDigest: "sha256:" + digestBytes(content),
 		Range: cloneReviewRange(target.Range), SelectedText: selected, ContextBefore: before, ContextAfter: after,
 	}, target, nil
+}
+
+func (service *reviewService) captureFileAnchor(target ReviewTarget, selection *SelectionHint) (*DocumentAnchor, ReviewTarget, error) {
+	if service.options.ChangeTarget != "" && service.options.ChangeTarget != "working-tree" {
+		return nil, ReviewTarget{}, agentFailure("AGENT_INVALID_TARGET", http.StatusForbidden, "file discussions require target=working-tree")
+	}
+	g, err := openGitRepositorySource(service.options.RepositoryRoot, 60)
+	if err != nil {
+		return nil, ReviewTarget{}, err
+	}
+	path, err := validateReviewPath(g, target.Path)
+	if err != nil {
+		return nil, ReviewTarget{}, mapReviewPathError(err)
+	}
+	base, working, err := resolveReviewComparison(g, service.options)
+	if err != nil {
+		return nil, ReviewTarget{}, err
+	}
+	if working.Type != "working-tree" {
+		return nil, ReviewTarget{}, agentFailure("AGENT_INVALID_TARGET", http.StatusForbidden, "file discussions require target=working-tree")
+	}
+	changes, err := g.listChanges(base, working)
+	if err != nil {
+		return nil, ReviewTarget{}, err
+	}
+	found, deleted := false, false
+	for _, change := range changes {
+		if change.path == path || change.oldPath == path {
+			found, deleted = true, change.status == "deleted"
+			if change.path != "" {
+				path = change.path
+			}
+			break
+		}
+	}
+	if !found {
+		return nil, ReviewTarget{}, agentFailure("AGENT_INVALID_TARGET", http.StatusConflict, "file is not present in the selected working-tree comparison")
+	}
+	target.Path = path
+	if deleted {
+		if target.Range != nil || selection != nil {
+			return nil, ReviewTarget{}, agentFailure("AGENT_INVALID_TARGET", http.StatusBadRequest, "a deleted file supports only a whole-file discussion")
+		}
+		return &DocumentAnchor{Kind: "file", Path: path}, target, nil
+	}
+	if err := ensureReviewPathSafe(g, working, path); err != nil {
+		return nil, ReviewTarget{}, mapReviewPathError(err)
+	}
+	content, err := readReviewText(g, working, path)
+	if err != nil {
+		if target.Range != nil || selection != nil {
+			return nil, ReviewTarget{}, mapReviewPathError(err)
+		}
+		return &DocumentAnchor{Kind: "file", Path: path}, target, nil
+	}
+	if selection != nil && target.Range == nil {
+		selected := selection.SelectedText
+		matches := selectionByteMatches(content, selected)
+		occurrence := max(1, selection.Occurrence)
+		if strings.TrimSpace(selected) == "" || occurrence > len(matches) {
+			return nil, ReviewTarget{}, agentFailure("AGENT_INVALID_TARGET", http.StatusConflict, "selected text occurrence was not found in the current file")
+		}
+		match := matches[occurrence-1]
+		target.Range = &ReviewRange{Start: offsetReviewPosition(content, match[0]), End: offsetReviewPosition(content, match[1])}
+	}
+	selected, before, after, err := extractReviewSelection(content, target)
+	if err != nil {
+		return nil, ReviewTarget{}, err
+	}
+	if len([]byte(selected)) > reviewSelectionLimit {
+		return nil, ReviewTarget{}, agentFailure("AGENT_PAYLOAD_TOO_LARGE", http.StatusRequestEntityTooLarge, "selectedText exceeds 32 KiB")
+	}
+	return &DocumentAnchor{Kind: "file", Path: path, SourceDigest: "sha256:" + digestBytes(content), Range: cloneReviewRange(target.Range), SelectedText: selected, ContextBefore: before, ContextAfter: after}, target, nil
 }
 
 func (service *reviewService) readDocumentation(requested string) (string, []byte, error) {
@@ -463,6 +545,21 @@ func (service *reviewService) validateDocumentationPath(requested string, allowM
 		if err := validateReviewChangedPath(g, path); err != nil {
 			return mapReviewPathError(err)
 		}
+	}
+	return nil
+}
+
+func (service *reviewService) validateRepositoryChangedPath(requested string) error {
+	g, err := openGitRepositorySource(service.options.RepositoryRoot, 60)
+	if err != nil {
+		return err
+	}
+	path, err := validateReviewPath(g, requested)
+	if err != nil {
+		return mapReviewPathError(err)
+	}
+	if err := validateReviewChangedPath(g, path); err != nil {
+		return mapReviewPathError(err)
 	}
 	return nil
 }
@@ -553,9 +650,25 @@ func (service *reviewService) reanchor(discussion Discussion) AnchorPlacement {
 		return placementFromTarget(discussion.Target, "stale", "anchor is missing")
 	}
 	anchor := discussion.Anchor
-	_, content, err := service.readDocumentation(anchor.Path)
+	var content []byte
+	var err error
+	if discussion.Target.Kind == "file" {
+		g, openErr := openGitRepositorySource(service.options.RepositoryRoot, 60)
+		if openErr != nil {
+			err = openErr
+		} else {
+			content, err = readReviewText(g, ChangeSide{Type: "working-tree"}, anchor.Path)
+		}
+	} else {
+		_, content, err = service.readDocumentation(anchor.Path)
+	}
 	if err != nil {
-		return AnchorPlacement{Status: "deleted", Path: anchor.Path, Reason: "document was deleted"}
+		if discussion.Target.Kind == "file" && anchor.Range == nil {
+			if g, openErr := openGitRepositorySource(service.options.RepositoryRoot, 60); openErr == nil && ensureReviewPathSafe(g, ChangeSide{Type: "working-tree"}, anchor.Path) == nil {
+				return AnchorPlacement{Status: "current", Path: anchor.Path}
+			}
+		}
+		return AnchorPlacement{Status: "deleted", Path: anchor.Path, Reason: "target file is unavailable"}
 	}
 	if anchor.Range == nil {
 		return AnchorPlacement{Status: "current", Path: anchor.Path}

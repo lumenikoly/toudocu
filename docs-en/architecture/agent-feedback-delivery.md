@@ -18,8 +18,8 @@ flowchart LR
     CLI[agent next / respond commands] --> Core
     Skill[Toudocu skill] --> CLI
     Skill -->|reads as evidence| Code[Code and checks]
-    Skill -->|reads; changes only for a documentation request| Docs[Canonical documentation]
-    Docs --> Watcher[Ordinary watch and rebuild]
+    Skill -->|reads; changes within the file or document target boundary| Sources[Safe repository files]
+    Sources --> Watcher[Ordinary watch and rebuild]
     Watcher --> Portal[Current portal model]
 ```
 
@@ -42,9 +42,9 @@ The queue belongs to one repository and is processed in strict arrival order.
 prevents a second handler from advancing to the next delivery; after the lease
 expires, the same delivery can be retrieved again.
 
-## Document anchor
+## Target anchor
 
-An anchor stores the repository-relative path, checksum, Unicode character
+A `document` anchor stores the repository-relative path, checksum, Unicode character
 range with one-based lines and columns, source text, and up to 2 KiB of context
 on each side. Before returning a delivery, the server determines one state:
 
@@ -57,12 +57,18 @@ on each side. Before returning a delivery, the server determines one state:
 The algorithm uses neither a language model nor fuzzy matching. Line numbers
 are hints, not proof of the current location.
 
+A `file` anchor can be created only for a regular file in a comparison against
+the working tree. It uses the same range for available UTF-8 text up to 2 MiB.
+A binary, large, or deleted file is stored as a whole-file target; its
+disappearance does not prevent a response or a follow-up in an existing thread.
+
 ## Response and actual changes
 
 The agent response is appended to history and is content-idempotent for its
 `deliveryId`. `changedPaths` helps the interface open a result but does not
-prove a change. The development agent writes Markdown through ordinary file
-tools, after which the watcher and rebuild reread the actual file.
+prove a change. A `document` target limits the agent to canonical
+documentation, while a `file` target permits changes to related safe repository
+paths. The watcher and rebuild then reread the actual files.
 
 ## Storage and recovery
 

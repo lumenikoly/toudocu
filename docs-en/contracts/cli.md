@@ -145,7 +145,9 @@ delivery again.
 `respond` rejects an unknown identifier, a different response for a completed
 delivery, an outcome outside
 `answered|changed|no_change|needs_clarification|failed`, oversized text, and
-unsafe `changedPaths`. `changed` is not allowed for `question`. These commands
+unsafe `changedPaths`. A `document` target limits changes to canonical
+documentation, while a `file` target permits related safe repository paths.
+`changed` is not allowed for `question`. These commands
 do not start an agent or language model, invoke a shell, or write to Git.
 
 Stable diagnostics are listed in

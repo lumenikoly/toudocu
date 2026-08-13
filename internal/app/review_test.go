@@ -1,6 +1,7 @@
 package toudocu
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -152,6 +153,86 @@ func TestAgentFeedbackAcceptsDraftDocument(t *testing.T) {
 	})
 	if err != nil || len(state.Session.Discussions) != 1 || state.Session.Discussions[0].Target.Path != "docs/drafts/entry.md" {
 		t.Fatalf("draft discussion: %#v %v", state, err)
+	}
+}
+
+func TestAgentFeedbackFileTargets(t *testing.T) {
+	root, docs := newReviewRepository(t)
+	t.Setenv("TOUDOCU_STATE_HOME", t.TempDir())
+	writeChangesTestFile(t, filepath.Join(root, "server.go"), "package main\n\nfunc changed() { println(\"привет\") }\n")
+	service, err := newReviewService(reviewOptions(root, docs))
+	if err != nil {
+		t.Fatal(err)
+	}
+	state, _ := service.discussions()
+	state, err = service.createDiscussion(CreateDiscussionRequest{
+		ReviewMutationGuard: guard(state), Target: ReviewTarget{Kind: "file", Path: "server.go", Range: &ReviewRange{Start: ReviewPosition{Line: 3, Column: 6}, End: ReviewPosition{Line: 3, Column: 13}}},
+		Intent: "change_request", Text: "Переименуй функцию.",
+	})
+	if err != nil || state.Session.Discussions[0].Anchor.SelectedText != "changed" {
+		t.Fatalf("file range=%#v err=%v", state, err)
+	}
+	next, err := service.claimNext()
+	if err != nil {
+		t.Fatal(err)
+	}
+	state, err = service.respond(AgentResponse{SchemaVersion: 1, DeliveryID: next.DeliveryID, DiscussionID: next.Discussion.ID, Outcome: "changed", Message: "Готово.", ChangedPaths: []string{"server.go"}})
+	if err != nil || state.Deliveries[0].State != "responded" {
+		t.Fatalf("file response=%#v err=%v", state, err)
+	}
+	if _, err := service.createDiscussion(CreateDiscussionRequest{ReviewMutationGuard: guard(state), Target: ReviewTarget{Kind: "file", Path: "README.md"}, Intent: "question", Text: "Почему?"}); reviewErrorCode(err) != "AGENT_INVALID_TARGET" {
+		t.Fatalf("unchanged file accepted: %v", err)
+	}
+
+	writeChangesTestFile(t, filepath.Join(root, "binary.dat"), "baseline\n")
+	writeChangesTestFile(t, filepath.Join(root, "large.txt"), "baseline\n")
+	gitTestRun(t, root, "add", "binary.dat", "large.txt")
+	gitTestRun(t, root, "commit", "-q", "-m", "binary baseline")
+	if err := os.WriteFile(filepath.Join(root, "binary.dat"), []byte{0, 1, 2}, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	state, _ = service.discussions()
+	state, err = service.createDiscussion(CreateDiscussionRequest{ReviewMutationGuard: guard(state), Target: ReviewTarget{Kind: "file", Path: "binary.dat"}, Intent: "question", Text: "Что изменилось?"})
+	if err != nil || state.Session.Discussions[len(state.Session.Discussions)-1].Target.Range != nil {
+		t.Fatalf("binary whole-file target=%#v err=%v", state, err)
+	}
+	if _, err := service.createDiscussion(CreateDiscussionRequest{ReviewMutationGuard: guard(state), Target: ReviewTarget{Kind: "file", Path: "binary.dat", Range: &ReviewRange{Start: ReviewPosition{Line: 1, Column: 1}, End: ReviewPosition{Line: 1, Column: 2}}}, Intent: "question", Text: "Где?"}); err == nil {
+		t.Fatalf("binary range accepted: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "large.txt"), bytes.Repeat([]byte{'x'}, reviewSnapshotLimit+1), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	state, _ = service.discussions()
+	if _, err := service.createDiscussion(CreateDiscussionRequest{ReviewMutationGuard: guard(state), Target: ReviewTarget{Kind: "file", Path: "large.txt"}, Intent: "question", Text: "Почему файл большой?"}); err != nil {
+		t.Fatalf("large whole-file target: %v", err)
+	}
+}
+
+func TestAgentFeedbackDeletedFileCanStartAndContinueDiscussion(t *testing.T) {
+	root, docs := newReviewRepository(t)
+	t.Setenv("TOUDOCU_STATE_HOME", t.TempDir())
+	if err := os.Remove(filepath.Join(root, "server.go")); err != nil {
+		t.Fatal(err)
+	}
+	service, err := newReviewService(reviewOptions(root, docs))
+	if err != nil {
+		t.Fatal(err)
+	}
+	state, _ := service.discussions()
+	state, err = service.createDiscussion(CreateDiscussionRequest{ReviewMutationGuard: guard(state), Target: ReviewTarget{Kind: "file", Path: "server.go"}, Intent: "question", Text: "Почему удалён?"})
+	if err != nil || state.Session.Discussions[0].Placement.Status != "deleted" {
+		t.Fatalf("deleted create=%#v err=%v", state, err)
+	}
+	next, err := service.claimNext()
+	if err != nil {
+		t.Fatal(err)
+	}
+	state, err = service.respond(AgentResponse{SchemaVersion: 1, DeliveryID: next.DeliveryID, DiscussionID: next.Discussion.ID, Outcome: "answered", Message: "Файл удалён в diff."})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = service.createMessage(next.Discussion.ID, CreateMessageRequest{ReviewMutationGuard: guard(state), Intent: "question", Text: "Это намеренно?"}); err != nil {
+		t.Fatalf("deleted follow-up: %v", err)
 	}
 }
 

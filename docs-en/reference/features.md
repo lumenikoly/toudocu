@@ -43,8 +43,9 @@ base. The browser provides the exact patch, full file, rendered Markdown before
 and after, semantics, relationships, and applicable OpenAPI, Mermaid, asset,
 and screen-map views.
 
-The main `serve` also shows local documentation discussions on document pages
-and in Changes. A message can target a whole Markdown document or a range.
+The main `serve` also shows local discussions on document pages and in Changes.
+The Portal targets canonical Markdown, while Changes can target any regular
+file in the working diff or an available text range within that file.
 Saving immediately creates a queue entry; the message can be edited or deleted
 until the agent retrieves it. Copy prompt only copies the request for the
 agent. A response does not close the discussion automatically.

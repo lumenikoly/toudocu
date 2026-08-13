@@ -337,7 +337,7 @@ func TestToudocuAgentFeedbackContract(t *testing.T) {
 	for _, expected := range []string{
 		"Обработай запросы из Toudocu",
 		"[references/agent-feedback.md](references/agent-feedback.md)",
-		"edit documentation only for verified `change_request`",
+		"a verified `change_request` may edit paths allowed by its target kind",
 	} {
 		if !containsNormalized(skill, expected) {
 			t.Errorf("SKILL.md does not define agent feedback contract %q", expected)
@@ -348,7 +348,8 @@ func TestToudocuAgentFeedbackContract(t *testing.T) {
 		"toudocu agent next",
 		"until the queue is empty",
 		"`question`: answer from current evidence and do not change documentation",
-		"`change_request`: change only canonical documentation",
+		"a `document` target permits",
+		"a `file` target permits",
 		"`needs_clarification`",
 		"toudocu agent respond",
 		"AGENT_RESPONSE_CONFLICT",

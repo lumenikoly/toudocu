@@ -51,6 +51,7 @@ import { text } from "../../core/locale";
     const languageFor: any = (path: any) => path.endsWith('.json') ? 'json' : /\.ya?ml$/i.test(path) ? 'yaml' : path.endsWith('.go') ? 'go' : path.endsWith('.java') ? 'java' : /\.(js|jsx|mjs|cjs)$/i.test(path) ? 'javascript' : /\.(ts|tsx|mts|cts)$/i.test(path) ? 'typescript' : /\.md$/i.test(path) ? 'markdown' : 'text';
     const changeText: any = (change: any) => [change.path, change.oldPath].join(' ').toLocaleLowerCase(locale);
     const isDocumentationFile: any = (change: any) => !!change.documentation || change.path === 'CHANGELOG.md' || change.oldPath === 'CHANGELOG.md';
+    const feedbackWritable: any = () => !!REVIEW && selectedTarget() === 'working-tree' && state.repository?.feedbackWritable !== false;
     function normalizedReviewFile(file: any) {
         const documentation: any = file.documentation || {};
         return {
@@ -157,7 +158,7 @@ import { text } from "../../core/locale";
         if (REVIEW && !change._reviewDetail) {
             elements.detail.innerHTML = detailHeader(change);
             elements.detail.setAttribute('aria-busy', 'true');
-            elements.detail.querySelectorAll('[data-tab], [data-file-comment]').forEach((button: any) => button.disabled = true);
+            elements.detail.querySelectorAll('[data-tab]').forEach((button: any) => button.disabled = true);
             $('[data-tab-panel]', elements.detail).innerHTML = `<div class="changes-loading" data-ui-state="loading" role="status">${escapeHTML(text("changes.loadingFile"))}</div>`;
             try {
                 const response: any = await fetch(repositoryReviewURL('/repository/file', { path: change.path }), { cache: 'no-store' });
@@ -184,7 +185,7 @@ import { text } from "../../core/locale";
     }
     function detailHeader(change: any) {
         const editorLink: any = EDITOR_WORKSPACE && change.path.startsWith('docs/') ? `<a class="changes-button secondary" href="${escapeHTML(EDITOR_WORKSPACE)}?path=${encodeURIComponent(change.path.replace(/^docs\//, ''))}">${escapeHTML(text("changes.editCurrentFile"))}</a>` : '';
-        const comment: any = REVIEW && isDocumentationFile(change) ? `<button type="button" class="changes-button secondary" data-file-comment>${text("features.changes.index.095")}</button>` : '';
+        const comment: any = feedbackWritable() && change.status !== 'linked' ? `<button type="button" class="changes-button secondary" data-file-comment>${text("features.changes.index.095")}</button>` : '';
         const diagnostics: any = change.diagnostics?.length ? `<details class="changes-diagnostics" ${change.diagnostics.some((item: any) => item.severity === 'error') ? 'open' : ''}><summary>${text("features.changes.index.155")} · ${change.diagnostics.length}</summary><ul>${change.diagnostics.map((item: any) => `<li class="is-${escapeHTML(item.severity)}"><code>${escapeHTML(item.code)}</code> ${escapeHTML(item.message)}</li>`).join('')}</ul></details>` : '';
         const tabs: any = tabsFor(change).map(([id, label]: any) => `<button type="button" role="tab" aria-selected="${state.tab === id}" data-tab="${id}">${escapeHTML(label)}</button>`).join('');
         return `<header class="changes-detail-header"><div><span class="changes-file-status status-${escapeHTML(change.status)}">${escapeHTML(statusLabel(change.status))}</span><h2>${escapeHTML(change.path.split('/').pop())}</h2><p>${escapeHTML(change.oldPath ? `${change.oldPath} → ${change.path}` : change.path)} · +${change.lines.added} −${change.lines.deleted}</p></div><div class="changes-detail-actions">${comment}${editorLink}</div></header>${diagnostics}<nav class="changes-tabs" role="tablist" aria-label="${escapeHTML(text("changes.changeViews"))}">${tabs}</nav><div class="changes-tab-panel" data-tab-panel></div>`;
@@ -195,7 +196,7 @@ import { text } from "../../core/locale";
             return;
         elements.detail.innerHTML = detailHeader(change);
         elements.detail.querySelectorAll('[data-tab]').forEach((button: any) => button.addEventListener('click', () => selectChange(change, button.dataset.tab)));
-        elements.detail.querySelector('[data-file-comment]')?.addEventListener('click', (event: any) => openComposer({ kind: 'document', path: change.path }, event.currentTarget));
+        elements.detail.querySelector('[data-file-comment]')?.addEventListener('click', (event: any) => openComposer({ kind: 'file', path: change.path }, event.currentTarget));
         const panel: any = $('[data-tab-panel]', elements.detail);
         if (state.tab === 'source')
             await renderSource(panel, change);
@@ -299,10 +300,10 @@ import { text } from "../../core/locale";
         const startColumn: any = textOffset(startRow.querySelector('.diff-line-content'), range.startContainer, range.startOffset, 0) + 1;
         const endColumn: any = textOffset(endRow.querySelector('.diff-line-content'), range.endContainer, range.endOffset, Array.from(endRow.querySelector('.diff-line-content')?.textContent || '').length) + 1;
         let target: any = null;
-        if (REVIEW && isDocumentationFile(change) && change.status !== 'deleted' && side === 'new')
+        if (feedbackWritable() && change.status !== 'deleted' && side === 'new')
             target = { type: 'diff', path: change.path, side, start: { line: firstLine, column: startColumn }, end: { line: lastLine, column: endColumn } };
-        if (REVIEW && isDocumentationFile(change) && change.status !== 'deleted' && side === 'old')
-            target = { kind: 'document', path: change.path, quote: oldSelectionQuote(change, firstLine, lastLine, selectedText) };
+        if (feedbackWritable() && side === 'old')
+            target = { kind: 'file', path: change.path, quote: oldSelectionQuote(change, firstLine, lastLine, selectedText) };
         const rectangles: any = range.getClientRects();
         return { text: selectedText, target, returnElement: startRow.querySelector('.diff-line-content'), rectangle: rectangles[rectangles.length - 1] || range.getBoundingClientRect() };
     }
@@ -351,7 +352,7 @@ import { text } from "../../core/locale";
                 newLine = counters.new++;
             const side: any = marker === '-' ? 'old' : 'new';
             const selectedLine: any = marker === '-' ? oldLine : newLine;
-            const comment: any = REVIEW && isDocumentationFile(change) && change.status !== 'deleted' ? `<button type="button" class="diff-comment" aria-label="${escapeHTML(text(side === 'old' ? "features.changes.index.096" : "features.changes.index.097", [selectedLine]))}">+</button>` : '<span></span>';
+            const comment: any = feedbackWritable() ? `<button type="button" class="diff-comment" aria-label="${escapeHTML(text(side === 'old' ? "features.changes.index.096" : "features.changes.index.097", [selectedLine]))}">+</button>` : '<span></span>';
             return `<span class="diff-line diff-line-${marker === '+' ? 'added' : marker === '-' ? 'removed' : 'context'}" data-review-side="${side}" data-review-line="${selectedLine}">${comment}<span class="diff-line-number">${oldLine}</span><span class="diff-line-number">${newLine}</span><span class="diff-line-marker">${escapeHTML(marker)}</span><span class="diff-line-content">${escapeHTML(line.slice(1))}</span></span>`;
         };
         const focusHunk: any = (index: any) => {
@@ -402,7 +403,7 @@ import { text } from "../../core/locale";
                 const row: any = button.closest('[data-review-line]');
                 const content: any = row.querySelector('.diff-line-content').textContent || '';
                 const target: any = row.dataset.reviewSide === 'old'
-                    ? { kind: 'document', path: change.path, quote: oldSelectionQuote(change, Number(row.dataset.reviewLine), Number(row.dataset.reviewLine), content) }
+                    ? { kind: 'file', path: change.path, quote: oldSelectionQuote(change, Number(row.dataset.reviewLine), Number(row.dataset.reviewLine), content) }
                     : { type: 'diff', path: change.path, side: 'new', start: { line: Number(row.dataset.reviewLine), column: 1 }, end: { line: Number(row.dataset.reviewLine), column: Array.from(content).length + 1 } };
                 openComposer(target, button);
             }));
@@ -460,7 +461,7 @@ import { text } from "../../core/locale";
             const host: any = $('[data-file-view]', panel);
             if (window.ToudocuCodeMirror?.createViewer) {
                 const menu: any = createSelectionMenu(panel);
-                $('[data-selection-question]', menu).disabled = !(REVIEW && isDocumentationFile(change) && !deleted);
+                $('[data-selection-question]', menu).disabled = !feedbackWritable();
                 const controller: any = new AbortController();
                 let pendingSelection: any = null;
                 let pendingText: any = '';
@@ -505,9 +506,13 @@ import { text } from "../../core/locale";
                 });
                 $('[data-selection-question]', menu)?.addEventListener('click', () => {
                     const selection: any = pendingSelection;
+                    const selectedText: any = pendingText;
                     const returnElement: any = $('.cm-content', host);
                     hideMenu();
-                    openComposer({ type: 'fileRange', path: change.path, start: selection.start, end: selection.end }, returnElement);
+                    const target: any = deleted
+                        ? { kind: 'file', path: change.path, quote: oldSelectionQuote(change, selection.start.line, selection.end.line, selectedText) }
+                        : { type: 'fileRange', path: change.path, start: selection.start, end: selection.end };
+                    openComposer(target, returnElement);
                 });
             }
             else {
@@ -724,13 +729,13 @@ import { text } from "../../core/locale";
         state.discussionsReturn?.focus?.();
     }
     function openComposer(target: any, returnElement: any, mode: any = { operation: 'create' }) {
-        if (!REVIEW) {
+        if (!feedbackWritable()) {
             announce(text("features.changes.index.098"));
             return;
         }
-        if (!target.path || mode.operation === 'create' && (!state.selected || !isDocumentationFile(state.selected)))
+        if (!target.path || mode.operation === 'create' && !state.selected)
             return;
-        const normalized: any = { kind: 'document', path: target.path };
+        const normalized: any = { kind: target.kind || 'file', path: target.path };
         if (target.start && !(target.type === 'diff' && target.side === 'old'))
             normalized.range = { start: target.start, end: target.end };
         state.composerTarget = normalized;
@@ -871,8 +876,14 @@ import { text } from "../../core/locale";
         }
     }
     async function loadReview() {
-        if (!REVIEW)
+        if (!REVIEW || selectedTarget() !== 'working-tree') {
+            state.review = null;
+            state.reviewEtag = '';
+            state.linked = [];
+            document.querySelectorAll('[data-discussions-toggle]').forEach((element: any) => element.hidden = true);
             return;
+        }
+        document.querySelectorAll('[data-discussions-toggle]').forEach((element: any) => element.hidden = false);
         const response: any = await fetch(reviewURL('/discussions'), { cache: 'no-store' });
         const data: any = await response.json();
         if (!response.ok)
@@ -926,7 +937,10 @@ import { text } from "../../core/locale";
         state.report = data;
         state.repository = repository || data;
         state.files = repository ? repository.files.map(normalizedReviewFile) : data.changes;
-        reconcileLinkedFiles();
+        if (feedbackWritable())
+            reconcileLinkedFiles();
+        else
+            state.linked = [];
         state.etag = response.headers.get('ETag') || '';
         state.repositoryEtag = repositoryResponse?.headers.get('ETag') || '';
         renderSummary();
@@ -1038,7 +1052,7 @@ import { text } from "../../core/locale";
         }
         setInterval(async () => {
             try {
-                if (REVIEW) {
+                if (feedbackWritable()) {
                     const response: any = await fetch(repositoryReviewURL('/repository/changes'), { headers: state.repositoryEtag ? { 'If-None-Match': state.repositoryEtag } : {}, cache: 'no-store' });
                     if (response.status !== 304) {
                         const next: any = response.headers.get('ETag') || '';

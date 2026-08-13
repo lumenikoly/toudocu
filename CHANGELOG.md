@@ -2,6 +2,10 @@
 
 ## 0.0.2
 
+- Changes discussions now support every regular file in the working diff,
+  including whole-file targets for binary, large, and deleted files. Index and
+  revision comparisons remain read-only.
+
 - Added the built-in `drafts/` section for free-form Markdown drafts.
 - Drafts appear in navigation, search, the static portal, and `ProjectReport`
   with `sectionType: "drafts"` and `type: "draft"`.

@@ -5,12 +5,12 @@
 - Module: MOD-CHANGES
 - Status: Implemented
 - Route: `/changes/`
-- Last updated: 2026-08-12
+- Last updated: 2026-08-13
 
 This screen lets a developer review the current Git diff and continue a
-documentation discussion without leaving the local portal. It shows
-documentation and other changed repository files, but new messages to the agent
-are allowed only for canonical Markdown documents. The public
+discussion about any changed file without leaving the local portal. New
+messages to the agent are allowed for regular files in a comparison against the
+working tree. The public
 `ChangeSetReport` remains limited to documentation.
 
 No current screenshot is available yet.
@@ -68,18 +68,18 @@ collapsed until needed; an error opens them automatically.
 
 ## Comments and agent responses
 
-A message can target an entire document, a new patch line, or selected content
+A message can target an entire file, a new patch line, or selected content
 in Full file or unified diff. In both views, the selection menu can copy clean
 text, copy context, or add a question, and releasing the pointer does not clear
 the selection.
 
-The new side of a unified diff stores an exact document range. For the old side
-of a modified document, Toudocu creates a document anchor without a range and
+The new side of a unified diff stores an exact file range. For the old side,
+Toudocu creates a file anchor without a range and
 adds a visible quote containing the path and old line number to the message.
-Mixed selections and fully deleted documents still allow both copy actions, but
-their Add question action is unavailable. A separate “+” appears on hover and
-focus for lines that support an exact or document anchor and remains visible on
-touch screens. Source code and fully deleted documents do not show it.
+Mixed selections remain available only for copying. A fully deleted, binary,
+or large file supports a whole-file discussion even when its content cannot be
+displayed. A separate “+” appears on hover and focus for lines that support an
+exact or file anchor and remains visible on touch screens.
 
 The form lets the user choose a question or change request. `Ctrl`+`Enter` or
 `Cmd`+`Enter` saves the message and immediately adds it to the queue; `Esc`
@@ -113,8 +113,8 @@ as color.
 ## Availability
 
 The screen and discussion writes are available only in the main portal started
-through `serve`. The Git range affects the view, but agent feedback always
-targets the current canonical document. Static builds, translation portals, and
+through `serve` and only with `target=working-tree`. Index and revision
+comparisons hide discussions, and the server rejects writes. Static builds, translation portals, and
 direct serving of a translation root do not include this capability.
 
 ## Related documents

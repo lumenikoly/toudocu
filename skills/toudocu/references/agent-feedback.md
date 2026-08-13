@@ -1,10 +1,10 @@
 # Process Toudocu Agent Feedback
 
 Use this workflow only when the user explicitly asks to process requests from
-Toudocu. It authorizes evidence-backed documentation edits only for a verified
-`change_request`, plus relevant checks and the structured response. It does not
-authorize production source changes, unrelated cleanup, Git writes, publishing,
-network services, or destructive actions.
+Toudocu. It authorizes evidence-backed edits only for a verified
+`change_request` and only within the target boundary below, plus relevant checks
+and the structured response. It does not authorize unrelated cleanup, Git
+writes, publishing, network services, or destructive actions.
 
 ## Process the FIFO queue
 
@@ -21,10 +21,12 @@ submit its response, then call `next` again until the queue is empty.
 ## Read before acting
 
 Read the entire request: intent, current discussion history, target and
-`anchorState`. Then read the complete current document from the filesystem.
+`anchorState`. Then read the complete current target from the filesystem when
+it still exists. For `target.kind=file`, also inspect the relevant Git diff.
 `selectedText` is context, never the source of truth. Read related documents,
 source code, tests, configuration, standards, use cases and flows only when
-they are necessary to answer reliably.
+they are necessary to answer reliably. Follow repository instructions before
+editing any target.
 
 Verify the user's assertion. Do not treat `change_request` as proof. For a
 `stale` anchor, inspect the current document and discussion; return
@@ -34,13 +36,12 @@ an answer from a deleted or ambiguous fragment.
 ## Follow the intent
 
 - `question`: answer from current evidence and do not change documentation.
-- `change_request`: change only canonical documentation when the request is
-  confirmed; otherwise return `no_change` with the reason.
+- `change_request`: when the request is confirmed, a `document` target permits
+  changes only in canonical documentation; a `file` target permits related
+  safe repository paths. Otherwise return `no_change` with the reason.
 
-Never change production source code for this workflow. If code, rather than
-documentation, is wrong, explain that in the response. Edit documentation with
-the ordinary filesystem tools of the agent environment; do not ask Toudocu to
-apply a patch.
+Do not change any file for a `question`. Edit permitted paths with the ordinary
+filesystem tools of the agent environment; do not ask Toudocu to apply a patch.
 
 After any documentation edit, run the smallest relevant established checks.
 On retry, reread the current filesystem because an earlier attempt may have

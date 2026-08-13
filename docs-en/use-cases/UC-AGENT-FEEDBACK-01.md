@@ -1,4 +1,4 @@
-# UC-AGENT-FEEDBACK-01: Discuss documentation with a development agent
+# UC-AGENT-FEEDBACK-01: Discuss a changed file with a development agent
 
 - Identifier: UC-AGENT-FEEDBACK-01
 - Status: Done
@@ -8,10 +8,10 @@
 - Screens: SC-SITE-DOCUMENT, SC-CHANGES-WORKSPACE
 - Start screen: SC-SITE-DOCUMENT
 - End screens: SC-SITE-DOCUMENT, SC-CHANGES-WORKSPACE
-- Last updated: 2026-08-12
+- Last updated: 2026-08-13
 
-A developer asks a question about current documentation or requests a verified
-documentation change. A development agent retrieves the request through a
+A developer asks a question about documentation or a changed file, or requests
+a verified target change. A development agent retrieves the request through a
 local command and returns a response to the original discussion.
 
 ## Preconditions
@@ -20,7 +20,8 @@ local command and returns a response to the original discussion.
   repository;
 - the development agent has the Toudocu skill installed and can run Toudocu
   commands;
-- the target Markdown file is inside the canonical documentation root.
+- the target is in canonical documentation or is a regular file in the current
+  working Git diff.
 
 ## Main scenario
 
@@ -43,9 +44,10 @@ local command and returns a response to the original discussion.
 6. After receiving that request, the development agent runs
    `toudocu agent next --json`, reads the complete request and current document,
    and gathers necessary evidence from code, tests, or configuration.
-7. For `question`, the agent responds without changing documentation. For
+7. For `question`, the agent responds without changing files. For
    `change_request`, it validates the facts first and then changes canonical
-   documents or explains why no change is needed.
+   documents for a `document` target or related safe paths for a `file` target,
+   or explains why no change is needed.
 8. The agent runs relevant checks and submits `AgentResponse` through
    `toudocu agent respond`. The response appears in the original thread, which
    remains open.
@@ -64,11 +66,11 @@ local command and returns a response to the original discussion.
   `stale` or `deleted`.
 - For `stale`, the agent rereads the current document. If it cannot determine
   the intent reliably, it returns `needs_clarification`.
-- In unified diff, a new-side selection creates an exact range. An old-side
-  selection in a modified document creates a document discussion, while the
+- In unified diff, a new-side selection creates an exact file range. An
+  old-side selection creates a file discussion, while the
   path, old line numbers, and deleted text are stored as a visible quote in the
-  message. Mixed selections and fully deleted documents allow text and context
-  copying but cannot create an inaccurate target.
+  message. Mixed selections allow copying only. A fully deleted file supports
+  a whole-file discussion.
 - Repeating an identical response does not create another message. A different
   response for the same completed delivery returns `AGENT_RESPONSE_CONFLICT`.
 - Corrupt local state is not overwritten and returns

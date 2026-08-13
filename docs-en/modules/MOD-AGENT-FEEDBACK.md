@@ -2,7 +2,7 @@
 
 - Identifier: MOD-AGENT-FEEDBACK
 - Status: Done
-- Last updated: 2026-08-12
+- Last updated: 2026-08-13
 
 This module attaches human messages to specific documentation locations and
 delivers them to an external development agent through a local queue. Toudocu
@@ -30,12 +30,12 @@ structured response to the same discussion.
 
 ## Boundaries
 
-The module accepts only `target.kind=document` and allows `change_request` to
-change canonical Markdown documents only. The agent may read code, tests, and
-configuration as evidence, but it does not change working code because of such
-a request. The agent edits documentation with the ordinary tools in its
-environment; the feedback API neither accepts patches nor receives arbitrary
-write access to the repository.
+The Portal creates a `document` target only for canonical Markdown. Changes
+also creates a `file` target for a regular file in the current working diff. A
+range is available only for UTF-8 text up to 2 MiB; a binary, large, or deleted
+file receives a whole-file target. A `change_request` for `document` is limited
+to canonical documentation, while one for `file` permits related safe
+repository paths. The feedback API does not accept patches or write files.
 
 State lives in the operating system's user-data directory and is keyed by the
 canonical repository root. It is not stored in Git and remains available to
@@ -52,9 +52,10 @@ therefore be added without changing discussion history.
 
 ### BR-AGENT-FEEDBACK-002: A question does not authorize a change
 
-For `intent=question`, the agent responds without changing documentation. Only
+For `intent=question`, the agent responds without changing files. Only
 `intent=change_request` permits the agent to validate the request and change
-canonical documents. The user's claim is not considered proven in either case.
+paths within the target-kind boundary. The user's claim is not considered
+proven in either case.
 
 ### BR-AGENT-FEEDBACK-003: A pending message is editable
 
@@ -80,7 +81,7 @@ delete any discussion. Closed threads appear after open threads.
 
 - A saved message appears in the queue immediately.
 - A message can be edited only before the agent atomically retrieves it.
-- A question does not grant permission to change documentation.
+- A question does not grant permission to change files.
 - The feedback API neither writes repository files nor starts an agent.
 - Open discussions and unfinished queue entries are never removed
   automatically.

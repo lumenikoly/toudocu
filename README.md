@@ -71,13 +71,13 @@ It includes:
 - diagnostics after edits;
 - the current Git changes;
 - a local Swagger UI;
-- discussions attached directly to selected documentation fragments.
+- discussions attached to selected documentation or any file in the working diff.
 
 By default, the portal is available at `http://127.0.0.1:8080`.
 
 ### Ask questions and request changes directly from the docs
 
-While reading a document, you can select text or a heading and create a question or change request.
+While reading a document, or reviewing any changed file in Changes, you can create a question or change request. Available UTF-8 text supports exact ranges; binary, large, and deleted files use a whole-file discussion.
 
 For example:
 
@@ -106,7 +106,7 @@ Changes helps you:
 - review the current documentation diff;
 - inspect changes for a specific file;
 - associate documentation changes with a work item;
-- discuss changed documentation before committing it.
+- discuss any changed file before committing it.
 
 The analysis does not modify the working tree, index, or Git history.
 
