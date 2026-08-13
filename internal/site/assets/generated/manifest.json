@@ -15,7 +15,7 @@
     },
     "changes.js": {
       "file": "changes.js",
-      "sha256": "c589b575870bc63cb83b44dd9a08623e8b18500244c88f8a1d09f224fa6d0c0a"
+      "sha256": "0ffc53987c5fd10abba50fd116257c623baf7ff03d15c9fbb883f5e5e7d8a0e8"
     },
     "codemirror.checksums.txt": {
       "file": "codemirror.checksums.txt",
@@ -63,7 +63,7 @@
     },
     "portal.js": {
       "file": "portal.js",
-      "sha256": "559ca9e29b751568d2fd95d968df3751c55e603e784c8ec05c19ac665e850467"
+      "sha256": "19d7d3a4134dcf0b4f2bdcedba29284de7bd1b08beffdb93eab4bbaa88cf0c8e"
     },
     "screen-map.css": {
       "file": "screen-map.css",
@@ -75,7 +75,7 @@
     },
     "serve.css": {
       "file": "serve.css",
-      "sha256": "81b7b6ad967c7817e8ce07ba42aac116385335d1f8715b10585eed24108fdf77"
+      "sha256": "c00ed59bbec9b8f580ba7e07b695ee83e10f2162ff3f9c053ae24841c7e4e54b"
     },
     "serve.js": {
       "file": "serve.js",

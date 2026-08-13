@@ -10,6 +10,7 @@ import (
 	"sync"
 	"testing"
 	"time"
+	"unicode/utf8"
 )
 
 func newReviewRepository(t *testing.T) (string, string) {
@@ -177,6 +178,37 @@ func TestAgentFeedbackSelectsRepeatedTextByOccurrence(t *testing.T) {
 	})
 	if err != nil || state.Session.Discussions[1].Target.Range.Start.Line != 3 || state.Session.Discussions[1].Anchor.SelectedText != "Repeated\ntext." {
 		t.Fatalf("state=%#v err=%v", state, err)
+	}
+}
+
+func TestAgentFeedbackPersistsUTF8AnchorContext(t *testing.T) {
+	root, docs := newReviewRepository(t)
+	t.Setenv("TOUDOCU_STATE_HOME", t.TempDir())
+	selected := "выделение"
+	writeChangesTestFile(t, filepath.Join(docs, "modules", "MOD-CORE.md"), strings.Repeat("界", 800)+selected+strings.Repeat("界", 800))
+	service, err := newReviewService(reviewOptions(root, docs))
+	if err != nil {
+		t.Fatal(err)
+	}
+	state, _ := service.discussions()
+	state, err = service.createDiscussion(CreateDiscussionRequest{
+		ReviewMutationGuard: guard(state), Target: ReviewTarget{Kind: "document", Path: "docs/modules/MOD-CORE.md"},
+		Selection: &SelectionHint{SelectedText: selected}, Intent: "question", Text: "Почему этот фрагмент?",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	anchor := state.Session.Discussions[0].Anchor
+	if !utf8.ValidString(anchor.ContextBefore) || !utf8.ValidString(anchor.ContextAfter) || anchor.SelectedText != selected {
+		t.Fatalf("anchor=%#v", anchor)
+	}
+	restarted, err := newReviewService(Options{RepositoryRoot: root})
+	if err != nil {
+		t.Fatal(err)
+	}
+	reloaded, err := restarted.discussions()
+	if err != nil || reloaded.Session.Discussions[0].Anchor.SelectedText != selected {
+		t.Fatalf("restart=%#v err=%v", reloaded, err)
 	}
 }
 

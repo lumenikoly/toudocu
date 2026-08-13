@@ -493,7 +493,7 @@ func extractReviewSelection(content []byte, target ReviewTarget) (string, string
 	if err != nil || end <= start {
 		return "", "", "", agentFailure("AGENT_INVALID_TARGET", http.StatusBadRequest, "document range is empty or outside the file")
 	}
-	return string(content[start:end]), truncateUTF8Start(content[max(0, start-reviewContextByteSize):start], reviewContextByteSize), truncateUTF8End(content[end:min(len(content), end+reviewContextByteSize)], reviewContextByteSize), nil
+	return string(content[start:end]), truncateUTF8Start(content[:start], reviewContextByteSize), truncateUTF8End(content[end:], reviewContextByteSize), nil
 }
 
 func reviewPositionOffset(content []byte, position ReviewPosition) (int, error) {

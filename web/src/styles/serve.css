@@ -107,6 +107,7 @@
 .portal-review-thread-actions { flex: 0 0 auto; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 2px; }
 .portal-review-thread-actions .is-danger { color: var(--danger); }
 .portal-review-anchor { margin: 0; padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--muted); font: .76rem/1.45 var(--font-mono); overflow-wrap: anywhere; }
+.portal-review-quote { max-height: 12em; margin: 0; padding: 10px 12px; overflow: auto; border-bottom: 1px solid var(--border); background: var(--surface-soft); color: var(--muted); font: .78rem/1.5 var(--font-body); white-space: pre-wrap; overflow-wrap: anywhere; }
 .portal-review-thread ol { margin: 0; padding: 0; list-style: none; }
 .portal-review-thread li { padding: 12px; border-bottom: 1px solid var(--border); }
 .portal-review-thread li.is-agent { background: var(--info-soft); }

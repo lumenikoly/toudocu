@@ -652,6 +652,7 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await expect(panel).toBeVisible();
     const thread = panel.locator(".portal-review-thread").filter({ hasText: "Почему фрагмент повторяется?" });
     await expect(thread.locator("[data-portal-message-edit]")).toBeVisible();
+    await expect(thread.locator(".portal-review-quote")).toHaveText("Repeated.");
 
     await panel.locator("[data-portal-review-copy-prompt]").click();
     await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe("Обработай запросы из Toudocu.");
@@ -684,6 +685,7 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await expect(page.locator("[data-open-discussion-count]")).toHaveText("1");
     await page.locator(".site-header [data-discussions-toggle]").click();
     await expect(page.locator(".portal-review-thread")).toContainText("Почему фрагмент повторяется?");
+    await expect(page.locator(".portal-review-thread").filter({ hasText: "Почему фрагмент повторяется?" }).locator(".portal-review-quote")).toHaveText("Repeated.");
     await expect(page.locator("[data-portal-review-new]")).toBeHidden();
     await page.keyboard.press("Escape");
     await expect(page.locator(".site-header [data-discussions-toggle]")).toBeFocused();
@@ -691,6 +693,9 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await page.locator('[data-file-list] [data-path="docs/architecture/overview.md"]').click();
     await expect(page.locator(".workspace-header [data-discussions-toggle]")).toHaveAttribute("aria-controls", "project-discussions-panel");
     await page.locator('[data-tab="file"]').click();
+    await page.locator("[data-discussions-toggle]").click();
+    await expect(page.locator(".review-thread").filter({ hasText: "Почему фрагмент повторяется?" }).locator(".portal-review-quote")).toHaveText("Repeated.");
+    await page.locator("[data-discussions-close]").click();
     const fullFileLine = page.locator('[data-file-view] .cm-line').filter({ hasText: "Updated now." });
     await fullFileLine.selectText();
     await expect.poll(() => page.evaluate(() => window.getSelection()?.toString())).toBe("Updated now.");
@@ -764,6 +769,7 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await changesComposer.locator("[data-review-message]").fill("Проверь и уточни этот документ.");
     await changesComposer.locator('button[type="submit"]').click();
     const changesThread = page.locator(".review-thread").filter({ hasText: "Проверь и уточни этот документ." });
+    await expect(changesThread.locator(".portal-review-quote")).toHaveCount(0);
     await expect(changesThread.locator("[data-edit-message]")).toBeVisible();
     const second = agentCLI(["next"]);
     expect(second.pending).toBe(true);
