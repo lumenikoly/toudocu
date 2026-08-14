@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.3
+
+- Document selections are now hints: when rendered text, such as a Mermaid
+  label, cannot be matched to the Markdown source, Toudocu keeps the question
+  as a document-level discussion and passes the original selection to the
+  agent. Exact matches still retain their range, and file selections in
+  Changes remain strict.
+
 ## 0.0.2
 
 - Changes discussions now support every regular file in the working diff,

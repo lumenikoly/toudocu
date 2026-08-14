@@ -244,7 +244,7 @@ components:
       type: object
       additionalProperties: false
       required: [expectedRevision, expectedStateDigest, target, intent, text]
-      properties: {expectedRevision: {type: integer, minimum: 0}, expectedStateDigest: {type: string}, target: {$ref: "#/components/schemas/Target"}, selection: {type: object, additionalProperties: false, required: [selectedText], properties: {selectedText: {type: string, description: At most 32768 UTF-8 bytes, x-maxBytes: 32768}, occurrence: {type: integer, minimum: 1}}}, intent: {enum: [question, change_request]}, text: {type: string, description: At most 65536 UTF-8 bytes, x-maxBytes: 65536}}
+      properties: {expectedRevision: {type: integer, minimum: 0}, expectedStateDigest: {type: string}, target: {$ref: "#/components/schemas/Target"}, selection: {type: object, description: A document selection is a hint. If selectedText and occurrence match the current Markdown source, the server records an exact range; otherwise it creates a document-level discussion and preserves selectedText. File selections remain strict., additionalProperties: false, required: [selectedText], properties: {selectedText: {type: string, description: Non-empty text of at most 32768 UTF-8 bytes., x-maxBytes: 32768}, occurrence: {type: integer, minimum: 1}}}, intent: {enum: [question, change_request]}, text: {type: string, description: At most 65536 UTF-8 bytes, x-maxBytes: 65536}}
     HumanMessageMutation:
       type: object
       additionalProperties: false

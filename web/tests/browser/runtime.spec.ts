@@ -562,7 +562,7 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
   mkdirSync(join(fixture, ".toudocu"));
   writeFileSync(join(fixture, ".toudocu", "config.yml"), "project:\n  locale: ru\n");
   writeFileSync(join(fixture, "docs", "index.md"), "# Review\n");
-  writeFileSync(join(fixture, "docs", "architecture", "overview.md"), "# Architecture\n\n- Тип документа: Architecture Overview\n\n## Boundary\n\nUpdated.\n\nRepeated.\n\nRepeated.\n");
+  writeFileSync(join(fixture, "docs", "architecture", "overview.md"), "# Architecture\n\n- Тип документа: Architecture Overview\n\n## Boundary\n\n```mermaid\nflowchart LR\n  A[\"Rendered<br>label\"]\n```\n\nUpdated.\n\nRepeated.\n\nRepeated.\n");
   writeFileSync(join(fixture, "server.go"), "package main\n\nfunc oldName() {}\n");
   writeFileSync(join(fixture, "image.bin"), Buffer.from([0, 1]));
   run("git", ["init", "-q"], fixture);
@@ -570,7 +570,7 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
   run("git", ["config", "user.name", "Review Browser"], fixture);
   run("git", ["add", "."], fixture);
   run("git", ["commit", "-qm", "baseline"], fixture);
-  writeFileSync(join(fixture, "docs", "architecture", "overview.md"), "# Architecture\n\n- Тип документа: Architecture Overview\n\n## Boundary\n\nUpdated now.\n\nRepeated.\n\nRepeated.\n\nChanged.\n");
+  writeFileSync(join(fixture, "docs", "architecture", "overview.md"), "# Architecture\n\n- Тип документа: Architecture Overview\n\n## Boundary\n\n```mermaid\nflowchart LR\n  A[\"Rendered<br>label\"]\n```\n\nUpdated now.\n\nRepeated.\n\nRepeated.\n\nChanged.\n");
   writeFileSync(join(fixture, "server.go"), "package main\n\nfunc newName() {}\n");
   writeFileSync(join(fixture, "image.bin"), Buffer.from([0, 2]));
 
@@ -665,7 +665,7 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     expect(request.pending).toBe(true);
     expect(request.discussion.messages[0].intent).toBe("question");
     expect(request.target.selectedText).toBe("Repeated.");
-    expect(request.target.range.start.line).toBe(11);
+    expect(request.target.range.start.line).toBe(16);
     await expect(thread.locator("[data-portal-message-edit]")).toHaveCount(0, { timeout: 5_000 });
     const responsePath = join(mkdtempSync(join(tmpdir(), "toudocu-agent-response-")), "response.json");
     writeFileSync(responsePath, JSON.stringify({
@@ -680,6 +680,32 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     const accepted = agentCLI(["respond", "--input", responsePath]);
     expect(accepted.accepted).toBe(true);
     await expect(panel).toContainText("Повтор нужен для сравнения двух сценариев.", { timeout: 5_000 });
+
+    const mermaidNode = page.locator("[data-mermaid-diagram] svg .node").filter({ hasText: "Renderedlabel" });
+    await selectPortalElement(mermaidNode);
+    await selectionMenu.getByRole("button", { name: "Добавить вопрос" }).click();
+    const renderedSelection = await composer.locator("[data-portal-review-selection]").textContent();
+    expect(renderedSelection).toBe("Rendered\nlabel");
+    await composer.locator("[data-portal-review-question]").fill("Что означает подпись диаграммы?");
+    await composer.locator(".portal-review-submit").click();
+    const mermaidThread = panel.locator(".portal-review-thread").filter({ hasText: "Что означает подпись диаграммы?" });
+    await expect(mermaidThread.locator(".portal-review-quote")).toHaveText("Rendered\nlabel");
+    const mermaidRequest = agentCLI(["next"]);
+    expect(mermaidRequest.target.path).toBe("docs/architecture/overview.md");
+    expect(mermaidRequest.target.selectedText).toBe("Rendered\nlabel");
+    expect(mermaidRequest.target.range).toBeUndefined();
+    writeFileSync(responsePath, JSON.stringify({
+      schemaVersion: 1,
+      deliveryId: mermaidRequest.deliveryId,
+      discussionId: mermaidRequest.discussion.id,
+      outcome: "answered",
+      message: "Это подпись шага диаграммы.",
+      evidence: [],
+      changedPaths: [],
+    }));
+    expect(agentCLI(["respond", "--input", responsePath]).accepted).toBe(true);
+    await expect(mermaidThread).toContainText("Это подпись шага диаграммы.", { timeout: 5_000 });
+    await mermaidThread.getByRole("button", { name: "Закрыть", exact: true }).click();
     await thread.getByRole("button", { name: "Закрыть", exact: true }).click();
     await expect(thread).toHaveClass(/is-resolved/);
     await thread.getByRole("button", { name: "Открыть снова" }).click();
@@ -688,7 +714,7 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await page.goto(origin);
     await expect(page.locator("[data-open-discussion-count]")).toHaveText("1");
     await page.locator(".site-header [data-discussions-toggle]").click();
-    await expect(page.locator(".portal-review-thread")).toContainText("Почему фрагмент повторяется?");
+    await expect(page.locator(".portal-review-thread").filter({ hasText: "Почему фрагмент повторяется?" })).toContainText("Почему фрагмент повторяется?");
     await expect(page.locator(".portal-review-thread").filter({ hasText: "Почему фрагмент повторяется?" }).locator(".portal-review-quote")).toHaveText("Repeated.");
     await expect(page.locator("[data-portal-review-new]")).toBeHidden();
     await page.keyboard.press("Escape");

@@ -262,6 +262,43 @@ func TestAgentFeedbackSelectsRepeatedTextByOccurrence(t *testing.T) {
 	}
 }
 
+func TestAgentFeedbackKeepsUnmatchedDocumentSelection(t *testing.T) {
+	root, docs := newReviewRepository(t)
+	t.Setenv("TOUDOCU_STATE_HOME", t.TempDir())
+	service, err := newReviewService(reviewOptions(root, docs))
+	if err != nil {
+		t.Fatal(err)
+	}
+	state, _ := service.discussions()
+	state, err = service.createDiscussion(CreateDiscussionRequest{
+		ReviewMutationGuard: guard(state), Target: ReviewTarget{Kind: "document", Path: "docs/modules/MOD-CORE.md"},
+		Selection: &SelectionHint{SelectedText: "Rendered Mermaid label"}, Intent: "question", Text: "Что означает подпись?",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	discussion := state.Session.Discussions[0]
+	if discussion.Target.Range != nil || discussion.Anchor.Range != nil || discussion.Anchor.SelectedText != "Rendered Mermaid label" {
+		t.Fatalf("discussion=%#v", discussion)
+	}
+	next, err := service.claimNext()
+	if err != nil || next.Target.Path != "docs/modules/MOD-CORE.md" || next.Target.Range != nil || next.Target.SelectedText != "Rendered Mermaid label" {
+		t.Fatalf("next=%#v err=%v", next, err)
+	}
+	state, err = service.respond(AgentResponse{SchemaVersion: 1, DeliveryID: next.DeliveryID, DiscussionID: next.Discussion.ID, Outcome: "answered", Message: "Это подпись шага."})
+	if err != nil {
+		t.Fatal(err)
+	}
+	state, err = service.createMessage(discussion.ID, CreateMessageRequest{ReviewMutationGuard: guard(state), Intent: "question", Text: "А подробнее?"})
+	if err != nil || state.Session.Discussions[0].Anchor.SelectedText != "Rendered Mermaid label" {
+		t.Fatalf("follow-up=%#v err=%v", state, err)
+	}
+	anchor, target, err := service.captureAnchor(ReviewTarget{Kind: "document", Path: "docs/modules/MOD-CORE.md"}, &SelectionHint{SelectedText: "Original.", Occurrence: 7})
+	if err != nil || target.Range != nil || anchor.Range != nil || anchor.SelectedText != "Original." {
+		t.Fatalf("invalid occurrence anchor=%#v target=%#v err=%v", anchor, target, err)
+	}
+}
+
 func TestAgentFeedbackPersistsUTF8AnchorContext(t *testing.T) {
 	root, docs := newReviewRepository(t)
 	t.Setenv("TOUDOCU_STATE_HOME", t.TempDir())

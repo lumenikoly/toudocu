@@ -226,6 +226,9 @@ func (service *reviewService) queueMessage(state *ReviewState, discussion *Discu
 		discussion.Target.Range = cloneReviewRange(placement.Range)
 	}
 	if refreshed, _, err := service.captureAnchor(discussion.Target, nil); err == nil {
+		if refreshed.Range == nil && discussion.Anchor != nil {
+			refreshed.SelectedText = discussion.Anchor.SelectedText
+		}
 		discussion.Anchor = refreshed
 	}
 	discussion.Placement = placement
@@ -415,13 +418,15 @@ func (service *reviewService) captureAnchor(target ReviewTarget, selection *Sele
 		if len([]byte(selected)) > reviewSelectionLimit {
 			return nil, ReviewTarget{}, agentFailure("AGENT_PAYLOAD_TOO_LARGE", http.StatusRequestEntityTooLarge, "selectedText exceeds 32 KiB")
 		}
+		if strings.TrimSpace(selected) == "" {
+			return nil, ReviewTarget{}, agentFailure("AGENT_INVALID_TARGET", http.StatusConflict, "selected text must not be empty")
+		}
 		matches := selectionByteMatches(content, selected)
 		occurrence := max(1, selection.Occurrence)
-		if strings.TrimSpace(selected) == "" || occurrence > len(matches) {
-			return nil, ReviewTarget{}, agentFailure("AGENT_INVALID_TARGET", http.StatusConflict, "selected text occurrence was not found in the current document")
+		if occurrence <= len(matches) {
+			match := matches[occurrence-1]
+			target.Range = &ReviewRange{Start: offsetReviewPosition(content, match[0]), End: offsetReviewPosition(content, match[1])}
 		}
-		match := matches[occurrence-1]
-		target.Range = &ReviewRange{Start: offsetReviewPosition(content, match[0]), End: offsetReviewPosition(content, match[1])}
 	}
 	selected, before, after, err := extractReviewSelection(content, target)
 	if err != nil {
@@ -429,6 +434,9 @@ func (service *reviewService) captureAnchor(target ReviewTarget, selection *Sele
 	}
 	if len([]byte(selected)) > reviewSelectionLimit {
 		return nil, ReviewTarget{}, agentFailure("AGENT_PAYLOAD_TOO_LARGE", http.StatusRequestEntityTooLarge, "selectedText exceeds 32 KiB")
+	}
+	if target.Range == nil && selection != nil {
+		selected = selection.SelectedText
 	}
 	return &DocumentAnchor{
 		Kind: "document", Path: path, DocumentID: target.DocumentID, SourceDigest: "sha256:" + digestBytes(content),
