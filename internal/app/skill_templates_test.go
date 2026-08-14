@@ -335,7 +335,7 @@ func TestToudocuRefreshContract(t *testing.T) {
 func TestToudocuAgentFeedbackContract(t *testing.T) {
 	skill := readToudocuFile(t, "SKILL.md")
 	for _, expected := range []string{
-		"$toudocu Обработай только локальную очередь обсуждений Toudocu",
+		"$toudocu feedback",
 		"Toudocu discussions, the local Agent Feedback queue",
 		"[references/agent-feedback.md](references/agent-feedback.md)",
 		"Use `agent next` as the sole source of work",

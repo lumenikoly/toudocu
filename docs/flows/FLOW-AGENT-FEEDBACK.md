@@ -31,7 +31,7 @@ sequenceDiagram
             Core->>Store: Атомарно обновить сообщение или удалить его с записью
         end
     end
-    Human->>Agent: $toudocu Обработай только локальную очередь обсуждений Toudocu
+    Human->>Agent: $toudocu feedback
     loop Пока есть ожидающие записи
         Agent->>Core: toudocu agent next --json
         Core->>Store: Закрепить старейшую запись
