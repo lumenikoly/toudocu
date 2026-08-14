@@ -33,7 +33,9 @@ $toudocu refresh diff
 
 The skill does not force a predefined architecture onto your project. The agent is expected to document what actually exists in the codebase and repository.
 
-Supported agents include **Codex**, **Claude Code**, and **GitHub Copilot**.
+Toudocu is flexible and agent-agnostic: its CLI and Markdown workflow can be used with any AI agent or agent harness.
+
+Bundled skill installation is provided for **Codex**, **Claude Code**, and **GitHub Copilot**.
 
 ### Verifiable documentation, not just a folder of Markdown files
 
