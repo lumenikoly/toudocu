@@ -43,7 +43,7 @@ local command and returns a response to the original discussion.
    not change the queue:
 
    ```text
-   $toudocu Process only the local Toudocu discussions queue. First run `toudocu agent next --json`, then for every retrieved delivery you must run `toudocu agent respond`. Do not look for or perform tasks, acceptance criteria, or other work outside the messages returned by `agent next`; if `pending=false`, stop without making changes.
+   $toudocu feedback
    ```
 
 6. After receiving the instruction and before reading documentation, the

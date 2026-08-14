@@ -25,7 +25,7 @@ $toudocu check the source documentation and explain the diagnostics
 $toudocu build the local portal in the output configured by the project
 $toudocu prepare context for TASK-AREA-001
 $toudocu update the installation guide from the current CLI contract
-$toudocu Process only the local Toudocu discussions queue. First run `toudocu agent next --json`, then for every retrieved delivery you must run `toudocu agent respond`. Do not look for or perform tasks, acceptance criteria, or other work outside the messages returned by `agent next`; if `pending=false`, stop without making changes.
+$toudocu feedback
 ```
 
 The CLI provides `check`, `build`, `serve`, `changes`, `agent`, `search`,
@@ -67,7 +67,7 @@ requests:
 | `$toudocu refresh diff` | Explicit diff refresh call |
 | `$toudocu translate <locale> ...` | Explicit translation request and target locale |
 | `$toudocu translate diff` | Explicit request to process the current diff for every configured locale |
-| “`$toudocu Process only the local Toudocu discussions queue`” | Explicit request to process only deliveries from the local discussions queue |
+| `$toudocu feedback` | Explicit request to process only deliveries from the local discussions queue |
 | `task verify --run` | Explicit request to verify or execute the task in a trusted repository |
 
 Missing files, first skill use, ordinary documentation edits, or `check` do not

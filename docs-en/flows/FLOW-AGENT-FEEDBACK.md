@@ -31,7 +31,7 @@ sequenceDiagram
             Core->>Store: Atomically update the message or delete it with its delivery
         end
     end
-    Human->>Agent: $toudocu Process only the local Toudocu discussions queue
+    Human->>Agent: $toudocu feedback
     loop While pending deliveries remain
         Agent->>Core: toudocu agent next --json
         Core->>Store: Lease the oldest delivery
