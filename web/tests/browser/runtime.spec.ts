@@ -659,7 +659,7 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await expect(thread.locator(".portal-review-quote")).toHaveText("Repeated.");
 
     await panel.locator("[data-portal-review-copy-prompt]").click();
-    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe("Обработай запросы из Toudocu.");
+    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe("$toudocu Обработай только локальную очередь обсуждений Toudocu. Сначала выполни `toudocu agent next --json`, затем для каждой полученной доставки обязательно выполни `toudocu agent respond`. Не ищи и не выполняй задачи, критерии приёмки или другую работу вне сообщений, возвращённых `agent next`; если `pending=false`, остановись без изменений.");
 
     const request = agentCLI(["next"]);
     expect(request.pending).toBe(true);
@@ -782,7 +782,7 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await expect(changesThread.locator("[data-edit-message]")).toHaveCount(0, { timeout: 5_000 });
 
     await page.locator("[data-send-feedback]").click();
-    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe("Обработай запросы из Toudocu.");
+    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe("$toudocu Обработай только локальную очередь обсуждений Toudocu. Сначала выполни `toudocu agent next --json`, затем для каждой полученной доставки обязательно выполни `toudocu agent respond`. Не ищи и не выполняй задачи, критерии приёмки или другую работу вне сообщений, возвращённых `agent next`; если `pending=false`, остановись без изменений.");
     await changesThread.locator("[data-delete-discussion]").click();
     await page.locator("[data-review-delete-confirm]").getByRole("button", { name: "Удалить" }).click();
     await expect(changesThread).toHaveCount(0);

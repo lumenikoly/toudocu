@@ -8,7 +8,7 @@
 - Screens: SC-SITE-DOCUMENT, SC-CHANGES-WORKSPACE
 - Start screen: SC-SITE-DOCUMENT
 - End screens: SC-SITE-DOCUMENT, SC-CHANGES-WORKSPACE
-- Last updated: 2026-08-13
+- Last updated: 2026-08-14
 
 A developer asks a question about documentation or a changed file, or requests
 a verified target change. A development agent retrieves the request through a
@@ -39,10 +39,18 @@ local command and returns a response to the original discussion.
    the main Portal and in Changes, so replying, editing, closing, or deleting
    does not require switching tabs. A new question is available only when a
    current canonical document exists.
-5. Copy prompt immediately copies “Process requests from Toudocu.” and does not
-   change the queue.
-6. After receiving that request, the development agent runs
-   `toudocu agent next --json`, reads the complete request, target, discussion
+5. Copy prompt immediately copies the fail-closed instruction below and does
+   not change the queue:
+
+   ```text
+   $toudocu Process only the local Toudocu discussions queue. First run `toudocu agent next --json`, then for every retrieved delivery you must run `toudocu agent respond`. Do not look for or perform tasks, acceptance criteria, or other work outside the messages returned by `agent next`; if `pending=false`, stop without making changes.
+   ```
+
+6. After receiving the instruction and before reading documentation, the
+   roadmap, `UC-*`, `TASK-*`, acceptance criteria, or status, the development
+   agent runs `toudocu agent next --json`. If the command returns
+   `pending=false`, the agent stops without reading or changing files.
+   Otherwise, it reads only the retrieved delivery, its target, discussion
    history, needed Git diff, and minimum context.
 7. For `question`, the agent responds without changing files. For
    `change_request`, it changes `target.path` and only additional files the

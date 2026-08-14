@@ -3,7 +3,7 @@
 - Identifier: FLOW-AGENT-FEEDBACK
 - Scenario: UC-AGENT-FEEDBACK-01
 - Module: MOD-AGENT-FEEDBACK
-- Last updated: 2026-08-13
+- Last updated: 2026-08-14
 
 ## Process
 
@@ -31,7 +31,7 @@ sequenceDiagram
             Core->>Store: Atomically update the message or delete it with its delivery
         end
     end
-    Human->>Agent: Process requests from Toudocu
+    Human->>Agent: $toudocu Process only the local Toudocu discussions queue
     loop While pending deliveries remain
         Agent->>Core: toudocu agent next --json
         Core->>Store: Lease the oldest delivery
@@ -49,6 +49,10 @@ sequenceDiagram
 
 ## Important conditions
 
+- Before reading documentation, the roadmap, `UC-*`, `TASK-*`, acceptance
+  criteria, or status, the agent runs `agent next`. Only the returned delivery
+  defines the work; `pending=false` ends the workflow without reading or
+  changing files.
 - `question` never grants permission to change documentation.
 - `change_request` requires validation of the user's claim.
 - Every retrieved delivery is completed through `agent respond` before the next

@@ -95,7 +95,7 @@ $toudocu refresh
 $toudocu refresh diff
 $toudocu translate en --all-stale
 $toudocu translate diff
-Process requests from Toudocu
+$toudocu Process only the local Toudocu discussions queue. First run `toudocu agent next --json`, then for every retrieved delivery you must run `toudocu agent respond`. Do not look for or perform tasks, acceptance criteria, or other work outside the messages returned by `agent next`; if `pending=false`, stop without making changes.
 ```
 
 Everyday scenarios, the distinction between shell commands and agent calls,

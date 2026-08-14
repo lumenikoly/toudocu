@@ -335,10 +335,12 @@ func TestToudocuRefreshContract(t *testing.T) {
 func TestToudocuAgentFeedbackContract(t *testing.T) {
 	skill := readToudocuFile(t, "SKILL.md")
 	for _, expected := range []string{
-		"Обработай запросы из Toudocu",
+		"$toudocu Обработай только локальную очередь обсуждений Toudocu",
+		"Toudocu discussions, the local Agent Feedback queue",
 		"[references/agent-feedback.md](references/agent-feedback.md)",
+		"Use `agent next` as the sole source of work",
 		"every delivery requires `agent respond`",
-		"only its target plus unambiguously named safe paths",
+		"`pending=false` stops the workflow without file reads or changes",
 		"Outside the Agent Feedback workflow",
 		"The Agent Feedback workflow is the exception to this section",
 	} {
@@ -349,6 +351,10 @@ func TestToudocuAgentFeedbackContract(t *testing.T) {
 	feedback := readToudocuFile(t, filepath.Join("references", "agent-feedback.md"))
 	for _, expected := range []string{
 		"toudocu agent next",
+		"The response from `agent next` is the sole source of work",
+		"does not authorize searching documentation, status, the roadmap, `UC-*`, `TASK-*`, acceptance criteria",
+		"`pending=false`, stop successfully without reading or changing files",
+		"no task, criterion, or other work outside its messages",
 		"until the queue is empty",
 		"always complete the current one with `toudocu agent respond`",
 		"An open discussion is not pending work",

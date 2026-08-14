@@ -1,7 +1,10 @@
 # Process Toudocu Agent Feedback
 
-Use this workflow only when the user explicitly asks to process requests from
-Toudocu. It authorizes evidence-backed edits only for a verified
+Use this workflow only when the user explicitly invokes the Toudocu discussions
+or local Agent Feedback queue. The response from `agent next` is the sole
+source of work. The prompt does not authorize searching documentation, status,
+the roadmap, `UC-*`, `TASK-*`, acceptance criteria, or the repository for
+unfinished work. It authorizes evidence-backed edits only for a verified
 `change_request` and only within the target boundary below, plus the structured
 response. It does not authorize unrelated cleanup, validation, Git writes,
 publishing, network services, or destructive actions.
@@ -15,7 +18,10 @@ toudocu agent next --repository-root <root> --json
 ```
 
 Inside the Toudocu source repository use `go run ./cmd/toudocu`. If
-`pending=false`, stop successfully. Process exactly the one returned delivery.
+`pending=false`, stop successfully without reading or changing files. Do not
+read documentation, the roadmap, use cases, work items, acceptance criteria,
+or status before this command. Process exactly the one returned delivery and
+no task, criterion, or other work outside its messages.
 Before requesting the next delivery or exiting, always complete the current one
 with `toudocu agent respond`. Then call `next` again until the queue is empty.
 

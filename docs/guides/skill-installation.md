@@ -93,7 +93,7 @@ $toudocu refresh
 $toudocu refresh diff
 $toudocu translate en --all-stale
 $toudocu translate diff
-Обработай запросы из Toudocu
+$toudocu Обработай только локальную очередь обсуждений Toudocu. Сначала выполни `toudocu agent next --json`, затем для каждой полученной доставки обязательно выполни `toudocu agent respond`. Не ищи и не выполняй задачи, критерии приёмки или другую работу вне сообщений, возвращённых `agent next`; если `pending=false`, остановись без изменений.
 ```
 
 Различие между командами терминала и сообщениями агенту и границы разрешений

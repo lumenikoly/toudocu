@@ -25,7 +25,7 @@ $toudocu check the source documentation and explain the diagnostics
 $toudocu build the local portal in the output configured by the project
 $toudocu prepare context for TASK-AREA-001
 $toudocu update the installation guide from the current CLI contract
-Process requests from Toudocu
+$toudocu Process only the local Toudocu discussions queue. First run `toudocu agent next --json`, then for every retrieved delivery you must run `toudocu agent respond`. Do not look for or perform tasks, acceptance criteria, or other work outside the messages returned by `agent next`; if `pending=false`, stop without making changes.
 ```
 
 The CLI provides `check`, `build`, `serve`, `changes`, `agent`, `search`,
@@ -67,7 +67,7 @@ requests:
 | `$toudocu refresh diff` | Explicit diff refresh call |
 | `$toudocu translate <locale> ...` | Explicit translation request and target locale |
 | `$toudocu translate diff` | Explicit request to process the current diff for every configured locale |
-| “Process requests from Toudocu” | Explicit request to process the local documentation queue |
+| “`$toudocu Process only the local Toudocu discussions queue`” | Explicit request to process only deliveries from the local discussions queue |
 | `task verify --run` | Explicit request to verify or execute the task in a trusted repository |
 
 Missing files, first skill use, ordinary documentation edits, or `check` do not
@@ -155,11 +155,16 @@ plainly.
 
 ## Special workflows
 
-### Process requests from Toudocu
+### Process only the local Toudocu discussions queue
 
-The agent runs `toudocu agent next --json`, retrieves only the oldest queue
-entry, and rereads the target, discussion history, needed Git diff, and minimum
-context for the request. For `question`, it responds without changing files.
+Before reading documentation, the roadmap, `UC-*`, `TASK-*`, acceptance
+criteria, or status, the agent runs `toudocu agent next --json`. That command's
+response is the sole source of work: the user's prompt does not ask the agent
+to find unfinished repository tasks. If `pending=false`, the agent stops
+without reading or changing files.
+
+For a retrieved delivery, the agent rereads the target, discussion history,
+needed Git diff, and minimum context for the request. For `question`, it responds without changing files.
 For `change_request`, it changes `target.path` and only additional paths the
 human unambiguously named when those paths remain within the target kind's safe
 boundary. An ambiguous additional path requires `needs_clarification`.

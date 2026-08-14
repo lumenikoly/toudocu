@@ -79,8 +79,9 @@ The installed skill adds workflows that do not exist in the Go CLI:
 - `$toudocu translate <locale>` synchronizes one configured translation;
 - `$toudocu translate diff` processes the current diff for every configured
   translation in sequence;
-- “Process requests from Toudocu” runs `agent next|respond` until the local
-  documentation queue is empty.
+- “`$toudocu Process only the local Toudocu discussions queue`” runs `agent
+  next` first and performs only retrieved deliveries through `agent respond`;
+  `pending=false` ends the workflow without reading or changing files.
 
 The canonical root is the sole source for ordinary analysis and work-item
 context. Translations are read only on an explicit locale request and remain
