@@ -9,8 +9,8 @@ import (
 )
 
 func TestPublicAPIFacadeDelegatesToInternalImplementation(t *testing.T) {
-	if toudocu.Version != "0.0.1" {
-		t.Fatalf("Version = %q, want 0.0.1", toudocu.Version)
+	if toudocu.Version != "0.0.2" {
+		t.Fatalf("Version = %q, want 0.0.2", toudocu.Version)
 	}
 	if actual := toudocu.ClassifyDocument("architecture/overview.md"); actual != "architecture" {
 		t.Fatalf("ClassifyDocument() = %q, want architecture", actual)

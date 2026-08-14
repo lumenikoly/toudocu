@@ -8,7 +8,7 @@
 - Screens: SC-SITE-DOCUMENT, SC-CHANGES-WORKSPACE
 - Transitions: TR-SITE-007
 - Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-12
+- Last updated: 2026-08-14
 
 ## Outcome
 
@@ -79,9 +79,10 @@ portal, and translations retain their previous behavior.
 - [x] `AC-09` The screen preserves existing Changes views and adds changed and
   related files, clear comment entry points, a responsive discussion panel, a
   watcher notice, and correct focus order.
-- [x] `AC-10` The bundled skill handles “Process requests from Toudocu,”
-  rereads current sources, does not change documentation for `question`, and
-  limits `change_request` changes to documentation.
+- [x] `AC-10` The bundled skill handles the explicit `$toudocu` call for the
+  local discussions queue, rereads only a retrieved delivery's target and
+  necessary context, does not change files for `question`, and limits
+  `change_request` to the target and unambiguously named safe paths.
 - [x] `AC-11` `ChangeSetReport`, ordinary `changes`, the public Go facade,
   static manifest, and translation behavior remain unchanged.
 - [x] `AC-12` On a document page, selection including headings and repeated
@@ -132,8 +133,8 @@ Generated browser files still come only from `web/`.
 
 A message has `question` or `change_request` intent. Saving immediately creates
 a durable `AgentDelivery`, and the message remains editable until the agent
-retrieves it. Copy prompt immediately copies “Process requests from Toudocu.”
-without changing state. The agent separately runs `toudocu agent next|respond`.
+retrieves it. Copy prompt immediately copies an explicit fail-closed instruction
+for the local discussions queue without changing state. The agent separately runs `toudocu agent next|respond`.
 On a document page, a question can start from selected content; the responsive
 panel on the same page shows responses and manages messages, thread state, and
 deletion without a trip to Changes.

@@ -228,6 +228,8 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
 
     const roadmapPath = join(fixture, "docs", "roadmap.md");
     await page.goto(`${origin}/roadmap.html`);
+    const initialRoadmapTotal = Number((await page.locator(".progress-label").textContent())?.match(/из (\d+)/)?.[1]);
+    expect(initialRoadmapTotal).toBeGreaterThan(0);
     const roadmapTrigger = page.locator("[data-roadmap-add]");
     await roadmapTrigger.focus();
     await roadmapTrigger.press("Enter");
@@ -260,7 +262,7 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await expect(roadmapDialog.locator("[data-state='success']")).toContainText("DLV-BROWSER-001");
     await page.waitForURL("**/roadmap.html#browser-stage");
     await expect(page.locator("#browser-stage").locator("xpath=..")).toContainText("DLV-BROWSER-001");
-    await expect(page.locator(".progress-label")).toContainText("из 19");
+    await expect(page.locator(".progress-label")).toContainText(`из ${initialRoadmapTotal + 2}`);
 
     await page.goto(`${origin}/_toudocu/editor/`);
     await expect.poll(() => page.evaluate(() => (window as any).__toudocuFirstFrame)).toEqual({ siteTheme: "paper", colorScheme: "dark", theme: "dark", accent: "violet" });
@@ -411,6 +413,11 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await expect(page.locator("[data-discussions-toggle]")).toBeFocused();
     await expect(page.locator("[data-discussions-scrim]")).toBeHidden();
     await page.setViewportSize({ width: 1280, height: 720 });
+    await page.locator("[data-discussions-toggle]").click();
+    await expect(page.locator("[data-discussions-panel]")).toHaveClass(/is-open/);
+    await page.locator("[data-discussions-toggle]").click();
+    await expect(page.locator("[data-discussions-panel]")).not.toHaveClass(/is-open/);
+    await expect(page.locator("[data-discussions-toggle]")).toHaveAttribute("aria-expanded", "false");
 
     const fallbackContext = await page.context().browser()!.newContext();
     const fallbackPage = await fallbackContext.newPage();
@@ -556,12 +563,16 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
   writeFileSync(join(fixture, ".toudocu", "config.yml"), "project:\n  locale: ru\n");
   writeFileSync(join(fixture, "docs", "index.md"), "# Review\n");
   writeFileSync(join(fixture, "docs", "architecture", "overview.md"), "# Architecture\n\n- Тип документа: Architecture Overview\n\n## Boundary\n\nUpdated.\n\nRepeated.\n\nRepeated.\n");
+  writeFileSync(join(fixture, "server.go"), "package main\n\nfunc oldName() {}\n");
+  writeFileSync(join(fixture, "image.bin"), Buffer.from([0, 1]));
   run("git", ["init", "-q"], fixture);
   run("git", ["config", "user.email", "review@example.invalid"], fixture);
   run("git", ["config", "user.name", "Review Browser"], fixture);
   run("git", ["add", "."], fixture);
   run("git", ["commit", "-qm", "baseline"], fixture);
   writeFileSync(join(fixture, "docs", "architecture", "overview.md"), "# Architecture\n\n- Тип документа: Architecture Overview\n\n## Boundary\n\nUpdated now.\n\nRepeated.\n\nRepeated.\n\nChanged.\n");
+  writeFileSync(join(fixture, "server.go"), "package main\n\nfunc newName() {}\n");
+  writeFileSync(join(fixture, "image.bin"), Buffer.from([0, 2]));
 
   const portServer = createServer();
   await new Promise<void>((resolveListen) => portServer.listen(0, "127.0.0.1", resolveListen));
@@ -590,6 +601,10 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await homeToggle.click();
     await expect(page.locator(".portal-review-panel")).toBeVisible();
     await expect(page.locator("[data-portal-review-new]")).toBeHidden();
+    await homeToggle.click();
+    await expect(page.locator(".portal-review-panel")).toBeHidden();
+    await expect(homeToggle).toHaveAttribute("aria-expanded", "false");
+    await homeToggle.click();
     await page.keyboard.press("Escape");
     await expect(homeToggle).toBeFocused();
     await page.goto(origin + "/architecture/overview.html");
@@ -641,9 +656,10 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await expect(panel).toBeVisible();
     const thread = panel.locator(".portal-review-thread").filter({ hasText: "Почему фрагмент повторяется?" });
     await expect(thread.locator("[data-portal-message-edit]")).toBeVisible();
+    await expect(thread.locator(".portal-review-quote")).toHaveText("Repeated.");
 
     await panel.locator("[data-portal-review-copy-prompt]").click();
-    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe("Обработай запросы из Toudocu.");
+    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe("$toudocu feedback");
 
     const request = agentCLI(["next"]);
     expect(request.pending).toBe(true);
@@ -673,6 +689,7 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await expect(page.locator("[data-open-discussion-count]")).toHaveText("1");
     await page.locator(".site-header [data-discussions-toggle]").click();
     await expect(page.locator(".portal-review-thread")).toContainText("Почему фрагмент повторяется?");
+    await expect(page.locator(".portal-review-thread").filter({ hasText: "Почему фрагмент повторяется?" }).locator(".portal-review-quote")).toHaveText("Repeated.");
     await expect(page.locator("[data-portal-review-new]")).toBeHidden();
     await page.keyboard.press("Escape");
     await expect(page.locator(".site-header [data-discussions-toggle]")).toBeFocused();
@@ -680,6 +697,9 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await page.locator('[data-file-list] [data-path="docs/architecture/overview.md"]').click();
     await expect(page.locator(".workspace-header [data-discussions-toggle]")).toHaveAttribute("aria-controls", "project-discussions-panel");
     await page.locator('[data-tab="file"]').click();
+    await page.locator("[data-discussions-toggle]").click();
+    await expect(page.locator(".review-thread").filter({ hasText: "Почему фрагмент повторяется?" }).locator(".portal-review-quote")).toHaveText("Repeated.");
+    await page.locator("[data-discussions-close]").click();
     const fullFileLine = page.locator('[data-file-view] .cm-line').filter({ hasText: "Updated now." });
     await fullFileLine.selectText();
     await expect.poll(() => page.evaluate(() => window.getSelection()?.toString())).toBe("Updated now.");
@@ -753,18 +773,44 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
     await changesComposer.locator("[data-review-message]").fill("Проверь и уточни этот документ.");
     await changesComposer.locator('button[type="submit"]').click();
     const changesThread = page.locator(".review-thread").filter({ hasText: "Проверь и уточни этот документ." });
+    await expect(changesThread.locator(".portal-review-quote")).toHaveCount(0);
     await expect(changesThread.locator("[data-edit-message]")).toBeVisible();
     const second = agentCLI(["next"]);
     expect(second.pending).toBe(true);
+    expect(second.target.kind).toBe("file");
     expect(second.discussion.messages.at(-1).intent).toBe("change_request");
     await expect(changesThread.locator("[data-edit-message]")).toHaveCount(0, { timeout: 5_000 });
 
     await page.locator("[data-send-feedback]").click();
-    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe("Обработай запросы из Toudocu.");
+    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe("$toudocu feedback");
     await changesThread.locator("[data-delete-discussion]").click();
     await page.locator("[data-review-delete-confirm]").getByRole("button", { name: "Удалить" }).click();
     await expect(changesThread).toHaveCount(0);
     expect(agentCLI(["next"]).pending).toBe(false);
+    await page.locator("[data-discussions-close]").click();
+
+    await page.locator('[data-file-list] [data-path="server.go"]').click();
+    await expect(page.locator("[data-detail] h2")).toHaveText("server.go");
+    await expect(page.locator("[data-detail]")).not.toHaveAttribute("aria-busy", "true");
+    await page.locator("[data-detail] [data-file-comment]").click();
+    await changesComposer.locator("[data-review-message]").fill("Почему переименована функция?");
+    await changesComposer.locator('button[type="submit"]').click();
+    await expect(page.locator(".review-thread").filter({ hasText: "Почему переименована функция?" })).toBeVisible();
+    const codeQuestion = agentCLI(["next"]);
+    expect(codeQuestion.target.kind).toBe("file");
+    expect(codeQuestion.target.path).toBe("server.go");
+    const codeResponse = join(mkdtempSync(join(tmpdir(), "toudocu-agent-response-")), "response.json");
+    writeFileSync(codeResponse, JSON.stringify({ schemaVersion: 1, deliveryId: codeQuestion.deliveryId, discussionId: codeQuestion.discussion.id, outcome: "answered", message: "Имя отражает новое поведение.", evidence: [{ path: "server.go" }], changedPaths: [] }));
+    agentCLI(["respond", "--input", codeResponse]);
+    await page.locator("[data-discussions-close]").click();
+
+    await page.locator('[data-file-list] [data-path="image.bin"]').click();
+    await expect(page.locator("[data-detail] [data-file-comment]")).toBeVisible();
+    await expect(page.locator("[data-tab-panel] .changes-error")).toBeVisible();
+
+    await page.goto(origin + "/changes/?target=HEAD");
+    await expect(page.locator("[data-discussions-toggle]")).toBeHidden();
+    await expect(page.locator("[data-file-comment]")).toHaveCount(0);
 
     const touchContext = await browser.newContext({ hasTouch: true, viewport: { width: 390, height: 844 } });
     const touchPage = await touchContext.newPage();

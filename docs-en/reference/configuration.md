@@ -183,15 +183,19 @@ project:
     runbooks: Runbooks
     reference: Reference
     work: Work Items
+    drafts: Drafts
     guides: Guides
 ```
 
 `project.locale` accepts a normalizable BCP-47-style tag such as `en`,
-`en-GB`, `pt-BR`, or `sr-Latn`. `project.sections` defines all 12 built-in
+`en-GB`, `pt-BR`, or `sr-Latn`. `project.sections` defines all 13 built-in
 navigation labels. The entry document's H1 must match its explicit label and is
 not used as a fallback.
 
-Without a locale or complete section list, Toudocu uses English fallback labels
+An existing complete 12-label configuration remains valid: Toudocu adds the
+localized `drafts` label (`Черновики` for `ru-*`, `Drafts` otherwise). An
+explicit `project.sections.drafts` value takes precedence. Without a locale or
+complete section list, Toudocu uses English fallback labels
 and reports a warning; strict mode treats it as a failure. HTML defaults to
 `lang="en"` when no locale is configured.
 
@@ -223,10 +227,12 @@ translations:
       runbooks: Runbooks
       reference: Reference
       work: Work Items
+      drafts: Drafts
       guides: Guides
 ```
 
-Each profile defines a separate root and all 12 labels. Its path is relative to
+Each profile defines a separate root and all 13 labels. An existing complete
+12-label profile receives the localized `drafts` label. Its path is relative to
 the repository root, stays inside that root, and cannot be absolute, contain
 `..`, be a symbolic link, overlap the canonical root, or intersect another
 translation root.

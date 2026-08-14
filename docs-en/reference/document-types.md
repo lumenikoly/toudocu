@@ -39,6 +39,7 @@ derived representations are collected in the
 | **Risks** — `risks.md` | Collects `RISK-*`, likelihood, impact, and mitigations | When risks need explicit management | A defect list or implementation plan |
 | **Ideas** — `ideas.md` | Keeps possible directions without promising implementation | For a capability or hypothesis not yet accepted | Roadmap, current status, or an approved requirement |
 | **Notes** — `notes.md` | Preserves observations and temporary context | When information is useful but not yet durable knowledge | Normative rules, contracts, or architectural decisions |
+| **Draft** — `drafts/**/*.md` | Keeps free-form text visible in the portal and search before it is accepted | When the text does not yet belong in a permanent section | Required IDs, metadata, sections, or a separate lifecycle |
 | **Changelog** — root `CHANGELOG.md` | Describes changes in published versions | If the project maintains release history | Current status or a duplicate `docs/changelog.md` |
 
 `status.md` does not accept task checklists. The global completion percentage
@@ -85,6 +86,7 @@ formats remain in [contracts](../contracts/cli.md), not duplicated here.
 |---|---|---|---|
 | **Work item** — `work/TASK-*.md` | Defines authorized scope, result, acceptance criteria, and verification | For substantial work that needs a verifiable contract and agent or CI handoff | Every small request, a general roadmap, or an existing-feature description |
 | **Defect** — `work/BUG-*.md` | Records an observable discrepancy and reproduction evidence; adds cause and regression verification when ready | When behavior truly differs from what is expected | Ideas, research work, or an unconfirmed bug hypothesis |
+| **Draft** — `drafts/**/*.md` | Holds free-form text before manual promotion to a permanent section | When portal visibility and search are useful without a workflow | Automatic promotion or a separate workflow |
 | **Custom section** — unknown top-level directory | Gives the project its own document group without new built-in semantics | When no built-in section expresses a durable domain | Disguising an existing built-in type |
 | **Ordinary Markdown** — any other safe path | Communicates useful knowledge without a typed contract | When text, links, and basic validation suffice | Declaring machine relationships that Toudocu must validate |
 

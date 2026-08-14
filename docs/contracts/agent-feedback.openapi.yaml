@@ -223,7 +223,7 @@ components:
       type: object
       additionalProperties: false
       required: [kind, path]
-      properties: {kind: {const: document}, path: {type: string}, documentId: {type: string}, range: {$ref: "#/components/schemas/Range"}}
+      properties: {kind: {enum: [document, file]}, path: {type: string}, documentId: {type: string}, range: {$ref: "#/components/schemas/Range"}}
     Message:
       type: object
       required: [id, author, text, evidence, changedPaths, createdAt]

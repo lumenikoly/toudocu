@@ -340,6 +340,7 @@ var scaffoldRegistry = []editorTemplate{
 	{Key: "decision", Label: "Решение", Languages: []string{"ru", "en"}, Fields: entityTemplateFields(), spec: scaffoldSpec{prefix: "ADR-", directory: "decisions"}},
 	{Key: "standard", Label: "Стандарт", Languages: []string{"ru", "en"}, Fields: entityTemplateFields(), spec: scaffoldSpec{prefix: "STD-", directory: "quality"}},
 	{Key: "runbook", Label: "Runbook", Languages: []string{"ru", "en"}, Fields: entityTemplateFields(), spec: scaffoldSpec{prefix: "RB-", directory: "runbooks"}},
+	{Key: "draft", Label: "Черновик", Languages: []string{"ru", "en"}, Fields: []editorTemplateField{{Name: "title", Label: "Название", Type: "text", Required: true}}, spec: scaffoldSpec{directory: "drafts"}},
 }
 
 func entityTemplateFields() []editorTemplateField {
@@ -487,6 +488,31 @@ func createFromEditorTemplate(options Options, key, language string, fields map[
 			return "", err
 		}
 		return report.Path, nil
+	}
+	if key == "draft" {
+		if err := rejectTranslationRootMutation(options); err != nil {
+			return "", err
+		}
+		title := strings.TrimSpace(fields["title"])
+		if err := validateScaffoldTitle(title); err != nil {
+			return "", err
+		}
+		for suffix := 1; suffix <= 100; suffix++ {
+			name := slugify(title)
+			if suffix > 1 {
+				name += fmt.Sprintf("-%d", suffix)
+			}
+			relative := filepath.ToSlash(filepath.Join(template.spec.directory, name+".md"))
+			err := atomicCreateFile(filepath.Join(options.InputDirectory, filepath.FromSlash(relative)), "# "+title+"\n")
+			if err != nil && strings.Contains(err.Error(), "already exists") {
+				continue
+			}
+			if err != nil {
+				return "", err
+			}
+			return relative, nil
+		}
+		return "", fmt.Errorf("could not allocate a free draft filename after concurrent changes")
 	}
 	options.EntityKind = key
 	options.EntityID = strings.TrimSpace(fields["id"])

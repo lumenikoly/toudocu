@@ -44,7 +44,12 @@ func (s *documentationServer) serveReviewAPI(w http.ResponseWriter, request *htt
 		s.serveReviewRepositoryAPI(w, request, path)
 		return
 	}
-	service, err := newReviewService(s.options)
+	options := reviewOptionsFromRequest(s.options, request)
+	if options.ChangeTarget != "" && options.ChangeTarget != "working-tree" {
+		writeReviewError(w, agentFailure("AGENT_INVALID_TARGET", http.StatusForbidden, "discussions are read-only outside target=working-tree"))
+		return
+	}
+	service, err := newReviewService(options)
 	if err != nil {
 		writeReviewError(w, err)
 		return

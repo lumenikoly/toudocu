@@ -1,125 +1,25 @@
-# Журнал изменений / Changelog
+# Changelog
+
+## 0.0.2
+
+- Changes discussions now support every regular file in the working diff,
+  including whole-file targets for binary, large, and deleted files. Index and
+  revision comparisons remain read-only.
+
+- Added the built-in `drafts/` section for free-form Markdown drafts.
+- Drafts appear in navigation, search, the static portal, and `ProjectReport`
+  with `sectionType: "drafts"` and `type: "draft"`.
+- Editor creates a draft from its required title, derives a safe file name,
+  adds sequential suffixes on collisions, and never overwrites an existing
+  file.
+- Existing complete 12-section configurations receive a localized `drafts`
+  label automatically; an explicit setting still takes precedence.
+- Updated Russian and English documentation, the OpenAPI contract, and the
+  embedded portal assets.
 
 ## 0.0.1
 
-### Русский
-
-#### Документация и портал
-
-- Добавлены проверка Markdown, поиск, построение статического портала и
-  локальный `serve` с редактором и автоматической пересборкой.
-- Документная модель поддерживает архитектурные вопросы, модули, правила,
-  пользовательские сценарии, процессы Mermaid, экраны, переходы, стандарты,
-  эксплуатационные инструкции и рабочие задачи.
-- Портал содержит отдельные каталоги известных сущностей, поиск, связи, карту
-  экранов, темы и локализацию.
-- Завершённость `UC-*` требует статуса группы `done`, хотя бы одного критерия
-  приёмки и отметки всех критериев. Дорожная карта, статистика и диагностика
-  используют этот единый расчёт, а `ProjectReport` сохраняет
-  `completionSource: "use-case-status"` в схеме версии 1.
-- `build` создаёт портал только для чтения, которому после сборки не нужен
-  запущенный Toudocu. Публикация поддерживается по HTTP(S), в том числе во
-  вложенном URL-пути.
-- Прямое открытие `index.html` через `file://` больше не входит в
-  поддерживаемый контракт. Для локального просмотра предназначен
-  `toudocu serve`.
-- Браузерная часть вынесена в `web/`. Готовые TypeScript/CSS-ресурсы
-  фиксируются в репозитории и встраиваются в Go-бинарник; Node.js не нужен
-  пользователю.
-- Статический и локальный режимы разделены: Editor, Changes, CodeMirror,
-  Swagger UI и локальные API присутствуют только в `serve`.
-- Editor и Changes API описаны двумя OpenAPI 3.1.0-контрактами. Канонический
-  `serve` показывает их через встроенный Swagger UI 5.32.12 без CDN.
-- Toudocu использует Goldmark 1.8.5 и единый CommonMark/GFM-разбор. Включены
-  таблицы, task-списки, зачёркивание и буквальные автоматические ссылки.
-- Сырой HTML и front matter в начале файла между одинаковыми строками
-  `---` или `+++` считаются ошибками. Безопасный предпросмотр всё
-  равно показывает такой исходный текст в экранированном виде.
-- Иконка вкладки лендинга совпадает с иконкой портала документации.
-
-#### Changes и локальные обсуждения
-
-- `changes`, `changes file` и `task changes` показывают
-  Git-изменения документации в текстовом, JSON- и Markdown-формате, не изменяя
-  рабочее дерево, индекс, ссылки и историю.
-- Рабочая область `/changes/` охватывает весь локальный репозиторий,
-  автоматически открывает первый подходящий файл и показывает точный Git diff.
-- Добавлены просмотр полного UTF-8-файла и фильтр: все файлы, документация или
-  остальные файлы. Основная вкладка называется «Diff».
-- Git-диапазон и диагностические сообщения перенесены в раскрываемые панели.
-  На узких экранах список файлов и обсуждения открываются отдельными панелями
-  без горизонтальной прокрутки всей страницы.
-- Панель «Изменения» открывается справа поверх рабочей области с теми же
-  размерами, затемнением, управлением фокусом и мобильным режимом, что и панель
-  обсуждений Портала.
-- В Портале и Changes можно выделить содержимое Markdown, включая заголовок,
-  скопировать текст или контекст и создать вопрос либо запрос на изменение.
-- Единый diff сохраняет выделение и предлагает скопировать текст или контекст
-  либо привязать вопрос. Новые строки получают точный диапазон, а старые строки
-  изменённого документа — видимую цитату без нового вида привязки. Знак «+»
-  становится видимым при наведении или фокусе на строке, к которой можно
-  привязать вопрос, и остаётся видимым на сенсорных устройствах.
-- Обсуждения и привязки хранятся локально вне репозитория. Toudocu переносит
-  привязку после однозначного изменения документа либо помечает её как
-  устаревшую или удалённую.
-- Сохранение вопроса сразу создаёт ожидающую запись очереди. Пока агент не
-  получил сообщение, его можно изменить или удалить; отмена закрывает пустую
-  форму без ошибки обязательного поля.
-- Привязка обсуждения распознаёт браузерные переносы пробелов и выбранное
-  вхождение повторяющегося текста.
-- Общая кнопка обсуждений находится в заголовке всех страниц основного
-  `serve`. Панель показывает все ветки проекта, но разрешает создать новую
-  только для текущего канонического документа.
-- «Скопировать промт» копирует явную просьбу обработать очередь и не имитирует
-  запуск агента.
-- Установленный навык получает старейшую запись через `toudocu agent next --json` и
-  возвращает структурированный ответ через `toudocu agent respond`. Вопрос не
-  разрешает менять документацию; запрос на изменение сначала требует проверки
-  фактов.
-- Для Go, Java, JavaScript и TypeScript в полном файле доступна подсветка
-  синтаксиса. Остальные корректные UTF-8-файлы показываются как обычный текст.
-
-#### Команды, задачи и встроенный навык
-
-- CLI поддерживает `check`, `build`, `serve`, `search`,
-  `changes`, `scaffold` и полный жизненный цикл рабочих задач.
-- `task verify` без `--run` не выполняет команды. Запуск происходит
-  только после явного `task verify --run`.
-- Публичные JSON-отчёты используют `schemaVersion: 1` и стабильные коды
-  завершения.
-- Встроенный навык можно установить, проверить, обновить и удалить для Codex,
-  Claude Code и Copilot. Управляемая копия не перезаписывается поверх локальных
-  изменений.
-- `$toudocu init`, `$toudocu refresh` и `$toudocu translate` реализованы как
-  процессы встроенного навыка, а очередь документационных запросов имеет независимый
-  интерфейс командной строки `toudocu agent next|respond`, не зависящий от
-  поставщика агента.
-- `$toudocu refresh diff` начинает со staged, unstaged и untracked
-  изменений относительно `HEAD` и добавляет зависимые документы.
-- `$toudocu translate diff` последовательно обновляет все настроенные
-  языковые зеркала. Переводы остаются изолированными каталогами только для
-  чтения.
-- Параметры `--include-assets` и `--translation-input` позволяют
-  явно включить бинарные ресурсы и полный вход для перевода.
-- `make update-local` собирает текущий исходный код и обновляет локальный
-  бинарник в `$(INSTALL_DIR)`.
-
-#### Поставка
-
-- Релизный комплект содержит сборки для Linux, macOS и Windows на AMD64 и
-  ARM64, включая Windows ARM64.
-- Процесс выпуска различает стабильный канал и кандидаты
-  `X.Y.Z-rc.N`. Кандидат публикуется как предварительный релиз только
-  после явного запуска процесса выпуска.
-- POSIX- и PowerShell-установщики выбирают нужный бинарник, сверяют SHA-256 и
-  версию и только затем заменяют файл в каталоге пользователя.
-- Путь `releases/latest` устанавливает последний стабильный выпуск.
-- Корневой пакет Go предоставляет типизированный фасад для локального
-  встраивания из исходного дерева. Основным публичным интерфейсом остаётся CLI.
-
-### English
-
-#### Documentation and portal
+### Documentation and portal
 
 - Added Markdown validation, search, static portal generation, and local
   `serve` with an editor and automatic rebuilds.
@@ -149,7 +49,7 @@
   are errors. The safe preview still renders that source as escaped text.
 - The landing page and documentation portal use the same favicon.
 
-#### Changes and local discussions
+### Changes and local discussions
 
 - `changes`, `changes file`, and `task changes` report documentation changes
   in text, JSON, and Markdown without modifying the working tree, index, refs,
@@ -191,7 +91,7 @@
 - Complete-file views highlight Go, Java, JavaScript, and TypeScript. Other
   valid UTF-8 files remain available as plain text.
 
-#### Commands, work items, and embedded skill
+### Commands, work items, and embedded skill
 
 - The CLI provides `check`, `build`, `serve`, `search`, `changes`, `scaffold`,
   and the complete work-item lifecycle.
@@ -212,7 +112,7 @@
 - `make update-local` builds the current source and updates the local binary in
   `$(INSTALL_DIR)`.
 
-#### Distribution
+### Distribution
 
 - The release bundle contains AMD64 and ARM64 binaries for Linux, macOS, and
   Windows, including Windows ARM64.

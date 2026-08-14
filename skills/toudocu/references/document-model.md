@@ -39,6 +39,7 @@ is an error. All other document types are optional.
 | `risks.md` | Risk tracking | Extracts `RISK-*` sections and mitigation progress |
 | `ideas.md` | Feature ideas and future plans | Free-form; no required metadata or sections |
 | `notes.md` | Notes, observations, and temporary context | Free-form; no required metadata or sections |
+| `drafts/**/*.md` | Provisional text not yet accepted into a permanent section | Type `draft`; no required ID, metadata, sections, relationships, status, or lifecycle |
 | `modules/*.md` | Stable component boundaries and rules | Requires a unique `MOD-*` and validates relationships |
 | `use-cases/*.md` | Observable actor behavior | Requires a unique `UC-*` and an existing module |
 | `flows/*.md` | A reusable visual process | Requires a unique `FLOW-*`, Mermaid, and a use-case or architecture relationship |
@@ -57,6 +58,10 @@ When an unknown top-level directory contains Markdown, its `index.md` is a
 custom-section manifest with `Type: Custom` and a description. Its
 H1 supplies the navigation title. Do not infer a typed category from filenames,
 document count, or prose.
+
+The built-in `drafts/` directory is not a custom section. Its `index.md` is
+optional; when present, its H1 matches the configured section title. A draft
+document is distinct from a work item whose workflow status is Draft.
 
 Use one H1 and a concise introduction when useful. These improve navigation but
 are not reasons to invent project metadata. Reader-facing content may use any

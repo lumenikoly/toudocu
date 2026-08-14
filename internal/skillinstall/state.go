@@ -62,12 +62,12 @@ func Inspect(target Target, bundle skills.Bundle) Snapshot {
 	if len(files) != len(declared) {
 		return Snapshot{State: Modified, Fingerprint: fingerprint, Manifest: &manifest, Detail: "managed file set changed"}
 	}
-	bundleModes := map[string]os.FileMode{}
-	for _, file := range bundle.Files {
-		bundleModes[file.Path] = file.Mode.Perm()
-	}
 	for name, file := range files {
-		if declared[name] != checksum(file.data) || bundleModes[name] == 0 || !modeMatches(file.mode, bundleModes[name]) {
+		expectedMode := os.FileMode(0o644)
+		if strings.HasPrefix(name, "scripts/") {
+			expectedMode = 0o755
+		}
+		if declared[name] != checksum(file.data) || !modeMatches(file.mode, expectedMode) {
 			return Snapshot{State: Modified, Fingerprint: fingerprint, Manifest: &manifest, Detail: "managed file content changed"}
 		}
 	}

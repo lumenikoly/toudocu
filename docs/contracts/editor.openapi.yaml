@@ -172,7 +172,7 @@ paths:
   /_toudocu/api/editor/create:
     post:
       operationId: createEditorSource
-      summary: Create a typed source from the shared scaffold registry
+      summary: Create a source from the shared scaffold registry
       parameters:
         - {$ref: "#/components/parameters/CreateAction"}
         - {$ref: "#/components/parameters/Origin"}
@@ -502,7 +502,7 @@ components:
       additionalProperties: false
       required: [template, language, fields]
       properties:
-        template: {type: string, enum: [task-init, module, use-case, flow, screen, decision, standard, runbook]}
+        template: {type: string, enum: [task-init, module, use-case, flow, screen, decision, standard, runbook, draft]}
         language: {type: string, enum: [ru, en]}
         fields: {type: object, additionalProperties: {type: string}}
     PreviewResponse:

@@ -17,7 +17,7 @@ another implicit skill trigger. The Toudocu Go CLI has no `init` command.
    when none establishes a locale. Normalize an `en-*` locale to the `en`
    bundled templates and a `ru-*` locale to `ru`. For another valid locale, use
    the English templates only as structural scaffolding and continue only when
-   the repository supplies a complete 12-title `project.sections` map. Author
+   the repository supplies a complete 13-title `project.sections` map. Author
    all headings and prose in the project locale. Managed agent instructions
    remain English and do not determine the documentation language.
 4. Inspect the repository-root `AGENTS.md` for these exact markers:
@@ -71,7 +71,7 @@ another implicit skill trigger. The Toudocu Go CLI has no `init` command.
    statuses, or relationships without evidence.
 4. Create or complete `<repository-root>/.toudocu/config.yml` without removing
    existing `site`, `changes`, or `translations` settings. Set the resolved
-   `project.locale` and write the already resolved 12 `project.sections`
+   `project.locale` and write the already resolved 13 `project.sections`
    titles. Do not rewrite existing H1 headings.
 5. Use `assets/project-guidance/en.md` for every project locale. The managed
    block is an agent instruction surface and therefore remains English. It must

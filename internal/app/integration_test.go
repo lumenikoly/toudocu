@@ -806,7 +806,7 @@ func TestGenerateSite(t *testing.T) {
 	if result.Pages < 10 {
 		t.Fatalf("pages=%d", result.Pages)
 	}
-	for _, name := range []string{"index.html", "health.html", "report.json", "assets/manifest.json", "assets/portal.css", "assets/portal.js", "data/search-index.json", "data/navigation.json", "data/relations.json", "data/screens.json", "data/use-cases/index.json", "modules/auth.html", "modules/index.html", "processes/index.html", "use-cases/UC-AUTH-01.html", "use-cases/index.html"} {
+	for _, name := range []string{"index.html", "404.html", "health.html", "report.json", "assets/manifest.json", "assets/portal.css", "assets/portal.js", "data/search-index.json", "data/navigation.json", "data/relations.json", "data/screens.json", "data/use-cases/index.json", "modules/auth.html", "modules/index.html", "processes/index.html", "use-cases/UC-AUTH-01.html", "use-cases/index.html"} {
 		if _, err := os.Stat(filepath.Join(output, filepath.FromSlash(name))); err != nil {
 			t.Fatalf("missing %s: %v", name, err)
 		}
@@ -865,6 +865,58 @@ func TestGenerateSite(t *testing.T) {
 	if !foundDirectoryTarget {
 		t.Fatal("generated directory link is missing a typed report target")
 	}
+}
+
+func TestDraftsSectionBuildsCatalogAndReport(t *testing.T) {
+	root, docs, output := createFixture(t)
+	writeTestFile(t, docs, "drafts/index.md", "# Наброски\n")
+	writeTestFile(t, docs, "drafts/entry.md", "# Первый черновик\n\nТекст для поиска.\n")
+	writeSiteConfig(t, root, "project:\n  locale: ru\n  sections:\n    architecture: Архитектура\n    modules: Модули\n    use-cases: Пользовательские сценарии\n    flows: Процессы\n    screens: Экраны\n    decisions: Архитектурные решения\n    contracts: Контракты\n    quality: Стандарты качества\n    runbooks: Runbooks\n    reference: Справочник\n    work: Рабочие задачи\n    drafts: Наброски\n    guides: Руководства\n")
+	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	draft := model.DocByPath["drafts/entry.md"]
+	if draft == nil || draft.Type != "draft" || draft.SectionType != SectionDrafts || localizedTypeLabel(model, draft.Type) != "Черновик" {
+		t.Fatalf("draft model: %#v", draft)
+	}
+	if modelDirectoryLabel(model, "drafts") != "Наброски" || !strings.Contains(renderNavigation(model, "drafts/index.html"), "Наброски") {
+		t.Fatalf("draft navigation: %s", renderNavigation(model, "drafts/index.html"))
+	}
+	if _, err := GenerateSite(model, Options{OutputDirectory: output, Clean: true}); err != nil {
+		t.Fatal(err)
+	}
+	catalog, err := os.ReadFile(filepath.Join(output, "drafts", "index.html"))
+	if err != nil || !strings.Contains(string(catalog), "Первый черновик") || !strings.Contains(string(catalog), "Черновик") {
+		t.Fatalf("draft catalog: %v %s", err, catalog)
+	}
+	page, err := os.ReadFile(filepath.Join(output, "drafts", "entry.html"))
+	if err != nil || !strings.Contains(string(page), "Черновик") || !strings.Contains(string(page), "Текст для поиска") {
+		t.Fatalf("draft page: %v %s", err, page)
+	}
+	foundSearch := false
+	for _, item := range model.SearchIndex {
+		if item.Path == "drafts/entry.md" && item.Type == "draft" && item.TypeLabel == "Черновик" {
+			foundSearch = true
+		}
+	}
+	if !foundSearch {
+		t.Fatalf("draft missing from search index: %#v", model.SearchIndex)
+	}
+	reportBytes, err := os.ReadFile(filepath.Join(output, "report.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report ProjectReport
+	if err := json.Unmarshal(reportBytes, &report); err != nil {
+		t.Fatal(err)
+	}
+	for _, document := range report.Documents {
+		if document.SourcePath == "drafts/entry.md" && document.Type == "draft" && document.SectionType == SectionDrafts {
+			return
+		}
+	}
+	t.Fatalf("draft missing from report: %#v", report.Documents)
 }
 
 func TestDocumentContextCopyMarkupAndAssets(t *testing.T) {

@@ -237,7 +237,7 @@ test("Pages artifact serves searchable Russian and English documentation under t
     await page.goto(`${hosted.origin}project-docs/architecture/overview.html`);
     await expect(page.locator("main article.doc-content").first()).toContainText("Граница системы");
     await page.goto(`${hosted.origin}project-docs/project-changelog.html`);
-    await expect(page.locator("main article.doc-content").first()).toContainText("Документация и портал");
+    await expect(page.locator("main article.doc-content").first()).toContainText("Documentation and portal");
 
     await page.goto(`${hosted.origin}en/`);
     await page.locator('a[href="../project-docs/en/"]').first().click();

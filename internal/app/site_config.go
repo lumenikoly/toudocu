@@ -272,7 +272,7 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 			}
 			config.Project.Locale = locale
 		case "translations":
-		case "project.sections.architecture", "project.sections.modules", "project.sections.use-cases", "project.sections.flows", "project.sections.screens", "project.sections.decisions", "project.sections.contracts", "project.sections.quality", "project.sections.runbooks", "project.sections.reference", "project.sections.work", "project.sections.guides":
+		case "project.sections.architecture", "project.sections.modules", "project.sections.use-cases", "project.sections.flows", "project.sections.screens", "project.sections.decisions", "project.sections.contracts", "project.sections.quality", "project.sections.runbooks", "project.sections.reference", "project.sections.work", "project.sections.drafts", "project.sections.guides":
 			if strings.TrimSpace(scalar.value) == "" {
 				return config, fmt.Errorf("config.yml:%d: %s must not be empty", scalar.line, key)
 			}
@@ -360,6 +360,11 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 			config.Translations[locale] = profile
 		}
 	}
+	completeLegacyDrafts(config.Project.Locale, config.Project.Sections)
+	for locale, profile := range config.Translations {
+		completeLegacyDrafts(locale, profile.Sections)
+		config.Translations[locale] = profile
+	}
 	config.Changes.Exclude = changeExcludes
 	if _, ok := values["site"]; !ok {
 		if _, changesOnly := values["changes"]; changesOnly || values["project"].line > 0 || values["translations"].line > 0 {
@@ -368,6 +373,21 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 		return config, fmt.Errorf("config.yml: root site map is missing")
 	}
 	return config, validateSiteConfig(config)
+}
+
+func completeLegacyDrafts(locale string, sections map[SectionType]string) {
+	if sections == nil {
+		return
+	}
+	if _, exists := sections[SectionDrafts]; exists {
+		return
+	}
+	for _, spec := range BuiltinSections {
+		if spec.Type != SectionDrafts && strings.TrimSpace(sections[spec.Type]) == "" {
+			return
+		}
+	}
+	sections[SectionDrafts] = defaultSectionTitle(locale, SectionDrafts)
 }
 
 func enumValue(field, value string, allowed ...string) error {

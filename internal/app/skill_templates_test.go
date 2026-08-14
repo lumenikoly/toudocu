@@ -335,9 +335,14 @@ func TestToudocuRefreshContract(t *testing.T) {
 func TestToudocuAgentFeedbackContract(t *testing.T) {
 	skill := readToudocuFile(t, "SKILL.md")
 	for _, expected := range []string{
-		"Обработай запросы из Toudocu",
+		"$toudocu feedback",
+		"Toudocu discussions, the local Agent Feedback queue",
 		"[references/agent-feedback.md](references/agent-feedback.md)",
-		"edit documentation only for verified `change_request`",
+		"Use `agent next` as the sole source of work",
+		"every delivery requires `agent respond`",
+		"`pending=false` stops the workflow without file reads or changes",
+		"Outside the Agent Feedback workflow",
+		"The Agent Feedback workflow is the exception to this section",
 	} {
 		if !containsNormalized(skill, expected) {
 			t.Errorf("SKILL.md does not define agent feedback contract %q", expected)
@@ -346,10 +351,23 @@ func TestToudocuAgentFeedbackContract(t *testing.T) {
 	feedback := readToudocuFile(t, filepath.Join("references", "agent-feedback.md"))
 	for _, expected := range []string{
 		"toudocu agent next",
+		"The response from `agent next` is the sole source of work",
+		"does not authorize searching documentation, status, the roadmap, `UC-*`, `TASK-*`, acceptance criteria",
+		"`pending=false`, stop successfully without reading or changing files",
+		"no task, criterion, or other work outside its messages",
 		"until the queue is empty",
+		"always complete the current one with `toudocu agent respond`",
+		"An open discussion is not pending work",
 		"`question`: answer from current evidence and do not change documentation",
-		"`change_request`: change only canonical documentation",
+		"change `target.path`",
+		"unambiguously named in that message",
+		"Do not infer a related path",
+		"A `document` target permits canonical documentation paths",
+		"a `file` target permits safe repository paths",
 		"`needs_clarification`",
+		"Do not run `check`, tests, lint, build or any other validation command",
+		"For `changed`, the message must explicitly say that the requested edits were made",
+		"list every path from `changedPaths`",
 		"toudocu agent respond",
 		"AGENT_RESPONSE_CONFLICT",
 		"Never resolve the discussion for the user",

@@ -2,7 +2,7 @@
 
 - Identifier: MOD-SITE
 - Status: Done
-- Last updated: 2026-08-11
+- Last updated: 2026-08-13
 
 The module produces backend-independent HTML pages, navigation, static JSON
 resources, and a typed `report.json` from the completed project model.
@@ -85,7 +85,10 @@ map and the use-case description.
 
 The main navigation follows the stable registry order of built-in sections; it
 does not depend on Go map iteration order. Built-in section names come from
-`project.sections`, and `flows` is emitted under the `processes` route.
+`project.sections`. The `flows` section is emitted under the `processes` route,
+while `drafts` appears after work items and before guides. The generated
+`drafts/index.html` catalog lists free-form Markdown drafts and does not require
+a source `index.md`.
 
 ### BR-SITE-006: Themes do not expand the trusted surface
 

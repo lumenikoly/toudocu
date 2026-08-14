@@ -3,7 +3,7 @@
 - Identifier: FLOW-AGENT-FEEDBACK
 - Scenario: UC-AGENT-FEEDBACK-01
 - Module: MOD-AGENT-FEEDBACK
-- Last updated: 2026-08-12
+- Last updated: 2026-08-14
 
 ## Process
 
@@ -31,17 +31,17 @@ sequenceDiagram
             Core->>Store: Atomically update the message or delete it with its delivery
         end
     end
-    Human->>Agent: Process requests from Toudocu
+    Human->>Agent: $toudocu feedback
     loop While pending deliveries remain
         Agent->>Core: toudocu agent next --json
         Core->>Store: Lease the oldest delivery
         Core-->>Agent: Discussion, intent, anchor, and HEAD
-        Agent->>Files: Reread the document and gather evidence
+        Agent->>Files: Read the target, Git diff, and needed context
         opt The change request is confirmed
-            Agent->>Files: Update canonical Markdown and verify it
+            Agent->>Files: Update the target and explicitly named safe paths
         end
         Agent->>Core: toudocu agent respond
-        Core->>Store: Append the response and complete the delivery
+        Core->>Store: Append the response and mark the delivery responded
         Core-->>UI: Response in the original discussion
     end
     Human->>UI: Close the thread or send a follow-up
@@ -49,8 +49,19 @@ sequenceDiagram
 
 ## Important conditions
 
+- Before reading documentation, the roadmap, `UC-*`, `TASK-*`, acceptance
+  criteria, or status, the agent runs `agent next`. Only the returned delivery
+  defines the work; `pending=false` ends the workflow without reading or
+  changing files.
 - `question` never grants permission to change documentation.
 - `change_request` requires validation of the user's claim.
+- Every retrieved delivery is completed through `agent respond` before the next
+  `agent next` call or the agent exits.
+- An open discussion is not an unfinished delivery. After a response, only a
+  new human message creates new work.
+- The agent does not run validation commands or change related files on its own
+  initiative. An additional path must be unambiguously named by the human and
+  permitted by the target kind.
 - A message can be edited only while its delivery is `pending`; retrieval through
   `agent next` and message updates are atomic with respect to each other.
 - After a retry, the agent rereads the files because the previous attempt may

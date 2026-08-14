@@ -1,11 +1,11 @@
 # Current status
 
 - Status: In progress
-- Stage: Maintaining version 0.0.1
-- Version: 0.0.1
-- Last updated: 2026-08-11
+- Stage: Maintaining version 0.0.2
+- Version: 0.0.2
+- Last updated: 2026-08-13
 
-The current stable version is `0.0.1`. The GitHub Release installers for POSIX
+The current stable version is `0.0.2`. The GitHub Release installers for POSIX
 and PowerShell select the appropriate binary and verify its checksum before
 replacing the program.
 
@@ -44,5 +44,5 @@ its SHA-256 before replacing the file in the user's program directory.
 
 ## Next focus
 
-Maintain version `0.0.1`: fix reported defects, keep the documentation current,
+Maintain version `0.0.2`: fix reported defects, keep the documentation current,
 and verify the installers on supported platforms.

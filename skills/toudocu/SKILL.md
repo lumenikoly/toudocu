@@ -1,6 +1,6 @@
 ---
 name: toudocu
-description: Use this skill when a request creates, changes, reviews, translates, validates, or publishes Toudocu-managed project documentation; when code or product changes may make that documentation inaccurate; or when working with MOD-*, UC-*, FLOW-*, SC-*, TR-*, ADR-*, STD-*, RB-*, TASK-* entities, Toudocu CLI, portal, or task workflows, or explicit $toudocu commands. Produce evidence-backed, reader-first text in the selected document language. Do not use it for code-only work with no documentation impact. Never infer initialization or run `task verify --run` without explicit authorization.
+description: Use this skill when a request creates, changes, reviews, translates, validates, or publishes Toudocu-managed project documentation; when code or product changes may make that documentation inaccurate; or when working with Toudocu discussions, the local Agent Feedback queue, MOD-*, UC-*, FLOW-*, SC-*, TR-*, ADR-*, STD-*, RB-*, TASK-* entities, Toudocu CLI, portal, or task workflows, or explicit $toudocu commands. Produce evidence-backed, reader-first text in the selected document language. Do not use it for code-only work with no documentation impact. Never infer initialization or run `task verify --run` without explicit authorization.
 ---
 
 # Toudocu
@@ -20,7 +20,7 @@ or review references only when the request meets their conditions below.
 | `$toudocu refresh diff` | [references/refresh.md](references/refresh.md) | May | Only when the user explicitly invokes `$toudocu refresh diff` |
 | `$toudocu translate <locale>` | [references/translate.md](references/translate.md) | Yes | Only for an explicit translation request and selected target locale |
 | `$toudocu translate diff` | [references/translate.md](references/translate.md) | Yes | Only when explicitly invoked; selects every configured target locale |
-| `Обработай запросы из Toudocu` or equivalent | [references/agent-feedback.md](references/agent-feedback.md) | May | Explicitly process the local documentation queue; edit documentation only for verified `change_request` |
+| `$toudocu feedback` | [references/agent-feedback.md](references/agent-feedback.md) | May | Use `agent next` as the sole source of work; every delivery requires `agent respond`, and `pending=false` stops the workflow without file reads or changes |
 | CLI, portal, task, or ordinary documentation work | [references/workflows.md](references/workflows.md) | Depends on request | Follow the requested mutation; `task verify --run` requires an explicit verification request |
 
 Init, refresh, refresh diff, and translate are agent
@@ -57,7 +57,8 @@ Load these references conditionally:
    only during translation.
 3. Resolve the CLI as `toudocu` from `PATH`, or `go run ./cmd/toudocu` inside
    the Toudocu source repository. Do not install it without permission.
-4. Run the repository's established read-only check before writing. Otherwise
+4. Outside the Agent Feedback workflow, run the repository's established
+   read-only check before writing. If the repository has no established check,
    substitute the resolved paths in:
 
    ```bash
@@ -148,6 +149,10 @@ for an explicit verification request in a trusted repository. Archive or
 restore only through the corresponding task command.
 
 ## Validate and deliver
+
+The Agent Feedback workflow is the exception to this section: it forbids
+validation commands and defines its own required delivery through
+`toudocu agent respond`.
 
 1. Complete the reader-first writing gate for every changed reader-facing
    source.

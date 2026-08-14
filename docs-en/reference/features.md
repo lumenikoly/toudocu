@@ -43,8 +43,9 @@ base. The browser provides the exact patch, full file, rendered Markdown before
 and after, semantics, relationships, and applicable OpenAPI, Mermaid, asset,
 and screen-map views.
 
-The main `serve` also shows local documentation discussions on document pages
-and in Changes. A message can target a whole Markdown document or a range.
+The main `serve` also shows local discussions on document pages and in Changes.
+The Portal targets canonical Markdown, while Changes can target any regular
+file in the working diff or an available text range within that file.
 Saving immediately creates a queue entry; the message can be edited or deleted
 until the agent retrieves it. Copy prompt only copies the request for the
 agent. A response does not close the discussion automatically.
@@ -78,8 +79,9 @@ The installed skill adds workflows that do not exist in the Go CLI:
 - `$toudocu translate <locale>` synchronizes one configured translation;
 - `$toudocu translate diff` processes the current diff for every configured
   translation in sequence;
-- “Process requests from Toudocu” runs `agent next|respond` until the local
-  documentation queue is empty.
+- `$toudocu feedback` runs `agent next` first and performs only retrieved
+  deliveries through `agent respond`;
+  `pending=false` ends the workflow without reading or changing files.
 
 The canonical root is the sole source for ordinary analysis and work-item
 context. Translations are read only on an explicit locale request and remain

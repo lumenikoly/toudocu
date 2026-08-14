@@ -21,7 +21,9 @@ selected profiles in normalized locale order. If none are configured, make no
 changes and report `TRANSLATION_PROFILES_EMPTY`.
 
 Before writing any target, validate every selected profile and root. A profile
-has a repository-relative, independent root and all 12 built-in section titles.
+has a repository-relative, independent root and all 13 built-in section titles.
+Existing complete 12-title profiles remain valid because Toudocu supplies the
+localized `drafts` title; new and rewritten profiles include it explicitly.
 Roots may not be absolute, traverse, use symlinks, overlap another translation
 root, or be the canonical docs root. An invalid profile or collision aborts the
 whole preflight without changing any target. Use the bundled map in

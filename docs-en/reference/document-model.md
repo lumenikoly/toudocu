@@ -38,6 +38,7 @@ staleness. Never invent information merely to remove a warning.
 | `risks.md` | Registry of `RISK-*` sections and mitigation progress |
 | `ideas.md` | Free-form ideas with no required metadata contract |
 | `notes.md` | Free-form notes with no required metadata contract |
+| `drafts/**/*.md` | Free-form text not yet accepted into a permanent section; classified as `draft` with no required ID, metadata, sections, or lifecycle |
 | `modules/*.md` | `MOD-*` module with a boundary and rules |
 | `use-cases/*.md` | `UC-*` user scenario |
 | `flows/*.md` | `FLOW-*` visual process with Mermaid |

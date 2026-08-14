@@ -18,7 +18,7 @@ func TestLoadContainsCompleteSkill(t *testing.T) {
 	foundWritingQuality, foundEnglishGuidance := false, false
 	foundTriggerEvals := false
 	foundEnglish, foundRussian := false, false
-	var skillText, writingText, openAIText, triggerCSV string
+	var skillText, workflowText, documentModelText, writingText, openAIText, triggerCSV string
 	for _, file := range bundle.Files {
 		if strings.Contains(file.Path, "..") || len(file.Data) == 0 {
 			t.Fatalf("invalid bundled file %q", file.Path)
@@ -29,6 +29,9 @@ func TestLoadContainsCompleteSkill(t *testing.T) {
 			skillText = string(file.Data)
 		case "references/workflows.md":
 			foundReference = true
+			workflowText = string(file.Data)
+		case "references/document-model.md":
+			documentModelText = string(file.Data)
 		case "references/architecture-gate.md":
 			foundArchitectureGate = true
 		case "references/screen-model.md":
@@ -61,6 +64,9 @@ func TestLoadContainsCompleteSkill(t *testing.T) {
 	}
 	if !strings.Contains(writingText, "`WRITE001`") || !strings.Contains(writingText, "`WRITE010`") {
 		t.Fatal("writing-quality gate is incomplete")
+	}
+	if !strings.Contains(workflowText, "### Free-form drafts") || !strings.Contains(workflowText, "Do not confuse a document in `drafts/`") || !strings.Contains(documentModelText, "`drafts/**/*.md`") {
+		t.Fatal("free-form draft guidance is incomplete")
 	}
 	if strings.Contains(openAIText, "$toudocu init") || strings.Contains(openAIText, "task verify --run") {
 		t.Fatal("default prompt must not infer initialization or executable verification")

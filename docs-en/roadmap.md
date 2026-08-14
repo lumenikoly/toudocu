@@ -25,6 +25,12 @@ checked. The roadmap checkbox must match that result.
   `translate` processes.
 - [x] `DLV-SELF-DOCS-01` Maintain this repository's own Toudocu documentation.
 
+## Version 0.0.2
+
+- Status: Done
+
+- [x] `DLV-RELEASE-03` Add the built-in drafts section to the portal, search, Editor, and public report; synchronize release documentation in Russian and English.
+
 ## Version 0.0.1
 
 - Status: Completed

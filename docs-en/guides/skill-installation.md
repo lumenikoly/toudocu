@@ -95,7 +95,7 @@ $toudocu refresh
 $toudocu refresh diff
 $toudocu translate en --all-stale
 $toudocu translate diff
-Process requests from Toudocu
+$toudocu feedback
 ```
 
 Everyday scenarios, the distinction between shell commands and agent calls,

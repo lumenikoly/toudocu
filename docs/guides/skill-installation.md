@@ -93,7 +93,7 @@ $toudocu refresh
 $toudocu refresh diff
 $toudocu translate en --all-stale
 $toudocu translate diff
-Обработай запросы из Toudocu
+$toudocu feedback
 ```
 
 Различие между командами терминала и сообщениями агенту и границы разрешений

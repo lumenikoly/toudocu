@@ -27,6 +27,11 @@ When an anchor is created, the browser sends the selected text and the
 one-based ordinal of an identical fragment in `occurrence`. The server computes
 Unicode character lines and columns; page-element coordinates are not stored.
 
+`target.kind` accepts `document` and `file`. A `file` target can be created
+only for a file in the working diff. It may contain a range when UTF-8 text up
+to 2 MiB is available; otherwise the discussion targets the whole file. A
+deleted target has the `deleted` state, but its existing thread remains usable.
+
 ## Submit a response
 
 ```bash
@@ -55,8 +60,9 @@ Minimal response:
 ```
 
 `outcome` accepts `answered`, `changed`, `no_change`,
-`needs_clarification`, or `failed`. `changed` requires at least one path inside
-the canonical documentation root. It is not allowed for `question`.
+`needs_clarification`, or `failed`. `changed` requires at least one safe path:
+inside canonical documentation for `document`, or inside the repository for
+`file`. It is not allowed for `question`.
 
 ## Limits
 

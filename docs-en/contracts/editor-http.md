@@ -2,7 +2,7 @@
 
 - Identifier: CON-EDITOR-HTTP-V1
 - Status: Done
-- Last updated: 2026-08-10
+- Last updated: 2026-08-13
 
 [OpenAPI 3.1.0](editor.openapi.yaml) contains routes, parameters, response codes,
 and data schemas. In canonical `serve`, this page also provides a button for
@@ -51,9 +51,12 @@ mode, synchronizes it, and atomically replaces the source. On conflict, the
 browser keeps the local text and asks the user to reload or deliberately retry
 with the current digest.
 
-Document creation uses the same template registry as the CLI and does not
-overwrite an existing file. Diagnostics warn the user but do not themselves
-prevent a save.
+Document creation uses the shared template registry and never overwrites an
+existing file. The `draft` template is available only in Editor. It creates
+free-form Markdown under `drafts/` from the required `title` field. The file
+name is a safe slug of that title; Editor adds sequential suffixes when a name
+already exists. The `scaffold` command does not accept this template.
+Diagnostics warn the user but do not themselves prevent a save.
 
 ## Adding a roadmap deliverable
 

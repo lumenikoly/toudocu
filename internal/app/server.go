@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -472,6 +473,24 @@ func (s *documentationServer) serveLocale(w http.ResponseWriter, r *http.Request
 func (s *documentationServer) serveSnapshot(w http.ResponseWriter, r *http.Request, state *ServePortalState) {
 	if state == nil || state.Status == portalUnavailable {
 		http.NotFound(w, r)
+		return
+	}
+	requestPath := strings.TrimPrefix(path.Clean("/"+r.URL.Path), "/")
+	if requestPath == "." || requestPath == "" {
+		requestPath = "index.html"
+	}
+	target := filepath.Join(state.Portal.OutputDirectory, filepath.FromSlash(requestPath))
+	if _, err := os.Stat(target); err != nil {
+		serveMode := state.BaseURL == "/" && !s.translationReadOnly
+		previous := state.model.serveMode
+		state.model.serveMode = serveMode
+		page := renderNotFoundPage(state.model, requestPath)
+		state.model.serveMode = previous
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.WriteHeader(http.StatusNotFound)
+		if r.Method != http.MethodHead {
+			_, _ = io.WriteString(w, page)
+		}
 		return
 	}
 	http.FileServer(http.Dir(state.Portal.OutputDirectory)).ServeHTTP(w, r)
