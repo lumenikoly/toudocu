@@ -1,4 +1,5 @@
 import { text } from "../../core/locale";
+import { createDiscussionPanel } from "../../components/discussion-panel";
 (() => {
     'use strict';
     const page: any = window.ToudocuPage;
@@ -9,6 +10,32 @@ import { text } from "../../core/locale";
     const EDITOR_WORKSPACE: any = page?.runtime === 'serve' && page.capabilities?.editor ? page.endpoints?.editorWorkspace : '';
     const $: any = (selector: any, root: any = document) => root.querySelector(selector);
     const escapeHTML: any = (value: any) => String(value ?? '').replace(/[&<>"']/g, (character: any) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } as Record<string, string>)[character]);
+    const { panel, scrim } = createDiscussionPanel({
+        ariaLabel: text("changes.discussions"),
+        className: 'changes-review-panel',
+        closeAttribute: 'data-discussions-close',
+        closeLabel: text("core.portal.057"),
+        copyAttribute: 'data-send-feedback',
+        copyHelp: text("core.portal.076"),
+        copyLabel: text("core.portal.075"),
+        id: 'project-discussions-panel',
+        listAttribute: 'data-discussion-list',
+        panelAttribute: 'data-discussions-panel',
+        scrimAttribute: 'data-discussions-scrim',
+        scrimLabel: text("changes.closeDiscussions"),
+        summaryAttribute: 'data-review-summary',
+        title: text("changes.discussions"),
+    });
+    const scrimMount: any = $('[data-discussions-scrim-mount]');
+    const panelMount: any = $('[data-discussions-panel-mount]');
+    if (scrimMount)
+        scrimMount.replaceWith(scrim);
+    else
+        document.body.append(scrim);
+    if (panelMount)
+        panelMount.replaceWith(panel);
+    else
+        document.body.append(panel);
     const state: any = { report: null, repository: null, files: [], linked: [], linkedPaths: new Set(), selected: null, tab: 'source', merge: null, etag: '', repositoryEtag: '', reviewEtag: '', review: null, composerTarget: null, composerQuote: '', composerReturn: null, discussionsReturn: null, pendingDelete: '', activeDiscussion: '', discussionScroll: 0, detailRequest: 0 };
     const elements: any = {
         base: $('[data-base]'), branchBase: $('[data-branch-base]'), target: $('[data-target]'), targetRevision: $('[data-target-revision]'), targetRevisionWrap: $('[data-target-revision-wrap]'), apply: $('[data-apply-range]'), range: $('[data-range-summary]'), rangeMeta: $('[data-range-meta]'),

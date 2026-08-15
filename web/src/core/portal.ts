@@ -1,5 +1,6 @@
 import { text } from "./locale";
 import { createEmptyState, selectTab, setExpanded } from "../components";
+import { createDiscussionPanel } from "../components/discussion-panel";
 (() => {
     'use strict';
     const $: any = (selector: any, root: any = document) => root.querySelector(selector);
@@ -509,18 +510,22 @@ import { createEmptyState, selectTab, setExpanded } from "../components";
         const confirmDialog: any = document.createElement('dialog');
         confirmDialog.className = 'portal-review-dialog portal-review-confirm';
         confirmDialog.innerHTML = `<form method="dialog"><header><h2>${text("core.portal.077")}</h2></header><p>${text("core.portal.078")}</p><p class="portal-review-error" data-portal-review-delete-error role="alert"></p><footer><button type="submit" value="cancel">${text("core.portal.046")}</button><button type="submit" class="portal-review-delete">${text("core.portal.072")}</button></footer></form>`;
-        const scrim: any = document.createElement('button');
-        scrim.type = 'button';
-        scrim.className = 'portal-review-scrim';
-        scrim.hidden = true;
-        scrim.setAttribute('aria-label', text("core.portal.057"));
-        const panel: any = document.createElement('aside');
-        panel.className = 'portal-review-panel';
-        panel.id = 'project-discussions-panel';
-        panel.hidden = true;
-        panel.setAttribute('role', 'complementary');
-        panel.setAttribute('aria-label', text("core.portal.054"));
-        panel.innerHTML = `<header><div><strong>${text("core.portal.054")}</strong><span ${path ? '' : 'hidden'}>${escapeHTML(path)}</span></div><div><button type="button" data-portal-review-new ${canCreate ? '' : 'hidden'}>${text("core.portal.056")}</button><button type="button" data-portal-review-close>${text("core.portal.057")}</button></div></header><p class="portal-review-summary" data-portal-review-summary></p><div class="portal-review-list" data-portal-review-list></div><footer><button type="button" class="portal-review-send" data-portal-review-copy-prompt>${text("core.portal.075")}</button><small>${text("core.portal.076")}</small></footer>`;
+        const { scrim, panel }: any = createDiscussionPanel({
+            ariaLabel: text("core.portal.054"),
+            closeAttribute: 'data-portal-review-close',
+            closeLabel: text("core.portal.057"),
+            copyAttribute: 'data-portal-review-copy-prompt',
+            copyHelp: text("core.portal.076"),
+            copyLabel: text("core.portal.075"),
+            id: 'project-discussions-panel',
+            listAttribute: 'data-portal-review-list',
+            newAction: { attribute: 'data-portal-review-new', hidden: !canCreate, label: text("core.portal.056") },
+            scrimAttribute: 'data-portal-review-scrim',
+            scrimLabel: text("core.portal.057"),
+            subtitle: path,
+            summaryAttribute: 'data-portal-review-summary',
+            title: text("core.portal.054"),
+        });
         const toast: any = document.createElement('div');
         toast.className = 'portal-review-toast';
         toast.hidden = true;
