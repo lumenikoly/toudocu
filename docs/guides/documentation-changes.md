@@ -88,6 +88,16 @@ toudocu changes file docs/modules/MOD-AUTH.md --base HEAD --target index
 toudocu task changes TASK-AUTH-015 ./docs --format json
 ```
 
+Чтобы сохранить полный JSON текущих изменений для CI или последующего анализа,
+укажите выходной файл явно:
+
+```bash
+toudocu changes ./docs --base HEAD --target working-tree \
+  --format json -o changes.json
+```
+
+Без `-o` тот же `ChangeSetReport` выводится в стандартный поток вывода.
+
 После построения отчёта его можно сузить:
 
 | Флаг | Что останется в отчёте |

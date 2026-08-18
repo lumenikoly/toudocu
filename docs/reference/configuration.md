@@ -86,7 +86,7 @@ site:
 Укажите настоящий верхний уровень репозитория:
 
 ```bash
-go run ./cmd/toudocu check ./docs --repository-root . --strict
+toudocu check ./docs --repository-root . --strict
 ```
 
 Если заданы `--repository-url` и точный `--repository-ref`, ссылка на файл за

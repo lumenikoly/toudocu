@@ -85,7 +85,7 @@ keys are forbidden. There is no custom CSS, web-font, or theme-plugin support.
 Point it at the repository's actual top level:
 
 ```bash
-go run ./cmd/toudocu check ./docs --repository-root . --strict
+toudocu check ./docs --repository-root . --strict
 ```
 
 When both `--repository-url` and an exact `--repository-ref` are set, links to

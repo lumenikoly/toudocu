@@ -34,6 +34,8 @@ implementation evidence. Exclude configured translation roots, including
 translated work items. A translation root may be read only when the user
 explicitly asks to check, find, build, run, or inspect that locale; restrict the
 operation to the selected locale and the files required by that operation.
+Do not add translation roots to `.gitignore` or global ignore files; explicit
+locale operations must remain able to select them.
 
 ## Documentation gate
 
@@ -49,10 +51,11 @@ For every documentation change, use this sequence:
 6. obtain independent semantic review when the change is risk-bearing;
 7. run Toudocu as the structural gate.
 
-An initial read-only `check` may be used during discovery. Its diagnostics are
-evidence about the declared structure, not instructions to invent content.
-Do not call a document complete until the reader-first gate, required semantic
-gates, and final structural check pass.
+Use an initial read-only `check` only when establishing a baseline for a large
+change, existing diagnostics, a validation or CI failure, or an explicit user
+request. Its diagnostics are evidence about the declared structure, not
+instructions to invent content. Do not call a document complete until the
+reader-first gate, required semantic gates, and final structural check pass.
 
 ## Command matrix
 
@@ -240,3 +243,10 @@ roadmap-add browser actions. On the first canonical browser request it may also
 query GitHub Releases for latest stable metadata. Add `--no-update-check` when
 an outbound request is not part of the requested preview. Use `--host 0.0.0.0`
 only for an explicitly requested trusted local-network preview.
+
+## Deliver
+
+Scale the summary to the size and risk of the work. State what changed, which
+validation ran, and what remains unverified or needs attention. Add detailed
+evidence, review results, diagnostics, or warnings only when they materially
+help the user assess the result.

@@ -3,18 +3,6 @@
 GitHub Release installers are the main way to install or update Toudocu. A
 source build remains available for development and testing changes.
 
-## Build from source
-
-```bash
-git clone https://github.com/lumenikoly/toudocu.git
-cd toudocu
-make build
-./toudocu version
-```
-
-This creates a `toudocu` binary in the working-copy root. It does not add the
-binary to `PATH`; move it to your own executable directory if needed.
-
 ## Install or update the latest stable release
 
 Linux and macOS:
@@ -32,6 +20,12 @@ irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 |
 Running the installer again will leave a binary with the same SHA-256 digest in
 place. When a newer version exists, replacement happens only after download,
 checksum, and version checks succeed.
+
+Confirm that the installed binary is available from `PATH`:
+
+```bash
+toudocu version
+```
 
 ## Supported platforms
 
@@ -54,13 +48,13 @@ For a POSIX shell, pass the environment variable after the pipe:
 
 ```sh
 curl -fsSL https://github.com/lumenikoly/toudocu/releases/latest/download/install.sh \
-  | TOUDOCU_VERSION=0.0.2 sh
+  | TOUDOCU_VERSION=0.0.3 sh
 ```
 
 PowerShell uses the same variable:
 
 ```powershell
-$env:TOUDOCU_VERSION = "0.0.2"
+$env:TOUDOCU_VERSION = "0.0.3"
 irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 | iex
 Remove-Item Env:TOUDOCU_VERSION
 ```
@@ -113,3 +107,30 @@ After installation, Toudocu remains one self-contained Go binary with no
 runtime dependencies. The only optional outbound request during normal
 operation is the stable-version check in the main `serve` portal; disable it
 with `--no-update-check`.
+
+## Build from source
+
+Use this method to develop Toudocu or test changes that have not been released:
+
+```bash
+git clone https://github.com/lumenikoly/toudocu.git
+cd toudocu
+make build
+./toudocu version
+```
+
+This creates a `toudocu` binary in the working-copy root. It does not add the
+binary to `PATH`; move it to your own executable directory if needed.
+
+To build the current source and update a local binary in one command, run:
+
+```bash
+make update-local
+```
+
+By default, the target installs the result at `~/.local/bin/toudocu`. To use a
+different directory, provide it explicitly:
+
+```bash
+make update-local INSTALL_DIR="$HOME/bin"
+```

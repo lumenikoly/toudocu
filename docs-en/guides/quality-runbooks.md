@@ -27,6 +27,27 @@ must map them to its `QUALITY` verification target.
 Russian field names and statuses are also recognized; use them only in a
 Russian-language documentation root.
 
+For example, define a rule for all Go code as a standard when the project can
+name both its scope and its check precisely:
+
+```markdown
+# STD-GO-001: Verify Go code
+
+- Identifier: STD-GO-001
+- Status: Active
+- Scope: Go code and tests
+- Last updated: 2026-08-18
+
+## Rules
+
+Code must pass formatting and tests.
+
+## Automated checks
+
+- `gofmt -w .`
+- `go test ./...`
+```
+
 ## `RB-*` runbooks
 
 A runbook is a verified operational procedure. Every `runbooks/*.md` file
@@ -51,6 +72,11 @@ missing, invalid, or future date, or status `Requires review`, produces
 
 This repository currently has no `docs/runbooks/` section: no operational
 procedures have been documented here yet.
+
+Create a runbook only for an operation that people actually perform. For
+example, recovering a service after an outage needs prerequisites, numbered
+actions, result verification, and rollback. A general explanation of how to
+start the service remains a guide and does not need an `RB-*` identifier.
 
 ## Custom sections
 

@@ -8,6 +8,12 @@ Exact identifier rules, allowed relationship directions and requirements, and
 derived representations are collected in the
 [document and relationship model](document-model.md).
 
+For example, steps for starting a local portal belong in a guide. A validation
+rule that every project must follow belongs in an `STD-*` standard, while a
+recovery procedure for an operational portal failure belongs in an `RB-*`
+runbook. If the material only explains command flags, use a reference without
+a stable identifier.
+
 ## Quick selection
 
 | Need to record | Use |

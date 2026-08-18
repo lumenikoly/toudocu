@@ -36,6 +36,15 @@ A bare path is rejected. There are no top-level `init`, `refresh`, or
 
 All options and exit codes are in the [CLI contract](../contracts/cli.md).
 
+For a first project, the installed binary and the two required source files,
+`docs/index.md` and `docs/architecture/overview.md`, are enough:
+
+```bash
+toudocu check ./docs
+toudocu build ./docs
+toudocu serve ./docs
+```
+
 ## Changes and discussions
 
 `changes` compares the working tree, index, local commits, or a branch merge
@@ -82,6 +91,15 @@ The installed skill adds workflows that do not exist in the Go CLI:
 - `$toudocu feedback` runs `agent next` first and performs only retrieved
   deliveries through `agent respond`;
   `pending=false` ends the workflow without reading or changing files.
+
+Send these entries to the development agent in a message; do not run them in a
+terminal:
+
+```text
+$toudocu refresh diff
+$toudocu translate en --base main
+$toudocu prepare context for TASK-AREA-001
+```
 
 The canonical root is the sole source for ordinary analysis and work-item
 context. Translations are read only on an explicit locale request and remain
