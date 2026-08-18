@@ -54,6 +54,10 @@ is an error. All other document types are optional.
 | `contracts/`, `guides/`, `reference/` | Specialized human documentation | Classifies and renders the document |
 | Any other path | Free-form documentation | Renders safely without a typed entity contract |
 
+A repository-root `CHANGELOG.md`, when present, is the only special release
+journal. Do not create a portal-specific duplicate inside the documentation
+root, and do not create a root changelog only to populate the portal.
+
 When an unknown top-level directory contains Markdown, its `index.md` is a
 custom-section manifest with `Type: Custom` and a description. Its
 H1 supplies the navigation title. Do not infer a typed category from filenames,

@@ -19,10 +19,12 @@ func TestLoadContainsCompleteSkill(t *testing.T) {
 	foundTriggerEvals := false
 	foundEnglish, foundRussian := false, false
 	var skillText, workflowText, documentModelText, writingText, openAIText, triggerCSV string
+	var embeddedText strings.Builder
 	for _, file := range bundle.Files {
 		if strings.Contains(file.Path, "..") || len(file.Data) == 0 {
 			t.Fatalf("invalid bundled file %q", file.Path)
 		}
+		embeddedText.Write(file.Data)
 		switch file.Path {
 		case "SKILL.md":
 			foundSkill = true
@@ -59,12 +61,12 @@ func TestLoadContainsCompleteSkill(t *testing.T) {
 	if !foundSkill || !foundReference || !foundArchitectureGate || !foundScreenModel || !foundWorkItemModel || !foundWritingQuality || !foundEnglishGuidance || !foundTriggerEvals || !foundEnglish || !foundRussian {
 		t.Fatal("bundle does not include metadata, review references, English guidance, trigger evals, and both template locales")
 	}
-	if !strings.Contains(skillText, "description: Use this skill when") || !strings.Contains(skillText, "reader-first writing gate") {
+	if !strings.Contains(skillText, "description: >-") || !strings.Contains(skillText, "references/writing-quality.md") {
 		t.Fatal("skill metadata or reader-first routing is missing")
 	}
-	for _, expected := range []string{"toudocu version", "/lumenikoly/toudocu@<version>", "/lumenikoly/toudocu", "unversioned documentation", "Context7 is optional"} {
-		if !strings.Contains(skillText, expected) {
-			t.Errorf("skill Context7 version selection is missing %q", expected)
+	for _, forbidden := range []string{"Context7", "lumenikoly/toudocu", "unversioned documentation"} {
+		if strings.Contains(embeddedText.String(), forbidden) {
+			t.Errorf("embedded skill retains external documentation instruction %q", forbidden)
 		}
 	}
 	if !strings.Contains(writingText, "`WRITE001`") || !strings.Contains(writingText, "`WRITE010`") {
@@ -76,7 +78,7 @@ func TestLoadContainsCompleteSkill(t *testing.T) {
 	if strings.Contains(openAIText, "$toudocu init") || strings.Contains(openAIText, "task verify --run") {
 		t.Fatal("default prompt must not infer initialization or executable verification")
 	}
-	if strings.Count(triggerCSV, "\n") < 20 {
+	if strings.Count(triggerCSV, ",true,") != 10 || strings.Count(triggerCSV, ",false,") != 10 {
 		t.Fatal("trigger evaluation dataset is incomplete")
 	}
 }

@@ -237,12 +237,12 @@ func TestToudocuOptionalRelationshipPlaceholders(t *testing.T) {
 func TestToudocuInitContract(t *testing.T) {
 	skill := readToudocuFile(t, "SKILL.md")
 	for _, expected := range []string{
-		"explicitly invokes `$toudocu init`",
+		"`$toudocu init`",
 		"[references/init.md](references/init.md)",
-		"Never infer initialization",
-		"Toudocu Go CLI command",
+		"Never infer `$toudocu init`",
+		"agent workflows, not Toudocu Go CLI commands",
 	} {
-		if !strings.Contains(skill, expected) {
+		if !containsNormalized(skill, expected) {
 			t.Errorf("SKILL.md does not define explicit init contract %q", expected)
 		}
 	}
@@ -279,10 +279,10 @@ func TestToudocuInitContract(t *testing.T) {
 func TestToudocuRefreshContract(t *testing.T) {
 	skill := readToudocuFile(t, "SKILL.md")
 	for _, expected := range []string{
-		"explicitly invokes `$toudocu refresh`",
+		"`$toudocu refresh`",
 		"`$toudocu refresh diff`",
 		"[references/refresh.md](references/refresh.md)",
-		"They are not Toudocu Go CLI commands",
+		"agent workflows, not Toudocu Go CLI commands",
 	} {
 		if !containsNormalized(skill, expected) {
 			t.Errorf("SKILL.md does not define refresh contract %q", expected)
@@ -336,13 +336,12 @@ func TestToudocuAgentFeedbackContract(t *testing.T) {
 	skill := readToudocuFile(t, "SKILL.md")
 	for _, expected := range []string{
 		"$toudocu feedback",
-		"Toudocu discussions, the local Agent Feedback queue",
+		"Toudocu discussions",
+		"local Agent Feedback queue",
 		"[references/agent-feedback.md](references/agent-feedback.md)",
-		"Use `agent next` as the sole source of work",
-		"every delivery requires `agent respond`",
-		"`pending=false` stops the workflow without file reads or changes",
-		"Outside the Agent Feedback workflow",
-		"The Agent Feedback workflow is the exception to this section",
+		"Process Agent Feedback only through `toudocu agent next|respond`",
+		"operation reference owns validation and delivery",
+		"do not run ordinary checks, tests, or builds for feedback",
 	} {
 		if !containsNormalized(skill, expected) {
 			t.Errorf("SKILL.md does not define agent feedback contract %q", expected)
@@ -381,7 +380,7 @@ func TestToudocuAgentFeedbackContract(t *testing.T) {
 func TestToudocuCompactOperationRouter(t *testing.T) {
 	skill := readToudocuFile(t, "SKILL.md")
 	for _, expected := range []string{
-		"| Operation | Reference | Changes files? | Authority |",
+		"| Request | Read | Rule |",
 		"[references/init.md](references/init.md)",
 		"[references/refresh.md](references/refresh.md)",
 		"[references/translate.md](references/translate.md)",
@@ -392,15 +391,32 @@ func TestToudocuCompactOperationRouter(t *testing.T) {
 		"[references/architecture-gate.md](references/architecture-gate.md)",
 		"[references/screen-model.md](references/screen-model.md)",
 		"[references/work-item-model.md](references/work-item-model.md)",
-		"Load these references conditionally",
-		"Every project requires both `index.md` and\n  `architecture/overview.md`",
+		"Explicit `$toudocu` operations take precedence",
+		"do not add `workflows.md`",
+		"Read-only review, analysis, or explanation",
+		"Skip `workflows.md` unless CLI or diagnostics are required",
 	} {
 		if !containsNormalized(skill, expected) {
 			t.Errorf("compact router missing %q", expected)
 		}
 	}
-	if strings.Count(skill, "architecture/overview.md") < 1 {
-		t.Fatal("skill must expose the single architecture overview invariant")
+}
+
+func TestToudocuGlobalInvariants(t *testing.T) {
+	skill := readToudocuFile(t, "SKILL.md")
+	for _, expected := range []string{
+		"Give repository evidence priority over assumptions",
+		"generated portals, builds, reports, and example output as derived artifacts",
+		"Never infer `$toudocu init` from missing files, first use",
+		"agent workflows, not Toudocu Go CLI commands",
+		"Run `task verify --run` only when the user explicitly requests execution",
+		"Never use configured translation roots as canonical documentation or backlog context",
+		"Process Agent Feedback only through `toudocu agent next|respond`",
+		"Create a durable work item only when the user or repository explicitly requires one",
+	} {
+		if !containsNormalized(skill, expected) {
+			t.Errorf("SKILL.md misses global invariant %q", expected)
+		}
 	}
 }
 
@@ -520,11 +536,7 @@ func TestToudocuTranslationContextIsolation(t *testing.T) {
 	translate := readToudocuFile(t, filepath.Join("references", "translate.md"))
 	initReference := readToudocuFile(t, filepath.Join("references", "init.md"))
 
-	for name, content := range map[string]string{
-		"SKILL.md":     skill,
-		"workflows.md": workflows,
-		"refresh.md":   refresh,
-	} {
+	for name, content := range map[string]string{"workflows.md": workflows, "refresh.md": refresh} {
 		for _, expected := range []string{"canonical documentation root", "translation root"} {
 			if !containsNormalized(content, expected) {
 				t.Errorf("%s does not isolate translations with %q", name, expected)
@@ -533,16 +545,11 @@ func TestToudocuTranslationContextIsolation(t *testing.T) {
 	}
 
 	for _, expected := range []string{
-		"only documentation and backlog source",
-		"implementation analysis",
-		"including translated work items",
-		"explicit `$toudocu translate",
-		"check, find, build, run, or inspect",
-		"source digests, and structural reports",
-		"Do not add translation roots to `.gitignore`",
+		"Never use configured translation roots as canonical documentation or backlog context",
+		"explicitly selected locale translation, check, find, build, run, or inspection operation",
 	} {
 		if !containsNormalized(skill, expected) {
-			t.Errorf("SKILL.md does not contain translation isolation scenario %q", expected)
+			t.Errorf("SKILL.md does not contain translation invariant %q", expected)
 		}
 	}
 
@@ -634,6 +641,14 @@ func TestToudocuInstructionConsistency(t *testing.T) {
 			t.Errorf("document-model.md misses architecture consistency statement %q", expected)
 		}
 	}
+	for _, expected := range []string{
+		"A repository-root `CHANGELOG.md`, when present, is the only special release journal",
+		"Do not create a portal-specific duplicate inside the documentation root",
+	} {
+		if !containsNormalized(documentModel, expected) {
+			t.Errorf("document-model.md misses changelog contract %q", expected)
+		}
+	}
 	if strings.Contains(documentModel, "Only `index.md` is globally expected") || strings.Contains(documentModel, "Requires document type `Architecture`") {
 		t.Fatal("document-model.md retains a contradictory architecture contract")
 	}
@@ -642,6 +657,10 @@ func TestToudocuInstructionConsistency(t *testing.T) {
 		"Read-only unless `--report` writes JSON",
 		"save, create, and roadmap-add actions can change canonical sources",
 		"`--no-update-check`",
+		"Do not add translation roots to `.gitignore` or global ignore files",
+		"Use an initial read-only `check` only when establishing a baseline",
+		"Scale the summary to the size and risk of the work",
+		"what remains unverified or needs attention",
 	} {
 		if !containsNormalized(workflows, expected) {
 			t.Errorf("workflows.md misses side-effect or verification contract %q", expected)
@@ -654,7 +673,7 @@ func TestToudocuTaskCreationThreshold(t *testing.T) {
 	workflows := readToudocuFile(t, filepath.Join("references", "workflows.md"))
 	for name, content := range map[string]string{"SKILL.md": skill, "workflows.md": workflows} {
 		for _, expected := range []string{"explicitly requires", "substantial", "Do not create"} {
-			if !strings.Contains(content, expected) {
+			if !containsNormalized(content, expected) {
 				t.Errorf("%s does not contain task threshold %q", name, expected)
 			}
 		}
