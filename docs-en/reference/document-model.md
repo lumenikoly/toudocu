@@ -145,6 +145,28 @@ portal; a derived reverse relationship needs no duplicate Markdown field.
 Multi-ID fields accept only existing targets of allowed kinds. An ordinary
 Markdown link does not replace a required metadata field.
 
+For example, a use case declares its module relationship in metadata:
+
+```markdown
+# UC-AUTH-01: Sign in
+
+- Identifier: UC-AUTH-01
+- Status: Planned
+- Module: MOD-AUTH
+```
+
+A flow that visualizes this use case refers to it separately:
+
+```markdown
+# FLOW-AUTH-01: Sign in
+
+- Identifier: FLOW-AUTH-01
+- Scenario: UC-AUTH-01
+```
+
+After validation, Toudocu shows the reverse `UC-AUTH-01 → FLOW-AUTH-01`
+relationship without a duplicate field in the use-case document.
+
 ## Derived relationships and data
 
 Toudocu derives views only from canonical Markdown sources:
@@ -243,7 +265,7 @@ flow or screens, and finally roadmap or work item. After changing an ID or
 relationship, run:
 
 ```bash
-go run ./cmd/toudocu check ./docs --repository-root .
+toudocu check ./docs --repository-root .
 ```
 
 The check proves the structure and integrity of declared relationships.

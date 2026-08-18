@@ -1,0 +1,28 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "Toudocu",
+  "description": "Dependency-free Go CLI for verifiable project documentation and static documentation portals.",
+  "branch": "stable",
+  "folders": [
+    "docs-en/guides",
+    "docs-en/reference",
+    "docs-en/contracts"
+  ],
+  "excludeFiles": [
+    "agent-feedback.openapi.yaml",
+    "changes.openapi.yaml",
+    "editor.openapi.yaml"
+  ],
+  "rules": [
+    "Use the installed toudocu binary for CLI commands; use go run ./cmd/toudocu only when developing Toudocu in its source repository.",
+    "Treat $toudocu commands as prompts for the installed skill, not as shell commands.",
+    "Choose a document type from the reader's question; use ordinary Markdown when stable IDs and validated relationships are unnecessary.",
+    "Read explicitly linked standards and runbooks before changing files, then run toudocu check for the whole documentation root.",
+    "Run task verify --run only after explicit authorization in a trusted repository."
+  ],
+  "previousVersions": [
+    {
+      "tag": "0.0.3"
+    }
+  ]
+}

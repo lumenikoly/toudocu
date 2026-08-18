@@ -62,6 +62,11 @@ func TestLoadContainsCompleteSkill(t *testing.T) {
 	if !strings.Contains(skillText, "description: Use this skill when") || !strings.Contains(skillText, "reader-first writing gate") {
 		t.Fatal("skill metadata or reader-first routing is missing")
 	}
+	for _, expected := range []string{"toudocu version", "/lumenikoly/toudocu@<version>", "/lumenikoly/toudocu", "unversioned documentation", "Context7 is optional"} {
+		if !strings.Contains(skillText, expected) {
+			t.Errorf("skill Context7 version selection is missing %q", expected)
+		}
+	}
 	if !strings.Contains(writingText, "`WRITE001`") || !strings.Contains(writingText, "`WRITE010`") {
 		t.Fatal("writing-quality gate is incomplete")
 	}

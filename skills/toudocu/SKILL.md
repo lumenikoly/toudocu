@@ -57,7 +57,13 @@ Load these references conditionally:
    only during translation.
 3. Resolve the CLI as `toudocu` from `PATH`, or `go run ./cmd/toudocu` inside
    the Toudocu source repository. Do not install it without permission.
-4. Outside the Agent Feedback workflow, run the repository's established
+4. When Context7 is available, run `toudocu version` through the resolved CLI
+   and prefer `/lumenikoly/toudocu@<version>`, using the exact printed version.
+   If that versioned library is unavailable, fall back to
+   `/lumenikoly/toudocu` and explicitly tell the user that Context7 returned
+   unversioned documentation. Context7 is optional; continue from repository
+   evidence when it is unavailable.
+5. Outside the Agent Feedback workflow, run the repository's established
    read-only check before writing. If the repository has no established check,
    substitute the resolved paths in:
 
