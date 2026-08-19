@@ -1,5 +1,7 @@
 {
   "$schema": "https://context7.com/schema/context7.json",
+  "url": "https://context7.com/lumenikoly/toudocu",
+  "public_key": "pk_WuJDFJAekVT4QaJlYdHHW",
   "projectTitle": "Toudocu",
   "description": "A local Go CLI and optional AI skill for creating, validating, maintaining, reviewing, translating, and publishing verifiable Markdown project documentation.",
   "folders": [
@@ -17,7 +19,10 @@
     "README.ru.md",
     "THIRD_PARTY_NOTICES.md",
     "frontend-development.md",
-    "testing.md"
+    "testing.md",
+    "api.md",
+    "editor-http.md",
+    "changes-http.md"
   ],
   "rules": [
     "In user repositories, use the installed `toudocu` binary. Use `go run ./cmd/toudocu` only inside the Toudocu source repository.",
@@ -29,16 +34,5 @@
     "Use canonical documentation as the operational source of truth. Translation roots are read-only mirrors during ordinary work and change only through an explicit translation workflow.",
     "Use `toudocu serve` for local editable work and `toudocu build` for read-only static HTTP(S) publication. `file://` is not a supported portal contract.",
     "For `$toudocu feedback`, process only deliveries returned by `toudocu agent next --json`; do not discover unrelated work or run check, tests, lint, or build."
-  ],
-  "previousVersions": [
-    {
-      "tag": "0.0.3"
-    },
-    {
-      "tag": "0.0.2"
-    },
-    {
-      "tag": "0.0.1"
-    }
   ]
 }
