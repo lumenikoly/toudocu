@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.0.4
+
+- Portal and Changes now share one accessible discussion panel implementation,
+  keeping their controls and labels consistent while reducing duplicated browser
+  code.
+- Installation, change-reporting, quality, runbook, configuration, and document
+  model guidance now describes the supported workflows more explicitly.
+- The embedded Toudocu skill is now a shorter routing and safety layer: explicit
+  operations take precedence, read-only reviews load only applicable guidance,
+  Context7-specific instructions are removed, and activation cases are more
+  precise.
+
 ## 0.0.3
 
 - Document selections are now hints: when rendered text, such as a Mermaid
