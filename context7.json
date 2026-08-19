@@ -1,28 +1,44 @@
 {
   "$schema": "https://context7.com/schema/context7.json",
   "projectTitle": "Toudocu",
-  "description": "Dependency-free Go CLI for verifiable project documentation and static documentation portals.",
-  "branch": "stable",
+  "description": "A local Go CLI and optional AI skill for creating, validating, maintaining, reviewing, translating, and publishing verifiable Markdown project documentation.",
   "folders": [
     "docs-en/guides",
     "docs-en/reference",
     "docs-en/contracts"
   ],
   "excludeFiles": [
-    "agent-feedback.openapi.yaml",
-    "changes.openapi.yaml",
-    "editor.openapi.yaml"
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "CONTRIBUTING.ru.md",
+    "DESIGN.md",
+    "PRODUCT.md",
+    "README.ru.md",
+    "THIRD_PARTY_NOTICES.md",
+    "frontend-development.md",
+    "testing.md"
   ],
   "rules": [
-    "Use the installed toudocu binary for CLI commands; use go run ./cmd/toudocu only when developing Toudocu in its source repository.",
-    "Treat $toudocu commands as prompts for the installed skill, not as shell commands.",
-    "Choose a document type from the reader's question; use ordinary Markdown when stable IDs and validated relationships are unnecessary.",
-    "Read explicitly linked standards and runbooks before changing files, then run toudocu check for the whole documentation root.",
-    "Run task verify --run only after explicit authorization in a trusted repository."
+    "In user repositories, use the installed `toudocu` binary. Use `go run ./cmd/toudocu` only inside the Toudocu source repository.",
+    "Treat `toudocu ...` as shell CLI and `$toudocu ...` as AI-skill workflows. `init`, `refresh`, `translate`, and `feedback` are not top-level CLI commands.",
+    "Before changing documentation, follow the target repository's instructions and `.toudocu/config.yml`; reuse its canonical docs root, repository root, excludes, locale, and output.",
+    "Do not invoke `$toudocu init`, `$toudocu refresh`, `$toudocu translate`, `$toudocu feedback`, or `task verify --run` implicitly; they require explicit user intent.",
+    "A successful `toudocu check` proves structural contracts and declared relationships, not semantic truth. Never invent facts, status, dates, or relationships to clear diagnostics.",
+    "Choose a document type by the reader question it answers; use ordinary Markdown when stable IDs, validated relationships, or special presentation are unnecessary.",
+    "Use canonical documentation as the operational source of truth. Translation roots are read-only mirrors during ordinary work and change only through an explicit translation workflow.",
+    "Use `toudocu serve` for local editable work and `toudocu build` for read-only static HTTP(S) publication. `file://` is not a supported portal contract.",
+    "For `$toudocu feedback`, process only deliveries returned by `toudocu agent next --json`; do not discover unrelated work or run check, tests, lint, or build."
   ],
   "previousVersions": [
     {
       "tag": "0.0.3"
+    },
+    {
+      "tag": "0.0.2"
+    },
+    {
+      "tag": "0.0.1"
     }
   ]
 }
