@@ -15,15 +15,15 @@
     },
     "changes.js": {
       "file": "changes.js",
-      "sha256": "8267335c4a1fd178a6cbffb7d9dfba7ed80172afd8c0f6551e8cde7da2015ab7"
+      "sha256": "c51f4678ef9931630e574f0d70d9e7aaf38ae5e094445bf0c421a6014e35fef0"
     },
     "codemirror.checksums.txt": {
       "file": "codemirror.checksums.txt",
-      "sha256": "9146cbb4182b51bb302a8224dec93a330a83af72badbecb2cc5d9bf51acfac5f"
+      "sha256": "0f660900f03f59c30244369fda1f0d79fe1e40ed6b5b211ceeb729c26fb33199"
     },
     "codemirror.js": {
       "file": "codemirror.js",
-      "sha256": "51444e18f83cb28d1a2028e1baafec6d8e35dd5bbb9b451e74d384be15c5c33d"
+      "sha256": "538a6fcd3317fef3c7dad4221d02df99b95a003f14cbb4747767c250cf3a2a7e"
     },
     "codemirror.LICENSE.txt": {
       "file": "codemirror.LICENSE.txt",
