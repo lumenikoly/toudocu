@@ -155,8 +155,8 @@ func printSearchText(w io.Writer, report SearchReport) {
 		}
 		fmt.Fprintf(w, "%s [%s] %s\n", label, result.Type, result.Path)
 		if len(result.MatchedSections) > 0 {
-			fmt.Fprintf(w, "  Разделы: %s\n", strings.Join(result.MatchedSections, ", "))
+			fmt.Fprintf(w, "  Sections: %s\n", strings.Join(result.MatchedSections, ", "))
 		}
 	}
-	fmt.Fprintf(w, "Найдено: %d\n", report.Total)
+	fmt.Fprintf(w, "Found: %d\n", report.Total)
 }

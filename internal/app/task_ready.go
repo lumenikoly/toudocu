@@ -347,7 +347,7 @@ func BuildTaskReady(model *Model, taskID string, strict bool) TaskReadyReport {
 }
 
 func printTaskReadyText(w io.Writer, report TaskReadyReport) {
-	fmt.Fprintf(w, "Задача: %s\nСтатус готовности: %s\nКонтракт заполнен: %t\nГотова к работе: %t\n",
+	fmt.Fprintf(w, "Task: %s\nReadiness status: %s\nContract complete: %t\nReady for work: %t\n",
 		report.Task.ID, report.Status, report.ContractComplete, report.ReadyForWork)
 	for _, issue := range report.Issues {
 		fmt.Fprintf(w, "[%s] %s — %s\n", strings.ToUpper(issue.Severity), issue.Code, issue.Message)

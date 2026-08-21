@@ -235,14 +235,14 @@ func MoveTask(model *Model, options Options, operation string) (TaskMoveReport, 
 
 func printTaskMoveText(w io.Writer, report TaskMoveReport) {
 	if report.Status == "archived" {
-		fmt.Fprintf(w, "Задача %s архивирована: %s\n", report.Task.ID, report.DestinationPath)
+		fmt.Fprintf(w, "Task %s archived: %s\n", report.Task.ID, report.DestinationPath)
 		return
 	}
 	if report.Status == "restored" {
-		fmt.Fprintf(w, "Задача %s восстановлена: %s\n", report.Task.ID, report.DestinationPath)
+		fmt.Fprintf(w, "Task %s restored: %s\n", report.Task.ID, report.DestinationPath)
 		return
 	}
-	fmt.Fprintf(w, "Задача %s не перемещена.\n", report.Task.ID)
+	fmt.Fprintf(w, "Task %s was not moved.\n", report.Task.ID)
 	for _, issue := range report.Issues {
 		location := issue.DocumentPath
 		if issue.Line > 0 {

@@ -390,7 +390,7 @@ func writeReportAtomically(target string, data []byte) error {
 }
 
 func printTaskVerifyText(stdout io.Writer, report TaskVerifyReport) {
-	fmt.Fprintf(stdout, "\nЗадача: %s\nСтатус проверки: %s\nКоманд: %d, успешно: %d, с ошибкой: %d\nКритериев успешно: %d, неуспешно: %d\n",
+	fmt.Fprintf(stdout, "\nTask: %s\nVerification status: %s\nCommands: %d, passed: %d, failed: %d\nCriteria passed: %d, failed: %d\n",
 		report.Task.ID, report.Status, report.Summary.TotalCommands, report.Summary.PassedCommands,
 		report.Summary.FailedCommands, report.Summary.CriteriaPassed, report.Summary.CriteriaFailed)
 	for _, issue := range report.ValidationIssues {

@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"unicode"
 )
 
 func TestEmbeddedMermaidVersionIsPinned(t *testing.T) {
@@ -1117,6 +1118,7 @@ func TestDashboardFocusFallbacksAndAlwaysVisibleOverview(t *testing.T) {
 
 	model.CurrentStatus.NextResult = nil
 	model.Project.StatusDocument = nil
+	model.Project.Status = StatusFor("")
 	model.DocByPath["status.md"] = nil
 	model.DocByPath["risks.md"] = nil
 	model.Stats.OpenRisks = 0
@@ -1141,6 +1143,12 @@ func TestDashboardFocusFallbacksAndAlwaysVisibleOverview(t *testing.T) {
 	if !strings.Contains(html, `<section class="dashboard-section dashboard-overview" data-dashboard-overview`) ||
 		strings.Contains(html, `<details class="dashboard-section dashboard-overview"`) {
 		t.Fatal("dashboard overview must remain permanently visible without a disclosure control")
+	}
+
+	model.SiteConfig.Project.Locale = "ru"
+	html = renderDashboard(model)
+	if !strings.Contains(html, `<span class="focus-status">Не указан</span>`) {
+		t.Fatalf("Russian portal must localize an unspecified project status: %s", html)
 	}
 	headingEnd := strings.Index(html, `</div><div class="dashboard-overview-body">`)
 	if headingEnd < 0 || !strings.Contains(html[:headingEnd], `data-copy-document-context`) {
@@ -1363,14 +1371,14 @@ func TestContextualHelp(t *testing.T) {
 		contains  []string
 		forbidden []string
 	}{
-		{[]string{"check", "--help"}, []string{"Побочные эффекты: отсутствуют", "--strict", "--format text|json"}, []string{"--host", "--clean"}},
+		{[]string{"check", "--help"}, []string{"Side effects: none", "--strict", "--format text|json"}, []string{"--host", "--clean"}},
 		{[]string{"serve", "--help"}, []string{"HTTP/editor workspace", "--host ADDRESS", "roadmap add"}, []string{"--base REV"}},
-		{[]string{"changes", "--help"}, []string{"--include-assets", "--translation-input", "-o записывает явно"}, []string{"--report"}},
-		{[]string{"task", "--help"}, []string{"init|ready|context|verify|archive|restore|changes"}, []string{"требуется TASK-ID"}},
-		{[]string{"task", "verify", "--help"}, []string{"--dry-run не выполняет команды", "--report в любом режиме записывает JSON-файл"}, []string{"--include-assets", "--translation-input"}},
-		{[]string{"task", "changes", "--help"}, []string{"единственный task-scoped", "TASK-ID", "--translation-input"}, []string{"--task"}},
-		{[]string{"scaffold", "--help"}, []string{".toudocu/config.yml", "fallback — en"}, []string{"--host"}},
-		{[]string{"changes", "file", "--help"}, []string{"одного изменённого пути", "PATH", "--translation-input"}, []string{"--task"}},
+		{[]string{"changes", "--help"}, []string{"--include-assets", "--translation-input", "-o writes"}, []string{"--report"}},
+		{[]string{"task", "--help"}, []string{"init|ready|context|verify|archive|restore|changes"}, []string{"requires TASK-ID"}},
+		{[]string{"task", "verify", "--help"}, []string{"--dry-run does not run commands", "--report writes a JSON file"}, []string{"--include-assets", "--translation-input"}},
+		{[]string{"task", "changes", "--help"}, []string{"task-scoped read-only", "TASK-ID", "--translation-input"}, []string{"--task"}},
+		{[]string{"scaffold", "--help"}, []string{".toudocu/config.yml", "fallback is en"}, []string{"--host"}},
+		{[]string{"changes", "file", "--help"}, []string{"one changed path", "PATH", "--translation-input"}, []string{"--task"}},
 	}
 	for _, test := range tests {
 		var stdout, stderr strings.Builder
@@ -1387,6 +1395,44 @@ func TestContextualHelp(t *testing.T) {
 				t.Errorf("%v help contains inapplicable %q:\n%s", test.args, forbidden, stdout.String())
 			}
 		}
+	}
+}
+
+func TestCLIHelpUsesEnglish(t *testing.T) {
+	var topLevel strings.Builder
+	PrintHelp(&topLevel)
+	if strings.IndexFunc(topLevel.String(), func(r rune) bool { return unicode.Is(unicode.Cyrillic, r) }) >= 0 {
+		t.Errorf("top-level help contains Cyrillic interface text:\n%s", topLevel.String())
+	}
+
+	topics := []string{"build", "check", "serve", "changes", "agent", "changes-file", "search", "scaffold", "task", "task-init", "task-ready", "task-context", "task-tree", "task-verify", "task-archive", "task-restore", "task-changes", "skill", "version"}
+	for _, topic := range topics {
+		var output strings.Builder
+		PrintCommandHelp(&output, topic)
+		if strings.IndexFunc(output.String(), func(r rune) bool { return unicode.Is(unicode.Cyrillic, r) }) >= 0 {
+			t.Errorf("%q help contains Cyrillic interface text:\n%s", topic, output.String())
+		}
+	}
+}
+
+func TestTextReportsUseEnglishInterfaceLabels(t *testing.T) {
+	var output strings.Builder
+	printCheckText(&output, &Model{})
+	printChangesText(&output, &ChangeSetReport{})
+	printSearchText(&output, SearchReport{})
+	printTaskReadyText(&output, TaskReadyReport{Task: TaskVerifyTask{ID: "TASK-CLI-001"}})
+	printTaskContextText(&output, TaskContextReport{Task: WorkItem{ID: "TASK-CLI-001"}})
+	printTaskVerifyText(&output, TaskVerifyReport{Task: TaskVerifyTask{ID: "TASK-CLI-001"}})
+	printTaskMoveText(&output, TaskMoveReport{Task: TaskMoveTask{ID: "TASK-CLI-001"}, Status: "archived", DestinationPath: "work/archive/2026/TASK-CLI-001.md"})
+	printAgentHelp(&output)
+
+	for _, expected := range []string{"Documents:", "Documentation changes", "Found:", "Readiness status:", "Required documents:", "Verification status:", "archived:", "Usage:"} {
+		if !strings.Contains(output.String(), expected) {
+			t.Errorf("text reports missing %q:\n%s", expected, output.String())
+		}
+	}
+	if strings.IndexFunc(output.String(), func(r rune) bool { return unicode.Is(unicode.Cyrillic, r) }) >= 0 {
+		t.Errorf("text reports contain Cyrillic interface text:\n%s", output.String())
 	}
 }
 

@@ -1079,7 +1079,9 @@ func renderDashboardFocus(model *Model) string {
 		target = riskHref
 	}
 	statusLabel := strings.TrimSpace(model.Project.Status.Label)
-	if statusLabel == "" {
+	if model.Project.Status.Kind == "neutral" && model.Project.Status.Recognized {
+		statusLabel = ui.Text("status.neutral")
+	} else if statusLabel == "" {
 		statusLabel = ui.Text("focus.projectStatus")
 	}
 	content := `<span class="focus-status">` + escapeHTML(statusLabel) + `</span><span class="focus-result"><span>` + escapeHTML(ui.Text("focus.next")) + `</span><strong>` + escapeHTML(nextLabel) + `</strong></span><span class="focus-arrow" aria-hidden="true">→</span>`

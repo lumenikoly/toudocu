@@ -263,36 +263,36 @@ func BuildTaskContext(model *Model, taskID string) (TaskContextReport, error) {
 }
 
 func printTaskContextText(w io.Writer, report TaskContextReport) {
-	fmt.Fprintf(w, "Задача: %s — %s\nДокумент: %s\nСтатус: %s\n", report.Task.ID, report.Task.Title, report.Task.Document, report.Task.Status.Label)
+	fmt.Fprintf(w, "Task: %s — %s\nDocument: %s\nStatus: %s\n", report.Task.ID, report.Task.Title, report.Task.Document, report.Task.Status.Label)
 	if report.Module != nil {
-		fmt.Fprintf(w, "Модуль: %s — %s\n", report.Module.ID, report.Module.Title)
+		fmt.Fprintf(w, "Module: %s — %s\n", report.Module.ID, report.Module.Title)
 	}
 	if report.UseCase != nil {
-		fmt.Fprintf(w, "Сценарий: %s — %s\n", report.UseCase.ID, report.UseCase.Title)
+		fmt.Fprintf(w, "Use case: %s — %s\n", report.UseCase.ID, report.UseCase.Title)
 	}
 	if report.Task.FlowID != "" {
-		fmt.Fprintf(w, "Процесс: %s\n", report.Task.FlowID)
+		fmt.Fprintf(w, "Flow: %s\n", report.Task.FlowID)
 	}
 	if report.Hierarchy.Parent != nil || len(report.Hierarchy.Ancestors) > 0 || len(report.Hierarchy.Children) > 0 || report.Hierarchy.Descendants.Total > 0 {
 		refText := func(ref TaskHierarchyRef) string {
-			blocker := "нет"
+			blocker := "no"
 			if ref.HasBlocker {
-				blocker = "да"
+				blocker = "yes"
 			}
-			return fmt.Sprintf("%s — %s [%s; блокер: %s]", ref.ID, ref.Title, ref.Status, blocker)
+			return fmt.Sprintf("%s — %s [%s; blocker: %s]", ref.ID, ref.Title, ref.Status, blocker)
 		}
 		if len(report.Hierarchy.Ancestors) > 0 {
 			ancestors := make([]string, 0, len(report.Hierarchy.Ancestors))
 			for _, ancestor := range report.Hierarchy.Ancestors {
 				ancestors = append(ancestors, refText(ancestor))
 			}
-			fmt.Fprintf(w, "Предки: %s\n", strings.Join(ancestors, " / "))
+			fmt.Fprintf(w, "Ancestors: %s\n", strings.Join(ancestors, " / "))
 		}
 		if report.Hierarchy.Parent != nil {
-			fmt.Fprintf(w, "Родительская задача: %s\n", refText(*report.Hierarchy.Parent))
+			fmt.Fprintf(w, "Parent task: %s\n", refText(*report.Hierarchy.Parent))
 		}
 		if len(report.Hierarchy.Children) > 0 {
-			fmt.Fprintln(w, "Дочерние задачи:")
+			fmt.Fprintln(w, "Child tasks:")
 			for _, child := range report.Hierarchy.Children {
 				fmt.Fprintf(w, "- %s\n", refText(child))
 			}
@@ -303,8 +303,8 @@ func printTaskContextText(w io.Writer, report TaskContextReport) {
 			label string
 			count int
 		}{
-			{"черновики", summary.Draft}, {"готовы", summary.Ready}, {"в работе", summary.InProgress},
-			{"заблокированы", summary.Blocked}, {"выполнены", summary.Done}, {"отменены", summary.Cancelled},
+			{"draft", summary.Draft}, {"ready", summary.Ready}, {"in progress", summary.InProgress},
+			{"blocked", summary.Blocked}, {"done", summary.Done}, {"cancelled", summary.Cancelled},
 		} {
 			if status.count > 0 {
 				statuses = append(statuses, fmt.Sprintf("%s: %d", status.label, status.count))
@@ -314,15 +314,15 @@ func printTaskContextText(w io.Writer, report TaskContextReport) {
 		if len(statuses) > 0 {
 			detail = "; " + strings.Join(statuses, "; ")
 		}
-		fmt.Fprintf(w, "Потомки: всего %d%s\n", summary.Total, detail)
+		fmt.Fprintf(w, "Descendants: total %d%s\n", summary.Total, detail)
 	}
 	if len(report.Task.ScreenIDs) > 0 {
-		fmt.Fprintf(w, "Экраны: %s\n", strings.Join(report.Task.ScreenIDs, ", "))
+		fmt.Fprintf(w, "Screens: %s\n", strings.Join(report.Task.ScreenIDs, ", "))
 	}
 	if len(report.Task.RepositoryPaths) > 0 {
-		fmt.Fprintf(w, "Область изменения: %s\n", strings.Join(report.Task.RepositoryPaths, ", "))
+		fmt.Fprintf(w, "Scope: %s\n", strings.Join(report.Task.RepositoryPaths, ", "))
 	}
-	fmt.Fprintf(w, "Критериев: %d\nПроверок: %d\nЗависимостей: %d\nЗависимых задач: %d\nЗамечаний контекста: %d\n",
+	fmt.Fprintf(w, "Criteria: %d\nChecks: %d\nDependencies: %d\nDependents: %d\nContext issues: %d\n",
 		len(report.Task.Criteria), len(report.Task.Checks), len(report.Dependencies), len(report.Dependents), len(report.Issues))
-	fmt.Fprintf(w, "Обязательные документы: %s\n", strings.Join(report.RequiredReads, ", "))
+	fmt.Fprintf(w, "Required documents: %s\n", strings.Join(report.RequiredReads, ", "))
 }

@@ -303,10 +303,10 @@ func TestTaskContextTextHierarchy(t *testing.T) {
 	var output strings.Builder
 	printTaskContextText(&output, report)
 	for _, expected := range []string{
-		"Предки: TASK-AUTH-001 — Program [in-progress; блокер: нет] / TASK-AUTH-100 — Parent [in-progress; блокер: нет]",
-		"Родительская задача: TASK-AUTH-100 — Parent [in-progress; блокер: нет]",
-		"- TASK-AUTH-111 — Blocked child [blocked; блокер: да]",
-		"Потомки: всего 2; готовы: 1; заблокированы: 1",
+		"Ancestors: TASK-AUTH-001 — Program [in-progress; blocker: no] / TASK-AUTH-100 — Parent [in-progress; blocker: no]",
+		"Parent task: TASK-AUTH-100 — Parent [in-progress; blocker: no]",
+		"- TASK-AUTH-111 — Blocked child [blocked; blocker: yes]",
+		"Descendants: total 2; ready: 1; blocked: 1",
 	} {
 		if !strings.Contains(output.String(), expected) {
 			t.Fatalf("text hierarchy missing %q:\n%s", expected, output.String())

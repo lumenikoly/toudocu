@@ -125,12 +125,12 @@ func writeChangesReport(w io.Writer, report *ChangeSetReport, format string) err
 }
 
 func printChangesText(w io.Writer, report *ChangeSetReport) {
-	fmt.Fprintf(w, "Изменения документации\nBase: %s — %s\nTarget: %s", report.Comparison.Base.DisplayRef, shortObjectID(report.Comparison.Base.Resolved), report.Comparison.Target.DisplayRef)
+	fmt.Fprintf(w, "Documentation changes\nBase: %s — %s\nTarget: %s", report.Comparison.Base.DisplayRef, shortObjectID(report.Comparison.Base.Resolved), report.Comparison.Target.DisplayRef)
 	if report.Comparison.Target.Resolved != "" {
 		fmt.Fprintf(w, " — %s", shortObjectID(report.Comparison.Target.Resolved))
 	}
 	fmt.Fprintf(w, "\nBranch: %s\nState: %s\n\n", emptyLabel(report.Repository.Branch, "detached HEAD"), map[bool]string{true: "dirty", false: "clean"}[report.Repository.Dirty])
-	fmt.Fprintf(w, "Добавлено: %d  Изменено: %d  Удалено: %d  Переименовано: %d\nСтрок: +%d −%d\n", report.Summary.Files.Added+report.Summary.Files.Untracked, report.Summary.Files.Modified, report.Summary.Files.Deleted, report.Summary.Files.Renamed, report.Summary.Lines.Added, report.Summary.Lines.Deleted)
+	fmt.Fprintf(w, "Added: %d  Modified: %d  Deleted: %d  Renamed: %d\nLines: +%d −%d\n", report.Summary.Files.Added+report.Summary.Files.Untracked, report.Summary.Files.Modified, report.Summary.Files.Deleted, report.Summary.Files.Renamed, report.Summary.Lines.Added, report.Summary.Lines.Deleted)
 	for _, change := range report.Changes {
 		fmt.Fprintf(w, "%s %s", statusSymbol(change.Status), change.Path)
 		if change.OldPath != "" {
@@ -230,6 +230,6 @@ func outputChangesReport(options Options, report *ChangeSetReport, stdout io.Wri
 		return err
 	}
 	ok = true
-	fmt.Fprintf(stdout, "Отчёт сохранён: %s\n", options.ChangeOutput)
+	fmt.Fprintf(stdout, "Report saved: %s\n", options.ChangeOutput)
 	return nil
 }

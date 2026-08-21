@@ -194,7 +194,7 @@ func outputPathForDocument(relativePath string) string {
 func StatusFor(status string) StatusInfo {
 	label := strings.TrimSpace(status)
 	if label == "" {
-		label = "Не указан"
+		label = "Not specified"
 	}
 	canonical := canonicalText(label)
 	for _, group := range statusGroups {

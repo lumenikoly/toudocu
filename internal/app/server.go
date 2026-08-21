@@ -596,9 +596,9 @@ func serveDocumentation(options Options, stdout, stderr io.Writer) error {
 	}
 	defer listener.Close()
 	localURL := browserURL(options.Host, options.Port)
-	fmt.Fprintf(stdout, "\nСервер документации запущен.\nАдрес:          %s\nКаталог:        %s\nСтраниц:        %d\nДокументов:     %d\nПредупреждений: %d\nОшибок:         %d\n", localURL, result.OutputDirectory, result.Pages, model.Stats.Documents, model.Stats.Warnings, model.Stats.Errors)
+	fmt.Fprintf(stdout, "\nDocumentation server started.\nAddress:        %s\nDirectory:      %s\nPages:          %d\nDocuments:      %d\nWarnings:       %d\nErrors:         %d\n", localURL, result.OutputDirectory, result.Pages, model.Stats.Documents, model.Stats.Warnings, model.Stats.Errors)
 	if externallyReachableHost(options.Host) {
-		fmt.Fprintf(stdout, "Локальная сеть: http://<IP-адрес-компьютера>:%d/\nВнимание: сервер доступен из сети без авторизации и TLS.\n", options.Port)
+		fmt.Fprintf(stdout, "Local network: http://<computer-IP-address>:%d/\nWarning: the server is reachable from the network without authentication or TLS.\n", options.Port)
 	}
 	if options.Open {
 		if err := openGeneratedSite(localURL); err != nil {

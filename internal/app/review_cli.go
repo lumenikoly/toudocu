@@ -96,7 +96,7 @@ func runAgentCLI(argv []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	if jsonOutput {
 		return writeAgentJSON(stdout, ack)
 	}
-	fmt.Fprintf(stdout, "Ответ для %s принят.\n", response.DeliveryID)
+	fmt.Fprintf(stdout, "Response for %s accepted.\n", response.DeliveryID)
 	return 0
 }
 
@@ -155,14 +155,14 @@ func resolveReviewCLIRoot(requested string) (string, error) {
 }
 
 func printAgentHelp(w io.Writer) {
-	fmt.Fprint(w, `Читает локальную очередь Toudocu и сохраняет структурированный ответ.
+	fmt.Fprint(w, `Reads the local Toudocu queue and saves a structured response.
 
-Использование:
+Usage:
   toudocu agent next [--repository-root DIR] --json
   toudocu agent respond [--input response.json] [--repository-root DIR] [--json]
 
-Без --input команда respond читает один JSON-объект из stdin.
-Команды не запускают языковую модель и не записывают файлы репозитория.
+Without --input, respond reads one JSON object from stdin.
+These commands do not run a language model or write repository files.
 `)
 }
 
