@@ -109,6 +109,7 @@ func BuildTaskContext(model *Model, taskID string) (TaskContextReport, error) {
 		SchemaVersion: 1, Kind: "task-context",
 		Generator:         GeneratorInfo{Name: "Toudocu", Version: Version},
 		Task:              *item,
+		Hierarchy:         taskHierarchy(model, item),
 		Screens:           []KnowledgeScreen{},
 		ScreenTransitions: []ScreenTransition{},
 		BusinessRules:     []BusinessRule{},
@@ -271,6 +272,49 @@ func printTaskContextText(w io.Writer, report TaskContextReport) {
 	}
 	if report.Task.FlowID != "" {
 		fmt.Fprintf(w, "Процесс: %s\n", report.Task.FlowID)
+	}
+	if report.Hierarchy.Parent != nil || len(report.Hierarchy.Ancestors) > 0 || len(report.Hierarchy.Children) > 0 || report.Hierarchy.Descendants.Total > 0 {
+		refText := func(ref TaskHierarchyRef) string {
+			blocker := "нет"
+			if ref.HasBlocker {
+				blocker = "да"
+			}
+			return fmt.Sprintf("%s — %s [%s; блокер: %s]", ref.ID, ref.Title, ref.Status, blocker)
+		}
+		if len(report.Hierarchy.Ancestors) > 0 {
+			ancestors := make([]string, 0, len(report.Hierarchy.Ancestors))
+			for _, ancestor := range report.Hierarchy.Ancestors {
+				ancestors = append(ancestors, refText(ancestor))
+			}
+			fmt.Fprintf(w, "Предки: %s\n", strings.Join(ancestors, " / "))
+		}
+		if report.Hierarchy.Parent != nil {
+			fmt.Fprintf(w, "Родительская задача: %s\n", refText(*report.Hierarchy.Parent))
+		}
+		if len(report.Hierarchy.Children) > 0 {
+			fmt.Fprintln(w, "Дочерние задачи:")
+			for _, child := range report.Hierarchy.Children {
+				fmt.Fprintf(w, "- %s\n", refText(child))
+			}
+		}
+		summary := report.Hierarchy.Descendants
+		statuses := []string{}
+		for _, status := range []struct {
+			label string
+			count int
+		}{
+			{"черновики", summary.Draft}, {"готовы", summary.Ready}, {"в работе", summary.InProgress},
+			{"заблокированы", summary.Blocked}, {"выполнены", summary.Done}, {"отменены", summary.Cancelled},
+		} {
+			if status.count > 0 {
+				statuses = append(statuses, fmt.Sprintf("%s: %d", status.label, status.count))
+			}
+		}
+		detail := ""
+		if len(statuses) > 0 {
+			detail = "; " + strings.Join(statuses, "; ")
+		}
+		fmt.Fprintf(w, "Потомки: всего %d%s\n", summary.Total, detail)
 	}
 	if len(report.Task.ScreenIDs) > 0 {
 		fmt.Fprintf(w, "Экраны: %s\n", strings.Join(report.Task.ScreenIDs, ", "))

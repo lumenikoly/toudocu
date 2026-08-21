@@ -356,7 +356,7 @@ func parseScreenDocument(model *Model, document *Document) KnowledgeScreen {
 		ModuleID: strings.TrimSpace(document.Metadata["module"]), Kind: kind,
 		Route: route, Status: document.Status, Preview: preview,
 		Component: component,
-		Updated:   document.Metadata["updated"], ParentID: strings.TrimSpace(document.Metadata["parentScreen"]), States: states,
+		Updated:   document.Metadata["updated"], ParentID: strings.TrimSpace(firstNonEmpty(document.Metadata["parentScreen"], document.Metadata["parentTask"])), States: states,
 		Document: document.SourcePath, UseCaseIDs: []string{}, WorkItemIDs: []string{}, ContractDocuments: []string{},
 		IncomingTransitionIDs: []string{}, OutgoingTransitionIDs: []string{},
 	}

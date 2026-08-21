@@ -18,7 +18,7 @@ var fieldAliases = map[string]string{
 	"screens": "screens", "screens affected": "screens", "экраны": "screens", "затронутые экраны": "screens", "transitions": "transitions",
 	"transitions affected": "transitions", "переходы": "transitions", "затронутые переходы": "transitions", "standards": "standards", "стандарты": "standards",
 	"affected runbooks": "runbooks", "runbooks affected": "runbooks", "затронутые runbooks": "runbooks", "route": "route", "маршрут": "route",
-	"preview": "preview", "превью": "preview", "parent screen": "parentScreen", "parent": "parentScreen", "родительский экран": "parentScreen", "родитель": "parentScreen",
+	"preview": "preview", "превью": "preview", "parent screen": "parentScreen", "родительский экран": "parentScreen", "parent": "parentTask", "родительская задача": "parentTask", "родитель": "parentTask",
 	"start screen": "startScreen", "initial screen": "startScreen", "начальный экран": "startScreen", "terminal screens": "terminalScreens", "end screens": "terminalScreens",
 	"конечные экраны": "terminalScreens", "allow cycle": "allowCycle", "разрешить цикл": "allowCycle", "component": "component", "компонент": "component",
 	"errors": "errors", "ошибки": "errors", "depends on": "dependsOn", "dependencies": "dependsOn", "зависит от": "dependsOn", "date": "date", "дата": "date",
@@ -35,7 +35,7 @@ var displayFieldNames = map[string]string{
 	"priority": "Приоритет", "criticality": "Критичность", "severity": "Серьёзность", "reproducibility": "Воспроизводимость", "regression": "Регрессия",
 	"module": "Модуль", "useCase": "Сценарий", "dependsOn": "Зависит от", "date": "Дата", "flow": "Процесс", "screens": "Экраны",
 	"transitions": "Переходы", "standards": "Стандарты", "runbooks": "Затронутые runbooks", "route": "Маршрут", "preview": "Превью",
-	"parentScreen": "Родительский экран", "startScreen": "Начальный экран", "terminalScreens": "Конечные экраны", "allowCycle": "Разрешить цикл",
+	"parentScreen": "Родительский экран", "parentTask": "Родительская задача", "startScreen": "Начальный экран", "terminalScreens": "Конечные экраны", "allowCycle": "Разрешить цикл",
 	"component": "Компонент", "errors": "Ошибки", "plannedDate": "Плановая дата", "updated": "Последнее обновление", "probability": "Вероятность",
 	"impact": "Влияние", "id": "Идентификатор", "tags": "Теги", "type": "Тип", "documentType": "Тип документа",
 	"architectureQuestion": "Архитектурный вопрос", "source": "Источник", "scope": "Область", "environment": "Среда", "risk": "Риск",
@@ -50,6 +50,7 @@ type markdownAnalysis struct {
 	Metadata           Metadata
 	MetadataExtras     []MetadataExtra
 	MetadataLocations  map[string]int
+	MetadataCounts     map[string]int
 	Tasks              []Task
 	ListItems          []markdowncore.ListItem
 	Links              []Link
@@ -70,7 +71,7 @@ func analyzeMarkdownPath(content, sourcePath string) markdownAnalysis {
 	document := markdowncore.Parse([]byte(content), sourcePath)
 	a := document.Analysis()
 	result := markdownAnalysis{Document: document, Content: string(document.Source()), Title: a.Title, Description: a.Description,
-		Metadata: Metadata{}, MetadataLocations: map[string]int{}, Tables: a.Tables, OrderedLists: a.OrderedLists, ListItems: a.ListItems, CodeBlocks: a.CodeBlocks, MermaidBlocks: a.MermaidBlocks, Diagnostics: a.Diagnostics, PlainText: a.PlainText}
+		Metadata: Metadata{}, MetadataLocations: map[string]int{}, MetadataCounts: map[string]int{}, Tables: a.Tables, OrderedLists: a.OrderedLists, ListItems: a.ListItems, CodeBlocks: a.CodeBlocks, MermaidBlocks: a.MermaidBlocks, Diagnostics: a.Diagnostics, PlainText: a.PlainText}
 	for _, h := range a.Headings {
 		result.Headings = append(result.Headings, Heading{Level: h.Level, Title: h.Title, ID: h.ID, Line: h.Range.Start.Line - 1, startOffset: h.Range.Start.Offset, endOffset: h.Range.End.Offset})
 	}
@@ -81,6 +82,7 @@ func analyzeMarkdownPath(content, sourcePath string) markdownAnalysis {
 			result.MetadataExtras = append(result.MetadataExtras, MetadataExtra{Key: m.RawKey, Value: value})
 			continue
 		}
+		result.MetadataCounts[key]++
 		if _, exists := result.MetadataLocations[key]; !exists {
 			result.MetadataLocations[key] = m.Range.Start.Line
 		}

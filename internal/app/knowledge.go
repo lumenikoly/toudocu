@@ -810,9 +810,9 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 		TransitionIDs: splitReferences(item.Metadata["transitions"]),
 		StandardIDs:   splitReferences(item.Metadata["standards"]),
 		RunbookIDs:    splitReferences(item.Metadata["runbooks"]),
-		DependsOn:     splitReferences(item.Metadata["dependsOn"]), Document: document.SourcePath,
+		DependsOn:     splitReferences(item.Metadata["dependsOn"]), ParentID: optionalString(strings.TrimSpace(item.Metadata["parentTask"])), ChildIDs: []string{}, Document: document.SourcePath,
 		Anchor: item.Heading.ID, Criteria: criteria, Verification: verification, Checks: checks,
-		RepositoryPaths: repositoryPaths, line: item.Heading.Line + 1,
+		RepositoryPaths: repositoryPaths, line: item.Heading.Line + 1, parentLine: document.metadataLocations["parentTask"], parentCount: document.metadataCounts["parentTask"],
 		Result:              strings.TrimSpace(resultSection.Text),
 		BehaviorChange:      strings.TrimSpace(behaviorSection.Text),
 		Before:              nestedWorkSection(behaviorSection, "было", "before"),
@@ -907,6 +907,160 @@ func detectTaskDependencyCycles(model *Model, workItems []WorkItem, workByID map
 	}
 	for i := range workItems {
 		visit(&workItems[i], nil)
+	}
+}
+
+func taskParentID(item *WorkItem) string {
+	if item == nil || item.ParentID == nil {
+		return ""
+	}
+	return *item.ParentID
+}
+
+func addTaskHierarchyIssue(model *Model, item *WorkItem, code, message, relatedID string, line int) {
+	issue := newIssue("error", code, message, item.Document, line)
+	issue.TaskID, issue.RelatedID = item.ID, relatedID
+	addDocumentIssue(model, item.ownerDoc, issue)
+}
+
+func sortedWorkItems(workItems []WorkItem) []*WorkItem {
+	items := make([]*WorkItem, len(workItems))
+	for index := range workItems {
+		items[index] = &workItems[index]
+	}
+	sort.Slice(items, func(i, j int) bool { return naturalCompare(items[i].ID, items[j].ID) < 0 })
+	return items
+}
+
+func validateTaskHierarchy(model *Model, workItems []WorkItem, workByID map[string]*WorkItem) {
+	for _, item := range sortedWorkItems(workItems) {
+		parentID := taskParentID(item)
+		if parentID == "" {
+			continue
+		}
+		line := item.parentLine
+		if line == 0 {
+			line = item.line
+		}
+		if item.parentCount > 1 {
+			addTaskHierarchyIssue(model, item, "TASK_PARENT_INVALID", fmt.Sprintf("Task %s declares Parent more than once; exactly one TASK-* identifier is allowed.", item.ID), parentID, line)
+			continue
+		}
+		if !taskIDRE.MatchString(parentID) {
+			addTaskHierarchyIssue(model, item, "TASK_PARENT_INVALID", fmt.Sprintf("Task %s has invalid Parent value %s; exactly one TASK-* identifier is required.", item.ID, parentID), parentID, line)
+			continue
+		}
+		if item.ID == parentID {
+			addTaskHierarchyIssue(model, item, "TASK_PARENT_SELF", fmt.Sprintf("Task %s cannot be its own parent.", item.ID), parentID, line)
+			continue
+		}
+		parent := workByID[parentID]
+		if parent == nil {
+			addTaskHierarchyIssue(model, item, "TASK_PARENT_UNKNOWN", fmt.Sprintf("Task %s references unknown parent %s.", item.ID, parentID), parentID, line)
+			continue
+		}
+		if !strings.HasPrefix(item.ID, "TASK-") || !strings.HasPrefix(parent.ID, "TASK-") {
+			addTaskHierarchyIssue(model, item, "TASK_PARENT_TYPE_UNSUPPORTED", fmt.Sprintf("Parent relation %s → %s is supported only between TASK-* work items.", item.ID, parentID), parentID, line)
+			continue
+		}
+		parent.ChildIDs = append(parent.ChildIDs, item.ID)
+	}
+	for _, item := range sortedWorkItems(workItems) {
+		sort.Slice(item.ChildIDs, func(i, j int) bool { return naturalCompare(item.ChildIDs[i], item.ChildIDs[j]) < 0 })
+	}
+
+	state := map[string]int{}
+	stack := []string{}
+	var visit func(*WorkItem)
+	visit = func(item *WorkItem) {
+		if state[item.ID] == 2 {
+			return
+		}
+		if state[item.ID] == 1 {
+			start := 0
+			for stack[start] != item.ID {
+				start++
+			}
+			cycle := append(append([]string{}, stack[start:]...), item.ID)
+			message := "Task hierarchy cycle: " + strings.Join(cycle, " → ") + "."
+			for _, id := range cycle[:len(cycle)-1] {
+				member := workByID[id]
+				addTaskHierarchyIssue(model, member, "TASK_PARENT_CYCLE", message, taskParentID(member), member.parentLine)
+			}
+			return
+		}
+		state[item.ID] = 1
+		stack = append(stack, item.ID)
+		if parent := workByID[taskParentID(item)]; parent != nil {
+			visit(parent)
+		}
+		stack = stack[:len(stack)-1]
+		state[item.ID] = 2
+	}
+	for _, item := range sortedWorkItems(workItems) {
+		visit(item)
+	}
+
+	for _, item := range sortedWorkItems(workItems) {
+		if item.statusName == "done" {
+			for _, childID := range item.ChildIDs {
+				if child := workByID[childID]; child != nil && child.statusName != "done" {
+					addTaskHierarchyIssue(model, item, "TASK_CHILD_INCOMPLETE", fmt.Sprintf("Done task %s has incomplete child %s (%s).", item.ID, child.ID, child.Status.Label), child.ID, item.line)
+				}
+			}
+		}
+		if item.statusName == "cancelled" {
+			for _, childID := range item.ChildIDs {
+				if child := workByID[childID]; child != nil && child.statusName != "done" && child.statusName != "cancelled" {
+					addTaskHierarchyIssue(model, item, "TASK_CANCELLED_PARENT_ACTIVE_CHILD", fmt.Sprintf("Cancelled task %s has active child %s (%s).", item.ID, child.ID, child.Status.Label), child.ID, item.line)
+				}
+			}
+		}
+	}
+}
+
+func detectTaskCompletionCycles(model *Model, workItems []WorkItem, workByID map[string]*WorkItem) {
+	state := map[string]int{}
+	stack := []string{}
+	reported := map[string]bool{}
+	var visit func(*WorkItem)
+	visit = func(item *WorkItem) {
+		if state[item.ID] == 2 {
+			return
+		}
+		if state[item.ID] == 1 {
+			start := 0
+			for stack[start] != item.ID {
+				start++
+			}
+			cycle := append(append([]string{}, stack[start:]...), item.ID)
+			key := strings.Join(cycle, "|")
+			if !reported[key] {
+				reported[key] = true
+				message := "Task completion cycle: " + strings.Join(cycle, " → ") + "."
+				for index, id := range cycle[:len(cycle)-1] {
+					member := workByID[id]
+					related := cycle[index+1]
+					addTaskHierarchyIssue(model, member, "TASK_COMPLETION_CYCLE", message, related, member.line)
+				}
+			}
+			return
+		}
+		state[item.ID] = 1
+		stack = append(stack, item.ID)
+		edges := append(append([]string{}, item.DependsOn...), item.ChildIDs...)
+		edges = uniqueStrings(edges)
+		sort.Slice(edges, func(i, j int) bool { return naturalCompare(edges[i], edges[j]) < 0 })
+		for _, id := range edges {
+			if next := workByID[id]; next != nil {
+				visit(next)
+			}
+		}
+		stack = stack[:len(stack)-1]
+		state[item.ID] = 2
+	}
+	for _, item := range sortedWorkItems(workItems) {
+		visit(item)
 	}
 }
 
@@ -1079,7 +1233,9 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 			}
 		}
 	}
+	validateTaskHierarchy(model, workItems, workByID)
 	detectTaskDependencyCycles(model, workItems, workByID)
+	detectTaskCompletionCycles(model, workItems, workByID)
 	validateStatusDocument(model)
 	validateRoadmap(model, documentIDs)
 	for i := range modules {

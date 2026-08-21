@@ -203,7 +203,7 @@ func taskReadiness(model *Model, taskID string, strict bool) (*WorkItem, []Issue
 	issues := []Issue{}
 	paths := taskRelatedDocumentPaths(model, item)
 	for _, issue := range model.Issues {
-		if !paths[issue.DocumentPath] {
+		if !paths[issue.DocumentPath] && issue.TaskID != item.ID && issue.RelatedID != item.ID {
 			continue
 		}
 		if issue.Severity == "error" || issue.Severity == "warning" {

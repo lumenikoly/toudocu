@@ -2,7 +2,7 @@
 
 - Идентификатор: CON-CLI-V1
 - Статус: Готово
-- Последнее обновление: 2026-08-12
+- Последнее обновление: 2026-08-21
 
 Этот контракт фиксирует команды, их побочные эффекты, коды завершения и
 версионируемые JSON-ответы. Полный синтаксис флагов всегда доступен через
@@ -21,6 +21,7 @@
 | `agent respond` | Добавляет структурированный ответ агента | Только локальное пользовательское состояние вне репозитория |
 | `task changes` | Сопоставляет Git diff с обещаниями задачи | Ничего, кроме явно указанного `-o` |
 | `task init` | Создаёт черновик `TASK-*` или `BUG-*` | Один новый файл без перезаписи |
+| `task tree` | Показывает дерево декомпозиции | Ничего |
 | `scaffold` | Создаёт документ выбранного типа | Один новый файл без перезаписи |
 | `task ready`, `task context` | Проверяет полноту или возвращает контекст | Ничего |
 | `task verify --dry-run` | Показывает план команд | Ничего, кроме явно указанного `--report` |
@@ -87,6 +88,8 @@ toudocu skill install|status|update|uninstall
 - `changes`, `changes file` и `task changes` принимают `--include-assets`:
   двоичные ресурсы включаются независимо от `changes.includeAssets`, но
   `changes.exclude` сохраняется.
+- `task changes --tree` принимается только для `TASK-*`; BUG не может быть
+  корнем или потомком декомпозиции первой версии.
 - `--translation-input` включает читательский Markdown, рабочие документы и
   двоичные ресурсы независимо от прочих флагов включения и произвольных
   `changes.exclude`. Исключаются только `generated/**` и `cache/**` внутри
@@ -102,7 +105,7 @@ toudocu skill install|status|update|uninstall
   критерии приёмки; `completionSource` остаётся `use-case-status`. Версия схемы
   остаётся `1`, поле `completionBlockers` не добавляется.
 - `SearchReport`, `TaskInitReport`, `ScaffoldReport`, `TaskReadyReport`,
-  `TaskContextReport`, `TaskMoveReport` и `TaskVerifyReport` принадлежат своим
+  `TaskContextReport`, `TaskTreeReport`, `TaskMoveReport` и `TaskVerifyReport` принадлежат своим
   командам.
 - `ChangeSetReport` — самостоятельный отчёт изменений и не входит в
   `ProjectReport`.
@@ -114,6 +117,14 @@ toudocu skill install|status|update|uninstall
 
 Пустые коллекции записываются как `[]`, номера строк начинаются с единицы. Новое
 необязательное поле может появиться без смены версии схемы.
+
+`ProjectReport.knowledge.workItems[]` содержит добавочные поля `parentId` и
+вычисленный `childIds`. `TaskContextReport.hierarchy` хранит только компактные
+ссылки на предков и непосредственных детей со сводкой потомков.
+Text-формат `task context` показывает те же компактные ссылки, статусы,
+наличие блокера и сводку, не включая полные документы потомков.
+`TaskTreeReport` содержит `taskId` и рекурсивные узлы `id`, `status`, `title`,
+`children`. Все эти отчёты сохраняют `schemaVersion: 1`.
 
 Человекочитаемое техническое поле `Issue.message`, другие диагностические
 сообщения JSON, ошибки и предупреждения CLI всегда записываются на английском

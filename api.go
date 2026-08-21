@@ -69,6 +69,11 @@ type (
 	SearchMatch              = core.SearchMatch
 	SearchReport             = core.SearchReport
 	TaskInitReport           = core.TaskInitReport
+	TaskHierarchyRef         = core.TaskHierarchyRef
+	TaskHierarchySummary     = core.TaskHierarchySummary
+	TaskHierarchy            = core.TaskHierarchy
+	TaskTreeNode             = core.TaskTreeNode
+	TaskTreeReport           = core.TaskTreeReport
 	TaskMoveTask             = core.TaskMoveTask
 	TaskMoveReport           = core.TaskMoveReport
 	ScaffoldReport           = core.ScaffoldReport
@@ -146,6 +151,10 @@ func MoveTask(model *Model, options Options, operation string) (TaskMoveReport, 
 
 func BuildTaskContext(model *Model, taskID string) (TaskContextReport, error) {
 	return core.BuildTaskContext(model, taskID)
+}
+
+func BuildTaskTree(model *Model, taskID string) (TaskTreeReport, error) {
+	return core.BuildTaskTree(model, taskID)
 }
 
 func BuildTaskReady(model *Model, taskID string, strict bool) TaskReadyReport {

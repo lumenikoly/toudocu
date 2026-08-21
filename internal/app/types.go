@@ -11,6 +11,7 @@ type Options struct {
 	EntityID                   string
 	Area                       string
 	TaskType                   string
+	ParentTaskID               string
 	Language                   string
 	Limit                      int
 	VerifyMode                 string
@@ -20,6 +21,7 @@ type Options struct {
 	ChangeBranchBase           string
 	ChangeFile                 string
 	ChangeTaskID               string
+	ChangeTaskTree             bool
 	ChangeStatus               string
 	ChangeEntityType           string
 	ChangeModule               string
@@ -147,6 +149,8 @@ type Issue struct {
 	DocumentPath string `json:"documentPath,omitempty"`
 	Line         int    `json:"line,omitempty"`
 	Column       int    `json:"column,omitempty"`
+	TaskID       string `json:"taskId,omitempty"`
+	RelatedID    string `json:"relatedId,omitempty"`
 }
 
 type Document struct {
@@ -166,6 +170,8 @@ type Document struct {
 	Sections            []Section
 	Metadata            Metadata
 	MetadataExtras      []MetadataExtra
+	metadataLocations   map[string]int
+	metadataCounts      map[string]int
 	markdownDiagnostics []Issue
 	mermaidBlocks       []mermaidBlock
 	markdownTables      []markdownTable
@@ -393,6 +399,8 @@ type WorkItem struct {
 	StandardIDs         []string                `json:"standardIds"`
 	RunbookIDs          []string                `json:"runbookIds"`
 	DependsOn           []string                `json:"dependsOn"`
+	ParentID            *string                 `json:"parentId"`
+	ChildIDs            []string                `json:"childIds"`
 	Document            string                  `json:"document"`
 	Anchor              string                  `json:"anchor"`
 	Criteria            []Task                  `json:"criteria"`
@@ -409,6 +417,8 @@ type WorkItem struct {
 	DocumentationPaths  []string                `json:"documentationPaths"`
 	Blocker             string                  `json:"blocker,omitempty"`
 	line                int
+	parentLine          int
+	parentCount         int
 	ownerDoc            *Document
 	statusName          string
 	useCaseOmitted      bool

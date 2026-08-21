@@ -152,7 +152,7 @@ func loadProjectChangelog(repositoryRoot string, staleDays int, now time.Time, f
 		OutputPath: projectChangelogOutput, Directory: ".", FileName: projectChangelogFile,
 		Type: "changelog", TypeLabel: localizedTypeLabel(nil, "changelog"), Title: title, Description: parsed.Description,
 		Content: content, Headings: parsed.Headings,
-		Sections: parsed.Sections, Metadata: parsed.Metadata, MetadataExtras: parsed.MetadataExtras,
+		Sections: parsed.Sections, Metadata: parsed.Metadata, MetadataExtras: parsed.MetadataExtras, metadataLocations: parsed.MetadataLocations, metadataCounts: parsed.MetadataCounts,
 		Tasks:     parsed.Tasks,
 		TaskStats: TaskStats{Total: len(parsed.Tasks), Completed: completed, Remaining: len(parsed.Tasks) - completed, Percent: progress(completed, len(parsed.Tasks))},
 		Links:     parsed.Links, PlainText: parsed.PlainText, MTime: info.ModTime().UTC(), UpdatedAt: updatedAt,
@@ -310,6 +310,14 @@ func createDocument(file scannedFile, root string, staleDays int, now time.Time,
 	content := string(contentBytes)
 	parsed := analyzeMarkdown(content)
 	typeName := ClassifyDocument(file.RelativePath)
+	if typeName == "screen" && parsed.Metadata["parentScreen"] == "" && parsed.Metadata["parentTask"] != "" {
+		parsed.Metadata["parentScreen"] = parsed.Metadata["parentTask"]
+		parsed.MetadataLocations["parentScreen"] = parsed.MetadataLocations["parentTask"]
+		parsed.MetadataCounts["parentScreen"] = parsed.MetadataCounts["parentTask"]
+		delete(parsed.Metadata, "parentTask")
+		delete(parsed.MetadataLocations, "parentTask")
+		delete(parsed.MetadataCounts, "parentTask")
+	}
 	section := sectionTypeForPath(file.RelativePath)
 	fallback := strings.TrimSuffix(path.Base(file.RelativePath), path.Ext(file.RelativePath))
 	fallback = strings.ReplaceAll(strings.ReplaceAll(fallback, "-", " "), "_", " ")
@@ -345,7 +353,7 @@ func createDocument(file scannedFile, root string, staleDays int, now time.Time,
 		OutputPath: outputPathForDocument(file.RelativePath), Directory: directory, FileName: path.Base(file.RelativePath),
 		Type: typeName, SectionType: section, TypeLabel: localizedTypeLabel(nil, typeName), Title: title, Description: parsed.Description,
 		Content: content, Headings: parsed.Headings,
-		Sections: parsed.Sections, Metadata: parsed.Metadata, MetadataExtras: parsed.MetadataExtras,
+		Sections: parsed.Sections, Metadata: parsed.Metadata, MetadataExtras: parsed.MetadataExtras, metadataLocations: parsed.MetadataLocations, metadataCounts: parsed.MetadataCounts,
 		Tasks:     parsed.Tasks,
 		TaskStats: TaskStats{Total: len(parsed.Tasks), Completed: completed, Remaining: len(parsed.Tasks) - completed, Percent: progress(completed, len(parsed.Tasks))},
 		Links:     parsed.Links, PlainText: parsed.PlainText, MTime: info.ModTime().UTC(), UpdatedAt: updatedAt,

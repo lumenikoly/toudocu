@@ -35,6 +35,22 @@ func escapeHTML(value any) string          { return html.EscapeString(fmt.Sprint
 func escapeAttr(value any) string          { return strings.ReplaceAll(escapeHTML(value), "`", "&#96;") }
 func normalizeSlashes(value string) string { return strings.ReplaceAll(value, `\`, "/") }
 
+func firstNonEmpty(values ...string) string {
+	for _, value := range values {
+		if strings.TrimSpace(value) != "" {
+			return value
+		}
+	}
+	return ""
+}
+
+func optionalString(value string) *string {
+	if value == "" {
+		return nil
+	}
+	return &value
+}
+
 func toPosixRelative(root, absolutePath string) string {
 	rel, err := filepath.Rel(root, absolutePath)
 	if err != nil {

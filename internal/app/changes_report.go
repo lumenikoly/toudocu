@@ -16,14 +16,24 @@ func filterDocumentationChanges(report *ChangeSetReport, options Options) {
 	if options.ChangeTaskID != "" {
 		content, selectedTaskPath, docsRel := reportTaskDocumentContent(report, options.ChangeTaskID)
 		taskPath = selectedTaskPath
-		for _, path := range declaredTaskDocumentation(content, selectedTaskPath, docsRel) {
-			taskPaths[path] = true
+		tasks := []changeTaskDocument{{path: selectedTaskPath, content: content}}
+		if report.taskContext != nil && len(report.taskContext.selected) > 0 {
+			tasks = nil
+			for _, id := range report.taskContext.selected {
+				tasks = append(tasks, report.taskContext.tasks[id])
+			}
 		}
-		for _, path := range taskScopePaths(content) {
-			taskPaths[path] = true
-		}
-		for _, id := range stableEntityIDRE.FindAllString(string(content), -1) {
-			taskEntities[id] = true
+		for _, task := range tasks {
+			taskPaths[task.path] = true
+			for _, path := range declaredTaskDocumentation(task.content, task.path, docsRel) {
+				taskPaths[path] = true
+			}
+			for _, path := range taskScopePaths(task.content) {
+				taskPaths[path] = true
+			}
+			for _, id := range stableEntityIDRE.FindAllString(string(task.content), -1) {
+				taskEntities[id] = true
+			}
 		}
 	}
 	filtered := make([]DocumentationChange, 0, len(report.Changes))

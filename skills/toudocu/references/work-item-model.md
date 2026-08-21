@@ -8,6 +8,22 @@ Apply the general [document model](document-model.md),
 Use one work item per `work/TASK-*.md` or `work/BUG-*.md`. Work items are
 intentionally stricter because their commands may be executed.
 
+If substantial work no longer fits one compact, independently verifiable work
+item, decompose it into `TASK-*` items by observable outcomes. Do not split it
+mechanically into backend, frontend, tests, and docs unless each is itself an
+independent outcome. Code, tests, and documentation belong to the outcome they
+verify.
+
+A child may declare exactly one `Parent` or `Родительская задача`. Parent means
+decomposition; Dependencies means execution and completion ordering. Never
+merge or infer either relation from the other. Children are computed from
+Parent, so do not add a source `Children` field.
+
+Use a large parent as a coordination contract for the overall result,
+boundaries, shared constraints, integration acceptance criteria, and final
+documentation consistency. Do not duplicate each child's detailed acceptance
+criteria in the parent.
+
 For the draft state, represented by `Draft` or `Черновик`, require a valid
 Status, Type, and non-empty Result.
 
@@ -61,6 +77,18 @@ criteria.
 Completed tasks require all criteria checked, plus `ALL` and `DOCS` targets and
 completed dependencies. Blocked tasks require a Blocker section; cancelled
 tasks require a Cancellation reason.
+
+A Done parent requires every immediate child to be Done; Cancelled does not
+count as completed. A Cancelled parent may have only Done or Cancelled children.
+Parent cycles and cycles in the combined Parent-plus-Dependencies completion
+graph are invalid. Resolve Parent and computed children across active and
+archived `work/**`.
+
+Use `task tree` for a decomposition overview and `task context` for one bounded
+work item. Context includes compact ancestors, parent, direct children, and a
+descendant status summary, never the full contents of the subtree. `task verify
+--run` remains local to the selected task. Use `task changes --tree` only when
+the user needs aggregated documentation impact for the entire subtree.
 
 Tasks may explicitly list project standards and affected operational
 procedures through the recognized metadata keys `Standards` or `Стандарты` and

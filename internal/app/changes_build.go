@@ -144,7 +144,7 @@ func BuildDocumentationChanges(options Options) (*ChangeSetReport, error) {
 		report.Changes[i].newContent = nil
 	}
 	if options.ChangeTaskID != "" {
-		taskContext, contextErr := buildChangeTaskContext(g, target, options.ChangeTaskID)
+		taskContext, contextErr := buildChangeTaskContext(g, target, options.ChangeTaskID, options.ChangeTaskTree)
 		if contextErr != nil {
 			return nil, contextErr
 		}
@@ -935,17 +935,58 @@ func digestChangeSet(report *ChangeSetReport) string {
 	return "sha256:" + hex.EncodeToString(sum[:])
 }
 
-func buildChangeTaskContext(g *gitChangeSource, target ChangeSide, taskID string) (*changeTaskContext, error) {
-	taskPath, content, err := g.taskDocumentContent(target, taskID)
+func buildChangeTaskContext(g *gitChangeSource, target ChangeSide, taskID string, tree bool) (*changeTaskContext, error) {
+	if tree && !strings.HasPrefix(taskID, "TASK-") {
+		return nil, fmt.Errorf("--tree is available only for TASK-* work items")
+	}
+	filterID := taskID
+	if tree {
+		filterID = ""
+	}
+	tasks, err := g.taskDocuments(target, filterID)
 	if err != nil {
 		return nil, err
 	}
-	context := &changeTaskContext{content: content, path: taskPath, docsRel: g.docsRel, pathExists: map[string]bool{}}
-	for _, path := range declaredTaskDocumentation(content, taskPath, g.docsRel) {
-		if _, contentErr := g.content(target, path); contentErr == nil {
-			context.pathExists[path] = true
-		} else if !os.IsNotExist(contentErr) {
-			return nil, contentErr
+	root, ok := tasks[taskID]
+	if !ok {
+		return nil, fmt.Errorf("task %s not found", taskID)
+	}
+	selected := []string{taskID}
+	if tree {
+		children := map[string][]string{}
+		for id, task := range tasks {
+			if !strings.HasPrefix(id, "TASK-") {
+				continue
+			}
+			parent := strings.TrimSpace(analyzeMarkdown(string(task.content)).Metadata["parentTask"])
+			if parent != "" {
+				children[parent] = append(children[parent], id)
+			}
+		}
+		seen := map[string]bool{taskID: true}
+		var add func(string)
+		add = func(id string) {
+			sort.Slice(children[id], func(i, j int) bool { return naturalCompare(children[id][i], children[id][j]) < 0 })
+			for _, child := range children[id] {
+				if seen[child] {
+					continue
+				}
+				seen[child] = true
+				selected = append(selected, child)
+				add(child)
+			}
+		}
+		add(taskID)
+	}
+	context := &changeTaskContext{content: root.content, path: root.path, docsRel: g.docsRel, pathExists: map[string]bool{}, tasks: tasks, selected: selected}
+	for _, id := range selected {
+		task := tasks[id]
+		for _, path := range declaredTaskDocumentation(task.content, task.path, g.docsRel) {
+			if _, contentErr := g.content(target, path); contentErr == nil {
+				context.pathExists[path] = true
+			} else if !os.IsNotExist(contentErr) {
+				return nil, contentErr
+			}
 		}
 	}
 	return context, nil
@@ -954,22 +995,43 @@ func buildChangeTaskContext(g *gitChangeSource, target ChangeSide, taskID string
 func buildTaskImpact(report *ChangeSetReport, taskID string) *TaskImpactReport {
 	impact := &TaskImpactReport{TaskID: taskID, Declared: []TaskImpactEntry{}, Actual: []TaskImpactEntry{}, TaskChanges: []DocumentationChange{}, Diagnostics: []Issue{}}
 	content, taskPath, docsRel := reportTaskDocumentContent(report, taskID)
+	selectedPaths := map[string]bool{taskPath: true}
+	declaredBy := map[string][]string{}
+	scope := []string{}
+	if report.taskContext != nil && len(report.taskContext.selected) > 0 {
+		for _, id := range report.taskContext.selected {
+			task := report.taskContext.tasks[id]
+			selectedPaths[task.path] = true
+			for _, path := range declaredTaskDocumentation(task.content, task.path, docsRel) {
+				declaredBy[path] = append(declaredBy[path], id)
+			}
+			scope = append(scope, taskScopePaths(task.content)...)
+		}
+	} else {
+		for _, path := range declaredTaskDocumentation(content, taskPath, docsRel) {
+			declaredBy[path] = []string{taskID}
+		}
+		scope = taskScopePaths(content)
+	}
 	for _, change := range report.Changes {
-		if taskPath != "" && (change.Path == taskPath || change.OldPath == taskPath) {
+		if selectedPaths[change.Path] || selectedPaths[change.OldPath] {
 			impact.TaskChanges = append(impact.TaskChanges, change)
 			continue
 		}
 		impact.Actual = append(impact.Actual, TaskImpactEntry{Path: change.Path, Changed: true, Created: change.Status == "added" || change.Status == "untracked"})
 	}
-	declared := declaredTaskDocumentation(content, taskPath, docsRel)
-	scope := taskScopePaths(content)
+	declared := make([]string, 0, len(declaredBy))
+	for path := range declaredBy {
+		declared = append(declared, path)
+	}
+	sort.Strings(declared)
 	changed := map[string]DocumentationChange{}
 	for _, change := range report.Changes {
 		changed[change.Path] = change
 	}
 	for _, path := range declared {
 		change, ok := changed[path]
-		entry := TaskImpactEntry{Path: path, Declared: true, Changed: ok}
+		entry := TaskImpactEntry{Path: path, Declared: true, Changed: ok, DeclaredBy: uniqueStrings(declaredBy[path])}
 		if ok {
 			entry.Created = change.Status == "added" || change.Status == "untracked"
 		}

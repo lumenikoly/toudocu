@@ -70,10 +70,13 @@ func TestNewCLIFormsAndRemovedTaskCheck(t *testing.T) {
 		{"task", "ready", "TASK-CLI-001", "./docs", "--strict", "--format", "json"},
 		{"task", "ready", "BUG-CLI-001", "./docs", "--format", "json"},
 		{"task", "context", "TASK-CLI-001", "./docs", "--format", "json"},
+		{"task", "tree", "TASK-CLI-001", "./docs", "--format", "json"},
 		{"task", "verify", "TASK-CLI-001", "./docs", "--dry-run", "--target", "AC-01"},
 		{"task", "archive", "TASK-CLI-001", "./docs", "--format", "json"},
 		{"task", "restore", "TASK-CLI-001", "./docs", "--format", "json"},
 		{"task", "changes", "TASK-CLI-001", "./docs", "--translation-input", "--format", "json"},
+		{"task", "changes", "TASK-CLI-001", "./docs", "--tree", "--format", "json"},
+		{"task", "init", "./docs", "--area", "CLI", "--title", "Child", "--type", "Feature", "--parent", "TASK-CLI-001"},
 	}
 	for _, args := range cases {
 		if _, _, _, err := ParseArguments(args); err != nil {
@@ -97,6 +100,9 @@ func TestNewCLIFormsAndRemovedTaskCheck(t *testing.T) {
 	}
 	if _, _, _, err := ParseArguments([]string{"changes", "./docs", "--translation-input", "--permanent-only"}); err == nil {
 		t.Fatal("translation input and permanent-only must be rejected together")
+	}
+	if _, _, _, err := ParseArguments([]string{"task", "changes", "BUG-CLI-001", "./docs", "--tree"}); err == nil {
+		t.Fatal("task changes --tree must be limited to TASK-* work items")
 	}
 	if _, _, _, err := ParseArguments([]string{"check", "./docs", "--include-assets"}); err == nil {
 		t.Fatal("--include-assets must be rejected outside changes commands")

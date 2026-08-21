@@ -689,6 +689,84 @@ func TestTaskImpactSeparatesTaskAndReportsMismatch(t *testing.T) {
 	}
 }
 
+func TestTaskChangesIgnoresUnrelatedDuplicateTaskIDs(t *testing.T) {
+	root, docs := newChangesRepository(t)
+	writeChangesTestFile(t, filepath.Join(docs, "work", "TASK-CORE-001.md"), "# TASK-CORE-001: Selected\n\n## Documentation impact\n\n- `docs/modules/MOD-CORE.md`\n")
+	duplicate := "# TASK-OTHER-001: Duplicate\n\n## Result\n\nDuplicate.\n"
+	writeChangesTestFile(t, filepath.Join(docs, "work", "TASK-OTHER-001.md"), duplicate)
+	writeChangesTestFile(t, filepath.Join(docs, "work", "TASK-OTHER-copy.md"), duplicate)
+	gitTestRun(t, root, "add", "docs/work")
+	gitTestRun(t, root, "commit", "-q", "-m", "tasks")
+	writeChangesTestFile(t, filepath.Join(docs, "modules", "MOD-CORE.md"), "# MOD-CORE: Core\n\nChanged.\n")
+
+	report, err := BuildDocumentationChanges(Options{InputDirectory: docs, ChangeTaskID: "TASK-CORE-001"})
+	if err != nil || report.TaskImpact == nil || report.TaskImpact.TaskID != "TASK-CORE-001" {
+		t.Fatalf("unrelated duplicate broke ordinary task changes: report=%#v err=%v", report, err)
+	}
+	if _, err := BuildDocumentationChanges(Options{InputDirectory: docs, ChangeTaskID: "TASK-OTHER-001"}); err == nil || !strings.Contains(err.Error(), "ambiguous") {
+		t.Fatalf("selected duplicate task ID was not rejected: %v", err)
+	}
+}
+
+func TestTaskChangesTreeRejectsBugs(t *testing.T) {
+	root, docs := newChangesRepository(t)
+	writeChangesTestFile(t, filepath.Join(docs, "work", "BUG-CORE-001.md"), "# BUG-CORE-001: Root bug\n\n## Documentation impact\n\n- `docs/use-cases/UC-CORE-01.md`\n")
+	writeChangesTestFile(t, filepath.Join(docs, "work", "TASK-CORE-100.md"), "# TASK-CORE-100: Parent\n\n## Documentation impact\n\n- `docs/modules/MOD-CORE.md`\n")
+	writeChangesTestFile(t, filepath.Join(docs, "work", "BUG-CORE-002.md"), "# BUG-CORE-002: Illegal child\n\n- Parent: TASK-CORE-100\n\n## Documentation impact\n\n- `docs/use-cases/UC-CORE-01.md`\n")
+	gitTestRun(t, root, "add", "docs/work")
+	gitTestRun(t, root, "commit", "-q", "-m", "task and bugs")
+
+	if _, err := BuildDocumentationChanges(Options{InputDirectory: docs, ChangeTaskID: "BUG-CORE-001", ChangeTaskTree: true}); err == nil || !strings.Contains(err.Error(), "TASK-*") {
+		t.Fatalf("BUG root accepted tree mode: %v", err)
+	}
+	report, err := BuildDocumentationChanges(Options{InputDirectory: docs, ChangeTaskID: "TASK-CORE-100", ChangeTaskTree: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.TaskImpact == nil || len(report.TaskImpact.Declared) != 1 || report.TaskImpact.Declared[0].Path != "docs/modules/MOD-CORE.md" || strings.Join(report.TaskImpact.Declared[0].DeclaredBy, ",") != "TASK-CORE-100" {
+		t.Fatalf("BUG child entered TASK decomposition: %#v", report.TaskImpact)
+	}
+}
+
+func TestTaskChangesTreeAggregatesDescendantsAndOwnership(t *testing.T) {
+	root, docs := newChangesRepository(t)
+	parentPath := filepath.Join(docs, "work", "TASK-CORE-100.md")
+	childPath := filepath.Join(docs, "work", "TASK-CORE-101.md")
+	grandchildPath := filepath.Join(docs, "work", "TASK-CORE-111.md")
+	writeChangesTestFile(t, parentPath, "# TASK-CORE-100: Parent\n\n## Documentation impact\n\n- `docs/modules/MOD-CORE.md`\n")
+	writeChangesTestFile(t, childPath, "# TASK-CORE-101: Child\n\n- Parent: TASK-CORE-100\n\n## Documentation impact\n\n- `docs/use-cases/UC-CORE-01.md`\n")
+	writeChangesTestFile(t, grandchildPath, "# TASK-CORE-111: Grandchild\n\n- Parent: TASK-CORE-101\n\n## Documentation impact\n\n- `docs/reference/auth.md`\n")
+	gitTestRun(t, root, "add", "docs/work")
+	gitTestRun(t, root, "commit", "-q", "-m", "task tree")
+	writeChangesTestFile(t, filepath.Join(docs, "modules", "MOD-CORE.md"), "# MOD-CORE: Core\n\nChanged.\n")
+	writeChangesTestFile(t, filepath.Join(docs, "use-cases", "UC-CORE-01.md"), "# UC-CORE-01: Open\n\nChanged.\n")
+	writeChangesTestFile(t, filepath.Join(docs, "reference", "auth.md"), "# Auth\n\nChanged.\n")
+	writeChangesTestFile(t, childPath, "# TASK-CORE-101: Child\n\n- Parent: TASK-CORE-100\n- Status: Done\n\n## Documentation impact\n\n- `docs/use-cases/UC-CORE-01.md`\n")
+	writeChangesTestFile(t, grandchildPath, "# TASK-CORE-111: Grandchild\n\n- Parent: TASK-CORE-101\n- Status: Done\n\n## Documentation impact\n\n- `docs/reference/auth.md`\n")
+
+	report, err := BuildDocumentationChanges(Options{InputDirectory: docs, ChangeTaskID: "TASK-CORE-100", ChangeTaskTree: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.TaskImpact == nil || len(report.TaskImpact.Declared) != 3 || len(report.TaskImpact.TaskChanges) != 2 {
+		t.Fatalf("tree impact not aggregated: %#v", report.TaskImpact)
+	}
+	owners := map[string][]string{}
+	for _, entry := range report.TaskImpact.Declared {
+		owners[entry.Path] = entry.DeclaredBy
+	}
+	if strings.Join(owners["docs/modules/MOD-CORE.md"], ",") != "TASK-CORE-100" || strings.Join(owners["docs/use-cases/UC-CORE-01.md"], ",") != "TASK-CORE-101" {
+		t.Fatalf("ownership lost: %#v", owners)
+	}
+	if strings.Join(owners["docs/reference/auth.md"], ",") != "TASK-CORE-111" {
+		t.Fatalf("deep descendant ownership lost: %#v", owners)
+	}
+	filterDocumentationChanges(report, Options{ChangeTaskID: "TASK-CORE-100", ChangeTaskTree: true})
+	if len(report.Changes) != 5 {
+		t.Fatalf("tree filter excluded descendant changes: %#v", report.Changes)
+	}
+}
+
 func TestTaskImpactUsesSelectedTargetTaskDocument(t *testing.T) {
 	root, docs := newChangesRepository(t)
 	taskPath := filepath.Join(docs, "work", "TASK-CORE-001.md")

@@ -127,7 +127,15 @@ func nextTaskNumber(docsDir, prefix, area string) (int, error) {
 	return maximum + 1, nil
 }
 
-func renderTaskScaffold(id, title, taskType, language, date string) string {
+func renderTaskScaffold(id, title, taskType, language, date, parentID string) string {
+	parent := ""
+	if parentID != "" {
+		if language == "ru" {
+			parent = "- Родительская задача: " + parentID + "\n"
+		} else {
+			parent = "- Parent: " + parentID + "\n"
+		}
+	}
 	if taskType == "Bug" {
 		if language == "ru" {
 			return fmt.Sprintf(`# %s: %s
@@ -135,6 +143,7 @@ func renderTaskScaffold(id, title, taskType, language, date string) string {
 - Тип: Bug
 - Статус: Черновик
 - Последнее обновление: %s
+%s
 
 ## Симптом
 
@@ -163,13 +172,14 @@ func renderTaskScaffold(id, title, taskType, language, date string) string {
 ## Регрессионный тест
 
 ## Влияние на документацию
-`, id, title, date)
+`, id, title, date, parent)
 		}
 		return fmt.Sprintf(`# %s: %s
 
 - Type: Bug
 - Status: Draft
 - Last updated: %s
+%s
 
 ## Symptom
 
@@ -198,7 +208,7 @@ Not established.
 ## Regression test
 
 ## Documentation impact
-`, id, title, date)
+`, id, title, date, parent)
 	}
 	if language == "ru" {
 		return fmt.Sprintf(`# %s: %s
@@ -206,6 +216,7 @@ Not established.
 - Статус: Черновик
 - Тип: %s
 - Последнее обновление: %s
+%s
 
 ## Результат
 
@@ -226,13 +237,14 @@ Not established.
 ## Проверка
 
 ## Влияние на документацию
-`, id, title, taskType, date)
+`, id, title, taskType, date, parent)
 	}
 	return fmt.Sprintf(`# %s: %s
 
 - Status: Draft
 - Type: %s
 - Last updated: %s
+%s
 
 ## Result
 
@@ -253,7 +265,7 @@ Not established.
 ## Verification
 
 ## Documentation impact
-`, id, title, taskType, date)
+`, id, title, taskType, date, parent)
 }
 
 func InitTask(options Options) (TaskInitReport, error) {
@@ -278,6 +290,25 @@ func InitTask(options Options) (TaskInitReport, error) {
 	if !validTaskInitType(options.TaskType) {
 		return TaskInitReport{}, fmt.Errorf("--type must be Feature, Bug, Maintenance, Documentation, or Research")
 	}
+	if options.ParentTaskID != "" {
+		if options.TaskType == "Bug" {
+			return TaskInitReport{}, fmt.Errorf("--parent is supported only for TASK-* work items")
+		}
+		if !taskIDRE.MatchString(options.ParentTaskID) || !strings.HasPrefix(options.ParentTaskID, "TASK-") {
+			return TaskInitReport{}, fmt.Errorf("--parent must contain exactly one TASK-* identifier")
+		}
+		model, err := BuildDocumentationModel(options)
+		if err != nil {
+			return TaskInitReport{}, err
+		}
+		parent, err := findWorkItem(model, options.ParentTaskID)
+		if err != nil {
+			return TaskInitReport{}, fmt.Errorf("parent task %s not found", options.ParentTaskID)
+		}
+		if !strings.HasPrefix(parent.ID, "TASK-") {
+			return TaskInitReport{}, fmt.Errorf("parent must be a TASK-* work item")
+		}
+	}
 	taskType := options.TaskType
 	prefix := "TASK"
 	if taskType == "Bug" {
@@ -289,9 +320,12 @@ func InitTask(options Options) (TaskInitReport, error) {
 			return TaskInitReport{}, err
 		}
 		id := fmt.Sprintf("%s-%s-%03d", prefix, options.Area, number)
+		if id == options.ParentTaskID {
+			return TaskInitReport{}, fmt.Errorf("task cannot be its own parent")
+		}
 		relative := filepath.ToSlash(filepath.Join("work", id+".md"))
 		target := filepath.Join(options.InputDirectory, filepath.FromSlash(relative))
-		err = atomicCreateFile(target, renderTaskScaffold(id, options.Title, taskType, options.Language, scaffoldDate(options.Now)))
+		err = atomicCreateFile(target, renderTaskScaffold(id, options.Title, taskType, options.Language, scaffoldDate(options.Now), options.ParentTaskID))
 		if err != nil && strings.Contains(err.Error(), "already exists") {
 			continue
 		}
@@ -300,7 +334,7 @@ func InitTask(options Options) (TaskInitReport, error) {
 		}
 		return TaskInitReport{
 			SchemaVersion: 1, Kind: "task-init", Generator: GeneratorInfo{Name: "Toudocu", Version: Version},
-			ID: id, Title: options.Title, Type: taskType, Language: options.Language, Path: relative,
+			ID: id, Title: options.Title, Type: taskType, Language: options.Language, Path: relative, ParentID: optionalString(options.ParentTaskID),
 		}, nil
 	}
 	return TaskInitReport{}, fmt.Errorf("could not allocate a free work-item identifier after concurrent changes")

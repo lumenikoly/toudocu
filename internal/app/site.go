@@ -15,7 +15,7 @@ import (
 
 const Version = "0.0.4"
 
-var fieldOrder = []string{"status", "type", "stage", "version", "author", "actor", "priority", "criticality", "module", "useCase", "flow", "screens", "transitions", "standards", "runbooks", "startScreen", "terminalScreens", "allowCycle", "route", "preview", "parentScreen", "component", "environment", "risk", "lastVerified", "supersededBy", "errors", "dependsOn", "source", "date", "plannedDate", "updated", "probability", "impact", "scope", "id", "tags"}
+var fieldOrder = []string{"status", "type", "stage", "version", "author", "actor", "priority", "criticality", "module", "useCase", "flow", "screens", "transitions", "standards", "runbooks", "parentTask", "startScreen", "terminalScreens", "allowCycle", "route", "preview", "parentScreen", "component", "environment", "risk", "lastVerified", "supersededBy", "errors", "dependsOn", "source", "date", "plannedDate", "updated", "probability", "impact", "scope", "id", "tags"}
 
 var typeIcons = map[string]string{"overview": "⌂", "status": "◐", "roadmap": "→", "risks": "!", "ideas": "✦", "notes": "✎", "changelog": "↻", "use-case": "◎", "module": "▦", "architecture": "◇", "contract": "⇄", "decision": "◆", "flow": "⇢", "screen-map": "⌗", "screen-index": "⌗", "screen": "▣", "guide": "◫", "work": "☐", "draft": "✎", "reference": "≡", "standard": "✓", "quality-index": "✓", "runbook": "↻", "runbook-index": "↻", "document": "•"}
 
@@ -759,6 +759,9 @@ func renderDocumentPage(model *Model, document *Document) string {
 	if document.Type == "flow" {
 		flowConnections = renderFlowConnections(model, document)
 	}
+	if document.Type == "work" {
+		computedStatus += renderTaskHierarchy(model, document)
+	}
 	if model.serveMode && document.Type == "work" {
 		id := stableEntityIDRE.FindString(document.Title)
 		computedStatus = `<nav class="task-page-tabs" aria-label="` + escapeAttr(ui.Text("task.views")) + `"><span aria-current="page">` + escapeHTML(ui.Text("task.contract")) + `</span><a href="/changes/?task=` + escapeAttr(url.QueryEscape(id)) + `&amp;path=` + escapeAttr(url.QueryEscape(documentContextPath(model, document))) + `">` + escapeHTML(ui.Text("nav.changes")) + `</a></nav>` + computedStatus
@@ -774,6 +777,61 @@ func renderDocumentPage(model *Model, document *Document) string {
 	content := breadcrumbs(model, document.OutputPath, document.Title) + `<header class="page-header"><div class="page-kicker">` + statusChip + `<span class="badge">` + escapeHTML(localizedTypeLabel(model, document.Type)) + `</span>` + issues + `</div><h1>` + escapeHTML(document.Title) + `</h1><p class="page-lead">` + escapeHTML(document.Description) + `</p>` + renderMetadata(model, document) + renderRiskStatus(model, document) + renderProgress(ui, document.TaskStats, progressLabel) + controls + `<div class="page-actions">` + renderRoadmapAddButton(model, document) + renderDocumentContextButton(model, document) + renderOpenAPIContractButton(model, document) + `<button class="collapse-all-button" type="button" data-collapse-all data-collapse-state="expanded" aria-expanded="true"><span class="collapse-all-icon" aria-hidden="true"><span class="collapse-icon collapse-icon-up">↑</span><span class="collapse-icon collapse-icon-down">↓</span></span><span data-collapse-label>` + escapeHTML(ui.Text("action.collapseSections")) + `</span></button></div></header>` + computedStatus + `<article class="doc-content">` + body + `</article>` + screenConnections + renderRelated(model, document)
 	content += flowConnections
 	return pageShell(model, document.OutputPath, document.Title, document.Description, content, renderTOC(document))
+}
+
+func renderTaskHierarchy(model *Model, document *Document) string {
+	item, err := findWorkItem(model, stableDocumentID(model, document.SourcePath))
+	if err != nil || item.ParentID == nil && len(item.ChildIDs) == 0 {
+		return ""
+	}
+	ui := portalUI(model)
+	byID := map[string]*WorkItem{}
+	for index := range model.Knowledge.WorkItems {
+		candidate := &model.Knowledge.WorkItems[index]
+		byID[candidate.ID] = candidate
+	}
+	link := func(candidate *WorkItem) string {
+		target := model.DocByPath[candidate.Document]
+		if target == nil {
+			return `<code>` + escapeHTML(candidate.ID) + `</code> · ` + escapeHTML(candidate.Title)
+		}
+		return `<a href="` + escapeAttr(relativeURL(document.OutputPath, target.OutputPath)) + `"><code>` + escapeHTML(candidate.ID) + `</code> · ` + escapeHTML(candidate.Title) + `</a>`
+	}
+	ancestors := taskHierarchy(model, item).Ancestors
+	var trail, children strings.Builder
+	for index, ancestor := range ancestors {
+		if index > 0 {
+			trail.WriteString(`<span aria-hidden="true">/</span>`)
+		}
+		trail.WriteString(link(byID[ancestor.ID]))
+	}
+	if trail.Len() > 0 {
+		trail.WriteString(`<span aria-hidden="true">/</span><strong><code>` + escapeHTML(item.ID) + `</code></strong>`)
+	}
+	for _, id := range item.ChildIDs {
+		child := byID[id]
+		if child == nil {
+			continue
+		}
+		symbol := map[string]string{"done": "✓", "in-progress": "→", "blocked": "!", "cancelled": "×"}[child.statusName]
+		if symbol == "" {
+			symbol = "•"
+		}
+		children.WriteString(`<li><span aria-hidden="true">` + symbol + `</span> ` + link(child) + ` <span class="badge">` + escapeHTML(child.Status.Label) + `</span></li>`)
+	}
+	parent := ""
+	if candidate := byID[taskParentID(item)]; candidate != nil {
+		parent = `<p><strong>` + escapeHTML(ui.Text("task.parent")) + `:</strong> ` + link(candidate) + `</p>`
+	}
+	childList := ""
+	if children.Len() > 0 {
+		childList = `<h3>` + escapeHTML(ui.Text("task.subtasks")) + `</h3><ul class="related-list">` + children.String() + `</ul>`
+	}
+	breadcrumb := ""
+	if trail.Len() > 0 {
+		breadcrumb = `<nav class="task-hierarchy-breadcrumb" aria-label="` + escapeAttr(ui.Text("task.hierarchy")) + `">` + trail.String() + `</nav>`
+	}
+	return `<section class="dashboard-section task-decomposition"><h2>` + escapeHTML(ui.Text("task.decomposition")) + `</h2>` + breadcrumb + parent + childList + `</section>`
 }
 
 func docCard(model *Model, current string, document *Document) string {

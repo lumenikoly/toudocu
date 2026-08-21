@@ -134,14 +134,14 @@ save, create и roadmap add изменяют workspace.
 		"task": `Операции жизненного цикла work item.
 
 Использование:
-  toudocu task init|ready|context|verify|archive|restore|changes ...
+  toudocu task init|ready|context|verify|archive|restore|changes|tree ...
 
 Для параметров операции:
   toudocu task OPERATION --help`,
 		"task-init": `Атомарно создаёт новый Draft TASK-* или BUG-*.
 
 Использование:
-  toudocu task init [docs-dir] --area AREA --title TITLE --type TYPE
+  toudocu task init [docs-dir] --area AREA --title TITLE --type TYPE [--parent TASK-ID]
                     [--lang en|ru] [--format text|json]
 
 TYPE: Feature, Bug, Maintenance, Documentation или Research.
@@ -154,6 +154,10 @@ TYPE: Feature, Bug, Maintenance, Documentation или Research.
 
 Использование:
   toudocu task context TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]`,
+		"task-tree": `Показывает read-only дерево декомпозиции TASK-*.
+
+Использование:
+  toudocu task tree TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]`,
 		"task-verify": `Планирует или выполняет доверенные команды проверки задачи.
 
 Использование:
@@ -178,10 +182,10 @@ TYPE: Feature, Bug, Maintenance, Documentation или Research.
                        [--target working-tree|index|HEAD|REV]
                        [--include-assets|--translation-input]
                        [--repository-root DIR]
-                       [--format text|json|markdown] [-o FILE]
+                       [--tree] [--format text|json|markdown] [-o FILE]
 
 Побочные эффекты: команда только читает Git и workspace; -o записывает явно
-указанный файл отчёта.`,
+указанный файл отчёта. --tree включает выбранную задачу и всех её потомков.`,
 		"skill": `Управляет встроенным offline-пакетом AI-skill Toudocu.
 
 Использование:
@@ -293,7 +297,7 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 				options.Command = "task-init"
 				args = args[2:]
 				goto parseOptions
-			case "ready", "context", "verify", "archive", "restore", "changes":
+			case "ready", "context", "tree", "verify", "archive", "restore", "changes":
 				if len(args) < 3 {
 					return options, false, false, fmt.Errorf("task %s requires TASK-ID", args[1])
 				}
@@ -361,6 +365,16 @@ parseOptions:
 			options.Area = v
 		case strings.HasPrefix(arg, "--area="):
 			options.Area = strings.TrimPrefix(arg, "--area=")
+		case arg == "--parent":
+			v, e := takeArgValue(args, &i, arg)
+			if e != nil {
+				return options, false, false, e
+			}
+			options.ParentTaskID = v
+		case strings.HasPrefix(arg, "--parent="):
+			options.ParentTaskID = strings.TrimPrefix(arg, "--parent=")
+		case arg == "--tree":
+			options.ChangeTaskTree = true
 		case arg == "--type":
 			v, e := takeArgValue(args, &i, arg)
 			if e != nil {
@@ -669,7 +683,7 @@ parseOptions:
 	if options.NoUpdateCheck && options.Command != "serve" {
 		return options, false, false, fmt.Errorf("--no-update-check is available only for serve")
 	}
-	if options.Command == "task-ready" || options.Command == "task-context" || options.Command == "task-verify" || options.Command == "task-changes" ||
+	if options.Command == "task-ready" || options.Command == "task-context" || options.Command == "task-tree" || options.Command == "task-verify" || options.Command == "task-changes" ||
 		options.Command == "task-archive" || options.Command == "task-restore" {
 		if !taskIDRE.MatchString(options.TaskID) {
 			return options, false, false, fmt.Errorf("work-item identifier must have the form TASK-AREA-NNN or BUG-AREA-NNN")
@@ -740,6 +754,15 @@ parseOptions:
 	}
 	if options.Area != "" && options.Command != "task-init" || options.TaskType != "" && options.Command != "task-init" {
 		return options, false, false, fmt.Errorf("--area and --type are available only for task init")
+	}
+	if options.ParentTaskID != "" && options.Command != "task-init" {
+		return options, false, false, fmt.Errorf("--parent is available only for task init")
+	}
+	if options.ChangeTaskTree && options.Command != "task-changes" {
+		return options, false, false, fmt.Errorf("--tree is available only for task changes")
+	}
+	if options.ChangeTaskTree && !strings.HasPrefix(options.TaskID, "TASK-") {
+		return options, false, false, fmt.Errorf("--tree is available only for TASK-* work items")
 	}
 	if titleSpecified && options.Command != "build" && options.Command != "serve" && options.Command != "task-init" && options.Command != "scaffold" {
 		return options, false, false, fmt.Errorf("--title is not available for this command")
@@ -1021,6 +1044,24 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 			fmt.Fprintln(stdout, string(data))
 		} else {
 			printTaskContextText(stdout, report)
+		}
+		return 0
+	}
+	if options.Command == "task-tree" {
+		report, err := BuildTaskTree(model, options.TaskID)
+		if err != nil {
+			fmt.Fprintln(stderr, "Error:", err)
+			return 1
+		}
+		if options.Format == "json" {
+			data, marshalErr := json.MarshalIndent(report, "", "  ")
+			if marshalErr != nil {
+				fmt.Fprintln(stderr, "Error:", marshalErr)
+				return 1
+			}
+			fmt.Fprintln(stdout, string(data))
+		} else {
+			printTaskTreeText(stdout, report)
 		}
 		return 0
 	}

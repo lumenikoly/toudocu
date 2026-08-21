@@ -2,7 +2,7 @@
 
 - Идентификатор: MOD-CLI
 - Статус: Готово
-- Последнее обновление: 2026-08-10
+- Последнее обновление: 2026-08-21
 
 Модуль объединяет команды проверки, сборки, локального просмотра, поиска,
 изменений и задач. Его результаты воспроизводимы, коды завершения стабильны, а
@@ -13,7 +13,7 @@
 - `api.go`, `cmd/toudocu/main.go` — публичный Go-фасад и точка входа;
 - `internal/app/cli.go`, `internal/app/server.go` — CLI и локальный сервер;
 - `internal/app/task_context.go`, `task_ready.go`, `task_verify.go`,
-  `task_archive.go` — процессы задач;
+  `task_archive.go`, `task_tree.go` — процессы задач;
 - `internal/app/search.go`, `scaffold.go` — поиск и каркасы;
 - `internal/app/command_process_*.go` — запуск и остановка процессов;
 - `skills/bundle.go`, `internal/skillinstall/`, `internal/app/skill_cli.go` —
@@ -91,6 +91,13 @@ Markdown или статус. Если прямая ссылка после пе
 После этого каждое обрабатывается независимо; ошибка одного не останавливает
 остальные, но частичный результат возвращает код `1`.
 
+### BR-CLI-011: Дерево не расширяет границу выполнения
+
+`task tree` только показывает декомпозицию `TASK-*`. `task changes --tree`
+агрегирует влияние на документацию того же дерева и не принимает `BUG-*`, но
+`task verify --run` выполняет команды только выбранной задачи и никогда не
+запускает проверки детей.
+
 ## Инварианты
 
 - JSON-ответ не смешивается с потоковым текстом.
@@ -109,7 +116,7 @@ Markdown или статус. Если прямая ссылка после пе
 ## Стабильные интерфейсы
 
 - команды и параметры из [CLI-контракта](../contracts/cli.md);
-- `ProjectReport`, `TaskContextReport`, `SearchReport`, `TaskInitReport`,
+- `ProjectReport`, `TaskContextReport`, `TaskTreeReport`, `SearchReport`, `TaskInitReport`,
   `ScaffoldReport`, `TaskReadyReport`, `TaskMoveReport` и `TaskVerifyReport`
   версии 1;
 - код `0` только для успешного результата или допустимой операции без
