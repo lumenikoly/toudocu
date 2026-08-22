@@ -1,11 +1,13 @@
+<!-- toudocu
+id: UC-DOCS-01
+status: done
+priority: high
+module: MOD-SITE
+updated: 2026-08-12
+-->
+
 # UC-DOCS-01: Build a Static HTTP Portal
 
-- Identifier: UC-DOCS-01
-- Status: Completed
-- Actor: Developer
-- Module: MOD-SITE
-- Priority: High
-- Last updated: 2026-08-12
 
 The developer converts a project-documentation directory into a read-only
 portal that is published on ordinary HTTP(S) static hosting and requires no
@@ -17,11 +19,13 @@ Toudocu backend after the build.
 - output directory;
 - optional repository URL, ref, excludes, and stale-threshold settings.
 
+<!-- toudocu:section prerequisites -->
 ## Preconditions
 
 - Toudocu is available to run;
 - the developer can read the source directory and write to the output directory.
 
+<!-- toudocu:section main-scenario -->
 ## Main scenario
 
 1. The developer runs `toudocu build ./docs --output ./build/project-docs`.
@@ -43,12 +47,14 @@ Toudocu backend after the build.
 - with `--strict`, warnings also produce exit code `1`;
 - a write or generation error interrupts the build and is printed to stderr.
 
+<!-- toudocu:section postconditions -->
 ## Postconditions
 
 After successful generation, the output directory contains a backend-independent
 portal, static data, and `ProjectReport` schema v1. Source Markdown is unchanged.
 Opening through `file://` is unsupported; use `toudocu serve` for local work.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] The output contains a backend-independent portal, static data, and
@@ -56,6 +62,7 @@ Opening through `file://` is unsupported; use `toudocu serve` for local work.
 - [x] Generation leaves source Markdown unchanged.
 - [x] Local viewing uses `toudocu serve`, not `file://`.
 
+<!-- toudocu:section business-rules -->
 ## Business rules
 
 Rules are defined in the corresponding module documents:
@@ -67,6 +74,7 @@ Rules are defined in the corresponding module documents:
 - [BR-MD-003](../modules/markdown.md#br-md-003-mermaid-remains-a-visualization) — Mermaid remains a visualization.
 - [BR-SITE-004](../modules/site.md#br-site-004-mermaid-works-autonomously-and-in-strict-mode) — Mermaid works autonomously and in strict mode.
 
+<!-- toudocu:section implementation -->
 ## Implementation
 
 - [FLOW-DOCS-BUILD: Building a static HTTP portal](../flows/FLOW-DOCS-BUILD.md)

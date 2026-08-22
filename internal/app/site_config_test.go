@@ -1,6 +1,8 @@
 package toudocu
 
 import (
+	"bytes"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,11 +20,15 @@ func configFixture(t *testing.T) (string, string) {
 	if err := os.WriteFile(filepath.Join(docs, "index.md"), []byte("# Index title\n\nProject description.\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
+	writeSiteConfig(t, root, "documentationVersion: 2\n")
 	return root, docs
 }
 
 func writeSiteConfig(t *testing.T, root, content string) {
 	t.Helper()
+	if !strings.Contains(content, "documentationVersion:") {
+		content = "documentationVersion: 2\n" + content
+	}
 	directory := filepath.Join(root, ".toudocu")
 	if err := os.MkdirAll(directory, 0o755); err != nil {
 		t.Fatal(err)
@@ -54,6 +60,74 @@ func TestSiteConfigDefaultsAndMissingFile(t *testing.T) {
 	}
 	if got := renderFooter(frontend.NewUI("ru"), config.Footer); got != `Сгенерировано <a href="https://lumenikoly.github.io/toudocu/" rel="noopener noreferrer">Toudocu</a> `+Version {
 		t.Fatalf("rendered default footer: %q", got)
+	}
+}
+
+func TestDocumentationVersionGatesParsing(t *testing.T) {
+	root := t.TempDir()
+	docs := filepath.Join(root, "docs")
+	if err := os.MkdirAll(docs, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	legacy := "# TASK-OLD-001: Legacy\n\n- Status: Ready\n- Type: Maintenance\n"
+	if err := os.WriteFile(filepath.Join(docs, "TASK-OLD-001.md"), []byte(legacy), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(model.Issues) != 1 || model.Issues[0].Code != "DOCS_MIGRATION_REQUIRED" || model.Issues[0].Migration != "v1-to-v2" || len(model.Documents) != 0 {
+		t.Fatalf("missing version must stop before parsing: %#v", model)
+	}
+	if _, err := InitTask(Options{InputDirectory: docs, RepositoryRoot: root, Area: "OLD", Title: "Must not write", TaskType: "Maintenance"}); err == nil || !strings.Contains(err.Error(), "DOCS_MIGRATION_REQUIRED") {
+		t.Fatalf("task init did not honor version gate: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(docs, "work")); !os.IsNotExist(err) {
+		t.Fatalf("version-gated task init changed the project: %v", err)
+	}
+
+	var stdout, stderr bytes.Buffer
+	if code := RunCLI([]string{"check", docs, "--repository-root", root, "--format", "json"}, &stdout, &stderr); code != 1 || stderr.Len() != 0 {
+		t.Fatalf("check code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+	}
+	var report ProjectReport
+	if err := json.Unmarshal(stdout.Bytes(), &report); err != nil || len(report.Issues) != 1 || report.Issues[0].Migration != "v1-to-v2" {
+		t.Fatalf("migration JSON: %#v (%v)", report.Issues, err)
+	}
+	stdout.Reset()
+	if code := RunCLI([]string{"check", docs, "--repository-root", root}, &stdout, &stderr); code != 1 || !strings.Contains(stdout.String(), "DOCS_MIGRATION_REQUIRED\n\nMigration: v1-to-v2\nFile: .toudocu/config.yml") {
+		t.Fatalf("migration text: code=%d output=%q", code, stdout.String())
+	}
+
+	writeSiteConfig(t, root, "documentationVersion: 1\n")
+	if explicit, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root}); err != nil || !hasDocumentationVersionIssue(explicit) {
+		t.Fatalf("explicit v1 did not require migration: %#v (%v)", explicit, err)
+	}
+	writeSiteConfig(t, root, "documentationVersion: 2\n")
+	model = buildConfigFixture(t, root, docs, "")
+	if hasDocumentationVersionIssue(model) || len(model.Documents) != 1 {
+		t.Fatalf("current version did not use the current parser: %#v", model.Issues)
+	}
+}
+
+func TestDocumentationVersionValidationAndFutureVersion(t *testing.T) {
+	for _, value := range []string{"0", "-1", "nope"} {
+		if _, err := parseSiteConfig([]byte("documentationVersion: " + value + "\n")); err == nil {
+			t.Fatalf("invalid documentationVersion %q accepted", value)
+		}
+	}
+	config, err := parseSiteConfig([]byte("documentationVersion: 2\n"))
+	if err != nil || config.DocumentationVersion != currentDocumentationVersion {
+		t.Fatalf("current documentationVersion: %#v (%v)", config, err)
+	}
+
+	root, docs := configFixture(t)
+	writeSiteConfig(t, root, "documentationVersion: 3\n")
+	model := buildConfigFixture(t, root, docs, "")
+	if len(model.Issues) != 1 || model.Issues[0].Code != "DOCUMENTATION_VERSION_UNSUPPORTED" || len(model.Documents) != 0 {
+		t.Fatalf("future version diagnostic: %#v", model.Issues)
 	}
 }
 

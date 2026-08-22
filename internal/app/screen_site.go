@@ -334,7 +334,7 @@ func screenCatalogRows(model *Model, current string) string {
 		}
 		errors := screenErrorIDs(model, screen.ID)
 		search := strings.Join([]string{screen.ID, screen.Title, screen.ModuleID, screen.Route, strings.Join(errors, " "), strings.Join(screen.UseCaseIDs, " ")}, " ")
-		fmt.Fprintf(&rows, `<tr data-filter-item data-search="%s" data-module="%s" data-status="%s" data-usecase="%s"><td><div class="screen-catalog-screen">%s<div class="screen-catalog-identity">%s<code>%s</code><span>%s</span>%s</div></div></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>`,
+		_, _ = fmt.Fprintf(&rows, `<tr data-filter-item data-search="%s" data-module="%s" data-status="%s" data-usecase="%s"><td><div class="screen-catalog-screen">%s<div class="screen-catalog-identity">%s<code>%s</code><span>%s</span>%s</div></div></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>`,
 			escapeAttr(search), escapeAttr(screen.ModuleID), escapeAttr(screen.Status.Kind), escapeAttr(strings.Join(screen.UseCaseIDs, "|")),
 			previewHTML(model, current, screen, "screen-catalog-preview"), title, escapeHTML(screen.ID), escapeHTML(screenKindLabel(model, screen.Kind)), screenCatalogErrors(model, errors),
 			screenModuleDetails(model, screen.ModuleID), route, screenCatalogUseCases(model, current, screen.UseCaseIDs), renderStatusChip(model, screen.Status),
@@ -430,7 +430,7 @@ func renderTraceabilityPage(model *Model, current string) string {
 	var rows strings.Builder
 	for _, row := range model.Knowledge.Traceability {
 		search := strings.Join([]string{row.UseCaseID, row.ScreenID, row.TransitionID, row.TaskID, row.CriterionID, row.Verification}, " ")
-		fmt.Fprintf(&rows, `<tr data-filter-item data-search="%s"><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td><code>%s</code></td></tr>`,
+		_, _ = fmt.Fprintf(&rows, `<tr data-filter-item data-search="%s"><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td><code>%s</code></td></tr>`,
 			escapeAttr(search), escapeHTML(fallbackDash(row.UseCaseID)), escapeHTML(row.ScreenID), escapeHTML(row.TransitionID),
 			escapeHTML(row.TaskID), escapeHTML(row.CriterionID), escapeHTML(row.Verification))
 	}

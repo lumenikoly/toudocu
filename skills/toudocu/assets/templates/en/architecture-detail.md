@@ -1,10 +1,12 @@
-# {{ARCHITECTURE_TITLE}}
+<!-- toudocu
+architectureQuestion: {{ARCHITECTURE_QUESTION}}
+-->
 
-- Document type: Architecture
-- Architecture question: {{ARCHITECTURE_QUESTION}}
+# {{ARCHITECTURE_TITLE}}
 
 {{SHORT_ANSWER}}
 
+<!-- toudocu:section scope -->
 ## Scope
 
 {{SCOPE}}

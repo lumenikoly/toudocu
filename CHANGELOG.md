@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.0.5
+
+- Removed redundant per-annotation `version: 1` metadata from the contract,
+  scaffolds, templates, and documentation.
+- Added an explicit documentation contract version. Projects on an older
+  contract now receive one migration diagnostic, while projects created by a
+  newer Toudocu version are rejected without partial parsing.
+- Added `task tree`, parent/child task relationships, hierarchy-aware task
+  context, and change reports that include affected descendants.
+- Standardized CLI diagnostics and generated report labels in English while
+  preserving reader-authored document values.
+- Added semantic change analysis and improved annotations, Changes rendering,
+  and CodeMirror behavior.
+
 ## 0.0.4
 
 - Portal and Changes now share one accessible discussion panel implementation,

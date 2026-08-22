@@ -1,7 +1,6 @@
 package toudocu
 
 import (
-	"encoding/json"
 	"fmt"
 	"html"
 	"io"
@@ -10,30 +9,28 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
-	"time"
 	"unicode"
 	"unicode/utf8"
 )
 
 var (
-	stripFenceRE      = regexp.MustCompile("(?s)```.*?```")
-	stripHeadingRE    = regexp.MustCompile(`(?m)^\s{0,3}#{1,6}\s+`)
-	stripQuoteRE      = regexp.MustCompile(`(?m)^\s*>\s?`)
-	stripListRE       = regexp.MustCompile(`(?m)^\s*(?:[-*+] |\d+[.)] )`)
-	stripCheckboxRE   = regexp.MustCompile(`\[[ xX]\]\s*`)
 	stripImageRE      = regexp.MustCompile(`!\[([^\]]*)\]\([^)]*\)`)
 	stripLinkRE       = regexp.MustCompile(`\[([^\]]+)\]\([^)]*\)`)
 	stripInlineCodeRE = regexp.MustCompile("`([^`]+)`")
-	stripMarksRE      = regexp.MustCompile("[`*_~|]")
-	spacesRE          = regexp.MustCompile(`\s+`)
 )
 
 func escapeHTML(value any) string          { return html.EscapeString(fmt.Sprint(value)) }
 func escapeAttr(value any) string          { return strings.ReplaceAll(escapeHTML(value), "`", "&#96;") }
 func normalizeSlashes(value string) string { return strings.ReplaceAll(value, `\`, "/") }
+
+func optionalString(value string) *string {
+	if value == "" {
+		return nil
+	}
+	return &value
+}
 
 func toPosixRelative(root, absolutePath string) string {
 	rel, err := filepath.Rel(root, absolutePath)
@@ -68,36 +65,12 @@ func slugify(value string) string {
 	return result
 }
 
-func uniqueSlug(value string, used map[string]struct{}) string {
-	base := slugify(value)
-	candidate := base
-	for i := 2; ; i++ {
-		if _, exists := used[candidate]; !exists {
-			used[candidate] = struct{}{}
-			return candidate
-		}
-		candidate = fmt.Sprintf("%s-%d", base, i)
-	}
-}
-
 func stripInlineMarkdown(value string) string {
 	value = stripImageRE.ReplaceAllString(value, "$1")
 	value = stripLinkRE.ReplaceAllString(value, "$1")
 	value = stripInlineCodeRE.ReplaceAllString(value, "$1")
 	value = strings.NewReplacer("*", "", "_", "", "~", "").Replace(value)
 	return strings.TrimSpace(value)
-}
-
-func stripMarkdown(value string) string {
-	value = stripFenceRE.ReplaceAllString(value, " ")
-	value = stripHeadingRE.ReplaceAllString(value, "")
-	value = stripQuoteRE.ReplaceAllString(value, "")
-	value = stripListRE.ReplaceAllString(value, "")
-	value = stripCheckboxRE.ReplaceAllString(value, "")
-	value = stripImageRE.ReplaceAllString(value, "$1")
-	value = stripLinkRE.ReplaceAllString(value, "$1")
-	value = stripMarksRE.ReplaceAllString(value, " ")
-	return strings.TrimSpace(spacesRE.ReplaceAllString(value, " "))
 }
 
 func ensureInside(root, candidate string) bool {
@@ -229,7 +202,7 @@ func copyFileEnsured(source, target string) error {
 	if err != nil {
 		return err
 	}
-	defer in.Close()
+	defer func() { _ = in.Close() }()
 	if err := mkdirp(filepath.Dir(target)); err != nil {
 		return err
 	}
@@ -251,51 +224,6 @@ func copyFSFile(sourceFS fs.FS, source, target string) error {
 		return err
 	}
 	return writeFileEnsured(target, data)
-}
-
-func parseDate(value string) (time.Time, bool) {
-	text := strings.TrimSpace(value)
-	if text == "" {
-		return time.Time{}, false
-	}
-	layouts := []string{
-		"2006-01-02",
-		time.RFC3339,
-		"2006-01-02 15:04:05",
-		"02.01.2006", "2.1.2006",
-		"02/01/2006", "2/1/2006",
-		"02-01-2006", "2-1-2006",
-		time.RFC1123, time.RFC822,
-	}
-	for _, layout := range layouts {
-		if parsed, err := time.Parse(layout, text); err == nil {
-			return parsed.UTC(), true
-		}
-	}
-	return time.Time{}, false
-}
-
-var russianMonths = [...]string{
-	"января", "февраля", "марта", "апреля", "мая", "июня",
-	"июля", "августа", "сентября", "октября", "ноября", "декабря",
-}
-
-func formatDate(value time.Time) string {
-	if value.IsZero() {
-		return "—"
-	}
-	value = value.UTC()
-	return fmt.Sprintf("%d %s %d", value.Day(), russianMonths[value.Month()-1], value.Year())
-}
-
-func formatDateValue(value string) string {
-	if parsed, ok := parseDate(value); ok {
-		return formatDate(parsed)
-	}
-	if strings.TrimSpace(value) == "" {
-		return "—"
-	}
-	return value
 }
 
 func progress(completed, total int) *int {
@@ -373,10 +301,6 @@ func naturalCompare(a, b string) int {
 	return 0
 }
 
-func sortNatural(values []string) {
-	sort.SliceStable(values, func(i, j int) bool { return naturalCompare(values[i], values[j]) < 0 })
-}
-
 func relativeURL(fromOutputPath, toOutputPath string) string {
 	fromDir := path.Dir(normalizeSlashes(fromOutputPath))
 	fromOS := filepath.FromSlash(fromDir)
@@ -398,19 +322,6 @@ func rootPrefix(outputPath string) string {
 		return ""
 	}
 	return strings.Repeat("../", len(strings.Split(strings.Trim(directory, "/"), "/")))
-}
-
-func jsonForScript(value any) ([]byte, error) {
-	data, err := json.Marshal(value)
-	if err != nil {
-		return nil, err
-	}
-	text := strings.NewReplacer(
-		"<", `\u003c`,
-		">", `\u003e`,
-		"&", `\u0026`,
-	).Replace(string(data))
-	return []byte(text), nil
 }
 
 func canonicalText(value string) string {
@@ -456,7 +367,7 @@ func pathEscapeSegment(value string) string {
 		if (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || strings.ContainsRune("-._~", rune(c)) {
 			b.WriteByte(c)
 		} else {
-			fmt.Fprintf(&b, "%%%02X", c)
+			_, _ = fmt.Fprintf(&b, "%%%02X", c)
 		}
 	}
 	return b.String()

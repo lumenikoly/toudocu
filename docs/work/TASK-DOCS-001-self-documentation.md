@@ -1,28 +1,35 @@
+<!-- toudocu
+id: TASK-DOCS-001
+status: done
+taskType: documentation
+priority: high
+module: MOD-MODEL
+useCase: UC-DOCS-02
+updated: 2026-08-10
+-->
+
 # TASK-DOCS-001: Добавить документацию самого Toudocu
 
-- Статус: Выполнено
-- Тип: Documentation
-- Приоритет: Высокий
-- Модуль: MOD-MODEL
-- Сценарий: UC-DOCS-02
-- Последнее обновление: 2026-08-10
-
+<!-- toudocu:section result -->
 ## Результат
 
 В репозитории появилась исходная документация Toudocu. Она описывает
 реализованное поведение и проверяется самим Toudocu в строгом режиме.
 
+<!-- toudocu:section scope -->
 ## Область изменения
 
 - `docs/`;
 - `README.md`.
 
+<!-- toudocu:section out-of-scope -->
 ## Не входит в задачу
 
 - изменение CLI или JSON-схем;
 - публикация релизных файлов;
 - добавление собранного портала в Git как источника документации.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Критерии приёмки
 
 - [x] `AC-01` Документация проходит `toudocu check --strict` без замечаний.
@@ -30,6 +37,7 @@
   стабильными идентификаторами.
 - [x] `AC-03` README содержит прямую ссылку на исходную документацию.
 
+<!-- toudocu:section plan -->
 ## План
 
 - [x] Зафиксировать состояние, архитектуру и продуктовый охват.
@@ -37,6 +45,7 @@
 - [x] Добавить риски, ADR, руководство по проверке и справочник параметров.
 - [x] Связать документы и выполнить строгую проверку.
 
+<!-- toudocu:section verification -->
 ## Проверка
 
 - `AC-01` → `go run ./cmd/toudocu check ./docs --strict --stale-days 0`
@@ -45,6 +54,7 @@
 - `ALL` → `go test ./...`
 - `DOCS` → `go run ./cmd/toudocu check ./docs --strict --stale-days 0`
 
+<!-- toudocu:section documentation-impact -->
 ## Влияние на документацию
 
 Создан канонический каталог `docs/`, а README получил ссылку на

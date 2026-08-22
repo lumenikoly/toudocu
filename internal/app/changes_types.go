@@ -21,6 +21,13 @@ type changeTaskContext struct {
 	path       string
 	docsRel    string
 	pathExists map[string]bool
+	tasks      map[string]changeTaskDocument
+	selected   []string
+}
+
+type changeTaskDocument struct {
+	path    string
+	content []byte
 }
 
 type ChangeRepository struct {
@@ -223,8 +230,9 @@ type TaskImpactReport struct {
 }
 
 type TaskImpactEntry struct {
-	Path     string `json:"path"`
-	Declared bool   `json:"declared"`
-	Changed  bool   `json:"changed"`
-	Created  bool   `json:"created,omitempty"`
+	Path       string   `json:"path"`
+	Declared   bool     `json:"declared"`
+	Changed    bool     `json:"changed"`
+	Created    bool     `json:"created,omitempty"`
+	DeclaredBy []string `json:"declaredBy,omitempty"`
 }

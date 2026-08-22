@@ -5,6 +5,7 @@
 [![CI](https://github.com/lumenikoly/toudocu/actions/workflows/test.yml/badge.svg)](https://github.com/lumenikoly/toudocu/actions/workflows/test.yml)
 [![Docs contract](https://github.com/lumenikoly/toudocu/actions/workflows/docs.yml/badge.svg)](https://github.com/lumenikoly/toudocu/actions/workflows/docs.yml)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/lumenikoly/toudocu)](https://go.dev/)
+[![golangci-lint](https://img.shields.io/badge/linted%20by-golangci--lint-brightgreen)](https://golangci-lint.run/)
 [![License](https://img.shields.io/github/license/lumenikoly/toudocu)](LICENSE)
 
 **Документация, которая живёт рядом с кодом — и остаётся полезной людям и AI-агентам.**
@@ -474,7 +475,7 @@ go build -o toudocu ./cmd/toudocu
 ```bash
 make fmt
 make fmt-check
-make vet
+make lint
 make test
 make web
 make web-check

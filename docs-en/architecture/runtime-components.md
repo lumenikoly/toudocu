@@ -1,7 +1,9 @@
+<!-- toudocu
+architectureQuestion: Как компоненты программы делят ответственность?
+-->
+
 # Runtime Component Responsibilities
 
-- Document type: Architecture
-- Architectural question: How do runtime components divide responsibilities?
 
 The runtime forms a sequential pipeline: the CLI or a direct Go API call
 selects an operation, the document/OpenAPI layer extracts a safe

@@ -560,28 +560,48 @@ import { createDiscussionPanel } from "../../components/discussion-panel";
             const beforeDocument: any = before || `<p class="changes-absence">${escapeHTML(text("changes.documentMissing"))}</p>`;
             const afterDocument: any = after || `<p class="changes-absence">${escapeHTML(text("changes.documentDeleted"))}</p>`;
             panel.innerHTML = `<div class="rendered-columns"><section><h3>${escapeHTML(text("changes.before"))}</h3><div class="rendered-document">${beforeDocument}</div></section><section><h3>${escapeHTML(text("changes.after"))}</h3><div class="rendered-document">${afterDocument}</div></section></div>`;
-            const markSections: any = (root: any, side: any) => {
-                (change.renderedSections || []).forEach((section: any) => {
-                    const anchor: any = side === 'before' ? section.anchorBefore : section.anchorAfter;
-                    if (!anchor)
-                        return;
-                    const heading: any = root.querySelector(`#${CSS.escape(anchor)}`);
+            const documents: any = panel.querySelectorAll('.rendered-document');
+            const sectionElements: any = (root: any, anchor: any) => {
+                const heading: any = anchor && root?.querySelector(`#${CSS.escape(anchor)}`);
+                const content: any[] = [];
+                for (let sibling: any = heading?.nextElementSibling; sibling && sibling.tagName !== 'H2'; sibling = sibling.nextElementSibling)
+                    content.push(sibling);
+                return { heading, content };
+            };
+            const unmatchedBlocks: any = (source: any[], target: any[]) => {
+                const remaining: any = new Map();
+                target.forEach((element: any) => remaining.set(element.outerHTML, (remaining.get(element.outerHTML) || 0) + 1));
+                return source.filter((element: any) => {
+                    const count: any = remaining.get(element.outerHTML) || 0;
+                    if (!count)
+                        return true;
+                    remaining.set(element.outerHTML, count - 1);
+                    return false;
+                });
+            };
+            const mark: any = (elements: any[], status: any) => elements.forEach((element: any) => element?.classList.add('rendered-section-content', status));
+            (change.renderedSections || []).forEach((section: any) => {
+                if (section.status === 'unchanged-section')
+                    return;
+                const before: any = sectionElements(documents[0], section.anchorBefore);
+                const after: any = sectionElements(documents[1], section.anchorAfter);
+                [before.heading, after.heading].forEach((heading: any) => {
                     if (!heading)
                         return;
                     heading.classList.add('rendered-section-heading', section.status);
                     heading.dataset.changeLabel = section.status.replace('-section', '').replace('-', ' ');
-                    let sibling: any = heading.nextElementSibling;
-                    while (sibling && sibling.tagName !== 'H2') {
-                        sibling.classList.add('rendered-section-content', section.status);
-                        sibling = sibling.nextElementSibling;
-                    }
                 });
-            };
-            const documents: any = panel.querySelectorAll('.rendered-document');
-            if (documents[0])
-                markSections(documents[0], 'before');
-            if (documents[1])
-                markSections(documents[1], 'after');
+                if (section.status === 'modified-section') {
+                    const beforeChanged: any[] = unmatchedBlocks(before.content, after.content);
+                    const afterChanged: any[] = unmatchedBlocks(after.content, before.content);
+                    mark(beforeChanged, section.status);
+                    mark(afterChanged, section.status);
+                }
+                else {
+                    mark(before.content, section.status);
+                    mark(after.content, section.status);
+                }
+            });
             if (window.mermaid) {
                 window.mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default' });
                 for (const diagram of panel.querySelectorAll('.mermaid')) {

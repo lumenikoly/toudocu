@@ -142,7 +142,7 @@ func (s *documentationServer) rebuildRegistry() error {
 		}
 		model, buildErr := BuildDocumentationModel(state.options)
 		if buildErr != nil {
-			fmt.Fprintln(s.stderr, "Could not prepare locale portal", locale+":", buildErr)
+			_, _ = fmt.Fprintln(s.stderr, "Could not prepare locale portal", locale+":", buildErr)
 			continue
 		}
 		state.model = model
@@ -158,7 +158,7 @@ func (s *documentationServer) rebuildRegistry() error {
 			continue
 		}
 		if _, genErr := s.generatePortal(state, false); genErr != nil {
-			fmt.Fprintln(s.stderr, "Could not build locale portal", locale+":", genErr)
+			_, _ = fmt.Fprintln(s.stderr, "Could not build locale portal", locale+":", genErr)
 			state.Status = portalUnavailable
 		}
 	}
@@ -439,7 +439,7 @@ func (s *documentationServer) serveRebuild(w http.ResponseWriter, r *http.Reques
 	}
 	model, result, err := s.rebuild()
 	if err != nil {
-		fmt.Fprintln(s.stderr, "Could not rebuild documentation:", err)
+		_, _ = fmt.Fprintln(s.stderr, "Could not rebuild documentation:", err)
 		http.Error(w, "Could not rebuild documentation: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -523,7 +523,7 @@ func (s *documentationServer) watch(ctx context.Context) {
 			s.mu.Lock()
 			if digest := s.currentConfigDigest(); digest != s.configDigest {
 				if err := s.rebuildRegistry(); err != nil {
-					fmt.Fprintln(s.stderr, "Could not update locale registry:", err)
+					_, _ = fmt.Fprintln(s.stderr, "Could not update locale registry:", err)
 				}
 				s.mu.Unlock()
 				continue
@@ -551,18 +551,18 @@ func (s *documentationServer) watch(ctx context.Context) {
 				}
 				if key == canonicalPortalKey() {
 					if _, _, err = s.rebuild(); err != nil {
-						fmt.Fprintln(s.stderr, "Could not rebuild documentation after an external change:", err)
+						_, _ = fmt.Fprintln(s.stderr, "Could not rebuild documentation after an external change:", err)
 					}
 				} else {
 					model, buildErr := BuildDocumentationModel(state.options)
 					if buildErr != nil {
-						fmt.Fprintln(s.stderr, "Could not rebuild locale portal", state.Locale+":", buildErr)
+						_, _ = fmt.Fprintln(s.stderr, "Could not rebuild locale portal", state.Locale+":", buildErr)
 						continue
 					}
 					state.model = model
 					populateLanguageTargets(s.portals)
 					if _, genErr := s.generatePortal(state, false); genErr != nil {
-						fmt.Fprintln(s.stderr, "Could not rebuild locale portal", state.Locale+":", genErr)
+						_, _ = fmt.Fprintln(s.stderr, "Could not rebuild locale portal", state.Locale+":", genErr)
 					}
 				}
 			}
@@ -594,15 +594,15 @@ func serveDocumentation(options Options, stdout, stderr io.Writer) error {
 	if err != nil {
 		return err
 	}
-	defer listener.Close()
+	defer func() { _ = listener.Close() }()
 	localURL := browserURL(options.Host, options.Port)
-	fmt.Fprintf(stdout, "\nСервер документации запущен.\nАдрес:          %s\nКаталог:        %s\nСтраниц:        %d\nДокументов:     %d\nПредупреждений: %d\nОшибок:         %d\n", localURL, result.OutputDirectory, result.Pages, model.Stats.Documents, model.Stats.Warnings, model.Stats.Errors)
+	_, _ = fmt.Fprintf(stdout, "\nDocumentation server started.\nAddress:        %s\nDirectory:      %s\nPages:          %d\nDocuments:      %d\nWarnings:       %d\nErrors:         %d\n", localURL, result.OutputDirectory, result.Pages, model.Stats.Documents, model.Stats.Warnings, model.Stats.Errors)
 	if externallyReachableHost(options.Host) {
-		fmt.Fprintf(stdout, "Локальная сеть: http://<IP-адрес-компьютера>:%d/\nВнимание: сервер доступен из сети без авторизации и TLS.\n", options.Port)
+		_, _ = fmt.Fprintf(stdout, "Local network: http://<computer-IP-address>:%d/\nWarning: the server is reachable from the network without authentication or TLS.\n", options.Port)
 	}
 	if options.Open {
 		if err := openGeneratedSite(localURL); err != nil {
-			fmt.Fprintln(stderr, "Failed to open the browser automatically:", err)
+			_, _ = fmt.Fprintln(stderr, "Failed to open the browser automatically:", err)
 		}
 	}
 	server := &http.Server{Handler: handler, ReadHeaderTimeout: 5 * time.Second}

@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"unicode"
 )
 
 func TestEmbeddedMermaidVersionIsPinned(t *testing.T) {
@@ -79,12 +80,12 @@ func TestNavigationIconsReflectDocumentStatus(t *testing.T) {
 		}
 	}
 	model.Documents = append(model.Documents,
-		document("work/TASK-DONE.md", "work", "Done task", "Выполнено"),
-		document("work/TASK-DRAFT.md", "work", "Draft task", "Черновик"),
-		document("work/BUG-BLOCKED.md", "work", "Blocked bug", "Заблокировано"),
-		document("work/TASK-CANCELLED.md", "work", "Cancelled task", "Отменено"),
-		document("modules/done.md", "module", "Done module", "Готово"),
-		document("decisions/accepted.md", "decision", "Accepted decision", "Принято"),
+		document("work/TASK-DONE.md", "work", "Done task", "done"),
+		document("work/TASK-DRAFT.md", "work", "Draft task", "draft"),
+		document("work/BUG-BLOCKED.md", "work", "Blocked bug", "blocked"),
+		document("work/TASK-CANCELLED.md", "work", "Cancelled task", "cancelled"),
+		document("modules/done.md", "module", "Done module", "done"),
+		document("decisions/accepted.md", "decision", "Accepted decision", "accepted"),
 		document("reference/unknown.md", "reference", "Unknown status", "Новый статус"),
 		document("architecture/no-status.md", "architecture", "No status", ""),
 	)
@@ -127,13 +128,32 @@ func TestNavigationIconsReflectDocumentStatus(t *testing.T) {
 
 func writeTestFile(t *testing.T, root, relative, content string) {
 	t.Helper()
+	ensureTestDocumentationVersion(t, root)
+	if relative == ".toudocu/config.yml" && !strings.Contains(content, "documentationVersion:") {
+		content = "documentationVersion: 2\n" + content
+	}
 	target := filepath.Join(root, filepath.FromSlash(relative))
 	if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(target, []byte(content), 0644); err != nil {
+	if err := os.WriteFile(target, []byte(canonicalizeTestMarkdown(relative, content)), 0644); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func fileLineContaining(t *testing.T, path, needle string) int {
+	t.Helper()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for index, line := range strings.Split(string(data), "\n") {
+		if strings.Contains(line, needle) {
+			return index + 1
+		}
+	}
+	t.Fatalf("%q is missing from %s", needle, path)
+	return 0
 }
 
 func createFixture(t *testing.T) (string, string, string) {
@@ -330,7 +350,7 @@ func TestArchitectureContract(t *testing.T) {
 		}
 	})
 
-	t.Run("overview type is exact", func(t *testing.T) {
+	t.Run("overview type comes from path", func(t *testing.T) {
 		root := t.TempDir()
 		docs := filepath.Join(root, "docs")
 		writeTestFile(t, docs, "index.md", "# Project\n")
@@ -339,8 +359,8 @@ func TestArchitectureContract(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if len(architectureIssueCodes(model)["invalid-architecture-overview-type"]) != 1 {
-			t.Fatalf("invalid overview type diagnostic not found: %#v", model.Issues)
+		if len(architectureIssueCodes(model)["invalid-architecture-overview-type"]) != 0 {
+			t.Fatalf("reader-facing type text must not affect the model: %#v", model.Issues)
 		}
 	})
 
@@ -464,7 +484,7 @@ func TestArchitectureSchemaContract(t *testing.T) {
 			if document.Type != "architecture" {
 				t.Fatalf("overview type=%q", document.Type)
 			}
-			if document.Metadata["documentType"] != "Architecture Overview" {
+			if document.Metadata["documentType"] != "" {
 				t.Fatalf("overview metadata=%#v", document.Metadata)
 			}
 			return
@@ -1117,6 +1137,7 @@ func TestDashboardFocusFallbacksAndAlwaysVisibleOverview(t *testing.T) {
 
 	model.CurrentStatus.NextResult = nil
 	model.Project.StatusDocument = nil
+	model.Project.Status = StatusFor("")
 	model.DocByPath["status.md"] = nil
 	model.DocByPath["risks.md"] = nil
 	model.Stats.OpenRisks = 0
@@ -1141,6 +1162,12 @@ func TestDashboardFocusFallbacksAndAlwaysVisibleOverview(t *testing.T) {
 	if !strings.Contains(html, `<section class="dashboard-section dashboard-overview" data-dashboard-overview`) ||
 		strings.Contains(html, `<details class="dashboard-section dashboard-overview"`) {
 		t.Fatal("dashboard overview must remain permanently visible without a disclosure control")
+	}
+
+	model.SiteConfig.Project.Locale = "ru"
+	html = renderDashboard(model)
+	if !strings.Contains(html, `<span class="focus-status">Не указан</span>`) {
+		t.Fatalf("Russian portal must localize an unspecified project status: %s", html)
 	}
 	headingEnd := strings.Index(html, `</div><div class="dashboard-overview-body">`)
 	if headingEnd < 0 || !strings.Contains(html[:headingEnd], `data-copy-document-context`) {
@@ -1363,14 +1390,14 @@ func TestContextualHelp(t *testing.T) {
 		contains  []string
 		forbidden []string
 	}{
-		{[]string{"check", "--help"}, []string{"Побочные эффекты: отсутствуют", "--strict", "--format text|json"}, []string{"--host", "--clean"}},
+		{[]string{"check", "--help"}, []string{"Side effects: none", "--strict", "--format text|json"}, []string{"--host", "--clean"}},
 		{[]string{"serve", "--help"}, []string{"HTTP/editor workspace", "--host ADDRESS", "roadmap add"}, []string{"--base REV"}},
-		{[]string{"changes", "--help"}, []string{"--include-assets", "--translation-input", "-o записывает явно"}, []string{"--report"}},
-		{[]string{"task", "--help"}, []string{"init|ready|context|verify|archive|restore|changes"}, []string{"требуется TASK-ID"}},
-		{[]string{"task", "verify", "--help"}, []string{"--dry-run не выполняет команды", "--report в любом режиме записывает JSON-файл"}, []string{"--include-assets", "--translation-input"}},
-		{[]string{"task", "changes", "--help"}, []string{"единственный task-scoped", "TASK-ID", "--translation-input"}, []string{"--task"}},
-		{[]string{"scaffold", "--help"}, []string{".toudocu/config.yml", "fallback — en"}, []string{"--host"}},
-		{[]string{"changes", "file", "--help"}, []string{"одного изменённого пути", "PATH", "--translation-input"}, []string{"--task"}},
+		{[]string{"changes", "--help"}, []string{"--include-assets", "--translation-input", "-o writes"}, []string{"--report"}},
+		{[]string{"task", "--help"}, []string{"init|ready|context|verify|archive|restore|changes"}, []string{"requires TASK-ID"}},
+		{[]string{"task", "verify", "--help"}, []string{"--dry-run does not run commands", "--report writes a JSON file"}, []string{"--include-assets", "--translation-input"}},
+		{[]string{"task", "changes", "--help"}, []string{"task-scoped read-only", "TASK-ID", "--translation-input"}, []string{"--task"}},
+		{[]string{"scaffold", "--help"}, []string{".toudocu/config.yml", "fallback is en"}, []string{"--host"}},
+		{[]string{"changes", "file", "--help"}, []string{"one changed path", "PATH", "--translation-input"}, []string{"--task"}},
 	}
 	for _, test := range tests {
 		var stdout, stderr strings.Builder
@@ -1387,6 +1414,44 @@ func TestContextualHelp(t *testing.T) {
 				t.Errorf("%v help contains inapplicable %q:\n%s", test.args, forbidden, stdout.String())
 			}
 		}
+	}
+}
+
+func TestCLIHelpUsesEnglish(t *testing.T) {
+	var topLevel strings.Builder
+	PrintHelp(&topLevel)
+	if strings.IndexFunc(topLevel.String(), func(r rune) bool { return unicode.Is(unicode.Cyrillic, r) }) >= 0 {
+		t.Errorf("top-level help contains Cyrillic interface text:\n%s", topLevel.String())
+	}
+
+	topics := []string{"build", "check", "serve", "changes", "agent", "changes-file", "search", "scaffold", "task", "task-init", "task-ready", "task-context", "task-tree", "task-verify", "task-archive", "task-restore", "task-changes", "skill", "version"}
+	for _, topic := range topics {
+		var output strings.Builder
+		PrintCommandHelp(&output, topic)
+		if strings.IndexFunc(output.String(), func(r rune) bool { return unicode.Is(unicode.Cyrillic, r) }) >= 0 {
+			t.Errorf("%q help contains Cyrillic interface text:\n%s", topic, output.String())
+		}
+	}
+}
+
+func TestTextReportsUseEnglishInterfaceLabels(t *testing.T) {
+	var output strings.Builder
+	printCheckText(&output, &Model{})
+	printChangesText(&output, &ChangeSetReport{})
+	printSearchText(&output, SearchReport{})
+	printTaskReadyText(&output, TaskReadyReport{Task: TaskVerifyTask{ID: "TASK-CLI-001"}})
+	printTaskContextText(&output, TaskContextReport{Task: WorkItem{ID: "TASK-CLI-001"}})
+	printTaskVerifyText(&output, TaskVerifyReport{Task: TaskVerifyTask{ID: "TASK-CLI-001"}})
+	printTaskMoveText(&output, TaskMoveReport{Task: TaskMoveTask{ID: "TASK-CLI-001"}, Status: "archived", DestinationPath: "work/archive/2026/TASK-CLI-001.md"})
+	printAgentHelp(&output)
+
+	for _, expected := range []string{"Documents:", "Documentation changes", "Found:", "Readiness status:", "Required documents:", "Verification status:", "archived:", "Usage:"} {
+		if !strings.Contains(output.String(), expected) {
+			t.Errorf("text reports missing %q:\n%s", expected, output.String())
+		}
+	}
+	if strings.IndexFunc(output.String(), func(r rune) bool { return unicode.Is(unicode.Cyrillic, r) }) >= 0 {
+		t.Errorf("text reports contain Cyrillic interface text:\n%s", output.String())
 	}
 }
 
@@ -1589,7 +1654,7 @@ func TestSpecialTaskStatusesAndSingleTaskFile(t *testing.T) {
 	writeTestFile(t, docs, "work/two-items.md", "# Список\n\n## TASK-AUTH-005: Первая\n\n## TASK-AUTH-006: Вторая\n")
 	model := buildFixture(t, docs)
 	codes := issueCodes(model)
-	for _, code := range []string{"work-item-count", "missing-work-section"} {
+	for _, code := range []string{"missing-work-section"} {
 		if !codes[code] {
 			t.Fatalf("missing issue %s in %#v", code, model.Issues)
 		}
@@ -1628,7 +1693,7 @@ func TestTaskTypeAndUseCaseRules(t *testing.T) {
 func TestStatusAndRoadmapConsistency(t *testing.T) {
 	_, docs, _ := createFixture(t)
 	writeTestFile(t, docs, "status.md", "# Состояние\n\n- Статус: В работе\n\n## В работе\n\n- [ ] Сделать авторизацию.\n")
-	writeTestFile(t, docs, "roadmap.md", "# Roadmap\n\n## MVP\n\n- [x] `UC-AUTH-01` Пользователь входит.\n- [ ] Произвольный результат.\n- [ ] `UC-UNKNOWN-01` Неизвестный сценарий.\n")
+	writeTestFile(t, docs, "roadmap.md", "# Roadmap\n\n## MVP\n\n- Status: In progress\n\n- [x] `UC-AUTH-01` Пользователь входит.\n- [ ] Произвольный результат.\n- [ ] `UC-UNKNOWN-01` Неизвестный сценарий.\n")
 	model := buildFixture(t, docs)
 	codes := issueCodes(model)
 	for _, code := range []string{"status-requirement-checklist", "invalid-roadmap-item-id", "dangling-roadmap-reference"} {
@@ -1648,7 +1713,7 @@ func TestRoadmapCompletionIsDerivedAndRendered(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	writeTestFile(t, docs, "use-cases/login.md", strings.Replace(string(content), "- Статус: В работе", "- Статус: Выполнено", 1))
+	writeTestFile(t, docs, "use-cases/login.md", strings.Replace(string(content), "status: in-progress", "status: done", 1))
 	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
 	if err != nil {
 		t.Fatal(err)
@@ -1682,7 +1747,7 @@ func TestRoadmapContractAndDeliverableRemainManual(t *testing.T) {
 	_, docs, _ := createFixture(t)
 	writeTestFile(t, docs, "contracts/auth.md", "# Auth contract\n\n- Идентификатор: CON-AUTH-API\n- Статус: В работе\n\nContract.\n")
 	writeTestFile(t, docs, "contracts/session.md", "# Session contract\n\n- Идентификатор: CONTRACT-SESSION-API\n- Статус: В работе\n\nContract.\n")
-	writeTestFile(t, docs, "roadmap.md", "# Roadmap\n\n## MVP\n\n- [x] `CON-AUTH-API` Контракт опубликован.\n- [ ] `CONTRACT-SESSION-API` Контракт сессии опубликован.\n- [x] `DLV-RELEASE-01` Релиз подготовлен.\n- [ ] `DELIVERABLE-NOTES-01` Примечания подготовлены.\n")
+	writeTestFile(t, docs, "roadmap.md", "# Roadmap\n\n## MVP\n\n- Status: In progress\n\n- [x] `CON-AUTH-API` Контракт опубликован.\n- [ ] `CONTRACT-SESSION-API` Контракт сессии опубликован.\n- [x] `DLV-RELEASE-01` Релиз подготовлен.\n- [ ] `DELIVERABLE-NOTES-01` Примечания подготовлены.\n")
 	model := buildFixture(t, docs)
 	items := model.RoadmapStages[0].Items
 	if len(items) != 4 || !items[0].EffectiveCompleted || items[0].CompletionSource != "roadmap-checkbox" || items[1].EffectiveCompleted || !items[2].EffectiveCompleted || items[3].EffectiveCompleted {
@@ -1778,9 +1843,13 @@ func TestVerificationMatrixIsReported(t *testing.T) {
 Не требуется: это тест.
 `
 	writeTestFile(t, docs, "work/TASK-AUTH-007-matrix.md", content)
+	stored, err := os.ReadFile(filepath.Join(docs, "work", "TASK-AUTH-007-matrix.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	model := buildFixture(t, docs)
 	expectedLine := 0
-	for index, line := range strings.Split(content, "\n") {
+	for index, line := range strings.Split(string(stored), "\n") {
 		if strings.Contains(line, "AC-01") && strings.Contains(line, "[ ]") {
 			expectedLine = index + 1
 			break

@@ -1,11 +1,13 @@
+<!-- toudocu
+id: UC-DOCS-02
+status: done
+priority: high
+module: MOD-MODEL
+updated: 2026-08-12
+-->
+
 # UC-DOCS-02: Check documentation
 
-- Identifier: UC-DOCS-02
-- Status: Completed
-- Actor: Developer or CI process
-- Module: MOD-MODEL
-- Priority: High
-- Last updated: 2026-08-12
 
 A developer or CI checks documentation structure and relationships without
 building the portal or running commands from work items.
@@ -17,11 +19,13 @@ building the portal or running commands from work items.
 - optional `--strict` mode;
 - `text` or `json` output.
 
+<!-- toudocu:section prerequisites -->
 ## Preconditions
 
 - Toudocu is available;
 - the caller can read the documentation and allowed repository files.
 
+<!-- toudocu:section main-scenario -->
 ## Main flow
 
 1. The caller runs `toudocu check ./docs`.
@@ -46,12 +50,14 @@ building the portal or running commands from work items.
 - A missing or invalid `architecture/overview.md`, an architecture document
   without a question, an indirect map, or an unsafe link is an error.
 
+<!-- toudocu:section postconditions -->
 ## Postconditions
 
 Sources are unchanged, no portal was created, and no Verification command was
 run. Every diagnostic has a stable code and, when available, a path, line, and
 column.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] A check does not change sources, create a portal, or run a Verification
@@ -62,6 +68,7 @@ column.
   mismatched roadmap produces an error and exit code `1` without changing
   Markdown.
 
+<!-- toudocu:section business-rules -->
 ## Business rules
 
 - [BR-MODEL-001](../modules/model.md#br-model-001-roadmap-is-the-only-source-of-global-coverage)
@@ -70,6 +77,7 @@ column.
 - [BR-MODEL-005](../modules/model.md#br-model-005-overview-is-a-direct-map-of-architectural-issues)
 - [BR-CLI-002](../modules/cli.md#br-cli-002-checks-are-only-run-explicitly)
 
+<!-- toudocu:section implementation -->
 ## Implementation
 
 - [FLOW-DOCS-CHECK](../flows/FLOW-DOCS-CHECK.md)

@@ -49,31 +49,34 @@ Use one `screens/SC-*.md` file for every significant screen. Metadata and the
 outgoing transition table are the machine-readable source of truth:
 
 ```md
-# SC-PUBLIC-HOME: Home
+<!-- toudocu
+id: SC-PUBLIC-HOME
+screenKind: page
+module: MOD-PUBLIC
+status: planned
+route: /
+-->
 
-- Identifier: SC-PUBLIC-HOME
-- Type: Page
-- Module: MOD-PUBLIC
-- Status: Planned
-- Route: `/`
+# SC-PUBLIC-HOME: Home
 
 ## Transitions
 
-| ID | Use case | Action | Condition | Result |
-|---|---|---|---|---|
-| TR-PUBLIC-001 | UC-PUBLIC-01 | Open account | Signed in | SC-ACCOUNT-OVERVIEW |
+<!-- toudocu:table transitions columns=id,useCase,action,condition,target,kind -->
+| ID | Use case | Action | Condition | Result | Type |
+|---|---|---|---|---|---|
+| TR-PUBLIC-001 | UC-PUBLIC-01 | Open account | Signed in | SC-ACCOUNT-OVERVIEW | navigation |
 ```
 
 Follow these constraints:
 
-- use Screen, Page, Modal window, Panel, External page, or System state for Type;
+- use `screen`, `page`, `modal`, `panel`, `external`, or `system` for `screenKind`;
 - reference existing uppercase `MOD-*`, `UC-*`, and `SC-*` IDs only;
 - treat routes as case-sensitive; duplicate routes are errors;
 - declare start and terminal screens on the use case;
 - describe self-transitions with a state, error, or explanation;
 - keep previews local, inside repository root, and use only raster formats.
 
-Transition Type may be navigation, error, redirect, return, or external. The
+Transition `kind` is explicitly `navigation`, `error`, `redirect`, `return`, or `external`. The
 generated map distinguishes them by stroke pattern or geometry, not color
 alone. Optional `screens/hotspots.json` uses percentage coordinates and must
 reference an existing transition from the same screen.
@@ -97,16 +100,16 @@ the catalog, SVG map, and playable flows from the screen documents.
 Use cases and tasks can select screens with:
 
 ```md
-- Screens: SC-AREA-START, SC-AREA-RESULT
+screens: SC-AREA-START, SC-AREA-RESULT
 ```
 
 Unknown screen IDs are errors. In templates, the whole-line placeholders
 `OPTIONAL_SCREENS_METADATA`, `OPTIONAL_FLOW_METADATA`,
 `OPTIONAL_ROUTE_METADATA`, and `OPTIONAL_COMPONENT_METADATA` mean: replace the
-placeholder with one complete metadata line, or delete the line.
+placeholder with one complete canonical annotation line, or delete the line.
 
 In a flow template, replace `OPTIONAL_USE_CASES_METADATA` with a complete
-`Scenario` metadata line containing one or more `UC-*`, or delete the line for
+`useCase` annotation line containing one or more `UC-*`, or delete the line for
 an architectural flow. Replace `RELATED_DOCUMENT_LINKS` with one or more
 Markdown links to the listed use cases or to the architecture document.
 `FLOW_DIAGRAM` and `TRANSITION_ROWS` must be replaced with complete,

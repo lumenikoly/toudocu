@@ -11,6 +11,7 @@ type Options struct {
 	EntityID                   string
 	Area                       string
 	TaskType                   string
+	ParentTaskID               string
 	Language                   string
 	Limit                      int
 	VerifyMode                 string
@@ -20,6 +21,7 @@ type Options struct {
 	ChangeBranchBase           string
 	ChangeFile                 string
 	ChangeTaskID               string
+	ChangeTaskTree             bool
 	ChangeStatus               string
 	ChangeEntityType           string
 	ChangeModule               string
@@ -76,6 +78,53 @@ type MetadataExtra struct {
 	Value string `json:"value"`
 }
 
+type SectionKind string
+
+const (
+	SectionKindSummary                    SectionKind = "summary"
+	SectionKindAcceptanceCriteria         SectionKind = "acceptance-criteria"
+	SectionKindVerification               SectionKind = "verification"
+	SectionKindRules                      SectionKind = "rules"
+	SectionKindAutomatedChecks            SectionKind = "automated-checks"
+	SectionKindPrerequisites              SectionKind = "prerequisites"
+	SectionKindProcedure                  SectionKind = "procedure"
+	SectionKindRollback                   SectionKind = "rollback"
+	SectionKindStopConditions             SectionKind = "stop-conditions"
+	SectionKindMainScenario               SectionKind = "main-scenario"
+	SectionKindPostconditions             SectionKind = "postconditions"
+	SectionKindBusinessRules              SectionKind = "business-rules"
+	SectionKindImplementation             SectionKind = "implementation"
+	SectionKindCodeLocation               SectionKind = "code-location"
+	SectionKindBoundaries                 SectionKind = "boundaries"
+	SectionKindInvariants                 SectionKind = "invariants"
+	SectionKindStableInterfaces           SectionKind = "stable-interfaces"
+	SectionKindRelatedUseCases            SectionKind = "related-use-cases"
+	SectionKindContext                    SectionKind = "context"
+	SectionKindDecision                   SectionKind = "decision"
+	SectionKindConsequences               SectionKind = "consequences"
+	SectionKindResult                     SectionKind = "result"
+	SectionKindBehaviorChange             SectionKind = "behavior-change"
+	SectionKindBefore                     SectionKind = "before"
+	SectionKindAfter                      SectionKind = "after"
+	SectionKindScope                      SectionKind = "scope"
+	SectionKindOutOfScope                 SectionKind = "out-of-scope"
+	SectionKindPlan                       SectionKind = "plan"
+	SectionKindDocumentationImpact        SectionKind = "documentation-impact"
+	SectionKindBlocker                    SectionKind = "blocker"
+	SectionKindCancellationReason         SectionKind = "cancellation-reason"
+	SectionKindUseCaseOmissionReason      SectionKind = "use-case-omission-reason"
+	SectionKindSymptom                    SectionKind = "symptom"
+	SectionKindExpectedBehavior           SectionKind = "expected-behavior"
+	SectionKindActualBehavior             SectionKind = "actual-behavior"
+	SectionKindStepsToReproduce           SectionKind = "steps-to-reproduce"
+	SectionKindEvidence                   SectionKind = "evidence"
+	SectionKindCause                      SectionKind = "cause"
+	SectionKindRegressionTest             SectionKind = "regression-test"
+	SectionKindRelationshipToUserBehavior SectionKind = "relationship-to-user-behavior"
+	SectionKindRoadmapStage               SectionKind = "roadmap-stage"
+	SectionKindRisk                       SectionKind = "risk"
+)
+
 type Heading struct {
 	Level       int    `json:"level"`
 	Title       string `json:"title"`
@@ -121,6 +170,7 @@ type ResolvedLink struct {
 }
 
 type Section struct {
+	Kind           SectionKind     `json:"kind,omitempty"`
 	Title          string          `json:"title"`
 	ID             string          `json:"id"`
 	StartLine      int             `json:"startLine"`
@@ -144,9 +194,12 @@ type Issue struct {
 	Severity     string `json:"severity"`
 	Code         string `json:"code"`
 	Message      string `json:"message"`
+	Migration    string `json:"migration,omitempty"`
 	DocumentPath string `json:"documentPath,omitempty"`
 	Line         int    `json:"line,omitempty"`
 	Column       int    `json:"column,omitempty"`
+	TaskID       string `json:"taskId,omitempty"`
+	RelatedID    string `json:"relatedId,omitempty"`
 }
 
 type Document struct {
@@ -166,6 +219,9 @@ type Document struct {
 	Sections            []Section
 	Metadata            Metadata
 	MetadataExtras      []MetadataExtra
+	metadataLocations   map[string]int
+	metadataCounts      map[string]int
+	metadataBlocks      int
 	markdownDiagnostics []Issue
 	mermaidBlocks       []mermaidBlock
 	markdownTables      []markdownTable
@@ -373,6 +429,29 @@ type BusinessRule struct {
 	ownerDoc *Document
 }
 
+type WorkItemStatus string
+type WorkItemID string
+type ModuleID string
+
+const (
+	WorkItemDraft      WorkItemStatus = "draft"
+	WorkItemReady      WorkItemStatus = "ready"
+	WorkItemInProgress WorkItemStatus = "in-progress"
+	WorkItemBlocked    WorkItemStatus = "blocked"
+	WorkItemDone       WorkItemStatus = "done"
+	WorkItemCancelled  WorkItemStatus = "cancelled"
+)
+
+type WorkItemType string
+
+const (
+	WorkItemFeature       WorkItemType = "feature"
+	WorkItemBug           WorkItemType = "bug"
+	WorkItemMaintenance   WorkItemType = "maintenance"
+	WorkItemDocumentation WorkItemType = "documentation"
+	WorkItemResearch      WorkItemType = "research"
+)
+
 type WorkItem struct {
 	ID                  string                  `json:"id"`
 	Title               string                  `json:"title"`
@@ -393,6 +472,8 @@ type WorkItem struct {
 	StandardIDs         []string                `json:"standardIds"`
 	RunbookIDs          []string                `json:"runbookIds"`
 	DependsOn           []string                `json:"dependsOn"`
+	ParentID            *string                 `json:"parentId"`
+	ChildIDs            []string                `json:"childIds"`
 	Document            string                  `json:"document"`
 	Anchor              string                  `json:"anchor"`
 	Criteria            []Task                  `json:"criteria"`
@@ -409,8 +490,10 @@ type WorkItem struct {
 	DocumentationPaths  []string                `json:"documentationPaths"`
 	Blocker             string                  `json:"blocker,omitempty"`
 	line                int
+	parentLine          int
+	parentCount         int
 	ownerDoc            *Document
-	statusName          string
+	statusName          WorkItemStatus
 	useCaseOmitted      bool
 }
 
@@ -450,7 +533,6 @@ type ProjectInfo struct {
 	Description      string
 	Status           StatusInfo
 	Stage            string
-	Version          string
 	Updated          string
 	Summary          string
 	OverviewDocument *Document

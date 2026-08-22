@@ -11,6 +11,8 @@ import (
 
 const defaultFooterURL = "https://lumenikoly.github.io/toudocu/"
 
+const currentDocumentationVersion = 2
+
 // FooterConfig configures the escaped footer text and its optional HTTPS link.
 type FooterConfig struct {
 	Text        string
@@ -38,18 +40,19 @@ type ChangesConfig struct {
 
 // SiteConfig configures the generated portal's built-in appearance and branding.
 type SiteConfig struct {
-	Title        string
-	Logo         string
-	Favicon      string
-	Theme        string
-	ColorScheme  string
-	Accent       string
-	Density      string
-	ContentWidth string
-	Footer       FooterConfig
-	Hero         HeroConfig
-	Changes      ChangesConfig
-	Project      ProjectConfig
+	DocumentationVersion int
+	Title                string
+	Logo                 string
+	Favicon              string
+	Theme                string
+	ColorScheme          string
+	Accent               string
+	Density              string
+	ContentWidth         string
+	Footer               FooterConfig
+	Hero                 HeroConfig
+	Changes              ChangesConfig
+	Project              ProjectConfig
 	// Translations describes independent documentation roots. It is deliberately
 	// not folded into Project: a Toudocu model is always monolingual.
 	Translations      map[string]TranslationProfile
@@ -72,11 +75,12 @@ type TranslationProfile struct {
 
 func defaultSiteConfig() SiteConfig {
 	return SiteConfig{
-		Theme:        "classic",
-		ColorScheme:  "system",
-		Accent:       "indigo",
-		Density:      "comfortable",
-		ContentWidth: "standard",
+		DocumentationVersion: 1,
+		Theme:                "classic",
+		ColorScheme:          "system",
+		Accent:               "indigo",
+		Density:              "comfortable",
+		ContentWidth:         "standard",
 		Footer: FooterConfig{
 			URL:         defaultFooterURL,
 			defaultText: true,
@@ -206,7 +210,8 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 
 	allowedMaps := map[string]bool{"site": true, "site.footer": true, "site.hero": true, "changes": true, "changes.exclude": true, "project": true, "project.sections": true, "translations": true}
 	allowedScalars := map[string]bool{
-		"site.title": true, "site.logo": true, "site.favicon": true, "site.theme": true,
+		"documentationVersion": true,
+		"site.title":           true, "site.logo": true, "site.favicon": true, "site.theme": true,
 		"site.colorScheme": true, "site.accent": true, "site.density": true, "site.contentWidth": true,
 		"site.footer.text": true, "site.footer.url": true, "site.hero.enabled": true, "site.hero.image": true,
 		"changes.defaultBaseRef": true, "changes.renameSimilarity": true, "changes.includeTaskArtifacts": true,
@@ -265,6 +270,12 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 			return config, fmt.Errorf("config.yml:%d: %s must be a string", scalar.line, key)
 		}
 		switch key {
+		case "documentationVersion":
+			value, err := strconv.Atoi(scalar.value)
+			if err != nil || value < 1 {
+				return config, fmt.Errorf("config.yml:%d: documentationVersion must be a positive integer", scalar.line)
+			}
+			config.DocumentationVersion = value
 		case "project.locale":
 			locale, ok := normalizeLocale(scalar.value)
 			if !ok {
@@ -367,12 +378,57 @@ func parseSiteConfig(data []byte) (SiteConfig, error) {
 	}
 	config.Changes.Exclude = changeExcludes
 	if _, ok := values["site"]; !ok {
-		if _, changesOnly := values["changes"]; changesOnly || values["project"].line > 0 || values["translations"].line > 0 {
+		if _, changesOnly := values["changes"]; changesOnly || values["documentationVersion"].line > 0 || values["project"].line > 0 || values["translations"].line > 0 {
 			return config, validateSiteConfig(config)
 		}
 		return config, fmt.Errorf("config.yml: root site map is missing")
 	}
 	return config, validateSiteConfig(config)
+}
+
+func documentationVersionIssue(config SiteConfig) *Issue {
+	version := config.DocumentationVersion
+	if version < currentDocumentationVersion {
+		return &Issue{
+			Severity: "error", Code: "DOCS_MIGRATION_REQUIRED",
+			Message:   "Documentation version 1 must be migrated to version 2.",
+			Migration: "v1-to-v2", DocumentPath: ".toudocu/config.yml",
+		}
+	}
+	if version > currentDocumentationVersion {
+		return &Issue{
+			Severity: "error", Code: "DOCUMENTATION_VERSION_UNSUPPORTED",
+			Message:      fmt.Sprintf("Documentation version %d is newer than supported version %d; update Toudocu.", version, currentDocumentationVersion),
+			DocumentPath: ".toudocu/config.yml",
+		}
+	}
+	return nil
+}
+
+func documentationVersionError(issue *Issue) error {
+	if issue == nil {
+		return nil
+	}
+	if issue.Migration != "" {
+		return fmt.Errorf("%s: Migration: %s", issue.Code, issue.Migration)
+	}
+	return fmt.Errorf("%s: %s", issue.Code, issue.Message)
+}
+
+func requireCurrentDocumentationVersion(options Options) error {
+	root, err := filepath.Abs(options.InputDirectory)
+	if err != nil {
+		return err
+	}
+	repositoryRoot := options.RepositoryRoot
+	if repositoryRoot == "" {
+		repositoryRoot = filepath.Dir(root)
+	}
+	config, _, err := loadSiteConfig(repositoryRoot)
+	if err != nil {
+		return err
+	}
+	return documentationVersionError(documentationVersionIssue(config))
 }
 
 func completeLegacyDrafts(locale string, sections map[SectionType]string) {

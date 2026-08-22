@@ -115,9 +115,10 @@ func writeChangesAPIError(w http.ResponseWriter, err error) {
 	code := "git-command-failed"
 	if failure, ok := err.(*changeFailure); ok {
 		code = failure.IssueCode
-		if failure.Code == 2 {
+		switch failure.Code {
+		case 2:
 			status = http.StatusBadRequest
-		} else if failure.Code == 3 {
+		case 3:
 			status = http.StatusServiceUnavailable
 		}
 	}
@@ -131,7 +132,7 @@ func writeChangesDiagnostic(w http.ResponseWriter, status int, code, message str
 func matchAPIRoute(registry []apiRoute, request *http.Request) (*apiRoute, bool) {
 	for index := range registry {
 		route := &registry[index]
-		if request.URL.Path != route.Path && !(route.Path == changesAPIBase && request.URL.Path == changesAPIBase+"/") {
+		if request.URL.Path != route.Path && (route.Path != changesAPIBase || request.URL.Path != changesAPIBase+"/") {
 			continue
 		}
 		for _, method := range route.Methods {

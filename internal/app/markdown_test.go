@@ -7,9 +7,11 @@ import (
 	"testing"
 )
 
-const sampleMarkdown = `# Документ
+const sampleMarkdown = `<!-- toudocu
+status: in-progress
+-->
 
-- Статус: В работе
+# Документ
 
 Краткое описание.
 
@@ -28,7 +30,7 @@ func TestMarkdownAnalysis(t *testing.T) {
 	if doc.Title != "Документ" || doc.Description != "Краткое описание." {
 		t.Fatalf("unexpected document: %#v", doc)
 	}
-	if doc.Metadata["status"] != "В работе" {
+	if doc.Metadata["status"] != "in-progress" {
 		t.Fatalf("metadata: %#v", doc.Metadata)
 	}
 	if len(doc.Tasks) != 2 || !doc.Tasks[0].Completed {
@@ -66,7 +68,7 @@ func TestMarkdownPolicyErrorsFailCheckAndBuild(t *testing.T) {
 }
 
 func TestMetadataInlineCodePreservesRouteUnderscores(t *testing.T) {
-	doc := analyzeMarkdown("# SC-SITE-API-DOCS: API\n\n- Маршрут: `/_toudocu/api-docs/`\n")
+	doc := analyzeMarkdown("<!-- toudocu\nroute: /_toudocu/api-docs/\n-->\n\n# SC-SITE-API-DOCS: API\n")
 	if got := doc.Metadata["route"]; got != "/_toudocu/api-docs/" {
 		t.Fatalf("route = %q", got)
 	}

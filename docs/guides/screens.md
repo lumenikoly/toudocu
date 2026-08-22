@@ -18,18 +18,21 @@ toudocu build ./docs --no-screen-map
 ## Как описать экран
 
 ```md
-# SC-AUTH-LOGIN: Вход
+<!-- toudocu
+id: SC-AUTH-LOGIN
+screenKind: screen
+module: MOD-AUTH
+status: in-progress
+route: /login
+preview: ../assets/screens/login.webp
+parentScreen: SC-PUBLIC-HOME
+-->
 
-- Идентификатор: SC-AUTH-LOGIN
-- Тип: Экран
-- Модуль: MOD-AUTH
-- Статус: В работе
-- Маршрут: `/login`
-- Превью: `../assets/screens/login.webp`
-- Родительский экран: SC-PUBLIC-HOME
+# SC-AUTH-LOGIN: Вход
 
 ## Состояния
 
+<!-- toudocu:table states columns=id,title,preview -->
 | ID | Название | Превью |
 |---|---|---|
 | DEFAULT | Исходное | `../assets/screens/login.webp` |
@@ -37,17 +40,18 @@ toudocu build ./docs --no-screen-map
 
 ## Переходы
 
-| ID | Сценарий | Действие | Условие | Результат | Состояние | Ошибка |
-|---|---|---|---|---|---|---|
-| TR-AUTH-001 | UC-AUTH-01 | Войти | Данные верны | SC-ACCOUNT-HOME | DEFAULT | — |
-| TR-AUTH-002 | UC-AUTH-01 | Войти | Данные неверны | SC-AUTH-LOGIN | INVALID-CREDENTIALS | INVALID_CREDENTIALS |
+<!-- toudocu:table transitions columns=id,useCase,action,condition,target,state,error,kind -->
+| ID | Сценарий | Действие | Условие | Результат | Состояние | Ошибка | Тип |
+|---|---|---|---|---|---|---|---|
+| TR-AUTH-001 | UC-AUTH-01 | Войти | Данные верны | SC-ACCOUNT-HOME | DEFAULT | — | navigation |
+| TR-AUTH-002 | UC-AUTH-01 | Войти | Данные неверны | SC-AUTH-LOGIN | INVALID-CREDENTIALS | INVALID_CREDENTIALS | error |
 ```
 
-Обязательны ID, тип, модуль и статус. Поддерживаемые типы: `Экран`, `Страница`,
-`Модальное окно`, `Панель`, `Внешняя страница` и `Системное состояние`.
+Обязательны канонические поля `id`, `screenKind`, `module` и `status`. Допустимые виды:
+`screen`, `page`, `modal`, `panel`, `external`, `system`.
 Состояние `DEFAULT` существует даже без явной строки.
 
-`Родительский экран` строит иерархию разделов интерфейса; он не задаёт порядок
+Поле `parentScreen` строит иерархию разделов интерфейса; оно не задаёт порядок
 прохождения сценария.
 
 ## Как описать переход
@@ -77,15 +81,15 @@ toudocu build ./docs --no-screen-map
 действительно нужен, разрешите его:
 
 ```md
-- Начальный экран: SC-AUTH-LOGIN
-- Конечные экраны: SC-ACCOUNT-HOME
-- Разрешить цикл: Да
+startScreen: SC-AUTH-LOGIN
+terminalScreens: SC-ACCOUNT-HOME
+allowCycle: true
 ```
 
 Toudocu берёт только переходы этого `UC-*`, находит достижимые экраны, тупики,
 циклы и пути к конечным экранам. У каждого достижимого неконечного экрана
 должно быть продолжение. Цикл без выхода считается ошибкой, если сценарий не
-содержит `Разрешить цикл: Да`.
+содержит `allowCycle: true`.
 
 ## Как человек пользуется картой
 
@@ -131,6 +135,7 @@ Toudocu берёт только переходы этого `UC-*`, находи
 ```md
 ## Ошибки
 
+<!-- toudocu:table errors columns=id,message -->
 | ID | Сообщение |
 |---|---|
 | INVALID_CREDENTIALS | Неверный email или пароль. |
@@ -182,8 +187,9 @@ Toudocu берёт только переходы этого `UC-*`, находи
 и командой:
 
 ```md
-- Переходы: TR-AUTH-001
+transitions: TR-AUTH-001
 
+<!-- toudocu:section verification -->
 ## Проверка
 
 - `AC-01` → `TR-AUTH-001` → `TestSuccessfulLogin`

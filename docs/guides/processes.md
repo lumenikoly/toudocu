@@ -16,13 +16,15 @@
 результат и, для интерфейса, начальный и конечные экраны:
 
 ```md
-# UC-AUTH-01: Войти в систему
+<!-- toudocu
+id: UC-AUTH-01
+module: MOD-AUTH
+startScreen: SC-AUTH-LOGIN
+terminalScreens: SC-ACCOUNT-DASHBOARD
+status: done
+-->
 
-- Идентификатор: UC-AUTH-01
-- Модуль: MOD-AUTH
-- Начальный экран: SC-AUTH-LOGIN
-- Конечные экраны: SC-ACCOUNT-DASHBOARD
-- Статус: Реализован
+# UC-AUTH-01: Войти в систему
 ```
 
 Пишите путь от первого действия человека до наблюдаемого результата. Не
@@ -47,11 +49,13 @@
 остаются в API-контракте.
 
 ````md
-# FLOW-AUTH-LOGIN: Проверка входа
+<!-- toudocu
+id: FLOW-AUTH-LOGIN
+module: MOD-AUTH
+useCase: UC-AUTH-01, UC-AUTH-02
+-->
 
-- Идентификатор: FLOW-AUTH-LOGIN
-- Модуль: MOD-AUTH
-- Сценарий: UC-AUTH-01, UC-AUTH-02
+# FLOW-AUTH-LOGIN: Проверка входа
 
 ```mermaid
 sequenceDiagram

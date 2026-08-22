@@ -127,8 +127,8 @@ module, guide, or other document type.
 - `screens/index.md` is the entry page for the built-in screen section and gets
   a separate machine type `screen-index`; it is not an `SC-*` entity.
 - `quality/index.md` and `runbooks/index.md` define their section entry pages.
-  An unknown section's manifest additionally declares `Type: Custom` and a
-  description.
+  An unknown section is identified by its own `index.md` and description; it
+  does not declare a localized type value.
 - `screens/map.md` is an obsolete source. The catalog, Screen Map, and playable
   flows are built from `screens/SC-*.md`; no separate map should be maintained.
 - Generated HTML, `report.json`, and the search index are derived output. They

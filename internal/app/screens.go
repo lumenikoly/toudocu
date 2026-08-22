@@ -23,6 +23,8 @@ var safePreviewExtensions = map[string]bool{
 
 type markdownTable struct {
 	Headers   []string
+	Kind      string
+	Columns   []string
 	Rows      []markdownTableRow
 	StartLine int
 }
@@ -32,38 +34,11 @@ type markdownTableRow struct {
 	Line  int
 }
 
-func headingSectionRange(document *Document, names ...string) (Heading, int, bool) {
-	targets := map[string]bool{}
-	for _, name := range names {
-		targets[canonicalText(name)] = true
-	}
-	for index, heading := range document.Headings {
-		if !targets[canonicalText(heading.Title)] {
-			continue
-		}
-		end := strings.Count(document.Content, "\n") + 1
-		for _, candidate := range document.Headings[index+1:] {
-			if candidate.Level <= heading.Level {
-				end = candidate.Line
-				break
-			}
-		}
-		return heading, end, true
-	}
-	return Heading{}, 0, false
-}
-
-func parseScreenTable(document *Document, sectionNames ...string) (markdownTable, bool) {
-	heading, end, found := headingSectionRange(document, sectionNames...)
-	if !found {
-		return markdownTable{}, false
-	}
+func semanticTable(document *Document, kind string) (markdownTable, bool) {
 	for _, candidate := range document.markdownTables {
-		line := candidate.StartLine - 1
-		if line <= heading.Line || line >= end {
-			continue
+		if candidate.Kind == kind {
+			return candidate, true
 		}
-		return candidate, true
 	}
 	return markdownTable{}, false
 }
@@ -71,7 +46,7 @@ func parseScreenTable(document *Document, sectionNames ...string) (markdownTable
 func markdownTablesFromAnalysis(parsed markdownAnalysis) []markdownTable {
 	result := []markdownTable{}
 	for _, candidate := range parsed.Tables {
-		table := markdownTable{Headers: candidate.Headers, StartLine: candidate.Range.Start.Line}
+		table := markdownTable{Headers: candidate.Headers, Kind: candidate.Kind, Columns: append([]string{}, candidate.Columns...), StartLine: candidate.Range.Start.Line}
 		for _, row := range candidate.Rows {
 			table.Rows = append(table.Rows, markdownTableRow{Cells: row.Cells, Line: row.Range.Start.Line})
 		}
@@ -80,41 +55,25 @@ func markdownTablesFromAnalysis(parsed markdownAnalysis) []markdownTable {
 	return result
 }
 
-func canonicalScreenHeader(value string) string {
-	aliases := map[string]string{
-		"id": "id", "идентификатор": "id",
-		"name": "title", "title": "title", "название": "title",
-		"preview": "preview", "превью": "preview",
-		"scenario": "useCase", "use case": "useCase", "сценарий": "useCase",
-		"action": "action", "действие": "action",
-		"condition": "condition", "условие": "condition",
-		"result": "target", "target": "target", "to": "target", "результат": "target", "в": "target",
-		"state": "state", "состояние": "state",
-		"error": "error", "ошибка": "error",
-		"message": "message", "сообщение": "message",
-		"contract": "contract", "контракт": "contract",
-		"type": "kind", "kind": "kind", "тип": "kind",
-	}
-	return aliases[canonicalText(stripInlineMarkdown(value))]
-}
-
 func screenTableColumns(model *Model, document *Document, table markdownTable, required []string) (map[string]int, bool) {
 	columns := map[string]int{}
-	for index, header := range table.Headers {
-		key := canonicalScreenHeader(header)
-		if key != "" {
-			if _, exists := columns[key]; !exists {
-				columns[key] = index
-			}
+	valid := len(table.Columns) == len(table.Headers)
+	for index, key := range table.Columns {
+		if _, exists := columns[key]; exists {
+			valid = false
+		} else {
+			columns[key] = index
 		}
 	}
-	valid := true
 	for _, key := range required {
 		if _, exists := columns[key]; exists {
 			continue
 		}
-		addDocumentIssue(model, document, newIssue("error", "invalid-screen-table-columns", "The table is missing required column "+key+".", document.SourcePath, 0))
+		addDocumentIssue(model, document, newIssue("error", "invalid-table-columns", "The table is missing required column "+key+".", document.SourcePath, table.StartLine))
 		valid = false
+	}
+	if !valid {
+		addDocumentIssue(model, document, newIssue("error", "invalid-table-columns", "The semantic table columns must be unique and match the visible column count.", document.SourcePath, table.StartLine))
 	}
 	return columns, valid
 }
@@ -135,46 +94,35 @@ func tableCell(row markdownTableRow, columns map[string]int, key string) string 
 	return value
 }
 
-func normalizeScreenKind(value string) (string, bool) {
-	switch canonicalText(value) {
-	case "screen", "экран":
-		return "screen", true
-	case "page", "страница":
-		return "page", true
-	case "modal", "dialog", "модальное окно":
-		return "modal", true
-	case "panel", "панель":
-		return "panel", true
-	case "external page", "внешняя страница":
-		return "external", true
-	case "system state", "системное состояние":
-		return "system", true
-	default:
-		return "", false
-	}
+type ScreenKind string
+
+const (
+	ScreenKindScreen   ScreenKind = "screen"
+	ScreenKindPage     ScreenKind = "page"
+	ScreenKindModal    ScreenKind = "modal"
+	ScreenKindPanel    ScreenKind = "panel"
+	ScreenKindExternal ScreenKind = "external"
+	ScreenKindSystem   ScreenKind = "system"
+)
+
+func parseScreenKind(value string) (ScreenKind, bool) {
+	kind := ScreenKind(strings.TrimSpace(value))
+	return kind, containsString([]string{string(ScreenKindScreen), string(ScreenKindPage), string(ScreenKindModal), string(ScreenKindPanel), string(ScreenKindExternal), string(ScreenKindSystem)}, string(kind))
 }
 
-func normalizeTransitionKind(value string, hasError bool, targetKind string) (string, bool) {
-	if hasError {
-		return "error", value == "" || containsString([]string{"error", "ошибка"}, canonicalText(value))
-	}
-	if targetKind == "external" && strings.TrimSpace(value) == "" {
-		return "external", true
-	}
-	switch canonicalText(value) {
-	case "", "navigation", "navigate", "переход", "навигация":
-		return "navigation", true
-	case "redirect", "редирект", "перенаправление":
-		return "redirect", true
-	case "return", "back", "возврат":
-		return "return", true
-	case "external", "внешний переход":
-		return "external", true
-	case "error", "ошибка":
-		return "error", true
-	default:
-		return "", false
-	}
+type TransitionKind string
+
+const (
+	TransitionKindNavigation TransitionKind = "navigation"
+	TransitionKindRedirect   TransitionKind = "redirect"
+	TransitionKindReturn     TransitionKind = "return"
+	TransitionKindExternal   TransitionKind = "external"
+	TransitionKindError      TransitionKind = "error"
+)
+
+func parseTransitionKind(value string) (TransitionKind, bool) {
+	kind := TransitionKind(strings.TrimSpace(value))
+	return kind, containsString([]string{string(TransitionKindNavigation), string(TransitionKindRedirect), string(TransitionKindReturn), string(TransitionKindExternal), string(TransitionKindError)}, string(kind))
 }
 
 func screenTitle(document *Document, id string) string {
@@ -241,7 +189,7 @@ func resolveScreenPreview(model *Model, document *Document, value string, line i
 
 func parseScreenStates(model *Model, document *Document, defaultPreview string) []ScreenState {
 	states := []ScreenState{{ID: "DEFAULT", Preview: defaultPreview}}
-	table, found := parseScreenTable(document, "Состояния", "States")
+	table, found := semanticTable(document, "states")
 	if !found {
 		return states
 	}
@@ -279,7 +227,7 @@ func parseErrorDefinitions(model *Model) []ErrorDefinition {
 	result := []ErrorDefinition{}
 	seen := map[string]ErrorDefinition{}
 	for _, document := range model.Collections["contract"] {
-		table, found := parseScreenTable(document, "Ошибки", "Errors")
+		table, found := semanticTable(document, "errors")
 		if !found {
 			continue
 		}
@@ -311,11 +259,11 @@ func parseErrorDefinitions(model *Model) []ErrorDefinition {
 
 func parseScreenDocument(model *Model, document *Document) KnowledgeScreen {
 	id := strings.TrimSpace(document.Metadata["id"])
-	kind, kindValid := normalizeScreenKind(document.Metadata["type"])
+	kind, kindValid := parseScreenKind(document.Metadata["screenKind"])
 	if !screenIDRE.MatchString(id) {
 		addDocumentIssue(model, document, newIssue("error", "invalid-screen-id", "The screen identifier must match SC-<AREA>-<NAME>.", document.SourcePath, 0))
 	}
-	for _, key := range []string{"id", "type", "module", "status"} {
+	for _, key := range []string{"id", "screenKind", "module", "status"} {
 		if strings.TrimSpace(document.Metadata[key]) == "" {
 			addDocumentIssue(model, document, newIssue("error", "missing-screen-field", "The screen requires field "+key+".", document.SourcePath, 0))
 		}
@@ -330,7 +278,7 @@ func parseScreenDocument(model *Model, document *Document) KnowledgeScreen {
 	preview := resolveScreenPreview(model, document, document.Metadata["preview"], 0)
 	states := parseScreenStates(model, document, preview)
 	route := strings.TrimSpace(strings.Trim(document.Metadata["route"], "`"))
-	if kind == "external" {
+	if kind == ScreenKindExternal {
 		lower := strings.ToLower(route)
 		if !strings.HasPrefix(lower, "https://") && !strings.HasPrefix(lower, "http://") {
 			addDocumentIssue(model, document, newIssue("error", "invalid-external-screen-route", "An external page requires an HTTP(S) route.", document.SourcePath, 0))
@@ -353,7 +301,7 @@ func parseScreenDocument(model *Model, document *Document) KnowledgeScreen {
 	}
 	return KnowledgeScreen{
 		ID: id, Title: screenTitle(document, id), Description: document.Description,
-		ModuleID: strings.TrimSpace(document.Metadata["module"]), Kind: kind,
+		ModuleID: strings.TrimSpace(document.Metadata["module"]), Kind: string(kind),
 		Route: route, Status: document.Status, Preview: preview,
 		Component: component,
 		Updated:   document.Metadata["updated"], ParentID: strings.TrimSpace(document.Metadata["parentScreen"]), States: states,
@@ -391,11 +339,11 @@ func resolveTransitionContract(model *Model, document *Document, value string, l
 }
 
 func parseTransitionsForScreen(model *Model, document *Document, screen KnowledgeScreen, screensByID map[string]*KnowledgeScreen, errorsByID map[string]ErrorDefinition) []ScreenTransition {
-	table, found := parseScreenTable(document, "Переходы", "Transitions")
+	table, found := semanticTable(document, "transitions")
 	if !found {
 		return []ScreenTransition{}
 	}
-	columns, valid := screenTableColumns(model, document, table, []string{"id", "action", "condition", "target"})
+	columns, valid := screenTableColumns(model, document, table, []string{"id", "useCase", "action", "condition", "target", "kind"})
 	if !valid {
 		return []ScreenTransition{}
 	}
@@ -447,11 +395,7 @@ func parseTransitionsForScreen(model *Model, document *Document, screen Knowledg
 				message = errorsByID[errorID].Message
 			}
 		}
-		targetKind := ""
-		if target != nil {
-			targetKind = target.Kind
-		}
-		kind, kindValid := normalizeTransitionKind(tableCell(row, columns, "kind"), errorID != "", targetKind)
+		kind, kindValid := parseTransitionKind(tableCell(row, columns, "kind"))
 		if !kindValid {
 			addDocumentIssue(model, document, newIssue("error", "invalid-screen-transition-kind", "Invalid transition kind.", document.SourcePath, row.Line))
 		}
@@ -460,7 +404,7 @@ func parseTransitionsForScreen(model *Model, document *Document, screen Knowledg
 		}
 		result = append(result, ScreenTransition{
 			ID: id, UseCaseID: useCaseID, FromID: screen.ID, ToID: targetID, Action: action, Condition: condition,
-			StateID: stateID, ErrorID: errorID, Message: message, Contract: contract, Kind: kind,
+			StateID: stateID, ErrorID: errorID, Message: message, Contract: contract, Kind: string(kind),
 			Document: document.SourcePath, Line: row.Line,
 		})
 	}
@@ -756,7 +700,7 @@ func flowResult(document *Document) string {
 	if document == nil {
 		return ""
 	}
-	if section := sectionByNames(document, []string{"Постусловия", "Postconditions"}); section != nil {
+	if section := sectionByKind(document, SectionKindPostconditions); section != nil {
 		return strings.TrimSpace(section.Text)
 	}
 	return ""

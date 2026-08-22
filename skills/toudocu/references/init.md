@@ -70,9 +70,9 @@ another implicit skill trigger. The Toudocu Go CLI has no `init` command.
    it. Do not create detailed architecture documents, typed entities,
    statuses, or relationships without evidence.
 4. Create or complete `<repository-root>/.toudocu/config.yml` without removing
-   existing `site`, `changes`, or `translations` settings. Set the resolved
-   `project.locale` and write the already resolved 13 `project.sections`
-   titles. Do not rewrite existing H1 headings.
+   existing `site`, `changes`, or `translations` settings. Set
+   `documentationVersion: 2`, the resolved `project.locale`, and the already
+   resolved 13 `project.sections` titles. Do not rewrite existing H1 headings.
 5. Use `assets/project-guidance/en.md` for every project locale. The managed
    block is an agent instruction surface and therefore remains English. It must
    still require source documentation in the selected project language and
@@ -96,9 +96,10 @@ initialization completed atomically.
 2. Confirm that `<docs-root>/index.md` and
    `<docs-root>/architecture/overview.md` exist and that overview has document
    type `Architecture Overview`.
-3. Complete the reader-first and semantic gates for the created documents.
-4. Run the ordinary project-wide Toudocu check. Run an additional strict check
+3. Confirm that `.toudocu/config.yml` contains `documentationVersion: 2`.
+4. Complete the reader-first and semantic gates for the created documents.
+5. Run the ordinary project-wide Toudocu check. Run an additional strict check
    only when strict validation is project policy.
-5. Report the resolved repository root, documentation directory, project locale,
+6. Report the resolved repository root, documentation directory, project locale,
    template language, English guidance asset, created or updated files, errors,
    and remaining warnings.

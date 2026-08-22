@@ -1,7 +1,9 @@
+<!-- toudocu
+architectureQuestion: Как сообщение из локальной документации доставляется внешнему агенту разработки без прямой интеграции с ИИ?
+-->
+
 # Delivering a request to an external development agent
 
-- Document type: Architecture
-- Architecture question: How does a message from local documentation reach an external development agent without a direct AI integration?
 
 Toudocu separates conversation content from delivery. A `Discussion` contains
 one logical thread, its message history, and a `DocumentAnchor`. Every saved

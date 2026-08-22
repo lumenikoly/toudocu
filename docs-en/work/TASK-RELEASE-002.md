@@ -1,24 +1,32 @@
+<!-- toudocu
+id: TASK-RELEASE-002
+status: done
+taskType: maintenance
+module: MOD-CLI
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-11
+-->
+
 # TASK-RELEASE-002: Add installation and updates from GitHub Release
 
-- Status: Completed
-- Type: Maintenance
-- Module: MOD-CLI
-- Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-11
 
+<!-- toudocu:section result -->
 ## Result
 
 The `0.0.1` release bundle includes POSIX and PowerShell installer scripts. Each
 script selects the file for the operating system and architecture, verifies its
 SHA-256 checksum, and only then replaces the program.
 
+<!-- toudocu:section behavior-change -->
 ## Behavior change
 
+<!-- toudocu:section before -->
 ### Before
 
 The user manually selected a binary in GitHub Releases, verified it, and added
 its directory to `PATH`.
 
+<!-- toudocu:section after -->
 ### After
 
 Either command downloads the matching binary and `checksums.txt`, verifies its
@@ -43,6 +51,7 @@ directory to the user `PATH` once. The current parent shell is not changed: the
 installer prints the exact `source`/fish command, requests a login/re-login for
 `.profile`, or asks the user to open a new terminal on Windows.
 
+<!-- toudocu:section scope -->
 ## Scope
 
 - installer scripts in `scripts/`;
@@ -50,6 +59,7 @@ installer prints the exact `source`/fish command, requests a login/re-login for
 - installer contract tests in `internal/app/`;
 - the README, changelog, and canonical documentation.
 
+<!-- toudocu:section out-of-scope -->
 ## Out of scope
 
 - publishing a Git tag or GitHub Release;
@@ -58,6 +68,7 @@ installer prints the exact `source`/fish command, requests a login/re-login for
 - new release targets other than Windows ARM64;
 - signing or notarization of release binaries.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] `AC-01` The installer unambiguously selects one of six Linux, macOS, and
@@ -78,6 +89,7 @@ installer prints the exact `source`/fish command, requests a login/re-login for
   directory to `PATH` are idempotent. A nonstandard directory does not change
   the profile and receives a clear hint.
 
+<!-- toudocu:section plan -->
 ## Plan
 
 1. Implement the same rules for POSIX and PowerShell.
@@ -86,6 +98,7 @@ installer prints the exact `source`/fish command, requests a login/re-login for
    bundle contents.
 4. Update the source documents and release notes.
 
+<!-- toudocu:section verification -->
 ## Verification
 
 - `AC-01` → `go test ./internal/app -run TestInstallerPlatformContract`
@@ -98,11 +111,13 @@ installer prints the exact `source`/fish command, requests a login/re-login for
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `make check`
 
+<!-- toudocu:section documentation-impact -->
 ## Documentation impact
 
 The work added an installation guide and updated the README, changelog, current
 status, system boundary, trust boundary, and tracked portal.
 
+<!-- toudocu:section use-case-omission-reason -->
 ## Use-case omission reason
 
 The task changes release-file delivery and installers without adding a command

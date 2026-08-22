@@ -1,15 +1,20 @@
+<!-- toudocu
+id: TASK-REVIEW-001
+status: done
+taskType: feature
+priority: high
+module: MOD-AGENT-FEEDBACK
+useCase: UC-AGENT-FEEDBACK-01
+screens: SC-SITE-DOCUMENT, SC-CHANGES-WORKSPACE
+transitions: TR-SITE-007
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-14
+-->
+
 # TASK-REVIEW-001: Discuss local changes with a development agent
 
-- Status: Done
-- Type: Feature
-- Priority: High
-- Module: MOD-AGENT-FEEDBACK
-- Use case: UC-AGENT-FEEDBACK-01
-- Screens: SC-SITE-DOCUMENT, SC-CHANGES-WORKSPACE
-- Transitions: TR-SITE-007
-- Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-14
 
+<!-- toudocu:section result -->
 ## Outcome
 
 The canonical Changes workspace shows a repository-wide diff, while the Portal
@@ -17,13 +22,16 @@ opens discussions beside a document. Threads survive restarts and deliver new
 comments to the installed skill through the version 1 command-line contract.
 Toudocu neither starts an agent nor changes Git.
 
+<!-- toudocu:section behavior-change -->
 ## Behavior change
 
+<!-- toudocu:section before -->
 ### Before
 
 Changes showed documentation roots only and did not store comments. A local
 review result could not be passed to a development agent.
 
+<!-- toudocu:section after -->
 ### After
 
 The existing screen provides a repository-wide view, durable comment anchors,
@@ -31,6 +39,7 @@ discussions, and an agent delivery queue. An agent response is stored beside
 the discussion. The ordinary `changes` command, public Go facade, static
 portal, and translations retain their previous behavior.
 
+<!-- toudocu:section scope -->
 ## Scope
 
 - discussion services, HTTP API, CLI, and local state in `internal/app/`;
@@ -40,6 +49,7 @@ portal, and translations retain their previous behavior.
 - OpenAPI, canonical documentation, README, changelog, and dependency notices;
 - Go, TypeScript, and browser tests.
 
+<!-- toudocu:section out-of-scope -->
 ## Out of scope
 
 - separate top-level Review, Feedback, Code, or Files tabs;
@@ -50,6 +60,7 @@ portal, and translations retain their previous behavior.
 - discussions in static portals and translations;
 - reading or updating translation roots.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] `AC-01` Changes still shows the repository for a supported range, while
@@ -90,6 +101,7 @@ portal, and translations retain their previous behavior.
   the same tab manages drafts, thread state, deletion, the queue, and prompt
   copying.
 
+<!-- toudocu:section plan -->
 ## Plan
 
 - [x] Implement the repository view and discussion storage.
@@ -101,6 +113,7 @@ portal, and translations retain their previous behavior.
 - [x] Update the bundled skill and canonical documentation without reading
   translations.
 
+<!-- toudocu:section verification -->
 ## Verification
 
 - `AC-01` → `go test ./internal/app -run 'TestRepositoryReview'`
@@ -120,6 +133,7 @@ portal, and translations retain their previous behavior.
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `make check`
 
+<!-- toudocu:section documentation-impact -->
 ## Documentation impact
 
 The earlier implementation added MOD-REVIEW, UC-REVIEW-01,
@@ -129,6 +143,7 @@ Changes screen, architecture boundaries, Changes and CLI contracts,
 references, guides, roadmap, changelog, and dependency notices were updated.
 Generated browser files still come only from `web/`.
 
+<!-- toudocu:section summary -->
 ## Current state
 
 A message has `question` or `change_request` intent. Saving immediately creates

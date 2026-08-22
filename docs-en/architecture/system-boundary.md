@@ -1,7 +1,9 @@
+<!-- toudocu
+architectureQuestion: Где проходит системная граница Toudocu и кто с ней взаимодействует?
+-->
+
 # Toudocu System Boundary
 
-- Document type: Architecture
-- Architectural question: Where is the Toudocu system boundary and who interacts with it?
 
 Toudocu runs as one local Go process. It reads documentation and allowed
 repository data, builds a model, and returns diagnostics, a JSON report, or a

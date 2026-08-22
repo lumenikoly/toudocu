@@ -1,7 +1,5 @@
 # Архитектура {{PROJECT_TITLE}}
 
-- Тип документа: Architecture Overview
-
 {{SYSTEM_BOUNDARY_SUMMARY}}
 
 ## Граница системы

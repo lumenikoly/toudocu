@@ -1,16 +1,20 @@
-# {{STANDARD_ID}}: {{STANDARD_TITLE}}
+<!-- toudocu
+id: {{STANDARD_ID}}
+status: {{STATUS}}
+scope: {{SCOPE}}
+updated: {{YYYY-MM-DD}}
+-->
 
-- Идентификатор: {{STANDARD_ID}}
-- Статус: {{STATUS}}
-- Область: {{SCOPE}}
-- Последнее обновление: {{YYYY-MM-DD}}
+# {{STANDARD_ID}}: {{STANDARD_TITLE}}
 
 {{STANDARD_SUMMARY}}
 
+<!-- toudocu:section rules -->
 ## Правила
 
 {{RULES}}
 
+<!-- toudocu:section automated-checks -->
 ## Автоматические проверки
 
 {{AUTOMATED_CHECKS}}

@@ -1,12 +1,15 @@
+<!-- toudocu
+id: SC-SITE-API-DOCS
+status: done
+screenKind: screen
+module: MOD-SITE
+route: /_toudocu/api-docs/
+preview: ../assets/screens/site-api-docs.png
+updated: 2026-08-13
+-->
+
 # SC-SITE-API-DOCS: HTTP API
 
-- Identifier: SC-SITE-API-DOCS
-- Type: Screen
-- Module: MOD-SITE
-- Status: Implemented
-- Route: `/_toudocu/api-docs/`
-- Preview: `../assets/screens/site-api-docs.png`
-- Last updated: 2026-08-12
 
 A `serve`-only catalog of the wire-level Editor, Changes, and agent feedback API
 contracts. The user selects an OpenAPI source, expands operations, and may

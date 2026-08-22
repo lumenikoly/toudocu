@@ -10,18 +10,22 @@ and verification commands, and annual archive.
 One file contains exactly one work item:
 
 ```md
+<!-- toudocu
+id: TASK-AUTH-014
+status: draft
+taskType: feature
+-->
+
 # TASK-AUTH-014: Add password recovery
 
-- Status: Draft
-- Type: Feature
-
+<!-- toudocu:section result -->
 ## Outcome
 
 A user can request a password-recovery link.
 ```
 
-A draft needs a valid Status and Type and a non-empty Outcome. Add the other
-fields as the contract becomes clearer.
+A draft needs canonical `id`, `status`, and `taskType` fields and a non-empty
+section marked `result`. Add the other fields as the contract becomes clearer.
 
 ## When a work item is useful
 
@@ -42,14 +46,14 @@ work item automatically. They use the same threshold.
 
 | Status | Use it when | Additional requirement |
 |---|---|---|
-| `Draft` | The task is still being defined | Type and observable outcome |
-| `Ready` | The contract is agreed | Every work section and every `AC-*` verification |
-| `In progress` | Work is underway | Same contract as Ready |
-| `Blocked` | Work cannot continue | Non-empty Blocker section |
-| `Done` or `Completed` | The result is accepted | Every `AC-*` checked; `ALL` and `DOCS` present; dependencies complete |
-| `Cancelled` or `Canceled` | The work is no longer needed | Non-empty Cancellation reason section |
+| `draft` | The task is still being defined | Type and observable outcome |
+| `ready` | The contract is agreed | Every work section and every `AC-*` verification |
+| `in-progress` | Work is underway | Same contract as ready |
+| `blocked` | Work cannot continue | A non-empty `blocker` section |
+| `done` | The result is accepted | Every `AC-*` checked; `ALL` and `DOCS` present; dependencies complete |
+| `cancelled` | The work is no longer needed | A non-empty `cancellation-reason` section |
 
-Russian status values are also recognized in Russian-language roots.
+Other spellings and translations are not recognized as machine values.
 
 ## Types
 
@@ -57,54 +61,52 @@ The type describes the nature of the work, not its state.
 
 | Type | Meaning | Use case field |
 |---|---|---|
-| `Feature` | New or changed user-facing behavior | Required |
-| `Bug` | Fix for observable incorrect behavior | Required, except for the technical case below |
-| `Maintenance` | Refactoring, infrastructure, or upkeep | Optional |
-| `Documentation` | Documentation-only work | Optional |
-| `Research` | Investigation or hypothesis testing | Optional |
+| `feature` | New or changed user-facing behavior | Required |
+| `bug` | Fix for observable incorrect behavior | Required, except for the technical case below |
+| `maintenance` | Refactoring, infrastructure, or upkeep | Optional |
+| `documentation` | Documentation-only work | Optional |
+| `research` | Investigation or hypothesis testing | Optional |
 
-A technical work item without a Use case needs a Rationale for no use case
-section. When a `UC-*` is named, it must exist.
-
-Russian type values are accepted and normalize to the English values above.
+A technical work item without `useCase` needs a section marked
+`use-case-omission-reason`. When a `UC-*` is named, it must exist.
 
 `task init --type Bug` creates `work/BUG-AREA-NNN.md`; other types receive a
-`TASK-AREA-NNN` identifier. Type `Bug` requires the `BUG-` prefix, and `BUG-*`
+`TASK-AREA-NNN` identifier. Machine value `bug` requires the `BUG-` prefix, and `BUG-*`
 cannot be used for another type.
 
 ## Fields
 
 | Field | Rule |
 |---|---|
-| `Status` | Always required; one of the statuses above |
-| `Type` | Always required |
-| `Module` | Required from Ready onward; the `MOD-*` must exist |
-| `Use case` | Required for Feature and user-facing Bug; the `UC-*` must exist |
-| `Flow` | Optional existing `FLOW-*`; included in task context |
-| `Standards` | Optional existing `STD-*` identifiers; requires a `QUALITY` target |
-| `Affected runbooks` | Optional existing `RB-*` identifiers; included in context |
-| `Depends on` | `TASK-*` and `BUG-*`, separated by spaces, commas, or semicolons |
-| `Priority` | Optional label; no fixed vocabulary outside the bug contract |
-| `Last updated` | Optional ISO date used by stale-document policy |
+| `status` | Always required; one of the canonical statuses above |
+| `taskType` | Always required |
+| `module` | Required from `ready`; the `MOD-*` must exist |
+| `useCase` | Required for `feature` and user-facing `bug`; the `UC-*` must exist |
+| `flow` | Optional existing `FLOW-*`; included in task context |
+| `standards` | Optional existing `STD-*` identifiers; requires a `QUALITY` target |
+| `runbooks` | Optional existing `RB-*` identifiers; included in context |
+| `parentTask` | One optional `TASK-*`; declares decomposition |
+| `dependsOn` | Comma-separated `TASK-*` and `BUG-*` identifiers |
+| `priority` | Optional canonical priority |
+| `updated` | Optional ISO date used by stale-document policy |
 
 Identifiers are unique across all of `work/**`, including the archive. A
 dependency must exist and must not form a cycle. A work item cannot be marked
-Done before all dependencies are complete.
+`done` before all dependencies are complete.
 
 ## Required sections for a Ready work item
 
-From Ready onward, a task needs:
+From `ready` onward, a task needs sections with these kinds:
 
-1. Outcome — what a user or system can observe.
-2. Behavior change with exact Before and After subsections — for Feature. These
-   subsection names are part of the format. Bugs use the separate contract
-   below.
-3. Scope — files and directories that may change.
-4. Out of scope — work explicitly excluded.
-5. Acceptance criteria — testable `AC-*` conditions.
-6. Plan — the expected work sequence.
-7. Verification — one command mapping per criterion plus `ALL` and `DOCS`.
-8. Documentation impact — exact files to update, or why no documentation
+1. `result` — what a user or system can observe.
+2. `behavior-change` with `before` and `after` subsections — for `feature`.
+   Bugs use the separate contract below.
+3. `scope` — files and directories that may change.
+4. `out-of-scope` — work explicitly excluded.
+5. `acceptance-criteria` — testable `AC-*` conditions.
+6. `plan` — the expected work sequence.
+7. `verification` — one command mapping per criterion plus `ALL` and `DOCS`.
+8. `documentation-impact` — exact files to update, or why no documentation
    change is needed.
 
 Backtick paths in Scope are relative to `--repository-root`. Existing paths
@@ -116,6 +118,7 @@ A glob must match at least one path.
 Each criterion has a unique local identifier:
 
 ```md
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [ ] `AC-01` An expired token returns `INVALID_TOKEN`.
@@ -126,6 +129,7 @@ Verification contains exactly one entry for each criterion, with at least one
 command:
 
 ```md
+<!-- toudocu:section verification -->
 ## Verification
 
 - `AC-01` → `go test ./internal/auth -run TestInvalidToken`
@@ -141,10 +145,10 @@ command:
 | `DOCS` | The complete documentation check |
 | `QUALITY` | Explicitly related standards, through commands in the work item |
 
-Readiness requires every `AC-*`, `ALL`, and `DOCS`. If Standards is non-empty,
+Readiness requires every `AC-*`, `ALL`, and `DOCS`. If `standards` is non-empty,
 one `QUALITY` entry is also required. `task context` includes named standards
 and runbooks in `documents` and `requiredReads`; Toudocu does not infer their
-applicability from Scope. A Done work item has every criterion marked `[x]`.
+applicability from scope. A `done` work item has every criterion marked `[x]`.
 
 ## Actual documentation impact
 
@@ -231,53 +235,65 @@ archived by mistake. Identifiers and dependencies span all of `work/**`, so
 ## Complete example
 
 ```md
+<!-- toudocu
+id: TASK-AUTH-014
+status: ready
+taskType: feature
+priority: high
+module: MOD-AUTH
+useCase: UC-AUTH-03
+flow: FLOW-AUTH-RECOVERY
+dependsOn: TASK-MAIL-004
+updated: 2026-07-27
+-->
+
 # TASK-AUTH-014: Add password recovery
 
-- Status: Ready
-- Type: Feature
-- Priority: High
-- Module: MOD-AUTH
-- Use case: UC-AUTH-03
-- Flow: FLOW-AUTH-RECOVERY
-- Depends on: TASK-MAIL-004
-- Last updated: 2026-07-27
-
+<!-- toudocu:section result -->
 ## Outcome
 
 A user can recover a password securely through a one-time link.
 
+<!-- toudocu:section behavior-change -->
 ## Behavior change
 
+<!-- toudocu:section before -->
 ### Before
 
 A user cannot recover a forgotten password without support.
 
+<!-- toudocu:section after -->
 ### After
 
 A user follows a one-time link and sets a new password.
 
+<!-- toudocu:section scope -->
 ## Scope
 
 - `internal/auth/`;
 - `internal/mail/`;
 - `docs/modules/auth.md`.
 
+<!-- toudocu:section out-of-scope -->
 ## Out of scope
 
 - changing registration rules;
 - adding a new mail provider.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [ ] `AC-01` An expired token is rejected.
 - [ ] `AC-02` A valid token changes the password once.
 
+<!-- toudocu:section plan -->
 ## Plan
 
 - [ ] Add token creation and storage.
 - [ ] Enforce expiry and one-time use.
 - [ ] Update the authentication documentation.
 
+<!-- toudocu:section verification -->
 ## Verification
 
 - `AC-01` → `go test ./internal/auth -run TestExpiredResetToken`
@@ -285,6 +301,7 @@ A user follows a one-time link and sets a new password.
 - `ALL` → `go test ./...`
 - `DOCS` → `toudocu check ./docs --strict`
 
+<!-- toudocu:section documentation-impact -->
 ## Documentation impact
 
 Update the password-recovery use case and authentication module rules.

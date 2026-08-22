@@ -33,35 +33,7 @@ func documentStableID(document *Document) string {
 	if id := strings.TrimSpace(document.Metadata["id"]); id != "" {
 		return id
 	}
-	if document.Type == "work" {
-		if match := workItemHeadingRE.FindStringSubmatch(document.Title); match != nil {
-			return match[1]
-		}
-	}
 	return ""
-}
-
-func metadataSearchTerms(document *Document, includeKeys bool) []string {
-	keys := make([]string, 0, len(document.Metadata))
-	for key := range document.Metadata {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
-
-	terms := make([]string, 0, len(keys)*2+len(document.MetadataExtras)*2)
-	for _, key := range keys {
-		if includeKeys {
-			terms = append(terms, key)
-		}
-		terms = append(terms, document.Metadata[key])
-	}
-	for _, extra := range document.MetadataExtras {
-		if includeKeys {
-			terms = append(terms, extra.Key)
-		}
-		terms = append(terms, extra.Value)
-	}
-	return terms
 }
 
 func SearchDocumentation(model *Model, query string, limit int) (SearchReport, error) {
@@ -79,8 +51,7 @@ func SearchDocumentation(model *Model, query string, limit int) (SearchReport, e
 	found := []ranked{}
 	for _, document := range model.Documents {
 		id := documentStableID(document)
-		metadata := metadataSearchTerms(document, true)
-		all := strings.Join([]string{id, document.Title, strings.Join(metadata, " "), document.SourcePath, document.PlainText}, " ")
+		all := strings.Join([]string{id, document.Title, document.SourcePath, document.PlainText}, " ")
 		if !containsAllWords(all, terms) {
 			continue
 		}
@@ -112,7 +83,7 @@ func SearchDocumentation(model *Model, query string, limit int) (SearchReport, e
 						break
 					}
 				}
-				if rank == 5 && containsAllWords(strings.Join(metadata, " ")+" "+document.SourcePath, terms) {
+				if rank == 5 && containsAllWords(document.SourcePath, terms) {
 					rank = 4
 				}
 			}
@@ -153,10 +124,10 @@ func printSearchText(w io.Writer, report SearchReport) {
 		if result.ID != "" {
 			label = result.ID + " — " + label
 		}
-		fmt.Fprintf(w, "%s [%s] %s\n", label, result.Type, result.Path)
+		_, _ = fmt.Fprintf(w, "%s [%s] %s\n", label, result.Type, result.Path)
 		if len(result.MatchedSections) > 0 {
-			fmt.Fprintf(w, "  Разделы: %s\n", strings.Join(result.MatchedSections, ", "))
+			_, _ = fmt.Fprintf(w, "  Sections: %s\n", strings.Join(result.MatchedSections, ", "))
 		}
 	}
-	fmt.Fprintf(w, "Найдено: %d\n", report.Total)
+	_, _ = fmt.Fprintf(w, "Found: %d\n", report.Total)
 }

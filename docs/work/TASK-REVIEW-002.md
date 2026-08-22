@@ -1,33 +1,41 @@
+<!-- toudocu
+id: TASK-REVIEW-002
+status: done
+taskType: feature
+priority: high
+module: MOD-AGENT-FEEDBACK
+useCase: UC-AGENT-FEEDBACK-01
+screens: SC-CHANGES-WORKSPACE
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-13
+-->
+
 # TASK-REVIEW-002: Обсуждения любых изменённых файлов
 
-- Статус: Выполнено
-- Тип: Feature
-- Приоритет: Высокий
-- Модуль: MOD-AGENT-FEEDBACK
-- Сценарий: UC-AGENT-FEEDBACK-01
-- Экраны: SC-CHANGES-WORKSPACE
-- Стандарты: STD-GO-001, STD-DOCS-001
-- Последнее обновление: 2026-08-13
-
+<!-- toudocu:section result -->
 ## Результат
 
 Разработчик может начать обсуждение любого обычного файла из текущего рабочего
 Git diff. Для доступного текста обсуждение сохраняет точный диапазон, а для
 двоичных, больших и удалённых файлов — цель всего файла.
 
+<!-- toudocu:section behavior-change -->
 ## Изменение поведения
 
+<!-- toudocu:section before -->
 ### Было
 
 Changes разрешал создавать обсуждения только для Markdown канонической
 документации.
 
+<!-- toudocu:section after -->
 ### Станет
 
 Changes разрешает обсуждения всех обычных файлов рабочего дерева. Сравнения с
 индексом и ревизией остаются только для чтения. Портал продолжает использовать
 цель `document`.
 
+<!-- toudocu:section scope -->
 ## Область изменения
 
 - очередь, HTTP API и проверки безопасных путей в `internal/app/`;
@@ -35,6 +43,7 @@ Changes разрешает обсуждения всех обычных файл
 - OpenAPI, встроенный навык и каноническая документация;
 - Go-, TypeScript- и браузерные тесты.
 
+<!-- toudocu:section out-of-scope -->
 ## Не входит в задачу
 
 - произвольные неизменённые файлы и глобальные комментарии;
@@ -42,6 +51,7 @@ Changes разрешает обсуждения всех обычных файл
 - обсуждения в статическом портале и корнях переводов;
 - новая версия JSON или хранилища.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Критерии приёмки
 
 - [x] `AC-01` Цель `file` принимается только для обычного файла рабочего diff;
@@ -58,6 +68,7 @@ Changes разрешает обсуждения всех обычных файл
 - [x] `AC-05` OpenAPI, встроенный навык и документация описывают фактические
   границы цели `file` без изменения версии 1.
 
+<!-- toudocu:section plan -->
 ## План
 
 - [x] Расширить модель и проверки очереди.
@@ -65,6 +76,7 @@ Changes разрешает обсуждения всех обычных файл
 - [x] Обновить контракт, навык и документацию.
 - [x] Выполнить проверки и завершить задачу.
 
+<!-- toudocu:section verification -->
 ## Проверка
 
 - `AC-01` → `go test ./internal/app -run 'TestAgentFeedback(FileTargets|DeletedFile)'`
@@ -76,6 +88,7 @@ Changes разрешает обсуждения всех обычных файл
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `make check`
 
+<!-- toudocu:section documentation-impact -->
 ## Влияние на документацию
 
 Обновляются архитектура доставки, модуль, сценарий, экран Changes, OpenAPI,

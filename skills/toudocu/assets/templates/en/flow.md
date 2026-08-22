@@ -1,9 +1,11 @@
-# {{FLOW_ID}}: {{FLOW_TITLE}}
-
-- Identifier: {{FLOW_ID}}
+<!-- toudocu
+id: {{FLOW_ID}}
+module: {{MODULE_ID}}
+updated: {{DATE}}
 {{OPTIONAL_USE_CASES_METADATA}}
-- Module: {{MODULE_ID}}
-- Last updated: {{DATE}}
+-->
+
+# {{FLOW_ID}}: {{FLOW_TITLE}}
 
 {{FLOW_SUMMARY}}
 

@@ -29,38 +29,31 @@ func findWorkItem(model *Model, taskID string) (*WorkItem, error) {
 
 func taskContextDocument(document *Document) TaskContextDocument {
 	sections := []TaskContextSection{}
-	full := document.Type == "work" || document.Type == "contract" || document.Type == "guide" || document.Type == "reference" || document.Type == "document"
+	full := containsType([]string{"work", "contract", "guide", "reference", "document", "flow", "screen"}, document.Type)
 	if full {
 		sections = append(sections, TaskContextSection{Title: document.Title, Markdown: document.Content})
 	} else {
-		selected := map[string]bool{}
+		selected := map[SectionKind]bool{}
 		switch document.Type {
 		case "module":
-			for _, name := range []string{"business rules", "бизнес-правила", "invariants", "инварианты", "interfaces", "интерфейсы", "stable interfaces", "стабильные интерфейсы"} {
-				selected[canonicalText(name)] = true
+			for _, kind := range []SectionKind{SectionKindBusinessRules, SectionKindInvariants, SectionKindStableInterfaces} {
+				selected[kind] = true
 			}
 		case "use-case":
-			for _, name := range []string{"main scenario", "основной сценарий", "alternative scenarios", "альтернативные сценарии", "error scenarios", "ошибочные сценарии", "postconditions", "постусловия", "business rules", "бизнес-правила"} {
-				selected[canonicalText(name)] = true
-			}
-		case "flow":
-			selected[canonicalText("process")] = true
-			selected[canonicalText("процесс")] = true
-		case "screen":
-			for _, name := range []string{"states", "состояния", "transitions", "переходы"} {
-				selected[canonicalText(name)] = true
+			for _, kind := range []SectionKind{SectionKindMainScenario, SectionKindPostconditions, SectionKindBusinessRules} {
+				selected[kind] = true
 			}
 		case "standard":
-			for _, name := range []string{"rules", "правила", "automated checks", "automatic checks", "автоматические проверки"} {
-				selected[canonicalText(name)] = true
+			for _, kind := range []SectionKind{SectionKindRules, SectionKindAutomatedChecks} {
+				selected[kind] = true
 			}
 		case "runbook":
-			for _, name := range []string{"prerequisites", "предварительные условия", "предпосылки", "procedure", "процедура", "verification", "проверка", "rollback", "откат", "stop conditions", "условия остановки"} {
-				selected[canonicalText(name)] = true
+			for _, kind := range []SectionKind{SectionKindPrerequisites, SectionKindProcedure, SectionKindVerification, SectionKindRollback, SectionKindStopConditions} {
+				selected[kind] = true
 			}
 		}
 		for _, section := range document.Sections {
-			if selected[canonicalText(section.Title)] {
+			if selected[section.Kind] {
 				sections = append(sections, TaskContextSection{Title: section.Title, Markdown: section.Markdown})
 			}
 		}
@@ -109,6 +102,7 @@ func BuildTaskContext(model *Model, taskID string) (TaskContextReport, error) {
 		SchemaVersion: 1, Kind: "task-context",
 		Generator:         GeneratorInfo{Name: "Toudocu", Version: Version},
 		Task:              *item,
+		Hierarchy:         taskHierarchy(model, item),
 		Screens:           []KnowledgeScreen{},
 		ScreenTransitions: []ScreenTransition{},
 		BusinessRules:     []BusinessRule{},
@@ -262,23 +256,66 @@ func BuildTaskContext(model *Model, taskID string) (TaskContextReport, error) {
 }
 
 func printTaskContextText(w io.Writer, report TaskContextReport) {
-	fmt.Fprintf(w, "Задача: %s — %s\nДокумент: %s\nСтатус: %s\n", report.Task.ID, report.Task.Title, report.Task.Document, report.Task.Status.Label)
+	_, _ = fmt.Fprintf(w, "Task: %s — %s\nDocument: %s\nStatus: %s\n", report.Task.ID, report.Task.Title, report.Task.Document, report.Task.Status.Label)
 	if report.Module != nil {
-		fmt.Fprintf(w, "Модуль: %s — %s\n", report.Module.ID, report.Module.Title)
+		_, _ = fmt.Fprintf(w, "Module: %s — %s\n", report.Module.ID, report.Module.Title)
 	}
 	if report.UseCase != nil {
-		fmt.Fprintf(w, "Сценарий: %s — %s\n", report.UseCase.ID, report.UseCase.Title)
+		_, _ = fmt.Fprintf(w, "Use case: %s — %s\n", report.UseCase.ID, report.UseCase.Title)
 	}
 	if report.Task.FlowID != "" {
-		fmt.Fprintf(w, "Процесс: %s\n", report.Task.FlowID)
+		_, _ = fmt.Fprintf(w, "Flow: %s\n", report.Task.FlowID)
+	}
+	if report.Hierarchy.Parent != nil || len(report.Hierarchy.Ancestors) > 0 || len(report.Hierarchy.Children) > 0 || report.Hierarchy.Descendants.Total > 0 {
+		refText := func(ref TaskHierarchyRef) string {
+			blocker := "no"
+			if ref.HasBlocker {
+				blocker = "yes"
+			}
+			return fmt.Sprintf("%s — %s [%s; blocker: %s]", ref.ID, ref.Title, ref.Status, blocker)
+		}
+		if len(report.Hierarchy.Ancestors) > 0 {
+			ancestors := make([]string, 0, len(report.Hierarchy.Ancestors))
+			for _, ancestor := range report.Hierarchy.Ancestors {
+				ancestors = append(ancestors, refText(ancestor))
+			}
+			_, _ = fmt.Fprintf(w, "Ancestors: %s\n", strings.Join(ancestors, " / "))
+		}
+		if report.Hierarchy.Parent != nil {
+			_, _ = fmt.Fprintf(w, "Parent task: %s\n", refText(*report.Hierarchy.Parent))
+		}
+		if len(report.Hierarchy.Children) > 0 {
+			_, _ = fmt.Fprintln(w, "Child tasks:")
+			for _, child := range report.Hierarchy.Children {
+				_, _ = fmt.Fprintf(w, "- %s\n", refText(child))
+			}
+		}
+		summary := report.Hierarchy.Descendants
+		statuses := []string{}
+		for _, status := range []struct {
+			label string
+			count int
+		}{
+			{"draft", summary.Draft}, {"ready", summary.Ready}, {"in progress", summary.InProgress},
+			{"blocked", summary.Blocked}, {"done", summary.Done}, {"cancelled", summary.Cancelled},
+		} {
+			if status.count > 0 {
+				statuses = append(statuses, fmt.Sprintf("%s: %d", status.label, status.count))
+			}
+		}
+		detail := ""
+		if len(statuses) > 0 {
+			detail = "; " + strings.Join(statuses, "; ")
+		}
+		_, _ = fmt.Fprintf(w, "Descendants: total %d%s\n", summary.Total, detail)
 	}
 	if len(report.Task.ScreenIDs) > 0 {
-		fmt.Fprintf(w, "Экраны: %s\n", strings.Join(report.Task.ScreenIDs, ", "))
+		_, _ = fmt.Fprintf(w, "Screens: %s\n", strings.Join(report.Task.ScreenIDs, ", "))
 	}
 	if len(report.Task.RepositoryPaths) > 0 {
-		fmt.Fprintf(w, "Область изменения: %s\n", strings.Join(report.Task.RepositoryPaths, ", "))
+		_, _ = fmt.Fprintf(w, "Scope: %s\n", strings.Join(report.Task.RepositoryPaths, ", "))
 	}
-	fmt.Fprintf(w, "Критериев: %d\nПроверок: %d\nЗависимостей: %d\nЗависимых задач: %d\nЗамечаний контекста: %d\n",
+	_, _ = fmt.Fprintf(w, "Criteria: %d\nChecks: %d\nDependencies: %d\nDependents: %d\nContext issues: %d\n",
 		len(report.Task.Criteria), len(report.Task.Checks), len(report.Dependencies), len(report.Dependents), len(report.Issues))
-	fmt.Fprintf(w, "Обязательные документы: %s\n", strings.Join(report.RequiredReads, ", "))
+	_, _ = fmt.Fprintf(w, "Required documents: %s\n", strings.Join(report.RequiredReads, ", "))
 }

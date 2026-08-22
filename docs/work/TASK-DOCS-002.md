@@ -1,13 +1,17 @@
+<!-- toudocu
+id: TASK-DOCS-002
+status: done
+taskType: feature
+priority: high
+module: MOD-MODEL
+useCase: UC-DOCS-02
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-10
+-->
+
 # TASK-DOCS-002: Добавить стандарты, runbooks и пользовательские разделы
 
-- Статус: Выполнено
-- Тип: Feature
-- Приоритет: Высокий
-- Модуль: MOD-MODEL
-- Сценарий: UC-DOCS-02
-- Стандарты: STD-GO-001, STD-DOCS-001
-- Последнее обновление: 2026-08-10
-
+<!-- toudocu:section result -->
 ## Результат
 
 Toudocu поддерживает необязательные стандарты `STD-*`, эксплуатационные
@@ -15,14 +19,17 @@ Toudocu поддерживает необязательные стандарты
 модель schema v1, получают отдельные каталоги в портале и могут быть явно
 связаны с рабочей задачей.
 
+<!-- toudocu:section behavior-change -->
 ## Изменение поведения
 
+<!-- toudocu:section before -->
 ### Было
 
 Неизвестные каталоги оставались неструктурированным Markdown. Для стандартов и
 эксплуатационных инструкций не было отдельных правил, связей с задачами и
 страниц портала.
 
+<!-- toudocu:section after -->
 ### Станет
 
 Появившиеся `quality/`, `runbooks/` и пользовательские разделы получают явный
@@ -30,6 +37,7 @@ Toudocu поддерживает необязательные стандарты
 обязательным для всех проектов. В контекст задачи попадают только явно
 указанные `STD-*` и `RB-*`.
 
+<!-- toudocu:section scope -->
 ## Область изменения
 
 - модель, разбор Markdown и диагностические сообщения в `internal/app/`;
@@ -37,6 +45,7 @@ Toudocu поддерживает необязательные стандарты
 - генерация специализированных каталогов портала;
 - встроенный skill, каноническая документация и `AGENTS.md`.
 
+<!-- toudocu:section out-of-scope -->
 ## Не входит в задачу
 
 - новые внешние зависимости;
@@ -45,6 +54,7 @@ Toudocu поддерживает необязательные стандарты
 - создание фиктивной эксплуатационной инструкции;
 - изменение версии schema v1.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Критерии приёмки
 
 - [x] `AC-01` Стандарты, runbooks и пользовательские разделы проверяются с
@@ -60,6 +70,7 @@ Toudocu поддерживает необязательные стандарты
 - [x] `AC-06` Документация Toudocu содержит только подтверждённые стандарты и
   не создаёт фиктивный runbook.
 
+<!-- toudocu:section plan -->
 ## План
 
 - [x] Добавить типы модели, диагностику, проверку давности и пользовательские
@@ -68,9 +79,10 @@ Toudocu поддерживает необязательные стандарты
 - [x] Добавить каталоги портала и тесты.
 - [x] Обновить документацию и проверить её смысл.
 
+<!-- toudocu:section verification -->
 ## Проверка
 
-- `AC-01` → `go test ./... -run 'TestQualityMetadataStatusAliasesAndValidationBoundaries|TestTypedKnowledgeErrorsAndCustomManifest'`
+- `AC-01` → `go test ./... -run 'TestQualityCanonicalMetadataAndValidationBoundaries|TestTypedKnowledgeErrorsAndCustomManifest'`
 - `AC-02` → `go test ./... -run TestStandardsRunbooksAndFreshness`
 - `AC-03` → `go test ./... -run 'TestQualityTaskContextAndConditionalVerification|TestQualityDanglingReferencesAndAdditiveJSON'`
 - `AC-04` → `go test ./... -run TestStandardAndRunbookScaffoldsAndCatalogs`
@@ -80,6 +92,7 @@ Toudocu поддерживает необязательные стандарты
 - `DOCS` → `go run ./cmd/toudocu check ./docs --strict --stale-days 0`
 - `QUALITY` → `go test ./... -run 'TestStandardsRunbooks|TestQualityTask|TestStandardAndRunbook|TestTypedKnowledge'`
 
+<!-- toudocu:section documentation-impact -->
 ## Влияние на документацию
 
 Были обновлены README, журнал изменений, главная страница, модель, сценарий

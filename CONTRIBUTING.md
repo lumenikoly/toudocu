@@ -32,7 +32,7 @@ assets, but it must not become a user runtime dependency.
 ```bash
 make fmt
 make fmt-check
-make vet
+make lint
 make test
 make web
 make web-check
@@ -40,8 +40,9 @@ make browser-test
 make check
 ```
 
-`make check` is the normal repository-wide cycle. Browser-facing changes
-also use `make browser-test`. Release changes use `make release`
+Run `make lint` as the local Go quality check before the normal repository-wide
+`make check` cycle. Browser-facing changes also use `make browser-test`.
+Release changes use `make release`
 only when release artifacts are part of the work.
 
 ## Documentation rules
@@ -66,4 +67,3 @@ A pull request should explain:
 Avoid heavy frameworks and hidden runtime dependencies. Prefer the smallest
 change that preserves path safety, data integrity, accessibility, and the
 published contracts.
-

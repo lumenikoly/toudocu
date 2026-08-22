@@ -1,9 +1,11 @@
-# FLOW-DOCS-CHANGES: Просмотр изменений
+<!-- toudocu
+id: FLOW-DOCS-CHANGES
+module: MOD-CHANGES
+useCase: UC-DOCS-05
+updated: 2026-08-10
+-->
 
-- Идентификатор: FLOW-DOCS-CHANGES
-- Сценарий: UC-DOCS-05
-- Модуль: MOD-CHANGES
-- Последнее обновление: 2026-08-10
+# FLOW-DOCS-CHANGES: Просмотр изменений
 
 Схема показывает, как выбранный диапазон Git превращается в список файлов и
 понятные представления каждого изменения.

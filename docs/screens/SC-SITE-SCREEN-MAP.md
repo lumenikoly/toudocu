@@ -1,12 +1,14 @@
-# SC-SITE-SCREEN-MAP: Общая карта экранов
+<!-- toudocu
+id: SC-SITE-SCREEN-MAP
+status: done
+screenKind: page
+module: MOD-SITE
+route: /screens/index.html
+preview: ../assets/screens/site-screen-map.png
+updated: 2026-08-12
+-->
 
-- Идентификатор: SC-SITE-SCREEN-MAP
-- Тип: Страница
-- Модуль: MOD-SITE
-- Статус: Реализован
-- Маршрут: `/screens/index.html`
-- Превью: `../assets/screens/site-screen-map.png`
-- Последнее обновление: 2026-08-12
+# SC-SITE-SCREEN-MAP: Общая карта экранов
 
 Карта показывает экраны `SC-*` и описанные между ними переходы `TR-*`. Её можно
 фильтровать, перемещать и масштабировать, а по нажатию на узел или стрелку —

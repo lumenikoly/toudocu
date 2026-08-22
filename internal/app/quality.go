@@ -14,31 +14,10 @@ var (
 	runbookIDRE  = regexp.MustCompile(`^RB-[A-Z0-9]+(?:-[A-Z0-9]+)*$`)
 )
 
-func typedDocumentID(document *Document, matcher *regexp.Regexp) string {
-	id := strings.TrimSpace(document.Metadata["id"])
-	if matcher.MatchString(id) {
-		return id
-	}
-	for _, heading := range document.Headings {
-		if heading.Level != 1 {
-			continue
-		}
-		if value := strings.FieldsFunc(heading.Title, func(r rune) bool {
-			return r == ':' || r == '—' || r == '–' || r == ' '
-		}); len(value) > 0 && matcher.MatchString(value[0]) {
-			return value[0]
-		}
-		break
-	}
-	return id
-}
-
-func sectionText(document *Document, names ...string) string {
+func sectionText(document *Document, kind SectionKind) string {
 	for _, section := range document.Sections {
-		for _, name := range names {
-			if canonicalText(section.Title) == canonicalText(name) {
-				return strings.TrimSpace(section.Text)
-			}
+		if section.Kind == kind {
+			return strings.TrimSpace(section.Text)
 		}
 	}
 	return ""
@@ -52,26 +31,82 @@ func typedError(model *Model, document *Document, code, message string) {
 	addDocumentIssue(model, document, newIssue("error", code, message, document.SourcePath, 0))
 }
 
-func standardStatus(value string) (string, bool) {
-	statuses := map[string]string{
-		"черновик": "draft", "draft": "draft",
-		"действует": "active", "active": "active", "effective": "active",
-		"устарел": "obsolete", "obsolete": "obsolete", "deprecated": "obsolete",
-		"заменён": "superseded", "заменен": "superseded", "superseded": "superseded", "replaced": "superseded",
-	}
-	result, ok := statuses[canonicalText(value)]
-	return result, ok
+type StandardStatus string
+type StandardID string
+
+const (
+	StandardDraft      StandardStatus = "draft"
+	StandardActive     StandardStatus = "active"
+	StandardObsolete   StandardStatus = "obsolete"
+	StandardSuperseded StandardStatus = "superseded"
+)
+
+func standardStatus(value string) (StandardStatus, bool) {
+	status := StandardStatus(strings.TrimSpace(value))
+	return status, containsString([]string{string(StandardDraft), string(StandardActive), string(StandardObsolete), string(StandardSuperseded)}, string(status))
 }
 
-func runbookStatus(value string) (string, bool) {
-	statuses := map[string]string{
-		"черновик": "draft", "draft": "draft",
-		"действует": "active", "active": "active",
-		"требует проверки": "review-required", "requires review": "review-required", "review required": "review-required",
-		"устарел": "obsolete", "obsolete": "obsolete", "deprecated": "obsolete",
-	}
-	result, ok := statuses[canonicalText(value)]
-	return result, ok
+type StandardMeta struct {
+	ID           StandardID
+	Status       StandardStatus
+	Scope        string
+	Updated      time.Time
+	UpdatedRaw   string
+	SupersededBy StandardID
+}
+
+func parseStandardMeta(document *Document) (StandardMeta, bool) {
+	status, statusValid := standardStatus(document.Metadata["status"])
+	updated, dateValid := parseISODate(document.Metadata["updated"])
+	return StandardMeta{
+		ID: StandardID(strings.TrimSpace(document.Metadata["id"])), Status: status,
+		Scope: strings.TrimSpace(document.Metadata["scope"]), Updated: updated,
+		UpdatedRaw: strings.TrimSpace(document.Metadata["updated"]), SupersededBy: StandardID(strings.TrimSpace(document.Metadata["supersededBy"])),
+	}, statusValid && dateValid
+}
+
+type RunbookStatus string
+type RunbookID string
+
+const (
+	RunbookDraft          RunbookStatus = "draft"
+	RunbookActive         RunbookStatus = "active"
+	RunbookReviewRequired RunbookStatus = "review-required"
+	RunbookObsolete       RunbookStatus = "obsolete"
+)
+
+type RiskLevel string
+
+const (
+	RiskLow      RiskLevel = "low"
+	RiskMedium   RiskLevel = "medium"
+	RiskHigh     RiskLevel = "high"
+	RiskCritical RiskLevel = "critical"
+)
+
+func runbookStatus(value string) (RunbookStatus, bool) {
+	status := RunbookStatus(strings.TrimSpace(value))
+	return status, containsString([]string{string(RunbookDraft), string(RunbookActive), string(RunbookReviewRequired), string(RunbookObsolete)}, string(status))
+}
+
+type RunbookMeta struct {
+	ID              RunbookID
+	Status          RunbookStatus
+	Risk            RiskLevel
+	LastVerified    time.Time
+	LastVerifiedRaw string
+	Environment     string
+}
+
+func parseRunbookMeta(document *Document) (RunbookMeta, bool, bool, bool) {
+	status, statusValid := runbookStatus(document.Metadata["status"])
+	risk := RiskLevel(strings.TrimSpace(document.Metadata["risk"]))
+	riskValid := containsString([]string{string(RiskLow), string(RiskMedium), string(RiskHigh), string(RiskCritical)}, string(risk))
+	verified, dateValid := parseISODate(document.Metadata["lastVerified"])
+	return RunbookMeta{
+		ID: RunbookID(strings.TrimSpace(document.Metadata["id"])), Status: status, Risk: risk,
+		LastVerified: verified, LastVerifiedRaw: strings.TrimSpace(document.Metadata["lastVerified"]), Environment: strings.TrimSpace(document.Metadata["environment"]),
+	}, statusValid, riskValid, dateValid
 }
 
 func parseISODate(value string) (time.Time, bool) {
@@ -82,7 +117,7 @@ func parseISODate(value string) (time.Time, bool) {
 func hasNumberedProcedure(document *Document) bool {
 	parsed := analyzeMarkdownPath(document.Content, document.SourcePath)
 	for _, section := range document.Sections {
-		if canonicalText(section.Title) != "процедура" && canonicalText(section.Title) != "procedure" {
+		if section.Kind != SectionKindProcedure {
 			continue
 		}
 		for _, list := range parsed.OrderedLists {
@@ -102,7 +137,8 @@ func validateTypedKnowledge(model *Model) {
 	runbookByID := map[string]*Document{}
 
 	for _, document := range model.Collections["standard"] {
-		id := typedDocumentID(document, standardIDRE)
+		meta, metaValid := parseStandardMeta(document)
+		id := string(meta.ID)
 		if !standardIDRE.MatchString(id) {
 			typedError(model, document, "invalid-standard-id", "A standard must have an STD-* identifier.")
 		} else if previous := standardByID[id]; previous != nil {
@@ -110,31 +146,30 @@ func validateTypedKnowledge(model *Model) {
 		} else {
 			standardByID[id] = document
 		}
-		statusName, statusValid := standardStatus(document.Metadata["status"])
-		if document.Metadata["scope"] == "" {
+		if meta.Scope == "" {
 			typedWarning(model, document, "missing-standard-scope", "The standard has no scope.")
 		}
-		if !statusValid {
+		if _, valid := standardStatus(document.Metadata["status"]); !valid {
 			typedWarning(model, document, "invalid-standard-status", "The standard status is missing or unrecognized.")
 		}
-		if _, ok := parseISODate(document.Metadata["updated"]); !ok {
+		if !metaValid && meta.Updated.IsZero() {
 			typedWarning(model, document, "invalid-standard-updated", "The standard update date is missing or is not a valid ISO date.")
 		}
-		rules := sectionText(document, "Правила", "Rules")
-		checks := sectionText(document, "Автоматические проверки", "Automated checks", "Automatic checks")
+		rules := sectionText(document, SectionKindRules)
+		checks := sectionText(document, SectionKindAutomatedChecks)
 		if rules == "" {
 			typedWarning(model, document, "missing-standard-rules", "The Rules section must not be empty.")
 		}
 		if checks == "" {
 			typedWarning(model, document, "missing-standard-automatic-checks", "The Automated checks section must not be empty.")
 		}
-		if statusName == "superseded" && !standardIDRE.MatchString(document.Metadata["supersededBy"]) {
+		if meta.Status == StandardSuperseded && !standardIDRE.MatchString(string(meta.SupersededBy)) {
 			typedError(model, document, "missing-standard-superseded-by", "A superseded standard must reference an STD-* identifier in its Superseded by field.")
 		}
 		standards = append(standards, KnowledgeStandard{
-			ID: id, Title: document.Title, Status: document.Status,
-			Scope: document.Metadata["scope"], Updated: document.Metadata["updated"],
-			SupersededBy: document.Metadata["supersededBy"], Rules: rules, AutomaticChecks: checks,
+			ID: id, Title: document.Title, Status: StatusFor(string(meta.Status)),
+			Scope: meta.Scope, Updated: meta.UpdatedRaw,
+			SupersededBy: string(meta.SupersededBy), Rules: rules, AutomaticChecks: checks,
 			Document: document.SourcePath,
 		})
 	}
@@ -150,7 +185,8 @@ func validateTypedKnowledge(model *Model) {
 	}
 
 	for _, document := range model.Collections["runbook"] {
-		id := typedDocumentID(document, runbookIDRE)
+		meta, statusValid, validRisk, dateValid := parseRunbookMeta(document)
+		id := string(meta.ID)
 		if !runbookIDRE.MatchString(id) {
 			typedError(model, document, "invalid-runbook-id", "A runbook must have an RB-* identifier.")
 		} else if previous := runbookByID[id]; previous != nil {
@@ -158,28 +194,25 @@ func validateTypedKnowledge(model *Model) {
 		} else {
 			runbookByID[id] = document
 		}
-		statusName, statusValid := runbookStatus(document.Metadata["status"])
-		if document.Metadata["environment"] == "" {
+		if meta.Environment == "" {
 			typedWarning(model, document, "missing-runbook-environment", "The runbook has no environment.")
 		}
 		if !statusValid {
 			typedWarning(model, document, "invalid-runbook-status", "The runbook status is missing or unrecognized.")
 		}
-		risk := canonicalText(document.Metadata["risk"])
-		validRisk := containsString([]string{"низкий", "low", "средний", "medium", "высокий", "high", "критический", "critical"}, risk)
 		if !validRisk {
 			typedWarning(model, document, "invalid-runbook-risk", "The runbook risk is missing or unrecognized.")
 		}
 		for _, required := range []struct {
-			names []string
+			kind  SectionKind
 			label string
 		}{
-			{[]string{"Предварительные условия", "Предпосылки", "Prerequisites"}, "Prerequisites"},
-			{[]string{"Процедура", "Procedure"}, "Procedure"},
-			{[]string{"Проверка", "Проверка результата", "Verification", "Result verification"}, "Verification"},
-			{[]string{"Откат", "План отката", "Rollback", "Rollback plan"}, "Rollback"},
+			{SectionKindPrerequisites, "Prerequisites"},
+			{SectionKindProcedure, "Procedure"},
+			{SectionKindVerification, "Verification"},
+			{SectionKindRollback, "Rollback"},
 		} {
-			if sectionText(document, required.names...) == "" {
+			if sectionText(document, required.kind) == "" {
 				typedWarning(model, document, "missing-runbook-section", "The runbook must contain a non-empty "+required.label+" section.")
 			}
 		}
@@ -191,28 +224,26 @@ func validateTypedKnowledge(model *Model) {
 				typedError(model, document, "invalid-runbook-link", "The runbook contains an unavailable or unsafe link: "+link.Destination+".")
 			}
 		}
-		if (risk == "высокий" || risk == "high" || risk == "критический" || risk == "critical") &&
-			sectionText(document, "Условия остановки", "Stop conditions") == "" {
+		if (meta.Risk == RiskHigh || meta.Risk == RiskCritical) && sectionText(document, SectionKindStopConditions) == "" {
 			typedWarning(model, document, "missing-runbook-stop-conditions", "A high- or critical-risk runbook must contain Stop conditions.")
 		}
-		freshness := "review-required"
-		verified, dateValid := parseISODate(document.Metadata["lastVerified"])
+		var freshness string
 		switch {
-		case statusName == "review-required" || !dateValid || verified.After(model.GeneratedAt):
+		case meta.Status == RunbookReviewRequired || !dateValid || meta.LastVerified.After(model.GeneratedAt):
 			freshness = "review-required"
 			typedWarning(model, document, "runbook-review-required", "The runbook requires review because its date is missing, invalid, in the future, or its status requires review.")
-		case statusName != "active":
+		case meta.Status != RunbookActive:
 			freshness = "not-applicable"
-		case statusName == "active" && model.StaleDays > 0 && int(model.GeneratedAt.Sub(verified).Hours()/24) > model.StaleDays:
+		case meta.Status == RunbookActive && model.StaleDays > 0 && int(model.GeneratedAt.Sub(meta.LastVerified).Hours()/24) > model.StaleDays:
 			freshness = "overdue"
 			typedWarning(model, document, "stale-runbook", fmt.Sprintf("The runbook has not been verified for more than %d days.", model.StaleDays))
 		default:
 			freshness = "recent"
 		}
 		runbooks = append(runbooks, KnowledgeRunbook{
-			ID: id, Title: document.Title, Status: document.Status,
-			Environment: document.Metadata["environment"], Risk: document.Metadata["risk"],
-			LastVerified: document.Metadata["lastVerified"], Freshness: freshness, Document: document.SourcePath,
+			ID: id, Title: document.Title, Status: StatusFor(string(meta.Status)),
+			Environment: meta.Environment, Risk: string(meta.Risk),
+			LastVerified: meta.LastVerifiedRaw, Freshness: freshness, Document: document.SourcePath,
 		})
 	}
 	sort.SliceStable(standards, func(i, j int) bool { return naturalCompare(standards[i].ID, standards[j].ID) < 0 })
@@ -257,9 +288,6 @@ func validateSectionManifests(model *Model) {
 		}
 		if official[directory] || manifest == nil {
 			continue
-		}
-		if canonicalText(manifest.Metadata["type"]) != "custom" {
-			typedWarning(model, manifest, "invalid-custom-manifest-type", "A custom section manifest must contain `Type: Custom` or its recognized locale equivalent.")
 		}
 		if manifest.Description == "" {
 			typedWarning(model, manifest, "missing-custom-description", "A custom section manifest must contain a non-empty description.")

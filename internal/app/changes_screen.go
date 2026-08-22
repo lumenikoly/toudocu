@@ -79,20 +79,15 @@ func screenSnapshot(content []byte, path string) (*ScreenNodeSnapshot, map[strin
 	}
 	parsed := analyzeMarkdown(string(content))
 	id := parsed.Metadata["id"]
-	if id == "" {
-		id = stableEntityIDRE.FindString(parsed.Title)
-	}
-	node := &ScreenNodeSnapshot{ID: id, Title: screenSnapshotTitle(parsed.Title, id), Route: parsed.Metadata["route"], Module: parsed.Metadata["module"], Status: parsed.Metadata["status"], Kind: parsed.Metadata["type"]}
+	node := &ScreenNodeSnapshot{ID: id, Title: screenSnapshotTitle(parsed.Title, id), Route: parsed.Metadata["route"], Module: parsed.Metadata["module"], Status: parsed.Metadata["status"], Kind: parsed.Metadata["screenKind"]}
 	document := &Document{SourcePath: path, Content: string(content), Title: parsed.Title, Headings: parsed.Headings, Sections: parsed.Sections, Metadata: parsed.Metadata, markdownTables: markdownTablesFromAnalysis(parsed)}
-	table, found := parseScreenTable(document, "Переходы", "Transitions")
+	table, found := semanticTable(document, "transitions")
 	if !found {
 		return node, transitions
 	}
 	columns := map[string]int{}
-	for index, header := range table.Headers {
-		if key := canonicalScreenHeader(header); key != "" {
-			columns[key] = index
-		}
+	for index, key := range table.Columns {
+		columns[key] = index
 	}
 	for _, row := range table.Rows {
 		transitionID := strings.ToUpper(tableCell(row, columns, "id"))

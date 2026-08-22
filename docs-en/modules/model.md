@@ -1,13 +1,16 @@
-# Project model and validation
+<!-- toudocu
+id: MOD-MODEL
+status: done
+updated: 2026-08-21
+-->
 
-- Identifier: MOD-MODEL
-- Status: Done
-- Last updated: 2026-08-12
+# Project model and validation
 
 This module reads the documentation root, connects known entities, and reports
 problems with structure, identifiers, paths, and dependencies. `check`, the
 portal, and JSON reports all consume the result.
 
+<!-- toudocu:section code-location -->
 ## Code locations
 
 - `internal/app/docs_core.go` and `types.go` — documents and project model;
@@ -15,12 +18,14 @@ portal, and JSON reports all consume the result.
 - `internal/app/documentation_links.go` — links;
 - `internal/app/utils.go` — safe path handling.
 
+<!-- toudocu:section boundaries -->
 ## Boundaries
 
 The model does not generate HTML or run work-item commands. It returns data and
 diagnostics without changing sources. For preview, the editor can supply one
 in-memory file version; an ordinary model build reads a filesystem snapshot.
 
+<!-- toudocu:section business-rules -->
 ## Business rules
 
 ### BR-MODEL-001: Roadmap is the only source of global coverage
@@ -59,6 +64,12 @@ validation. Toudocu checks root fields, operations and responses, unique
 `operationId` values, path parameters, and internal `$ref` values. It never
 loads external references or invents a schema for arbitrary YAML.
 
+### BR-MODEL-007: Decomposition and completion order are independent
+
+The parent relationship models decomposition. Declared dependencies determine
+completion order; neither relationship is inferred from the other.
+
+<!-- toudocu:section invariants -->
 ## Invariants
 
 - Every stable identifier is unique within its model.
@@ -79,6 +90,7 @@ loads external references or invents a schema for arbitrary YAML.
 - Model construction runs no commands and never writes calculated state back
   into Markdown.
 
+<!-- toudocu:section stable-interfaces -->
 ## Stable interfaces
 
 - `BuildDocumentationModel(Options)` and other exports from `api.go`;
@@ -92,6 +104,7 @@ loads external references or invents a schema for arbitrary YAML.
 - [work items](../guides/work-items.md);
 - [quality standards](../quality/).
 
+<!-- toudocu:section related-use-cases -->
 ## Related use cases
 
 - [Check documentation](../use-cases/check-documentation.md)

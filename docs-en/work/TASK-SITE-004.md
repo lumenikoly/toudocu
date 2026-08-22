@@ -1,28 +1,36 @@
+<!-- toudocu
+id: TASK-SITE-004
+status: done
+taskType: feature
+priority: normal
+module: MOD-SITE
+useCase: UC-DOCS-03
+flow: FLOW-DOCS-SERVE
+screens: SC-SITE-DOCUMENT
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-10
+-->
+
 # TASK-SITE-004: Add a roadmap deliverable through serve
 
-- Status: Done
-- Type: Feature
-- Priority: Medium
-- Module: MOD-SITE
-- Use case: UC-DOCS-03
-- Flow: FLOW-DOCS-SERVE
-- Screens: SC-SITE-DOCUMENT
-- Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-10
 
+<!-- toudocu:section result -->
 ## Result
 
 On the `roadmap.md` page in canonical `toudocu serve`, the user adds a new
 unfinished `DLV-*` to an existing stage through an accessible dialog without
 editing Markdown manually. Static builds and translation portals remain read-only.
 
+<!-- toudocu:section behavior-change -->
 ## Behavior change
 
+<!-- toudocu:section before -->
 ### Before
 
 The roadmap displays computed progress, but a new deliverable can be added only
 through the general editor or an external Markdown change.
 
+<!-- toudocu:section after -->
 ### After
 
 An action available only in `serve` loads the current stages, file digest, and
@@ -31,6 +39,7 @@ inserts an unchecked item into the selected H2 section, and rebuilds the portal.
 If the digest is stale, the file is not overwritten and the form keeps the
 values entered by the user.
 
+<!-- toudocu:section scope -->
 ## Scope
 
 - `internal/app/` — roadmap Editor API, safe insertion, CAS, and renderer control;
@@ -39,6 +48,7 @@ values entered by the user.
 - `docs/contracts/`, `docs/flows/`, `docs/guides/`, `docs/modules/`,
   `docs/screens/`, `docs/use-cases/`, `docs/roadmap.md`, and this work item.
 
+<!-- toudocu:section out-of-scope -->
 ## Out of scope
 
 - creating stages, `UC-*`, or `CON-*`, and automatically creating `TASK-*`;
@@ -46,6 +56,7 @@ values entered by the user.
 - changing `ProjectReport`, bootstrap schema, or the public Go API;
 - write capabilities in static builds, translation portals, or direct translation serve.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] `AC-01` GET returns revision, path, digest, the suggested next
@@ -65,6 +76,7 @@ values entered by the user.
 - [x] `AC-06` The Editor OpenAPI contract and the related user documentation
   agree with the behavior.
 
+<!-- toudocu:section plan -->
 ## Plan
 
 - [x] Add roadmap server state, validation, guarded POST, and atomic CAS insertion.
@@ -72,6 +84,7 @@ values entered by the user.
 - [x] Cover backend, frontend, and browser behavior, including conflict and mobile.
 - [x] Update the canonical documentation sources.
 
+<!-- toudocu:section verification -->
 ## Verification
 
 - `AC-01` → `go test ./internal/app -run TestEditorRoadmap`
@@ -84,6 +97,7 @@ values entered by the user.
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `make check`
 
+<!-- toudocu:section documentation-impact -->
 ## Documentation impact
 
 Editor OpenAPI and its behavioral contract, FLOW-DOCS-SERVE, the local-workflow

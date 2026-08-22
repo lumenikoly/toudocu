@@ -1,7 +1,8 @@
-# {{ARCHITECTURE_TITLE}}
+<!-- toudocu
+architectureQuestion: {{ARCHITECTURE_QUESTION}}
+-->
 
-- Тип документа: Architecture
-- Архитектурный вопрос: {{ARCHITECTURE_QUESTION}}
+# {{ARCHITECTURE_TITLE}}
 
 {{SHORT_ANSWER}}
 

@@ -1,7 +1,5 @@
 # {{PROJECT_TITLE}} architecture
 
-- Document type: Architecture Overview
-
 {{SYSTEM_BOUNDARY_SUMMARY}}
 
 ## System boundary

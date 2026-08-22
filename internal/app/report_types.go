@@ -100,6 +100,47 @@ type TaskInitReport struct {
 	Type          string        `json:"type"`
 	Language      string        `json:"language"`
 	Path          string        `json:"path"`
+	ParentID      *string       `json:"parentId"`
+}
+
+type TaskHierarchyRef struct {
+	ID         string `json:"id"`
+	Title      string `json:"title"`
+	Status     string `json:"status"`
+	HasBlocker bool   `json:"hasBlocker"`
+}
+
+type TaskHierarchySummary struct {
+	Total      int `json:"total"`
+	Draft      int `json:"draft,omitempty"`
+	Ready      int `json:"ready,omitempty"`
+	InProgress int `json:"inProgress,omitempty"`
+	Blocked    int `json:"blocked,omitempty"`
+	Done       int `json:"done,omitempty"`
+	Cancelled  int `json:"cancelled,omitempty"`
+}
+
+type TaskHierarchy struct {
+	Parent      *TaskHierarchyRef    `json:"parent"`
+	Ancestors   []TaskHierarchyRef   `json:"ancestors"`
+	Children    []TaskHierarchyRef   `json:"children"`
+	Descendants TaskHierarchySummary `json:"descendants"`
+}
+
+type TaskTreeNode struct {
+	ID          string         `json:"id"`
+	Status      string         `json:"status"`
+	Title       string         `json:"title"`
+	Children    []TaskTreeNode `json:"children"`
+	statusLabel string
+}
+
+type TaskTreeReport struct {
+	SchemaVersion int           `json:"schemaVersion"`
+	Kind          string        `json:"kind"`
+	Generator     GeneratorInfo `json:"generator"`
+	TaskID        string        `json:"taskId"`
+	Tree          TaskTreeNode  `json:"tree"`
 }
 
 type TaskMoveTask struct {
@@ -198,7 +239,6 @@ type ReportProject struct {
 	Description string     `json:"description"`
 	Status      StatusInfo `json:"status"`
 	Stage       string     `json:"stage"`
-	Version     string     `json:"version"`
 	Updated     string     `json:"updated"`
 	Summary     string     `json:"summary"`
 }
@@ -276,6 +316,7 @@ type TaskContextReport struct {
 	Kind              string                `json:"kind"`
 	Generator         GeneratorInfo         `json:"generator"`
 	Task              WorkItem              `json:"task"`
+	Hierarchy         TaskHierarchy         `json:"hierarchy"`
 	FullVerification  bool                  `json:"fullVerification"`
 	Module            *KnowledgeModule      `json:"module,omitempty"`
 	UseCase           *KnowledgeUseCase     `json:"useCase,omitempty"`

@@ -250,6 +250,7 @@ func TestSwaggerUIVendoredAssets(t *testing.T) {
 func TestStaticSiteExcludesAPIDocs(t *testing.T) {
 	repository := t.TempDir()
 	docs := filepath.Join(repository, "docs")
+	ensureTestDocumentationVersion(t, docs)
 	if err := os.MkdirAll(filepath.Join(docs, "contracts"), 0o755); err != nil {
 		t.Fatal(err)
 	}

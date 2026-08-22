@@ -31,22 +31,39 @@ func TestParseGoldmarkDialectAndRanges(t *testing.T) {
 	}
 }
 
-func TestMetadataHasOneASTBoundary(t *testing.T) {
-	cases := []struct {
-		name, source string
-		count        int
-	}{
-		{"first-list", "# H\n\n- Status: Active\n- Category: Guides\n\nBody\n", 2},
-		{"content-before", "# H\n\nBody\n\n- Status: Active\n", 0},
-		{"ordered", "# H\n\n1. Status: Active\n", 0},
-		{"nested-block", "# H\n\n- Status: Active\n  - nested\n- Category: Guides\n", 1},
+func TestSemanticAnnotationsAreTypedHiddenAndFenceSafe(t *testing.T) {
+	source := "<!-- toudocu\nid: RB-TEST\nstatus: active\n-->\n# Reader title\n\n<!-- toudocu:section procedure -->\n## Banana spaceship\n\n1. Step\n\n<!-- toudocu:table transitions columns=id,action,condition,target -->\n| Whatever | You | Like | Here |\n|---|---|---|---|\n| TR-X-001 | Go | Always | SC-X-END |\n\n```md\n<!-- toudocu:section verification -->\n```\n"
+	doc := Parse([]byte(source), "test.md")
+	a := doc.Analysis()
+	if len(a.Metadata) != 2 || a.Metadata[0].Key != "id" || a.Metadata[0].Value != "RB-TEST" {
+		t.Fatalf("metadata = %#v", a.Metadata)
 	}
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			if got := len(Parse([]byte(tc.source), "").Analysis().Metadata); got != tc.count {
-				t.Fatalf("metadata count = %d, want %d", got, tc.count)
-			}
-		})
+	if len(a.Sections) != 1 || a.Sections[0].Kind != "procedure" {
+		t.Fatalf("sections = %#v", a.Sections)
+	}
+	if len(a.Tables) != 1 || a.Tables[0].Kind != "transitions" || strings.Join(a.Tables[0].Columns, ",") != "id,action,condition,target" {
+		t.Fatalf("tables = %#v", a.Tables)
+	}
+	if strings.Contains(a.PlainText, "toudocu") || len(a.Diagnostics) != 0 {
+		t.Fatalf("plain text or diagnostics = %q %#v", a.PlainText, a.Diagnostics)
+	}
+	html, err := Render(doc, RenderConfig{})
+	if err != nil || strings.Contains(html, "toudocu:section procedure") || !strings.Contains(html, "toudocu:section verification") {
+		t.Fatalf("render = %q, %v", html, err)
+	}
+}
+
+func TestOnlyExactToudocuAnnotationsBypassRawHTMLPolicy(t *testing.T) {
+	source := "<!-- toudocu\nid: X\n-->\n# H\n\n<!-- toudocuX -->\n<div>unsafe</div>\n"
+	a := Parse([]byte(source), "test.md").Analysis()
+	forbidden := 0
+	for _, diagnostic := range a.Diagnostics {
+		if diagnostic.Code == "forbidden-raw-html" {
+			forbidden++
+		}
+	}
+	if forbidden != 2 || a.MetadataBlocks != 1 || strings.Contains(a.PlainText, "toudocu\nid") {
+		t.Fatalf("exact annotation boundary failed: metadata=%d plain=%q diagnostics=%#v", a.MetadataBlocks, a.PlainText, a.Diagnostics)
 	}
 }
 

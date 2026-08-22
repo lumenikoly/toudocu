@@ -20,24 +20,26 @@ var rootOrder = map[string]int{
 type statusGroup struct {
 	Kind   string
 	Symbol string
-	Values []string
 }
 
-var statusGroups = []statusGroup{
-	{Kind: "not-started", Symbol: "○", Values: []string{"не начато", "не начат", "not started", "new", "черновик", "draft"}},
-	{Kind: "planned", Symbol: "◷", Values: []string{"запланировано", "запланирован", "planned", "proposed", "предложено", "предложен", "готово к работе", "ready"}},
-	{Kind: "in-progress", Symbol: "◐", Values: []string{"в работе", "работа", "in progress", "work in progress", "active", "effective", "действует", "активен", "снижается"}},
-	{Kind: "blocked", Symbol: "!", Values: []string{"заблокировано", "заблокирован", "blocked"}},
-	{Kind: "paused", Symbol: "Ⅱ", Values: []string{"приостановлено", "приостановлен", "paused", "on hold"}},
-	{Kind: "done", Symbol: "✓", Values: []string{"готово", "готов", "выполнено", "выполнен", "завершено", "завершен", "реализовано", "реализован", "done", "complete", "completed", "implemented", "закрыт", "закрыто", "closed"}},
-	{Kind: "open", Symbol: "◇", Values: []string{"открыт", "открыто", "open"}},
-	{Kind: "accepted", Symbol: "✓", Values: []string{"принято", "принят", "accepted"}},
-	{Kind: "rejected", Symbol: "×", Values: []string{"отклонено", "отклонен", "rejected"}},
-	{Kind: "cancelled", Symbol: "×", Values: []string{"отменено", "отменен", "cancelled", "canceled"}},
-	{Kind: "superseded", Symbol: "↪", Values: []string{"заменено", "заменен", "заменён", "superseded", "replaced"}},
-	{Kind: "obsolete", Symbol: "⌁", Values: []string{"устарело", "устарел", "deprecated", "obsolete"}},
-	{Kind: "review-required", Symbol: "!", Values: []string{"требует проверки", "requires review", "review required"}},
-	{Kind: "risk-accepted", Symbol: "≈", Values: []string{"риск принят", "risk accepted"}},
+var statusGroups = map[string]statusGroup{
+	"draft":           {Kind: "not-started", Symbol: "○"},
+	"ready":           {Kind: "planned", Symbol: "◷"},
+	"planned":         {Kind: "planned", Symbol: "◷"},
+	"proposed":        {Kind: "planned", Symbol: "◷"},
+	"in-progress":     {Kind: "in-progress", Symbol: "◐"},
+	"active":          {Kind: "in-progress", Symbol: "◐"},
+	"blocked":         {Kind: "blocked", Symbol: "!"},
+	"paused":          {Kind: "paused", Symbol: "Ⅱ"},
+	"done":            {Kind: "done", Symbol: "✓"},
+	"open":            {Kind: "open", Symbol: "◇"},
+	"accepted":        {Kind: "accepted", Symbol: "✓"},
+	"rejected":        {Kind: "rejected", Symbol: "×"},
+	"cancelled":       {Kind: "cancelled", Symbol: "×"},
+	"superseded":      {Kind: "superseded", Symbol: "↪"},
+	"obsolete":        {Kind: "obsolete", Symbol: "⌁"},
+	"review-required": {Kind: "review-required", Symbol: "!"},
+	"risk-accepted":   {Kind: "risk-accepted", Symbol: "≈"},
 }
 
 func ClassifyDocument(relativePath string) string {
@@ -73,8 +75,6 @@ func ClassifyDocument(relativePath string) string {
 		return "flow"
 	case SectionGuides:
 		return "guide"
-	case SectionWork:
-		return "work"
 	case SectionDrafts:
 		return "draft"
 	case SectionReference:
@@ -83,12 +83,16 @@ func ClassifyDocument(relativePath string) string {
 		if base == "index.md" {
 			return "quality-index"
 		}
-		return "standard"
+		if strings.HasPrefix(base, "std-") {
+			return "standard"
+		}
 	case SectionRunbooks:
 		if base == "index.md" {
 			return "runbook-index"
 		}
-		return "runbook"
+		if strings.HasPrefix(base, "rb-") {
+			return "runbook"
+		}
 	case SectionScreens:
 		if base == "map.md" {
 			return "screen-map"
@@ -96,7 +100,13 @@ func ClassifyDocument(relativePath string) string {
 		if base == "index.md" {
 			return "screen-index"
 		}
-		return "screen"
+		if strings.HasPrefix(base, "sc-") {
+			return "screen"
+		}
+	case SectionWork:
+		if strings.HasPrefix(base, "task-") || strings.HasPrefix(base, "bug-") {
+			return "work"
+		}
 	}
 	if base == "index.md" {
 		return "document"
@@ -133,11 +143,11 @@ func loadProjectChangelog(repositoryRoot string, staleDays int, now time.Time, f
 	}
 	updatedAt := info.ModTime().UTC()
 	if value := parsed.Metadata["updated"]; value != "" {
-		if parsedDate, ok := parseDate(value); ok {
+		if parsedDate, ok := parseISODate(value); ok {
 			updatedAt = parsedDate
 		}
 	} else if value := parsed.Metadata["date"]; value != "" {
-		if parsedDate, ok := parseDate(value); ok {
+		if parsedDate, ok := parseISODate(value); ok {
 			updatedAt = parsedDate
 		}
 	}
@@ -152,7 +162,7 @@ func loadProjectChangelog(repositoryRoot string, staleDays int, now time.Time, f
 		OutputPath: projectChangelogOutput, Directory: ".", FileName: projectChangelogFile,
 		Type: "changelog", TypeLabel: localizedTypeLabel(nil, "changelog"), Title: title, Description: parsed.Description,
 		Content: content, Headings: parsed.Headings,
-		Sections: parsed.Sections, Metadata: parsed.Metadata, MetadataExtras: parsed.MetadataExtras,
+		Sections: parsed.Sections, Metadata: parsed.Metadata, MetadataExtras: parsed.MetadataExtras, metadataLocations: parsed.MetadataLocations, metadataCounts: parsed.MetadataCounts, metadataBlocks: parsed.MetadataBlocks,
 		Tasks:     parsed.Tasks,
 		TaskStats: TaskStats{Total: len(parsed.Tasks), Completed: completed, Remaining: len(parsed.Tasks) - completed, Percent: progress(completed, len(parsed.Tasks))},
 		Links:     parsed.Links, PlainText: parsed.PlainText, MTime: info.ModTime().UTC(), UpdatedAt: updatedAt,
@@ -190,21 +200,16 @@ func outputPathForDocument(relativePath string) string {
 	return normalized + ".html"
 }
 
-// StatusFor converts a human status into a visual and machine-readable group.
+// StatusFor maps one canonical status to its presentation group.
 func StatusFor(status string) StatusInfo {
 	label := strings.TrimSpace(status)
 	if label == "" {
-		label = "Не указан"
+		return StatusInfo{Kind: "neutral", Symbol: "•", Recognized: true}
 	}
-	canonical := canonicalText(label)
-	for _, group := range statusGroups {
-		for _, value := range group.Values {
-			if canonical == canonicalText(value) {
-				return StatusInfo{Kind: group.Kind, Symbol: group.Symbol, Label: label, Recognized: true}
-			}
-		}
+	if group, ok := statusGroups[label]; ok {
+		return StatusInfo{Kind: group.Kind, Symbol: group.Symbol, Label: label, Recognized: true}
 	}
-	return StatusInfo{Kind: "neutral", Symbol: "•", Label: label, Recognized: status == ""}
+	return StatusInfo{Kind: "neutral", Symbol: "•", Label: label}
 }
 
 func shouldExclude(relativePath, baseName string, excludes map[string]struct{}) bool {
@@ -320,11 +325,11 @@ func createDocument(file scannedFile, root string, staleDays int, now time.Time,
 	}
 	updatedAt := info.ModTime().UTC()
 	if value := parsed.Metadata["updated"]; value != "" {
-		if parsedDate, ok := parseDate(value); ok {
+		if parsedDate, ok := parseISODate(value); ok {
 			updatedAt = parsedDate
 		}
 	} else if value := parsed.Metadata["date"]; value != "" {
-		if parsedDate, ok := parseDate(value); ok {
+		if parsedDate, ok := parseISODate(value); ok {
 			updatedAt = parsedDate
 		}
 	}
@@ -345,7 +350,7 @@ func createDocument(file scannedFile, root string, staleDays int, now time.Time,
 		OutputPath: outputPathForDocument(file.RelativePath), Directory: directory, FileName: path.Base(file.RelativePath),
 		Type: typeName, SectionType: section, TypeLabel: localizedTypeLabel(nil, typeName), Title: title, Description: parsed.Description,
 		Content: content, Headings: parsed.Headings,
-		Sections: parsed.Sections, Metadata: parsed.Metadata, MetadataExtras: parsed.MetadataExtras,
+		Sections: parsed.Sections, Metadata: parsed.Metadata, MetadataExtras: parsed.MetadataExtras, metadataLocations: parsed.MetadataLocations, metadataCounts: parsed.MetadataCounts, metadataBlocks: parsed.MetadataBlocks,
 		Tasks:     parsed.Tasks,
 		TaskStats: TaskStats{Total: len(parsed.Tasks), Completed: completed, Remaining: len(parsed.Tasks) - completed, Percent: progress(completed, len(parsed.Tasks))},
 		Links:     parsed.Links, PlainText: parsed.PlainText, MTime: info.ModTime().UTC(), UpdatedAt: updatedAt,
@@ -370,13 +375,9 @@ func addDocumentIssue(model *Model, document *Document, issue Issue) {
 	}
 }
 
-func hasSection(document *Document, names []string) bool {
-	targets := map[string]struct{}{}
-	for _, name := range names {
-		targets[canonicalText(name)] = struct{}{}
-	}
+func hasSection(document *Document, kind SectionKind) bool {
 	for _, section := range document.Sections {
-		if _, exists := targets[canonicalText(section.Title)]; exists {
+		if section.Kind == kind {
 			return true
 		}
 	}
@@ -387,6 +388,7 @@ func validateDocumentBasics(model *Model, document *Document) {
 	for _, issue := range document.markdownDiagnostics {
 		addDocumentIssue(model, document, issue)
 	}
+	validateSemanticAnnotations(model, document)
 	if containsType([]string{"notes", "ideas"}, document.Type) {
 		return
 	}
@@ -417,32 +419,32 @@ func validateDocumentBasics(model *Model, document *Document) {
 	}
 
 	type sectionRule struct {
-		Names   []string
+		Kind    SectionKind
 		Message string
 	}
 	rules := map[string][]sectionRule{
 		"use-case": {
-			{[]string{"основной сценарий", "main scenario", "main flow", "основной поток"}, "The Main scenario section is missing."},
-			{[]string{"постусловия", "postconditions"}, "The Postconditions section is missing."},
-			{[]string{"бизнес-правила", "business rules"}, "The Business rules section is missing."},
-			{[]string{"реализация", "implementation"}, "The Implementation section is missing."},
+			{SectionKindMainScenario, "The Main scenario section is missing."},
+			{SectionKindPostconditions, "The Postconditions section is missing."},
+			{SectionKindBusinessRules, "The Business rules section is missing."},
+			{SectionKindImplementation, "The Implementation section is missing."},
 		},
 		"module": {
-			{[]string{"расположение в коде", "code location", "code locations"}, "The Code location section is missing."},
-			{[]string{"границы", "границы модуля", "boundaries", "module boundaries"}, "The Boundaries section is missing."},
-			{[]string{"бизнес-правила", "business rules"}, "The Business rules section is missing."},
-			{[]string{"инварианты", "invariants"}, "The Invariants section is missing."},
-			{[]string{"стабильные интерфейсы", "stable interfaces"}, "The Stable interfaces section is missing."},
-			{[]string{"связанные сценарии", "related use cases"}, "The Related use cases section is missing."},
+			{SectionKindCodeLocation, "The Code location section is missing."},
+			{SectionKindBoundaries, "The Boundaries section is missing."},
+			{SectionKindBusinessRules, "The Business rules section is missing."},
+			{SectionKindInvariants, "The Invariants section is missing."},
+			{SectionKindStableInterfaces, "The Stable interfaces section is missing."},
+			{SectionKindRelatedUseCases, "The Related use cases section is missing."},
 		},
 		"decision": {
-			{[]string{"контекст", "context"}, "The Context section is missing."},
-			{[]string{"решение", "decision"}, "The Decision section is missing."},
-			{[]string{"последствия", "consequences"}, "The Consequences section is missing."},
+			{SectionKindContext, "The Context section is missing."},
+			{SectionKindDecision, "The Decision section is missing."},
+			{SectionKindConsequences, "The Consequences section is missing."},
 		},
 	}
 	for _, rule := range rules[document.Type] {
-		if !hasSection(document, rule.Names) {
+		if !hasSection(document, rule.Kind) {
 			addDocumentIssue(model, document, newIssue("warning", "missing-section", rule.Message, document.SourcePath, 0))
 		}
 	}
@@ -509,16 +511,6 @@ func validateGlobalStructure(model *Model) {
 
 func validateArchitectureDocuments(model *Model) {
 	overview := model.DocByPath["architecture/overview.md"]
-	if overview != nil && strings.TrimSpace(overview.Metadata["documentType"]) != "Architecture Overview" {
-		addDocumentIssue(model, overview, newIssue(
-			"error",
-			"invalid-architecture-overview-type",
-			"architecture/overview.md must contain the field `Document type: Architecture Overview` or its recognized locale equivalent.",
-			overview.SourcePath,
-			0,
-		))
-	}
-
 	listed := map[string]struct{}{}
 	if overview != nil {
 		for _, link := range overview.ResolvedLinks {
@@ -662,6 +654,11 @@ func buildDocumentationModel(options Options, overlay map[string][]byte) (*Model
 	if model.RepositoryRef == "" {
 		model.RepositoryRef = "main"
 	}
+	if issue := documentationVersionIssue(siteConfig); issue != nil {
+		model.Issues = append(model.Issues, *issue)
+		model.Stats = buildStats(model)
+		return model, nil
+	}
 	files := scanMarkdownFiles(root, options.Excludes, &model.Issues)
 	// A repository-root scan is canonical by definition. Translation trees are
 	// independent portals and must never leak into task context or ProjectModel.
@@ -798,13 +795,4 @@ func directoryHasSourceIndex(model *Model, directory string) bool {
 		return true
 	}
 	return model.DocByPath[path.Join(directory, "index.md")] != nil
-}
-
-func highRisk(risk Risk) bool {
-	high := map[string]struct{}{
-		"высокая": {}, "высокое": {}, "высокий": {}, "high": {}, "critical": {}, "критическая": {}, "критическое": {},
-	}
-	_, probability := high[canonicalText(risk.Probability)]
-	_, impact := high[canonicalText(risk.Impact)]
-	return probability || impact
 }

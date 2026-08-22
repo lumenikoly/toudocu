@@ -1,26 +1,33 @@
+<!-- toudocu
+id: TASK-ARCH-001
+status: done
+taskType: feature
+priority: high
+module: MOD-MODEL
+useCase: UC-DOCS-02
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-10
+-->
+
 # TASK-ARCH-001: Перестроить архитектурную документацию вокруг вопросов
 
-- Статус: Выполнено
-- Тип: Feature
-- Приоритет: Высокий
-- Модуль: MOD-MODEL
-- Сценарий: UC-DOCS-02
-- Стандарты: STD-GO-001, STD-DOCS-001
-- Последнее обновление: 2026-08-10
-
+<!-- toudocu:section result -->
 ## Результат
 
 `docs/architecture/overview.md` стал обязательной картой архитектуры. Каждый
 другой Markdown-документ в `architecture/` отвечает на один конкретный вопрос
 и связан с обзором прямой ссылкой.
 
+<!-- toudocu:section behavior-change -->
 ## Изменение поведения
 
+<!-- toudocu:section before -->
 ### Было
 
 Каталог `architecture/` был необязательным набором документов без общей карты,
 явных вопросов и строгих требований к локальным ссылкам.
 
+<!-- toudocu:section after -->
 ### Станет
 
 Обычный `check` требует корректный архитектурный обзор, непустой вопрос в
@@ -28,6 +35,7 @@
 и безопасные существующие локальные ссылки. Skill содержит отдельные русские и
 английские шаблоны и применяет правила смысла `ARCH001`–`ARCH013`.
 
+<!-- toudocu:section scope -->
 ## Область изменения
 
 - разбор документов и ссылок в `internal/app/`;
@@ -35,6 +43,7 @@
 - `skills/toudocu/`;
 - исходная документация, README, журнал изменений и `AGENTS.md`.
 
+<!-- toudocu:section out-of-scope -->
 ## Не входит в задачу
 
 - новая Go-команда `toudocu init`;
@@ -44,6 +53,7 @@
 - создание документов о развёртывании или владении данными без подтверждённого
   архитектурного вопроса.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Критерии приёмки
 
 - [x] `AC-01` Обычный `check` выдаёт стабильные ошибки, если обзора нет, он
@@ -61,6 +71,7 @@
 - [x] `AC-06` Архитектура Toudocu разделена на подтверждённые ответы на вопросы,
   а портал строится из исходного Markdown.
 
+<!-- toudocu:section plan -->
 ## План
 
 - [x] Добавить варианты метаданных и структурные сообщения архитектуры.
@@ -68,6 +79,7 @@
 - [x] Обновить шаблоны, `init`, управляемые правила и проверку смысла.
 - [x] Перевести документацию Toudocu на новую форму.
 
+<!-- toudocu:section verification -->
 ## Проверка
 
 - `AC-01` → `go test ./... -run 'TestArchitectureContract'`
@@ -80,6 +92,7 @@
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `go test ./... -run 'TestArchitectureContract|TestArchitectureSchemaContract|TestUseToudocuArchitecture'`
 
+<!-- toudocu:section documentation-impact -->
 ## Влияние на документацию
 
 Были обновлены архитектурный контракт, `init` и правила skill, документация

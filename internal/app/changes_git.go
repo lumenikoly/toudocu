@@ -42,7 +42,7 @@ func openGitChangeSource(docsRoot string, similarity int) (*gitChangeSource, err
 	out, err := cmd.Output()
 	if err != nil {
 		if errors.Is(err, exec.ErrNotFound) {
-			return nil, &changeFailure{Code: 3, IssueCode: "git-command-failed", Err: fmt.Errorf("Git is unavailable")}
+			return nil, &changeFailure{Code: 3, IssueCode: "git-command-failed", Err: fmt.Errorf("git is unavailable")}
 		}
 		return nil, &changeFailure{Code: 3, IssueCode: "git-repository-not-found", Err: fmt.Errorf("documentation directory is not inside a Git repository")}
 	}
@@ -95,7 +95,7 @@ func (g *gitChangeSource) resolveCommit(ref string) (string, error) {
 	}
 	out, err := g.run("rev-parse", "--verify", "--end-of-options", ref+"^{commit}")
 	if err != nil {
-		return "", &changeFailure{Code: 2, IssueCode: "git-base-not-found", Err: fmt.Errorf("Git revision %q not found", ref)}
+		return "", &changeFailure{Code: 2, IssueCode: "git-base-not-found", Err: fmt.Errorf("git revision %q not found", ref)}
 	}
 	return strings.TrimSpace(string(out)), nil
 }
@@ -332,13 +332,13 @@ func (g *gitChangeSource) diff(base, target ChangeSide, change gitFileChange) ([
 
 func addedFilePatch(path string, content []byte) []byte {
 	var out strings.Builder
-	fmt.Fprintf(&out, "diff --git a/%s b/%s\nnew file mode 100644\n--- /dev/null\n+++ b/%s\n", path, path, path)
+	_, _ = fmt.Fprintf(&out, "diff --git a/%s b/%s\nnew file mode 100644\n--- /dev/null\n+++ b/%s\n", path, path, path)
 	lines := strings.Split(strings.ReplaceAll(string(content), "\r\n", "\n"), "\n")
 	count := len(lines)
 	if count > 0 && lines[count-1] == "" {
 		count--
 	}
-	fmt.Fprintf(&out, "@@ -0,0 +1,%d @@\n", count)
+	_, _ = fmt.Fprintf(&out, "@@ -0,0 +1,%d @@\n", count)
 	for i := 0; i < count; i++ {
 		out.WriteByte('+')
 		out.WriteString(lines[i])
@@ -367,14 +367,10 @@ func (g *gitChangeSource) content(side ChangeSide, path string) ([]byte, error) 
 }
 
 func taskIDFromContent(content []byte) string {
-	match := workItemHeadingRE.FindStringSubmatch(analyzeMarkdown(string(content)).Title)
-	if match == nil {
-		return ""
-	}
-	return match[1]
+	return strings.TrimSpace(analyzeMarkdown(string(content)).Metadata["id"])
 }
 
-func (g *gitChangeSource) taskDocumentContent(side ChangeSide, taskID string) (string, []byte, error) {
+func (g *gitChangeSource) taskDocuments(side ChangeSide, taskID string) (map[string]changeTaskDocument, error) {
 	workPath := filepath.ToSlash(filepath.Join(g.docsRel, "work"))
 	var paths []string
 	switch side.Type {
@@ -397,12 +393,12 @@ func (g *gitChangeSource) taskDocumentContent(side ChangeSide, taskID string) (s
 			paths = append(paths, filepath.ToSlash(rel))
 			return nil
 		}); err != nil {
-			return "", nil, err
+			return nil, err
 		}
 	case "index":
 		out, err := g.run("ls-files", "-z", "--", workPath)
 		if err != nil {
-			return "", nil, err
+			return nil, err
 		}
 		for _, raw := range bytes.Split(out, []byte{0}) {
 			path := filepath.ToSlash(string(raw))
@@ -413,7 +409,7 @@ func (g *gitChangeSource) taskDocumentContent(side ChangeSide, taskID string) (s
 	case "commit":
 		out, err := g.run("ls-tree", "-r", "-z", "--name-only", side.Resolved, "--", workPath)
 		if err != nil {
-			return "", nil, err
+			return nil, err
 		}
 		for _, raw := range bytes.Split(out, []byte{0}) {
 			path := filepath.ToSlash(string(raw))
@@ -422,25 +418,28 @@ func (g *gitChangeSource) taskDocumentContent(side ChangeSide, taskID string) (s
 			}
 		}
 	default:
-		return "", nil, fmt.Errorf("unsupported side %q", side.Type)
+		return nil, fmt.Errorf("unsupported side %q", side.Type)
 	}
 	sort.Strings(paths)
-	foundPath := ""
-	var foundContent []byte
+	tasks := map[string]changeTaskDocument{}
 	for _, path := range paths {
 		content, err := g.content(side, path)
-		if err == nil && taskIDFromContent(content) == taskID {
-			if foundPath != "" {
-				return "", nil, fmt.Errorf("task identifier %s is ambiguous", taskID)
+		if err == nil {
+			id := taskIDFromContent(content)
+			if id == "" || taskID != "" && id != taskID {
+				continue
 			}
-			foundPath, foundContent = path, content
+			if previous, exists := tasks[id]; exists {
+				return nil, fmt.Errorf("task identifier %s is ambiguous (%s and %s)", id, previous.path, path)
+			}
+			tasks[id] = changeTaskDocument{path: path, content: content}
 			continue
 		}
 		if err != nil && !os.IsNotExist(err) {
-			return "", nil, err
+			return nil, err
 		}
 	}
-	return foundPath, foundContent, nil
+	return tasks, nil
 }
 
 func isBinaryContent(content []byte) bool {

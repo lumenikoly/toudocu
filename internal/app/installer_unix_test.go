@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"sync"
 	"testing"
@@ -253,7 +252,7 @@ func newVersionedPlatformInstallerFixture(t *testing.T, versions map[string]stri
 			if fixture.badChecksum {
 				digest = strings.Repeat("0", 64)
 			}
-			fmt.Fprintf(response, "%s  %s\n", digest, fixture.asset)
+			_, _ = fmt.Fprintf(response, "%s  %s\n", digest, fixture.asset)
 		case fixture.asset:
 			_, _ = response.Write(binary)
 		default:
@@ -357,8 +356,5 @@ func TestInstallerScriptsArePortableText(t *testing.T) {
 		if strings.Contains(string(content), "\r\n") {
 			t.Errorf("%s contains CRLF", file)
 		}
-	}
-	if runtime.GOOS == "windows" {
-		t.Fatal("unix installer tests must not run on Windows")
 	}
 }

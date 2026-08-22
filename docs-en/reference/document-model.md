@@ -19,7 +19,7 @@ Toudocu validates only explicit promises:
 | Ordinary Markdown | A safe, readable document | Markdown, local links, and basic editorial warnings |
 | Reserved path | A special document kind | The contract for that kind |
 | Stable ID | Durable entity identity | Format, uniqueness, and allowed location |
-| ID field or local link | Explicit relationship | Existence and allowed target kind |
+| Canonical annotated field or local link | Explicit relationship | Existence and allowed target kind |
 | Checkbox in `roadmap.md` | Global-scope item | Supported ID and `UC-*` readiness derived from status and acceptance criteria |
 | `task ready` | Complete task contract | Required fields, sections, relationships, and checks |
 | `task verify --run` | Permission to execute commands | Task-local validation before execution |
@@ -58,15 +58,16 @@ staleness. Never invent information merely to remove a warning.
 | Repository-root `CHANGELOG.md` | The sole special release journal, when present |
 | Any other path | Ordinary Markdown without a built-in typed contract |
 
-An unknown top-level Markdown section declares its own `index.md` with
-`Type: Custom`, a description, and a useful H1. This adds navigation,
-not new built-in semantics. See [Document Types](document-types.md) for the
-semantic boundaries between kinds.
+An unknown top-level Markdown section declares its own `index.md` with a
+description and useful H1. Its path is the machine signal for a custom section;
+this adds navigation, not new built-in semantics. See
+[Document Types](document-types.md) for the semantic boundaries between kinds.
 
 ## Identity
 
-Stable IDs do not depend on a title or filename. Renaming must not change the
-ID; a real identity change updates every reference together.
+Stable IDs come only from the canonical `id` field in a document annotation.
+They do not depend on a title or filename. Renaming must not change the ID; a
+real identity change updates every reference together.
 
 | Entity | ID format | Uniqueness scope |
 |---|---|---|
@@ -86,6 +87,28 @@ ID; a real identity change updates every reference together.
 The same stable ID cannot be declared twice. Relative Markdown links must
 resolve inside the repository root; a link is an explicit relationship even
 when it does not participate in the typed model.
+
+## Semantic annotations
+
+Outside fenced code blocks, Toudocu recognizes only these exact forms:
+
+```markdown
+<!-- toudocu
+id: UC-AUTH-01
+status: planned
+module: MOD-AUTH
+-->
+
+<!-- toudocu:section acceptance-criteria -->
+## Any reader-facing heading
+
+<!-- toudocu:table transitions columns=id,useCase,action,condition,target,kind -->
+```
+
+Metadata keys, enum values, section and table kinds, and column identifiers are
+canonical and are not translated. Visible headings and table labels can be
+translated or rewritten without changing the model. An annotation is excluded
+from HTML, extracted text, and search, and any other raw HTML is forbidden.
 
 ## Map of primary relationships
 
@@ -128,19 +151,19 @@ portal; a derived reverse relationship needs no duplicate Markdown field.
 | `SC-*` | `Parent screen` | `SC-*` | Optional, at most one | Derived child relationship |
 | `TR-*` row | `Use case` | `UC-*` | Exactly one | Transition enters the use-case screen graph |
 | `TR-*` row | `Result` | `SC-*` | Exactly one | Target receives an incoming transition |
-| Ordinary `TASK-*` | `Module` | `MOD-*` | Required for non-Draft | Related task context |
-| `BUG-*` | `Module` | `MOD-*` | Required in every status | Related task context |
-| Ordinary `TASK-*` | `Use case` | `UC-*` | Required for non-Draft Feature; reasoned omission for other types | Related task context |
-| `BUG-*` | `Use case` | `UC-*` | Required or explicitly `Not applicable` with user-behavior rationale | Related task context |
-| Work item | `Flow` | `FLOW-*` | Optional, at most one | Included in task context |
-| Work item | `Screens` | `SC-*` | Optional list | Included in task context |
-| Work item | `Transitions` | `TR-*` | Optional list | Included in context and traceability |
-| Work item | `Standards` | `STD-*` | Optional list | Documents become required reads |
-| Work item | `Affected runbooks` | `RB-*` | Optional list | Documents become required reads |
-| Work item | `Depends on` | `TASK-*` or `BUG-*` | Optional list | Dependency enters the task graph |
+| Ordinary `TASK-*` | `module` | `MOD-*` | Required from `ready` | Related task context |
+| `BUG-*` | `module` | `MOD-*` | Required in every status | Related task context |
+| Ordinary `TASK-*` | `useCase` | `UC-*` | Required for `feature`; other types can explain omission | Related task context |
+| `BUG-*` | `useCase` | `UC-*` | Required or explained through user behavior | Related task context |
+| Work item | `flow` | `FLOW-*` | Optional, at most one | Included in task context |
+| Work item | `screens` | `SC-*` | Optional list | Included in task context |
+| Work item | `transitions` | `TR-*` | Optional list | Included in context and traceability |
+| Work item | `standards` | `STD-*` | Optional list | Documents become required reads |
+| Work item | `runbooks` | `RB-*` | Optional list | Documents become required reads |
+| Work item | `dependsOn` | `TASK-*` or `BUG-*` | Optional list | Dependency enters the task graph |
 | `roadmap.md` | ID in a checklist item | `UC-*`, `CON-*`, `CONTRACT-*`, `DLV-*`, or `DELIVERABLE-*` | Exactly one supported ID per item | `UC-*` readiness is derived from its use case |
 | Architecture Overview | Direct Markdown link | Every other `architecture/**/*.md` | One or more per document | Detail is listed in overview |
-| Superseded `STD-*` | `Superseded by` | `STD-*` | Exactly one when superseded | Standard replacement chain |
+| Superseded `STD-*` | `supersededBy` | `STD-*` | Exactly one when superseded | Standard replacement chain |
 
 Multi-ID fields accept only existing targets of allowed kinds. An ordinary
 Markdown link does not replace a required metadata field.
@@ -148,20 +171,24 @@ Markdown link does not replace a required metadata field.
 For example, a use case declares its module relationship in metadata:
 
 ```markdown
-# UC-AUTH-01: Sign in
+<!-- toudocu
+id: UC-AUTH-01
+status: planned
+module: MOD-AUTH
+-->
 
-- Identifier: UC-AUTH-01
-- Status: Planned
-- Module: MOD-AUTH
+# UC-AUTH-01: Sign in
 ```
 
 A flow that visualizes this use case refers to it separately:
 
 ```markdown
-# FLOW-AUTH-01: Sign in
+<!-- toudocu
+id: FLOW-AUTH-01
+useCase: UC-AUTH-01
+-->
 
-- Identifier: FLOW-AUTH-01
-- Scenario: UC-AUTH-01
+# FLOW-AUTH-01: Sign in
 ```
 
 After validation, Toudocu shows the reverse `UC-AUTH-01 → FLOW-AUTH-01`
@@ -171,7 +198,7 @@ relationship without a duplicate field in the use-case document.
 
 Toudocu derives views only from canonical Markdown sources:
 
-- `FLOW → UC` from `Scenario` automatically creates `UC → FLOW`.
+- `FLOW → UC` from `useCase` automatically creates `UC → FLOW`.
 - `TR-*` rows create incoming/outgoing transitions, the screen graph, and the
   playable flow for the selected `UC-*`.
 - Parent-screen relationships create the Screen Map hierarchy.

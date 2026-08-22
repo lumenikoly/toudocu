@@ -1,8 +1,11 @@
+<!-- toudocu
+id: MOD-CHANGES
+status: done
+updated: 2026-08-10
+-->
+
 # MOD-CHANGES: Documentation changes
 
-- Identifier: MOD-CHANGES
-- Status: Done
-- Last updated: 2026-08-10
 
 This module compares two explicitly selected states in the local Git
 repository and produces one reproducible report for the CLI, CI, and local
@@ -14,6 +17,7 @@ Show the exact Git patch and, for known documents, add readable differences in
 structure, relationships, and rendered output. The analysis does not use an AI
 model.
 
+<!-- toudocu:section code-location -->
 ## Code locations
 
 - `internal/app/changes_*.go` — Git reads, comparison, report generation, and
@@ -26,12 +30,14 @@ model.
   `serve`-only interface. Built assets are embedded from
   `internal/site/assets/generated/`.
 
+<!-- toudocu:section boundaries -->
 ## Boundaries
 
 The module does not change the working tree, index, refs, or Git history.
 Static `build` does not read history or include the Changes API. Markdown
 rendering belongs to `MOD-MARKDOWN`; `MOD-SITE` supplies the page shell.
 
+<!-- toudocu:section business-rules -->
 ## Business rules
 
 Paths, HTTP methods, and response schemas are defined in
@@ -66,6 +72,7 @@ Repository-wide file listing and discussions belong to
 `ChangeSetReport` schema or add source code to documentation reports from the
 CLI.
 
+<!-- toudocu:section invariants -->
 ## Invariants
 
 - Git runs directly, without a system shell, external diff handler, `textconv`,
@@ -75,6 +82,7 @@ CLI.
 - Full contents and rendered versions load only when requested.
 - Existing `check` and static `build` behavior does not depend on this module.
 
+<!-- toudocu:section stable-interfaces -->
 ## Stable interfaces
 
 - `ChangeSetReport` schema v1;
@@ -83,6 +91,7 @@ CLI.
 - read-only `/_toudocu/api/changes/`;
 - diagnostic codes and comparison-range values.
 
+<!-- toudocu:section related-use-cases -->
 ## Related use cases
 
 - [UC-DOCS-05: View documentation changes](../use-cases/UC-DOCS-05.md)

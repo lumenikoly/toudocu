@@ -1,33 +1,42 @@
+<!-- toudocu
+id: TASK-CHANGES-002
+status: done
+taskType: feature
+priority: normal
+module: MOD-CHANGES
+useCase: UC-AGENT-FEEDBACK-01
+screens: SC-CHANGES-WORKSPACE
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-12
+-->
+
 # TASK-CHANGES-002: Simplify the Changes workspace
 
-- Status: Done
-- Type: Feature
-- Priority: Normal
-- Module: MOD-CHANGES
-- Use case: UC-AGENT-FEEDBACK-01
-- Screens: SC-CHANGES-WORKSPACE
-- Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-12
 
+<!-- toudocu:section result -->
 ## Outcome
 
 After this task, Changes opened the first matching diff automatically. The main
 workspace kept the file list, search, status, and discussions; Git range
 settings and diagnostics moved into controls that open only when needed.
 
+<!-- toudocu:section behavior-change -->
 ## Behavior change
 
+<!-- toudocu:section before -->
 ### Before
 
 Until a file was selected, Git settings, metrics, and extra filters occupied
 most of the workspace, while the diff was hidden behind a Summary tab.
 
+<!-- toudocu:section after -->
 ### After
 
 The first matching file and its diff open automatically. Git range settings and
 diagnostics live in compact disclosure panels. On desktop, tablet, and phone,
 individual panels scroll without forcing the whole page to scroll sideways.
 
+<!-- toudocu:section scope -->
 ## Scope
 
 - `internal/site/` — workspace HTML and template tests;
@@ -35,6 +44,7 @@ individual panels scroll without forcing the whole page to scroll sideways.
 - `internal/site/assets/generated/` — output built from `web/`;
 - `docs/screens/SC-CHANGES-WORKSPACE.md`, this task, and `CHANGELOG.md`.
 
+<!-- toudocu:section out-of-scope -->
 ## Out of scope
 
 - the Go facade, `ChangeSetReport`, discussion data structures, HTTP API, and
@@ -42,6 +52,7 @@ individual panels scroll without forcing the whole page to scroll sideways.
 - a full Toudocu redesign or changes to `DESIGN.md`;
 - static portal and translation features.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] `AC-01` The header combines the title, Git range disclosure, file
@@ -61,6 +72,7 @@ individual panels scroll without forcing the whole page to scroll sideways.
 - [x] `AC-07` Canonical documentation and generated browser assets match the
   implementation.
 
+<!-- toudocu:section plan -->
 ## Plan
 
 - [x] Simplify the template and remove unnecessary state branches and filters.
@@ -68,6 +80,7 @@ individual panels scroll without forcing the whole page to scroll sideways.
 - [x] Update unit and browser regression tests.
 - [x] Update documentation and rebuild browser assets.
 
+<!-- toudocu:section verification -->
 ## Verification
 
 - `AC-01` → `go test ./internal/site && npm --prefix web run test:browser`
@@ -81,6 +94,7 @@ individual panels scroll without forcing the whole page to scroll sideways.
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `go vet ./... && go mod verify && npm --prefix web run typecheck`
 
+<!-- toudocu:section documentation-impact -->
 ## Documentation impact
 
 This task updated `SC-CHANGES-WORKSPACE`, this work item, and the root

@@ -1,8 +1,11 @@
+<!-- toudocu
+id: CON-CHANGES-HTTP-V1
+status: done
+updated: 2026-08-12
+-->
+
 # Changes HTTP API: Behavior and boundaries
 
-- Identifier: CON-CHANGES-HTTP-V1
-- Status: Done
-- Last updated: 2026-08-12
 
 [OpenAPI 3.1.0](changes.openapi.yaml) defines exact routes, parameters,
 response codes, and JSON schemas. This document describes what an HTTP schema

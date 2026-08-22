@@ -12,6 +12,7 @@ Validate only promises the documentation makes:
 |---|---|---|
 | Ordinary Markdown | Human-readable documentation | Render safely; report basic editorial warnings |
 | Typed path such as `modules/` or `use-cases/` | Opt-in machine-readable entity | Validate its ID and explicit relationships |
+| `toudocu` annotation | Canonical metadata, section, or typed-table contract | Parse exact identifiers without reading display labels |
 | Stable ID or local link | Declared identity or relationship | Require uniqueness and a valid target |
 | `roadmap.md` checklist item | Declared global scope | Require one supported stable ID and derive `UC-*` readiness |
 | `task ready` | Read-only readiness request | Require the complete task schema even for Draft |
@@ -49,8 +50,8 @@ is an error. All other document types are optional.
 | `quality/STD-*.md` | Enforceable project standards | Requires a unique `STD-*`; validates status and replacement links |
 | `runbooks/RB-*.md` | Operational procedures | Requires a unique `RB-*`; derives review freshness |
 | `work/TASK-*.md`, `work/BUG-*.md`, and yearly archive paths | Agent- or CI-readable work and terminal history | Requires exactly one work item, status-dependent fields, and terminal archive status |
-| `architecture/overview.md` | Required architecture boundary and question map | Requires `Architecture Overview` and direct links to every detailed architecture document |
-| Other `architecture/**/*.md` | One evidence-backed architectural question per document | Structurally requires one non-empty question and a direct overview listing; document type `Architecture` is a semantic-gate requirement |
+| `architecture/overview.md` | Required architecture boundary and question map | The path defines the type; requires direct links to every detailed architecture document |
+| Other `architecture/**/*.md` | One evidence-backed architectural question per document | Requires canonical `architectureQuestion` metadata and a direct overview listing |
 | `contracts/`, `guides/`, `reference/` | Specialized human documentation | Classifies and renders the document |
 | Any other path | Free-form documentation | Renders safely without a typed entity contract |
 
@@ -58,10 +59,9 @@ A repository-root `CHANGELOG.md`, when present, is the only special release
 journal. Do not create a portal-specific duplicate inside the documentation
 root, and do not create a root changelog only to populate the portal.
 
-When an unknown top-level directory contains Markdown, its `index.md` is a
-custom-section manifest with `Type: Custom` and a description. Its
-H1 supplies the navigation title. Do not infer a typed category from filenames,
-document count, or prose.
+When an unknown top-level directory contains Markdown, its `index.md` is its
+custom-section manifest by structure. It needs a description; its H1 supplies
+the navigation title. No localized `Type: Custom` field is used.
 
 The built-in `drafts/` directory is not a custom section. Its `index.md` is
 optional; when present, its H1 matches the configured section title. A draft
@@ -71,9 +71,24 @@ Use one H1 and a concise introduction when useful. These improve navigation but
 are not reasons to invent project metadata. Reader-facing content may use any
 project-selected language and must be idiomatic in that language. Exact code
 tokens remain unchanged and receive a plain-language explanation when needed.
-Recognized structural metadata and typed section aliases are Russian or English;
-for another document language, preserve a supported structural key while writing
-the surrounding prose in the selected language.
+Reader-facing content may use any headings and language. Put all machine
+semantics in exact, non-localized annotations:
+
+```md
+<!-- toudocu
+id: UC-AUTH-01
+status: planned
+module: MOD-AUTH
+-->
+
+# Any reader-facing title
+
+<!-- toudocu:section acceptance-criteria -->
+## Any reader-facing heading
+```
+
+Never derive an ID from H1. Canonical field names, enum values, section kinds,
+table kinds, and table columns are not translated.
 
 ## Stable IDs and relationships
 
@@ -94,8 +109,8 @@ When opting into a typed entity:
 - use relative Markdown links that remain inside repository root.
 
 For a `UC-*` roadmap item, Toudocu sets `effectiveCompleted` only when the
-linked use case has a `done`-group status, at least one checkbox in its
-Acceptance criteria section, and every checkbox in that section checked. Nested
+linked use case has canonical status `done`, at least one checkbox in its
+`acceptance-criteria` section, and every checkbox in that section checked. Nested
 subsections count; the next heading of the same or higher level ends the section. The public
 `ProjectReport` remains schema v1 and `completionSource` remains
 `use-case-status`. `CON-*`, `CONTRACT-*`, `DLV-*`, and `DELIVERABLE-*` retain
@@ -142,6 +157,7 @@ Common schema-driven anti-patterns include:
 Use CommonMark headings, paragraphs, emphasis, links, safe raster images,
 blockquotes, lists, task lists, tables, strikethrough, literal autolinks, inline
 code, and fenced code. Do not use raw HTML, front matter, attributes, footnotes,
-definition lists, active SVG/XML/HTML assets, or JavaScript URLs. Raw HTML and
-front matter are policy errors. Fenced code is not parsed as headings, links,
-or tasks.
+definition lists, active SVG/XML/HTML assets, or JavaScript URLs. Raw HTML is a
+policy error except for exact `toudocu` annotations; annotations are omitted
+from HTML, plain text, and search. Fenced code is not parsed as headings,
+annotations, links, or tasks.

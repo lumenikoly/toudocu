@@ -15,24 +15,24 @@ import (
 )
 
 func PrintHelp(w io.Writer) {
-	fmt.Fprintf(w, `Toudocu %s
+	_, _ = fmt.Fprintf(w, `Toudocu %s
 
-Использование:
-  toudocu COMMAND [параметры]
+Usage:
+  toudocu COMMAND [options]
 
-Команды:
-  check       Проверить исходную документацию без изменений
-  build       Собрать автономный read-only портал
-  serve       Запустить локальный портал, редактор и live rebuild
-  changes     Показать Git-backed изменения документации
-  agent       Получить запрос из локальной очереди или сохранить ответ
-  search      Найти документы в исходном Markdown
-  scaffold    Создать один типизированный документ
-  task        Операции жизненного цикла work item
-  skill       Установить встроенный AI-skill для поддерживаемого host
-  version     Показать версию
+Commands:
+  check       Validate source documentation without changing it
+  build       Build a standalone read-only portal
+  serve       Start the local portal, editor, and live rebuild
+  changes     Show Git-backed documentation changes
+  agent       Read a local request or save an agent response
+  search      Search source Markdown documents
+  scaffold    Create one typed document
+  task        Operate the work-item lifecycle
+  skill       Install the bundled AI skill for a supported host
+  version     Show the version
 
-Для справки по применимым параметрам и побочным эффектам:
+For command options and side effects:
   toudocu COMMAND --help
   toudocu task --help
 `, Version)
@@ -40,160 +40,160 @@ func PrintHelp(w io.Writer) {
 
 func PrintCommandHelp(w io.Writer, topic string) {
 	help := map[string]string{
-		"build": `Собирает автономный read-only портал и записывает output.
+		"build": `Builds a standalone read-only portal and writes the output.
 
-Использование:
+Usage:
   toudocu build [docs-dir] [-o DIR] [--clean] [--open] [--strict]
                 [--exclude PATHS] [--stale-days N] [--repository-root DIR]
                 [--repository-url URL] [--repository-ref REF]
                 [--screen-map|--no-screen-map] [-t TITLE]
 
-Пример:
+Example:
   toudocu build ./docs -o ./build/project-docs --clean
 
-Побочные эффекты: создаёт output; --clean предварительно очищает только безопасный output.`,
-		"check": `Проверяет структуру, ссылки, ID и явные связи без изменения файлов.
+Side effects: writes output; --clean first removes only a validated safe output directory.`,
+		"check": `Validates structure, links, IDs, and explicit relationships without changing files.
 
-Использование:
+Usage:
   toudocu check [docs-dir] [--strict] [--format text|json]
                 [--exclude PATHS] [--stale-days N] [--repository-root DIR]
 
-Пример:
+Example:
   toudocu check ./docs --strict
 
-Побочные эффекты: отсутствуют. Без --strict warnings не меняют exit code.`,
-		"serve": `Собирает портал и запускает локальный HTTP/editor workspace с live rebuild.
+Side effects: none. Without --strict, warnings do not change the exit code.`,
+		"serve": `Builds the portal and starts a local HTTP/editor workspace with live rebuild.
 
-Использование:
+Usage:
   toudocu serve [docs-dir] [-o DIR] [--host ADDRESS] [--port N]
                 [--open] [--strict] [--exclude PATHS] [--stale-days N]
                 [--repository-root DIR] [--screen-map|--no-screen-map]
                 [--no-update-check] [-t TITLE]
 
-Пример:
+Example:
   toudocu serve ./docs --host 127.0.0.1 --port 8080
 
-Побочные эффекты: записывает output, запускает HTTP; явные browser-действия
-save, create и roadmap add изменяют workspace.
-При первом открытии canonical-портала один раз проверяет latest stable GitHub Release;
---no-update-check отключает этот outbound-запрос.`,
-		"changes": `Строит read-only Git-backed отчёт об изменениях документации.
+Side effects: writes output and starts HTTP; explicit browser actions for save,
+create, and roadmap add change the workspace. The first canonical portal request
+checks the latest stable GitHub Release once; --no-update-check disables it.`,
+		"changes": `Builds a read-only Git-backed documentation changes report.
 
-Использование:
+Usage:
   toudocu changes [docs-dir] [--base REV|--branch-base REF]
                   [--target working-tree|index|HEAD|REV]
                   [--status STATUS] [--module ID] [--type TYPE]
                   [--permanent-only] [--include-assets|--translation-input]
                   [--repository-root DIR] [--format text|json|markdown] [-o FILE]
-  toudocu changes file PATH [docs-dir] [те же параметры]
-Пример:
+  toudocu changes file PATH [docs-dir] [same options]
+Example:
   toudocu changes ./docs --base main --target working-tree --format markdown
 
---include-assets принудительно включает binary assets независимо от changes.includeAssets.
---translation-input включает reader-facing Markdown, work artifacts и assets,
-игнорируя changes.exclude кроме generated/** и cache/** внутри docs root.
+--include-assets includes binary assets regardless of changes.includeAssets.
+--translation-input includes reader-facing Markdown, work artifacts, and assets,
+ignoring changes.exclude except generated/** and cache/** inside the docs root.
 
-Побочные эффекты: changes только читает Git и workspace; -o записывает явно
-указанный отчёт.`,
-		"agent": `Читает локальную очередь Toudocu или сохраняет ответ агента разработки.
+Side effects: reads Git and the workspace; -o writes the explicitly selected report.`,
+		"agent": `Reads the local Toudocu queue or saves a development-agent response.
 
-Использование:
+Usage:
   toudocu agent next [--repository-root DIR] --json
   toudocu agent respond [--input response.json] [--repository-root DIR] [--json]
 
-Без --input команда respond читает JSON из стандартного ввода. Команды меняют
-только локальное пользовательское состояние вне репозитория и не запускают
-языковую модель.`,
-		"changes-file": `Показывает detail одного изменённого пути без изменения файлов.
+Without --input, respond reads JSON from standard input. These commands change
+only local user state outside the repository and do not run a language model.`,
+		"changes-file": `Shows details for one changed path without changing files.
 
-Использование:
+Usage:
   toudocu changes file PATH [docs-dir] [--base REV|--branch-base REF]
                        [--target working-tree|index|HEAD|REV]
                        [--include-assets|--translation-input]
                        [--repository-root DIR]
                        [--format text|json|markdown] [-o FILE]
 
-Побочные эффекты: команда только читает Git и workspace; -o записывает явно
-указанный файл отчёта.`,
-		"search": `Ищет по свежим исходным Markdown без изменения файлов.
+Side effects: reads Git and the workspace; -o writes the explicitly selected report file.`,
+		"search": `Searches current source Markdown without changing files.
 
-Использование:
+Usage:
   toudocu search "QUERY" [docs-dir] [--limit N] [--format text|json]
 
-Пример:
+Example:
   toudocu search "task workflow" ./docs --format json`,
-		"scaffold": `Атомарно создаёт один типизированный Markdown-файл.
+		"scaffold": `Atomically creates one typed Markdown file.
 
-Использование:
+Usage:
   toudocu scaffold module|use-case|flow|screen|decision|standard|runbook ID
                    [docs-dir] --title TITLE [--lang en|ru] [--format text|json]
 
-Без --lang язык берётся из .toudocu/config.yml; fallback — en.
-Пример:
+Without --lang, the language comes from .toudocu/config.yml; the fallback is en.
+Example:
   toudocu scaffold module MOD-CLI ./docs --title "CLI"`,
-		"task": `Операции жизненного цикла work item.
+		"task": `Operates the work-item lifecycle.
 
-Использование:
-  toudocu task init|ready|context|verify|archive|restore|changes ...
+Usage:
+  toudocu task init|ready|context|verify|archive|restore|changes|tree ...
 
-Для параметров операции:
+For operation options:
   toudocu task OPERATION --help`,
-		"task-init": `Атомарно создаёт новый Draft TASK-* или BUG-*.
+		"task-init": `Atomically creates a new Draft TASK-* or BUG-*.
 
-Использование:
-  toudocu task init [docs-dir] --area AREA --title TITLE --type TYPE
+Usage:
+  toudocu task init [docs-dir] --area AREA --title TITLE --type TYPE [--parent TASK-ID]
                     [--lang en|ru] [--format text|json]
 
-TYPE: Feature, Bug, Maintenance, Documentation или Research.
-Без --lang язык берётся из .toudocu/config.yml; fallback — en.`,
-		"task-ready": `Проверяет полноту Draft/Ready контракта без изменения файлов.
+TYPE: Feature, Bug, Maintenance, Documentation, or Research.
+Without --lang, the language comes from .toudocu/config.yml; the fallback is en.`,
+		"task-ready": `Validates a Draft or Ready contract without changing files.
 
-Использование:
+Usage:
   toudocu task ready TASK-ID [docs-dir] [--strict] [--format text|json]`,
-		"task-context": `Возвращает компактный read-only контекст Ready+ задачи.
+		"task-context": `Returns compact read-only context for a Ready+ task.
 
-Использование:
+Usage:
   toudocu task context TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]`,
-		"task-verify": `Планирует или выполняет доверенные команды проверки задачи.
+		"task-tree": `Shows a read-only TASK-* decomposition tree.
 
-Использование:
+Usage:
+  toudocu task tree TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]`,
+		"task-verify": `Plans or runs trusted task verification commands.
+
+Usage:
   toudocu task verify TASK-ID [docs-dir] (--dry-run|--run)
                       [--target TARGET] [--report FILE] [--timeout DURATION]
                       [--repository-root DIR] [--format text|json]
 
---dry-run не выполняет команды. --report в любом режиме записывает JSON-файл;
---run выполняет команды задачи.`,
-		"task-archive": `Перемещает валидную Done/Cancelled задачу в work/archive/YYYY без перезаписи.
+--dry-run does not run commands. --report writes a JSON file in either mode;
+--run executes the task commands.`,
+		"task-archive": `Moves a valid Done or Cancelled task to work/archive/YYYY without overwriting.
 
-Использование:
+Usage:
   toudocu task archive TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]`,
-		"task-restore": `Возвращает архивную задачу в work/ без перезаписи.
+		"task-restore": `Moves an archived task back to work/ without overwriting.
 
-Использование:
+Usage:
   toudocu task restore TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]`,
-		"task-changes": `Строит единственный task-scoped read-only отчёт изменений и impact diagnostics.
+		"task-changes": `Builds one task-scoped read-only changes and impact report.
 
-Использование:
+Usage:
   toudocu task changes TASK-ID [docs-dir] [--base REV|--branch-base REF]
                        [--target working-tree|index|HEAD|REV]
                        [--include-assets|--translation-input]
                        [--repository-root DIR]
-                       [--format text|json|markdown] [-o FILE]
+                       [--tree] [--format text|json|markdown] [-o FILE]
 
-Побочные эффекты: команда только читает Git и workspace; -o записывает явно
-указанный файл отчёта.`,
-		"skill": `Управляет встроенным offline-пакетом AI-skill Toudocu.
+Side effects: reads Git and the workspace; -o writes the explicitly selected
+report file. --tree includes the selected task and all its descendants.`,
+		"skill": `Manages the bundled offline Toudocu AI-skill package.
 
-Использование:
+Usage:
   toudocu skill install|status|update|uninstall
                   [--agent auto|codex|claude-code|copilot|all]
                   [--scope project|user] [--repository-root DIR]
 
---repository-root доступен только для project scope. status ничего не изменяет.`,
-		"version": "Показывает версию Toudocu без побочных эффектов.\n\nИспользование:\n  toudocu version",
+--repository-root is available only for project scope. status changes nothing.`,
+		"version": "Shows the Toudocu version without side effects.\n\nUsage:\n  toudocu version",
 	}
 	if text, ok := help[topic]; ok {
-		fmt.Fprintln(w, text)
+		_, _ = fmt.Fprintln(w, text)
 		return
 	}
 	PrintHelp(w)
@@ -286,20 +286,20 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			args = args[1:]
 		case "task":
 			if len(args) < 2 {
-				return options, false, false, fmt.Errorf("usage: toudocu task init|ready|context|verify|archive|restore ...")
+				return options, false, false, fmt.Errorf("usage: toudocu task init|ready|context|verify|archive|restore")
 			}
 			switch args[1] {
 			case "init":
 				options.Command = "task-init"
 				args = args[2:]
 				goto parseOptions
-			case "ready", "context", "verify", "archive", "restore", "changes":
+			case "ready", "context", "tree", "verify", "archive", "restore", "changes":
 				if len(args) < 3 {
 					return options, false, false, fmt.Errorf("task %s requires TASK-ID", args[1])
 				}
 				options.Command = "task-" + args[1]
 			default:
-				return options, false, false, fmt.Errorf("usage: toudocu task init|ready|context|verify|archive|restore ...")
+				return options, false, false, fmt.Errorf("usage: toudocu task init|ready|context|verify|archive|restore")
 			}
 			options.TaskID = args[2]
 			args = args[3:]
@@ -361,6 +361,16 @@ parseOptions:
 			options.Area = v
 		case strings.HasPrefix(arg, "--area="):
 			options.Area = strings.TrimPrefix(arg, "--area=")
+		case arg == "--parent":
+			v, e := takeArgValue(args, &i, arg)
+			if e != nil {
+				return options, false, false, e
+			}
+			options.ParentTaskID = v
+		case strings.HasPrefix(arg, "--parent="):
+			options.ParentTaskID = strings.TrimPrefix(arg, "--parent=")
+		case arg == "--tree":
+			options.ChangeTaskTree = true
 		case arg == "--type":
 			v, e := takeArgValue(args, &i, arg)
 			if e != nil {
@@ -654,7 +664,8 @@ parseOptions:
 	if strings.TrimSpace(options.RepositoryRef) == "" {
 		return options, false, false, fmt.Errorf("--repository-ref cannot be empty")
 	}
-	if options.Format != "text" && options.Format != "json" && !((options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes") && options.Format == "markdown") {
+	markdownChanges := options.Format == "markdown" && (options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes")
+	if options.Format != "text" && options.Format != "json" && !markdownChanges {
 		return options, false, false, fmt.Errorf("--format must be text, json, or markdown for changes")
 	}
 	if strings.TrimSpace(options.Host) == "" {
@@ -669,7 +680,7 @@ parseOptions:
 	if options.NoUpdateCheck && options.Command != "serve" {
 		return options, false, false, fmt.Errorf("--no-update-check is available only for serve")
 	}
-	if options.Command == "task-ready" || options.Command == "task-context" || options.Command == "task-verify" || options.Command == "task-changes" ||
+	if options.Command == "task-ready" || options.Command == "task-context" || options.Command == "task-tree" || options.Command == "task-verify" || options.Command == "task-changes" ||
 		options.Command == "task-archive" || options.Command == "task-restore" {
 		if !taskIDRE.MatchString(options.TaskID) {
 			return options, false, false, fmt.Errorf("work-item identifier must have the form TASK-AREA-NNN or BUG-AREA-NNN")
@@ -740,6 +751,15 @@ parseOptions:
 	}
 	if options.Area != "" && options.Command != "task-init" || options.TaskType != "" && options.Command != "task-init" {
 		return options, false, false, fmt.Errorf("--area and --type are available only for task init")
+	}
+	if options.ParentTaskID != "" && options.Command != "task-init" {
+		return options, false, false, fmt.Errorf("--parent is available only for task init")
+	}
+	if options.ChangeTaskTree && options.Command != "task-changes" {
+		return options, false, false, fmt.Errorf("--tree is available only for task changes")
+	}
+	if options.ChangeTaskTree && !strings.HasPrefix(options.TaskID, "TASK-") {
+		return options, false, false, fmt.Errorf("--tree is available only for TASK-* work items")
 	}
 	if titleSpecified && options.Command != "build" && options.Command != "serve" && options.Command != "task-init" && options.Command != "scaffold" {
 		return options, false, false, fmt.Errorf("--title is not available for this command")
@@ -822,14 +842,27 @@ func openGeneratedSite(file string) error {
 }
 
 func printCheckText(w io.Writer, model *Model) {
-	fmt.Fprintf(w, "Документов: %d\nПредупреждений: %d\nОшибок: %d\n", model.Stats.Documents, model.Stats.Warnings, model.Stats.Errors)
+	_, _ = fmt.Fprintf(w, "Documents: %d\nWarnings: %d\nErrors: %d\n", model.Stats.Documents, model.Stats.Warnings, model.Stats.Errors)
 	for _, issue := range model.Issues {
+		if issue.Code == "DOCS_MIGRATION_REQUIRED" {
+			_, _ = fmt.Fprintf(w, "\n%s\n\nMigration: %s\nFile: %s\n", issue.Code, issue.Migration, issue.DocumentPath)
+			continue
+		}
 		location := issue.DocumentPath
 		if issue.Line > 0 {
 			location += fmt.Sprintf(":%d", issue.Line)
 		}
-		fmt.Fprintf(w, "[%s] %s %s — %s\n", strings.ToUpper(issue.Severity), issue.Code, location, issue.Message)
+		_, _ = fmt.Fprintf(w, "[%s] %s %s — %s\n", strings.ToUpper(issue.Severity), issue.Code, location, issue.Message)
 	}
+}
+
+func hasDocumentationVersionIssue(model *Model) bool {
+	for _, issue := range model.Issues {
+		if issue.Code == "DOCS_MIGRATION_REQUIRED" || issue.Code == "DOCUMENTATION_VERSION_UNSUPPORTED" {
+			return true
+		}
+	}
+	return false
 }
 
 // RunCLI executes one command and returns a process exit code.
@@ -850,7 +883,7 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	}
 	options, help, version, err := ParseArguments(argv)
 	if err != nil {
-		fmt.Fprintln(stderr, "Error:", err)
+		_, _ = fmt.Fprintln(stderr, "Error:", err)
 		if len(argv) > 0 && (argv[0] == "changes" || (argv[0] == "task" && len(argv) > 1 && argv[1] == "changes")) {
 			return 2
 		}
@@ -861,40 +894,40 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 		return 0
 	}
 	if version {
-		fmt.Fprintln(stdout, Version)
+		_, _ = fmt.Fprintln(stdout, Version)
 		return 0
 	}
 	if options.Command == "task-init" {
 		report, err := InitTask(options)
 		if err != nil {
-			fmt.Fprintln(stderr, "Error:", err)
+			_, _ = fmt.Fprintln(stderr, "Error:", err)
 			return 1
 		}
 		if options.Format == "json" {
 			data, _ := json.MarshalIndent(report, "", "  ")
-			fmt.Fprintln(stdout, string(data))
+			_, _ = fmt.Fprintln(stdout, string(data))
 		} else {
-			fmt.Fprintf(stdout, "Создана задача %s: %s\n", report.ID, report.Path)
+			_, _ = fmt.Fprintf(stdout, "Created task %s: %s\n", report.ID, report.Path)
 		}
 		return 0
 	}
 	if options.Command == "scaffold" {
 		report, err := Scaffold(options)
 		if err != nil {
-			fmt.Fprintln(stderr, "Error:", err)
+			_, _ = fmt.Fprintln(stderr, "Error:", err)
 			return 1
 		}
 		if options.Format == "json" {
 			data, _ := json.MarshalIndent(report, "", "  ")
-			fmt.Fprintln(stdout, string(data))
+			_, _ = fmt.Fprintln(stdout, string(data))
 		} else {
-			fmt.Fprintf(stdout, "Создан %s %s: %s\n", report.EntityType, report.ID, report.Path)
+			_, _ = fmt.Fprintf(stdout, "Created %s %s: %s\n", report.EntityType, report.ID, report.Path)
 		}
 		return 0
 	}
 	if options.Command == "serve" {
 		if err := serveDocumentation(options, stdout, stderr); err != nil {
-			fmt.Fprintln(stderr, "Error:", err)
+			_, _ = fmt.Fprintln(stderr, "Error:", err)
 			return 1
 		}
 		return 0
@@ -902,7 +935,7 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	if options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes" {
 		report, err := BuildDocumentationChanges(options)
 		if err != nil {
-			fmt.Fprintln(stderr, "Error:", err)
+			_, _ = fmt.Fprintln(stderr, "Error:", err)
 			var failure *changeFailure
 			if errors.As(err, &failure) {
 				return failure.Code
@@ -911,7 +944,7 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 		}
 		filterDocumentationChanges(report, options)
 		if err := outputChangesReport(options, report, stdout); err != nil {
-			fmt.Fprintln(stderr, "Error:", err)
+			_, _ = fmt.Fprintln(stderr, "Error:", err)
 			return 4
 		}
 		for _, diagnostic := range report.Diagnostics {
@@ -930,18 +963,27 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	}
 	model, err := BuildDocumentationModel(options)
 	if err != nil {
-		fmt.Fprintln(stderr, "Error:", err)
+		_, _ = fmt.Fprintln(stderr, "Error:", err)
+		return 1
+	}
+	if hasDocumentationVersionIssue(model) {
+		if options.Format == "json" {
+			data, _ := json.MarshalIndent(BuildReport(model), "", "  ")
+			_, _ = fmt.Fprintln(stdout, string(data))
+		} else {
+			printCheckText(stdout, model)
+		}
 		return 1
 	}
 	if options.Command == "search" {
 		report, err := SearchDocumentation(model, options.Query, options.Limit)
 		if err != nil {
-			fmt.Fprintln(stderr, "Error:", err)
+			_, _ = fmt.Fprintln(stderr, "Error:", err)
 			return 1
 		}
 		if options.Format == "json" {
 			data, _ := json.MarshalIndent(report, "", "  ")
-			fmt.Fprintln(stdout, string(data))
+			_, _ = fmt.Fprintln(stdout, string(data))
 		} else {
 			printSearchText(stdout, report)
 		}
@@ -951,16 +993,16 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 		operation := strings.TrimPrefix(options.Command, "task-")
 		report, err := MoveTask(model, options, operation)
 		if err != nil {
-			fmt.Fprintln(stderr, "Error:", err)
+			_, _ = fmt.Fprintln(stderr, "Error:", err)
 			return 1
 		}
 		if options.Format == "json" {
 			data, marshalErr := json.MarshalIndent(report, "", "  ")
 			if marshalErr != nil {
-				fmt.Fprintln(stderr, "Error:", marshalErr)
+				_, _ = fmt.Fprintln(stderr, "Error:", marshalErr)
 				return 1
 			}
-			fmt.Fprintln(stdout, string(data))
+			_, _ = fmt.Fprintln(stdout, string(data))
 		} else {
 			printTaskMoveText(stdout, report)
 		}
@@ -973,18 +1015,18 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 		report := executeTaskVerify(model, options, stdout, stderr, osCommandRunner{})
 		data, marshalErr := marshalTaskVerifyReport(report)
 		if marshalErr != nil {
-			fmt.Fprintln(stderr, "Error:", marshalErr)
+			_, _ = fmt.Fprintln(stderr, "Error:", marshalErr)
 			return 1
 		}
 		reportWriteFailed := false
 		if options.ReportPath != "" {
 			if err := writeReportAtomically(options.ReportPath, data); err != nil {
-				fmt.Fprintln(stderr, "Failed to save report:", err)
+				_, _ = fmt.Fprintln(stderr, "Failed to save report:", err)
 				reportWriteFailed = true
 			}
 		}
 		if options.Format == "json" {
-			fmt.Fprintln(stdout, string(data))
+			_, _ = fmt.Fprintln(stdout, string(data))
 		} else {
 			printTaskVerifyText(stdout, report)
 		}
@@ -997,7 +1039,7 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 		report := BuildTaskReady(model, options.TaskID, options.Strict)
 		if options.Format == "json" {
 			data, _ := json.MarshalIndent(report, "", "  ")
-			fmt.Fprintln(stdout, string(data))
+			_, _ = fmt.Fprintln(stdout, string(data))
 		} else {
 			printTaskReadyText(stdout, report)
 		}
@@ -1009,25 +1051,43 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	if options.Command == "task-context" {
 		report, err := BuildTaskContext(model, options.TaskID)
 		if err != nil {
-			fmt.Fprintln(stderr, "Error:", err)
+			_, _ = fmt.Fprintln(stderr, "Error:", err)
 			return 1
 		}
 		if options.Format == "json" {
 			data, marshalErr := json.MarshalIndent(report, "", "  ")
 			if marshalErr != nil {
-				fmt.Fprintln(stderr, "Error:", marshalErr)
+				_, _ = fmt.Fprintln(stderr, "Error:", marshalErr)
 				return 1
 			}
-			fmt.Fprintln(stdout, string(data))
+			_, _ = fmt.Fprintln(stdout, string(data))
 		} else {
 			printTaskContextText(stdout, report)
+		}
+		return 0
+	}
+	if options.Command == "task-tree" {
+		report, err := BuildTaskTree(model, options.TaskID)
+		if err != nil {
+			_, _ = fmt.Fprintln(stderr, "Error:", err)
+			return 1
+		}
+		if options.Format == "json" {
+			data, marshalErr := json.MarshalIndent(report, "", "  ")
+			if marshalErr != nil {
+				_, _ = fmt.Fprintln(stderr, "Error:", marshalErr)
+				return 1
+			}
+			_, _ = fmt.Fprintln(stdout, string(data))
+		} else {
+			printTaskTreeText(stdout, report)
 		}
 		return 0
 	}
 	if options.Command == "check" {
 		if options.Format == "json" {
 			data, _ := json.MarshalIndent(BuildReport(model), "", "  ")
-			fmt.Fprintln(stdout, string(data))
+			_, _ = fmt.Fprintln(stdout, string(data))
 		} else {
 			printCheckText(stdout, model)
 		}
@@ -1038,13 +1098,13 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	}
 	result, err := GenerateSite(model, options)
 	if err != nil {
-		fmt.Fprintln(stderr, "Error:", err)
+		_, _ = fmt.Fprintln(stderr, "Error:", err)
 		return 1
 	}
-	fmt.Fprintf(stdout, "\nДокументация создана.\nКаталог:        %s\nСтраниц:        %d\nДокументов:     %d\nЗадач roadmap:  %d\nВыполнено:      %d\nПредупреждений: %d\nОшибок:         %d\nГлавная:        %s\n", result.OutputDirectory, result.Pages, model.Stats.Documents, model.Stats.TotalTasks, model.Stats.CompletedTasks, model.Stats.Warnings, model.Stats.Errors, filepath.Join(result.OutputDirectory, "index.html"))
+	_, _ = fmt.Fprintf(stdout, "\nDocumentation built.\nDirectory:      %s\nPages:          %d\nDocuments:      %d\nRoadmap tasks:  %d\nCompleted:      %d\nWarnings:       %d\nErrors:         %d\nHome:           %s\n", result.OutputDirectory, result.Pages, model.Stats.Documents, model.Stats.TotalTasks, model.Stats.CompletedTasks, model.Stats.Warnings, model.Stats.Errors, filepath.Join(result.OutputDirectory, "index.html"))
 	if options.Open {
 		if err := openGeneratedSite(filepath.Join(result.OutputDirectory, "index.html")); err != nil {
-			fmt.Fprintln(stderr, "Failed to open the browser automatically:", err)
+			_, _ = fmt.Fprintln(stderr, "Failed to open the browser automatically:", err)
 		}
 	}
 	if model.Stats.Errors > 0 || (options.Strict && model.Stats.Warnings > 0) {

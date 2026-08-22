@@ -1,8 +1,10 @@
-# Changes HTTP API: поведение и границы
+<!-- toudocu
+id: CON-CHANGES-HTTP-V1
+status: done
+updated: 2026-08-12
+-->
 
-- Идентификатор: CON-CHANGES-HTTP-V1
-- Статус: Готово
-- Последнее обновление: 2026-08-12
+# Changes HTTP API: поведение и границы
 
 [OpenAPI 3.1.0](changes.openapi.yaml) задаёт точные маршруты, параметры, коды
 ответов и схемы JSON. Здесь описано то, что одной HTTP-схемой не выразить:

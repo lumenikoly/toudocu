@@ -8,14 +8,28 @@
 
 ```bash
 gofmt -w .
-go vet ./...
+golangci-lint run ./...
 go test ./...
 go run ./cmd/toudocu check ./docs --strict --stale-days 0
 ```
 
+Для воспроизводимой локальной проверки используйте закреплённый готовый
+бинарник golangci-lint:
+
+```bash
+curl -sSfL https://golangci-lint.run/install.sh | \
+  sh -s -- -b "$(go env GOPATH)/bin" v2.13.1
+```
+
+Команда `make lint` запускает настроенный стандартный набор линтеров. Отдельный
+`go vet` локально не нужен: тот же анализ выполняет `govet` внутри
+golangci-lint. Инструмент не добавляется в `go.mod` и не входит в сборку
+Toudocu.
+
 ## Полный цикл
 
 ```bash
+golangci-lint run ./...
 go test -count=1 ./...
 go test -count=1 -race ./...
 cd web
@@ -69,7 +83,7 @@ go run ./cmd/toudocu task verify TASK-DOCS-001 ./docs --dry-run --format json
 ## Когда изменение готово
 
 1. Форматирование больше не меняет файлы.
-2. Vet, обычные и race-тесты проходят.
+2. Golangci-lint, обычные и race-тесты проходят.
 3. `toudocu check ./docs --strict` не возвращает ошибок и предупреждений.
 4. Минимальный проект с `index.md` и `architecture/overview.md` остаётся
    допустимым.

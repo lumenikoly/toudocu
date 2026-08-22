@@ -7,14 +7,26 @@ code, frontend assets, and source documentation.
 
 ```bash
 gofmt -w .
-go vet ./...
+golangci-lint run ./...
 go test ./...
 go run ./cmd/toudocu check ./docs --strict --stale-days 0
 ```
 
+Install the pinned release binary for reproducible local checks:
+
+```bash
+curl -sSfL https://golangci-lint.run/install.sh | \
+  sh -s -- -b "$(go env GOPATH)/bin" v2.13.1
+```
+
+`make lint` runs the configured standard linter set. A separate local `go vet`
+is unnecessary because golangci-lint runs the same analysis through `govet`.
+The tool is not added to `go.mod` or included in the Toudocu build.
+
 ## Full check
 
 ```bash
+golangci-lint run ./...
 go test -count=1 ./...
 go test -count=1 -race ./...
 cd web
@@ -67,7 +79,7 @@ for a trusted task in the current repository.
 A change is ready when:
 
 1. formatting produces no diff;
-2. vet, ordinary tests, and race tests pass;
+2. golangci-lint, ordinary tests, and race tests pass;
 3. `toudocu check ./docs --strict` contains no warnings or errors;
 4. the example and a minimal project with `index.md` and an architecture
    overview remain valid;

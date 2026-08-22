@@ -1,8 +1,10 @@
-# {{CONTRACT_TITLE}}
+<!-- toudocu
+id: {{CONTRACT_ID}}
+status: {{STATUS}}
+updated: {{DATE}}
+-->
 
-- Идентификатор: {{CONTRACT_ID}}
-- Статус: {{STATUS}}
-- Последнее обновление: {{DATE}}
+# {{CONTRACT_TITLE}}
 
 {{CONTRACT_SUMMARY}}
 
@@ -10,6 +12,7 @@
 
 {{INPUTS}}
 
+<!-- toudocu:section result -->
 ## Результат
 
 {{OUTPUTS}}
@@ -22,6 +25,7 @@
 
 {{COMPATIBILITY}}
 
+<!-- toudocu:section verification -->
 ## Проверка
 
 {{VERIFICATION}}

@@ -1,11 +1,13 @@
+<!-- toudocu
+id: UC-TASK-04
+status: done
+priority: medium
+module: MOD-CLI
+updated: 2026-08-12
+-->
+
 # UC-TASK-04: Archive or Restore a Work Item
 
-- Identifier: UC-TASK-04
-- Status: Completed
-- Actor: Assignee — developer or software agent
-- Module: MOD-CLI
-- Priority: Medium
-- Last updated: 2026-08-12
 
 The assignee moves a completed or cancelled task out of the active list into a
 yearly archive, or returns an archived work item to the active directory without
@@ -18,12 +20,14 @@ changing its contract.
 - repository root;
 - result format: `text` or `json`.
 
+<!-- toudocu:section prerequisites -->
 ## Preconditions
 
 - the task being archived has status Done or Cancelled;
 - the destination path does not exist;
 - direct Markdown links will still resolve after the move.
 
+<!-- toudocu:section main-scenario -->
 ## Main scenario
 
 1. The assignee runs `toudocu task archive TASK-ID ./docs`.
@@ -45,23 +49,27 @@ changing its contract.
 - a direct Markdown link that could break leaves the file in place;
 - a configured translation root is rejected without moving the work item.
 
+<!-- toudocu:section postconditions -->
 ## Postconditions
 
 On success, only the location of one work item has changed. Its Markdown,
 status, stable ID, dependencies, and history are preserved; when blocked, the
 filesystem is unchanged.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] A successful operation changes only one work item's location and
   preserves its Markdown, status, stable ID, dependencies, and history.
 - [x] A blocked operation leaves the filesystem unchanged.
 
+<!-- toudocu:section business-rules -->
 ## Business rules
 
 - [BR-CLI-006](../modules/cli.md#br-cli-006-a-translation-root-is-not-a-work-context) — a translation root does not participate in the task workflow.
 - [BR-CLI-007](../modules/cli.md#br-cli-007-archiving-does-not-change-the-task-contract) — moving a task preserves its contract.
 
+<!-- toudocu:section implementation -->
 ## Implementation
 
 - [CLI and task workflow](../modules/cli.md)

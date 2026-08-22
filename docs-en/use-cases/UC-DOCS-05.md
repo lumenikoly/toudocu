@@ -1,14 +1,16 @@
+<!-- toudocu
+id: UC-DOCS-05
+status: done
+priority: high
+module: MOD-CHANGES
+screens: SC-SITE-HOME, SC-CHANGES-WORKSPACE
+startScreen: SC-SITE-HOME
+terminalScreens: SC-CHANGES-WORKSPACE
+updated: 2026-08-12
+-->
+
 # UC-DOCS-05: View documentation changes
 
-- Identifier: UC-DOCS-05
-- Status: Completed
-- Actor: Developer
-- Module: MOD-CHANGES
-- Priority: High
-- Screens: SC-SITE-HOME, SC-CHANGES-WORKSPACE
-- Start screen: SC-SITE-HOME
-- Terminal screens: SC-CHANGES-WORKSPACE
-- Last updated: 2026-08-12
 
 Before finishing work, a developer can see which files changed, how the text
 changed, and what those edits mean for the documentation model.
@@ -19,11 +21,13 @@ changed, and what those edits mean for the documentation model.
 - explicit start and end states, or default `HEAD → working-tree`;
 - optional filters, assets, complete translation input, or related work item.
 
+<!-- toudocu:section prerequisites -->
 ## Preconditions
 
 - Git is installed and the documentation root is inside a local repository;
 - selected commits or refs already exist locally.
 
+<!-- toudocu:section main-scenario -->
 ## Main flow
 
 1. For the browser journey, the developer runs `toudocu serve ./docs` and opens
@@ -55,6 +59,7 @@ changed, and what those edits mean for the documentation model.
 - When the working tree changes, the page receives a new report and preserves
   applicable filters when possible.
 
+<!-- toudocu:section postconditions -->
 ## Postconditions
 
 - Git state is unchanged.
@@ -62,12 +67,14 @@ changed, and what those edits mean for the documentation model.
 - Task-impact warnings remain prompts for human review, not automatic
   decisions.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] Viewing changes leaves Git state unchanged.
 - [x] Browser, CLI, and CI consume the same versioned report.
 - [x] A task-impact warning does not make the decision for the reviewer.
 
+<!-- toudocu:section business-rules -->
 ## Business rules
 
 - [BR-CHANGES-001](../modules/MOD-CHANGES.md#br-changes-001-git-is-the-only-version-source)
@@ -75,6 +82,7 @@ changed, and what those edits mean for the documentation model.
 - [BR-CHANGES-003](../modules/MOD-CHANGES.md#br-changes-003-range-is-always-explicit)
 - [BR-CHANGES-004](../modules/MOD-CHANGES.md#br-changes-004-public-reports-are-limited-to-documentation-roots)
 
+<!-- toudocu:section implementation -->
 ## Implementation
 
 - [MOD-CHANGES](../modules/MOD-CHANGES.md)

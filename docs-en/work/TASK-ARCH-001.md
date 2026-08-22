@@ -1,26 +1,34 @@
+<!-- toudocu
+id: TASK-ARCH-001
+status: done
+taskType: feature
+priority: high
+module: MOD-MODEL
+useCase: UC-DOCS-02
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-10
+-->
+
 # TASK-ARCH-001: Organize architecture documentation around questions
 
-- Status: Completed
-- Type: Feature
-- Priority: High
-- Module: MOD-MODEL
-- Use case: UC-DOCS-02
-- Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-10
 
+<!-- toudocu:section result -->
 ## Result
 
 `docs/architecture/overview.md` is the required architecture map. Every other
 Markdown document under `architecture/` answers one explicit question and is
 linked directly from the overview.
 
+<!-- toudocu:section behavior-change -->
 ## Behavior change
 
+<!-- toudocu:section before -->
 ### Before
 
 The `architecture/` directory was an optional collection of documents with no
 required map, explicit questions, or strict rules for local links.
 
+<!-- toudocu:section after -->
 ### After
 
 A regular `check` requires a valid overview, one non-empty question in each
@@ -28,6 +36,7 @@ detailed document, direct links to every document including nested ones, and
 safe local links that point to existing files. The skill provides separate
 Russian and English templates and applies semantic rules `ARCH001`–`ARCH013`.
 
+<!-- toudocu:section scope -->
 ## Scope
 
 - document and link parsing in `internal/app/`;
@@ -35,6 +44,7 @@ Russian and English templates and applies semantic rules `ARCH001`–`ARCH013`.
 - `skills/toudocu/`;
 - source documentation, README, changelog, and `AGENTS.md`.
 
+<!-- toudocu:section out-of-scope -->
 ## Out of scope
 
 - new Go command `toudocu init`;
@@ -44,6 +54,7 @@ Russian and English templates and applies semantic rules `ARCH001`–`ARCH013`.
 - Toudocu documents about deployment or data ownership without confirmation
   architectural issue.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] `AC-01` A regular check reports stable errors when the overview is
@@ -62,6 +73,7 @@ Russian and English templates and applies semantic rules `ARCH001`–`ARCH013`.
 - [x] `AC-06` Toudocu architecture is split into evidence-backed answers, and
   the portal is built from source Markdown.
 
+<!-- toudocu:section plan -->
 ## Plan
 
 - [x] Add metadata aliases and structural architecture diagnostics.
@@ -70,6 +82,7 @@ Russian and English templates and applies semantic rules `ARCH001`–`ARCH013`.
   semantic review rules.
 - [x] Convert Toudocu and demo documentation to the new structure.
 
+<!-- toudocu:section verification -->
 ## Verification
 
 - `AC-01` → `go test ./... -run 'TestArchitectureContract'`
@@ -82,6 +95,7 @@ Russian and English templates and applies semantic rules `ARCH001`–`ARCH013`.
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0 && go run ./cmd/toudocu check ./example/docs --repository-root ./example --strict --stale-days 0`
 - `QUALITY` → `go test ./... -run 'TestArchitectureContract|TestArchitectureSchemaContract|TestUseToudocuArchitecture'`
 
+<!-- toudocu:section documentation-impact -->
 ## Documentation impact
 
 The work updated the architecture contract, skill initialization and guidance,

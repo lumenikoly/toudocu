@@ -1,12 +1,15 @@
+<!-- toudocu
+id: SC-SITE-SCREEN-MAP
+status: done
+screenKind: page
+module: MOD-SITE
+route: /screens/index.html
+preview: ../assets/screens/site-screen-map.png
+updated: 2026-08-12
+-->
+
 # SC-SITE-SCREEN-MAP: Global Screen Map
 
-- Identifier: SC-SITE-SCREEN-MAP
-- Type: Page
-- Module: MOD-SITE
-- Status: Implemented
-- Route: `/screens/index.html`
-- Preview: `../assets/screens/site-screen-map.png`
-- Last updated: 2026-08-10
 
 The map shows documented `SC-*` screens and their `TR-*` transitions. Users can
 filter, pan, and zoom it, then select a node or edge to open details and the

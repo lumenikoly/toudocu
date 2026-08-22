@@ -24,6 +24,7 @@ Toudocu поставляется одним Go-бинарником; для за
 | Создать документ | `toudocu scaffold TYPE ID ./docs --title TITLE` | Каркас выбранного типа без перезаписи |
 | Проверить готовность | `toudocu task ready TASK-ID ./docs` | `TaskReadyReport`, файлы не меняются |
 | Получить контекст | `toudocu task context TASK-ID ./docs` | `TaskContextReport`, команды не запускаются |
+| Показать декомпозицию | `toudocu task tree TASK-ID ./docs` | `TaskTreeReport`, файлы не меняются |
 | Показать или выполнить проверки | `toudocu task verify TASK-ID ./docs --dry-run|--run` | План или `TaskVerifyReport` |
 | Сопоставить задачу с diff | `toudocu task changes TASK-ID ./docs` | Отчёт и предупреждения о заявленных документах |
 | Архивировать или вернуть | `toudocu task archive|restore TASK-ID ./docs` | Перемещение одного файла |

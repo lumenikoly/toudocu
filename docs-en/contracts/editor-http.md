@@ -1,8 +1,11 @@
+<!-- toudocu
+id: CON-EDITOR-HTTP-V1
+status: done
+updated: 2026-08-13
+-->
+
 # Editor HTTP API: Behavior and Boundaries
 
-- Identifier: CON-EDITOR-HTTP-V1
-- Status: Done
-- Last updated: 2026-08-13
 
 [OpenAPI 3.1.0](editor.openapi.yaml) contains routes, parameters, response codes,
 and data schemas. In canonical `serve`, this page also provides a button for

@@ -39,6 +39,10 @@ function appearanceTheme(theme: any) {
         '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': { backgroundColor: 'var(--accent-soft)' },
         '.cm-gutters': { color: 'var(--muted)', backgroundColor: 'var(--surface-soft)', borderRightColor: 'var(--border)' },
         '.cm-activeLine, .cm-activeLineGutter': { backgroundColor: 'color-mix(in srgb, var(--accent) 7%, transparent)' },
+        '&.cm-merge-a .cm-changedLine, &.cm-merge-b .cm-changedLine': { backgroundColor: 'transparent' },
+        '&.cm-merge-a .cm-activeLine, &.cm-merge-b .cm-activeLine, &.cm-merge-a .cm-activeLineGutter, &.cm-merge-b .cm-activeLineGutter': { backgroundColor: 'transparent' },
+        '&.cm-merge-a .cm-changedText': { background: 'var(--danger-soft)' },
+        '&.cm-merge-b .cm-changedText': { background: 'var(--success-soft)' },
     }, { dark: theme === 'dark' });
 }
 const currentTheme: any = () => document.documentElement.dataset.theme || 'light';
@@ -69,7 +73,7 @@ window.ToudocuCodeMirror = {
         const themeA: any = new Compartment();
         const themeB: any = new Compartment();
         let highlighting: any = false;
-        const readOnly: any = [basicSetup, languageExtension(language), EditorView.lineWrapping, EditorState.readOnly.of(true), EditorView.editable.of(false)];
+        const readOnly: any = [basicSetup, languageExtension(language), EditorState.readOnly.of(true), EditorView.editable.of(false)];
         const selectionExtension: any = (side: any) => EditorView.updateListener.of((update: any) => {
             if (update.selectionSet && !highlighting)
                 onSelect?.(reviewSelection(update.view, side));

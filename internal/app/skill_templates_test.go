@@ -34,13 +34,13 @@ The user can continue from the start screen.
 				"{{MODULE_ID}}":                     "MOD-CORE",
 				"{{USE_CASE_ID}}":                   "UC-CORE-01",
 				"{{USE_CASE_TITLE}}":                "Continue",
-				"{{STATUS}}":                        "Запланировано",
+				"{{STATUS}}":                        "planned",
 				"{{ACTOR}}":                         "User",
-				"{{OPTIONAL_SCREENS_METADATA}}":     "- Экраны: SC-CORE-HOME, SC-CORE-WORKSPACE",
+				"{{OPTIONAL_SCREENS_METADATA}}":     "screens: SC-CORE-HOME, SC-CORE-WORKSPACE",
 				"{{START_SCREEN_ID}}":               "SC-CORE-HOME",
 				"{{TERMINAL_SCREEN_IDS}}":           "SC-CORE-WORKSPACE",
 				"{{OPTIONAL_ALLOW_CYCLE_METADATA}}": "",
-				"{{PRIORITY}}":                      "Средний",
+				"{{PRIORITY}}":                      "medium",
 				"{{DATE}}":                          "2026-07-28",
 				"{{USE_CASE_SUMMARY}}":              "The user opens the workspace from the home page.",
 				"{{INPUT}}":                         "A valid request.",
@@ -56,24 +56,24 @@ The user can continue from the start screen.
 				"{{FLOW_TITLE}}":                    "Continue",
 				"{{FLOW_SUMMARY}}":                  "Detailed workspace navigation.",
 				"{{FLOW_DIAGRAM}}":                  "flowchart TD\n    Home[\"Home\"] -->|Open workspace| Workspace[\"Workspace\"]",
-				"{{OPTIONAL_USE_CASES_METADATA}}":   "- Сценарий: UC-CORE-01, UC-CORE-02",
+				"{{OPTIONAL_USE_CASES_METADATA}}":   "useCase: UC-CORE-01, UC-CORE-02",
 				"{{RELATED_DOCUMENT_LINKS}}":        "- [UC-CORE-01](../use-cases/core.md)\n- [UC-CORE-02](../use-cases/secondary.md)",
 				"{{USE_CASE_LINK}}":                 "../use-cases/core.md",
 				"{{SCREEN_ID}}":                     "SC-CORE-HOME",
 				"{{SCREEN_TITLE}}":                  "Home",
-				"{{SCREEN_STATUS}}":                 "Запланировано",
-				"{{SCREEN_TYPE}}":                   "Страница",
-				"{{OPTIONAL_ROUTE_METADATA}}":       "- Маршрут: `/`",
+				"{{SCREEN_STATUS}}":                 "planned",
+				"{{SCREEN_TYPE}}":                   "page",
+				"{{OPTIONAL_ROUTE_METADATA}}":       "route: /",
 				"{{OPTIONAL_PREVIEW_METADATA}}":     "",
 				"{{OPTIONAL_PARENT_METADATA}}":      "",
-				"{{OPTIONAL_COMPONENT_METADATA}}":   "- Компонент: `web/home/`",
+				"{{OPTIONAL_COMPONENT_METADATA}}":   "component: web/home/",
 				"{{YYYY-MM-DD}}":                    "2026-07-28",
 				"{{SCREEN_PURPOSE}}":                "Provides the product entry point.",
 				"{{STATE_ROWS}}":                    "| DEFAULT | Default | — |",
 				"{{TASK_ID}}":                       "TASK-CORE-001",
 				"{{TASK_TITLE}}":                    "Implement continue",
-				"{{OPTIONAL_FLOW_METADATA}}":        "- Процесс: FLOW-CORE-01",
-				"{{OPTIONAL_TRANSITIONS_METADATA}}": "- Переходы: TR-CORE-001",
+				"{{OPTIONAL_FLOW_METADATA}}":        "flow: FLOW-CORE-01",
+				"{{OPTIONAL_TRANSITIONS_METADATA}}": "transitions: TR-CORE-001",
 				"{{TRANSITION_ID}}":                 "TR-CORE-001",
 				"{{VERIFICATION_REFERENCE}}":        "TestOpenWorkspace",
 				"{{RESULT}}":                        "The continue path works.",
@@ -88,19 +88,6 @@ The user can continue from the start screen.
 				"{{DOCS_COMMAND}}":                  "go run ./cmd/toudocu check ./docs",
 				"{{DOCUMENTATION_IMPACT}}":          "Update the screen map.",
 			}
-			if language == "en" {
-				replacements["{{STATUS}}"] = "Planned"
-				replacements["{{SCREEN_STATUS}}"] = "Planned"
-				replacements["{{PRIORITY}}"] = "Medium"
-				replacements["{{OPTIONAL_SCREENS_METADATA}}"] = "- Screens: SC-CORE-HOME, SC-CORE-WORKSPACE"
-				replacements["{{SCREEN_TYPE}}"] = "Page"
-				replacements["{{OPTIONAL_ROUTE_METADATA}}"] = "- Route: `/`"
-				replacements["{{OPTIONAL_COMPONENT_METADATA}}"] = "- Component: `web/home/`"
-				replacements["{{OPTIONAL_FLOW_METADATA}}"] = "- Flow: FLOW-CORE-01"
-				replacements["{{OPTIONAL_TRANSITIONS_METADATA}}"] = "- Transitions: TR-CORE-001"
-				replacements["{{OPTIONAL_USE_CASES_METADATA}}"] = "- Use case: UC-CORE-01, UC-CORE-02"
-			}
-
 			writeSkillTemplate(t, docs, language, "use-case.md", "use-cases/core.md", replacements)
 			writeTestFile(t, docs, "use-cases/secondary.md", `# UC-CORE-02: Review
 
@@ -425,12 +412,12 @@ func TestToudocuArchitectureTemplates(t *testing.T) {
 		t.Run(language, func(t *testing.T) {
 			overview := readSkillTemplate(t, language, "architecture-overview.md")
 			detail := readSkillTemplate(t, language, "architecture-detail.md")
-			for _, expected := range []string{"Architecture Overview", "{{SYSTEM_BOUNDARY}}", "{{ARCHITECTURE_QUESTION_LINKS}}", "{{OPTIONAL_CONTEXT_DIAGRAM}}"} {
+			for _, expected := range []string{"{{SYSTEM_BOUNDARY}}", "{{ARCHITECTURE_QUESTION_LINKS}}", "{{OPTIONAL_CONTEXT_DIAGRAM}}"} {
 				if !strings.Contains(overview, expected) {
 					t.Errorf("%s architecture overview does not contain %q", language, expected)
 				}
 			}
-			for _, expected := range []string{"Architecture", "{{ARCHITECTURE_QUESTION}}", "{{SHORT_ANSWER}}", "{{SCOPE}}", "{{ADAPTABLE_SECTIONS}}"} {
+			for _, expected := range []string{"architectureQuestion: {{ARCHITECTURE_QUESTION}}", "{{SHORT_ANSWER}}", "{{SCOPE}}", "{{ADAPTABLE_SECTIONS}}"} {
 				if !strings.Contains(detail, expected) {
 					t.Errorf("%s architecture detail does not contain %q", language, expected)
 				}
@@ -567,10 +554,9 @@ func TestToudocuTranslationContextIsolation(t *testing.T) {
 		"relative paths",
 		"manifest source digests",
 		"structural reports",
-		"normalized semantic",
-		"`Готово` has `status.kind=done`",
-		"`Completed` or `Done`, never\n`Ready`",
-		"`Готово к работе` has `status.kind=planned`",
+		"Preserve every `toudocu` annotation byte-for-byte",
+		"canonical enum values",
+		"Translate only reader-facing headings",
 		"`documents[].type` and `documents[].status.kind`",
 		"`effectiveCompleted`, `completionSource`",
 		"TRANSLATION_SEMANTIC_MISMATCH",
@@ -635,7 +621,7 @@ func TestToudocuInstructionConsistency(t *testing.T) {
 		"Every project requires `index.md` and `architecture/overview.md`",
 		"A missing\n`index.md` is a warning",
 		"architecture overview\nis an error",
-		"document type `Architecture` is a semantic-gate requirement",
+		"Requires canonical `architectureQuestion` metadata and a direct overview listing",
 	} {
 		if !containsNormalized(documentModel, expected) {
 			t.Errorf("document-model.md misses architecture consistency statement %q", expected)

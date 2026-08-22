@@ -364,7 +364,7 @@ func TestOrdinaryCheckDoesNotExecuteTaskCommands(t *testing.T) {
 	writeTestFile(t, docs, "work/TASK-AUTH-020-verify.md", taskVerifyFixture("Черновик", false, commands, ""))
 	var stdout, stderr bytes.Buffer
 	code := RunCLI([]string{"check", docs, "--repository-root", root, "--stale-days", "0"}, &stdout, &stderr)
-	if code != 0 || stderr.Len() != 0 || !strings.Contains(stdout.String(), "Ошибок: 0") {
+	if code != 0 || stderr.Len() != 0 || !strings.Contains(stdout.String(), "Errors: 0") {
 		t.Fatalf("ordinary check attempted execution or failed: code=%d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 }

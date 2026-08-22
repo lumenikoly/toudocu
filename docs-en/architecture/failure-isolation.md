@@ -1,7 +1,9 @@
+<!-- toudocu
+architectureQuestion: Как изолируются ошибки документации и запускаемых проверок?
+-->
+
 # Isolating documentation and verification failures
 
-- Document type: Architecture
-- Architectural question: How are documentation errors and failed verification commands isolated?
 
 Read and structure problems become diagnostics attached to files; they never
 cause code to run. Work-item commands run only after explicit authorization,
@@ -17,6 +19,12 @@ editor. The user-facing sequences are in
 [FLOW-TASK-WORKFLOW](../flows/FLOW-TASK-WORKFLOW.md).
 
 ## Documentation errors
+
+Before scanning Markdown, Toudocu compares `documentationVersion` with the
+current contract. An older version produces a single migration diagnostic,
+while a newer version requires a CLI update. The main parser therefore never
+mixes the current model with legacy constructs or emits a cascade of
+new-format errors for a project known to use an older contract.
 
 Scanning continues through documents that can still be read. Validation adds
 problems to the project model and to the affected files. An error makes the

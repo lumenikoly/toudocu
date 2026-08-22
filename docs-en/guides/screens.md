@@ -24,18 +24,21 @@ a selected scenario are embedded in its canonical
 ## Screen document
 
 ```md
-# SC-AUTH-LOGIN: Sign in
+<!-- toudocu
+id: SC-AUTH-LOGIN
+screenKind: screen
+module: MOD-AUTH
+status: in-progress
+route: /login
+preview: ../assets/screens/login.webp
+parentScreen: SC-PUBLIC-HOME
+-->
 
-- Identifier: SC-AUTH-LOGIN
-- Type: Screen
-- Module: MOD-AUTH
-- Status: In progress
-- Route: `/login`
-- Preview: `../assets/screens/login.webp`
-- Parent screen: SC-PUBLIC-HOME
+# SC-AUTH-LOGIN: Sign in
 
 ## States
 
+<!-- toudocu:table states columns=id,title,preview -->
 | ID | Name | Preview |
 |---|---|---|
 | DEFAULT | Initial | `../assets/screens/login.webp` |
@@ -43,17 +46,18 @@ a selected scenario are embedded in its canonical
 
 ## Transitions
 
-| ID | Use case | Action | Condition | Result | State | Error |
-|---|---|---|---|---|---|---|
-| TR-AUTH-001 | UC-AUTH-01 | Sign in | Success | SC-ACCOUNT-HOME | DEFAULT | — |
-| TR-AUTH-002 | UC-AUTH-01 | Sign in | Invalid credentials | SC-AUTH-LOGIN | INVALID-CREDENTIALS | INVALID_CREDENTIALS |
+<!-- toudocu:table transitions columns=id,useCase,action,condition,target,state,error,kind -->
+| ID | Use case | Action | Condition | Result | State | Error | Type |
+|---|---|---|---|---|---|---|---|
+| TR-AUTH-001 | UC-AUTH-01 | Sign in | Success | SC-ACCOUNT-HOME | DEFAULT | — | navigation |
+| TR-AUTH-002 | UC-AUTH-01 | Sign in | Invalid credentials | SC-AUTH-LOGIN | INVALID-CREDENTIALS | INVALID_CREDENTIALS | error |
 ```
 
-ID, type, module, and status are required. Supported types are Screen, Page,
-Modal window, Panel, External page, and System state. `DEFAULT` exists
-implicitly. Every transition references one existing `UC-*`; global
-transitions without a use case are unsupported. `Parent screen` defines the
-sitemap, not user-flow order.
+Canonical `id`, `screenKind`, `module`, and `status` fields are required.
+Supported screen kinds are `screen`, `page`, `modal`, `panel`, `external`, and
+`system`. `DEFAULT` exists implicitly. Every transition references one existing
+`UC-*`; global transitions without a use case are unsupported. `parentScreen`
+defines the sitemap, not user-flow order.
 
 A transition requires an ID, action, condition, and result. State, error,
 message, contract, and type may also be specified:
@@ -79,17 +83,16 @@ that explains the observable change.
 A screen scenario defines:
 
 ```md
-- Entry screen: SC-AUTH-LOGIN
-- Exit screens: SC-ACCOUNT-HOME
-- Allow cycle: Yes
+startScreen: SC-AUTH-LOGIN
+terminalScreens: SC-ACCOUNT-HOME
+allowCycle: true
 ```
 
 Toudocu adds transitions for the selected `UC-*`, then calculates reachable
 screens, dead ends, cycles, and paths to terminal screens.
 
 A reachable nonterminal screen must have an outgoing transition. A cycle with
-no exit is an error unless the use case explicitly contains
-`Allow cycle: Yes`.
+no exit is an error unless the use case explicitly contains `allowCycle: true`.
 
 ## Map
 

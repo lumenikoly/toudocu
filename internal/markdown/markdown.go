@@ -87,11 +87,14 @@ type Table struct {
 	Headers    []string
 	Rows       []TableRow
 	Alignments []string
+	Kind       string
+	Columns    []string
 	Range      SourceRange
 }
 
 type Section struct {
 	Heading  Heading
+	Kind     string
 	Metadata []MetadataItem
 	Tasks    []Task
 	Text     string
@@ -113,14 +116,18 @@ type Analysis struct {
 	Tables                        []Table
 	OrderedLists                  []SourceRange
 	Diagnostics                   []Diagnostic
+	MetadataBlocks                int
 }
 
 type Document struct {
-	source    []byte
-	path      string
-	lineIndex []int
-	tree      ast.Node
-	analysis  Analysis
+	source         []byte
+	parsed         []byte
+	path           string
+	lineIndex      []int
+	tree           ast.Node
+	analysis       Analysis
+	annotations    []annotation
+	annotationUsed map[int]bool
 }
 
 func (d *Document) Source() []byte     { return bytes.Clone(d.source) }
@@ -138,8 +145,9 @@ func Engine() goldmark.Markdown {
 
 func Parse(source []byte, sourcePath string) *Document {
 	source = bytes.TrimPrefix(bytes.ReplaceAll(bytes.ReplaceAll(source, []byte("\r\n"), []byte("\n")), []byte("\r"), []byte("\n")), []byte("\xef\xbb\xbf"))
-	d := &Document{source: bytes.Clone(source), path: sourcePath, lineIndex: buildLineIndex(source)}
-	d.tree = Engine().Parser().Parse(text.NewReader(d.source), parser.WithContext(parser.NewContext()))
+	d := &Document{source: bytes.Clone(source), path: sourcePath, lineIndex: buildLineIndex(source), annotationUsed: map[int]bool{}}
+	d.parsed, d.annotations, d.analysis.Diagnostics = d.extractAnnotations(d.source)
+	d.tree = Engine().Parser().Parse(text.NewReader(d.parsed), parser.WithContext(parser.NewContext()))
 	d.analysis = d.analyze()
 	return d
 }
@@ -293,7 +301,7 @@ func (d *Document) rangeFor(n ast.Node) SourceRange {
 }
 
 func (d *Document) analyze() Analysis {
-	var a Analysis
+	a := Analysis{Diagnostics: append([]Diagnostic{}, d.analysis.Diagnostics...)}
 	used := map[string]int{}
 	var current Heading
 	_ = ast.Walk(d.tree, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
@@ -347,7 +355,7 @@ func (d *Document) analyze() Analysis {
 		case *ast.FencedCodeBlock:
 			info := ""
 			if v.Info != nil {
-				info = strings.TrimSpace(string(v.Info.Text(d.source)))
+				info = strings.TrimSpace(string(v.Info.Value(d.source)))
 			}
 			source := linesValue(v, d.source)
 			closed := fenceClosed(d.source, d.lineIndex, v, info)
@@ -370,16 +378,106 @@ func (d *Document) analyze() Analysis {
 		}
 		return ast.WalkContinue, nil
 	})
-	a.Metadata = d.extractMetadata()
+	a.Metadata, a.MetadataBlocks = d.semanticMetadata(a.Headings)
 	d.analysis.Metadata = a.Metadata
 	d.analysis.Tasks = a.Tasks
 	a.Sections = d.extractSections(a.Headings)
-	a.Description = d.description(a.Metadata)
+	d.applySectionAnnotations(a.Sections)
+	d.applyTableAnnotations(a.Tables)
+	a.Diagnostics = append(a.Diagnostics, semanticSectionMetadataDiagnostics(a.Sections)...)
+	a.Diagnostics = append(a.Diagnostics, d.orphanAnnotationDiagnostics()...)
+	a.Description = d.description()
 	a.PlainText = textOf(d.tree, d.source)
 	if r, ok := frontMatterRange(d.source, d.lineIndex); ok {
 		a.Diagnostics = append(a.Diagnostics, Diagnostic{Severity: "error", Code: "forbidden-front-matter", Message: "Front matter is forbidden.", Range: r})
 	}
 	return a
+}
+
+func semanticSectionMetadataDiagnostics(sections []Section) []Diagnostic {
+	result := []Diagnostic{}
+	for _, section := range sections {
+		seen := map[string]bool{}
+		for _, item := range section.Metadata {
+			if seen[item.Key] {
+				result = append(result, Diagnostic{Severity: "error", Code: "duplicate-toudocu-metadata", Message: "Semantic field " + item.Key + " is declared more than once.", Range: item.Range})
+			}
+			seen[item.Key] = true
+		}
+		result = append(result, semanticSectionMetadataDiagnostics(section.Children)...)
+	}
+	return result
+}
+
+func (d *Document) semanticMetadata(headings []Heading) ([]MetadataItem, int) {
+	firstH1 := len(d.source)
+	for _, heading := range headings {
+		if heading.Level == 1 {
+			firstH1 = heading.Range.Start.Offset
+			break
+		}
+	}
+	items := []MetadataItem{}
+	blocks := 0
+	for _, candidate := range d.annotations {
+		if candidate.Kind == annotationMetadata && candidate.Range.Start.Offset < firstH1 {
+			d.annotationUsed[candidate.Range.Start.Offset] = true
+			blocks++
+			items = append(items, candidate.Metadata...)
+		}
+	}
+	return items, blocks
+}
+
+func (d *Document) applySectionAnnotations(sections []Section) {
+	var apply func([]Section)
+	apply = func(items []Section) {
+		for i := range items {
+			section := &items[i]
+			for _, candidate := range d.annotations {
+				if candidate.Kind != annotationSection || candidate.Range.End.Offset > section.Heading.Range.Start.Offset || strings.TrimSpace(string(d.parsed[candidate.Range.End.Offset:section.Heading.Range.Start.Offset])) != "" {
+					continue
+				}
+				section.Kind = candidate.Name
+				d.annotationUsed[candidate.Range.Start.Offset] = true
+				for _, metadata := range d.annotations {
+					if metadata.Kind == annotationMetadata && metadata.Range.Start.Offset > candidate.Range.End.Offset && metadata.Range.End.Offset < section.Heading.Range.Start.Offset {
+						section.Metadata = append(section.Metadata, metadata.Metadata...)
+						d.annotationUsed[metadata.Range.Start.Offset] = true
+					}
+				}
+			}
+			apply(section.Children)
+		}
+	}
+	apply(sections)
+}
+
+func (d *Document) applyTableAnnotations(tables []Table) {
+	for i := range tables {
+		for _, candidate := range d.annotations {
+			if candidate.Kind == annotationTable && candidate.Range.End.Offset <= tables[i].Range.Start.Offset && strings.TrimSpace(string(d.parsed[candidate.Range.End.Offset:tables[i].Range.Start.Offset])) == "" {
+				tables[i].Kind = candidate.Name
+				tables[i].Columns = append([]string{}, candidate.Columns...)
+				d.annotationUsed[candidate.Range.Start.Offset] = true
+			}
+		}
+	}
+}
+
+func (d *Document) orphanAnnotationDiagnostics() []Diagnostic {
+	result := []Diagnostic{}
+	for _, candidate := range d.annotations {
+		if d.annotationUsed[candidate.Range.Start.Offset] {
+			continue
+		}
+		code, message := "invalid-toudocu-annotation", "Toudocu annotation is not attached to a supported element."
+		if candidate.Kind == annotationSection {
+			code, message = "orphan-section-marker", "Toudocu section marker must immediately precede a heading."
+		}
+		result = append(result, Diagnostic{Severity: "error", Code: code, Message: message, Range: candidate.Range})
+	}
+	return result
 }
 
 func itoa(n int) string {
@@ -429,71 +527,12 @@ func linesValue(n ast.Node, source []byte) string {
 	return strings.TrimSuffix(b.String(), "\n")
 }
 
-func (d *Document) extractMetadata() []MetadataItem {
-	root := d.tree
-	var h1 ast.Node
-	for n := root.FirstChild(); n != nil; n = n.NextSibling() {
-		if h, ok := n.(*ast.Heading); ok && h.Level == 1 {
-			h1 = n
-			break
-		}
-		if n.Kind() != ast.KindThematicBreak {
-			return nil
-		}
-	}
-	if h1 == nil {
-		return nil
-	}
-	candidate := h1.NextSibling()
-	list, ok := candidate.(*ast.List)
-	if !ok || list.IsOrdered() {
-		return nil
-	}
-	return d.metadataFromList(list)
-}
-
-func (d *Document) metadataFromList(list *ast.List) []MetadataItem {
-	items := []MetadataItem{}
-	for item := list.FirstChild(); item != nil; item = item.NextSibling() {
-		if metadata, ok := d.metadataItem(item); ok {
-			items = append(items, metadata)
-		}
-	}
-	return items
-}
-
-func (d *Document) metadataItem(item ast.Node) (MetadataItem, bool) {
-	if item.ChildCount() != 1 || containsNodeKind(item, extast.KindTaskCheckBox) {
-		return MetadataItem{}, false
-	}
-	block := item.FirstChild()
-	if block.Kind() != ast.KindTextBlock && block.Kind() != ast.KindParagraph {
-		return MetadataItem{}, false
-	}
-	value := textOf(block, d.source)
-	key, val, ok := strings.Cut(value, ":")
-	if !ok {
-		key, val, ok = strings.Cut(value, "：")
-	}
-	key = strings.TrimSpace(key)
-	val = strings.TrimSpace(val)
-	if !ok || key == "" || val == "" {
-		return MetadataItem{}, false
-	}
-	return MetadataItem{RawKey: key, Key: strings.ToLower(key), Value: val, Range: d.rangeFor(item)}, true
-}
-
-func (d *Document) description(metadata []MetadataItem) string {
+func (d *Document) description() string {
 	var after ast.Node
 	for n := d.tree.FirstChild(); n != nil; n = n.NextSibling() {
 		if h, ok := n.(*ast.Heading); ok && h.Level == 1 {
 			after = n.NextSibling()
 			break
-		}
-	}
-	if after != nil {
-		if _, ok := after.(*ast.List); ok && len(metadata) > 0 {
-			after = after.NextSibling()
 		}
 	}
 	if after != nil && after.Kind() == ast.KindParagraph {
@@ -516,7 +555,7 @@ func (d *Document) extractSections(headings []Heading) []Section {
 			}
 		}
 		start := h.Range.End.Offset
-		raw := strings.TrimSpace(string(d.source[start:end]))
+		raw := strings.TrimSpace(string(d.parsed[start:end]))
 		flat = append(flat, Section{Heading: h, Text: d.sectionPlainText(h), Markdown: raw, Range: d.sourceRange(h.Range.Start.Offset, end)})
 	}
 	// Existing consumers use the flat H2 list; Children still expose hierarchy.
@@ -541,19 +580,6 @@ func (d *Document) extractSections(headings []Heading) []Section {
 	return result
 }
 func (d *Document) fillSection(s *Section) {
-	_ = ast.Walk(d.tree, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
-		if !entering {
-			return ast.WalkContinue, nil
-		}
-		h, ok := n.(*ast.Heading)
-		if !ok || h.Pos() != s.Heading.Range.Start.Offset {
-			return ast.WalkContinue, nil
-		}
-		if list, ok := h.NextSibling().(*ast.List); ok && !list.IsOrdered() {
-			s.Metadata = d.metadataFromList(list)
-		}
-		return ast.WalkStop, nil
-	})
 	for _, t := range d.analysis.Tasks {
 		if t.Range.Start.Offset >= s.Range.Start.Offset && t.Range.End.Offset <= s.Range.End.Offset {
 			s.Tasks = append(s.Tasks, t)
@@ -575,22 +601,14 @@ func (d *Document) sectionPlainText(heading Heading) string {
 		return ""
 	}
 	parts := []string{}
-	first := true
 	for candidate := node.NextSibling(); candidate != nil; candidate = candidate.NextSibling() {
 		if h, ok := candidate.(*ast.Heading); ok && h.Level <= heading.Level {
 			break
 		}
-		isFirst := first
-		first = false
 		value := textOf(candidate, d.source)
 		if list, ok := candidate.(*ast.List); ok {
 			items := []string{}
 			for item := list.FirstChild(); item != nil; item = item.NextSibling() {
-				if isFirst && !list.IsOrdered() {
-					if _, metadata := d.metadataItem(item); metadata {
-						continue
-					}
-				}
 				if containsNodeKind(item, extast.KindTaskCheckBox) {
 					items = append(items, taskText(item, d.source))
 				} else {

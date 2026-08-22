@@ -1,15 +1,19 @@
+<!-- toudocu
+id: TASK-SITE-002
+status: done
+taskType: feature
+priority: high
+module: MOD-SITE
+useCase: UC-DOCS-03
+flow: FLOW-DOCS-SERVE
+transitions: TR-SITE-001, TR-SITE-002, TR-SITE-003
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-10
+-->
+
 # TASK-SITE-002: Редактирование исходной документации через serve
 
-- Статус: Выполнено
-- Тип: Feature
-- Приоритет: Высокий
-- Модуль: MOD-SITE
-- Сценарий: UC-DOCS-03
-- Процесс: FLOW-DOCS-SERVE
-- Переходы: TR-SITE-001, TR-SITE-002, TR-SITE-003
-- Стандарты: STD-GO-001, STD-DOCS-001
-- Последнее обновление: 2026-08-10
-
+<!-- toudocu:section result -->
 ## Результат
 
 Задача добавила в `toudocu serve` локальную рабочую область. В ней можно
@@ -17,14 +21,17 @@
 диагностические сообщения, а после сохранения получать обновлённые страницы и
 поиск.
 
+<!-- toudocu:section behavior-change -->
 ## Изменение поведения
 
+<!-- toudocu:section before -->
 ### Было
 
 `serve` пересобирал портал при открытии HTML и по отдельной кнопке, но не давал
 доступа к исходникам. Внешнее изменение становилось видно лишь при следующем
 просмотре или ручной пересборке.
 
+<!-- toudocu:section after -->
 ### Станет
 
 `serve` включает защищённый API редактора с тем же origin, отдельный интерфейс,
@@ -32,6 +39,7 @@
 `build` не получает разметку редактора, локальные скрипты сервера и ссылки на
 API.
 
+<!-- toudocu:section scope -->
 ## Область изменения
 
 - сервер, модель документации и рабочая область редактора в `internal/app/`;
@@ -42,6 +50,7 @@ API.
 - связанные пользовательские сценарии, процессы, модули, контракты,
   архитектурные документы, справочники, README и журнал изменений.
 
+<!-- toudocu:section out-of-scope -->
 ## Не входит в задачу
 
 - изменение смысла `--host`, `--port`, `--open` и автоматического открытия;
@@ -51,6 +60,7 @@ API.
 - запуск Git, оболочки, `task verify` или любых других команд через API;
 - общая проверка схемы произвольного YAML.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Критерии приёмки
 
 - [x] `AC-01` `GenerateSite` всегда создаёт статический портал, а вариант
@@ -109,6 +119,7 @@ API.
   интерактивным `serve`; серверные, конкурентные, отрицательные, платформенные
   и браузерные сценарии были включены в проверку задачи.
 
+<!-- toudocu:section plan -->
 ## План
 
 - [x] Разделить статическую генерацию и вариант для `serve`.
@@ -120,6 +131,7 @@ API.
 - [x] Добавить отрицательные, конкурентные и сквозные тесты.
 - [x] Обновить связанные источники документации и порталы.
 
+<!-- toudocu:section verification -->
 ## Проверка
 
 - `AC-01` → `TR-SITE-001` → `TestDashboardFocusFallbacksAndAlwaysVisibleOverview`
@@ -146,6 +158,7 @@ API.
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root .`
 - `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/toudocu check ./docs --strict --stale-days 0`
 
+<!-- toudocu:section documentation-impact -->
 ## Влияние на документацию
 
 Были обновлены сценарий и процесс `serve`, контракты Site/CLI/Model, границы

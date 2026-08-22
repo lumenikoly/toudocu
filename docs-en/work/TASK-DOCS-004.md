@@ -1,12 +1,17 @@
+<!-- toudocu
+id: TASK-DOCS-004
+status: done
+taskType: documentation
+priority: high
+module: MOD-MODEL
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-10
+-->
+
 # TASK-DOCS-004: Add refresh workflow to update documentation
 
-- Status: Completed
-- Type: Documentation
-- Priority: High
-- Module: MOD-MODEL
-- Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-10
 
+<!-- toudocu:section result -->
 ## Result
 
 The user can explicitly refresh all documentation or limit the work to current
@@ -14,13 +19,16 @@ Git changes. The skill compares Markdown with the implementation, changes only
 facts supported by repository evidence, and normally finishes with semantic
 and structural review.
 
+<!-- toudocu:section behavior-change -->
 ## Behavior change
 
+<!-- toudocu:section before -->
 ### Before
 
 The skill updated individual documents for a specific request but offered no
 single workflow for reviewing the whole documentation set.
 
+<!-- toudocu:section after -->
 ### After
 
 `$toudocu refresh` covers all source documentation. `$toudocu refresh diff`
@@ -28,6 +36,7 @@ starts with staged, unstaged, and untracked changes relative to `HEAD`, then
 adds documents affected by those changes. Either mode may update, delete, or
 rename a document when the repository provides clear evidence.
 
+<!-- toudocu:section scope -->
 ## Scope
 
 - `skills/toudocu/`;
@@ -35,6 +44,7 @@ rename a document when the repository provides clear evidence.
 - template and integration tests;
 - README, changelog, `AGENTS.md`, and source documentation.
 
+<!-- toudocu:section out-of-scope -->
 ## Out of scope
 
 - new Go command `toudocu refresh`;
@@ -43,6 +53,7 @@ rename a document when the repository provides clear evidence.
 - changing the code to comply with the documentation;
 - updating `Last verified` without actually checking the runbook.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] `AC-01` The skill routes `$toudocu refresh` and `$toudocu refresh diff`
@@ -57,6 +68,7 @@ rename a document when the repository provides clear evidence.
   workflows, not Go CLI commands.
 - [x] `AC-06` The Go CLI rejects `toudocu refresh`.
 
+<!-- toudocu:section plan -->
 ## Plan
 
 - [x] Add refresh reference and command routing.
@@ -64,6 +76,7 @@ rename a document when the repository provides clear evidence.
 - [x] Cover full mode, diff mode, safety rules, and the absence of a Go command.
 - [x] Review the documentation independently for meaning.
 
+<!-- toudocu:section verification -->
 ## Verification
 
 - `AC-01` → `go test ./... -run 'TestUseToudocuRefresh'`
@@ -76,11 +89,13 @@ rename a document when the repository provides clear evidence.
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0 && go run ./cmd/toudocu check ./example/docs --repository-root ./example --strict --stale-days 0`
 - `QUALITY` → `go test ./... -run 'TestUseToudocu'`
 
+<!-- toudocu:section documentation-impact -->
 ## Documentation impact
 
 The work updated the embedded skill, Russian and English managed guidance,
 README, changelog, Toudocu's own documentation, and the root `AGENTS.md`.
 
+<!-- toudocu:section use-case-omission-reason -->
 ## Use-case omission reason
 
 This is a workflow of the installed AI skill, not a new Go CLI command or

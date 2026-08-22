@@ -90,7 +90,7 @@ func renderProcessRows(model *Model, current, onlyType string) string {
 				}
 			}
 			search := strings.Join([]string{useCase.ID, useCase.Title, useCase.ModuleID, strings.Join(useCase.FlowIDs, " ")}, " ")
-			fmt.Fprintf(&rows, `<tr data-filter-item data-search="%s" data-type="use-case" data-module="%s" data-status="%s" data-usecase="%s"><td><a class="process-title" href="%s">%s</a><code>%s</code></td><td><span class="process-kind process-kind-user">%s</span></td><td><code>%s</code></td><td>%s</td><td>%s</td><td><div class="process-view-links">%s</div></td></tr>`,
+			_, _ = fmt.Fprintf(&rows, `<tr data-filter-item data-search="%s" data-type="use-case" data-module="%s" data-status="%s" data-usecase="%s"><td><a class="process-title" href="%s">%s</a><code>%s</code></td><td><span class="process-kind process-kind-user">%s</span></td><td><code>%s</code></td><td>%s</td><td>%s</td><td><div class="process-view-links">%s</div></td></tr>`,
 				escapeAttr(search), escapeAttr(useCase.ModuleID), escapeAttr(useCase.Status.Kind), escapeAttr(useCase.ID),
 				escapeAttr(relativeURL(current, document.OutputPath)), escapeHTML(screenTitleForUseCase(useCase)), escapeHTML(useCase.ID),
 				escapeHTML(ui.Text("process.useCase")), escapeHTML(useCase.ModuleID), renderStatusChip(model, useCase.Status), processRelations(current, model, useCase.FlowIDs, "flow"), views)
@@ -103,7 +103,7 @@ func renderProcessRows(model *Model, current, onlyType string) string {
 				continue
 			}
 			search := strings.Join([]string{flow.ID, flow.Title, flow.ModuleID, strings.Join(flow.UseCaseIDs, " ")}, " ")
-			fmt.Fprintf(&rows, `<tr data-filter-item data-search="%s" data-type="flow" data-module="%s" data-status="%s" data-usecase="%s"><td><a class="process-title" href="%s">%s</a><code>%s</code></td><td><span class="process-kind process-kind-system">%s</span></td><td><code>%s</code></td><td>%s</td><td>%s</td><td><div class="process-view-links"><a href="%s">%s</a></div></td></tr>`,
+			_, _ = fmt.Fprintf(&rows, `<tr data-filter-item data-search="%s" data-type="flow" data-module="%s" data-status="%s" data-usecase="%s"><td><a class="process-title" href="%s">%s</a><code>%s</code></td><td><span class="process-kind process-kind-system">%s</span></td><td><code>%s</code></td><td>%s</td><td>%s</td><td><div class="process-view-links"><a href="%s">%s</a></div></td></tr>`,
 				escapeAttr(search), escapeAttr(flow.ModuleID), escapeAttr(document.Status.Kind), escapeAttr(strings.Join(flow.UseCaseIDs, "|")),
 				escapeAttr(relativeURL(current, document.OutputPath)), escapeHTML(processTitle(flow.ID, flow.Title)), escapeHTML(flow.ID),
 				escapeHTML(ui.Text("process.visual")), escapeHTML(flow.ModuleID), renderStatusChip(model, document.Status), processRelations(current, model, flow.UseCaseIDs, "use-case"),
@@ -244,7 +244,7 @@ func renderUseCasePage(model *Model, document *Document) string {
 			tabIndex = "0"
 			active = " is-active"
 		}
-		fmt.Fprintf(&tabLinks, `<a class="usecase-tab%s" id="tab-%s" role="tab" aria-selected="%s" aria-controls="%s" tabindex="%s" href="#%s" data-usecase-tab="%s">%s</a>`,
+		_, _ = fmt.Fprintf(&tabLinks, `<a class="usecase-tab%s" id="tab-%s" role="tab" aria-selected="%s" aria-controls="%s" tabindex="%s" href="#%s" data-usecase-tab="%s">%s</a>`,
 			active, tab.id, selected, tab.id, tabIndex, tab.id, tab.id, tab.label)
 	}
 	content := breadcrumbs(model, current, useCase.ID) +

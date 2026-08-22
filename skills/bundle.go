@@ -14,7 +14,7 @@ import (
 
 const (
 	SkillID       = "toudocu"
-	SkillVersion  = "0.0.4"
+	SkillVersion  = "0.0.5"
 	maxFileSize   = 2 << 20
 	maxBundleSize = 10 << 20
 )
@@ -93,7 +93,7 @@ func Load() (Bundle, error) {
 	}
 	h := sha256.New()
 	for _, file := range files {
-		fmt.Fprintf(h, "%s\x00%d\x00", file.Path, file.Mode.Perm())
+		_, _ = fmt.Fprintf(h, "%s\x00%d\x00", file.Path, file.Mode.Perm())
 		h.Write(file.Data)
 		h.Write([]byte{0})
 	}

@@ -1,28 +1,36 @@
+<!-- toudocu
+id: TASK-API-001
+status: done
+taskType: feature
+priority: high
+module: MOD-SITE
+useCase: UC-DOCS-03
+screens: SC-SITE-HOME, SC-SITE-API-DOCS
+transitions: TR-SITE-006
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-10
+-->
+
 # TASK-API-001: OpenAPI Contracts and Offline Swagger UI
 
-- Status: Done
-- Type: Feature
-- Priority: High
-- Module: MOD-SITE
-- Use case: UC-DOCS-03
-- Screens: SC-SITE-HOME, SC-SITE-API-DOCS
-- Transitions: TR-SITE-006
-- Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-10
 
+<!-- toudocu:section result -->
 ## Result
 
 Two OpenAPI 3.1.0 files define the exact HTTP contracts of the Editor and
 Changes APIs. Canonical `serve` displays both contracts in an embedded Swagger
 UI that does not need a CDN. The public schema v1 of the reports did not change.
 
+<!-- toudocu:section behavior-change -->
 ## Behavior change
 
+<!-- toudocu:section before -->
 ### Before
 
 Wire contracts are duplicated in Markdown, OpenAPI files are not validated as a
 distinct source type, and the local portal provides no interactive API catalog.
 
+<!-- toudocu:section after -->
 ### After
 
 `check` and the editor validate OpenAPI files. The Go route registry and the
@@ -31,6 +39,7 @@ JSON format, and `HEAD` is allowed only on the summary route. Canonical `serve`
 displays both contracts in the embedded Swagger UI; static and translated
 portals do not include it.
 
+<!-- toudocu:section scope -->
 ## Scope
 
 - OpenAPI validation, Editor/Changes route registries, and HTTP handlers in `internal/app/`;
@@ -38,6 +47,7 @@ portals do not include it.
 - canonical contracts and the related documentation;
 - wire-parity, validation, portal-isolation, and vendored-checksum tests.
 
+<!-- toudocu:section out-of-scope -->
 ## Out of scope
 
 - new CLI flags, Go exports, or schemaVersion changes in public JSON reports;
@@ -46,6 +56,7 @@ portals do not include it.
 - changes to successful Editor payloads or raw/rendered Changes content media types;
 - changes to translation roots and generated example portals.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] `AC-01` Two OpenAPI 3.1.0 files fully describe the active Editor and Changes operations, parameters, statuses, media types, examples, and schema v1 components.
@@ -58,6 +69,7 @@ portals do not include it.
 - [x] `AC-08` The Markdown explanations and related architecture documents agree with the contracts without duplicating the HTTP schema or changing translation roots.
 - [x] `AC-09` The task includes unit, contract, regression, portal, race, documentation, repository, and browser checks.
 
+<!-- toudocu:section plan -->
 ## Plan
 
 - [x] Add and validate OpenAPI sources.
@@ -65,6 +77,7 @@ portals do not include it.
 - [x] Embed the offline Swagger UI and isolate static/translation portals.
 - [x] Update the source documentation.
 
+<!-- toudocu:section verification -->
 ## Verification
 
 - `AC-05` → `TR-SITE-006` → `TestAPIDocsUI`
@@ -81,6 +94,7 @@ portals do not include it.
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root .`
 - `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/toudocu check ./docs --strict --stale-days 0 && make check`
 
+<!-- toudocu:section documentation-impact -->
 ## Documentation impact
 
 The work added two OpenAPI contracts, an ADR, a screen, and this task record.

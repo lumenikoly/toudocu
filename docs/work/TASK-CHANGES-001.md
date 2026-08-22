@@ -1,15 +1,19 @@
+<!-- toudocu
+id: TASK-CHANGES-001
+status: done
+taskType: feature
+priority: high
+module: MOD-CHANGES
+useCase: UC-DOCS-05
+flow: FLOW-DOCS-CHANGES
+transitions: TR-SITE-005
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-10
+-->
+
 # TASK-CHANGES-001: Просмотр изменений документации
 
-- Статус: Выполнено
-- Тип: Feature
-- Приоритет: Высокий
-- Модуль: MOD-CHANGES
-- Сценарий: UC-DOCS-05
-- Процесс: FLOW-DOCS-CHANGES
-- Переходы: TR-SITE-005
-- Стандарты: STD-GO-001, STD-DOCS-001
-- Последнее обновление: 2026-08-10
-
+<!-- toudocu:section result -->
 ## Результат
 
 `toudocu changes` и раздел `/changes/` показывают изменения исходной
@@ -17,14 +21,17 @@
 известных сущностей. Они сопоставляют изменённые документы с заявленным
 влиянием рабочей задачи и могут вывести `ChangeSetReport` schema v1.
 
+<!-- toudocu:section behavior-change -->
 ## Изменение поведения
 
+<!-- toudocu:section before -->
 ### Было
 
 Портал показывал только текущее состояние. Для проверки изменений приходилось
 использовать внешний `git diff`, который не знает типов документов, их связей
 и обещаний рабочей задачи.
 
+<!-- toudocu:section after -->
 ### Станет
 
 `serve` предоставляет раздел «Изменения» только для чтения с явным диапазоном
@@ -32,6 +39,7 @@
 файлов прежний отчёт помечается устаревшим. CLI и CI получают те же данные, не
 изменяя Git.
 
+<!-- toudocu:section scope -->
 ## Область изменения
 
 - публичный Go-фасад и команды CLI;
@@ -41,6 +49,7 @@
 - закреплённые зависимости и их уведомления;
 - тесты, каноническая документация, README и журнал изменений.
 
+<!-- toudocu:section out-of-scope -->
 ## Не входит в задачу
 
 - изменение рабочего дерева, индекса, истории и ссылок Git;
@@ -50,6 +59,7 @@
 - сравнение изображений по пикселям;
 - diff исходного кода вне каталогов документации.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Критерии приёмки
 
 - [x] `AC-01` Слой Git читает коммиты, индекс и рабочее дерево, включая
@@ -84,6 +94,7 @@
 - [x] `AC-12` Статический `build`, существующий `check`, `ProjectReport` schema
   v1 и редактор сохраняют прежнее поведение.
 
+<!-- toudocu:section plan -->
 ## План
 
 - [x] Реализовать чтение состояний Git, модель сравнения и `ChangeSetReport`.
@@ -93,6 +104,7 @@
 - [x] Добавить интерфейс и переходы со страниц документов, задач и экранов.
 - [x] Обновить документацию.
 
+<!-- toudocu:section verification -->
 ## Проверка
 
 - `AC-10` → `TR-SITE-005` → `TestServeSiteIncludesEditor`
@@ -112,6 +124,7 @@
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root .`
 - `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/toudocu check ./docs --strict --stale-days 0`
 
+<!-- toudocu:section documentation-impact -->
 ## Влияние на документацию
 
 Были добавлены MOD-CHANGES, UC-DOCS-05, FLOW-DOCS-CHANGES, архитектурный ответ,
@@ -119,6 +132,7 @@ ADR, руководство, HTTP/JSON-контракты и справочни�
 Также обновлены CLI, `serve`, рабочие задачи, OpenAPI, карта экранов,
 конфигурация, безопасность, README и журнал изменений.
 
+<!-- toudocu:section summary -->
 ## Текущее состояние
 
 Это историческая задача первого выпуска Changes. Последующие изменения

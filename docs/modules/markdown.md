@@ -1,8 +1,10 @@
-# Безопасный Markdown
+<!-- toudocu
+id: MOD-MARKDOWN
+status: done
+updated: 2026-08-10
+-->
 
-- Идентификатор: MOD-MARKDOWN
-- Статус: Готово
-- Последнее обновление: 2026-08-10
+# Безопасный Markdown
 
 Модуль один раз разбирает поддерживаемый CommonMark и GFM, создаёт
 нормализованную структуру и безопасный HTML. Встроенное содержимое не
@@ -14,6 +16,7 @@
 списки, галочки, таблицы, зачёркивание, автоматические ссылки, код и ограниченные
 блоки Mermaid. Внешний Markdown-сервис не нужен.
 
+<!-- toudocu:section code-location -->
 ## Расположение в коде
 
 - `internal/markdown/` — разбор, анализ и создание HTML;
@@ -21,6 +24,7 @@
 - `internal/app/markdown_render.go` — использование в портале;
 - `internal/app/utils.go` — нормализация и экранирование.
 
+<!-- toudocu:section boundaries -->
 ## Границы
 
 Внутреннее дерево Goldmark не входит в публичный Go API и JSON. Включены
@@ -28,6 +32,7 @@ CommonMark, Table, TaskList, Strikethrough и Linkify. Attributes, front matter,
 footnotes, definition lists и typographer не поддерживаются. Репозиторные
 ссылки и копирование ресурсов проверяет модель проекта.
 
+<!-- toudocu:section business-rules -->
 ## Бизнес-правила
 
 ### BR-MD-001: Пользовательский HTML считается ошибкой политики
@@ -48,6 +53,7 @@ footnotes, definition lists и typographer не поддерживаются. Р
 становятся требованиями, критериями или пунктами дорожной карты. Карта экранов
 строится из таблиц `screens/SC-*.md`, а не из диаграммы.
 
+<!-- toudocu:section invariants -->
 ## Инварианты
 
 - Текст блока кода не разбирается как заголовок, ссылка или задача.
@@ -61,11 +67,13 @@ footnotes, definition lists и typographer не поддерживаются. Р
   остаётся в API-контракте.
 - Документ с Mermaid связан со сценарием или архитектурой.
 
+<!-- toudocu:section stable-interfaces -->
 ## Стабильные интерфейсы
 
 `check`, `build`, `serve`, Editor и Changes используют одну нормализованную
 модель. Низкоуровневые функции разбора и отрисовки намеренно не экспортируются.
 
+<!-- toudocu:section related-use-cases -->
 ## Связанные сценарии
 
 - [Сборка портала](../use-cases/build-portal.md)

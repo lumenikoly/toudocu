@@ -63,11 +63,6 @@ func Render(document *Document, config RenderConfig) (string, error) {
 			r.headingIDs[n] = h.ID
 		}
 	}
-	if config.SuppressMetadata {
-		if n := metadataList(document); n != nil {
-			r.suppressed[n] = true
-		}
-	}
 	engine := renderer.NewRenderer(renderer.WithNodeRenderers(util.Prioritized(r, 1000)))
 	var out bytes.Buffer
 	if err := engine.Render(&out, document.source, document.tree); err != nil {
@@ -90,22 +85,6 @@ func headingNode(root ast.Node, index int) ast.Node {
 		return ast.WalkContinue, nil
 	})
 	return found
-}
-func metadataList(d *Document) ast.Node {
-	var h1 ast.Node
-	for n := d.tree.FirstChild(); n != nil; n = n.NextSibling() {
-		if h, ok := n.(*ast.Heading); ok && h.Level == 1 {
-			h1 = n
-			break
-		}
-	}
-	if h1 == nil {
-		return nil
-	}
-	if l, ok := h1.NextSibling().(*ast.List); ok && !l.IsOrdered() && len(d.analysis.Metadata) > 0 {
-		return l
-	}
-	return nil
 }
 
 type nodeRenderer struct {
@@ -197,9 +176,9 @@ func (r *nodeRenderer) heading(w util.BufWriter, source []byte, n ast.Node, ente
 	}
 	id := r.headingIDs[n]
 	if entering {
-		fmt.Fprintf(w, `<h%d id="%s"><a class="heading-anchor" href="#%s" aria-hidden="true" tabindex="-1">#</a>`, h.Level, attr(id), attr(id))
+		_, _ = fmt.Fprintf(w, `<h%d id="%s"><a class="heading-anchor" href="#%s" aria-hidden="true" tabindex="-1">#</a>`, h.Level, attr(id), attr(id))
 	} else {
-		fmt.Fprintf(w, "</h%d>", h.Level)
+		_, _ = fmt.Fprintf(w, "</h%d>", h.Level)
 	}
 	return ast.WalkContinue, nil
 }
@@ -243,7 +222,7 @@ func (r *nodeRenderer) fencedCodeBlock(w util.BufWriter, source []byte, n ast.No
 	f := n.(*ast.FencedCodeBlock)
 	info := ""
 	if f.Info != nil {
-		info = strings.TrimSpace(string(f.Info.Text(source)))
+		info = strings.TrimSpace(string(f.Info.Value(source)))
 	}
 	body := linesValue(f, source)
 	if strings.EqualFold(info, "mermaid") {
@@ -294,9 +273,9 @@ func (r *nodeRenderer) list(w util.BufWriter, _ []byte, n ast.Node, entering boo
 		if containsTask(l) {
 			class = ` class="task-list"`
 		}
-		fmt.Fprintf(w, "<%s%s%s>", tag, start, class)
+		_, _ = fmt.Fprintf(w, "<%s%s%s>", tag, start, class)
 	} else {
-		fmt.Fprintf(w, "</%s>", tag)
+		_, _ = fmt.Fprintf(w, "</%s>", tag)
 	}
 	return ast.WalkContinue, nil
 }
@@ -322,7 +301,7 @@ func (r *nodeRenderer) listItem(w util.BufWriter, _ []byte, n ast.Node, entering
 			if checked {
 				state, class = "complete", "is-complete"
 			}
-			fmt.Fprintf(w, `<li class="task-item %s" data-task-state="%s">`, class, state)
+			_, _ = fmt.Fprintf(w, `<li class="task-item %s" data-task-state="%s">`, class, state)
 		}
 	} else {
 		if r.taskTextOpen[n] {
@@ -360,7 +339,7 @@ func (r *nodeRenderer) taskCheckbox(w util.BufWriter, _ []byte, n ast.Node, ente
 				label = "Completed"
 			}
 		}
-		fmt.Fprintf(w, `<span class="task-checkbox" role="img" aria-label="%s">%s</span><span class="task-text">`, label, mark)
+		_, _ = fmt.Fprintf(w, `<span class="task-checkbox" role="img" aria-label="%s">%s</span><span class="task-text">`, label, mark)
 		if item != nil {
 			r.taskTextOpen[item] = true
 		}
@@ -410,9 +389,9 @@ func (r *nodeRenderer) tableCell(w util.BufWriter, _ []byte, n ast.Node, enterin
 		style = ` style="text-align:` + cell.Alignment.String() + `"`
 	}
 	if entering {
-		fmt.Fprintf(w, "<%s%s>", tag, style)
+		_, _ = fmt.Fprintf(w, "<%s%s>", tag, style)
 	} else {
-		fmt.Fprintf(w, "</%s>", tag)
+		_, _ = fmt.Fprintf(w, "</%s>", tag)
 	}
 	return ast.WalkContinue, nil
 }
@@ -490,10 +469,6 @@ func (r *nodeRenderer) image(w util.BufWriter, source []byte, n ast.Node, enteri
 	}
 	return ast.WalkSkipChildren, nil
 }
-func (r *nodeRenderer) openLink(w util.BufWriter, dest, title string, image bool) (ast.WalkStatus, error) {
-	return r.openResolvedLink(w, r.resolve(dest, image, title))
-}
-
 func (r *nodeRenderer) openResolvedLink(w util.BufWriter, res LinkResolution) (ast.WalkStatus, error) {
 	if res.Blocked {
 		_, _ = io.WriteString(w, `<span class="unsafe-link" title="`+attr(r.config.UnsafeLinkTitle)+`">`)
@@ -508,7 +483,7 @@ func (r *nodeRenderer) openResolvedLink(w util.BufWriter, res LinkResolution) (a
 	if res.Broken {
 		classes = ` class="broken-link"`
 	}
-	fmt.Fprintf(w, `<a href="%s"%s%s>`, attr(res.Href), classes, attrs)
+	_, _ = fmt.Fprintf(w, `<a href="%s"%s%s>`, attr(res.Href), classes, attrs)
 	return ast.WalkContinue, nil
 }
 func (r *nodeRenderer) writeLink(w util.BufWriter, dest, label, title string, image bool) {
@@ -526,7 +501,7 @@ func (r *nodeRenderer) writeLink(w util.BufWriter, dest, label, title string, im
 		if res.Broken {
 			broken = " is-broken"
 		}
-		fmt.Fprintf(w, `<img class="doc-image%s" src="%s" alt="%s" loading="lazy">`, broken, attr(res.Href), attr(label))
+		_, _ = fmt.Fprintf(w, `<img class="doc-image%s" src="%s" alt="%s" loading="lazy">`, broken, attr(res.Href), attr(label))
 		return
 	}
 	classes := ""
@@ -535,7 +510,7 @@ func (r *nodeRenderer) writeLink(w util.BufWriter, dest, label, title string, im
 		classes = ` class="external-link"`
 		attrs = ` target="_blank" rel="noopener noreferrer"`
 	}
-	fmt.Fprintf(w, `<a href="%s"%s%s>%s</a>`, attr(res.Href), classes, attrs, html.EscapeString(label))
+	_, _ = fmt.Fprintf(w, `<a href="%s"%s%s>%s</a>`, attr(res.Href), classes, attrs, html.EscapeString(label))
 }
 func (r *nodeRenderer) resolve(dest string, image bool, title string) LinkResolution {
 	if r.config.ResolveLink != nil {

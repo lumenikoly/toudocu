@@ -1,9 +1,12 @@
+<!-- toudocu
+id: FLOW-DOCS-CHECK
+module: MOD-MODEL
+useCase: UC-DOCS-02
+updated: 2026-08-10
+-->
+
 # FLOW-DOCS-CHECK: Documentation contract check
 
-- Identifier: FLOW-DOCS-CHECK
-- Use case: UC-DOCS-02
-- Module: MOD-MODEL
-- Last updated: 2026-08-10
 
 `check` only reads documentation and reports problems. The complete rule set is
 defined in [UC-DOCS-02](../use-cases/check-documentation.md).

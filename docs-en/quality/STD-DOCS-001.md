@@ -1,14 +1,18 @@
+<!-- toudocu
+id: STD-DOCS-001
+status: active
+scope: Исходная документация, шаблоны встроенного skill и сгенерированные порталы
+updated: 2026-08-12
+-->
+
 # STD-DOCS-001: Verifiable documentation
 
-- Identifier: STD-DOCS-001
-- Status: Active
-- Scope: Source documentation, skill templates, and generated portals
-- Last updated: 2026-08-12
 
 This standard separates confirmed sources from local or generated views.
 Markdown remains the source of the document model; explicitly recognized
 OpenAPI may own only the HTTP wire contract.
 
+<!-- toudocu:section rules -->
 ## Rules
 
 1. Global scope is defined by `roadmap.md`. An explicitly linked `UC-*` is
@@ -47,6 +51,7 @@ OpenAPI may own only the HTTP wire contract.
     filesystem, and trust-boundary invariants. External `$ref` values are not
     loaded.
 
+<!-- toudocu:section automated-checks -->
 ## Automated checks
 
 - `go run ./cmd/toudocu check ./docs --strict --stale-days 0`;

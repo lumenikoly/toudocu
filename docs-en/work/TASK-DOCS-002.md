@@ -1,26 +1,34 @@
+<!-- toudocu
+id: TASK-DOCS-002
+status: done
+taskType: feature
+priority: high
+module: MOD-MODEL
+useCase: UC-DOCS-02
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-10
+-->
+
 # TASK-DOCS-002: Add standards, runbooks, and custom sections
 
-- Status: Completed
-- Type: Feature
-- Priority: High
-- Module: MOD-MODEL
-- Use case: UC-DOCS-02
-- Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-10
 
+<!-- toudocu:section result -->
 ## Result
 
 Toudocu supports optional `STD-*` standards, `RB-*` operational procedures,
 and project-specific top-level sections. They are part of schema v1, have
 their own portal catalogs, and can be linked to a work item explicitly.
 
+<!-- toudocu:section behavior-change -->
 ## Behavior change
 
+<!-- toudocu:section before -->
 ### Before
 
 Unknown directories were unstructured Markdown. Standards and operational
 procedures had no dedicated rules, work-item links, or portal pages.
 
+<!-- toudocu:section after -->
 ### After
 
 When `quality/`, `runbooks/`, or a custom section exists, it has an explicit
@@ -28,6 +36,7 @@ When `quality/`, `runbooks/`, or a custom section exists, it has an explicit
 every project. A task context includes only the `STD-*` and `RB-*` documents
 named by that task.
 
+<!-- toudocu:section scope -->
 ## Scope
 
 - the model, Markdown parser, and diagnostics in `internal/app/`;
@@ -35,6 +44,7 @@ named by that task.
 - specialized portal catalogs;
 - the embedded skill, canonical documentation, and `AGENTS.md`.
 
+<!-- toudocu:section out-of-scope -->
 ## Out of scope
 
 - external dependencies;
@@ -43,6 +53,7 @@ named by that task.
 - creating a placeholder runbook when no real operational procedure exists;
 - changing the schema v1 version.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] `AC-01` Standards, runbooks and custom manifests are validated with errors and warnings separated.
@@ -52,6 +63,7 @@ named by that task.
 - [x] `AC-05` The portal keeps the `processes` route and adds catalogs, filters, and four runbook metrics.
 - [x] `AC-06` Toudocu's own documentation contains only confirmed standards and does not create a fictional runbook.
 
+<!-- toudocu:section plan -->
 ## Plan
 
 - [x] Add typed model, diagnostics, freshness and custom manifests.
@@ -59,6 +71,7 @@ named by that task.
 - [x] Add specialized catalogs and portal tests.
 - [x] Update the source documentation.
 
+<!-- toudocu:section verification -->
 ## Verification
 
 - `AC-01` → `go test ./... -run 'TestQualityMetadataStatusAliasesAndValidationBoundaries|TestTypedKnowledgeErrorsAndCustomManifest'`
@@ -71,6 +84,7 @@ named by that task.
 - `DOCS` → `go run ./cmd/toudocu check ./docs --strict --stale-days 0`
 - `QUALITY` → `go test ./... -run 'TestStandardsRunbooks|TestQualityTask|TestStandardAndRunbook|TestTypedKnowledge'`
 
+<!-- toudocu:section documentation-impact -->
 ## Documentation impact
 
 The work updated the README, changelog, home page, model, validation use case,

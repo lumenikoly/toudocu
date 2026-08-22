@@ -1,11 +1,14 @@
+<!-- toudocu
+id: SC-SITE-DOCUMENT
+status: done
+screenKind: page
+module: MOD-SITE
+preview: ../assets/screens/site-document.png
+updated: 2026-08-12
+-->
+
 # SC-SITE-DOCUMENT: Document Page
 
-- Identifier: SC-SITE-DOCUMENT
-- Type: Page
-- Module: MOD-SITE
-- Status: Implemented
-- Preview: `../assets/screens/site-document.png`
-- Last updated: 2026-08-12
 
 This is the ordinary page for one Markdown document. Its URL comes from the
 source path, so this document does not declare one shared route pattern.
@@ -53,6 +56,7 @@ current page. Static and translation portals do not include it.
 
 ## Transitions
 
+<!-- toudocu:table transitions columns=id,useCase,action,condition,target,kind -->
 | ID | Scenario | Action | Condition | Result | Type |
 |---|---|---|---|---|---|
 | TR-SITE-007 | UC-AGENT-FEEDBACK-01 | Open Changes | The user selected the shared Changes section | SC-CHANGES-WORKSPACE | navigation |

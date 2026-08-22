@@ -51,6 +51,14 @@ Load additional references only when the request needs them:
 - [references/work-item-model.md](references/work-item-model.md) for `TASK-*`,
   `BUG-*`, or work-item lifecycle operations.
 
+If Toudocu returns `DOCS_MIGRATION_REQUIRED`, read `Migration` from the
+diagnostic and open `references/migrations/<Migration>.md`. Apply that guide
+only to canonical documentation, set the guide's target
+`documentationVersion` before validation, run `toudocu check`, and fix the
+remaining migration-related errors. Preserve unrelated information and never
+invent a value that project evidence cannot establish. After the check passes,
+continue with the ordinary current-format workflow.
+
 ## Preserve global invariants
 
 1. Give repository evidence priority over assumptions. Never invent behavior,
