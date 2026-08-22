@@ -1,25 +1,32 @@
-# {{RUNBOOK_ID}}: {{RUNBOOK_TITLE}}
+<!-- toudocu
+version: 1
+id: {{RUNBOOK_ID}}
+status: {{STATUS}}
+environment: {{ENVIRONMENT}}
+risk: {{RISK}}
+lastVerified: {{YYYY-MM-DD}}
+-->
 
-- Идентификатор: {{RUNBOOK_ID}}
-- Статус: {{STATUS}}
-- Среда: {{ENVIRONMENT}}
-- Риск: {{RISK}}
-{{OPTIONAL_LAST_VERIFIED_METADATA}}
+# {{RUNBOOK_ID}}: {{RUNBOOK_TITLE}}
 
 {{RUNBOOK_SUMMARY}}
 
+<!-- toudocu:section prerequisites -->
 ## Предварительные условия
 
 {{PREREQUISITES}}
 
+<!-- toudocu:section procedure -->
 ## Процедура
 
 {{NUMBERED_PROCEDURE}}
 
+<!-- toudocu:section verification -->
 ## Проверка
 
 {{VERIFICATION}}
 
+<!-- toudocu:section rollback -->
 ## Откат
 
 {{ROLLBACK}}

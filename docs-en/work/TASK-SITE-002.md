@@ -1,35 +1,45 @@
+<!-- toudocu
+version: 1
+id: TASK-SITE-002
+status: done
+taskType: feature
+priority: high
+module: MOD-SITE
+useCase: UC-DOCS-03
+flow: FLOW-DOCS-SERVE
+transitions: TR-SITE-001, TR-SITE-002, TR-SITE-003
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-10
+-->
+
 # TASK-SITE-002: Edit source documentation in serve
 
-- Status: Completed
-- Type: Feature
-- Priority: High
-- Module: MOD-SITE
-- Use case: UC-DOCS-03
-- Flow: FLOW-DOCS-SERVE
-- Transitions: TR-SITE-001, TR-SITE-002, TR-SITE-003
-- Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-10
 
+<!-- toudocu:section result -->
 ## Result
 
 The task added a local workspace to `toudocu serve`. A user can open and create
 source documents, see previews and diagnostics, and get updated pages and
 search results after saving.
 
+<!-- toudocu:section behavior-change -->
 ## Behavior change
 
+<!-- toudocu:section before -->
 ### Before
 
 `serve` rebuilds the static portal when HTML is opened and on a manual button,
 but does not provide access to source files or notice an external change before
 the next view or manual rebuild.
 
+<!-- toudocu:section after -->
 ### After
 
 `serve` includes a guarded same-origin editor API, a dedicated editor
 interface, a rebuild after each write, and a watcher for external changes.
 Static output contains no editor markup, server-only scripts, or API links.
 
+<!-- toudocu:section scope -->
 ## Scope
 
 - `internal/app/server.go`, `internal/app/docs_core.go`, `internal/app/screens.go`, and new Go files for the server/editor workspace;
@@ -50,6 +60,7 @@ Static output contains no editor markup, server-only scripts, or API links.
 - `docs/reference/features.md`, `docs/reference/configuration.md`;
 - `project-docs/` and `example/project-docs/` only through rebuilding.
 
+<!-- toudocu:section out-of-scope -->
 ## Out of scope
 
 - changing the semantics of `--host`, `--port`, `--open`, or auto-open;
@@ -60,6 +71,7 @@ Static output contains no editor markup, server-only scripts, or API links.
   API;
 - general schema validation for arbitrary YAML.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] `AC-01` `GenerateSite` always creates a self-contained static portal,
@@ -121,6 +133,7 @@ Static output contains no editor markup, server-only scripts, or API links.
   backend, race, static-negative, cross-build, browser desktop/mobile QA,
   semantic review, and strict Toudocu checks pass.
 
+<!-- toudocu:section plan -->
 ## Plan
 
 - [x] Separate static and serve portal generation.
@@ -132,6 +145,7 @@ Static output contains no editor markup, server-only scripts, or API links.
 - [x] Update the related source documents and rebuild the portals.
 - [x] Perform semantic, automated, and browser verification.
 
+<!-- toudocu:section verification -->
 ## Verification
 
 - `AC-01` → `TR-SITE-001` → `TestDashboardFocusFallbacksAndAlwaysVisibleOverview`
@@ -158,6 +172,7 @@ Static output contains no editor markup, server-only scripts, or API links.
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root .`
 - `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/toudocu check ./docs --strict --stale-days 0`
 
+<!-- toudocu:section documentation-impact -->
 ## Documentation impact
 
 The serve-mode use case and flow, Site/CLI/Model contracts, runtime and trust

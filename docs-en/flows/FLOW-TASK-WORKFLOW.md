@@ -1,9 +1,14 @@
+<!-- toudocu
+version: 1
+id: FLOW-TASK-WORKFLOW
+module: MOD-CLI
+useCase: UC-TASK-01, UC-TASK-02, UC-TASK-03
+updated: 2026-08-21
+-->
+
 # FLOW-TASK-WORKFLOW: Work with a verifiable task
 
-- Identifier: FLOW-TASK-WORKFLOW
 - Use cases: UC-TASK-01, UC-TASK-02, UC-TASK-03
-- Module: MOD-CLI
-- Last updated: 2026-08-10
 
 The diagram connects task preparation, safe context collection, and a separate,
 explicitly authorized verification run.

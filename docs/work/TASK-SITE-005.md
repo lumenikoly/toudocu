@@ -1,15 +1,20 @@
+<!-- toudocu
+version: 1
+id: TASK-SITE-005
+status: done
+taskType: feature
+priority: normal
+module: MOD-SITE
+useCase: UC-DOCS-03
+flow: FLOW-DOCS-SERVE
+screens: SC-SITE-HOME
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-10
+-->
+
 # TASK-SITE-005: Показывать доступное обновление в serve
 
-- Статус: Выполнено
-- Тип: Feature
-- Приоритет: Обычный
-- Модуль: MOD-SITE
-- Сценарий: UC-DOCS-03
-- Процесс: FLOW-DOCS-SERVE
-- Экраны: SC-SITE-HOME
-- Стандарты: STD-GO-001, STD-DOCS-001
-- Последнее обновление: 2026-08-10
-
+<!-- toudocu:section result -->
 ## Результат
 
 Канонический `toudocu serve` необязательно проверяет последний стабильный
@@ -17,13 +22,16 @@ GitHub Release. Если он новее текущей программы, по
 предложение открыть официальную страницу релиза. Ошибка проверки не мешает
 работе. Статический портал, переводы и сама программа остаются автономными.
 
+<!-- toudocu:section behavior-change -->
 ## Изменение поведения
 
+<!-- toudocu:section before -->
 ### Было
 
 Пользователь узнавал о новом релизе только за пределами Toudocu или вручную
 открывал GitHub Releases.
 
+<!-- toudocu:section after -->
 ### Станет
 
 При первом открытии канонического портала браузер обращается к адресу проверки
@@ -32,6 +40,7 @@ GitHub Release. Если он новее текущей программы, по
 скрыть для конкретной версии; `--no-update-check` полностью отключает исходящий
 запрос.
 
+<!-- toudocu:section scope -->
 ## Область изменения
 
 - параметр CLI, проверка версии, HTTP-маршрут и данные запуска в Go;
@@ -39,6 +48,7 @@ GitHub Release. Если он новее текущей программы, по
 - связанные ADR, контракты, архитектурные документы, модуль, сценарий, процесс,
   экран и справочники.
 
+<!-- toudocu:section out-of-scope -->
 ## Не входит в задачу
 
 - самообновление, запуск установщика и замена программы из браузера;
@@ -46,6 +56,7 @@ GitHub Release. Если он новее текущей программы, по
 - сетевые запросы из `build`, переводов и `serve`, запущенного из перевода;
 - изменение `docs-en` в рамках исторической задачи.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Критерии приёмки
 
 - [x] `AC-01` `serve --no-update-check` отключает возможность, HTTP-маршрут и
@@ -64,6 +75,7 @@ GitHub Release. Если он новее текущей программы, по
 - [x] `AC-06` ADR, контракты и пользовательская документация согласованы с
   поведением.
 
+<!-- toudocu:section plan -->
 ## План
 
 - [x] Добавить параметр CLI, проверку версии, HTTP-маршрут и возможность в
@@ -73,6 +85,7 @@ GitHub Release. Если он новее текущей программы, по
   портале.
 - [x] Обновить каноническую документацию.
 
+<!-- toudocu:section verification -->
 ## Проверка
 
 - `AC-01` → `go test ./internal/app -run 'TestParseUpdateCheckFlag|TestVersionEndpointDisabled'`
@@ -85,6 +98,7 @@ GitHub Release. Если он новее текущей программы, по
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `go vet ./... && go mod verify && npm --prefix web run typecheck`
 
+<!-- toudocu:section documentation-impact -->
 ## Влияние на документацию
 
 Был добавлен ADR об узком сетевом исключении с возможностью отключения.

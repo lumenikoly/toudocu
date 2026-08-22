@@ -1,25 +1,32 @@
-# {{RUNBOOK_ID}}: {{RUNBOOK_TITLE}}
+<!-- toudocu
+version: 1
+id: {{RUNBOOK_ID}}
+status: {{STATUS}}
+environment: {{ENVIRONMENT}}
+risk: {{RISK}}
+lastVerified: {{YYYY-MM-DD}}
+-->
 
-- Identifier: {{RUNBOOK_ID}}
-- Status: {{STATUS}}
-- Environment: {{ENVIRONMENT}}
-- Risk: {{RISK}}
-{{OPTIONAL_LAST_VERIFIED_METADATA}}
+# {{RUNBOOK_ID}}: {{RUNBOOK_TITLE}}
 
 {{RUNBOOK_SUMMARY}}
 
+<!-- toudocu:section prerequisites -->
 ## Prerequisites
 
 {{PREREQUISITES}}
 
+<!-- toudocu:section procedure -->
 ## Procedure
 
 {{NUMBERED_PROCEDURE}}
 
+<!-- toudocu:section verification -->
 ## Verification
 
 {{VERIFICATION}}
 
+<!-- toudocu:section rollback -->
 ## Rollback
 
 {{ROLLBACK}}

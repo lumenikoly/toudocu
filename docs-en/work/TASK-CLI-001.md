@@ -1,31 +1,41 @@
+<!-- toudocu
+version: 1
+id: TASK-CLI-001
+status: done
+taskType: feature
+priority: high
+module: MOD-CLI
+useCase: UC-TASK-03
+flow: FLOW-TASK-WORKFLOW
+updated: 2026-08-10
+-->
+
 # TASK-CLI-001: Implement the complete work-item workflow
 
-- Status: Completed
-- Type: Feature
-- Priority: High
-- Module: MOD-CLI
-- Use case: UC-TASK-03
-- Flow: FLOW-TASK-WORKFLOW
-- Last updated: 2026-08-10
 
+<!-- toudocu:section result -->
 ## Result
 
 The CLI takes a user from finding relevant documentation and creating a
 scaffold to checking readiness, collecting context, and explicitly running the
 selected work item's commands.
 
+<!-- toudocu:section behavior-change -->
 ## Behavior change
 
+<!-- toudocu:section before -->
 ### Before
 
 The CLI provided only `task context` and the command-running `task check`.
 Scaffolding, readiness checks, and source search were missing.
 
+<!-- toudocu:section after -->
 ### After
 
 The CLI provides `search`, `task init`, `scaffold`, `task ready`, extended
 `task context`, and `task verify`. The old `task check` command is rejected.
 
+<!-- toudocu:section scope -->
 ## Scope
 
 - `internal/app/cli.go`
@@ -40,6 +50,7 @@ The CLI provides `search`, `task init`, `scaffold`, `task ready`, extended
 - `docs/`
 - `skills/toudocu/`
 
+<!-- toudocu:section out-of-scope -->
 ## Out of scope
 
 - interpretation of natural-language request inside Toudocu;
@@ -47,6 +58,7 @@ The CLI provides `search`, `task init`, `scaffold`, `task ready`, extended
 - automatic change of statuses and acceptance checkboxes;
 - new external dependencies.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] `AC-01` New CLI forms are parsed deterministically, and `task check` is rejected.
@@ -55,6 +67,7 @@ The CLI provides `search`, `task init`, `scaffold`, `task ready`, extended
 - [x] `AC-04` Verify supports dry-run, targeted and full run with secure reporting and limited output.
 - [x] `AC-05` All public JSON reports use a single schema v1.
 
+<!-- toudocu:section plan -->
 ## Plan
 
 - [x] Expand parser, report types and task contract.
@@ -63,6 +76,7 @@ The CLI provides `search`, `task init`, `scaffold`, `task ready`, extended
 - [x] Synchronize documentation, skills and tests.
 - [x] Run a full verification cycle.
 
+<!-- toudocu:section verification -->
 ## Verification
 
 - `AC-01` → `go test ./... -run 'TestCLI|TestTask'`
@@ -73,6 +87,7 @@ The CLI provides `search`, `task init`, `scaffold`, `task ready`, extended
 - `ALL` → `go test ./...`
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict`
 
+<!-- toudocu:section documentation-impact -->
 ## Documentation impact
 
 `README.md`, `CHANGELOG.md`, `docs/contracts/cli.md`,

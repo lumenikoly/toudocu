@@ -10,7 +10,7 @@ import (
 
 func readinessDocument(content, status string) *Document {
 	parsed := analyzeMarkdown(content)
-	return &Document{Content: content, Headings: parsed.Headings, Tasks: parsed.Tasks, Status: StatusFor(status)}
+	return &Document{Content: content, Headings: parsed.Headings, Sections: parsed.Sections, Tasks: parsed.Tasks, Status: StatusFor(status)}
 }
 
 func TestUseCaseReadiness(t *testing.T) {
@@ -24,13 +24,13 @@ func TestUseCaseReadiness(t *testing.T) {
 		remaining int
 		ready     bool
 	}{
-		{"done all checked", "Готово", "## Критерии приёмки\n\n- [x] Готово.\n", true, 1, 1, 0, true},
-		{"done open", "Completed", "## Acceptance criteria\n\n- [ ] Open.\n", true, 1, 0, 1, false},
-		{"done missing", "Completed", "## Result\n\nDone.\n", false, 0, 0, 0, false},
-		{"done empty", "Готово", "## Критерии приемки\n\n## Проверка\n", true, 0, 0, 0, false},
-		{"non-done all checked", "In progress", "## Acceptance criteria\n\n- [x] Done.\n", true, 1, 1, 0, false},
-		{"non-done open", "В работе", "## Критерии приёмки\n\n- [ ] Открыто.\n", true, 1, 0, 1, false},
-		{"nested included and neighbor excluded", "Completed", "## Acceptance criteria\n\n- [x] First.\n\n### Details\n\n- [x] Nested.\n\n## Verification\n\n- [ ] Outside.\n", true, 2, 2, 0, true},
+		{"done all checked", "done", "<!-- toudocu:section acceptance-criteria -->\n## Критерии приёмки\n\n- [x] Готово.\n", true, 1, 1, 0, true},
+		{"done open", "done", "<!-- toudocu:section acceptance-criteria -->\n## Acceptance criteria\n\n- [ ] Open.\n", true, 1, 0, 1, false},
+		{"done missing", "done", "## Result\n\nDone.\n", false, 0, 0, 0, false},
+		{"done empty", "done", "<!-- toudocu:section acceptance-criteria -->\n## Критерии приемки\n\n## Проверка\n", true, 0, 0, 0, false},
+		{"non-done all checked", "in-progress", "<!-- toudocu:section acceptance-criteria -->\n## Acceptance criteria\n\n- [x] Done.\n", true, 1, 1, 0, false},
+		{"non-done open", "in-progress", "<!-- toudocu:section acceptance-criteria -->\n## Критерии приёмки\n\n- [ ] Открыто.\n", true, 1, 0, 1, false},
+		{"nested included and neighbor excluded", "done", "<!-- toudocu:section acceptance-criteria -->\n## Acceptance criteria\n\n- [x] First.\n\n### Details\n\n- [x] Nested.\n\n## Verification\n\n- [ ] Outside.\n", true, 2, 2, 0, true},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -55,14 +55,22 @@ func TestDoneUseCaseAcceptanceDiagnostics(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			_, docs, _ := createFixture(t)
+			path := filepath.Join(docs, "use-cases", "login.md")
 			writeTestFile(t, docs, "use-cases/login.md", "# UC-AUTH-01: Login\n\n- Identifier: UC-AUTH-01\n- Status: Completed\n- Module: MOD-AUTH\n\n"+test.acceptance)
+			expectedLine := fileLineContaining(t, path, "# UC-AUTH-01")
+			if test.acceptance != "" {
+				expectedLine = fileLineContaining(t, path, "## Acceptance criteria")
+			}
+			if strings.Contains(test.acceptance, "[ ]") {
+				expectedLine = fileLineContaining(t, path, "[ ]")
+			}
 			model := buildFixture(t, docs)
 			for _, issue := range model.Issues {
-				if issue.Code == test.code && issue.DocumentPath == "use-cases/login.md" && issue.Line == test.line {
+				if issue.Code == test.code && issue.DocumentPath == "use-cases/login.md" && issue.Line == expectedLine {
 					return
 				}
 			}
-			t.Fatalf("missing %s on line %d in %#v", test.code, test.line, model.Issues)
+			t.Fatalf("missing %s on line %d in %#v", test.code, expectedLine, model.Issues)
 		})
 	}
 }
@@ -81,9 +89,10 @@ func TestRoadmapReadinessDiagnostics(t *testing.T) {
 			_, docs, _ := createFixture(t)
 			writeTestFile(t, docs, "use-cases/login.md", "# UC-AUTH-01: Login\n\n- Identifier: UC-AUTH-01\n- Status: "+test.status+"\n- Module: MOD-AUTH\n\n## Acceptance criteria\n\n"+test.criterion+"\n")
 			writeTestFile(t, docs, "roadmap.md", "# Roadmap\n\nPlan.\n\n## MVP\n\n- Status: In progress\n\n"+test.roadmapTask+"\n")
+			expectedLine := fileLineContaining(t, filepath.Join(docs, "roadmap.md"), "UC-AUTH-01")
 			model := buildFixture(t, docs)
 			for _, issue := range model.Issues {
-				if issue.Code == "roadmap-item-completion-mismatch" && issue.Line == 9 && issue.Message == test.message {
+				if issue.Code == "roadmap-item-completion-mismatch" && issue.Line == expectedLine && issue.Message == test.message {
 					return
 				}
 			}
@@ -97,6 +106,7 @@ func TestUseCaseReadinessErrorsFailOrdinaryAndStrictCheckWithoutWrites(t *testin
 	path := filepath.Join(docs, "use-cases", "login.md")
 	content := "# UC-AUTH-01: Login\n\n- Identifier: UC-AUTH-01\n- Status: Completed\n- Module: MOD-AUTH\n\n## Acceptance criteria\n\n- [ ] Ready.\n"
 	writeTestFile(t, docs, "use-cases/login.md", content)
+	content = canonicalizeTestMarkdown("use-cases/login.md", content)
 	for _, strict := range []bool{false, true} {
 		args := []string{"check", docs, "--repository-root", root, "--stale-days", "0"}
 		if strict {
@@ -119,9 +129,10 @@ func TestUseCaseReadinessErrorsFailOrdinaryAndStrictCheckWithoutWrites(t *testin
 func TestDoneRoadmapSectionRequiresCompleteItems(t *testing.T) {
 	_, docs, _ := createFixture(t)
 	writeTestFile(t, docs, "roadmap.md", "# Roadmap\n\nPlan.\n\n## MVP\n\n- Status: Done\n\n- [ ] `UC-AUTH-01` User logs in.\n")
+	expectedLine := fileLineContaining(t, filepath.Join(docs, "roadmap.md"), "## MVP")
 	model := buildFixture(t, docs)
 	for _, issue := range model.Issues {
-		if issue.Code == "roadmap-section-status-mismatch" && issue.Line == 5 && issue.Message == "Done roadmap section MVP contains incomplete items." {
+		if issue.Code == "roadmap-section-status-mismatch" && issue.Line == expectedLine && issue.Message == "Done roadmap section MVP contains incomplete items." {
 			return
 		}
 	}

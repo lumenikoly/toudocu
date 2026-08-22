@@ -1,7 +1,10 @@
+<!-- toudocu
+version: 1
+architectureQuestion: Как изолируются ошибки документации и запускаемых проверок?
+-->
+
 # Isolating documentation and verification failures
 
-- Document type: Architecture
-- Architectural question: How are documentation errors and failed verification commands isolated?
 
 Read and structure problems become diagnostics attached to files; they never
 cause code to run. Work-item commands run only after explicit authorization,

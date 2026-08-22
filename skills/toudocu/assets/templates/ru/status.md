@@ -1,12 +1,17 @@
+<!-- toudocu
+version: 1
+status: {{STATUS}}
+stage: {{STAGE}}
+updated: {{DATE}}
+-->
+
 # Текущее состояние
 
-- Статус: {{STATUS}}
-- Этап: {{STAGE}}
-- Версия: {{VERSION}}
-- Последнее обновление: {{DATE}}
+Версия продукта: `{{VERSION}}`.
 
 {{CURRENT_STATE_SUMMARY}}
 
+<!-- toudocu:section summary -->
 ## Краткое состояние
 
 {{CURRENT_BEHAVIOR}}

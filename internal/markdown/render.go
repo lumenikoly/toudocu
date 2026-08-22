@@ -63,11 +63,6 @@ func Render(document *Document, config RenderConfig) (string, error) {
 			r.headingIDs[n] = h.ID
 		}
 	}
-	if config.SuppressMetadata {
-		if n := metadataList(document); n != nil {
-			r.suppressed[n] = true
-		}
-	}
 	engine := renderer.NewRenderer(renderer.WithNodeRenderers(util.Prioritized(r, 1000)))
 	var out bytes.Buffer
 	if err := engine.Render(&out, document.source, document.tree); err != nil {
@@ -90,22 +85,6 @@ func headingNode(root ast.Node, index int) ast.Node {
 		return ast.WalkContinue, nil
 	})
 	return found
-}
-func metadataList(d *Document) ast.Node {
-	var h1 ast.Node
-	for n := d.tree.FirstChild(); n != nil; n = n.NextSibling() {
-		if h, ok := n.(*ast.Heading); ok && h.Level == 1 {
-			h1 = n
-			break
-		}
-	}
-	if h1 == nil {
-		return nil
-	}
-	if l, ok := h1.NextSibling().(*ast.List); ok && !l.IsOrdered() && len(d.analysis.Metadata) > 0 {
-		return l
-	}
-	return nil
 }
 
 type nodeRenderer struct {

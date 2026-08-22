@@ -1,6 +1,8 @@
-# Архитектура {{PROJECT_TITLE}}
+<!-- toudocu
+version: 1
+-->
 
-- Тип документа: Architecture Overview
+# Архитектура {{PROJECT_TITLE}}
 
 {{SYSTEM_BOUNDARY_SUMMARY}}
 

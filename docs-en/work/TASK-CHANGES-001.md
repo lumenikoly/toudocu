@@ -1,15 +1,21 @@
+<!-- toudocu
+version: 1
+id: TASK-CHANGES-001
+status: done
+taskType: feature
+priority: high
+module: MOD-CHANGES
+useCase: UC-DOCS-05
+flow: FLOW-DOCS-CHANGES
+transitions: TR-SITE-005
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-10
+-->
+
 # TASK-CHANGES-001: View documentation changes
 
-- Status: Completed
-- Type: Feature
-- Priority: High
-- Module: MOD-CHANGES
-- Use case: UC-DOCS-05
-- Flow: FLOW-DOCS-CHANGES
-- Transitions: TR-SITE-005
-- Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-10
 
+<!-- toudocu:section result -->
 ## Result
 
 `toudocu changes` and `/changes/` show Git changes to source documentation as
@@ -17,19 +23,23 @@ an exact patch, rendered Markdown, and a semantic comparison of known entity
 types. They compare changed documents with a work item's declared impact and
 can output `ChangeSetReport` schema v1.
 
+<!-- toudocu:section behavior-change -->
 ## Behavior change
 
+<!-- toudocu:section before -->
 ### Before
 
 The portal shows only the current state, and review uses an external
 `git diff` without project semantics and task impact.
 
+<!-- toudocu:section after -->
 ### After
 
 `serve` provides a read-only Changes workspace with an explicit comparison
 range. Expensive views load only when requested, and a report becomes stale
 after files change. The CLI and CI can read the same data without modifying Git.
 
+<!-- toudocu:section scope -->
 ## Scope
 
 - the public Go facade and CLI commands;
@@ -39,6 +49,7 @@ after files change. The CLI and CI can read the same data without modifying Git.
 - pinned dependencies and their notices;
 - tests, canonical documentation, README, and changelog.
 
+<!-- toudocu:section out-of-scope -->
 ## Out of scope
 
 - changing Git index, history, refs or working tree;
@@ -48,6 +59,7 @@ after files change. The CLI and CI can read the same data without modifying Git.
 - pixel diff Mermaid or images;
 - Git diff source code outside documentation roots.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] `AC-01` Git adapter supports commit, index and working-tree snapshots,
@@ -77,6 +89,7 @@ after files change. The CLI and CI can read the same data without modifying Git.
 - [x] `AC-12` Static `build`, existing `check`, ProjectReport schema v1 and
   editor workflows remain compatible and pass regression tests.
 
+<!-- toudocu:section plan -->
 ## Plan
 
 - [x] Implement Git snapshots, comparison model and ChangeSetReport.
@@ -86,6 +99,7 @@ after files change. The CLI and CI can read the same data without modifying Git.
 - [x] Implement Changes UI and integration with document/task/screen pages.
 - [x] Update the documentation.
 
+<!-- toudocu:section verification -->
 ## Verification
 
 - `AC-10` → `TR-SITE-005` → `TestServeSiteIncludesEditor`
@@ -105,6 +119,7 @@ after files change. The CLI and CI can read the same data without modifying Git.
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root .`
 - `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/toudocu check ./docs --strict --stale-days 0`
 
+<!-- toudocu:section documentation-impact -->
 ## Documentation impact
 
 A module/use case/flow, architecture answer, YAML ADR, changes guide, HTTP/JSON
@@ -131,6 +146,7 @@ Screen Map, configuration, security, README, and changelog were updated.
 - `README.md`;
 - `CHANGELOG.md`.
 
+<!-- toudocu:section summary -->
 ## Current state
 
 This is the historical task for the first Changes release. Later work

@@ -1,15 +1,21 @@
+<!-- toudocu
+version: 1
+id: TASK-SITE-003
+status: done
+taskType: feature
+priority: high
+module: MOD-SITE
+useCase: UC-DOCS-01
+flow: FLOW-DOCS-BUILD
+screens: SC-SITE-HOME, SC-SITE-DOCUMENT, SC-SITE-USE-CASE, SC-SITE-SCREEN-MAP, SC-SITE-EDITOR, SC-CHANGES-WORKSPACE
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-10
+-->
+
 # TASK-SITE-003: Separate the Go core from the browser layer
 
-- Status: Completed
-- Type: Feature
-- Priority: High
-- Module: MOD-SITE
-- Use case: UC-DOCS-01
-- Flow: FLOW-DOCS-BUILD
-- Screens: SC-SITE-HOME, SC-SITE-DOCUMENT, SC-SITE-USE-CASE, SC-SITE-SCREEN-MAP, SC-SITE-EDITOR, SC-CHANGES-WORKSPACE
-- Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-10
 
+<!-- toudocu:section result -->
 ## Result
 
 The user receives one self-contained Toudocu Go binary: `build` creates a
@@ -20,8 +26,10 @@ and the trusted boundary for the filesystem, Git, and task verification;
 TypeScript/CSS form a separately built presentation layer embedded into the
 binary as ready-made assets.
 
+<!-- toudocu:section behavior-change -->
 ## Behavior change
 
+<!-- toudocu:section before -->
 ### Before
 
 The HTML shell and large fragments of individual workspace pages are assembled
@@ -33,6 +41,7 @@ executable JavaScript and the frontend is constrained by that contract. The
 existing Node build handles separate vendored bundles but does not form an
 independent frontend workspace.
 
+<!-- toudocu:section after -->
 ### After
 
 Go builds the Project Model, page view models, a safe HTML shell, bootstrap
@@ -52,6 +61,7 @@ preserved. Explicit product boundaries remain stable: the `build` and `serve`
 commands, their user-facing flags and exit codes, stable ID-based routes, and
 existing JSON schemas. No new `preview` command is introduced.
 
+<!-- toudocu:section scope -->
 ## Scope
 
 - A new frontend workspace `web/` with TypeScript/CSS source, lockfile,
@@ -86,6 +96,7 @@ existing JSON schemas. No new `preview` command is introduced.
 - Tracked generated portals only through rebuilding after semantic review and
   structural checks.
 
+<!-- toudocu:section out-of-scope -->
 ## Out of scope
 
 - Moving Markdown parsing, document classification, validation, relationship
@@ -113,6 +124,7 @@ existing JSON schemas. No new `preview` command is introduced.
 - Preserving the current internal package/DOM/asset implementation after the
   migration is complete.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] `AC-01` Go remains the sole source of the Project Model, diagnostics,
@@ -208,6 +220,7 @@ existing JSON schemas. No new `preview` command is introduced.
   licenses/notices for new frontend dependencies are current, and the complete
   Go, frontend, browser, security, and documentation regression passes.
 
+<!-- toudocu:section plan -->
 ## Plan
 
 - [x] Record an inventory of current assets, HTML string generation, DOM/URL
@@ -240,6 +253,7 @@ existing JSON schemas. No new `preview` command is introduced.
 - [x] Update every listed source document, add the architecture answer and its
   direct overview link, and update the release and migration notes.
 
+<!-- toudocu:section verification -->
 ## Verification
 
 - `AC-01` → `go test ./...`
@@ -266,6 +280,7 @@ existing JSON schemas. No new `preview` command is introduced.
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 
+<!-- toudocu:section documentation-impact -->
 ## Documentation impact
 
 The portal product contract changes: self-contained means no backend after

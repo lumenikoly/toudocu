@@ -1,9 +1,12 @@
-# FLOW-DOCS-SERVE: Локальная работа с порталом
+<!-- toudocu
+version: 1
+id: FLOW-DOCS-SERVE
+module: MOD-SITE
+useCase: UC-DOCS-03
+updated: 2026-08-10
+-->
 
-- Идентификатор: FLOW-DOCS-SERVE
-- Сценарий: UC-DOCS-03
-- Модуль: MOD-SITE
-- Последнее обновление: 2026-08-10
+# FLOW-DOCS-SERVE: Локальная работа с порталом
 
 Схема показывает основной жизненный цикл `serve`. Подробные ошибки и
 дополнительные пути описаны в

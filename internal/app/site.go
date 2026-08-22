@@ -15,7 +15,7 @@ import (
 
 const Version = "0.0.4"
 
-var fieldOrder = []string{"status", "type", "stage", "version", "author", "actor", "priority", "criticality", "module", "useCase", "flow", "screens", "transitions", "standards", "runbooks", "parentTask", "startScreen", "terminalScreens", "allowCycle", "route", "preview", "parentScreen", "component", "environment", "risk", "lastVerified", "supersededBy", "errors", "dependsOn", "source", "date", "plannedDate", "updated", "probability", "impact", "scope", "id", "tags"}
+var fieldOrder = []string{"id", "status", "taskType", "screenKind", "version", "author", "priority", "severity", "reproducibility", "regression", "module", "useCase", "flow", "screens", "transitions", "standards", "runbooks", "parentTask", "startScreen", "terminalScreens", "allowCycle", "route", "preview", "parentScreen", "component", "environment", "risk", "lastVerified", "supersededBy", "dependsOn", "date", "plannedDate", "updated", "probability", "impact", "scope"}
 
 var typeIcons = map[string]string{"overview": "⌂", "status": "◐", "roadmap": "→", "risks": "!", "ideas": "✦", "notes": "✎", "changelog": "↻", "use-case": "◎", "module": "▦", "architecture": "◇", "contract": "⇄", "decision": "◆", "flow": "⇢", "screen-map": "⌗", "screen-index": "⌗", "screen": "▣", "guide": "◫", "work": "☐", "draft": "✎", "reference": "≡", "standard": "✓", "quality-index": "✓", "runbook": "↻", "runbook-index": "↻", "document": "•"}
 
@@ -51,11 +51,35 @@ func navigationDocumentIcon(document *Document) (glyph, statusClass, statusLabel
 }
 
 func renderStatusChip(model *Model, status StatusInfo) string {
-	label := portalUI(model).Text("status." + status.Kind)
+	ui := portalUI(model)
+	label := ""
+	if status.Label != "" {
+		key := "status." + status.Label
+		if localized := ui.Text(key); localized != key {
+			label = localized
+		}
+	}
+	if label == "" {
+		label = ui.Text("status." + status.Kind)
+	}
 	if strings.HasPrefix(label, "status.") {
 		label = status.Label
 	}
 	return fmt.Sprintf(`<span class="status-chip status-%s" title="%s"><span aria-hidden="true">%s</span><span>%s</span></span>`, escapeAttr(status.Kind), escapeAttr(label), escapeHTML(status.Symbol), escapeHTML(label))
+}
+
+func localizedSemanticValue(ui frontend.UI, key, value string) string {
+	if value == "" {
+		return value
+	}
+	translationKey := "value." + value
+	if key == "status" {
+		translationKey = "status." + value
+	}
+	if localized := ui.Text(translationKey); localized != translationKey {
+		return localized
+	}
+	return value
 }
 
 func renderProgress(ui frontend.UI, stats TaskStats, label string) string {
@@ -616,16 +640,17 @@ func renderMetadata(model *Model, document *Document) string {
 		return ""
 	}
 	var b strings.Builder
+	ui := portalUI(model)
 	b.WriteString(`<dl class="metadata-grid">`)
 	seen := map[string]bool{}
 	for _, key := range fieldOrder {
 		if value := document.Metadata[key]; value != "" {
 			seen[key] = true
-			label := portalUI(model).Text("field." + key)
+			label := ui.Text("field." + key)
 			if strings.HasPrefix(label, "field.") {
 				label = key
 			}
-			b.WriteString(`<div><dt>` + escapeHTML(label) + `</dt><dd>` + escapeHTML(value) + `</dd></div>`)
+			b.WriteString(`<div><dt>` + escapeHTML(label) + `</dt><dd>` + escapeHTML(localizedSemanticValue(ui, key, value)) + `</dd></div>`)
 		}
 	}
 	keys := []string{}
@@ -636,7 +661,7 @@ func renderMetadata(model *Model, document *Document) string {
 	}
 	sort.Strings(keys)
 	for _, key := range keys {
-		b.WriteString(`<div><dt>` + escapeHTML(key) + `</dt><dd>` + escapeHTML(document.Metadata[key]) + `</dd></div>`)
+		b.WriteString(`<div><dt>` + escapeHTML(key) + `</dt><dd>` + escapeHTML(localizedSemanticValue(ui, key, document.Metadata[key])) + `</dd></div>`)
 	}
 	for _, extra := range document.MetadataExtras {
 		b.WriteString(`<div><dt>` + escapeHTML(extra.Key) + `</dt><dd>` + escapeHTML(extra.Value) + `</dd></div>`)
@@ -763,7 +788,7 @@ func renderDocumentPage(model *Model, document *Document) string {
 		computedStatus += renderTaskHierarchy(model, document)
 	}
 	if model.serveMode && document.Type == "work" {
-		id := stableEntityIDRE.FindString(document.Title)
+		id := document.Metadata["id"]
 		computedStatus = `<nav class="task-page-tabs" aria-label="` + escapeAttr(ui.Text("task.views")) + `"><span aria-current="page">` + escapeHTML(ui.Text("task.contract")) + `</span><a href="/changes/?task=` + escapeAttr(url.QueryEscape(id)) + `&amp;path=` + escapeAttr(url.QueryEscape(documentContextPath(model, document))) + `">` + escapeHTML(ui.Text("nav.changes")) + `</a></nav>` + computedStatus
 	}
 	statusChip := ""
@@ -813,11 +838,11 @@ func renderTaskHierarchy(model *Model, document *Document) string {
 		if child == nil {
 			continue
 		}
-		symbol := map[string]string{"done": "✓", "in-progress": "→", "blocked": "!", "cancelled": "×"}[child.statusName]
+		symbol := map[WorkItemStatus]string{WorkItemDone: "✓", WorkItemInProgress: "→", WorkItemBlocked: "!", WorkItemCancelled: "×"}[child.statusName]
 		if symbol == "" {
 			symbol = "•"
 		}
-		children.WriteString(`<li><span aria-hidden="true">` + symbol + `</span> ` + link(child) + ` <span class="badge">` + escapeHTML(child.Status.Label) + `</span></li>`)
+		children.WriteString(`<li><span aria-hidden="true">` + symbol + `</span> ` + link(child) + ` <span class="badge">` + escapeHTML(localizedSemanticValue(ui, "status", child.Status.Kind)) + `</span></li>`)
 	}
 	parent := ""
 	if candidate := byID[taskParentID(item)]; candidate != nil {
@@ -846,33 +871,35 @@ func docCard(model *Model, current string, document *Document) string {
 	workType := ""
 	workDetails := ""
 	if document.Type == "work" {
-		if normalized, ok := taskType(document.Metadata["type"]); ok {
-			workType = strings.ToLower(normalized)
+		if normalized, ok := taskType(document.Metadata["taskType"]); ok {
+			workType = string(normalized)
 		}
 		if workType == "bug" {
-			workDetails = `<p class="table-subtext">` + escapeHTML(ui.Text("work.severity")) + `: ` + escapeHTML(fallbackDash(document.Metadata["severity"])) +
-				` · ` + escapeHTML(ui.Text("work.priority")) + `: ` + escapeHTML(fallbackDash(document.Metadata["priority"])) +
-				` · ` + escapeHTML(ui.Text("work.reproducibility")) + `: ` + escapeHTML(fallbackDash(document.Metadata["reproducibility"])) +
-				` · ` + escapeHTML(ui.Text("work.regression")) + `: ` + escapeHTML(fallbackDash(document.Metadata["regression"])) +
+			workDetails = `<p class="table-subtext">` + escapeHTML(ui.Text("work.severity")) + `: ` + escapeHTML(fallbackDash(localizedSemanticValue(ui, "severity", document.Metadata["severity"]))) +
+				` · ` + escapeHTML(ui.Text("work.priority")) + `: ` + escapeHTML(fallbackDash(localizedSemanticValue(ui, "priority", document.Metadata["priority"]))) +
+				` · ` + escapeHTML(ui.Text("work.reproducibility")) + `: ` + escapeHTML(fallbackDash(localizedSemanticValue(ui, "reproducibility", document.Metadata["reproducibility"]))) +
+				` · ` + escapeHTML(ui.Text("work.regression")) + `: ` + escapeHTML(fallbackDash(localizedSemanticValue(ui, "regression", document.Metadata["regression"]))) +
 				` · ` + escapeHTML(ui.Text("work.module")) + `: ` + escapeHTML(fallbackDash(document.Metadata["module"])) + `</p>`
 		}
 	}
-	searchText := strings.Join([]string{document.Title, document.Description, document.SourcePath, document.Metadata["module"], document.Metadata["useCase"], document.Metadata["screens"]}, " ")
-	severity, _ := normalizedEnum(document.Metadata["severity"], map[string]string{"критическая": "critical", "critical": "critical", "высокая": "high", "high": "high", "средняя": "medium", "medium": "medium", "низкая": "low", "low": "low"})
-	regression, _ := normalizedEnum(document.Metadata["regression"], map[string]string{"да": "yes", "yes": "yes", "true": "yes", "нет": "no", "no": "no", "false": "no"})
-	reproducibility, _ := normalizedEnum(document.Metadata["reproducibility"], map[string]string{"всегда": "always", "always": "always", "часто": "often", "often": "often", "иногда": "sometimes", "sometimes": "sometimes", "редко": "rarely", "rarely": "rarely", "не воспроизводится": "missing", "not reproduced": "missing", "неизвестно": "missing", "unknown": "missing"})
+	searchText := strings.Join([]string{documentStableID(document), document.Title, document.Description, document.SourcePath}, " ")
+	severity := document.Metadata["severity"]
+	regression := document.Metadata["regression"]
+	reproducibility := document.Metadata["reproducibility"]
+	if reproducibility == "not-reproduced" || reproducibility == "unknown" {
+		reproducibility = "missing"
+	}
 	causeState := ""
 	regressionTestState := ""
 	if workType == "bug" {
 		causeState = "missing"
 		regressionTestState = "missing"
 		if items := parseWorkItems(document); len(items) == 1 {
-			cause, found := workSection(items[0], "причина", "cause", "root cause")
-			value := canonicalText(cause.Text)
-			if found && value != "" && value != "не установлена" && value != "unknown" && value != "not established" {
+			cause, found := workSection(items[0], SectionKindCause)
+			if found && strings.TrimSpace(cause.Text) != "" {
 				causeState = "established"
 			}
-			criteria, _ := workSection(items[0], "критерии приёмки", "критерии приемки", "acceptance criteria")
+			criteria, _ := workSection(items[0], SectionKindAcceptanceCriteria)
 			if bugHasRegressionCoverage(items[0], criteria.Tasks) {
 				regressionTestState = "present"
 			}
@@ -906,7 +933,7 @@ func workFilterControls(ui frontend.UI, includeStatus bool) string {
 		statusControl +
 		`<select data-filter-control="workType"><option value="all">` + escapeHTML(ui.Text("filter.all")) + `</option><option value="feature">` + escapeHTML(ui.Text("filter.feature")) + `</option><option value="bug">` + escapeHTML(ui.Text("filter.bug")) + `</option><option value="maintenance">` + escapeHTML(ui.Text("filter.maintenance")) + `</option><option value="documentation">` + escapeHTML(ui.Text("filter.documentation")) + `</option><option value="research">` + escapeHTML(ui.Text("filter.research")) + `</option></select>` +
 		`<select data-filter-control="severity"><option value="all">` + escapeHTML(ui.Text("filter.anySeverity")) + `</option><option value="critical">` + escapeHTML(ui.Text("filter.critical")) + `</option><option value="high">` + escapeHTML(ui.Text("filter.high")) + `</option></select>` +
-		`<select data-filter-control="regression"><option value="all">` + escapeHTML(ui.Text("filter.anyRegression")) + `</option><option value="yes">` + escapeHTML(ui.Text("filter.regressions")) + `</option></select>` +
+		`<select data-filter-control="regression"><option value="all">` + escapeHTML(ui.Text("filter.anyRegression")) + `</option><option value="true">` + escapeHTML(ui.Text("filter.regressions")) + `</option></select>` +
 		`<select data-filter-control="reproducibility"><option value="all">` + escapeHTML(ui.Text("filter.anyReproducibility")) + `</option><option value="always">` + escapeHTML(ui.Text("filter.alwaysReproduced")) + `</option><option value="missing">` + escapeHTML(ui.Text("filter.notReproduced")) + `</option></select>` +
 		`<select data-filter-control="cause"><option value="all">` + escapeHTML(ui.Text("filter.anyCause")) + `</option><option value="missing">` + escapeHTML(ui.Text("filter.noCause")) + `</option></select>` +
 		`<select data-filter-control="regressionTest"><option value="all">` + escapeHTML(ui.Text("filter.anyRegressionTest")) + `</option><option value="missing">` + escapeHTML(ui.Text("filter.noRegressionTest")) + `</option></select>` +
@@ -968,7 +995,7 @@ func renderComputedStatus(model *Model, current string) string {
 		if document := model.DocByPath[target]; document != nil {
 			href = relativeURL(current, document.OutputPath)
 		}
-		status := StatusFor(ui.Text("filter.planned"))
+		status := StatusFor("planned")
 		if next.CompletionSource == "use-case-status" && next.TargetStatus != nil {
 			status = *next.TargetStatus
 		}
@@ -1195,7 +1222,7 @@ func renderKnowledgeCatalogPage(model *Model, kind string) string {
 			`"><div class="card-kicker">` + renderStatusChip(model, document.Status) + `<span class="badge">` + escapeHTML(runbook.Freshness) +
 			`</span></div><h3><a href="` + escapeAttr(relativeURL(current, document.OutputPath)) + `">` + escapeHTML(runbook.Title) +
 			`</a></h3><p>` + escapeHTML(truncate(document.Description, 180)) + `</p><p class="table-subtext">` + escapeHTML(ui.Text("runbooks.environment")) + `: ` +
-			escapeHTML(fallbackDash(runbook.Environment)) + ` · ` + escapeHTML(ui.Text("runbooks.risk")) + `: ` + escapeHTML(fallbackDash(runbook.Risk)) +
+			escapeHTML(fallbackDash(runbook.Environment)) + ` · ` + escapeHTML(ui.Text("runbooks.risk")) + `: ` + escapeHTML(fallbackDash(localizedSemanticValue(ui, "risk", runbook.Risk))) +
 			` · ` + escapeHTML(ui.Text("runbooks.lastVerified")) + `: ` + escapeHTML(fallbackDash(runbook.LastVerified)) + `</p><div class="card-path">` +
 			escapeHTML(runbook.Document) + `</div></article>`)
 	}

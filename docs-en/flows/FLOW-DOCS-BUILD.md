@@ -1,9 +1,14 @@
+<!-- toudocu
+version: 1
+id: FLOW-DOCS-BUILD
+module: MOD-SITE
+useCase: UC-DOCS-01
+updated: 2026-08-10
+-->
+
 # FLOW-DOCS-BUILD: Building a Static HTTP Portal
 
-- Identifier: FLOW-DOCS-BUILD
 - Scenario: UC-DOCS-01
-- Module: MOD-SITE
-- Last updated: 2026-08-10
 
 The diagram follows `build` from the command to a directory that can be
 published on ordinary HTTP hosting. Exact options and exit codes are defined in

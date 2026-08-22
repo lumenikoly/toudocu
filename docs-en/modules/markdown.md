@@ -1,8 +1,12 @@
+<!-- toudocu
+version: 1
+id: MOD-MARKDOWN
+status: done
+updated: 2026-08-10
+-->
+
 # Secure Markdown
 
-- Identifier: MOD-MARKDOWN
-- Status: Done
-- Last updated: 2026-08-10
 
 This module parses the supported CommonMark and GFM syntax once, produces one
 normalized structure, and renders safe HTML. Embedded content is never
@@ -14,6 +18,7 @@ Toudocu supports headings, paragraphs, emphasis, block quotes, links, safe
 images, lists, task lists, tables, strikethrough, autolinks, code, and a limited
 set of Mermaid diagrams. No external Markdown service is required.
 
+<!-- toudocu:section code-location -->
 ## Code locations
 
 - `internal/markdown/` — parsing, analysis, and HTML rendering;
@@ -21,6 +26,7 @@ set of Mermaid diagrams. No external Markdown service is required.
 - `internal/app/markdown_render.go` — portal integration;
 - `internal/app/utils.go` — normalization and escaping.
 
+<!-- toudocu:section boundaries -->
 ## Boundaries
 
 The internal Goldmark tree is not part of the public Go API or JSON reports.
@@ -28,6 +34,7 @@ CommonMark plus Table, TaskList, Strikethrough, and Linkify are enabled.
 Attributes, front matter, footnotes, definition lists, and typographer are not
 supported. The project model validates repository links and copied assets.
 
+<!-- toudocu:section business-rules -->
 ## Business rules
 
 ### BR-MD-001: User HTML is a policy error
@@ -48,6 +55,7 @@ Only `flowchart`, `stateDiagram-v2`, and `sequenceDiagram` are allowed, up to
 arrows do not become requirements, acceptance criteria, or roadmap items. The
 screen map comes from tables in `screens/SC-*.md`, not from Mermaid text.
 
+<!-- toudocu:section invariants -->
 ## Invariants
 
 - Fenced code is not parsed as headings, links, or tasks.
@@ -61,11 +69,13 @@ screen map comes from tables in `screens/SC-*.md`, not from Mermaid text.
   API contracts.
 - A document containing Mermaid is related to a use case or architecture.
 
+<!-- toudocu:section stable-interfaces -->
 ## Stable interfaces
 
 `check`, `build`, `serve`, Editor, and Changes all use the same normalized
 model. Low-level parser and renderer functions are intentionally private.
 
+<!-- toudocu:section related-use-cases -->
 ## Related use cases
 
 - [Build the portal](../use-cases/build-portal.md)

@@ -1,15 +1,18 @@
+<!-- toudocu
+version: 1
+id: UC-DOCS-03
+status: done
+priority: medium
+module: MOD-SITE
+screens: SC-SITE-HOME, SC-SITE-EDITOR, SC-SITE-DOCUMENT, SC-SITE-API-DOCS
+startScreen: SC-SITE-HOME
+terminalScreens: SC-SITE-DOCUMENT, SC-SITE-API-DOCS
+allowCycle: true
+updated: 2026-08-12
+-->
+
 # UC-DOCS-03: View documentation on a local server
 
-- Identifier: UC-DOCS-03
-- Status: Completed
-- Actor: Developer
-- Module: MOD-SITE
-- Priority: Medium
-- Screens: SC-SITE-HOME, SC-SITE-EDITOR, SC-SITE-DOCUMENT, SC-SITE-API-DOCS
-- Start screen: SC-SITE-HOME
-- Terminal screens: SC-SITE-DOCUMENT, SC-SITE-API-DOCS
-- Allow cycle: Yes
-- Last updated: 2026-08-12
 
 A developer runs the portal on their computer, reads documentation, and edits
 source files when needed. After a save, Toudocu rereads the sources and displays
@@ -24,12 +27,14 @@ the updated result.
 - `.md`, `.yaml`, `.yml`, and `.json` files inside the documentation root;
 - a local Git repository when Changes is needed.
 
+<!-- toudocu:section prerequisites -->
 ## Preconditions
 
 - Toudocu is available;
 - the developer can read documentation and write to the documentation and
   output roots.
 
+<!-- toudocu:section main-scenario -->
 ## Main flow
 
 1. The developer runs `toudocu serve ./docs`.
@@ -81,6 +86,7 @@ the updated result.
 - `--host 0.0.0.0` exposes the server to the local network without TLS or
   authentication, and Toudocu prints a warning.
 
+<!-- toudocu:section postconditions -->
 ## Postconditions
 
 While the command runs, the portal is available over HTTP. The Editor API can
@@ -90,6 +96,7 @@ and discussions, but it never writes Git. After `Ctrl+C`, the server and local
 APIs disappear. `/_toudocu/locales/<locale>/` is read-only and has no Editor,
 Changes, discussions, API docs, or workspace commands.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] While the command runs, the portal and allowed local APIs are available
@@ -99,6 +106,7 @@ Changes, discussions, API docs, or workspace commands.
 - [x] The translation URL is read-only and has no Editor, Changes,
   discussions, API docs, or workspace commands.
 
+<!-- toudocu:section business-rules -->
 ## Business rules
 
 - [BR-SITE-003](../modules/site.md#br-site-003-the-local-server-exposes-files-only-through-explicit-interfaces)
@@ -107,6 +115,7 @@ Changes, discussions, API docs, or workspace commands.
 - [BR-SITE-014](../modules/site.md#br-site-014-roadmap-changes-use-only-a-constrained-operation)
 - [BR-SITE-015](../modules/site.md#br-site-015-version-check-does-not-affect-portal-availability)
 
+<!-- toudocu:section implementation -->
 ## Implementation
 
 - [FLOW-DOCS-SERVE](../flows/FLOW-DOCS-SERVE.md)

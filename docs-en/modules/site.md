@@ -1,8 +1,11 @@
-# Static portal
+<!-- toudocu
+version: 1
+id: MOD-SITE
+status: done
+updated: 2026-08-21
+-->
 
-- Identifier: MOD-SITE
-- Status: Done
-- Last updated: 2026-08-13
+# Static portal
 
 The module produces backend-independent HTML pages, navigation, static JSON
 resources, and a typed `report.json` from the completed project model.
@@ -13,6 +16,7 @@ Make project documentation convenient for people on ordinary HTTP(S) static
 hosting or through local `serve`, while also providing the complete model to CI
 and agents.
 
+<!-- toudocu:section code-location -->
 ## Code location
 
 - application services and report: `internal/app/site.go`, `internal/app/report_types.go`;
@@ -27,12 +31,14 @@ and agents.
 - shared Editor and Changes shell: `internal/site/workspace.go`;
 - theme and safe-branding configuration: `internal/app/site_config.go`.
 
+<!-- toudocu:section boundaries -->
 ## Module boundaries
 
 Static generation does not revalidate business entities or edit Markdown. Only
 the explicit `serve` mode provides workspace operations, after which it rebuilds
 the model through `MOD-MODEL`.
 
+<!-- toudocu:section business-rules -->
 ## Business rules
 
 ### BR-SITE-001: Cleaning output does not affect protected directories
@@ -196,6 +202,7 @@ version. Every failure remains silent. `--no-update-check`, static builds,
 locale mounts, and direct translation serves keep the capability disabled, the
 endpoint unavailable, and perform no check.
 
+<!-- toudocu:section invariants -->
 ## Invariants
 
 - the source `index.md` is displayed by the dashboard rather than a duplicate
@@ -251,6 +258,7 @@ endpoint unavailable, and perform no check.
 - `ProjectReport` and HTML are built from the same model;
 - generated files never become editable documentation sources.
 
+<!-- toudocu:section stable-interfaces -->
 ## Stable interfaces
 
 - `GenerateSite`;
@@ -261,6 +269,7 @@ endpoint unavailable, and perform no check.
 - `ProjectReport` schema v1;
 - HTML entrypoint `index.html` and machine-readable `report.json`.
 
+<!-- toudocu:section related-use-cases -->
 ## Related use cases
 
 - [UC-DOCS-01: Build the portal](../use-cases/build-portal.md)

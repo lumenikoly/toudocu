@@ -1,6 +1,9 @@
+<!-- toudocu
+version: 1
+-->
+
 # Architecture
 
-- Document type: Architecture Overview
 
 Toudocu is a local Go tool with no third-party Go dependencies. It reads source
 Markdown, validates relationships, and builds a static HTML portal. The same

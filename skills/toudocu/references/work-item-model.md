@@ -14,7 +14,7 @@ mechanically into backend, frontend, tests, and docs unless each is itself an
 independent outcome. Code, tests, and documentation belong to the outcome they
 verify.
 
-A child may declare exactly one `Parent` or `Родительская задача`. Parent means
+A child may declare exactly one canonical `parentTask`. Parent means
 decomposition; Dependencies means execution and completion ordering. Never
 merge or infer either relation from the other. Children are computed from
 Parent, so do not add a source `Children` field.
@@ -24,8 +24,8 @@ boundaries, shared constraints, integration acceptance criteria, and final
 documentation consistency. Do not duplicate each child's detailed acceptance
 criteria in the parent.
 
-For the draft state, represented by `Draft` or `Черновик`, require a valid
-Status, Type, and non-empty Result.
+For canonical status `draft`, require `id`, `status`, `taskType`, and a
+non-empty `result` section.
 
 For every non-draft status, also require:
 
@@ -48,7 +48,8 @@ numbered Plan, Acceptance criteria, Verification, regression-test coverage,
 and Documentation impact. A technical bug may set Use case to Not applicable
 only with a non-empty Relationship to user behavior section.
 
-Tasks may declare an optional `Flow`/`Process` field with an existing `FLOW-*`.
+Tasks may declare optional canonical `flow`, `screens`, and `transitions`
+fields. `flow` references an existing `FLOW-*`.
 It adds the flow document to task context but does not replace the use case or
 acceptance criteria. `Screens` and `Transitions` may reference existing `SC-*`
 and `TR-*`; task context then includes selected screen records, incident
@@ -65,10 +66,12 @@ numbered steps without checkboxes, so a bug keeps checkboxes only in acceptance
 criteria.
 
 ```md
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [ ] `AC-01` An invalid token is rejected.
 
+<!-- toudocu:section verification -->
 ## Verification
 
 - `AC-01` -> `go test ./internal/auth -run TestInvalidToken`
@@ -91,8 +94,7 @@ descendant status summary, never the full contents of the subtree. `task verify
 the user needs aggregated documentation impact for the entire subtree.
 
 Tasks may explicitly list project standards and affected operational
-procedures through the recognized metadata keys `Standards` or `Стандарты` and
-`Affected runbooks` or `Затронутые runbooks`. Task context includes those
+procedures through canonical metadata keys `standards` and `runbooks`. Task context includes those
 `STD-*` and `RB-*` records and documents without matching scope globs
 automatically.
 When Standards is non-empty, readiness and full verification also require

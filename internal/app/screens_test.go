@@ -78,9 +78,9 @@ flowchart LR
 
 ## Переходы
 
-| ID | Сценарий | Действие | Условие | Результат |
-|---|---|---|---|---|
-| TR-AUTH-001 | UC-AUTH-01 | Войти | Всегда | SC-AUTH-LOGIN |
+| ID | Сценарий | Действие | Условие | Результат | Тип |
+|---|---|---|---|---|---|
+| TR-AUTH-001 | UC-AUTH-01 | Войти | Всегда | SC-AUTH-LOGIN | navigation |
 `)
 	writeTestFile(t, docs, "screens/SC-AUTH-LOGIN.md", `# SC-AUTH-LOGIN: Вход
 
@@ -353,7 +353,7 @@ func TestScreenPreviewSafetyAndCopy(t *testing.T) {
 		t.Fatal(err)
 	}
 	withPreview := func(value string) {
-		content := strings.Replace(string(original), "- Маршрут: /login", "- Маршрут: /login\n- Превью: `"+value+"`", 1)
+		content := strings.Replace(string(original), "route: /login", "route: /login\npreview: "+value, 1)
 		writeTestFile(t, docs, "screens/SC-AUTH-LOGIN.md", content)
 	}
 

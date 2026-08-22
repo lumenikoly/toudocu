@@ -7,7 +7,7 @@ import (
 )
 
 func hierarchyRef(item *WorkItem) TaskHierarchyRef {
-	return TaskHierarchyRef{ID: item.ID, Title: item.Title, Status: item.statusName, HasBlocker: strings.TrimSpace(item.Blocker) != ""}
+	return TaskHierarchyRef{ID: item.ID, Title: item.Title, Status: string(item.statusName), HasBlocker: strings.TrimSpace(item.Blocker) != ""}
 }
 
 func taskHierarchy(model *Model, item *WorkItem) TaskHierarchy {
@@ -80,7 +80,7 @@ func BuildTaskTree(model *Model, taskID string) (TaskTreeReport, error) {
 	seen := map[string]bool{}
 	var node func(*WorkItem) TaskTreeNode
 	node = func(current *WorkItem) TaskTreeNode {
-		result := TaskTreeNode{ID: current.ID, Status: current.statusName, Title: current.Title, Children: []TaskTreeNode{}, statusLabel: current.Status.Label}
+		result := TaskTreeNode{ID: current.ID, Status: string(current.statusName), Title: current.Title, Children: []TaskTreeNode{}, statusLabel: current.Status.Label}
 		if seen[current.ID] {
 			return result
 		}

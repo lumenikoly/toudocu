@@ -1,3 +1,7 @@
+<!-- toudocu
+version: 1
+-->
+
 # Roadmap
 
 The roadmap shows what Toudocu already includes and which areas continue to
@@ -5,9 +9,13 @@ evolve. A linked `UC-*` is complete only when its document has a `done`-group
 status, at least one acceptance checkbox, and every checkbox in that section
 checked. The roadmap checkbox must match that result.
 
+<!-- toudocu:section roadmap-stage -->
+<!-- toudocu
+status: done
+-->
+
 ## Implemented
 
-- Status: Completed
 
 - [x] `UC-DOCS-01` Build a self-contained documentation portal.
 - [x] `UC-DOCS-02` Check documentation structure and relationships.
@@ -25,15 +33,23 @@ checked. The roadmap checkbox must match that result.
   `translate` processes.
 - [x] `DLV-SELF-DOCS-01` Maintain this repository's own Toudocu documentation.
 
+<!-- toudocu:section roadmap-stage -->
+<!-- toudocu
+status: done
+-->
+
 ## Version 0.0.2
 
-- Status: Done
 
 - [x] `DLV-RELEASE-03` Add the built-in drafts section to the portal, search, Editor, and public report; synchronize release documentation in Russian and English.
 
+<!-- toudocu:section roadmap-stage -->
+<!-- toudocu
+status: done
+-->
+
 ## Version 0.0.1
 
-- Status: Completed
 
 - [x] `UC-AGENT-01` Install and maintain the embedded AI skill.
 - [x] `DLV-ROADMAP-001` Add an outcome to an existing roadmap stage from

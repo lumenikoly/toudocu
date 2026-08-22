@@ -65,6 +65,9 @@ func (s *documentationServer) roadmapState() (editorRoadmapState, editorFile, er
 	analysis := analyzeMarkdown(file.Content)
 	stages := make([]editorRoadmapStage, 0, len(analysis.Sections))
 	for _, section := range analysis.Sections {
+		if section.Kind != SectionKindRoadmapStage {
+			continue
+		}
 		stages = append(stages, editorRoadmapStage{Anchor: section.ID, Title: section.Title, Status: StatusFor(section.Metadata["status"]), ItemCount: len(section.Tasks)})
 	}
 	return editorRoadmapState{SchemaVersion: 1, Revision: s.revision, Path: roadmapSourcePath, Digest: file.Digest, SuggestedID: suggestedRoadmapID(file.Content), Stages: stages}, file, nil

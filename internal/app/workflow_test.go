@@ -157,7 +157,7 @@ func TestSearchDocumentationRankingAndSections(t *testing.T) {
 	}
 }
 
-func TestSearchIndexMetadataOrderIsDeterministic(t *testing.T) {
+func TestSearchIndexExcludesSemanticAnnotations(t *testing.T) {
 	document := &Document{
 		Title:      "Release",
 		SourcePath: "status.md",
@@ -176,13 +176,13 @@ func TestSearchIndexMetadataOrderIsDeterministic(t *testing.T) {
 	if len(first) != 1 || len(second) != 1 || first[0].Text != second[0].Text {
 		t.Fatalf("search index changed between builds: %#v %#v", first, second)
 	}
-	want := "release status md ready 0 0 1 stable"
+	want := "release status md"
 	if first[0].Text != want {
 		t.Fatalf("search index metadata order = %q, want %q", first[0].Text, want)
 	}
-	terms := strings.Join(metadataSearchTerms(document, true), " ")
-	if terms != "status Ready version 0.0.1 Channel stable" {
-		t.Fatalf("CLI metadata order = %q", terms)
+	model = &Model{Documents: []*Document{document}}
+	if report, err := SearchDocumentation(model, "stable", 20); err != nil || report.Total != 0 {
+		t.Fatalf("semantic annotation leaked into CLI search: report=%#v err=%v", report, err)
 	}
 }
 
@@ -202,7 +202,7 @@ func TestTaskInitAndScaffoldAtomicCreate(t *testing.T) {
 		t.Fatalf("allocation: %#v", report)
 	}
 	data, _ := os.ReadFile(filepath.Join(docs, filepath.FromSlash(report.Path)))
-	if !strings.Contains(string(data), "- Status: Draft") || !strings.Contains(string(data), "## Symptom") {
+	if !strings.Contains(string(data), "status: draft") || !strings.Contains(string(data), "<!-- toudocu:section symptom -->\n## Symptom") {
 		t.Fatalf("english scaffold: %s", data)
 	}
 	entity, err := Scaffold(Options{InputDirectory: docs, EntityKind: "decision", EntityID: "ADR-002", Title: "Boundary", Language: "ru"})
@@ -240,6 +240,7 @@ func TestTaskArchiveAndRestoreRoundTrip(t *testing.T) {
 	root, docs, _ := createFixture(t)
 	original := terminalTaskFixture("Done")
 	writeTestFile(t, docs, "work/TASK-AUTH-021.md", original)
+	original = canonicalizeTestMarkdown("work/TASK-AUTH-021.md", original)
 	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
 	if err != nil {
 		t.Fatal(err)

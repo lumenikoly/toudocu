@@ -1,27 +1,35 @@
+<!-- toudocu
+version: 1
+id: TASK-CHANGES-002
+status: done
+taskType: feature
+priority: normal
+module: MOD-CHANGES
+useCase: UC-AGENT-FEEDBACK-01
+screens: SC-CHANGES-WORKSPACE
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-12
+-->
+
 # TASK-CHANGES-002: Упростить рабочую область изменений
 
-- Статус: Выполнено
-- Тип: Feature
-- Приоритет: Обычный
-- Модуль: MOD-CHANGES
-- Сценарий: UC-AGENT-FEEDBACK-01
-- Экраны: SC-CHANGES-WORKSPACE
-- Стандарты: STD-GO-001, STD-DOCS-001
-- Последнее обновление: 2026-08-12
-
+<!-- toudocu:section result -->
 ## Результат
 
 После выполнения задачи раздел «Изменения» стал сразу открывать первый
 подходящий diff. В основном интерфейсе остались список файлов, поиск, статус и
 обсуждения; параметры Git и диагностические сообщения открывались по запросу.
 
+<!-- toudocu:section behavior-change -->
 ## Изменение поведения
 
+<!-- toudocu:section before -->
 ### Было
 
 До выбора файла большую часть экрана занимали параметры Git, метрики и
 дополнительные фильтры, а diff был скрыт за вкладкой «Сводка».
 
+<!-- toudocu:section after -->
 ### Станет
 
 Первый подходящий файл и его diff открываются автоматически. Диапазон Git и
@@ -29,6 +37,7 @@
 компьютере, планшете и телефоне прокручиваются отдельные панели, а не вся
 страница по горизонтали.
 
+<!-- toudocu:section scope -->
 ## Область изменения
 
 - `internal/site/` — HTML рабочей области и тесты шаблонов;
@@ -37,6 +46,7 @@
 - `internal/site/assets/generated/` — результат сборки из `web/`;
 - `docs/screens/SC-CHANGES-WORKSPACE.md`, эта задача и `CHANGELOG.md`.
 
+<!-- toudocu:section out-of-scope -->
 ## Не входит в задачу
 
 - Go-фасад, `ChangeSetReport`, структуры данных обсуждений, HTTP API и передача
@@ -44,6 +54,7 @@
 - полный визуальный пересмотр Toudocu и изменение `DESIGN.md`;
 - возможности статического портала и переводов.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Критерии приёмки
 
 - [x] `AC-01` Шапка объединяет название, раскрывающийся диапазон Git, сводку по
@@ -64,6 +75,7 @@
 - [x] `AC-07` Каноническая документация и сгенерированные браузерные ресурсы
   согласованы с реализацией.
 
+<!-- toudocu:section plan -->
 ## План
 
 - [x] Упростить шаблон и удалить ненужные ветви состояния и фильтров.
@@ -72,6 +84,7 @@
 - [x] Обновить модульные и браузерные регрессионные тесты.
 - [x] Обновить документацию и пересобрать браузерные ресурсы.
 
+<!-- toudocu:section verification -->
 ## Проверка
 
 - `AC-01` → `go test ./internal/site && npm --prefix web run test:browser`
@@ -85,6 +98,7 @@
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `go vet ./... && go mod verify && npm --prefix web run typecheck`
 
+<!-- toudocu:section documentation-impact -->
 ## Влияние на документацию
 
 Были обновлены экран `SC-CHANGES-WORKSPACE`, эта задача и корневой

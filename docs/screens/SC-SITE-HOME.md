@@ -1,12 +1,15 @@
-# SC-SITE-HOME: Главная портала
+<!-- toudocu
+version: 1
+id: SC-SITE-HOME
+status: done
+screenKind: page
+module: MOD-SITE
+route: /
+preview: ../assets/screens/site-home.png
+updated: 2026-08-10
+-->
 
-- Идентификатор: SC-SITE-HOME
-- Тип: Страница
-- Модуль: MOD-SITE
-- Статус: Реализован
-- Маршрут: `/`
-- Превью: `../assets/screens/site-home.png`
-- Последнее обновление: 2026-08-10
+# SC-SITE-HOME: Главная портала
 
 Главная страница быстро отвечает на три вопроса: что это за проект, в каком он
 состоянии и куда идти дальше. Сначала показаны название, описание и основные
@@ -22,6 +25,7 @@
 
 ## Переходы
 
+<!-- toudocu:table transitions columns=id,useCase,action,condition,target,kind -->
 | ID | Сценарий | Действие | Условие | Результат | Тип |
 |---|---|---|---|---|---|
 | TR-SITE-001 | UC-DOCS-03 | Открыть документ | Документ выбран | SC-SITE-DOCUMENT | navigation |

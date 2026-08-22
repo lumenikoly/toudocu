@@ -1,13 +1,18 @@
+<!-- toudocu
+version: 1
+id: STD-GO-001
+status: active
+scope: Go-код и тесты репозитория
+updated: 2026-08-11
+-->
+
 # STD-GO-001: Go code quality
 
-- Identifier: STD-GO-001
-- Status: Active
-- Scope: Repository Go code and tests
-- Last updated: 2026-08-10
 
 This standard keeps the Toudocu implementation small, predictable,
 self-contained, and verifiable on supported Go platforms.
 
+<!-- toudocu:section rules -->
 ## Rules
 
 1. Do not add an external dependency without an ADR, a pinned version, notices,
@@ -21,6 +26,7 @@ self-contained, and verifiable on supported Go platforms.
 6. Keep ordinary `check`, `build`, `serve`, and `task context` from executing
    work-item commands.
 
+<!-- toudocu:section automated-checks -->
 ## Automated checks
 
 - `gofmt -w .`;

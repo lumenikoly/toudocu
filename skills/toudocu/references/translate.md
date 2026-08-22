@@ -85,11 +85,10 @@ Mermaid labels, notes, and arrow text. Introduce an uncommon preserved token
 after its plain-language meaning when the reader needs both, for example
 `Create the participant (REGISTER)`.
 
-A metadata key may use a recognized target-locale alias. An enum or status value
-may be localized only when its normalized semantic value remains unchanged.
-Compare normalized values, never lexical similarity: `Готово` has
-`status.kind=done` and translates to `Completed` or `Done`, never `Ready`;
-`Готово к работе` has `status.kind=planned` and translates to `Ready`.
+Preserve every `toudocu` annotation byte-for-byte unless the source semantic
+contract itself changed. Metadata keys, canonical enum values, section kinds,
+table kinds, and canonical column IDs are never translated. Translate only
+reader-facing headings, table headers, and prose.
 
 Do not read another locale root or other target-locale files for general
 context. For parity discovery, compare relative paths, manifest source digests,

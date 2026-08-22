@@ -1,9 +1,12 @@
-# FLOW-TASK-WORKFLOW: Работа с проверяемой задачей
+<!-- toudocu
+version: 1
+id: FLOW-TASK-WORKFLOW
+module: MOD-CLI
+useCase: UC-TASK-01, UC-TASK-02, UC-TASK-03
+updated: 2026-08-21
+-->
 
-- Идентификатор: FLOW-TASK-WORKFLOW
-- Сценарий: UC-TASK-01, UC-TASK-02, UC-TASK-03
-- Модуль: MOD-CLI
-- Последнее обновление: 2026-08-21
+# FLOW-TASK-WORKFLOW: Работа с проверяемой задачей
 
 Схема связывает подготовку задачи, безопасное получение контекста и отдельный,
 явно разрешённый запуск команд проверки.

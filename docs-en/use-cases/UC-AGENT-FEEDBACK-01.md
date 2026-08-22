@@ -1,19 +1,23 @@
+<!-- toudocu
+version: 1
+id: UC-AGENT-FEEDBACK-01
+status: done
+priority: high
+module: MOD-AGENT-FEEDBACK
+screens: SC-SITE-DOCUMENT, SC-CHANGES-WORKSPACE
+startScreen: SC-SITE-DOCUMENT
+terminalScreens: SC-SITE-DOCUMENT, SC-CHANGES-WORKSPACE
+updated: 2026-08-14
+-->
+
 # UC-AGENT-FEEDBACK-01: Discuss a changed file with a development agent
 
-- Identifier: UC-AGENT-FEEDBACK-01
-- Status: Done
-- Actor: Developer
-- Module: MOD-AGENT-FEEDBACK
-- Priority: High
-- Screens: SC-SITE-DOCUMENT, SC-CHANGES-WORKSPACE
-- Start screen: SC-SITE-DOCUMENT
-- End screens: SC-SITE-DOCUMENT, SC-CHANGES-WORKSPACE
-- Last updated: 2026-08-14
 
 A developer asks a question about documentation or a changed file, or requests
 a verified target change. A development agent retrieves the request through a
 local command and returns a response to the original discussion.
 
+<!-- toudocu:section prerequisites -->
 ## Preconditions
 
 - the canonical portal is running through `toudocu serve` inside a Git
@@ -23,6 +27,7 @@ local command and returns a response to the original discussion.
 - the target is in canonical documentation or is a regular file in the current
   working Git diff.
 
+<!-- toudocu:section main-scenario -->
 ## Main scenario
 
 1. The developer selects document text, including headings, and opens the
@@ -89,6 +94,7 @@ local command and returns a response to the original discussion.
 - Corrupt local state is not overwritten and returns
   `AGENT_STATE_CORRUPTED`.
 
+<!-- toudocu:section postconditions -->
 ## Postconditions
 
 - the conversation and queue are stored outside the repository and survive a
@@ -97,6 +103,7 @@ local command and returns a response to the original discussion.
 - the filesystem and ordinary rebuild remain the source of actual changes;
 - Toudocu did not start a language model or change working code.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] The conversation and queue are stored outside the repository and survive
@@ -106,6 +113,7 @@ local command and returns a response to the original discussion.
 - [x] The filesystem and ordinary rebuild remain the source of actual changes.
 - [x] Toudocu does not start a language model or change working code.
 
+<!-- toudocu:section business-rules -->
 ## Business rules
 
 - [BR-AGENT-FEEDBACK-001](../modules/MOD-AGENT-FEEDBACK.md#br-agent-feedback-001-content-is-independent-of-transport)
@@ -114,6 +122,7 @@ local command and returns a response to the original discussion.
 - [BR-AGENT-FEEDBACK-004](../modules/MOD-AGENT-FEEDBACK.md#br-agent-feedback-004-the-queue-is-processed-in-strict-order)
 - [BR-AGENT-FEEDBACK-005](../modules/MOD-AGENT-FEEDBACK.md#br-agent-feedback-005-a-human-controls-the-discussion)
 
+<!-- toudocu:section implementation -->
 ## Implementation
 
 - [MOD-AGENT-FEEDBACK](../modules/MOD-AGENT-FEEDBACK.md)

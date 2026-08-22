@@ -1,15 +1,19 @@
-# {{USE_CASE_ID}}: {{USE_CASE_TITLE}}
-
-- Идентификатор: {{USE_CASE_ID}}
-- Статус: {{STATUS}}
-- Актор: {{ACTOR}}
-- Модуль: {{MODULE_ID}}
-- Начальный экран: {{START_SCREEN_ID}}
-- Конечные экраны: {{TERMINAL_SCREEN_IDS}}
+<!-- toudocu
+version: 1
+id: {{USE_CASE_ID}}
+status: {{STATUS}}
+priority: {{PRIORITY}}
+module: {{MODULE_ID}}
+startScreen: {{START_SCREEN_ID}}
+terminalScreens: {{TERMINAL_SCREEN_IDS}}
+updated: {{DATE}}
 {{OPTIONAL_ALLOW_CYCLE_METADATA}}
 {{OPTIONAL_SCREENS_METADATA}}
-- Приоритет: {{PRIORITY}}
-- Последнее обновление: {{DATE}}
+-->
+
+# {{USE_CASE_ID}}: {{USE_CASE_TITLE}}
+
+Актор: {{ACTOR}}.
 
 {{USE_CASE_SUMMARY}}
 
@@ -17,10 +21,12 @@
 
 - {{INPUT}}
 
+<!-- toudocu:section prerequisites -->
 ## Предусловия
 
 - {{PRECONDITION}}
 
+<!-- toudocu:section main-scenario -->
 ## Основной сценарий
 
 1. {{MAIN_STEP}}
@@ -29,18 +35,22 @@
 
 {{ERROR_SCENARIOS}}
 
+<!-- toudocu:section postconditions -->
 ## Постусловия
 
 {{POSTCONDITIONS}}
 
+<!-- toudocu:section acceptance-criteria -->
 ## Критерии приёмки
 
 - [ ] {{ACCEPTANCE_CRITERION}}
 
+<!-- toudocu:section business-rules -->
 ## Бизнес-правила
 
 - {{BUSINESS_RULE_ID}} — {{BUSINESS_RULE_REFERENCE}}
 
+<!-- toudocu:section implementation -->
 ## Реализация
 
 - [{{MODULE_TITLE}}](../modules/{{MODULE_FILE}})

@@ -1,14 +1,20 @@
+<!-- toudocu
+version: 1
+status: in-progress
+stage: Сопровождение версии 0.0.4
+updated: 2026-08-19
+-->
+
 # Current status
 
-- Status: In progress
 - Stage: Maintaining version 0.0.2
 - Version: 0.0.2
-- Last updated: 2026-08-13
 
 The current stable version is `0.0.2`. The GitHub Release installers for POSIX
 and PowerShell select the appropriate binary and verify its checksum before
 replacing the program.
 
+<!-- toudocu:section summary -->
 ## Summary
 
 The CLI checks, builds, and locally serves documentation, produces typed JSON

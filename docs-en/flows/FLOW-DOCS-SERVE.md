@@ -1,9 +1,13 @@
+<!-- toudocu
+version: 1
+id: FLOW-DOCS-SERVE
+module: MOD-SITE
+useCase: UC-DOCS-03
+updated: 2026-08-10
+-->
+
 # FLOW-DOCS-SERVE: Work with the portal locally
 
-- Identifier: FLOW-DOCS-SERVE
-- Use case: UC-DOCS-03
-- Module: MOD-SITE
-- Last updated: 2026-08-10
 
 The diagram shows the main `serve` lifecycle. Detailed errors and alternative
 paths are described in [UC-DOCS-03](../use-cases/serve-portal.md).

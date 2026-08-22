@@ -443,9 +443,6 @@ func entitiesFromMarkdown(content []byte, path string) []ChangeEntity {
 	parsed := analyzeMarkdown(string(content))
 	typ := ClassifyDocument(strings.TrimPrefix(filepath.ToSlash(path), "docs/"))
 	id := parsed.Metadata["id"]
-	if id == "" {
-		id = stableEntityIDRE.FindString(parsed.Title)
-	}
 	return []ChangeEntity{{ID: id, Type: typ, Title: parsed.Title}}
 }
 
@@ -464,9 +461,6 @@ func semanticMarkdownDiff(oldContent, newContent []byte, oldPath, newPath string
 		return []SemanticChange{{Kind: "entity-removed", Entity: entity, Before: entity, Summary: "Removed " + semanticEntityName(entity) + ".", SourceBefore: &ChangeLocation{Path: oldPath, Line: 1}}}
 	}
 	oldParsed, newParsed := analyzeMarkdown(string(oldContent)), analyzeMarkdown(string(newContent))
-	if oldParsed.Title != newParsed.Title {
-		changes = append(changes, SemanticChange{Kind: "field-changed", Entity: entity, Field: "title", Before: oldParsed.Title, After: newParsed.Title, Summary: "Changed entity title.", SourceBefore: &ChangeLocation{Path: oldPath, Line: 1}, SourceAfter: &ChangeLocation{Path: newPath, Line: 1}})
-	}
 	keys := map[string]bool{}
 	for k := range oldParsed.Metadata {
 		keys[k] = true
@@ -495,11 +489,15 @@ func semanticMarkdownDiff(oldContent, newContent []byte, oldPath, newPath string
 	}
 	oldSections := map[string]Section{}
 	for _, s := range oldParsed.Sections {
-		oldSections[s.ID] = s
+		if s.Kind != "" {
+			oldSections[string(s.Kind)] = s
+		}
 	}
 	newSections := map[string]Section{}
 	for _, s := range newParsed.Sections {
-		newSections[s.ID] = s
+		if s.Kind != "" {
+			newSections[string(s.Kind)] = s
+		}
 	}
 	sectionIDs := map[string]bool{}
 	for k := range oldSections {
@@ -516,12 +514,12 @@ func semanticMarkdownDiff(oldContent, newContent []byte, oldPath, newPath string
 	for _, id := range ids {
 		o, ook := oldSections[id]
 		n, nok := newSections[id]
-		kind := typedSectionChangeKind(entity.Type, n.Title, o.Title, "changed")
+		kind := typedSectionChangeKind(entity.Type, n.Kind, o.Kind, "changed")
 		summary := "Changed section "
 		if !ook {
-			kind, summary = typedSectionChangeKind(entity.Type, n.Title, "", "added"), "Added section "
+			kind, summary = typedSectionChangeKind(entity.Type, n.Kind, "", "added"), "Added section "
 		} else if !nok {
-			kind, summary = typedSectionChangeKind(entity.Type, "", o.Title, "removed"), "Removed section "
+			kind, summary = typedSectionChangeKind(entity.Type, "", o.Kind, "removed"), "Removed section "
 		} else if normalizeSemanticText(o.Markdown) == normalizeSemanticText(n.Markdown) {
 			continue
 		}
@@ -530,6 +528,56 @@ func semanticMarkdownDiff(oldContent, newContent []byte, oldPath, newPath string
 			title = o.Title
 		}
 		changes = append(changes, SemanticChange{Kind: kind, Entity: entity, Field: id, Before: semanticSectionValue(o, ook), After: semanticSectionValue(n, nok), Summary: summary + title + ".", SourceBefore: sectionLocation(oldPath, o, ook), SourceAfter: sectionLocation(newPath, n, nok)})
+	}
+	type tableContract struct {
+		columns []string
+		line    int
+	}
+	oldTables, newTables := map[string]tableContract{}, map[string]tableContract{}
+	for _, table := range oldParsed.Tables {
+		if table.Kind != "" {
+			oldTables[table.Kind] = tableContract{append([]string{}, table.Columns...), table.Range.Start.Line}
+		}
+	}
+	for _, table := range newParsed.Tables {
+		if table.Kind != "" {
+			newTables[table.Kind] = tableContract{append([]string{}, table.Columns...), table.Range.Start.Line}
+		}
+	}
+	tableKinds := map[string]bool{}
+	for kind := range oldTables {
+		tableKinds[kind] = true
+	}
+	for kind := range newTables {
+		tableKinds[kind] = true
+	}
+	orderedTableKinds := make([]string, 0, len(tableKinds))
+	for kind := range tableKinds {
+		orderedTableKinds = append(orderedTableKinds, kind)
+	}
+	sort.Strings(orderedTableKinds)
+	for _, tableKind := range orderedTableKinds {
+		oldTable, oldOK := oldTables[tableKind]
+		newTable, newOK := newTables[tableKind]
+		if oldOK && newOK && strings.Join(oldTable.columns, "\x00") == strings.Join(newTable.columns, "\x00") {
+			continue
+		}
+		kind := "field-changed"
+		if !oldOK {
+			kind = "field-added"
+		} else if !newOK {
+			kind = "field-removed"
+		}
+		change := SemanticChange{Kind: kind, Entity: entity, Field: "table." + tableKind, Summary: semanticFieldSummary(kind, "table."+tableKind)}
+		if oldOK {
+			change.Before = oldTable.columns
+			change.SourceBefore = &ChangeLocation{Path: oldPath, Line: oldTable.line}
+		}
+		if newOK {
+			change.After = newTable.columns
+			change.SourceAfter = &ChangeLocation{Path: newPath, Line: newTable.line}
+		}
+		changes = append(changes, change)
 	}
 	changes = append(changes, semanticStableSubjectDiff(oldParsed, newParsed, oldPath, newPath, entity)...)
 	if entity.Type == "work" {
@@ -549,19 +597,15 @@ func semanticEntityName(entity ChangeEntity) string {
 }
 
 func semanticFieldSummary(kind, key string) string {
-	label := displayFieldNames[key]
-	if label == "" {
-		label = key
-	}
 	switch kind {
 	case "field-added":
-		return "Added field " + label + "."
+		return "Added field " + key + "."
 	case "field-removed":
-		return "Removed field " + label + "."
+		return "Removed field " + key + "."
 	case "status-changed":
 		return "Changed status."
 	default:
-		return "Changed field " + label + "."
+		return "Changed field " + key + "."
 	}
 }
 
@@ -572,15 +616,18 @@ func metadataLocation(path string, parsed markdownAnalysis, key string) *ChangeL
 	return nil
 }
 
-func typedSectionChangeKind(entityType, newTitle, oldTitle, operation string) string {
-	title := canonicalText(newTitle + " " + oldTitle)
+func typedSectionChangeKind(entityType string, newKind, oldKind SectionKind, operation string) string {
+	kind := newKind
+	if kind == "" {
+		kind = oldKind
+	}
 	prefix := "section"
 	switch {
-	case strings.Contains(title, "business rule") || strings.Contains(title, "бизнес правил") || strings.Contains(title, "invariant") || strings.Contains(title, "инвариант"):
+	case kind == SectionKindBusinessRules || kind == SectionKindRules || kind == SectionKindInvariants:
 		prefix = "rule"
-	case entityType == "work" && (strings.Contains(title, "verification") || strings.Contains(title, "проверк")):
+	case entityType == "work" && kind == SectionKindVerification:
 		prefix = "verification"
-	case entityType == "screen" && strings.Contains(title, "transition"), entityType == "screen" && strings.Contains(title, "переход"):
+	case entityType == "screen" && kind == "transitions":
 		prefix = "transition"
 	}
 	return prefix + "-" + operation
@@ -1106,8 +1153,7 @@ func declaredTaskDocumentation(content []byte, taskPath, docsRel string) []strin
 	parsed := analyzeMarkdown(string(content))
 	var impactSection *Section
 	for _, section := range parsed.Sections {
-		title := strings.ToLower(section.Title)
-		if strings.Contains(title, "влияние на документацию") || strings.Contains(title, "documentation impact") {
+		if section.Kind == SectionKindDocumentationImpact {
 			copy := section
 			impactSection = &copy
 			break
@@ -1176,8 +1222,7 @@ func taskScopePaths(content []byte) []string {
 	parsed := analyzeMarkdown(string(content))
 	values := []string{}
 	for _, section := range parsed.Sections {
-		title := strings.ToLower(section.Title)
-		if title != "область изменения" && title != "scope" {
+		if section.Kind != SectionKindScope {
 			continue
 		}
 		for _, line := range strings.Split(section.Markdown, "\n") {

@@ -131,8 +131,7 @@ func documentationImpactIssues(model *Model, item *WorkItem) []Issue {
 	parsedItems := parseWorkItems(document)
 	var parsed *parsedWorkItem
 	for index := range parsedItems {
-		match := workItemHeadingRE.FindStringSubmatch(parsedItems[index].Heading.Title)
-		if match != nil && match[1] == item.ID {
+		if parsedItems[index].ID == item.ID {
 			parsed = &parsedItems[index]
 			break
 		}
@@ -140,7 +139,7 @@ func documentationImpactIssues(model *Model, item *WorkItem) []Issue {
 	if parsed == nil {
 		return nil
 	}
-	section, found := workSection(*parsed, "влияние на документацию", "documentation impact")
+	section, found := workSection(*parsed, SectionKindDocumentationImpact)
 	if !found {
 		return nil
 	}
@@ -220,7 +219,7 @@ func taskReadiness(model *Model, taskID string, strict bool) (*WorkItem, []Issue
 		{item.Plan, "missing-task-plan", "Plan"},
 		{item.DocumentationImpact, "missing-task-documentation-impact", "Documentation impact"},
 	}
-	if item.Type != "Bug" {
+	if item.Type != "bug" {
 		required = append(required, struct {
 			value string
 			code  string
@@ -235,14 +234,14 @@ func taskReadiness(model *Model, taskID string, strict bool) (*WorkItem, []Issue
 	if strings.TrimSpace(item.ModuleID) == "" {
 		issues = append(issues, readinessIssue("missing-task-module", "A task ready for work requires a linked module.", item))
 	}
-	if item.Type == "Feature" {
+	if item.Type == "feature" {
 		if strings.TrimSpace(item.BehaviorChange) == "" || item.Before == "" || item.After == "" {
 			issues = append(issues, readinessIssue("missing-behavior-change", "A Feature requires Behavior change, Before, and After content.", item))
 		}
 		if item.UseCaseID == "" {
 			issues = append(issues, readinessIssue("missing-task-use-case", "A Feature requires a linked use case.", item))
 		}
-	} else if item.Type == "Bug" {
+	} else if item.Type == "bug" {
 		if item.UseCaseID == "" && !item.useCaseOmitted {
 			issues = append(issues, readinessIssue("missing-task-use-case", "A Bug requires a linked use case or a valid not-applicable explanation.", item))
 		}
@@ -251,11 +250,10 @@ func taskReadiness(model *Model, taskID string, strict bool) (*WorkItem, []Issue
 		found := false
 		if document != nil {
 			for _, parsed := range parseWorkItems(document) {
-				match := workItemHeadingRE.FindStringSubmatch(parsed.Heading.Title)
-				if match == nil || match[1] != item.ID {
+				if parsed.ID != item.ID {
 					continue
 				}
-				section, exists := workSection(parsed, "обоснование отсутствия сценария", "use case omission reason")
+				section, exists := workSection(parsed, SectionKindUseCaseOmissionReason)
 				found = exists && strings.TrimSpace(section.Text) != ""
 				break
 			}

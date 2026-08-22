@@ -1,11 +1,14 @@
+<!-- toudocu
+version: 1
+id: UC-AGENT-01
+status: done
+priority: high
+module: MOD-CLI
+updated: 2026-08-12
+-->
+
 # UC-AGENT-01: Install the Toudocu AI skill
 
-- Identifier: UC-AGENT-01
-- Status: Completed
-- Actor: Toudocu user
-- Module: MOD-CLI
-- Priority: High
-- Last updated: 2026-08-12
 
 The user installs the embedded offline `toudocu` skill package in project or
 user scope for a supported AI host and can safely inspect, update, or remove the
@@ -18,12 +21,14 @@ managed copy.
 - `project` or `user` scope;
 - optional repository root for project scope.
 
+<!-- toudocu:section prerequisites -->
 ## Preconditions
 
 - the target boundary is accessible to the current user;
 - a conflicting unmanaged or locally modified copy is resolved manually;
 - the skill is installed from the current binary's bundle without network or shell.
 
+<!-- toudocu:section main-scenario -->
 ## Main scenario
 
 1. The user first runs `toudocu skill status` or directly selects a mutating operation.
@@ -41,12 +46,14 @@ managed copy.
 - a target change after planning blocks publication;
 - a publication failure restores the previous copy, while impossible rollback preserves the backup and returns `SKILL_RESTORE_FAILED`.
 
+<!-- toudocu:section postconditions -->
 ## Postconditions
 
 After a successful `install`, `update`, or `uninstall`, the target is absent or
 contains the exact managed copy of the embedded bundle and manifest schema v1.
 `status` only reports state. User files are preserved on conflict.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] After a successful `install`, `update`, or `uninstall`, the target is
@@ -54,11 +61,13 @@ contains the exact managed copy of the embedded bundle and manifest schema v1.
   schema v1.
 - [x] User files are preserved on conflict.
 
+<!-- toudocu:section business-rules -->
 ## Business rules
 
 - [BR-CLI-008](../modules/cli.md#br-cli-008-a-managed-skill-does-not-overwrite-user-changes) — the lifecycle needs no `--force` and does not replace conflicting copies.
 - [BR-CLI-009](../modules/cli.md#br-cli-009-the-skill-lifecycle-works-offline) — the package is read only from the current binary.
 
+<!-- toudocu:section implementation -->
 ## Implementation
 
 - [CLI and workflow tasks](../modules/cli.md)

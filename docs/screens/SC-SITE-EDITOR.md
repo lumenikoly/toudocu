@@ -1,11 +1,14 @@
-# SC-SITE-EDITOR: Редактор
+<!-- toudocu
+version: 1
+id: SC-SITE-EDITOR
+status: done
+screenKind: screen
+module: MOD-SITE
+preview: ../assets/screens/site-editor.png
+updated: 2026-08-11
+-->
 
-- Идентификатор: SC-SITE-EDITOR
-- Тип: Экран
-- Модуль: MOD-SITE
-- Статус: Реализован
-- Превью: `../assets/screens/site-editor.png`
-- Последнее обновление: 2026-08-11
+# SC-SITE-EDITOR: Редактор
 
 Редактор исходной документации доступен по адресу `/_toudocu/editor/` только в
 режиме `serve`. Здесь можно выбрать или создать разрешённый файл, изменить его,
@@ -32,6 +35,7 @@
 
 ## Переходы
 
+<!-- toudocu:table transitions columns=id,useCase,action,condition,target,kind -->
 | ID | Сценарий | Действие | Условие | Результат | Тип |
 |---|---|---|---|---|---|
 | TR-SITE-003 | UC-DOCS-03 | Вернуться в портал | Всегда | SC-SITE-HOME | return |

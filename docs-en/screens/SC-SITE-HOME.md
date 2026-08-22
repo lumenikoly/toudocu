@@ -1,12 +1,16 @@
+<!-- toudocu
+version: 1
+id: SC-SITE-HOME
+status: done
+screenKind: page
+module: MOD-SITE
+route: /
+preview: ../assets/screens/site-home.png
+updated: 2026-08-10
+-->
+
 # SC-SITE-HOME: Portal Home
 
-- Identifier: SC-SITE-HOME
-- Type: Page
-- Module: MOD-SITE
-- Status: Implemented
-- Route: `/`
-- Preview: `../assets/screens/site-home.png`
-- Last updated: 2026-08-10
 
 The main entry point to the built documentation is presented as a project
 passport: a cover with title, description, and metadata is followed by one
@@ -21,6 +25,7 @@ below the header; it can be dismissed for that version.
 
 ## Transitions
 
+<!-- toudocu:table transitions columns=id,useCase,action,condition,target,kind -->
 | ID | Use case | Action | Condition | Result | Type |
 |---|---|---|---|---|---|
 | TR-SITE-001 | UC-DOCS-03 | Open a document | A document is selected | SC-SITE-DOCUMENT | navigation |

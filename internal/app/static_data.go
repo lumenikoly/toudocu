@@ -72,14 +72,14 @@ func writeStaticData(output string, model *Model, search []SearchItem) error {
 	}
 	screens := make([]staticScreen, 0, len(model.Knowledge.Screens))
 	for _, screen := range model.Knowledge.Screens {
-		screens = append(screens, staticScreen{ID: screen.ID, Title: screen.Title, Route: screen.Route, Status: screen.Status.Kind, UseCases: screen.UseCaseIDs, Incoming: screen.IncomingTransitionIDs, Outgoing: screen.OutgoingTransitionIDs})
+		screens = append(screens, staticScreen{ID: screen.ID, Title: screen.Title, Route: screen.Route, Status: screen.Status.Label, UseCases: screen.UseCaseIDs, Incoming: screen.IncomingTransitionIDs, Outgoing: screen.OutgoingTransitionIDs})
 	}
 	if err := writeStaticJSON(output, "screens.json", screens); err != nil {
 		return err
 	}
 	useCases := make([]staticUseCase, 0, len(model.Knowledge.UseCases))
 	for _, useCase := range model.Knowledge.UseCases {
-		useCases = append(useCases, staticUseCase{ID: useCase.ID, Title: useCase.Title, Status: useCase.Status.Kind, Module: useCase.ModuleID, Flows: useCase.FlowIDs, Screens: useCase.ScreenIDs, Start: useCase.StartScreenID, Terminals: useCase.TerminalScreens})
+		useCases = append(useCases, staticUseCase{ID: useCase.ID, Title: useCase.Title, Status: useCase.Status.Label, Module: useCase.ModuleID, Flows: useCase.FlowIDs, Screens: useCase.ScreenIDs, Start: useCase.StartScreenID, Terminals: useCase.TerminalScreens})
 	}
 	return writeStaticJSON(output, "use-cases/index.json", useCases)
 }

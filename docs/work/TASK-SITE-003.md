@@ -1,15 +1,20 @@
+<!-- toudocu
+version: 1
+id: TASK-SITE-003
+status: done
+taskType: feature
+priority: high
+module: MOD-SITE
+useCase: UC-DOCS-01
+flow: FLOW-DOCS-BUILD
+screens: SC-SITE-HOME, SC-SITE-DOCUMENT, SC-SITE-USE-CASE, SC-SITE-SCREEN-MAP, SC-SITE-EDITOR, SC-CHANGES-WORKSPACE
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-10
+-->
+
 # TASK-SITE-003: Разделить Go-ядро и браузерную часть портала
 
-- Статус: Выполнено
-- Тип: Feature
-- Приоритет: Высокий
-- Модуль: MOD-SITE
-- Сценарий: UC-DOCS-01
-- Процесс: FLOW-DOCS-BUILD
-- Экраны: SC-SITE-HOME, SC-SITE-DOCUMENT, SC-SITE-USE-CASE, SC-SITE-SCREEN-MAP, SC-SITE-EDITOR, SC-CHANGES-WORKSPACE
-- Стандарты: STD-GO-001, STD-DOCS-001
-- Последнее обновление: 2026-08-10
-
+<!-- toudocu:section result -->
 ## Результат
 
 Пользователь по-прежнему получает один исполняемый файл Toudocu. Команда
@@ -22,8 +27,10 @@ Go остаётся единственным источником проектн
 TypeScript и CSS отвечают только за поведение и внешний вид в браузере. Они
 собираются заранее и входят в исполняемый файл как готовые ресурсы.
 
+<!-- toudocu:section behavior-change -->
 ## Изменение поведения
 
+<!-- toudocu:section before -->
 ### Было
 
 HTML-оболочка и большие фрагменты рабочих страниц собирались строками рядом с
@@ -34,6 +41,7 @@ HTML-оболочка и большие фрагменты рабочих стр
 Существующая Node-сборка готовила лишь отдельные встроенные библиотеки и не
 образовывала самостоятельную браузерную часть.
 
+<!-- toudocu:section after -->
 ### Станет
 
 Go строит проектную модель, данные страниц, безопасную HTML-оболочку, JSON для
@@ -53,6 +61,7 @@ Go строит проектную модель, данные страниц, б
 завершения, стабильные маршруты на основе идентификаторов и существующие
 JSON-схемы. Новая команда `preview` не появляется.
 
+<!-- toudocu:section scope -->
 ## Область изменения
 
 - новый каталог `web/` с TypeScript/CSS, lockfile, esbuild, проверкой типов и
@@ -70,6 +79,7 @@ JSON-схемы. Новая команда `preview` не появляется.
 - README, журнал изменений, уведомления о зависимостях и связанные
   архитектурные, модульные, пользовательские и справочные документы.
 
+<!-- toudocu:section out-of-scope -->
 ## Не входит в задачу
 
 - перенос в TypeScript разбора Markdown, классификации документов, проверки
@@ -92,6 +102,7 @@ JSON-схемы. Новая команда `preview` не появляется.
 - поддержка и CI-проверка открытия через `file://`;
 - сохранение старой внутренней реализации после миграции.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Критерии приёмки
 
 - [x] `AC-01` Go остаётся единственным источником `ProjectModel`,
@@ -176,6 +187,7 @@ JSON-схемы. Новая команда `preview` не появляется.
   мёртвых CSS-селекторов, дублирующей браузерной логики и двух параллельных UI.
   Лицензии новых браузерных зависимостей актуальны.
 
+<!-- toudocu:section plan -->
 ## План
 
 - [x] Описать прежние ресурсы, сборку HTML и различия `build`/`serve` и
@@ -197,6 +209,7 @@ JSON-схемы. Новая команда `preview` не появляется.
 - [x] Удалить старую реализацию после единого перехода.
 - [x] Обновить все связанные источники документации.
 
+<!-- toudocu:section verification -->
 ## Проверка
 
 - `AC-01` → `go test ./...`
@@ -223,6 +236,7 @@ JSON-схемы. Новая команда `preview` не появляется.
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 
+<!-- toudocu:section documentation-impact -->
 ## Влияние на документацию
 
 Изменился продуктовый контракт портала: автономность `build` означает, что

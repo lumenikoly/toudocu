@@ -1,9 +1,12 @@
-# FLOW-AGENT-FEEDBACK: Обработка локальной очереди документации
+<!-- toudocu
+version: 1
+id: FLOW-AGENT-FEEDBACK
+module: MOD-AGENT-FEEDBACK
+useCase: UC-AGENT-FEEDBACK-01
+updated: 2026-08-14
+-->
 
-- Идентификатор: FLOW-AGENT-FEEDBACK
-- Сценарий: UC-AGENT-FEEDBACK-01
-- Модуль: MOD-AGENT-FEEDBACK
-- Последнее обновление: 2026-08-14
+# FLOW-AGENT-FEEDBACK: Обработка локальной очереди документации
 
 ## Процесс
 

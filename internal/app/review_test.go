@@ -241,6 +241,8 @@ func TestAgentFeedbackSelectsRepeatedTextByOccurrence(t *testing.T) {
 	t.Setenv("TOUDOCU_STATE_HOME", t.TempDir())
 	path := filepath.Join(docs, "modules", "MOD-CORE.md")
 	writeChangesTestFile(t, path, "# Core\n\nRepeated\ntext.\n\nRepeated text.\n")
+	secondLine := fileLineContaining(t, path, "Repeated text.")
+	firstLine := fileLineContaining(t, path, "Repeated")
 	service, err := newReviewService(reviewOptions(root, docs))
 	if err != nil {
 		t.Fatal(err)
@@ -250,14 +252,14 @@ func TestAgentFeedbackSelectsRepeatedTextByOccurrence(t *testing.T) {
 		ReviewMutationGuard: guard(state), Target: ReviewTarget{Kind: "document", Path: "docs/modules/MOD-CORE.md"},
 		Selection: &SelectionHint{SelectedText: "Repeated text.", Occurrence: 2}, Intent: "question", Text: "Почему повтор?",
 	})
-	if err != nil || state.Session.Discussions[0].Target.Range.Start.Line != 6 {
+	if err != nil || state.Session.Discussions[0].Target.Range.Start.Line != secondLine {
 		t.Fatalf("state=%#v err=%v", state, err)
 	}
 	state, err = service.createDiscussion(CreateDiscussionRequest{
 		ReviewMutationGuard: guard(state), Target: ReviewTarget{Kind: "document", Path: "docs/modules/MOD-CORE.md"},
 		Selection: &SelectionHint{SelectedText: "Repeated text."}, Intent: "question", Text: "Почему перенос?",
 	})
-	if err != nil || state.Session.Discussions[1].Target.Range.Start.Line != 3 || state.Session.Discussions[1].Anchor.SelectedText != "Repeated\ntext." {
+	if err != nil || state.Session.Discussions[1].Target.Range.Start.Line != firstLine || state.Session.Discussions[1].Anchor.SelectedText != "Repeated\ntext." {
 		t.Fatalf("state=%#v err=%v", state, err)
 	}
 }
@@ -360,8 +362,9 @@ func TestAgentFeedbackFIFOReanchorPersistenceAndConcurrency(t *testing.T) {
 	}
 
 	writeChangesTestFile(t, filepath.Join(docs, "modules", "MOD-CORE.md"), "# MOD-CORE: Core\n\nInserted.\n\n- Status: Active\n\n## Rules\n\nOriginal.\n")
+	originalLine := fileLineContaining(t, filepath.Join(docs, "modules", "MOD-CORE.md"), "Original.")
 	loaded, err := service.discussions()
-	if err != nil || loaded.Session.Discussions[0].Placement.Status != "moved" || loaded.Session.Discussions[0].Placement.Range.Start.Line != 9 {
+	if err != nil || loaded.Session.Discussions[0].Placement.Status != "moved" || loaded.Session.Discussions[0].Placement.Range.Start.Line != originalLine {
 		t.Fatalf("moved=%#v err=%v", loaded.Session.Discussions[0].Placement, err)
 	}
 	restarted, err := newReviewService(Options{RepositoryRoot: root})

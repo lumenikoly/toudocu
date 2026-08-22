@@ -11,7 +11,7 @@ import (
 
 var (
 	businessRuleHeadingRE   = regexp.MustCompile(`^(BR-[A-Z0-9-]+)\s*[:—-]\s*(.+)$`)
-	workItemHeadingRE       = regexp.MustCompile(`^((?:TASK|BUG)-[A-Z0-9-]+)\s*[:—-]\s*(.+)$`)
+	workItemIDRE            = regexp.MustCompile(`^(?:TASK|BUG)-[A-Z0-9]+(?:-[A-Z0-9]+)*$`)
 	riskHeadingRE           = regexp.MustCompile(`^([A-Za-zА-Яа-я]+[-_ ]?\d+)\s*[:—-]\s*(.+)$`)
 	businessRuleReferenceRE = regexp.MustCompile(`\bBR-[A-Z0-9-]+\b`)
 	criterionIDRE           = regexp.MustCompile(`\bAC-[A-Z0-9-]+\b`)
@@ -43,14 +43,16 @@ type workSubsection struct {
 	Markdown string
 	Text     string
 	Tasks    []Task
-	Nested   map[string]string
+	Nested   map[SectionKind]string
 }
 
 type parsedWorkItem struct {
+	ID          string
+	Title       string
 	Heading     Heading
 	EndLine     int
 	Metadata    Metadata
-	Subsections map[string]workSubsection
+	Subsections map[SectionKind]workSubsection
 }
 
 type useCaseAcceptanceState struct {
@@ -70,11 +72,11 @@ type useCaseReadiness struct {
 
 func calculateUseCaseReadiness(document *Document) useCaseReadiness {
 	state := useCaseAcceptanceState{}
-	heading, end, found := headingSectionRange(document, "критерии приёмки", "критерии приемки", "acceptance criteria")
-	if found {
+	section := sectionByKind(document, SectionKindAcceptanceCriteria)
+	if section != nil {
 		state.Found = true
-		state.HeadingLine = heading.Line + 1
-		for _, task := range tasksInRange(document.Tasks, heading.Line+2, end) {
+		state.HeadingLine = section.StartLine + 1
+		for _, task := range section.Tasks {
 			state.Total++
 			if task.Completed {
 				state.Completed++
@@ -116,7 +118,7 @@ func validateDoneUseCaseReadiness(model *Model, document *Document) {
 func parseWorkItems(document *Document) []parsedWorkItem {
 	result := []parsedWorkItem{}
 	for headingIndex, heading := range document.Headings {
-		if workItemHeadingRE.FindStringSubmatch(heading.Title) == nil {
+		if heading.Level != 1 {
 			continue
 		}
 		end := strings.Count(document.Content, "\n") + 1
@@ -134,7 +136,7 @@ func parseWorkItems(document *Document) []parsedWorkItem {
 				metadata[key] = value
 			}
 		}
-		subsections := map[string]workSubsection{}
+		subsections := map[SectionKind]workSubsection{}
 		for childIndex, child := range document.Headings {
 			if child.Line <= heading.Line || child.Line >= end || child.Level != heading.Level+1 {
 				continue
@@ -152,17 +154,22 @@ func parseWorkItems(document *Document) []parsedWorkItem {
 				}
 			}
 			content := strings.TrimSpace(document.Content[child.endOffset:childEndOffset])
-			nested := map[string]string{}
+			nested := map[SectionKind]string{}
 			sectionText := ""
+			sectionKind := SectionKind("")
 			for _, section := range document.Sections {
 				if section.StartLine == child.Line {
+					sectionKind = section.Kind
 					sectionText = strings.TrimSpace(section.Text)
 					for _, candidate := range section.children {
-						nested[canonicalText(candidate.Title)] = strings.TrimSpace(candidate.Text)
+						nested[candidate.Kind] = strings.TrimSpace(candidate.Text)
 					}
 				}
 			}
-			subsections[canonicalText(child.Title)] = workSubsection{
+			if sectionKind == "" {
+				continue
+			}
+			subsections[sectionKind] = workSubsection{
 				Heading:  child,
 				EndLine:  childEnd,
 				Markdown: content,
@@ -171,7 +178,14 @@ func parseWorkItems(document *Document) []parsedWorkItem {
 				Nested:   nested,
 			}
 		}
-		result = append(result, parsedWorkItem{Heading: heading, EndLine: end, Metadata: metadata, Subsections: subsections})
+		id := strings.TrimSpace(document.Metadata["id"])
+		title := strings.TrimSpace(heading.Title)
+		for _, separator := range []string{":", "—"} {
+			if strings.HasPrefix(title, id+separator) {
+				title = strings.TrimSpace(strings.TrimPrefix(title, id+separator))
+			}
+		}
+		result = append(result, parsedWorkItem{ID: id, Title: title, Heading: heading, EndLine: end, Metadata: metadata, Subsections: subsections})
 	}
 	return result
 }
@@ -186,47 +200,28 @@ func tasksInRange(tasks []Task, startLine, endLine int) []Task {
 	return result
 }
 
-func workSection(item parsedWorkItem, names ...string) (workSubsection, bool) {
-	for _, name := range names {
-		if section, ok := item.Subsections[canonicalText(name)]; ok {
-			return section, true
-		}
-	}
-	return workSubsection{}, false
+func workSection(item parsedWorkItem, kind SectionKind) (workSubsection, bool) {
+	section, ok := item.Subsections[kind]
+	return section, ok
 }
 
-func taskStatus(value string) (name string, valid bool) {
-	aliases := map[string]string{
-		"черновик": "draft", "draft": "draft",
-		"готово к работе": "ready", "ready": "ready",
-		"в работе": "in-progress", "in progress": "in-progress",
-		"заблокировано": "blocked", "blocked": "blocked",
-		"выполнено": "done", "done": "done", "completed": "done",
-		"отменено": "cancelled", "cancelled": "cancelled", "canceled": "cancelled",
-	}
-	name, valid = aliases[canonicalText(value)]
-	return name, valid
+func taskStatus(value string) (WorkItemStatus, bool) {
+	status := WorkItemStatus(strings.TrimSpace(value))
+	return status, containsString([]string{string(WorkItemDraft), string(WorkItemReady), string(WorkItemInProgress), string(WorkItemBlocked), string(WorkItemDone), string(WorkItemCancelled)}, string(status))
 }
 
-func taskType(value string) (name string, valid bool) {
-	aliases := map[string]string{
-		"feature": "Feature", "функциональность": "Feature",
-		"bug": "Bug", "ошибка": "Bug",
-		"maintenance": "Maintenance", "обслуживание": "Maintenance",
-		"documentation": "Documentation", "документация": "Documentation",
-		"research": "Research", "исследование": "Research",
-	}
-	name, valid = aliases[canonicalText(value)]
-	return name, valid
+func taskType(value string) (WorkItemType, bool) {
+	taskType := WorkItemType(strings.TrimSpace(value))
+	return taskType, containsString([]string{string(WorkItemFeature), string(WorkItemBug), string(WorkItemMaintenance), string(WorkItemDocumentation), string(WorkItemResearch)}, string(taskType))
 }
 
 func workSectionContentRequired(model *Model, document *Document, item parsedWorkItem, section workSubsection, found bool, label string) {
 	if !found {
-		addKnowledgeIssue(model, document, "error", "missing-work-section", fmt.Sprintf("Task %s has no %s section.", item.Heading.Title, label), item.Heading.Line+1)
+		addKnowledgeIssue(model, document, "error", "missing-work-section", fmt.Sprintf("Task %s has no %s section.", item.ID, label), item.Heading.Line+1)
 		return
 	}
 	if strings.TrimSpace(section.Text) == "" {
-		addKnowledgeIssue(model, document, "error", "empty-work-section", fmt.Sprintf("Section %s in task %s must not be empty.", label, item.Heading.Title), section.Heading.Line+1)
+		addKnowledgeIssue(model, document, "error", "empty-work-section", fmt.Sprintf("Section %s in task %s must not be empty.", label, item.ID), section.Heading.Line+1)
 	}
 }
 
@@ -296,7 +291,7 @@ func traceabilityForVerificationLine(line, criterionID string) ([]string, string
 }
 
 func parseCriteriaAndVerification(model *Model, document *Document, item parsedWorkItem, required bool) ([]Task, []CriterionVerification, []VerificationCheck) {
-	criteriaSection, criteriaFound := workSection(item, "критерии приёмки", "критерии приемки", "acceptance criteria")
+	criteriaSection, criteriaFound := workSection(item, SectionKindAcceptanceCriteria)
 	if !criteriaFound {
 		return []Task{}, []CriterionVerification{}, []VerificationCheck{}
 	}
@@ -325,7 +320,7 @@ func parseCriteriaAndVerification(model *Model, document *Document, item parsedW
 		byID[id] = data
 	}
 
-	verificationSection, verificationFound := workSection(item, "проверка", "verification")
+	verificationSection, verificationFound := workSection(item, SectionKindVerification)
 	commandsByID := map[string][]string{}
 	transitionsByID := map[string][]string{}
 	referencesByID := map[string][]string{}
@@ -398,7 +393,7 @@ func parseCriteriaAndVerification(model *Model, document *Document, item parsedW
 }
 
 func validateScopePaths(model *Model, document *Document, item parsedWorkItem, terminal bool) []string {
-	scope, found := workSection(item, "область изменения", "scope")
+	scope, found := workSection(item, SectionKindScope)
 	if !found {
 		return nil
 	}
@@ -468,17 +463,12 @@ func validateScopePaths(model *Model, document *Document, item parsedWorkItem, t
 	return result
 }
 
-func nestedWorkSection(section workSubsection, names ...string) string {
-	for _, name := range names {
-		if value := section.Nested[canonicalText(name)]; value != "" {
-			return value
-		}
-	}
-	return ""
+func nestedWorkSection(section workSubsection, kind SectionKind) string {
+	return section.Nested[kind]
 }
 
 func documentationPathsFor(model *Model, document *Document, item parsedWorkItem) []string {
-	section, found := workSection(item, "влияние на документацию", "documentation impact")
+	section, found := workSection(item, SectionKindDocumentationImpact)
 	if !found {
 		return []string{}
 	}
@@ -519,11 +509,6 @@ func documentationPathsFor(model *Model, document *Document, item parsedWorkItem
 	return result
 }
 
-func normalizedEnum(value string, aliases map[string]string) (string, bool) {
-	normalized, ok := aliases[canonicalText(value)]
-	return normalized, ok
-}
-
 func validateRequiredBugMetadata(model *Model, document *Document, item parsedWorkItem) {
 	fields := []struct {
 		key   string
@@ -543,158 +528,132 @@ func validateRequiredBugMetadata(model *Model, document *Document, item parsedWo
 		}
 	}
 
-	if _, ok := normalizedEnum(item.Metadata["severity"], map[string]string{
-		"критическая": "critical", "critical": "critical",
-		"высокая": "high", "high": "high",
-		"средняя": "medium", "medium": "medium",
-		"низкая": "low", "low": "low",
-	}); item.Metadata["severity"] != "" && !ok {
+	if value := item.Metadata["severity"]; value != "" && !containsString([]string{"critical", "high", "medium", "low"}, value) {
 		addKnowledgeIssue(model, document, "error", "invalid-bug-severity", "Bug severity must be Critical, High, Medium, or Low.", item.Heading.Line+1)
 	}
-	if _, ok := normalizedEnum(item.Metadata["priority"], map[string]string{
-		"срочный": "urgent", "urgent": "urgent",
-		"высокий": "high", "high": "high",
-		"обычный": "normal", "normal": "normal",
-		"низкий": "low", "low": "low",
-	}); item.Metadata["priority"] != "" && !ok {
+	if value := item.Metadata["priority"]; value != "" && !containsString([]string{"urgent", "high", "normal", "low"}, value) {
 		addKnowledgeIssue(model, document, "error", "invalid-bug-priority", "Bug priority must be Urgent, High, Normal, or Low.", item.Heading.Line+1)
 	}
-	if _, ok := normalizedEnum(item.Metadata["reproducibility"], map[string]string{
-		"всегда": "always", "always": "always",
-		"часто": "often", "often": "often",
-		"иногда": "sometimes", "sometimes": "sometimes",
-		"редко": "rarely", "rarely": "rarely",
-		"не воспроизводится": "not-reproduced", "not reproduced": "not-reproduced",
-		"неизвестно": "unknown", "unknown": "unknown",
-	}); item.Metadata["reproducibility"] != "" && !ok {
+	if value := item.Metadata["reproducibility"]; value != "" && !containsString([]string{"always", "often", "sometimes", "rarely", "not-reproduced", "unknown"}, value) {
 		addKnowledgeIssue(model, document, "error", "invalid-bug-reproducibility", "Invalid bug reproducibility value.", item.Heading.Line+1)
 	}
-	regression, regressionValid := normalizedEnum(item.Metadata["regression"], map[string]string{
-		"да": "yes", "yes": "yes", "true": "yes",
-		"нет": "no", "no": "no", "false": "no",
-	})
+	regression := strings.TrimSpace(item.Metadata["regression"])
+	regressionValid := regression == "true" || regression == "false"
 	if item.Metadata["regression"] != "" && !regressionValid {
-		addKnowledgeIssue(model, document, "error", "invalid-bug-regression", "The Regression field must be Yes or No.", item.Heading.Line+1)
+		addKnowledgeIssue(model, document, "error", "invalid-bug-regression", "The Regression field must be true or false.", item.Heading.Line+1)
 	}
 	if item.Metadata["updated"] != "" {
-		if _, ok := parseDate(item.Metadata["updated"]); !ok {
+		if _, ok := parseISODate(item.Metadata["updated"]); !ok {
 			addKnowledgeIssue(model, document, "error", "invalid-bug-updated-date", "The Updated field must contain a YYYY-MM-DD date.", item.Heading.Line+1)
 		}
 	}
-	if regression == "yes" {
-		bodyParts := []string{}
-		for _, section := range item.Subsections {
-			bodyParts = append(bodyParts, section.Markdown)
-		}
-		body := strings.ToLower(strings.Join(bodyParts, "\n"))
-		versionOrPeriod := regexp.MustCompile(`(?m)^\s*[-*+]\s*(?:версия|version|период|period)\s*[:：]\s*\S+`).MatchString(body)
-		if !versionOrPeriod {
+	if regression == "true" {
+		if strings.TrimSpace(item.Metadata["observedIn"]) == "" {
 			addKnowledgeIssue(model, document, "error", "missing-regression-version", "A regression requires the version or period in which the defect was observed.", item.Heading.Line+1)
 		}
 	}
 }
 
 func bugHasRegressionCoverage(item parsedWorkItem, criteria []Task) bool {
-	for _, criterion := range criteria {
-		text := canonicalText(criterion.Text)
-		if strings.Contains(text, "регрессион") || strings.Contains(text, "regression") {
-			return true
-		}
-	}
-	section, found := workSection(item, "регрессионный тест", "regression test")
-	if !found || strings.TrimSpace(section.Text) == "" {
-		return false
-	}
-	explanation := canonicalText(section.Text)
-	for _, marker := range []string{"невозмож", "cannot", "not possible", "impossible", "not feasible"} {
-		if strings.Contains(explanation, marker) {
-			return true
-		}
-	}
-	return false
+	section, found := workSection(item, SectionKindRegressionTest)
+	return found && strings.TrimSpace(section.Text) != ""
 }
 
 func bugUseCaseNotApplicable(value string) bool {
-	value = canonicalText(value)
-	return value == "не применяется" || value == "not applicable" || value == "n/a"
+	return strings.TrimSpace(value) == "not-applicable"
+}
+
+type WorkItemMeta struct {
+	ID       WorkItemID
+	Status   WorkItemStatus
+	Type     WorkItemType
+	ModuleID ModuleID
+}
+
+func parseWorkItemMeta(item parsedWorkItem) (WorkItemMeta, bool, bool) {
+	status, statusValid := taskStatus(item.Metadata["status"])
+	typeName, typeValid := taskType(item.Metadata["taskType"])
+	return WorkItemMeta{ID: WorkItemID(strings.TrimSpace(item.ID)), Status: status, Type: typeName, ModuleID: ModuleID(strings.TrimSpace(item.Metadata["module"]))}, statusValid, typeValid
 }
 
 func validateWorkItem(model *Model, document *Document, item parsedWorkItem) WorkItem {
-	match := workItemHeadingRE.FindStringSubmatch(item.Heading.Title)
-	statusName, statusValid := taskStatus(item.Metadata["status"])
+	meta, statusValid, typeValid := parseWorkItemMeta(item)
+	statusName, typeName := meta.Status, meta.Type
 	if !statusValid {
 		addKnowledgeIssue(model, document, "error", "invalid-task-status", "Invalid task status: "+fallbackDash(item.Metadata["status"])+".", item.Heading.Line+1)
 	}
-	typeName, typeValid := taskType(item.Metadata["type"])
 	if !typeValid {
 		addKnowledgeIssue(model, document, "error", "invalid-task-type", "Task type must be Feature, Bug, Maintenance, Documentation, or Research.", item.Heading.Line+1)
 	}
-	isBug := typeValid && typeName == "Bug"
-	if isBug && !strings.HasPrefix(match[1], "BUG-") {
+	isBug := typeValid && typeName == WorkItemBug
+	if !workItemIDRE.MatchString(string(meta.ID)) {
+		addKnowledgeIssue(model, document, "error", "invalid-work-item-id", "A work item requires a canonical TASK-* or BUG-* id.", item.Heading.Line+1)
+	}
+	if isBug && !strings.HasPrefix(item.ID, "BUG-") {
 		addKnowledgeIssue(model, document, "error", "invalid-bug-id", "A Bug work item identifier must start with BUG-.", item.Heading.Line+1)
 	}
-	if !isBug && strings.HasPrefix(match[1], "BUG-") {
-		addKnowledgeIssue(model, document, "error", "bug-id-type-mismatch", "A BUG-* identifier requires `Type: Bug`.", item.Heading.Line+1)
+	if !isBug && strings.HasPrefix(item.ID, "BUG-") {
+		addKnowledgeIssue(model, document, "error", "bug-id-type-mismatch", "A BUG-* identifier requires `taskType: bug`.", item.Heading.Line+1)
 	}
 	if isBug {
 		validateRequiredBugMetadata(model, document, item)
 	}
 
 	type requiredWorkSection struct {
-		names []string
+		kind  SectionKind
 		label string
 	}
 	requiredSections := []requiredWorkSection{}
 	if isBug {
 		requiredSections = append(requiredSections,
-			requiredWorkSection{[]string{"симптом", "symptom"}, "Symptom"},
-			requiredWorkSection{[]string{"ожидаемое поведение", "expected behavior"}, "Expected behavior"},
-			requiredWorkSection{[]string{"фактическое поведение", "actual behavior"}, "Actual behavior"},
+			requiredWorkSection{SectionKindSymptom, "Symptom"},
+			requiredWorkSection{SectionKindExpectedBehavior, "Expected behavior"},
+			requiredWorkSection{SectionKindActualBehavior, "Actual behavior"},
 		)
 	} else {
-		requiredSections = append(requiredSections, requiredWorkSection{[]string{"результат", "result", "outcome"}, "Result"})
+		requiredSections = append(requiredSections, requiredWorkSection{SectionKindResult, "Result"})
 	}
 	strictWorkflow := statusValid && statusName != "draft"
 	if strictWorkflow {
 		requiredSections = append(requiredSections,
-			requiredWorkSection{[]string{"область изменения", "scope"}, "Scope"},
-			requiredWorkSection{[]string{"не входит в задачу", "не входит в исправление", "out of scope"}, "Out of scope"},
-			requiredWorkSection{[]string{"критерии приёмки", "критерии приемки", "acceptance criteria"}, "Acceptance criteria"},
-			requiredWorkSection{[]string{"план", "plan"}, "Plan"},
-			requiredWorkSection{[]string{"проверка", "verification"}, "Verification"},
-			requiredWorkSection{[]string{"влияние на документацию", "documentation impact"}, "Documentation impact"},
+			requiredWorkSection{SectionKindScope, "Scope"},
+			requiredWorkSection{SectionKindOutOfScope, "Out of scope"},
+			requiredWorkSection{SectionKindAcceptanceCriteria, "Acceptance criteria"},
+			requiredWorkSection{SectionKindPlan, "Plan"},
+			requiredWorkSection{SectionKindVerification, "Verification"},
+			requiredWorkSection{SectionKindDocumentationImpact, "Documentation impact"},
 		)
 		if isBug {
 			requiredSections = append(requiredSections,
-				requiredWorkSection{[]string{"причина", "cause", "root cause"}, "Root cause"},
+				requiredWorkSection{SectionKindCause, "Root cause"},
 			)
-		} else if typeValid && typeName == "Feature" {
+		} else if typeValid && typeName == WorkItemFeature {
 			requiredSections = append(requiredSections,
-				requiredWorkSection{[]string{"изменение поведения", "behavior change"}, "Behavior change"},
+				requiredWorkSection{SectionKindBehaviorChange, "Behavior change"},
 			)
 		}
 	}
 	for _, required := range requiredSections {
-		section, found := workSection(item, required.names...)
+		section, found := workSection(item, required.kind)
 		workSectionContentRequired(model, document, item, section, found, required.label)
 	}
 
 	criteria, verification, checks := parseCriteriaAndVerification(model, document, item, strictWorkflow)
-	if strictWorkflow && typeValid && typeName == "Feature" {
-		behavior, found := workSection(item, "изменение поведения", "behavior change")
+	if strictWorkflow && typeValid && typeName == WorkItemFeature {
+		behavior, found := workSection(item, SectionKindBehaviorChange)
 		if found {
-			if nestedWorkSection(behavior, "было", "before") == "" || nestedWorkSection(behavior, "станет", "after") == "" {
+			if nestedWorkSection(behavior, SectionKindBefore) == "" || nestedWorkSection(behavior, SectionKindAfter) == "" {
 				addKnowledgeIssue(model, document, "error", "incomplete-behavior-change", "The Behavior change section must contain non-empty Before and After subsections.", behavior.Heading.Line+1)
 			}
 		}
 	}
 	checklistLines := map[int]struct{}{}
-	if criteriaSection, found := workSection(item, "критерии приёмки", "критерии приемки", "acceptance criteria"); found {
+	if criteriaSection, found := workSection(item, SectionKindAcceptanceCriteria); found {
 		for _, criterion := range criteriaSection.Tasks {
 			checklistLines[criterion.Line] = struct{}{}
 		}
 	}
-	if planSection, found := workSection(item, "план", "plan"); found {
+	if planSection, found := workSection(item, SectionKindPlan); found {
 		for _, step := range planSection.Tasks {
 			if isBug {
 				addKnowledgeIssue(model, document, "error", "bug-plan-checkbox", "A bug plan must be a numbered list without checkboxes.", step.Line)
@@ -713,8 +672,8 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 	}
 
 	if isBug {
-		steps, stepsFound := workSection(item, "шаги воспроизведения", "steps to reproduce", "reproduction steps")
-		evidence, evidenceFound := workSection(item, "доказательства", "evidence", "подтверждение", "confirmation")
+		steps, stepsFound := workSection(item, SectionKindStepsToReproduce)
+		evidence, evidenceFound := workSection(item, SectionKindEvidence)
 		if (!stepsFound || strings.TrimSpace(steps.Text) == "") && (!evidenceFound || strings.TrimSpace(evidence.Text) == "") {
 			addKnowledgeIssue(model, document, "error", "missing-bug-reproduction-evidence", "A bug must contain reproduction steps or non-empty evidence.", item.Heading.Line+1)
 		}
@@ -722,20 +681,19 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 			addKnowledgeIssue(model, document, "error", "missing-bug-regression-test", "A bug requires a regression-test criterion or a Regression test section explaining why automation is not possible.", item.Heading.Line+1)
 		}
 		if statusName == "done" {
-			cause, found := workSection(item, "причина", "cause", "root cause")
-			unknown := canonicalText(cause.Text)
-			if !found || unknown == "" || unknown == "не установлена" || unknown == "unknown" || unknown == "not established" {
+			cause, found := workSection(item, SectionKindCause)
+			if !found || strings.TrimSpace(cause.Text) == "" {
 				addKnowledgeIssue(model, document, "error", "missing-completed-bug-cause", "A completed bug must have an established root cause.", item.Heading.Line+1)
 			}
 		}
 	}
 
 	if statusName == "blocked" {
-		blocker, found := workSection(item, "блокер", "blocker")
+		blocker, found := workSection(item, SectionKindBlocker)
 		workSectionContentRequired(model, document, item, blocker, found, "Blocker")
 	}
 	if statusName == "cancelled" {
-		reason, found := workSection(item, "причина отмены", "cancellation reason")
+		reason, found := workSection(item, SectionKindCancellationReason)
 		workSectionContentRequired(model, document, item, reason, found, "Cancellation reason")
 	}
 	if strictWorkflow {
@@ -760,7 +718,7 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 	terminalScopeHistory := statusName == "cancelled"
 	if statusName == "done" {
 		terminalScopeHistory = true
-		if criteriaSection, found := workSection(item, "критерии приёмки", "критерии приемки", "acceptance criteria"); found {
+		if criteriaSection, found := workSection(item, SectionKindAcceptanceCriteria); found {
 			for _, criterion := range criteriaSection.Tasks {
 				if !criterion.Completed {
 					terminalScopeHistory = false
@@ -776,35 +734,35 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 	useCaseOmitted := isBug && bugUseCaseNotApplicable(useCaseID)
 	if useCaseOmitted {
 		useCaseID = ""
-		relation, found := workSection(item, "связь с пользовательским поведением", "relationship to user behavior")
+		relation, found := workSection(item, SectionKindRelationshipToUserBehavior)
 		if !found || strings.TrimSpace(relation.Text) == "" {
 			addKnowledgeIssue(model, document, "error", "missing-bug-use-case-explanation", "A not-applicable Use case value requires a Relationship to user behavior section.", item.Heading.Line+1)
 		}
 	}
-	if strictWorkflow && typeValid && (typeName == "Feature" || typeName == "Bug") && useCaseID == "" {
+	if strictWorkflow && typeValid && (typeName == WorkItemFeature || typeName == WorkItemBug) && useCaseID == "" {
 		if !useCaseOmitted {
-			addKnowledgeIssue(model, document, "error", "missing-task-use-case", "A "+typeName+" task requires a linked use case.", item.Heading.Line+1)
+			addKnowledgeIssue(model, document, "error", "missing-task-use-case", "A "+string(typeName)+" task requires a linked use case.", item.Heading.Line+1)
 		}
 	}
-	if strictWorkflow && typeValid && typeName != "Feature" && typeName != "Bug" && useCaseID == "" {
-		reason, found := workSection(item, "обоснование отсутствия сценария", "use case omission reason")
+	if strictWorkflow && typeValid && typeName != WorkItemFeature && typeName != WorkItemBug && useCaseID == "" {
+		reason, found := workSection(item, SectionKindUseCaseOmissionReason)
 		if !found || strings.TrimSpace(reason.Text) == "" {
 			addKnowledgeIssue(model, document, "error", "missing-use-case-omission-reason", "A technical task without a use case must contain a Use case omission reason section.", item.Heading.Line+1)
 		}
 	}
 
-	resultSection, _ := workSection(item, "результат", "result")
-	behaviorSection, _ := workSection(item, "изменение поведения", "behavior change")
-	outOfScopeSection, _ := workSection(item, "не входит в задачу", "не входит в исправление", "out of scope")
-	planSection, _ := workSection(item, "план", "plan")
-	documentationImpactSection, _ := workSection(item, "влияние на документацию", "documentation impact")
-	blockerSection, _ := workSection(item, "блокер", "blocker")
+	resultSection, _ := workSection(item, SectionKindResult)
+	behaviorSection, _ := workSection(item, SectionKindBehaviorChange)
+	outOfScopeSection, _ := workSection(item, SectionKindOutOfScope)
+	planSection, _ := workSection(item, SectionKindPlan)
+	documentationImpactSection, _ := workSection(item, SectionKindDocumentationImpact)
+	blockerSection, _ := workSection(item, SectionKindBlocker)
 	repositoryPaths := append([]string{}, validateScopePaths(model, document, item, terminalScopeHistory)...)
 	return WorkItem{
-		ID: match[1], Title: match[2], Status: StatusFor(item.Metadata["status"]), Type: typeName,
+		ID: string(meta.ID), Title: item.Title, Status: StatusFor(string(meta.Status)), Type: string(typeName),
 		Priority: item.Metadata["priority"], Severity: item.Metadata["severity"],
 		Reproducibility: item.Metadata["reproducibility"], Regression: item.Metadata["regression"],
-		Updated: item.Metadata["updated"], ModuleID: item.Metadata["module"],
+		Updated: item.Metadata["updated"], ModuleID: string(meta.ModuleID),
 		UseCaseID: useCaseID, FlowID: strings.TrimSpace(item.Metadata["flow"]),
 		ScreenIDs:     splitReferences(item.Metadata["screens"]),
 		TransitionIDs: splitReferences(item.Metadata["transitions"]),
@@ -815,8 +773,8 @@ func validateWorkItem(model *Model, document *Document, item parsedWorkItem) Wor
 		RepositoryPaths: repositoryPaths, line: item.Heading.Line + 1, parentLine: document.metadataLocations["parentTask"], parentCount: document.metadataCounts["parentTask"],
 		Result:              strings.TrimSpace(resultSection.Text),
 		BehaviorChange:      strings.TrimSpace(behaviorSection.Text),
-		Before:              nestedWorkSection(behaviorSection, "было", "before"),
-		After:               nestedWorkSection(behaviorSection, "станет", "after"),
+		Before:              nestedWorkSection(behaviorSection, SectionKindBefore),
+		After:               nestedWorkSection(behaviorSection, SectionKindAfter),
 		OutOfScope:          strings.TrimSpace(outOfScopeSection.Text),
 		Plan:                strings.TrimSpace(planSection.Text),
 		DocumentationImpact: strings.TrimSpace(documentationImpactSection.Text),
@@ -1096,7 +1054,7 @@ func buildKnowledgeModel(model *Model) KnowledgeModel {
 				Document: document.SourcePath, RepositoryPaths: repositoryPathsFor(document), BusinessRuleIDs: []string{}, FlowIDs: []string{},
 				ScreenIDs: splitReferences(document.Metadata["screens"]), StartScreenID: strings.TrimSpace(document.Metadata["startScreen"]),
 				TerminalScreens: splitReferences(document.Metadata["terminalScreens"]),
-				AllowCycle:      containsString([]string{"да", "yes", "true", "1"}, canonicalText(document.Metadata["allowCycle"])),
+				AllowCycle:      document.Metadata["allowCycle"] == "true",
 			})
 			validateDoneUseCaseReadiness(model, document)
 		case "flow":
@@ -1264,6 +1222,9 @@ func buildRisks(model *Model) []Risk {
 	result := []Risk{}
 	for _, document := range model.Collections["risks"] {
 		for _, section := range document.Sections {
+			if section.Kind != SectionKindRisk {
+				continue
+			}
 			match := riskHeadingRE.FindStringSubmatch(section.Title)
 			id, title := section.Title, section.Title
 			if match != nil {
@@ -1275,7 +1236,7 @@ func buildRisks(model *Model) []Risk {
 					completed++
 				}
 			}
-			result = append(result, Risk{ID: id, Title: title, FullTitle: section.Title, Status: StatusFor(section.Metadata["status"]), Probability: fallbackValue(section.Metadata["probability"], "Не указана"), Impact: fallbackValue(section.Metadata["impact"], "Не указано"), TaskStats: TaskStats{Total: len(section.Tasks), Completed: completed, Remaining: len(section.Tasks) - completed, Percent: progress(completed, len(section.Tasks))}, Document: document, Anchor: section.ID, Text: section.Text})
+			result = append(result, Risk{ID: id, Title: title, FullTitle: section.Title, Status: StatusFor(section.Metadata["status"]), Probability: section.Metadata["probability"], Impact: section.Metadata["impact"], TaskStats: TaskStats{Total: len(section.Tasks), Completed: completed, Remaining: len(section.Tasks) - completed, Percent: progress(completed, len(section.Tasks))}, Document: document, Anchor: section.ID, Text: section.Text})
 		}
 	}
 	return result
@@ -1302,6 +1263,9 @@ func buildRoadmapStages(model *Model) []RoadmapStage {
 	}
 	for _, document := range model.Collections["roadmap"] {
 		for _, section := range document.Sections {
+			if section.Kind != SectionKindRoadmapStage {
+				continue
+			}
 			items := []RoadmapItem{}
 			completed := 0
 			for _, task := range section.Tasks {
@@ -1504,22 +1468,22 @@ func buildStats(model *Model) Stats {
 		}
 	}
 	for _, item := range model.Knowledge.WorkItems {
-		if item.Type != "Bug" || item.Archived {
+		if item.Type != "bug" || item.Archived {
 			continue
 		}
 		if item.statusName != "done" && item.statusName != "cancelled" {
 			stats.OpenBugs++
 		}
-		switch canonicalText(item.Severity) {
-		case "критическая", "critical":
+		switch item.Severity {
+		case "critical":
 			stats.CriticalBugs++
-		case "высокая", "high":
+		case "high":
 			stats.HighSeverityBugs++
 		}
-		if regression, ok := normalizedEnum(item.Regression, map[string]string{"да": "yes", "yes": "yes", "true": "yes"}); ok && regression == "yes" {
+		if item.Regression == "true" {
 			stats.RegressionBugs++
 		}
-		if containsString([]string{"не воспроизводится", "неизвестно", "not reproduced", "unknown"}, canonicalText(item.Reproducibility)) {
+		if item.Reproducibility == "not-reproduced" || item.Reproducibility == "unknown" {
 			stats.UnreproducedBugs++
 		}
 		if item.statusName == "blocked" {
@@ -1556,7 +1520,7 @@ func buildProjectInfo(model *Model, requestedTitle string) ProjectInfo {
 	}
 	summary := ""
 	if statusDoc != nil {
-		if section := sectionByNames(statusDoc, []string{"Краткое состояние", "Summary", "Текущее состояние"}); section != nil {
+		if section := sectionByKind(statusDoc, SectionKindSummary); section != nil {
 			summary = section.Text
 		}
 		if summary == "" {
@@ -1585,7 +1549,6 @@ func pathBase(value string) string {
 func buildSearchIndex(model *Model) []SearchItem {
 	result := make([]SearchItem, 0, len(model.Documents))
 	for _, document := range model.Documents {
-		metadata := metadataSearchTerms(document, false)
 		tasks := []string{}
 		for _, task := range document.Tasks {
 			tasks = append(tasks, task.Text)
@@ -1594,7 +1557,7 @@ func buildSearchIndex(model *Model) []SearchItem {
 		for _, heading := range document.Headings {
 			headings = append(headings, heading.Title)
 		}
-		text := canonicalText(strings.Join([]string{document.Title, document.SourcePath, strings.Join(metadata, " "), strings.Join(headings, " "), strings.Join(tasks, " "), document.PlainText}, " "))
+		text := canonicalText(strings.Join([]string{documentStableID(document), document.Title, document.SourcePath, strings.Join(headings, " "), strings.Join(tasks, " "), document.PlainText}, " "))
 		description := document.Description
 		if description == "" {
 			description = document.PlainText

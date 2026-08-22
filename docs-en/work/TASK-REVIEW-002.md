@@ -1,32 +1,42 @@
+<!-- toudocu
+version: 1
+id: TASK-REVIEW-002
+status: done
+taskType: feature
+priority: high
+module: MOD-AGENT-FEEDBACK
+useCase: UC-AGENT-FEEDBACK-01
+screens: SC-CHANGES-WORKSPACE
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-13
+-->
+
 # TASK-REVIEW-002: Discussions for any changed file
 
-- Status: Done
-- Type: Feature
-- Priority: High
-- Module: MOD-AGENT-FEEDBACK
-- Use case: UC-AGENT-FEEDBACK-01
-- Screens: SC-CHANGES-WORKSPACE
-- Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-13
 
+<!-- toudocu:section result -->
 ## Result
 
 A developer can start a discussion about any regular file in the current
 working Git diff. For available text, the discussion stores an exact range;
 for binary, large, and deleted files, it stores a whole-file target.
 
+<!-- toudocu:section behavior-change -->
 ## Behavior change
 
+<!-- toudocu:section before -->
 ### Before
 
 Changes allowed discussions only for Markdown in canonical documentation.
 
+<!-- toudocu:section after -->
 ### After
 
 Changes allows discussions for every regular file in the working tree. Index
 and revision comparisons remain read-only. The Portal continues to use the
 `document` target.
 
+<!-- toudocu:section scope -->
 ## Scope
 
 - the queue, HTTP API, and safe-path checks in `internal/app/`;
@@ -34,6 +44,7 @@ and revision comparisons remain read-only. The Portal continues to use the
 - OpenAPI, the built-in skill, and canonical documentation;
 - Go, TypeScript, and browser tests.
 
+<!-- toudocu:section out-of-scope -->
 ## Out of scope
 
 - arbitrary unchanged files and global comments;
@@ -41,6 +52,7 @@ and revision comparisons remain read-only. The Portal continues to use the
 - discussions in the static portal and translation roots;
 - a new JSON or storage version.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] `AC-01` A `file` target is accepted only for a regular file in the
@@ -57,6 +69,7 @@ and revision comparisons remain read-only. The Portal continues to use the
 - [x] `AC-05` OpenAPI, the built-in skill, and documentation describe the
   actual `file` target boundary without changing version 1.
 
+<!-- toudocu:section plan -->
 ## Plan
 
 - [x] Extend the queue model and checks.
@@ -64,6 +77,7 @@ and revision comparisons remain read-only. The Portal continues to use the
 - [x] Update the contract, skill, and documentation.
 - [x] Run checks and complete the work item.
 
+<!-- toudocu:section verification -->
 ## Verification
 
 - `AC-01` → `go test ./internal/app -run 'TestAgentFeedback(FileTargets|DeletedFile)'`
@@ -75,6 +89,7 @@ and revision comparisons remain read-only. The Portal continues to use the
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `make check`
 
+<!-- toudocu:section documentation-impact -->
 ## Documentation impact
 
 The delivery architecture, module, use case, Changes screen, OpenAPI, API and

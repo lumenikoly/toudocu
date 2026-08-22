@@ -1,7 +1,10 @@
+<!-- toudocu
+version: 1
+architectureQuestion: Как состояния Git превращаются в единый отчёт об изменениях документации?
+-->
+
 # Architecture of documentation changes
 
-- Document type: Architecture
-- Architectural question: How do Git states become one consistent report about documentation changes?
 
 Toudocu compares two explicitly selected local Git states. It loads each side
 only when needed and combines the result in one versioned `ChangeSetReport`.
@@ -40,6 +43,7 @@ revision, `HEAD`, `git status --porcelain=v2`, and resolved Git refs. After any
 change, the next request builds a new report and digest. Toudocu does not keep
 older working-tree contents as its own history.
 
+<!-- toudocu:section boundaries -->
 ## Boundaries
 
 - Toudocu does not fetch remote Git refs.

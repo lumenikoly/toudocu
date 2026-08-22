@@ -29,7 +29,11 @@ func writeChangesTestFile(t *testing.T, path, content string) {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+	relative := filepath.ToSlash(path)
+	if index := strings.LastIndex(relative, "/docs/"); index >= 0 {
+		relative = relative[index+len("/docs/"):]
+	}
+	if err := os.WriteFile(path, []byte(canonicalizeTestMarkdown(relative, content)), 0o644); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -244,8 +248,8 @@ func TestSourceDiffHunksKeepLocationsAndPatch(t *testing.T) {
 }
 
 func TestRenderedSectionsAndTypedSemanticDiff(t *testing.T) {
-	oldContent := []byte("# MOD-AUTH: Auth\n\n- Status: Active\n\n## Business rules\n\n- `BR-AUTH-001` Login is allowed.\n\n## Responsibility\n\nOwn auth.\n")
-	newContent := []byte("# MOD-AUTH: Auth\n\n- Status: Deprecated\n\n## Responsibility\n\nOwn identity.\n\n## Business rules\n\n- `BR-AUTH-001` Login requires MFA.\n- `BR-AUTH-002` Lock after five attempts.\n")
+	oldContent := []byte(canonicalizeTestMarkdown("modules/MOD-AUTH.md", "# MOD-AUTH: Auth\n\n- Status: Active\n\n## Business rules\n\n- `BR-AUTH-001` Login is allowed.\n\n## Responsibility\n\nOwn auth.\n"))
+	newContent := []byte(canonicalizeTestMarkdown("modules/MOD-AUTH.md", "# MOD-AUTH: Auth\n\n- Status: Deprecated\n\n## Responsibility\n\nOwn identity.\n\n## Business rules\n\n- `BR-AUTH-001` Login requires MFA.\n- `BR-AUTH-002` Lock after five attempts.\n"))
 	sections, diagnostics := renderedSectionDiff(oldContent, newContent, "docs/modules/MOD-AUTH.md", "docs/modules/MOD-AUTH.md", nil)
 	states := map[string]string{}
 	for _, section := range sections {
@@ -334,8 +338,8 @@ func TestAssetMetadataForPNGSVGAndWebP(t *testing.T) {
 }
 
 func TestScreenDiffKeepsGhostEndpoints(t *testing.T) {
-	oldContent := []byte("# SC-AUTH-LOGIN: Login\n\n- Identifier: SC-AUTH-LOGIN\n- Route: `/login`\n\n## Transitions\n\n| ID | Scenario | Action | Condition | Target |\n|---|---|---|---|---|\n| TR-AUTH-001 | UC-AUTH-01 | Submit | Invalid | SC-AUTH-ERROR |\n| TR-AUTH-002 | UC-AUTH-01 | Cancel | Always | SC-HOME |\n")
-	newContent := []byte("# SC-AUTH-LOGIN: Login\n\n- Identifier: SC-AUTH-LOGIN\n- Route: `/sign-in`\n\n## Transitions\n\n| ID | Scenario | Action | Condition | Target |\n|---|---|---|---|---|\n| TR-AUTH-001 | UC-AUTH-01 | Submit | Locked | SC-AUTH-LOCKED |\n| TR-AUTH-003 | UC-AUTH-01 | Help | Always | SC-AUTH-HELP |\n")
+	oldContent := []byte("<!-- toudocu\nversion: 1\nid: SC-AUTH-LOGIN\nroute: /login\n-->\n# SC-AUTH-LOGIN: Login\n\n## Transitions\n\n<!-- toudocu:table transitions columns=id,useCase,action,condition,target,kind -->\n| ID | Scenario | Action | Condition | Target | Type |\n|---|---|---|---|---|---|\n| TR-AUTH-001 | UC-AUTH-01 | Submit | Invalid | SC-AUTH-ERROR | navigation |\n| TR-AUTH-002 | UC-AUTH-01 | Cancel | Always | SC-HOME | navigation |\n")
+	newContent := []byte("<!-- toudocu\nversion: 1\nid: SC-AUTH-LOGIN\nroute: /sign-in\n-->\n# SC-AUTH-LOGIN: Login\n\n## Transitions\n\n<!-- toudocu:table transitions columns=id,useCase,action,condition,target,kind -->\n| ID | Scenario | Action | Condition | Target | Type |\n|---|---|---|---|---|---|\n| TR-AUTH-001 | UC-AUTH-01 | Submit | Locked | SC-AUTH-LOCKED | navigation |\n| TR-AUTH-003 | UC-AUTH-01 | Help | Always | SC-AUTH-HELP | navigation |\n")
 	diff := buildScreenDiffMetadata(oldContent, newContent, "docs/screens/SC-AUTH-LOGIN.md", "docs/screens/SC-AUTH-LOGIN.md")
 	if diff.Before == nil || diff.After == nil || diff.Before.Route != "/login" || diff.After.Route != "/sign-in" || len(diff.Transitions) != 3 {
 		t.Fatalf("screen diff: %#v", diff)
@@ -820,7 +824,7 @@ func TestTaskImpactResolvesRelativeDocumentationLinks(t *testing.T) {
 	}
 }
 
-func TestTaskChangesSelectsExactTaskIDFromHeading(t *testing.T) {
+func TestTaskChangesDoesNotInferTaskIDFromHeading(t *testing.T) {
 	root, docs := newChangesRepository(t)
 	exactPath := filepath.Join(docs, "work", "custom-name.md")
 	prefixPath := filepath.Join(docs, "work", "TASK-CORE-0010.md")
@@ -831,19 +835,8 @@ func TestTaskChangesSelectsExactTaskIDFromHeading(t *testing.T) {
 	writeChangesTestFile(t, exactPath, "# TASK-CORE-001: Exact\n\nChanged.\n")
 	writeChangesTestFile(t, prefixPath, "# TASK-CORE-0010: Prefix\n\nChanged.\n")
 
-	report, err := BuildDocumentationChanges(Options{InputDirectory: docs, ChangeBase: "HEAD", ChangeTarget: "working-tree", ChangeTaskID: "TASK-CORE-001"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if report.taskContext == nil || report.taskContext.path != "docs/work/custom-name.md" {
-		t.Fatalf("wrong task document selected: %#v", report.taskContext)
-	}
-	if report.TaskImpact == nil || len(report.TaskImpact.TaskChanges) != 1 || report.TaskImpact.TaskChanges[0].Path != "docs/work/custom-name.md" {
-		t.Fatalf("task changes used a filename substring: %#v", report.TaskImpact)
-	}
-	filterDocumentationChanges(report, Options{ChangeTaskID: "TASK-CORE-001"})
-	if len(report.Changes) != 1 || report.Changes[0].Path != "docs/work/custom-name.md" {
-		t.Fatalf("task filter used a filename substring: %#v", report.Changes)
+	if _, err := BuildDocumentationChanges(Options{InputDirectory: docs, ChangeBase: "HEAD", ChangeTarget: "working-tree", ChangeTaskID: "TASK-CORE-001"}); err == nil {
+		t.Fatal("a heading-only task ID must not be accepted")
 	}
 }
 

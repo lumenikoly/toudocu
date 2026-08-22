@@ -1,11 +1,15 @@
+<!-- toudocu
+version: 1
+id: SC-SITE-EDITOR
+status: done
+screenKind: screen
+module: MOD-SITE
+preview: ../assets/screens/site-editor.png
+updated: 2026-08-11
+-->
+
 # SC-SITE-EDITOR: Editor
 
-- Identifier: SC-SITE-EDITOR
-- Type: Screen
-- Module: MOD-SITE
-- Status: Implemented
-- Preview: `../assets/screens/site-editor.png`
-- Last updated: 2026-08-10
 
 The source-documentation workspace in `serve` mode: file selection, preview,
 diagnostics, creation, and protected saving.
@@ -26,6 +30,7 @@ screens the tree opens in a local panel, and the page gains no horizontal scroll
 
 ## Transitions
 
+<!-- toudocu:table transitions columns=id,useCase,action,condition,target,kind -->
 | ID | Use case | Action | Condition | Result | Type |
 |---|---|---|---|---|---|
 | TR-SITE-003 | UC-DOCS-03 | Return to the portal | Always | SC-SITE-HOME | return |

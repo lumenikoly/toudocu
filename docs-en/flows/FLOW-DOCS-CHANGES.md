@@ -1,9 +1,13 @@
+<!-- toudocu
+version: 1
+id: FLOW-DOCS-CHANGES
+module: MOD-CHANGES
+useCase: UC-DOCS-05
+updated: 2026-08-10
+-->
+
 # FLOW-DOCS-CHANGES: View documentation changes
 
-- Identifier: FLOW-DOCS-CHANGES
-- Use case: UC-DOCS-05
-- Module: MOD-CHANGES
-- Last updated: 2026-08-10
 
 The diagram shows how a selected Git range becomes a file list and a set of
 readable views for each change.

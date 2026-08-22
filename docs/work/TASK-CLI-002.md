@@ -1,28 +1,36 @@
+<!-- toudocu
+version: 1
+id: TASK-CLI-002
+status: done
+taskType: feature
+priority: high
+module: MOD-CLI
+useCase: UC-TASK-01
+flow: FLOW-TASK-WORKFLOW
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-21
+-->
+
 # TASK-CLI-002: Добавить иерархическую декомпозицию рабочих задач
 
-- Статус: Выполнено
-- Тип: Feature
-- Приоритет: Высокий
-- Модуль: MOD-CLI
-- Сценарий: UC-TASK-01
-- Процесс: FLOW-TASK-WORKFLOW
-- Стандарты: STD-GO-001, STD-DOCS-001
-- Последнее обновление: 2026-08-21
-
+<!-- toudocu:section result -->
 ## Результат
 
 Toudocu представляет большую работу как проверяемое дерево `TASK-*`, сохраняя
 отдельный граф зависимостей, ограниченный контекст каждой задачи и прежнее
 поведение существующих проектов без декомпозиции.
 
+<!-- toudocu:section behavior-change -->
 ## Изменение поведения
 
+<!-- toudocu:section before -->
 ### Было
 
 Рабочая задача могла ссылаться только на зависимости. Общую задачу и её
 самостоятельные части нельзя было связать отдельным отношением, увидеть как
 дерево или проверить одним агрегированным отчётом об изменениях.
 
+<!-- toudocu:section after -->
 ### Станет
 
 Дочерняя `TASK-*` может объявить одного родителя через `Parent` или
@@ -31,6 +39,7 @@ Toudocu представляет большую работу как провер
 командам и порталу ограниченные данные о декомпозиции. Отношение родителя не
 задаёт порядок выполнения и не заменяет `Dependencies`.
 
+<!-- toudocu:section scope -->
 ## Область изменения
 
 - публичные модели и фасад в `api.go`;
@@ -41,6 +50,7 @@ Toudocu представляет большую работу как провер
 - guidance для агента в `skills/toudocu/`;
 - поведенческие и регрессионные тесты Go.
 
+<!-- toudocu:section out-of-scope -->
 ## Не входит в задачу
 
 - декомпозиция `BUG-*` и отношение Parent с участием `BUG-*`;
@@ -50,6 +60,7 @@ Toudocu представляет большую работу как провер
   команд;
 - отдельная база задач и синхронизация с внешними issue trackers.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Критерии приёмки
 
 - [x] `AC-01` `TASK-*` принимает необязательное единственное поле `Parent` или
@@ -75,7 +86,7 @@ Toudocu представляет большую работу как провер
   не перезаписывая файл и не создавая зависимости или детей.
 - [x] `AC-10` `task changes --tree` доступен только для `TASK-*`, агрегирует
   всех потомков, сохраняет `declaredBy` и отделяет task artifacts; обычный
-  `task changes` сохраняет прежнюю изоляцию выбранного work item.
+  `task changes` сохраняет прежнюю изоляцию выбранной задачи.
 - [x] `AC-11` `task verify` выполняет только проверки выбранной задачи и не
   запускает verification детей.
 - [x] `AC-12` `ProjectReport` версии 1 аддитивно возвращает `parentId` и
@@ -95,6 +106,7 @@ Toudocu представляет большую работу как провер
   проверяемым результатам, а parent использует как координирующий контракт без
   механического разбиения на код, тесты и документацию.
 
+<!-- toudocu:section plan -->
 ## План
 
 - [x] Добавить Parent в parsing и публичную модель, вычислить children.
@@ -109,6 +121,7 @@ Toudocu представляет большую работу как провер
 - [x] Выполнить полный цикл проверки.
 - [x] Получить независимый semantic review задачи и итогового diff.
 
+<!-- toudocu:section verification -->
 ## Проверка
 
 - `AC-01` → `go test ./internal/app -run 'TestTaskHierarchyBuildsComputedChildrenAndCompatibleJSON|TestTaskHierarchyDiagnostics'`
@@ -133,6 +146,7 @@ Toudocu представляет большую работу как провер
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `make fmt-check && go vet ./... && go test -race ./... && go mod verify && for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64; do GOOS=${target%/*} GOARCH=${target#*/} CGO_ENABLED=0 go build -trimpath -o /dev/null ./cmd/toudocu || exit 1; done`
 
+<!-- toudocu:section documentation-impact -->
 ## Влияние на документацию
 
 - `docs/contracts/cli.md` — команды, параметры и JSON-отчёты;
@@ -142,6 +156,6 @@ Toudocu представляет большую работу как провер
 - `docs/modules/cli.md` — границы task-команд;
 - `docs/modules/model.md` — иерархия и completion graph в Go-модели;
 - `docs/reference/changes-report.md` — агрегированный impact и ownership;
-- `docs/reference/document-model.md` — нормализованные поля work item;
+- `docs/reference/document-model.md` — нормализованные поля рабочих задач;
 - `docs/reference/features.md` — доступные команды;
 - `docs/use-cases/task-workflow.md` — ограниченный контекст и обзор дерева.

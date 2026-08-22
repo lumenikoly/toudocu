@@ -19,6 +19,7 @@ func completeBugFixture(status string) string {
 - Priority: High
 - Reproducibility: Always
 - Regression: Yes
+- Observed in: 0.8.2
 - Module: MOD-AUTH
 - Use case: UC-AUTH-01
 - Last updated: 2026-07-30
@@ -79,6 +80,10 @@ Changing the session lifetime.
 - ` + "`ALL`" + ` -> ` + "`go test ./...`" + `
 - ` + "`DOCS`" + ` -> ` + "`go run ./cmd/toudocu check ./docs --strict`" + `
 
+## Regression test
+
+Covered by AC-01.
+
 ## Documentation impact
 
 Not required: the fix restores documented behavior.
@@ -117,7 +122,7 @@ func TestBugWorkItemValidationAndPortalFilters(t *testing.T) {
 		t.Fatalf("work items: %#v", model.Knowledge.WorkItems)
 	}
 	item := model.Knowledge.WorkItems[0]
-	if item.ID != "BUG-AUTH-021" || item.Type != "Bug" || item.Severity != "High" || item.Reproducibility != "Always" || item.Regression != "Yes" {
+	if item.ID != "BUG-AUTH-021" || item.Type != "bug" || item.Severity != "high" || item.Reproducibility != "always" || item.Regression != "true" {
 		t.Fatalf("bug item: %#v", item)
 	}
 	context, err := BuildTaskContext(model, "BUG-AUTH-021")
@@ -151,6 +156,8 @@ func TestBugValidationRejectsMissingContractAndWrongPrefix(t *testing.T) {
 	content = strings.Replace(content, "- [x] `AC-01`", "- [ ] `AC-01`", 1)
 	content = strings.Replace(content, "The expiration handler clears the token but does not navigate to login.", "Not established.", 1)
 	content = strings.Replace(content, "A regression test protects the original session-expiration behavior.", "The redirect works.", 1)
+	content = strings.Replace(content, "Not established.\n\n## Scope", "\n## Scope", 1)
+	content = strings.Replace(content, "Covered by AC-01.", "", 1)
 	writeTestFile(t, docs, "work/TASK-AUTH-021.md", content)
 	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
 	if err != nil {

@@ -1,24 +1,32 @@
+<!-- toudocu
+version: 1
+id: TASK-RELEASE-002
+status: done
+taskType: maintenance
+module: MOD-CLI
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-11
+-->
+
 # TASK-RELEASE-002: Добавить установку и обновление из GitHub Release
 
-- Статус: Выполнено
-- Тип: Maintenance
-- Модуль: MOD-CLI
-- Стандарты: STD-GO-001, STD-DOCS-001
-- Последнее обновление: 2026-08-11
-
+<!-- toudocu:section result -->
 ## Результат
 
 Релизный комплект `0.0.1` включает установочные скрипты POSIX и PowerShell.
 Скрипт выбирает файл для операционной системы и архитектуры, проверяет SHA-256
 и только затем заменяет программу.
 
+<!-- toudocu:section behavior-change -->
 ## Изменение поведения
 
+<!-- toudocu:section before -->
 ### Было
 
 Пользователь вручную выбирал бинарник в GitHub Releases, проверял его и
 добавлял каталог в `PATH`.
 
+<!-- toudocu:section after -->
 ### Станет
 
 Одна из команд скачивает подходящий бинарник и `checksums.txt`, проверяет
@@ -42,6 +50,7 @@ irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 |
 пользовательский `PATH`. Уже запущенная оболочка не меняется: скрипт печатает
 точную команду перезагрузки профиля или просит открыть новый терминал.
 
+<!-- toudocu:section scope -->
 ## Область изменения
 
 - установочные скрипты в `scripts/`;
@@ -49,6 +58,7 @@ irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 |
 - контрактные тесты установщиков в `internal/app/`;
 - README, журнал изменений и каноническая документация.
 
+<!-- toudocu:section out-of-scope -->
 ## Не входит в задачу
 
 - публикация Git-тега или GitHub Release;
@@ -57,6 +67,7 @@ irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 |
 - новые целевые платформы, кроме добавленного Windows ARM64;
 - подпись и notarization бинарников.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Критерии приёмки
 
 - [x] `AC-01` Установщик однозначно выбирает один из шести файлов Linux, macOS
@@ -77,6 +88,7 @@ irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 |
   каталога в `PATH` идемпотентны. Нестандартный каталог профиль не меняет и
   получает понятную подсказку.
 
+<!-- toudocu:section plan -->
 ## План
 
 1. Реализовать одинаковые правила для POSIX и PowerShell.
@@ -85,6 +97,7 @@ irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 |
    релиза.
 4. Обновить исходную документацию и примечания к выпуску.
 
+<!-- toudocu:section verification -->
 ## Проверка
 
 - `AC-01` → `go test ./internal/app -run TestInstallerPlatformContract`
@@ -97,11 +110,13 @@ irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 |
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `make check`
 
+<!-- toudocu:section documentation-impact -->
 ## Влияние на документацию
 
 Было добавлено руководство по установке; обновлены README, журнал изменений,
 текущее состояние, системная граница, граница доверия и отслеживаемый портал.
 
+<!-- toudocu:section use-case-omission-reason -->
 ## Обоснование отсутствия сценария
 
 Задача меняет поставку релизных файлов и установщики, но не добавляет команду

@@ -1,8 +1,12 @@
+<!-- toudocu
+version: 1
+id: MOD-AGENT-FEEDBACK
+status: done
+updated: 2026-08-13
+-->
+
 # MOD-AGENT-FEEDBACK: Local requests to a development agent
 
-- Identifier: MOD-AGENT-FEEDBACK
-- Status: Done
-- Last updated: 2026-08-13
 
 This module attaches human messages to specific documentation locations and
 delivers them to an external development agent through a local queue. Toudocu
@@ -17,6 +21,7 @@ editable until the agent retrieves it through the command line. The agent
 checks the current document and, when needed, the code, then returns a
 structured response to the same discussion.
 
+<!-- toudocu:section code-location -->
 ## Code location
 
 - `internal/app/review_types.go`, `review_store.go`, and `review_service.go` —
@@ -28,6 +33,7 @@ structured response to the same discussion.
 - `.agents/skills/toudocu/references/agent-feedback.md` — the built-in skill's
   queue-processing rules.
 
+<!-- toudocu:section boundaries -->
 ## Boundaries
 
 The Portal creates a `document` target only for canonical Markdown. Changes
@@ -43,6 +49,7 @@ canonical repository root. It is not stored in Git and remains available to
 the CLI while `serve` is stopped. Static portals and translation roots remain
 read-only.
 
+<!-- toudocu:section business-rules -->
 ## Business rules
 
 ### BR-AGENT-FEEDBACK-001: Content is independent of transport
@@ -81,6 +88,7 @@ delivery.
 An agent response does not close the discussion. The user can close, reopen, or
 delete any discussion. Closed threads appear after open threads.
 
+<!-- toudocu:section invariants -->
 ## Invariants
 
 - A saved message appears in the queue immediately.
@@ -94,6 +102,7 @@ delete any discussion. Closed threads appear after open threads.
 - Open discussions and unfinished queue entries are never removed
   automatically.
 
+<!-- toudocu:section stable-interfaces -->
 ## Stable interfaces
 
 - `/_toudocu/api/agent/` — [agent feedback HTTP API](../contracts/agent-feedback.openapi.yaml);
@@ -103,6 +112,7 @@ delete any discussion. Closed threads appear after open threads.
 - [delivery process](../architecture/agent-feedback-delivery.md);
 - [user scenario](../use-cases/UC-AGENT-FEEDBACK-01.md).
 
+<!-- toudocu:section related-use-cases -->
 ## Related use cases
 
 - [UC-AGENT-FEEDBACK-01: Discuss documentation with a development agent](../use-cases/UC-AGENT-FEEDBACK-01.md)

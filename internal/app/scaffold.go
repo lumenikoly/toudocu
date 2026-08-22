@@ -114,11 +114,7 @@ func nextTaskNumber(docsDir, prefix, area string) (int, error) {
 		if readErr != nil {
 			return readErr
 		}
-		for _, heading := range analyzeMarkdown(string(content)).Headings {
-			if match := workItemHeadingRE.FindStringSubmatch(heading.Title); match != nil {
-				consider(match[1])
-			}
-		}
+		consider(analyzeMarkdown(string(content)).Metadata["id"])
 		return nil
 	})
 	if err != nil && !os.IsNotExist(err) {
@@ -130,142 +126,197 @@ func nextTaskNumber(docsDir, prefix, area string) (int, error) {
 func renderTaskScaffold(id, title, taskType, language, date, parentID string) string {
 	parent := ""
 	if parentID != "" {
-		if language == "ru" {
-			parent = "- Родительская задача: " + parentID + "\n"
-		} else {
-			parent = "- Parent: " + parentID + "\n"
-		}
+		parent = "parentTask: " + parentID + "\n"
 	}
 	if taskType == "Bug" {
 		if language == "ru" {
-			return fmt.Sprintf(`# %s: %s
+			return fmt.Sprintf(`<!-- toudocu
+version: 1
+id: %s
+status: draft
+taskType: bug
+updated: %s
+%s-->
 
-- Тип: Bug
-- Статус: Черновик
-- Последнее обновление: %s
-%s
+# %s: %s
 
+<!-- toudocu:section symptom -->
 ## Симптом
 
+<!-- toudocu:section expected-behavior -->
 ## Ожидаемое поведение
 
+<!-- toudocu:section actual-behavior -->
 ## Фактическое поведение
 
+<!-- toudocu:section steps-to-reproduce -->
 ## Шаги воспроизведения
 
+<!-- toudocu:section evidence -->
 ## Доказательства
 
+<!-- toudocu:section cause -->
 ## Причина
 
 Не установлена.
 
+<!-- toudocu:section scope -->
 ## Область изменения
 
+<!-- toudocu:section out-of-scope -->
 ## Не входит в исправление
 
+<!-- toudocu:section plan -->
 ## План
 
+<!-- toudocu:section acceptance-criteria -->
 ## Критерии приёмки
 
+<!-- toudocu:section verification -->
 ## Проверка
 
+<!-- toudocu:section regression-test -->
 ## Регрессионный тест
 
+<!-- toudocu:section documentation-impact -->
 ## Влияние на документацию
-`, id, title, date, parent)
+`, id, date, parent, id, title)
 		}
-		return fmt.Sprintf(`# %s: %s
+		return fmt.Sprintf(`<!-- toudocu
+version: 1
+id: %s
+status: draft
+taskType: bug
+updated: %s
+%s-->
 
-- Type: Bug
-- Status: Draft
-- Last updated: %s
-%s
+# %s: %s
 
+<!-- toudocu:section symptom -->
 ## Symptom
 
+<!-- toudocu:section expected-behavior -->
 ## Expected behavior
 
+<!-- toudocu:section actual-behavior -->
 ## Actual behavior
 
+<!-- toudocu:section steps-to-reproduce -->
 ## Steps to reproduce
 
+<!-- toudocu:section evidence -->
 ## Evidence
 
+<!-- toudocu:section cause -->
 ## Cause
 
 Not established.
 
+<!-- toudocu:section scope -->
 ## Scope
 
+<!-- toudocu:section out-of-scope -->
 ## Out of scope
 
+<!-- toudocu:section plan -->
 ## Plan
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
+<!-- toudocu:section verification -->
 ## Verification
 
+<!-- toudocu:section regression-test -->
 ## Regression test
 
+<!-- toudocu:section documentation-impact -->
 ## Documentation impact
-`, id, title, date, parent)
+`, id, date, parent, id, title)
 	}
+	canonicalType := strings.ToLower(taskType)
 	if language == "ru" {
-		return fmt.Sprintf(`# %s: %s
+		return fmt.Sprintf(`<!-- toudocu
+version: 1
+id: %s
+status: draft
+taskType: %s
+updated: %s
+%s-->
 
-- Статус: Черновик
-- Тип: %s
-- Последнее обновление: %s
-%s
+# %s: %s
 
+<!-- toudocu:section result -->
 ## Результат
 
+<!-- toudocu:section behavior-change -->
 ## Изменение поведения
 
+<!-- toudocu:section before -->
 ### Было
 
+<!-- toudocu:section after -->
 ### Станет
 
+<!-- toudocu:section scope -->
 ## Область изменения
 
+<!-- toudocu:section out-of-scope -->
 ## Не входит в задачу
 
+<!-- toudocu:section acceptance-criteria -->
 ## Критерии приёмки
 
+<!-- toudocu:section plan -->
 ## План
 
+<!-- toudocu:section verification -->
 ## Проверка
 
+<!-- toudocu:section documentation-impact -->
 ## Влияние на документацию
-`, id, title, taskType, date, parent)
+`, id, canonicalType, date, parent, id, title)
 	}
-	return fmt.Sprintf(`# %s: %s
+	return fmt.Sprintf(`<!-- toudocu
+version: 1
+id: %s
+status: draft
+taskType: %s
+updated: %s
+%s-->
 
-- Status: Draft
-- Type: %s
-- Last updated: %s
-%s
+# %s: %s
 
+<!-- toudocu:section result -->
 ## Result
 
+<!-- toudocu:section behavior-change -->
 ## Behavior change
 
+<!-- toudocu:section before -->
 ### Before
 
+<!-- toudocu:section after -->
 ### After
 
+<!-- toudocu:section scope -->
 ## Scope
 
+<!-- toudocu:section out-of-scope -->
 ## Out of scope
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
+<!-- toudocu:section plan -->
 ## Plan
 
+<!-- toudocu:section verification -->
 ## Verification
 
+<!-- toudocu:section documentation-impact -->
 ## Documentation impact
-`, id, title, taskType, date, parent)
+`, id, canonicalType, date, parent, id, title)
 }
 
 func InitTask(options Options) (TaskInitReport, error) {
@@ -419,36 +470,36 @@ func renderEntityScaffold(kind, id, title, language, date string) string {
 	if language == "ru" {
 		switch kind {
 		case "module":
-			return fmt.Sprintf("# %s: %s\n\n- Идентификатор: %s\n- Статус: Черновик\n- Последнее обновление: %s\n\n## Назначение\n\n## Бизнес-правила\n\n## Инварианты\n\n## Интерфейсы\n", id, title, id, date)
+			return fmt.Sprintf("<!-- toudocu\nversion: 1\nid: %s\nstatus: draft\nupdated: %s\n-->\n\n# %s: %s\n\n## Назначение\n\n<!-- toudocu:section business-rules -->\n## Бизнес-правила\n\n<!-- toudocu:section invariants -->\n## Инварианты\n\n<!-- toudocu:section stable-interfaces -->\n## Интерфейсы\n", id, date, id, title)
 		case "use-case":
-			return fmt.Sprintf("# %s: %s\n\n- Идентификатор: %s\n- Статус: Черновик\n- Последнее обновление: %s\n\n## Основной сценарий\n\n## Альтернативные сценарии\n\n## Постусловия\n\n## Критерии приёмки\n\n## Бизнес-правила\n", id, title, id, date)
+			return fmt.Sprintf("<!-- toudocu\nversion: 1\nid: %s\nstatus: draft\nupdated: %s\n-->\n\n# %s: %s\n\n<!-- toudocu:section main-scenario -->\n## Основной сценарий\n\n## Альтернативные сценарии\n\n<!-- toudocu:section postconditions -->\n## Постусловия\n\n<!-- toudocu:section acceptance-criteria -->\n## Критерии приёмки\n\n<!-- toudocu:section business-rules -->\n## Бизнес-правила\n", id, date, id, title)
 		case "flow":
-			return fmt.Sprintf("# %s: %s\n\n- Идентификатор: %s\n- Статус: Черновик\n- Последнее обновление: %s\n\n## Процесс\n", id, title, id, date)
+			return fmt.Sprintf("<!-- toudocu\nversion: 1\nid: %s\nupdated: %s\n-->\n\n# %s: %s\n\n## Процесс\n", id, date, id, title)
 		case "screen":
-			return fmt.Sprintf("# %s: %s\n\n- Идентификатор: %s\n- Статус: Черновик\n- Последнее обновление: %s\n\n## Назначение\n\n## Состояния\n\n## Переходы\n", id, title, id, date)
+			return fmt.Sprintf("<!-- toudocu\nversion: 1\nid: %s\nscreenKind: screen\nstatus: planned\nupdated: %s\n-->\n\n# %s: %s\n\n## Назначение\n\n## Состояния\n\n## Переходы\n", id, date, id, title)
 		case "standard":
-			return fmt.Sprintf("# %s: %s\n\n- Идентификатор: %s\n- Статус: Черновик\n- Последнее обновление: %s\n- Область: \n\n## Правила\n\n## Автоматические проверки\n", id, title, id, date)
+			return fmt.Sprintf("<!-- toudocu\nversion: 1\nid: %s\nstatus: draft\nscope: TODO\nupdated: %s\n-->\n\n# %s: %s\n\n<!-- toudocu:section rules -->\n## Правила\n\n<!-- toudocu:section automated-checks -->\n## Автоматические проверки\n", id, date, id, title)
 		case "runbook":
-			return fmt.Sprintf("# %s: %s\n\n- Идентификатор: %s\n- Статус: Черновик\n- Среда: \n- Риск: \n\n## Предварительные условия\n\n## Процедура\n\n## Проверка\n\n## Откат\n", id, title, id)
+			return fmt.Sprintf("<!-- toudocu\nversion: 1\nid: %s\nstatus: draft\nrisk: low\nlastVerified: %s\n-->\n\n# %s: %s\n\n<!-- toudocu:section prerequisites -->\n## Предварительные условия\n\n<!-- toudocu:section procedure -->\n## Процедура\n\n<!-- toudocu:section verification -->\n## Проверка\n\n<!-- toudocu:section rollback -->\n## Откат\n", id, date, id, title)
 		default:
-			return fmt.Sprintf("# %s: %s\n\n- Идентификатор: %s\n- Статус: Предложено\n- Дата: %s\n\n## Контекст\n\n## Решение\n\n## Последствия\n", id, title, id, date)
+			return fmt.Sprintf("<!-- toudocu\nversion: 1\nid: %s\nstatus: proposed\ndate: %s\n-->\n\n# %s: %s\n\n<!-- toudocu:section context -->\n## Контекст\n\n<!-- toudocu:section decision -->\n## Решение\n\n<!-- toudocu:section consequences -->\n## Последствия\n", id, date, id, title)
 		}
 	}
 	switch kind {
 	case "module":
-		return fmt.Sprintf("# %s: %s\n\n- Identifier: %s\n- Status: Draft\n- Last updated: %s\n\n## Purpose\n\n## Business rules\n\n## Invariants\n\n## Interfaces\n", id, title, id, date)
+		return fmt.Sprintf("<!-- toudocu\nversion: 1\nid: %s\nstatus: draft\nupdated: %s\n-->\n\n# %s: %s\n\n## Purpose\n\n<!-- toudocu:section business-rules -->\n## Business rules\n\n<!-- toudocu:section invariants -->\n## Invariants\n\n<!-- toudocu:section stable-interfaces -->\n## Interfaces\n", id, date, id, title)
 	case "use-case":
-		return fmt.Sprintf("# %s: %s\n\n- Identifier: %s\n- Status: Draft\n- Last updated: %s\n\n## Main scenario\n\n## Alternative scenarios\n\n## Postconditions\n\n## Acceptance criteria\n\n## Business rules\n", id, title, id, date)
+		return fmt.Sprintf("<!-- toudocu\nversion: 1\nid: %s\nstatus: draft\nupdated: %s\n-->\n\n# %s: %s\n\n<!-- toudocu:section main-scenario -->\n## Main scenario\n\n## Alternative scenarios\n\n<!-- toudocu:section postconditions -->\n## Postconditions\n\n<!-- toudocu:section acceptance-criteria -->\n## Acceptance criteria\n\n<!-- toudocu:section business-rules -->\n## Business rules\n", id, date, id, title)
 	case "flow":
-		return fmt.Sprintf("# %s: %s\n\n- Identifier: %s\n- Status: Draft\n- Last updated: %s\n\n## Process\n", id, title, id, date)
+		return fmt.Sprintf("<!-- toudocu\nversion: 1\nid: %s\nupdated: %s\n-->\n\n# %s: %s\n\n## Process\n", id, date, id, title)
 	case "screen":
-		return fmt.Sprintf("# %s: %s\n\n- Identifier: %s\n- Status: Draft\n- Last updated: %s\n\n## Purpose\n\n## States\n\n## Transitions\n", id, title, id, date)
+		return fmt.Sprintf("<!-- toudocu\nversion: 1\nid: %s\nscreenKind: screen\nstatus: planned\nupdated: %s\n-->\n\n# %s: %s\n\n## Purpose\n\n## States\n\n## Transitions\n", id, date, id, title)
 	case "standard":
-		return fmt.Sprintf("# %s: %s\n\n- Identifier: %s\n- Status: Draft\n- Last updated: %s\n- Scope: \n\n## Rules\n\n## Automated checks\n", id, title, id, date)
+		return fmt.Sprintf("<!-- toudocu\nversion: 1\nid: %s\nstatus: draft\nscope: TODO\nupdated: %s\n-->\n\n# %s: %s\n\n<!-- toudocu:section rules -->\n## Rules\n\n<!-- toudocu:section automated-checks -->\n## Automated checks\n", id, date, id, title)
 	case "runbook":
-		return fmt.Sprintf("# %s: %s\n\n- Identifier: %s\n- Status: Draft\n- Environment: \n- Risk: \n\n## Prerequisites\n\n## Procedure\n\n## Verification\n\n## Rollback\n", id, title, id)
+		return fmt.Sprintf("<!-- toudocu\nversion: 1\nid: %s\nstatus: draft\nrisk: low\nlastVerified: %s\n-->\n\n# %s: %s\n\n<!-- toudocu:section prerequisites -->\n## Prerequisites\n\n<!-- toudocu:section procedure -->\n## Procedure\n\n<!-- toudocu:section verification -->\n## Verification\n\n<!-- toudocu:section rollback -->\n## Rollback\n", id, date, id, title)
 	default:
-		return fmt.Sprintf("# %s: %s\n\n- Identifier: %s\n- Status: Proposed\n- Date: %s\n\n## Context\n\n## Decision\n\n## Consequences\n", id, title, id, date)
+		return fmt.Sprintf("<!-- toudocu\nversion: 1\nid: %s\nstatus: proposed\ndate: %s\n-->\n\n# %s: %s\n\n<!-- toudocu:section context -->\n## Context\n\n<!-- toudocu:section decision -->\n## Decision\n\n<!-- toudocu:section consequences -->\n## Consequences\n", id, date, id, title)
 	}
 }
 

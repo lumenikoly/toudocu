@@ -1,7 +1,9 @@
-# Toudocu Trust Boundaries
+<!-- toudocu
+version: 1
+architectureQuestion: Где проходят границы доверия?
+-->
 
-- Document type: Architecture
-- Architectural question: Where are the trust boundaries?
+# Toudocu Trust Boundaries
 
 Markdown, links, assets, and Mermaid source are treated as untrusted data;
 repository root and the selected output/report paths define the filesystem

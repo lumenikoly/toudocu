@@ -1,12 +1,17 @@
+<!-- toudocu
+version: 1
+status: {{STATUS}}
+stage: {{STAGE}}
+updated: {{DATE}}
+-->
+
 # Current status
 
-- Status: {{STATUS}}
-- Stage: {{STAGE}}
-- Version: {{VERSION}}
-- Last updated: {{DATE}}
+Product version: `{{VERSION}}`.
 
 {{CURRENT_STATE_SUMMARY}}
 
+<!-- toudocu:section summary -->
 ## Summary
 
 {{CURRENT_BEHAVIOR}}

@@ -47,7 +47,7 @@ func TestTaskInitWithParent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if report.ParentID == nil || *report.ParentID != "TASK-AUTH-100" || !strings.Contains(string(content), "- Родительская задача: TASK-AUTH-100") {
+	if report.ParentID == nil || *report.ParentID != "TASK-AUTH-100" || !strings.Contains(string(content), "parentTask: TASK-AUTH-100") {
 		t.Fatalf("parent missing from scaffold/report: %#v\n%s", report, content)
 	}
 	if _, err := InitTask(Options{InputDirectory: docs, RepositoryRoot: model.RepositoryRoot, Area: "AUTH", Title: "Bug", TaskType: "Bug", Language: "en", ParentTaskID: "TASK-AUTH-100"}); err == nil {
@@ -149,8 +149,9 @@ func TestTaskHierarchyDiagnostics(t *testing.T) {
 		})
 	}
 	model, _ := hierarchyModel(t, map[string]string{"work/TASK-AUTH-100.md": hierarchyTask("TASK-AUTH-100", "Draft", "TASK-AUTH-999", "")})
+	parentLine := fileLineContaining(t, filepath.Join(model.RootDirectory, "work", "TASK-AUTH-100.md"), "parentTask:")
 	for _, issue := range model.Issues {
-		if issue.Code == "TASK_PARENT_UNKNOWN" && (issue.Line != 5 || issue.TaskID != "TASK-AUTH-100" || issue.RelatedID != "TASK-AUTH-999") {
+		if issue.Code == "TASK_PARENT_UNKNOWN" && (issue.Line != parentLine || issue.TaskID != "TASK-AUTH-100" || issue.RelatedID != "TASK-AUTH-999") {
 			t.Fatalf("diagnostic location/IDs lost: %#v", issue)
 		}
 	}
@@ -240,7 +241,7 @@ func TestTaskTreeContextAndPortalUseSharedHierarchy(t *testing.T) {
 		t.Fatalf("tree=%#v err=%v", tree, err)
 	}
 	var stdout, stderr strings.Builder
-	if code := RunCLI([]string{"task", "tree", "TASK-AUTH-100", model.RootDirectory}, &stdout, &stderr); code != 0 || !strings.Contains(stdout.String(), "└── TASK-AUTH-101  Ready") || !strings.Contains(stdout.String(), "    └── TASK-AUTH-111  Ready") {
+	if code := RunCLI([]string{"task", "tree", "TASK-AUTH-100", model.RootDirectory}, &stdout, &stderr); code != 0 || !strings.Contains(stdout.String(), "└── TASK-AUTH-101  ready") || !strings.Contains(stdout.String(), "    └── TASK-AUTH-111  ready") {
 		t.Fatalf("task tree text failed: code=%d stdout=%s stderr=%s", code, stdout.String(), stderr.String())
 	}
 	stdout.Reset()

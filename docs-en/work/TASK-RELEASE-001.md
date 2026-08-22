@@ -1,18 +1,25 @@
+<!-- toudocu
+version: 1
+id: TASK-RELEASE-001
+status: done
+taskType: maintenance
+priority: high
+module: MOD-CLI
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-11
+-->
+
 # TASK-RELEASE-001: Build stable release 0.0.1
 
-- Status: Completed
-- Type: Maintenance
-- Priority: High
-- Module: MOD-CLI
-- Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-11
 
+<!-- toudocu:section result -->
 ## Result
 
 The repository contains an aligned `0.0.1` version, reproducible portal build,
 local checks, release bundle, and GitHub Actions workflow. Creating the tag and
 starting publication were deliberately outside this task.
 
+<!-- toudocu:section scope -->
 ## Scope
 
 - `Makefile`;
@@ -23,6 +30,7 @@ starting publication were deliberately outside this task.
 - `CHANGELOG.md`;
 - `project-docs/`;
 
+<!-- toudocu:section out-of-scope -->
 ## Out of scope
 
 - creating a Git tag;
@@ -31,6 +39,7 @@ starting publication were deliberately outside this task.
 - changing the command set, public Go API, or JSON schema v1 structure. Only
   the existing `toudocu.Version` constant changed.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] `AC-01` The CLI and canonical documentation use version `0.0.1`, and the
@@ -44,6 +53,7 @@ starting publication were deliberately outside this task.
 - [x] `AC-05` Source documentation and the tracked portal describe the stable
   version and supported installation methods without temporary caveats.
 
+<!-- toudocu:section plan -->
 ## Plan
 
 1. Fix the version and release contract.
@@ -53,6 +63,7 @@ starting publication were deliberately outside this task.
 5. Perform a full local release cycle without accessing GitHub.
 6. Independently review the meaning of the changed documentation.
 
+<!-- toudocu:section verification -->
 ## Verification
 
 - `AC-01` → `go run ./cmd/toudocu version && test "$(go run ./cmd/toudocu version)" = "0.0.1"`
@@ -64,12 +75,14 @@ starting publication were deliberately outside this task.
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `make check`
 
+<!-- toudocu:section documentation-impact -->
 ## Documentation impact
 
 The version, current status, completed Changes entities, root changelog, and
 self-contained delivery description were updated. The tracked portal was
 rebuilt from Markdown.
 
+<!-- toudocu:section use-case-omission-reason -->
 ## Use-case omission reason
 
 The task concerns release engineering and artifact reproducibility, not a new

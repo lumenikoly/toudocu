@@ -1,11 +1,15 @@
+<!-- toudocu
+version: 1
+id: SC-CHANGES-WORKSPACE
+status: done
+screenKind: screen
+module: MOD-CHANGES
+route: /changes/
+updated: 2026-08-20
+-->
+
 # SC-CHANGES-WORKSPACE: Changes
 
-- Identifier: SC-CHANGES-WORKSPACE
-- Type: Screen
-- Module: MOD-CHANGES
-- Status: Implemented
-- Route: `/changes/`
-- Last updated: 2026-08-13
 
 This screen lets a developer review the current Git diff and continue a
 discussion about any changed file without leaving the local portal. New

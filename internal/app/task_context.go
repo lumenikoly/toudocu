@@ -29,38 +29,31 @@ func findWorkItem(model *Model, taskID string) (*WorkItem, error) {
 
 func taskContextDocument(document *Document) TaskContextDocument {
 	sections := []TaskContextSection{}
-	full := document.Type == "work" || document.Type == "contract" || document.Type == "guide" || document.Type == "reference" || document.Type == "document"
+	full := containsType([]string{"work", "contract", "guide", "reference", "document", "flow", "screen"}, document.Type)
 	if full {
 		sections = append(sections, TaskContextSection{Title: document.Title, Markdown: document.Content})
 	} else {
-		selected := map[string]bool{}
+		selected := map[SectionKind]bool{}
 		switch document.Type {
 		case "module":
-			for _, name := range []string{"business rules", "бизнес-правила", "invariants", "инварианты", "interfaces", "интерфейсы", "stable interfaces", "стабильные интерфейсы"} {
-				selected[canonicalText(name)] = true
+			for _, kind := range []SectionKind{SectionKindBusinessRules, SectionKindInvariants, SectionKindStableInterfaces} {
+				selected[kind] = true
 			}
 		case "use-case":
-			for _, name := range []string{"main scenario", "основной сценарий", "alternative scenarios", "альтернативные сценарии", "error scenarios", "ошибочные сценарии", "postconditions", "постусловия", "business rules", "бизнес-правила"} {
-				selected[canonicalText(name)] = true
-			}
-		case "flow":
-			selected[canonicalText("process")] = true
-			selected[canonicalText("процесс")] = true
-		case "screen":
-			for _, name := range []string{"states", "состояния", "transitions", "переходы"} {
-				selected[canonicalText(name)] = true
+			for _, kind := range []SectionKind{SectionKindMainScenario, SectionKindPostconditions, SectionKindBusinessRules} {
+				selected[kind] = true
 			}
 		case "standard":
-			for _, name := range []string{"rules", "правила", "automated checks", "automatic checks", "автоматические проверки"} {
-				selected[canonicalText(name)] = true
+			for _, kind := range []SectionKind{SectionKindRules, SectionKindAutomatedChecks} {
+				selected[kind] = true
 			}
 		case "runbook":
-			for _, name := range []string{"prerequisites", "предварительные условия", "предпосылки", "procedure", "процедура", "verification", "проверка", "rollback", "откат", "stop conditions", "условия остановки"} {
-				selected[canonicalText(name)] = true
+			for _, kind := range []SectionKind{SectionKindPrerequisites, SectionKindProcedure, SectionKindVerification, SectionKindRollback, SectionKindStopConditions} {
+				selected[kind] = true
 			}
 		}
 		for _, section := range document.Sections {
-			if selected[canonicalText(section.Title)] {
+			if selected[section.Kind] {
 				sections = append(sections, TaskContextSection{Title: section.Title, Markdown: section.Markdown})
 			}
 		}

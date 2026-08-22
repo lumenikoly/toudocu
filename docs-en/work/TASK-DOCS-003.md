@@ -1,25 +1,34 @@
+<!-- toudocu
+version: 1
+id: TASK-DOCS-003
+status: done
+taskType: documentation
+priority: high
+module: MOD-MODEL
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-10
+-->
+
 # TASK-DOCS-003: Add explicit skill initialization
 
-- Status: Completed
-- Type: Documentation
-- Priority: High
-- Module: MOD-MODEL
-- Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-10
 
+<!-- toudocu:section result -->
 ## Result
 
 The user connects Toudocu to a project only through explicit `$toudocu init`.
 When needed, the skill creates minimal documentation and adds a constrained
 managed guidance block to `AGENTS.md`.
 
+<!-- toudocu:section behavior-change -->
 ## Behavior change
 
+<!-- toudocu:section before -->
 ### Before
 
 The skill had no separate first-run workflow, and the previous process proposed
 a `TASK-*` for almost every request.
 
+<!-- toudocu:section after -->
 ### After
 
 Only `$toudocu init` performs a read-only preflight, creates a missing
@@ -27,6 +36,7 @@ Only `$toudocu init` performs a read-only preflight, creates a missing
 check. Ordinary calls do not change project instructions. A new `TASK-*` is
 created only for substantial work.
 
+<!-- toudocu:section scope -->
 ## Scope
 
 - `skills/toudocu/`;
@@ -36,6 +46,7 @@ created only for substantial work.
 - `docs/guides/work-items.md`;
 - `docs/work/TASK-DOCS-003.md`.
 
+<!-- toudocu:section out-of-scope -->
 ## Out of scope
 
 - new Go CLI command `toudocu init`;
@@ -43,6 +54,7 @@ created only for substantial work.
 - external runtime or dependency for Markdown merging;
 - creation of complete starter pack documentation.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] `AC-01` Skill treats `$toudocu init` as the only explicit
@@ -54,6 +66,7 @@ created only for substantial work.
   work or at the explicit request of the user or project.
 - [x] `AC-04` Metadata skill describes an explicit init and remains valid.
 
+<!-- toudocu:section plan -->
 ## Plan
 
 - [x] Add init reference and RU/EN project-guidance assets.
@@ -61,6 +74,7 @@ created only for substantial work.
 - [x] Fix the contract with tests and user documentation.
 - [x] Perform semantic review and full verification cycle.
 
+<!-- toudocu:section verification -->
 ## Verification
 
 - `AC-01` → `go test ./... -run TestUseToudocuInitContract`
@@ -71,12 +85,14 @@ created only for substantial work.
 - `DOCS` → `go run ./cmd/toudocu check ./docs --strict --stale-days 0`
 - `QUALITY` → `go test ./... -run 'TestUseToudocu'`
 
+<!-- toudocu:section documentation-impact -->
 ## Documentation impact
 
 Updated `skills/toudocu/`, `README.md`, `CHANGELOG.md`,
 `docs/guides/work-items.md` and `skill_templates_test.go`. Public Go API, CLI
 and JSON schema do not change; generated portals cannot be edited.
 
+<!-- toudocu:section use-case-omission-reason -->
 ## Use-case omission reason
 
 The change determines the behavior of the installed AI-skill and does not change

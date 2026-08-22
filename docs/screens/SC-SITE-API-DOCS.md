@@ -1,12 +1,15 @@
-# SC-SITE-API-DOCS: HTTP API
+<!-- toudocu
+version: 1
+id: SC-SITE-API-DOCS
+status: done
+screenKind: screen
+module: MOD-SITE
+route: /_toudocu/api-docs/
+preview: ../assets/screens/site-api-docs.png
+updated: 2026-08-13
+-->
 
-- Идентификатор: SC-SITE-API-DOCS
-- Тип: Экран
-- Модуль: MOD-SITE
-- Статус: Реализован
-- Маршрут: `/_toudocu/api-docs/`
-- Превью: `../assets/screens/site-api-docs.png`
-- Последнее обновление: 2026-08-13
+# SC-SITE-API-DOCS: HTTP API
 
 Страница доступна только при `serve` и показывает OpenAPI-контракты редактора,
 раздела «Изменения» и обратной связи с агентом. Пользователь выбирает контракт,

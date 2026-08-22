@@ -1,11 +1,15 @@
+<!-- toudocu
+version: 1
+id: SC-SITE-USE-CASE
+status: done
+screenKind: page
+module: MOD-SITE
+preview: ../assets/screens/site-use-case.png
+updated: 2026-08-12
+-->
+
 # SC-SITE-USE-CASE: Use-case page
 
-- Identifier: SC-SITE-USE-CASE
-- Type: Page
-- Module: MOD-SITE
-- Status: Implemented
-- Preview: `../assets/screens/site-use-case.png`
-- Last updated: 2026-08-10
 
 A single page for a selected `UC-*`, with its description, map, playback, and
 relationships. The URL depends on the generated use case and is not declared as
@@ -13,6 +17,7 @@ a separate route pattern.
 
 ## Transitions
 
+<!-- toudocu:table transitions columns=id,useCase,action,condition,target,kind -->
 | ID | Use case | Action | Condition | Result | Type |
 |---|---|---|---|---|---|
 | TR-SITE-004 | UC-DOCS-04 | Show the global map | Always | SC-SITE-SCREEN-MAP | navigation |

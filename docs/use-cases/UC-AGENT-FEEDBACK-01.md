@@ -1,19 +1,24 @@
+<!-- toudocu
+version: 1
+id: UC-AGENT-FEEDBACK-01
+status: done
+priority: high
+module: MOD-AGENT-FEEDBACK
+screens: SC-SITE-DOCUMENT, SC-CHANGES-WORKSPACE
+startScreen: SC-SITE-DOCUMENT
+terminalScreens: SC-SITE-DOCUMENT, SC-CHANGES-WORKSPACE
+updated: 2026-08-14
+-->
+
 # UC-AGENT-FEEDBACK-01: Обсудить документацию с агентом разработки
 
-- Идентификатор: UC-AGENT-FEEDBACK-01
-- Статус: Готово
-- Актор: Разработчик
-- Модуль: MOD-AGENT-FEEDBACK
-- Приоритет: Высокий
-- Экраны: SC-SITE-DOCUMENT, SC-CHANGES-WORKSPACE
-- Начальный экран: SC-SITE-DOCUMENT
-- Конечные экраны: SC-SITE-DOCUMENT, SC-CHANGES-WORKSPACE
-- Последнее обновление: 2026-08-14
+Актор: разработчик.
 
 Разработчик задаёт вопрос по документации или изменённому файлу либо просит
 проверить и изменить цель, а агент разработки получает запрос через локальную команду и возвращает
 ответ в исходное обсуждение.
 
+<!-- toudocu:section prerequisites -->
 ## Предусловия
 
 - канонический портал запущен через `toudocu serve` внутри Git-репозитория;
@@ -21,6 +26,7 @@
 - цель находится в канонической документации либо среди обычных файлов
   текущего рабочего Git diff.
 
+<!-- toudocu:section main-scenario -->
 ## Основной сценарий
 
 1. Разработчик выделяет текст документа, включая заголовок, и открывает
@@ -82,6 +88,7 @@
 - Повреждённое локальное состояние не перезаписывается и возвращает
   `AGENT_STATE_CORRUPTED`.
 
+<!-- toudocu:section postconditions -->
 ## Постусловия
 
 - разговор и очередь сохранены вне репозитория и переживают перезапуск;
@@ -89,6 +96,7 @@
 - файловая система и обычная пересборка являются источником фактических изменений;
 - Toudocu не запускал языковую модель и не менял рабочий код.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Критерии приёмки
 
 - [x] Разговор и очередь сохранены вне репозитория и переживают перезапуск.
@@ -98,6 +106,7 @@
   изменений.
 - [x] Toudocu не запускает языковую модель и не меняет рабочий код.
 
+<!-- toudocu:section business-rules -->
 ## Бизнес-правила
 
 - [BR-AGENT-FEEDBACK-001](../modules/MOD-AGENT-FEEDBACK.md#br-agent-feedback-001-содержание-не-зависит-от-транспорта)
@@ -106,6 +115,7 @@
 - [BR-AGENT-FEEDBACK-004](../modules/MOD-AGENT-FEEDBACK.md#br-agent-feedback-004-очередь-обрабатывается-строго-по-порядку)
 - [BR-AGENT-FEEDBACK-005](../modules/MOD-AGENT-FEEDBACK.md#br-agent-feedback-005-обсуждением-управляет-человек)
 
+<!-- toudocu:section implementation -->
 ## Реализация
 
 - [MOD-AGENT-FEEDBACK](../modules/MOD-AGENT-FEEDBACK.md)

@@ -1,14 +1,17 @@
+<!-- toudocu
+version: 1
+id: UC-DOCS-04
+status: done
+priority: high
+module: MOD-SITE
+screens: SC-SITE-USE-CASE, SC-SITE-SCREEN-MAP
+startScreen: SC-SITE-USE-CASE
+terminalScreens: SC-SITE-SCREEN-MAP
+updated: 2026-08-12
+-->
+
 # UC-DOCS-04: Explore the Screen Map
 
-- Identifier: UC-DOCS-04
-- Status: Completed
-- Actor: Developer
-- Module: MOD-SITE
-- Priority: High
-- Screens: SC-SITE-USE-CASE, SC-SITE-SCREEN-MAP
-- Start screen: SC-SITE-USE-CASE
-- Terminal screens: SC-SITE-SCREEN-MAP
-- Last updated: 2026-08-12
 
 The developer explores user navigation and plays documented scenarios in the
 standalone portal.
@@ -20,12 +23,14 @@ standalone portal.
 - optional `screens/hotspots.json`;
 - `SC-*` and `TR-*` references from work items.
 
+<!-- toudocu:section prerequisites -->
 ## Preconditions
 
 - each screen has a unique `SC-*` and an existing module;
 - each transition has a unique `TR-*`, a use case, and an existing target screen;
 - a playable use case has a start screen and at least one terminal screen.
 
+<!-- toudocu:section main-scenario -->
 ## Main scenario
 
 1. The developer runs `check` or `build`.
@@ -50,22 +55,26 @@ standalone portal.
 - an invalid hotspot is diagnosed while the action list remains available;
 - a hidden hotspot appears on hover or focus, and a toggle can keep all areas visible.
 
+<!-- toudocu:section postconditions -->
 ## Postconditions
 
 The HTML and ProjectReport schema v1 contain consistent screens, transitions,
 playable scenarios, and traceability. The source Markdown is unchanged.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] HTML and `ProjectReport` schema v1 contain consistent screens,
   transitions, playable scenarios, and traceability.
 - [x] Building the map leaves source Markdown unchanged.
 
+<!-- toudocu:section business-rules -->
 ## Business rules
 
 - [BR-MODEL-004](../modules/model.md#br-model-004-screen-documents-are-the-source-of-the-graph) — screen documents are the graph source.
 - [BR-SITE-005](../modules/site.md#br-site-005-the-screen-map-works-autonomously) — the map and step-by-step viewer work autonomously.
 
+<!-- toudocu:section implementation -->
 ## Implementation
 
 - [Screen guide](../guides/screens.md)

@@ -1,13 +1,19 @@
+<!-- toudocu
+version: 1
+id: TASK-SKILL-001
+status: done
+taskType: feature
+priority: high
+module: MOD-CLI
+useCase: UC-AGENT-01
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-10
+-->
+
 # TASK-SKILL-001: Add embedded Toudocu skill installation
 
-- Status: Done
-- Type: Feature
-- Priority: High
-- Module: MOD-CLI
-- Use case: UC-AGENT-01
-- Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-10
 
+<!-- toudocu:section result -->
 ## Result
 
 The prepared `0.0.1` binary contains the canonical `toudocu` skill and provides
@@ -15,19 +21,23 @@ a safe offline lifecycle for Codex, Claude Code, and Copilot in project and
 user scope. This task prepared the capability; it does not prove that stable
 `0.0.1` was published.
 
+<!-- toudocu:section behavior-change -->
 ## Behavior change
 
+<!-- toudocu:section before -->
 ### Before
 
 The CLI is installed separately, and users manually place the skill in the
 chosen AI host directory without verifiable ownership or an update lifecycle.
 
+<!-- toudocu:section after -->
 ### After
 
 The `toudocu skill install|status|update|uninstall` commands resolve the
 target, classify the existing copy using the manifest/checksums, and change
 only an unchanged managed package through atomic publication and rollback.
 
+<!-- toudocu:section scope -->
 ## Scope
 
 - `skills/`
@@ -37,6 +47,7 @@ only an unchanged managed package through atomic publication and rollback.
 - `docs/`
 - `project-docs/`
 
+<!-- toudocu:section out-of-scope -->
 ## Out of scope
 
 - `--force`, `--dry-run`, JSON output, or a new public Go API;
@@ -44,6 +55,7 @@ only an unchanged managed package through atomic publication and rollback.
 - changing the `docs-en` translation root;
 - executing scripts from the embedded bundle.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] `AC-01` The binary embeds the full current `skills/toudocu` package as
@@ -62,6 +74,7 @@ only an unchanged managed package through atomic publication and rollback.
 - [x] `AC-06` gofmt, vet, ordinary/race tests, module verification, strict
   canonical docs check, and five CGO-disabled cross-build targets pass.
 
+<!-- toudocu:section plan -->
 ## Plan
 
 - [x] Embed and validate the canonical skill package.
@@ -71,6 +84,7 @@ only an unchanged managed package through atomic publication and rollback.
 - [x] Update canonical documentation sources.
 - [x] Complete semantic review and the full verification cycle.
 
+<!-- toudocu:section verification -->
 ## Verification
 
 - `AC-01` → `go test ./skills`
@@ -83,6 +97,7 @@ only an unchanged managed package through atomic publication and rollback.
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `make check`
 
+<!-- toudocu:section documentation-impact -->
 ## Documentation impact
 
 The work added the use case and guide and updated the README, roadmap, CLI

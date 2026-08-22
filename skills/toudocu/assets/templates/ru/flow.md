@@ -1,9 +1,12 @@
-# {{FLOW_ID}}: {{FLOW_TITLE}}
-
-- Идентификатор: {{FLOW_ID}}
+<!-- toudocu
+version: 1
+id: {{FLOW_ID}}
+module: {{MODULE_ID}}
+updated: {{DATE}}
 {{OPTIONAL_USE_CASES_METADATA}}
-- Модуль: {{MODULE_ID}}
-- Последнее обновление: {{DATE}}
+-->
+
+# {{FLOW_ID}}: {{FLOW_TITLE}}
 
 {{FLOW_SUMMARY}}
 

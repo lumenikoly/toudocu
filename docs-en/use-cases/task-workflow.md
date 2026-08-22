@@ -1,11 +1,14 @@
+<!-- toudocu
+version: 1
+id: UC-TASK-01
+status: done
+priority: high
+module: MOD-CLI
+updated: 2026-08-21
+-->
+
 # UC-TASK-01: Collect work-item context
 
-- Identifier: UC-TASK-01
-- Status: Completed
-- Actor: Developer or software agent
-- Module: MOD-CLI
-- Priority: High
-- Last updated: 2026-08-12
 
 Before changing code or documentation, the assignee retrieves a bounded context
 for one ready work item.
@@ -17,11 +20,13 @@ for one ready work item.
 - repository root;
 - `text` or `json` output.
 
+<!-- toudocu:section prerequisites -->
 ## Preconditions
 
 - Toudocu is available;
 - the assignee can read the documentation and repository.
 
+<!-- toudocu:section main-scenario -->
 ## Main flow
 
 1. The assignee runs:
@@ -49,21 +54,25 @@ for one ready work item.
   before work starts.
 - A project read failure ends the command before context is created.
 
+<!-- toudocu:section postconditions -->
 ## Postconditions
 
 The assignee has the selected task context. Files are unchanged and no command
 from Verification has run.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] The assignee receives context for exactly one selected work item.
 - [x] Collecting context leaves files unchanged and runs no command from
   Verification.
 
+<!-- toudocu:section business-rules -->
 ## Business rules
 
 - [BR-CLI-001](../modules/cli.md#br-cli-001-task-context-does-not-execute-commands)
 
+<!-- toudocu:section implementation -->
 ## Implementation
 
 - [FLOW-TASK-WORKFLOW](../flows/FLOW-TASK-WORKFLOW.md)

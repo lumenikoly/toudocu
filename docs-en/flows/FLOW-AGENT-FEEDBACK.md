@@ -1,9 +1,14 @@
+<!-- toudocu
+version: 1
+id: FLOW-AGENT-FEEDBACK
+module: MOD-AGENT-FEEDBACK
+useCase: UC-AGENT-FEEDBACK-01
+updated: 2026-08-14
+-->
+
 # FLOW-AGENT-FEEDBACK: Process the local documentation queue
 
-- Identifier: FLOW-AGENT-FEEDBACK
 - Scenario: UC-AGENT-FEEDBACK-01
-- Module: MOD-AGENT-FEEDBACK
-- Last updated: 2026-08-14
 
 ## Process
 

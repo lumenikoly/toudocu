@@ -1,28 +1,36 @@
+<!-- toudocu
+version: 1
+id: TASK-API-001
+status: done
+taskType: feature
+priority: high
+module: MOD-SITE
+useCase: UC-DOCS-03
+screens: SC-SITE-HOME, SC-SITE-API-DOCS
+transitions: TR-SITE-006
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-10
+-->
+
 # TASK-API-001: OpenAPI-контракты и автономный Swagger UI
 
-- Статус: Выполнено
-- Тип: Feature
-- Приоритет: Высокий
-- Модуль: MOD-SITE
-- Сценарий: UC-DOCS-03
-- Экраны: SC-SITE-HOME, SC-SITE-API-DOCS
-- Переходы: TR-SITE-006
-- Стандарты: STD-GO-001, STD-DOCS-001
-- Последнее обновление: 2026-08-10
-
+<!-- toudocu:section result -->
 ## Результат
 
 Два файла OpenAPI 3.1.0 стали источниками точного HTTP-контракта Editor и
 Changes API. Канонический `serve` показывает их через встроенный Swagger UI,
 которому не нужен CDN. Публичная schema v1 отчётов не изменилась.
 
+<!-- toudocu:section behavior-change -->
 ## Изменение поведения
 
+<!-- toudocu:section before -->
 ### Было
 
 HTTP-контракт повторялся в Markdown, OpenAPI не проверялся как отдельный тип
 источника, а в локальном портале не было интерактивного справочника API.
 
+<!-- toudocu:section after -->
 ### Станет
 
 `check` и диагностика редактора проверяют OpenAPI. Реестр маршрутов в Go и
@@ -31,6 +39,7 @@ Changes API имеют единый JSON-формат, а `HEAD` разрешё�
 маршрута. Канонический `serve` показывает оба контракта во встроенном Swagger
 UI; статический портал и переводы этот интерфейс не получают.
 
+<!-- toudocu:section scope -->
 ## Область изменения
 
 - проверка OpenAPI, реестры маршрутов и HTTP-обработчики в `internal/app/`;
@@ -38,6 +47,7 @@ UI; статический портал и переводы этот интер�
 - OpenAPI-контракты и связанная документация;
 - тесты соответствия контрактов, изоляции портала и контрольных сумм.
 
+<!-- toudocu:section out-of-scope -->
 ## Не входит в задачу
 
 - новые параметры CLI, экспортируемые функции Go или новая версия JSON-схем;
@@ -46,6 +56,7 @@ UI; статический портал и переводы этот интер�
 - изменение успешных ответов Editor и форматов содержимого Changes;
 - изменение корней переводов и сгенерированных порталов вручную.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Критерии приёмки
 
 - [x] `AC-01` Два файла OpenAPI 3.1.0 описывают все действующие операции,
@@ -70,6 +81,7 @@ UI; статический портал и переводы этот интер�
 - [x] `AC-09` В задачу включены модульные, контрактные, регрессионные,
   портальные и браузерные проверки.
 
+<!-- toudocu:section plan -->
 ## План
 
 - [x] Добавить и проверять OpenAPI-источники.
@@ -78,6 +90,7 @@ UI; статический портал и переводы этот интер�
   переводов.
 - [x] Обновить исходную документацию.
 
+<!-- toudocu:section verification -->
 ## Проверка
 
 - `AC-05` → `TR-SITE-006` → `TestAPIDocsUI`
@@ -94,6 +107,7 @@ UI; статический портал и переводы этот интер�
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root .`
 - `QUALITY` → `go vet ./... && go test ./... && go test -race ./... && go run ./cmd/toudocu check ./docs --strict --stale-days 0 && make check`
 
+<!-- toudocu:section documentation-impact -->
 ## Влияние на документацию
 
 Были добавлены два OpenAPI-контракта, ADR, экран и эта задача. Обновлены

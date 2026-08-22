@@ -1,8 +1,12 @@
+<!-- toudocu
+version: 1
+id: CON-CLI-V1
+status: done
+updated: 2026-08-21
+-->
+
 # Toudocu CLI v1
 
-- Identifier: CON-CLI-V1
-- Status: Done
-- Last updated: 2026-08-12
 
 This document defines CLI commands, side effects, exit codes, and versioned JSON
 results. `toudocu COMMAND --help` shows the exact flag syntax.

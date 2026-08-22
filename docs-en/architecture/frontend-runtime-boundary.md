@@ -1,7 +1,10 @@
+<!-- toudocu
+version: 1
+architectureQuestion: Что делает Go-часть, а что — код в браузере?
+-->
+
 # Where Is the Boundary Between the Go Core and the Frontend Runtime?
 
-- Document type: Architecture
-- Architectural question: Where is the boundary between the Go core and the browser runtime?
 
 Go remains the sole source of the project model and the trusted boundary for
 the filesystem, Git, and task verification. The frontend receives only a
@@ -69,6 +72,7 @@ Opening HTML directly via `file://` is not an architectural or product
 contract. The existing `toudocu serve` command provides a local browser
 runtime; no new preview command is needed.
 
+<!-- toudocu:section invariants -->
 ## Invariants
 
 - The HTML of a regular page contains the main Markdown content before

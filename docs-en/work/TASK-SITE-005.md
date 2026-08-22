@@ -1,15 +1,21 @@
+<!-- toudocu
+version: 1
+id: TASK-SITE-005
+status: done
+taskType: feature
+priority: normal
+module: MOD-SITE
+useCase: UC-DOCS-03
+flow: FLOW-DOCS-SERVE
+screens: SC-SITE-HOME
+standards: STD-GO-001, STD-DOCS-001
+updated: 2026-08-10
+-->
+
 # TASK-SITE-005: Show an available update in the serve portal
 
-- Status: Done
-- Type: Feature
-- Priority: Normal
-- Module: MOD-SITE
-- Use case: UC-DOCS-03
-- Flow: FLOW-DOCS-SERVE
-- Screens: SC-SITE-HOME
-- Standards: STD-GO-001, STD-DOCS-001
-- Last updated: 2026-08-10
 
+<!-- toudocu:section result -->
 ## Result
 
 Canonical `toudocu serve` can check the latest stable GitHub release without
@@ -17,13 +23,16 @@ blocking the portal. If it is newer than the running binary, the portal shows
 a small prompt that opens the official release page. Static builds, translated
 portals, and the binary itself remain self-contained.
 
+<!-- toudocu:section behavior-change -->
 ## Behavior change
 
+<!-- toudocu:section before -->
 ### Before
 
 The user learns about a new release only outside Toudocu or by opening GitHub
 Releases manually.
 
+<!-- toudocu:section after -->
 ### After
 
 When the canonical serve portal is opened for the first time, the browser
@@ -32,6 +41,7 @@ release once per process and returns a safe typed state. The banner can be
 dismissed for the specific latest version; `--no-update-check` disables the
 outbound request completely.
 
+<!-- toudocu:section scope -->
 ## Scope
 
 - `internal/app/`, `internal/site/`, and `api.go` — CLI option, checker,
@@ -41,6 +51,7 @@ outbound request completely.
 - `docs/` — work item, ADR, CLI/HTTP contracts, architecture, module, use case,
   flow, screen, and references.
 
+<!-- toudocu:section out-of-scope -->
 ## Out of scope
 
 - Self-update, running an installer, or replacing the binary from the browser.
@@ -49,6 +60,7 @@ outbound request completely.
   serves.
 - Changing the `docs-en` translation root.
 
+<!-- toudocu:section acceptance-criteria -->
 ## Acceptance criteria
 
 - [x] `AC-01` `serve --no-update-check` disables the update capability,
@@ -67,6 +79,7 @@ outbound request completely.
 - [x] `AC-06` The ADR, contracts, architecture, module, use case, flow, screen,
   and reference agree with the behavior.
 
+<!-- toudocu:section plan -->
 ## Plan
 
 - [x] Add the CLI option, update checker, HTTP route, and bootstrap capability.
@@ -74,6 +87,7 @@ outbound request completely.
 - [x] Cover backend, frontend, static isolation, and browser behavior.
 - [x] Update the canonical documentation sources.
 
+<!-- toudocu:section verification -->
 ## Verification
 
 - `AC-01` → `go test ./internal/app -run 'TestParseUpdateCheckFlag|TestVersionEndpointDisabled'`
@@ -86,6 +100,7 @@ outbound request completely.
 - `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
 - `QUALITY` → `go vet ./... && go mod verify && npm --prefix web run typecheck`
 
+<!-- toudocu:section documentation-impact -->
 ## Documentation impact
 
 Adds an ADR for the narrow opt-out network exception. Updates the Editor

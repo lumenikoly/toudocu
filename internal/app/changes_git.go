@@ -367,11 +367,7 @@ func (g *gitChangeSource) content(side ChangeSide, path string) ([]byte, error) 
 }
 
 func taskIDFromContent(content []byte) string {
-	match := workItemHeadingRE.FindStringSubmatch(analyzeMarkdown(string(content)).Title)
-	if match == nil {
-		return ""
-	}
-	return match[1]
+	return strings.TrimSpace(analyzeMarkdown(string(content)).Metadata["id"])
 }
 
 func (g *gitChangeSource) taskDocuments(side ChangeSide, taskID string) (map[string]changeTaskDocument, error) {

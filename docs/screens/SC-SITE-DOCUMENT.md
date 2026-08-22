@@ -1,11 +1,14 @@
-# SC-SITE-DOCUMENT: Страница документа
+<!-- toudocu
+version: 1
+id: SC-SITE-DOCUMENT
+status: done
+screenKind: page
+module: MOD-SITE
+preview: ../assets/screens/site-document.png
+updated: 2026-08-12
+-->
 
-- Идентификатор: SC-SITE-DOCUMENT
-- Тип: Страница
-- Модуль: MOD-SITE
-- Статус: Реализован
-- Превью: `../assets/screens/site-document.png`
-- Последнее обновление: 2026-08-12
+# SC-SITE-DOCUMENT: Страница документа
 
 Это обычная страница выбранного документа Markdown. Её адрес строится из пути
 исходного файла, поэтому один общий маршрут здесь не задаётся.
@@ -54,6 +57,7 @@
 
 ## Переходы
 
+<!-- toudocu:table transitions columns=id,useCase,action,condition,target,kind -->
 | ID | Сценарий | Действие | Условие | Результат | Тип |
 |---|---|---|---|---|---|
 | TR-SITE-007 | UC-AGENT-FEEDBACK-01 | Открыть изменения | Пользователь выбрал общий раздел «Изменения» | SC-CHANGES-WORKSPACE | navigation |

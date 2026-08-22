@@ -10,27 +10,35 @@ import (
 	"time"
 )
 
-func TestQualityMetadataStatusAliasesAndValidationBoundaries(t *testing.T) {
-	for _, value := range []string{"Черновик", "Draft", "Действует", "Active", "Effective", "Устарел", "Obsolete", "Deprecated", "Заменён", "Superseded"} {
+func TestQualityCanonicalMetadataAndValidationBoundaries(t *testing.T) {
+	for _, value := range []string{"draft", "active", "obsolete", "superseded"} {
 		if _, ok := standardStatus(value); !ok {
 			t.Errorf("standard status %q was not recognized", value)
 		}
 	}
-	for _, value := range []string{"Черновик", "Draft", "Действует", "Active", "Требует проверки", "Requires review", "Устарел", "Obsolete", "Deprecated"} {
+	for _, value := range []string{"draft", "active", "review-required", "obsolete"} {
 		if _, ok := runbookStatus(value); !ok {
 			t.Errorf("runbook status %q was not recognized", value)
 		}
 	}
-	parsed := analyzeMarkdown(`# Entity
+	for _, value := range []string{"Черновик", "Draft", "Действует", "Active"} {
+		if _, ok := standardStatus(value); ok {
+			t.Errorf("localized standard status %q was recognized", value)
+		}
+	}
+	parsed := analyzeMarkdown(`<!-- toudocu
+version: 1
+scope: code
+environment: production
+risk: high
+lastVerified: 2026-07-31
+supersededBy: STD-NEXT-001
+-->
 
-- Область: Код
-- Environment: Production
-- Риск: Высокий
-- Last verified: 2026-07-31
-- Заменён: STD-NEXT-001
+# Entity
 `)
 	for key, expected := range map[string]string{
-		"scope": "Код", "environment": "Production", "risk": "Высокий",
+		"scope": "code", "environment": "production", "risk": "high",
 		"lastVerified": "2026-07-31", "supersededBy": "STD-NEXT-001",
 	} {
 		if parsed.Metadata[key] != expected {
@@ -45,7 +53,7 @@ func TestQualityMetadataStatusAliasesAndValidationBoundaries(t *testing.T) {
 	writeTestFile(t, docs, "quality/STD-NEXT-001.md", validStandard("STD-NEXT-001"))
 	superseded := strings.Replace(validStandard("STD-OLD-001"), "- Status: Active", "- Status: Superseded\n- Superseded by: STD-NEXT-001", 1)
 	writeTestFile(t, docs, "quality/STD-OLD-001.md", superseded)
-	writeTestFile(t, docs, "quality/duplicate.md", validStandard("STD-NEXT-001"))
+	writeTestFile(t, docs, "quality/STD-DUPLICATE.md", validStandard("STD-NEXT-001"))
 	writeTestFile(t, docs, "quality/STD-WARN-001.md", "# STD-WARN-001: Incomplete\n\n- Identifier: STD-WARN-001\n- Status: Unknown\n\n## Rules\n\n## Automated checks\n")
 	self := strings.Replace(validStandard("STD-SELF-001"), "- Status: Active", "- Status: Superseded\n- Superseded by: STD-SELF-001", 1)
 	writeTestFile(t, docs, "quality/STD-SELF-001.md", self)
@@ -54,8 +62,8 @@ func TestQualityMetadataStatusAliasesAndValidationBoundaries(t *testing.T) {
 	writeTestFile(t, docs, "runbooks/index.md", "# Runbooks\n\nProcedures.\n")
 	missingSections := "# RB-OPS-EMPTY: Empty\n\n- Identifier: RB-OPS-EMPTY\n- Status: Active\n- Environment: Production\n- Risk: Critical\n- Last verified: invalid\n\nNo procedure.\n"
 	writeTestFile(t, docs, "runbooks/RB-OPS-EMPTY.md", missingSections)
-	writeTestFile(t, docs, "runbooks/invalid.md", strings.Replace(validRunbook("RB-OPS-INVALID", "Active", "2026-07-20", "Low"), "RB-OPS-INVALID", "INVALID", 2))
-	writeTestFile(t, docs, "runbooks/duplicate.md", validRunbook("RB-OPS-EMPTY", "Active", "2026-07-20", "Low"))
+	writeTestFile(t, docs, "runbooks/RB-INVALID.md", strings.Replace(validRunbook("RB-OPS-INVALID", "Active", "2026-07-20", "Low"), "RB-OPS-INVALID", "INVALID", 2))
+	writeTestFile(t, docs, "runbooks/RB-DUPLICATE.md", validRunbook("RB-OPS-EMPTY", "Active", "2026-07-20", "Low"))
 	writeTestFile(t, docs, "runbooks/RB-OPS-WARN.md", "# RB-OPS-WARN: Incomplete\n\n- Identifier: RB-OPS-WARN\n- Status: Unknown\n- Risk: Unknown\n- Last verified: 2026-07-20\n\n## Prerequisites\n\nKnown.\n\n## Procedure\n\n1. Act.\n\n## Verification\n\nVerify.\n\n## Rollback\n\nRollback.\n")
 	now := time.Date(2026, 7, 31, 0, 0, 0, 0, time.UTC)
 	writeTestFile(t, docs, "runbooks/RB-OPS-BOUNDARY.md", validRunbook("RB-OPS-BOUNDARY", "Active", now.AddDate(0, 0, -90).Format("2006-01-02"), "Low"))
@@ -75,7 +83,7 @@ func TestQualityMetadataStatusAliasesAndValidationBoundaries(t *testing.T) {
 		"missing-runbook-environment", "invalid-runbook-status", "invalid-runbook-risk",
 		"missing-runbook-section", "runbook-procedure-not-numbered",
 		"missing-runbook-stop-conditions", "runbook-review-required", "stale-runbook",
-		"invalid-custom-manifest-type", "missing-custom-description",
+		"missing-custom-description",
 	} {
 		if !hasIssueCode(model.Issues, code) {
 			t.Errorf("missing validation code %s: %#v", code, model.Issues)
@@ -193,10 +201,10 @@ func TestTypedKnowledgeErrorsAndCustomManifest(t *testing.T) {
 	docs := filepath.Join(root, "docs")
 	writeTestFile(t, docs, "index.md", "# Project\n\nTyped knowledge.\n")
 	writeTestFile(t, docs, "quality/index.md", "# Quality\n\nStandards.\n")
-	writeTestFile(t, docs, "quality/bad.md", "# Bad\n\n- Identifier: std-bad\n- Status: Superseded\n\n## Rules\n\nRule.\n\n## Automated checks\n\nCheck.\n")
+	writeTestFile(t, docs, "quality/STD-BAD.md", "# Bad\n\n- Identifier: std-bad\n- Status: Superseded\n\n## Rules\n\nRule.\n\n## Automated checks\n\nCheck.\n")
 	writeTestFile(t, docs, "runbooks/index.md", "# Runbooks\n\nOperational procedures.\n")
 	writeTestFile(t, docs, "runbooks/RB-BAD-001.md", validRunbook("RB-BAD-001", "Active", "2026-07-20", "Low")+"\n[Missing target](missing.md)\n")
-	writeTestFile(t, docs, "handbook/index.md", "# Team handbook\n\n- Type: Custom\n\nTeam-specific guidance.\n")
+	writeTestFile(t, docs, "handbook/index.md", "# Team handbook\n\nTeam-specific guidance.\n")
 	writeTestFile(t, docs, "handbook/start.md", "# Start\n\nRead this first.\n")
 	writeTestFile(t, docs, "misc/note.md", "# Note\n\nNo manifest exists.\n")
 

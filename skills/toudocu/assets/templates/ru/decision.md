@@ -1,21 +1,27 @@
-# {{ADR_ID}}: {{DECISION_TITLE}}
+<!-- toudocu
+version: 1
+id: {{ADR_ID}}
+status: {{STATUS}}
+date: {{DATE}}
+author: {{AUTHOR}}
+updated: {{DATE}}
+-->
 
-- Идентификатор: {{ADR_ID}}
-- Статус: {{STATUS}}
-- Дата: {{DATE}}
-- Автор: {{AUTHOR}}
-- Последнее обновление: {{DATE}}
+# {{ADR_ID}}: {{DECISION_TITLE}}
 
 {{DECISION_SUMMARY}}
 
+<!-- toudocu:section context -->
 ## Контекст
 
 {{CONTEXT}}
 
+<!-- toudocu:section decision -->
 ## Решение
 
 {{DECISION}}
 
+<!-- toudocu:section consequences -->
 ## Последствия
 
 {{CONSEQUENCES}}

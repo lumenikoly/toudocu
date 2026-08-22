@@ -1,6 +1,8 @@
-# {{PROJECT_TITLE}} architecture
+<!-- toudocu
+version: 1
+-->
 
-- Document type: Architecture Overview
+# {{PROJECT_TITLE}} architecture
 
 {{SYSTEM_BOUNDARY_SUMMARY}}
 

@@ -1,13 +1,17 @@
-# CLI and work-item operations
+<!-- toudocu
+version: 1
+id: MOD-CLI
+status: done
+updated: 2026-08-21
+-->
 
-- Identifier: MOD-CLI
-- Status: Done
-- Last updated: 2026-08-10
+# CLI and work-item operations
 
 This module provides documentation checks, portal builds, local serving,
 search, Git comparisons, and work-item operations. Results are reproducible,
 exit codes are stable, and machine-readable reports use JSON schema v1.
 
+<!-- toudocu:section code-location -->
 ## Code locations
 
 - `api.go` and `cmd/toudocu/main.go` — public Go facade and executable entry
@@ -21,6 +25,7 @@ exit codes are stable, and machine-readable reports use JSON schema v1.
   `internal/app/skill_cli.go` — embedded skill, planning, and filesystem
   operations.
 
+<!-- toudocu:section boundaries -->
 ## Boundaries
 
 The CLI does not interpret a natural-language request. `task ready` and
@@ -33,6 +38,7 @@ workflows, not Go CLI commands. `skill` only
 places embedded files and never executes their contents. The skill lifecycle is
 not exported through the public Go facade.
 
+<!-- toudocu:section business-rules -->
 ## Business rules
 
 ### BR-CLI-001: Task context does not execute commands
@@ -96,6 +102,18 @@ With `--agent all`, the CLI resolves and classifies every unique target before
 writing. It then processes targets independently; one failure does not stop the
 others, but a partial result returns exit code `1`.
 
+### BR-CLI-011: The task tree does not widen the execution boundary
+
+`task tree` and `task context` only read existing documentation. Running task
+commands remains exclusive to `task verify --run` after local validation.
+
+### BR-CLI-012: The built-in CLI interface uses English
+
+Help, reports, diagnostics, and server-start messages produced by the Go CLI
+are in English. Russian and English scaffolds translate only the reader-facing
+text; metadata names, section kinds, and permitted values stay identical.
+
+<!-- toudocu:section invariants -->
 ## Invariants
 
 - JSON output is not mixed with streaming human-readable text.
@@ -111,6 +129,7 @@ others, but a partial result returns exit code `1`.
 - `skill status` is read-only. Mutating skill commands recheck the target before
   publication and restore the backup if publication fails.
 
+<!-- toudocu:section stable-interfaces -->
 ## Stable interfaces
 
 - commands and options in the [CLI contract](../contracts/cli.md);
@@ -119,6 +138,7 @@ others, but a partial result returns exit code `1`.
   `TaskVerifyReport`;
 - exit code `0` only for success or an allowed no-op.
 
+<!-- toudocu:section related-use-cases -->
 ## Related use cases
 
 - [Work-item context](../use-cases/task-workflow.md)

@@ -1,11 +1,14 @@
-# SC-CHANGES-WORKSPACE: Изменения
+<!-- toudocu
+version: 1
+id: SC-CHANGES-WORKSPACE
+status: done
+screenKind: screen
+module: MOD-CHANGES
+route: /changes/
+updated: 2026-08-20
+-->
 
-- Идентификатор: SC-CHANGES-WORKSPACE
-- Тип: Экран
-- Модуль: MOD-CHANGES
-- Статус: Реализован
-- Маршрут: `/changes/`
-- Последнее обновление: 2026-08-20
+# SC-CHANGES-WORKSPACE: Изменения
 
 Экран помогает проверить текущий Git diff и продолжить обсуждение любого
 изменённого файла, не покидая локальный портал. Новые сообщения агенту
