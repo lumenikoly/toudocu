@@ -161,11 +161,12 @@ func canonicalizeTestMarkdown(relative, content string) string {
 			continue
 		}
 		if key == "type" {
-			if kind == "work" {
+			switch kind {
+			case "work":
 				key = "taskType"
-			} else if kind == "screen" {
+			case "screen":
 				key = "screenKind"
-			} else {
+			default:
 				end++
 				continue
 			}

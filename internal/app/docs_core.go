@@ -796,10 +796,3 @@ func directoryHasSourceIndex(model *Model, directory string) bool {
 	}
 	return model.DocByPath[path.Join(directory, "index.md")] != nil
 }
-
-func highRisk(risk Risk) bool {
-	high := map[string]struct{}{"high": {}, "critical": {}}
-	_, probability := high[risk.Probability]
-	_, impact := high[risk.Impact]
-	return probability || impact
-}

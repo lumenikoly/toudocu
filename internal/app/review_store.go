@@ -184,7 +184,7 @@ func (store *reviewStore) withLock(operation func() error) error {
 	if err != nil {
 		return err
 	}
-	defer lock.Close()
+	defer func() { _ = lock.Close() }()
 	_ = lock.Chmod(0o600)
 	deadline := time.Now().Add(750 * time.Millisecond)
 	for {
@@ -200,7 +200,7 @@ func (store *reviewStore) withLock(operation func() error) error {
 		}
 		time.Sleep(25 * time.Millisecond)
 	}
-	defer unlockReviewFile(lock)
+	defer func() { _ = unlockReviewFile(lock) }()
 	if err := lock.Truncate(0); err != nil {
 		return err
 	}
@@ -258,7 +258,7 @@ func (store *reviewStore) writeState(state ReviewState) error {
 		return err
 	}
 	temporaryPath := temporary.Name()
-	defer os.Remove(temporaryPath)
+	defer func() { _ = os.Remove(temporaryPath) }()
 	if err := temporary.Chmod(0o600); err != nil {
 		_ = temporary.Close()
 		return err

@@ -74,7 +74,7 @@ func checkLatestVersion(client updateHTTPClient, endpoint, current string) versi
 	if err != nil {
 		return result
 	}
-	defer response.Body.Close()
+	defer func() { _ = response.Body.Close() }()
 	if response.StatusCode != http.StatusOK {
 		return result
 	}

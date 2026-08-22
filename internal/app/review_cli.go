@@ -96,7 +96,7 @@ func runAgentCLI(argv []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	if jsonOutput {
 		return writeAgentJSON(stdout, ack)
 	}
-	fmt.Fprintf(stdout, "Response for %s accepted.\n", response.DeliveryID)
+	_, _ = fmt.Fprintf(stdout, "Response for %s accepted.\n", response.DeliveryID)
 	return 0
 }
 
@@ -119,7 +119,7 @@ func readAgentResponseInput(inputPath string, stdin io.Reader) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		defer file.Close()
+		defer func() { _ = file.Close() }()
 		reader = file
 	}
 	if reader == nil {
@@ -155,7 +155,7 @@ func resolveReviewCLIRoot(requested string) (string, error) {
 }
 
 func printAgentHelp(w io.Writer) {
-	fmt.Fprint(w, `Reads the local Toudocu queue and saves a structured response.
+	_, _ = fmt.Fprint(w, `Reads the local Toudocu queue and saves a structured response.
 
 Usage:
   toudocu agent next [--repository-root DIR] --json
@@ -176,16 +176,16 @@ func reviewErrorCode(err error) string {
 
 func writeAgentJSON(w io.Writer, value any) int {
 	data, _ := json.MarshalIndent(value, "", "  ")
-	fmt.Fprintln(w, string(data))
+	_, _ = fmt.Fprintln(w, string(data))
 	return 0
 }
 
 func writeAgentCLIError(w io.Writer, jsonOutput bool, code, message string) int {
 	if jsonOutput {
 		data, _ := json.Marshal(map[string]any{"schemaVersion": reviewSchemaVersion, "diagnostics": []Issue{{Severity: "error", Code: code, Message: message}}})
-		fmt.Fprintln(w, string(data))
+		_, _ = fmt.Fprintln(w, string(data))
 	} else {
-		fmt.Fprintf(w, "Error %s: %s\n", code, message)
+		_, _ = fmt.Fprintf(w, "Error %s: %s\n", code, message)
 	}
 	return 1
 }

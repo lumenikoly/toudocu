@@ -7,22 +7,10 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"regexp"
 	"sort"
-	"strconv"
 	"strings"
 )
-
-type reviewLineHunk struct {
-	oldStart int
-	oldCount int
-	newStart int
-	newCount int
-}
-
-var reviewLineHunkPattern = regexp.MustCompile(`^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@`)
 
 func openGitRepositorySource(repositoryRoot string, similarity int) (*gitChangeSource, error) {
 	if strings.TrimSpace(repositoryRoot) == "" {
@@ -59,48 +47,6 @@ func execGit(root string, args ...string) gitExecResult {
 	g := &gitChangeSource{root: root}
 	out, err := g.run(args...)
 	return gitExecResult{out: out, err: err}
-}
-
-func gitReviewLineHunks(repositoryRoot, snapshotPath, currentPath string) ([]reviewLineHunk, error) {
-	args := []string{"-C", repositoryRoot, "-c", "core.hooksPath=/dev/null", "-c", "core.fsmonitor=false", "diff", "--no-index", "--no-ext-diff", "--no-textconv", "--no-color", "--unified=0", "--", snapshotPath, currentPath}
-	command := exec.Command("git", args...)
-	output, err := command.CombinedOutput()
-	if err != nil {
-		if exitError, ok := err.(*exec.ExitError); !ok || exitError.ExitCode() != 1 {
-			return nil, err
-		}
-	}
-	hunks := []reviewLineHunk{}
-	for _, line := range strings.Split(string(output), "\n") {
-		match := reviewLineHunkPattern.FindStringSubmatch(line)
-		if match == nil {
-			continue
-		}
-		oldStart, parseErr := strconv.Atoi(match[1])
-		if parseErr != nil {
-			return nil, parseErr
-		}
-		oldCount := 1
-		if match[2] != "" {
-			oldCount, parseErr = strconv.Atoi(match[2])
-			if parseErr != nil {
-				return nil, parseErr
-			}
-		}
-		newStart, parseErr := strconv.Atoi(match[3])
-		if parseErr != nil {
-			return nil, parseErr
-		}
-		newCount := 1
-		if match[4] != "" {
-			newCount, parseErr = strconv.Atoi(match[4])
-			if parseErr != nil {
-				return nil, parseErr
-			}
-		}
-		hunks = append(hunks, reviewLineHunk{oldStart: oldStart, oldCount: oldCount, newStart: newStart, newCount: newCount})
-	}
-	return hunks, nil
 }
 
 func resolveReviewComparison(g *gitChangeSource, options Options) (ChangeSide, ChangeSide, error) {

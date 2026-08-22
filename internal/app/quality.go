@@ -227,7 +227,7 @@ func validateTypedKnowledge(model *Model) {
 		if (meta.Risk == RiskHigh || meta.Risk == RiskCritical) && sectionText(document, SectionKindStopConditions) == "" {
 			typedWarning(model, document, "missing-runbook-stop-conditions", "A high- or critical-risk runbook must contain Stop conditions.")
 		}
-		freshness := "review-required"
+		var freshness string
 		switch {
 		case meta.Status == RunbookReviewRequired || !dateValid || meta.LastVerified.After(model.GeneratedAt):
 			freshness = "review-required"

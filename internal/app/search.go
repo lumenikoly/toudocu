@@ -124,10 +124,10 @@ func printSearchText(w io.Writer, report SearchReport) {
 		if result.ID != "" {
 			label = result.ID + " — " + label
 		}
-		fmt.Fprintf(w, "%s [%s] %s\n", label, result.Type, result.Path)
+		_, _ = fmt.Fprintf(w, "%s [%s] %s\n", label, result.Type, result.Path)
 		if len(result.MatchedSections) > 0 {
-			fmt.Fprintf(w, "  Sections: %s\n", strings.Join(result.MatchedSections, ", "))
+			_, _ = fmt.Fprintf(w, "  Sections: %s\n", strings.Join(result.MatchedSections, ", "))
 		}
 	}
-	fmt.Fprintf(w, "Found: %d\n", report.Total)
+	_, _ = fmt.Fprintf(w, "Found: %d\n", report.Total)
 }

@@ -2,7 +2,7 @@
 id: STD-GO-001
 status: active
 scope: Go-код и тесты репозитория
-updated: 2026-08-11
+updated: 2026-08-22
 -->
 
 # STD-GO-001: Go code quality
@@ -29,11 +29,13 @@ self-contained, and verifiable on supported Go platforms.
 ## Automated checks
 
 - `gofmt -w .`;
-- `go vet ./...`;
+- `golangci-lint run ./...` with the standard `errcheck`, `govet`, `ineffassign`,
+  `staticcheck`, and `unused` set;
 - `go test ./...`;
 - `go test -race ./...`;
 - `go mod verify`;
 - CGO-disabled cross-builds for supported targets.
 
-Commands are run from a work item or trusted CI workflow, not directly from
-this standard.
+Developers, work items, or trusted CI workflows run these commands; the
+standard itself does not. Golangci-lint remains a local quality tool and is not
+a dependency or part of the distributed Toudocu binary.

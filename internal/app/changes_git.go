@@ -42,7 +42,7 @@ func openGitChangeSource(docsRoot string, similarity int) (*gitChangeSource, err
 	out, err := cmd.Output()
 	if err != nil {
 		if errors.Is(err, exec.ErrNotFound) {
-			return nil, &changeFailure{Code: 3, IssueCode: "git-command-failed", Err: fmt.Errorf("Git is unavailable")}
+			return nil, &changeFailure{Code: 3, IssueCode: "git-command-failed", Err: fmt.Errorf("git is unavailable")}
 		}
 		return nil, &changeFailure{Code: 3, IssueCode: "git-repository-not-found", Err: fmt.Errorf("documentation directory is not inside a Git repository")}
 	}
@@ -95,7 +95,7 @@ func (g *gitChangeSource) resolveCommit(ref string) (string, error) {
 	}
 	out, err := g.run("rev-parse", "--verify", "--end-of-options", ref+"^{commit}")
 	if err != nil {
-		return "", &changeFailure{Code: 2, IssueCode: "git-base-not-found", Err: fmt.Errorf("Git revision %q not found", ref)}
+		return "", &changeFailure{Code: 2, IssueCode: "git-base-not-found", Err: fmt.Errorf("git revision %q not found", ref)}
 	}
 	return strings.TrimSpace(string(out)), nil
 }
@@ -332,13 +332,13 @@ func (g *gitChangeSource) diff(base, target ChangeSide, change gitFileChange) ([
 
 func addedFilePatch(path string, content []byte) []byte {
 	var out strings.Builder
-	fmt.Fprintf(&out, "diff --git a/%s b/%s\nnew file mode 100644\n--- /dev/null\n+++ b/%s\n", path, path, path)
+	_, _ = fmt.Fprintf(&out, "diff --git a/%s b/%s\nnew file mode 100644\n--- /dev/null\n+++ b/%s\n", path, path, path)
 	lines := strings.Split(strings.ReplaceAll(string(content), "\r\n", "\n"), "\n")
 	count := len(lines)
 	if count > 0 && lines[count-1] == "" {
 		count--
 	}
-	fmt.Fprintf(&out, "@@ -0,0 +1,%d @@\n", count)
+	_, _ = fmt.Fprintf(&out, "@@ -0,0 +1,%d @@\n", count)
 	for i := 0; i < count; i++ {
 		out.WriteByte('+')
 		out.WriteString(lines[i])

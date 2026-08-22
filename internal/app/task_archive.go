@@ -202,9 +202,7 @@ func MoveTask(model *Model, options Options, operation string) (TaskMoveReport, 
 	}
 
 	if operation == "archive" {
-		for _, issue := range document.Errors {
-			report.Issues = append(report.Issues, issue)
-		}
+		report.Issues = append(report.Issues, document.Errors...)
 	}
 	if len(report.Issues) > 0 {
 		return report, nil
@@ -235,19 +233,19 @@ func MoveTask(model *Model, options Options, operation string) (TaskMoveReport, 
 
 func printTaskMoveText(w io.Writer, report TaskMoveReport) {
 	if report.Status == "archived" {
-		fmt.Fprintf(w, "Task %s archived: %s\n", report.Task.ID, report.DestinationPath)
+		_, _ = fmt.Fprintf(w, "Task %s archived: %s\n", report.Task.ID, report.DestinationPath)
 		return
 	}
 	if report.Status == "restored" {
-		fmt.Fprintf(w, "Task %s restored: %s\n", report.Task.ID, report.DestinationPath)
+		_, _ = fmt.Fprintf(w, "Task %s restored: %s\n", report.Task.ID, report.DestinationPath)
 		return
 	}
-	fmt.Fprintf(w, "Task %s was not moved.\n", report.Task.ID)
+	_, _ = fmt.Fprintf(w, "Task %s was not moved.\n", report.Task.ID)
 	for _, issue := range report.Issues {
 		location := issue.DocumentPath
 		if issue.Line > 0 {
 			location += fmt.Sprintf(":%d", issue.Line)
 		}
-		fmt.Fprintf(w, "[ERROR] %s %s — %s\n", issue.Code, location, issue.Message)
+		_, _ = fmt.Fprintf(w, "[ERROR] %s %s — %s\n", issue.Code, location, issue.Message)
 	}
 }

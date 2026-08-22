@@ -77,7 +77,3 @@ func renderDocumentBody(model *Model, document *Document, resolver LinkResolver,
 	}
 	return body
 }
-
-func renderMarkdownFragment(source string, context renderContext) string {
-	return renderMarkdown(analyzeMarkdown(source), context, renderOptions{})
-}

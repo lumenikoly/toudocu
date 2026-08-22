@@ -167,7 +167,7 @@ func scanTree(root string) (string, map[string]diskFile, bool, error) {
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(h, "%s\x00%s\x00%d\x00", rel, info.Mode().Type().String(), info.Mode().Perm())
+		_, _ = fmt.Fprintf(h, "%s\x00%s\x00%d\x00", rel, info.Mode().Type().String(), info.Mode().Perm())
 		if isReparseOrSymlink(info) {
 			unsafe = true
 			return nil

@@ -57,13 +57,13 @@ func isExternalDestination(destination string) bool {
 
 func destinationHasScheme(destination string) bool {
 	for index, character := range destination {
-		if index == 0 && !((character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z')) {
+		if index == 0 && !asciiLetter(character) {
 			return false
 		}
 		if character == ':' {
 			return true
 		}
-		if !((character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '+' || character == '.' || character == '-') {
+		if !asciiLetter(character) && (character < '0' || character > '9') && character != '+' && character != '.' && character != '-' {
 			return false
 		}
 	}

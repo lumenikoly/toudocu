@@ -256,15 +256,15 @@ func BuildTaskContext(model *Model, taskID string) (TaskContextReport, error) {
 }
 
 func printTaskContextText(w io.Writer, report TaskContextReport) {
-	fmt.Fprintf(w, "Task: %s — %s\nDocument: %s\nStatus: %s\n", report.Task.ID, report.Task.Title, report.Task.Document, report.Task.Status.Label)
+	_, _ = fmt.Fprintf(w, "Task: %s — %s\nDocument: %s\nStatus: %s\n", report.Task.ID, report.Task.Title, report.Task.Document, report.Task.Status.Label)
 	if report.Module != nil {
-		fmt.Fprintf(w, "Module: %s — %s\n", report.Module.ID, report.Module.Title)
+		_, _ = fmt.Fprintf(w, "Module: %s — %s\n", report.Module.ID, report.Module.Title)
 	}
 	if report.UseCase != nil {
-		fmt.Fprintf(w, "Use case: %s — %s\n", report.UseCase.ID, report.UseCase.Title)
+		_, _ = fmt.Fprintf(w, "Use case: %s — %s\n", report.UseCase.ID, report.UseCase.Title)
 	}
 	if report.Task.FlowID != "" {
-		fmt.Fprintf(w, "Flow: %s\n", report.Task.FlowID)
+		_, _ = fmt.Fprintf(w, "Flow: %s\n", report.Task.FlowID)
 	}
 	if report.Hierarchy.Parent != nil || len(report.Hierarchy.Ancestors) > 0 || len(report.Hierarchy.Children) > 0 || report.Hierarchy.Descendants.Total > 0 {
 		refText := func(ref TaskHierarchyRef) string {
@@ -279,15 +279,15 @@ func printTaskContextText(w io.Writer, report TaskContextReport) {
 			for _, ancestor := range report.Hierarchy.Ancestors {
 				ancestors = append(ancestors, refText(ancestor))
 			}
-			fmt.Fprintf(w, "Ancestors: %s\n", strings.Join(ancestors, " / "))
+			_, _ = fmt.Fprintf(w, "Ancestors: %s\n", strings.Join(ancestors, " / "))
 		}
 		if report.Hierarchy.Parent != nil {
-			fmt.Fprintf(w, "Parent task: %s\n", refText(*report.Hierarchy.Parent))
+			_, _ = fmt.Fprintf(w, "Parent task: %s\n", refText(*report.Hierarchy.Parent))
 		}
 		if len(report.Hierarchy.Children) > 0 {
-			fmt.Fprintln(w, "Child tasks:")
+			_, _ = fmt.Fprintln(w, "Child tasks:")
 			for _, child := range report.Hierarchy.Children {
-				fmt.Fprintf(w, "- %s\n", refText(child))
+				_, _ = fmt.Fprintf(w, "- %s\n", refText(child))
 			}
 		}
 		summary := report.Hierarchy.Descendants
@@ -307,15 +307,15 @@ func printTaskContextText(w io.Writer, report TaskContextReport) {
 		if len(statuses) > 0 {
 			detail = "; " + strings.Join(statuses, "; ")
 		}
-		fmt.Fprintf(w, "Descendants: total %d%s\n", summary.Total, detail)
+		_, _ = fmt.Fprintf(w, "Descendants: total %d%s\n", summary.Total, detail)
 	}
 	if len(report.Task.ScreenIDs) > 0 {
-		fmt.Fprintf(w, "Screens: %s\n", strings.Join(report.Task.ScreenIDs, ", "))
+		_, _ = fmt.Fprintf(w, "Screens: %s\n", strings.Join(report.Task.ScreenIDs, ", "))
 	}
 	if len(report.Task.RepositoryPaths) > 0 {
-		fmt.Fprintf(w, "Scope: %s\n", strings.Join(report.Task.RepositoryPaths, ", "))
+		_, _ = fmt.Fprintf(w, "Scope: %s\n", strings.Join(report.Task.RepositoryPaths, ", "))
 	}
-	fmt.Fprintf(w, "Criteria: %d\nChecks: %d\nDependencies: %d\nDependents: %d\nContext issues: %d\n",
+	_, _ = fmt.Fprintf(w, "Criteria: %d\nChecks: %d\nDependencies: %d\nDependents: %d\nContext issues: %d\n",
 		len(report.Task.Criteria), len(report.Task.Checks), len(report.Dependencies), len(report.Dependents), len(report.Issues))
-	fmt.Fprintf(w, "Required documents: %s\n", strings.Join(report.RequiredReads, ", "))
+	_, _ = fmt.Fprintf(w, "Required documents: %s\n", strings.Join(report.RequiredReads, ", "))
 }

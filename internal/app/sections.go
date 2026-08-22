@@ -122,11 +122,14 @@ func normalizeLocale(value string) (string, bool) {
 
 func asciiLetters(value string) bool {
 	for _, r := range value {
-		if !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z')) {
+		if !asciiLetter(r) {
 			return false
 		}
 	}
 	return true
+}
+func asciiLetter(r rune) bool {
+	return r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z'
 }
 func asciiDigits(value string) bool {
 	for _, r := range value {
@@ -138,7 +141,7 @@ func asciiDigits(value string) bool {
 }
 func asciiAlphaNumeric(value string) bool {
 	for _, r := range value {
-		if !unicode.IsDigit(r) && !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z')) {
+		if !unicode.IsDigit(r) && !asciiLetter(r) {
 			return false
 		}
 	}

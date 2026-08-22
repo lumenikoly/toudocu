@@ -5,7 +5,7 @@ INSTALL_DIR ?= $(HOME)/.local/bin
 TOUDOCU := go run $(CMD)
 DOCS_DIR := docs
 
-.PHONY: fmt fmt-check vet test web web-check browser-test check build update-local docs docs-serve landing-serve clean release
+.PHONY: fmt fmt-check lint test web web-check browser-test check build update-local docs docs-serve landing-serve clean release
 
 fmt:
 	gofmt -w .
@@ -13,10 +13,10 @@ fmt:
 fmt-check:
 	test -z "$$(gofmt -l .)"
 
-vet:
-	go vet ./...
+lint:
+	golangci-lint run ./...
 
-test: vet
+test:
 	go test ./...
 	go test -race ./...
 	npm --prefix web run typecheck

@@ -125,57 +125,57 @@ func writeChangesReport(w io.Writer, report *ChangeSetReport, format string) err
 }
 
 func printChangesText(w io.Writer, report *ChangeSetReport) {
-	fmt.Fprintf(w, "Documentation changes\nBase: %s — %s\nTarget: %s", report.Comparison.Base.DisplayRef, shortObjectID(report.Comparison.Base.Resolved), report.Comparison.Target.DisplayRef)
+	_, _ = fmt.Fprintf(w, "Documentation changes\nBase: %s — %s\nTarget: %s", report.Comparison.Base.DisplayRef, shortObjectID(report.Comparison.Base.Resolved), report.Comparison.Target.DisplayRef)
 	if report.Comparison.Target.Resolved != "" {
-		fmt.Fprintf(w, " — %s", shortObjectID(report.Comparison.Target.Resolved))
+		_, _ = fmt.Fprintf(w, " — %s", shortObjectID(report.Comparison.Target.Resolved))
 	}
-	fmt.Fprintf(w, "\nBranch: %s\nState: %s\n\n", emptyLabel(report.Repository.Branch, "detached HEAD"), map[bool]string{true: "dirty", false: "clean"}[report.Repository.Dirty])
-	fmt.Fprintf(w, "Added: %d  Modified: %d  Deleted: %d  Renamed: %d\nLines: +%d −%d\n", report.Summary.Files.Added+report.Summary.Files.Untracked, report.Summary.Files.Modified, report.Summary.Files.Deleted, report.Summary.Files.Renamed, report.Summary.Lines.Added, report.Summary.Lines.Deleted)
+	_, _ = fmt.Fprintf(w, "\nBranch: %s\nState: %s\n\n", emptyLabel(report.Repository.Branch, "detached HEAD"), map[bool]string{true: "dirty", false: "clean"}[report.Repository.Dirty])
+	_, _ = fmt.Fprintf(w, "Added: %d  Modified: %d  Deleted: %d  Renamed: %d\nLines: +%d −%d\n", report.Summary.Files.Added+report.Summary.Files.Untracked, report.Summary.Files.Modified, report.Summary.Files.Deleted, report.Summary.Files.Renamed, report.Summary.Lines.Added, report.Summary.Lines.Deleted)
 	for _, change := range report.Changes {
-		fmt.Fprintf(w, "%s %s", statusSymbol(change.Status), change.Path)
+		_, _ = fmt.Fprintf(w, "%s %s", statusSymbol(change.Status), change.Path)
 		if change.OldPath != "" {
-			fmt.Fprintf(w, " ← %s", change.OldPath)
+			_, _ = fmt.Fprintf(w, " ← %s", change.OldPath)
 		}
-		fmt.Fprintf(w, "  +%d −%d\n", change.Lines.Added, change.Lines.Deleted)
+		_, _ = fmt.Fprintf(w, "  +%d −%d\n", change.Lines.Added, change.Lines.Deleted)
 		for _, semantic := range change.SemanticChanges {
-			fmt.Fprintf(w, "    %s\n", semantic.Summary)
+			_, _ = fmt.Fprintf(w, "    %s\n", semantic.Summary)
 		}
 	}
 	for _, diagnostic := range report.Diagnostics {
 		if diagnostic.Code == "DOCS_MIGRATION_REQUIRED" {
-			fmt.Fprintf(w, "\n%s\n\nMigration: %s\nFile: %s\n", diagnostic.Code, diagnostic.Migration, diagnostic.DocumentPath)
+			_, _ = fmt.Fprintf(w, "\n%s\n\nMigration: %s\nFile: %s\n", diagnostic.Code, diagnostic.Migration, diagnostic.DocumentPath)
 			continue
 		}
-		fmt.Fprintf(w, "[%s] %s — %s\n", strings.ToUpper(diagnostic.Severity), diagnostic.Code, diagnostic.Message)
+		_, _ = fmt.Fprintf(w, "[%s] %s — %s\n", strings.ToUpper(diagnostic.Severity), diagnostic.Code, diagnostic.Message)
 	}
 }
 
 func printChangesMarkdown(w io.Writer, report *ChangeSetReport) {
-	fmt.Fprintln(w, "# Documentation changes")
-	fmt.Fprintln(w)
-	fmt.Fprintf(w, "Base: `%s` (`%s`)  \nTarget: `%s`", report.Comparison.Base.DisplayRef, shortObjectID(report.Comparison.Base.Resolved), report.Comparison.Target.DisplayRef)
+	_, _ = fmt.Fprintln(w, "# Documentation changes")
+	_, _ = fmt.Fprintln(w)
+	_, _ = fmt.Fprintf(w, "Base: `%s` (`%s`)  \nTarget: `%s`", report.Comparison.Base.DisplayRef, shortObjectID(report.Comparison.Base.Resolved), report.Comparison.Target.DisplayRef)
 	if report.Comparison.Target.Resolved != "" {
-		fmt.Fprintf(w, " (`%s`)", shortObjectID(report.Comparison.Target.Resolved))
+		_, _ = fmt.Fprintf(w, " (`%s`)", shortObjectID(report.Comparison.Target.Resolved))
 	}
-	fmt.Fprintln(w, "\n\n## Summary")
-	fmt.Fprintln(w)
-	fmt.Fprintf(w, "- Added: %d\n- Modified: %d\n- Deleted: %d\n- Renamed: %d\n- Lines: +%d −%d\n", report.Summary.Files.Added+report.Summary.Files.Untracked, report.Summary.Files.Modified, report.Summary.Files.Deleted, report.Summary.Files.Renamed, report.Summary.Lines.Added, report.Summary.Lines.Deleted)
-	fmt.Fprintln(w, "\n## Semantic changes")
+	_, _ = fmt.Fprintln(w, "\n\n## Summary")
+	_, _ = fmt.Fprintln(w)
+	_, _ = fmt.Fprintf(w, "- Added: %d\n- Modified: %d\n- Deleted: %d\n- Renamed: %d\n- Lines: +%d −%d\n", report.Summary.Files.Added+report.Summary.Files.Untracked, report.Summary.Files.Modified, report.Summary.Files.Deleted, report.Summary.Files.Renamed, report.Summary.Lines.Added, report.Summary.Lines.Deleted)
+	_, _ = fmt.Fprintln(w, "\n## Semantic changes")
 	changes := append([]DocumentationChange{}, report.Changes...)
 	sort.Slice(changes, func(i, j int) bool { return changes[i].Path < changes[j].Path })
 	for _, change := range changes {
 		if len(change.SemanticChanges) == 0 {
 			continue
 		}
-		fmt.Fprintf(w, "\n### `%s`\n\n", change.Path)
+		_, _ = fmt.Fprintf(w, "\n### `%s`\n\n", change.Path)
 		for _, semantic := range change.SemanticChanges {
-			fmt.Fprintf(w, "- %s\n", semantic.Summary)
+			_, _ = fmt.Fprintf(w, "- %s\n", semantic.Summary)
 		}
 	}
 	if report.TaskImpact != nil {
-		fmt.Fprintln(w, "\n## Task impact")
+		_, _ = fmt.Fprintln(w, "\n## Task impact")
 		for _, diagnostic := range report.TaskImpact.Diagnostics {
-			fmt.Fprintf(w, "\n- `%s`: %s\n", diagnostic.Code, diagnostic.Message)
+			_, _ = fmt.Fprintf(w, "\n- `%s`: %s\n", diagnostic.Code, diagnostic.Message)
 		}
 	}
 }
@@ -216,9 +216,9 @@ func outputChangesReport(options Options, report *ChangeSetReport, stdout io.Wri
 	name := temporary.Name()
 	ok := false
 	defer func() {
-		temporary.Close()
+		_ = temporary.Close()
 		if !ok {
-			os.Remove(name)
+			_ = os.Remove(name)
 		}
 	}()
 	if err := writeChangesReport(temporary, report, options.Format); err != nil {
@@ -234,6 +234,6 @@ func outputChangesReport(options Options, report *ChangeSetReport, stdout io.Wri
 		return err
 	}
 	ok = true
-	fmt.Fprintf(stdout, "Report saved: %s\n", options.ChangeOutput)
+	_, _ = fmt.Fprintf(stdout, "Report saved: %s\n", options.ChangeOutput)
 	return nil
 }

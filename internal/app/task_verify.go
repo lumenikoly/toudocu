@@ -304,7 +304,7 @@ func executeTaskVerify(model *Model, options Options, stdout, stderr io.Writer, 
 	}
 	for index, planned := range commands {
 		if options.Format != "json" {
-			fmt.Fprintf(stdout, "\n[%d/%d] %s\n", index+1, len(commands), planned.Command)
+			_, _ = fmt.Fprintf(stdout, "\n[%d/%d] %s\n", index+1, len(commands), planned.Command)
 		}
 		stdoutBuffer := newTailBuffer(taskOutputLimit)
 		stderrBuffer := newTailBuffer(taskOutputLimit)
@@ -390,10 +390,10 @@ func writeReportAtomically(target string, data []byte) error {
 }
 
 func printTaskVerifyText(stdout io.Writer, report TaskVerifyReport) {
-	fmt.Fprintf(stdout, "\nTask: %s\nVerification status: %s\nCommands: %d, passed: %d, failed: %d\nCriteria passed: %d, failed: %d\n",
+	_, _ = fmt.Fprintf(stdout, "\nTask: %s\nVerification status: %s\nCommands: %d, passed: %d, failed: %d\nCriteria passed: %d, failed: %d\n",
 		report.Task.ID, report.Status, report.Summary.TotalCommands, report.Summary.PassedCommands,
 		report.Summary.FailedCommands, report.Summary.CriteriaPassed, report.Summary.CriteriaFailed)
 	for _, issue := range report.ValidationIssues {
-		fmt.Fprintf(stdout, "[%s] %s — %s\n", strings.ToUpper(issue.Severity), issue.Code, issue.Message)
+		_, _ = fmt.Fprintf(stdout, "[%s] %s — %s\n", strings.ToUpper(issue.Severity), issue.Code, issue.Message)
 	}
 }

@@ -88,10 +88,6 @@ The user can continue from the start screen.
 				"{{DOCS_COMMAND}}":                  "go run ./cmd/toudocu check ./docs",
 				"{{DOCUMENTATION_IMPACT}}":          "Update the screen map.",
 			}
-			if language == "en" {
-				// Reader-facing language does not change machine annotations.
-			}
-
 			writeSkillTemplate(t, docs, language, "use-case.md", "use-cases/core.md", replacements)
 			writeTestFile(t, docs, "use-cases/secondary.md", `# UC-CORE-02: Review
 

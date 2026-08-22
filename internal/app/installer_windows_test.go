@@ -42,7 +42,7 @@ func newWindowsInstallerFixture(t *testing.T, binaries map[string][]byte) *windo
 			if fixture.badChecksum {
 				digest = strings.Repeat("0", 64)
 			}
-			fmt.Fprintf(response, "%s  toudocu-windows-amd64.exe\n%s  toudocu-windows-arm64.exe\n", digest, digest)
+			_, _ = fmt.Fprintf(response, "%s  toudocu-windows-amd64.exe\n%s  toudocu-windows-arm64.exe\n", digest, digest)
 			return
 		}
 		if file != "toudocu-windows-amd64.exe" && file != "toudocu-windows-arm64.exe" {

@@ -243,7 +243,7 @@ func renderNavigation(model *Model, current string) string {
 		if label == "" {
 			label = document.Title
 		}
-		fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"%s><span class="nav-icon%s" aria-hidden="true"%s>%s</span><span>%s</span>%s</a></li>`, active, escapeAttr(relativeURL(current, document.OutputPath)), aria, escapeAttr(statusClass), statusTitle, escapeHTML(glyph), escapeHTML(label), accessibleStatus)
+		_, _ = fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"%s><span class="nav-icon%s" aria-hidden="true"%s>%s</span><span>%s</span>%s</a></li>`, active, escapeAttr(relativeURL(current, document.OutputPath)), aria, escapeAttr(statusClass), statusTitle, escapeHTML(glyph), escapeHTML(label), accessibleStatus)
 	}
 	for _, doc := range rootDocs {
 		writeDoc(doc, "")
@@ -278,12 +278,12 @@ func renderNavigation(model *Model, current string) string {
 				}
 			}
 			if !hasFlowDocuments {
-				fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span class="nav-icon" aria-hidden="true">⇢</span><span>%s</span></a></li>`,
+				_, _ = fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span class="nav-icon" aria-hidden="true">⇢</span><span>%s</span></a></li>`,
 					active, escapeAttr(relativeURL(current, target)), escapeHTML(label))
 				return
 			}
 		}
-		fmt.Fprintf(&b, `<li class="nav-item nav-folder" data-nav-folder="%s"><div class="nav-folder-row"><button class="nav-folder-toggle" type="button" data-nav-folder-toggle aria-expanded="true" aria-controls="%s" aria-label="%s"><span aria-hidden="true">▾</span></button><a class="nav-folder-link%s" href="%s"><span>%s</span></a></div><ul id="%s">`, escapeAttr(groupKey), escapeAttr(groupID), escapeAttr(ui.Text("nav.collapseSection", label)), active, escapeAttr(relativeURL(current, target)), escapeHTML(label), escapeAttr(groupID))
+		_, _ = fmt.Fprintf(&b, `<li class="nav-item nav-folder" data-nav-folder="%s"><div class="nav-folder-row"><button class="nav-folder-toggle" type="button" data-nav-folder-toggle aria-expanded="true" aria-controls="%s" aria-label="%s"><span aria-hidden="true">▾</span></button><a class="nav-folder-link%s" href="%s"><span>%s</span></a></div><ul id="%s">`, escapeAttr(groupKey), escapeAttr(groupID), escapeAttr(ui.Text("nav.collapseSection", label)), active, escapeAttr(relativeURL(current, target)), escapeHTML(label), escapeAttr(groupID))
 		if section == SectionScreens && model.ScreenMapEnabled {
 			activeClass := ""
 			aria := ""
@@ -291,7 +291,7 @@ func renderNavigation(model *Model, current string) string {
 				activeClass = " is-active"
 				aria = ` aria-current="page"`
 			}
-			fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"%s><span class="nav-icon" aria-hidden="true">⌗</span><span>%s</span></a></li>`,
+			_, _ = fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"%s><span class="nav-icon" aria-hidden="true">⌗</span><span>%s</span></a></li>`,
 				activeClass, escapeAttr(relativeURL(current, "screens/index.html")), aria, escapeHTML(ui.Text("nav.screenMap")))
 		}
 		if section == SectionFlows {
@@ -341,11 +341,11 @@ func renderNavigation(model *Model, current string) string {
 	if current == model.HealthOutputPath {
 		active = " is-active"
 	}
-	fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span>%s</span></a></li>`, active, escapeAttr(relativeURL(current, model.HealthOutputPath)), escapeHTML(ui.Text("nav.quality")))
+	_, _ = fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span>%s</span></a></li>`, active, escapeAttr(relativeURL(current, model.HealthOutputPath)), escapeHTML(ui.Text("nav.quality")))
 	if model.serveMode {
-		fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link" href="/changes/"><span>%s</span></a></li>`, escapeHTML(ui.Text("nav.changes")))
+		_, _ = fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link" href="/changes/"><span>%s</span></a></li>`, escapeHTML(ui.Text("nav.changes")))
 		if len(model.openAPIContracts) > 0 {
-			fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link" href="/_toudocu/api-docs/"><span>HTTP API</span></a></li>`)
+			_, _ = fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link" href="/_toudocu/api-docs/"><span>HTTP API</span></a></li>`)
 		}
 	}
 	if len(model.Knowledge.Screens) > 0 {
@@ -353,7 +353,7 @@ func renderNavigation(model *Model, current string) string {
 		if current == "traceability.html" {
 			active = " is-active"
 		}
-		fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span>%s</span></a></li>`, active, escapeAttr(relativeURL(current, "traceability.html")), escapeHTML(ui.Text("nav.traceability")))
+		_, _ = fmt.Fprintf(&b, `<li class="nav-item"><a class="nav-link%s" href="%s"><span>%s</span></a></li>`, active, escapeAttr(relativeURL(current, "traceability.html")), escapeHTML(ui.Text("nav.traceability")))
 	}
 	b.WriteString(`</ul></nav>`)
 	return b.String()
@@ -1246,7 +1246,7 @@ func renderHealthPage(model *Model) string {
 		if doc := model.DocByPath[issue.DocumentPath]; doc != nil {
 			location = `<a href="` + escapeAttr(relativeURL(current, doc.OutputPath)) + `">` + escapeHTML(issue.DocumentPath) + `</a>`
 		}
-		fmt.Fprintf(&rows, `<div class="issue-row" data-filter-item data-search="%s" data-severity="%s" data-code="%s"><div class="issue-severity">%s</div><div><strong>%s</strong><span class="table-subtext">%s</span></div><div class="issue-location">%s%s</div></div>`, escapeAttr(issue.Message+" "+issue.Code+" "+issue.DocumentPath), escapeAttr(issue.Severity), escapeAttr(issue.Code), ui.Text(map[bool]string{true: "health.error", false: "health.warning"}[issue.Severity == "error"]), escapeHTML(issue.Message), escapeHTML(issue.Code), location, func() string {
+		_, _ = fmt.Fprintf(&rows, `<div class="issue-row" data-filter-item data-search="%s" data-severity="%s" data-code="%s"><div class="issue-severity">%s</div><div><strong>%s</strong><span class="table-subtext">%s</span></div><div class="issue-location">%s%s</div></div>`, escapeAttr(issue.Message+" "+issue.Code+" "+issue.DocumentPath), escapeAttr(issue.Severity), escapeAttr(issue.Code), ui.Text(map[bool]string{true: "health.error", false: "health.warning"}[issue.Severity == "error"]), escapeHTML(issue.Message), escapeHTML(issue.Code), location, func() string {
 			if issue.Line > 0 {
 				return " · " + escapeHTML(ui.Text("health.line", issue.Line))
 			}

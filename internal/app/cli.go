@@ -15,7 +15,7 @@ import (
 )
 
 func PrintHelp(w io.Writer) {
-	fmt.Fprintf(w, `Toudocu %s
+	_, _ = fmt.Fprintf(w, `Toudocu %s
 
 Usage:
   toudocu COMMAND [options]
@@ -193,7 +193,7 @@ Usage:
 		"version": "Shows the Toudocu version without side effects.\n\nUsage:\n  toudocu version",
 	}
 	if text, ok := help[topic]; ok {
-		fmt.Fprintln(w, text)
+		_, _ = fmt.Fprintln(w, text)
 		return
 	}
 	PrintHelp(w)
@@ -286,7 +286,7 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 			args = args[1:]
 		case "task":
 			if len(args) < 2 {
-				return options, false, false, fmt.Errorf("usage: toudocu task init|ready|context|verify|archive|restore ...")
+				return options, false, false, fmt.Errorf("usage: toudocu task init|ready|context|verify|archive|restore")
 			}
 			switch args[1] {
 			case "init":
@@ -299,7 +299,7 @@ func ParseArguments(argv []string) (Options, bool, bool, error) {
 				}
 				options.Command = "task-" + args[1]
 			default:
-				return options, false, false, fmt.Errorf("usage: toudocu task init|ready|context|verify|archive|restore ...")
+				return options, false, false, fmt.Errorf("usage: toudocu task init|ready|context|verify|archive|restore")
 			}
 			options.TaskID = args[2]
 			args = args[3:]
@@ -664,7 +664,8 @@ parseOptions:
 	if strings.TrimSpace(options.RepositoryRef) == "" {
 		return options, false, false, fmt.Errorf("--repository-ref cannot be empty")
 	}
-	if options.Format != "text" && options.Format != "json" && !((options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes") && options.Format == "markdown") {
+	markdownChanges := options.Format == "markdown" && (options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes")
+	if options.Format != "text" && options.Format != "json" && !markdownChanges {
 		return options, false, false, fmt.Errorf("--format must be text, json, or markdown for changes")
 	}
 	if strings.TrimSpace(options.Host) == "" {
@@ -841,17 +842,17 @@ func openGeneratedSite(file string) error {
 }
 
 func printCheckText(w io.Writer, model *Model) {
-	fmt.Fprintf(w, "Documents: %d\nWarnings: %d\nErrors: %d\n", model.Stats.Documents, model.Stats.Warnings, model.Stats.Errors)
+	_, _ = fmt.Fprintf(w, "Documents: %d\nWarnings: %d\nErrors: %d\n", model.Stats.Documents, model.Stats.Warnings, model.Stats.Errors)
 	for _, issue := range model.Issues {
 		if issue.Code == "DOCS_MIGRATION_REQUIRED" {
-			fmt.Fprintf(w, "\n%s\n\nMigration: %s\nFile: %s\n", issue.Code, issue.Migration, issue.DocumentPath)
+			_, _ = fmt.Fprintf(w, "\n%s\n\nMigration: %s\nFile: %s\n", issue.Code, issue.Migration, issue.DocumentPath)
 			continue
 		}
 		location := issue.DocumentPath
 		if issue.Line > 0 {
 			location += fmt.Sprintf(":%d", issue.Line)
 		}
-		fmt.Fprintf(w, "[%s] %s %s — %s\n", strings.ToUpper(issue.Severity), issue.Code, location, issue.Message)
+		_, _ = fmt.Fprintf(w, "[%s] %s %s — %s\n", strings.ToUpper(issue.Severity), issue.Code, location, issue.Message)
 	}
 }
 
@@ -882,7 +883,7 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	}
 	options, help, version, err := ParseArguments(argv)
 	if err != nil {
-		fmt.Fprintln(stderr, "Error:", err)
+		_, _ = fmt.Fprintln(stderr, "Error:", err)
 		if len(argv) > 0 && (argv[0] == "changes" || (argv[0] == "task" && len(argv) > 1 && argv[1] == "changes")) {
 			return 2
 		}
@@ -893,40 +894,40 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 		return 0
 	}
 	if version {
-		fmt.Fprintln(stdout, Version)
+		_, _ = fmt.Fprintln(stdout, Version)
 		return 0
 	}
 	if options.Command == "task-init" {
 		report, err := InitTask(options)
 		if err != nil {
-			fmt.Fprintln(stderr, "Error:", err)
+			_, _ = fmt.Fprintln(stderr, "Error:", err)
 			return 1
 		}
 		if options.Format == "json" {
 			data, _ := json.MarshalIndent(report, "", "  ")
-			fmt.Fprintln(stdout, string(data))
+			_, _ = fmt.Fprintln(stdout, string(data))
 		} else {
-			fmt.Fprintf(stdout, "Created task %s: %s\n", report.ID, report.Path)
+			_, _ = fmt.Fprintf(stdout, "Created task %s: %s\n", report.ID, report.Path)
 		}
 		return 0
 	}
 	if options.Command == "scaffold" {
 		report, err := Scaffold(options)
 		if err != nil {
-			fmt.Fprintln(stderr, "Error:", err)
+			_, _ = fmt.Fprintln(stderr, "Error:", err)
 			return 1
 		}
 		if options.Format == "json" {
 			data, _ := json.MarshalIndent(report, "", "  ")
-			fmt.Fprintln(stdout, string(data))
+			_, _ = fmt.Fprintln(stdout, string(data))
 		} else {
-			fmt.Fprintf(stdout, "Created %s %s: %s\n", report.EntityType, report.ID, report.Path)
+			_, _ = fmt.Fprintf(stdout, "Created %s %s: %s\n", report.EntityType, report.ID, report.Path)
 		}
 		return 0
 	}
 	if options.Command == "serve" {
 		if err := serveDocumentation(options, stdout, stderr); err != nil {
-			fmt.Fprintln(stderr, "Error:", err)
+			_, _ = fmt.Fprintln(stderr, "Error:", err)
 			return 1
 		}
 		return 0
@@ -934,7 +935,7 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	if options.Command == "changes" || options.Command == "changes-file" || options.Command == "task-changes" {
 		report, err := BuildDocumentationChanges(options)
 		if err != nil {
-			fmt.Fprintln(stderr, "Error:", err)
+			_, _ = fmt.Fprintln(stderr, "Error:", err)
 			var failure *changeFailure
 			if errors.As(err, &failure) {
 				return failure.Code
@@ -943,7 +944,7 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 		}
 		filterDocumentationChanges(report, options)
 		if err := outputChangesReport(options, report, stdout); err != nil {
-			fmt.Fprintln(stderr, "Error:", err)
+			_, _ = fmt.Fprintln(stderr, "Error:", err)
 			return 4
 		}
 		for _, diagnostic := range report.Diagnostics {
@@ -962,13 +963,13 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	}
 	model, err := BuildDocumentationModel(options)
 	if err != nil {
-		fmt.Fprintln(stderr, "Error:", err)
+		_, _ = fmt.Fprintln(stderr, "Error:", err)
 		return 1
 	}
 	if hasDocumentationVersionIssue(model) {
 		if options.Format == "json" {
 			data, _ := json.MarshalIndent(BuildReport(model), "", "  ")
-			fmt.Fprintln(stdout, string(data))
+			_, _ = fmt.Fprintln(stdout, string(data))
 		} else {
 			printCheckText(stdout, model)
 		}
@@ -977,12 +978,12 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	if options.Command == "search" {
 		report, err := SearchDocumentation(model, options.Query, options.Limit)
 		if err != nil {
-			fmt.Fprintln(stderr, "Error:", err)
+			_, _ = fmt.Fprintln(stderr, "Error:", err)
 			return 1
 		}
 		if options.Format == "json" {
 			data, _ := json.MarshalIndent(report, "", "  ")
-			fmt.Fprintln(stdout, string(data))
+			_, _ = fmt.Fprintln(stdout, string(data))
 		} else {
 			printSearchText(stdout, report)
 		}
@@ -992,16 +993,16 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 		operation := strings.TrimPrefix(options.Command, "task-")
 		report, err := MoveTask(model, options, operation)
 		if err != nil {
-			fmt.Fprintln(stderr, "Error:", err)
+			_, _ = fmt.Fprintln(stderr, "Error:", err)
 			return 1
 		}
 		if options.Format == "json" {
 			data, marshalErr := json.MarshalIndent(report, "", "  ")
 			if marshalErr != nil {
-				fmt.Fprintln(stderr, "Error:", marshalErr)
+				_, _ = fmt.Fprintln(stderr, "Error:", marshalErr)
 				return 1
 			}
-			fmt.Fprintln(stdout, string(data))
+			_, _ = fmt.Fprintln(stdout, string(data))
 		} else {
 			printTaskMoveText(stdout, report)
 		}
@@ -1014,18 +1015,18 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 		report := executeTaskVerify(model, options, stdout, stderr, osCommandRunner{})
 		data, marshalErr := marshalTaskVerifyReport(report)
 		if marshalErr != nil {
-			fmt.Fprintln(stderr, "Error:", marshalErr)
+			_, _ = fmt.Fprintln(stderr, "Error:", marshalErr)
 			return 1
 		}
 		reportWriteFailed := false
 		if options.ReportPath != "" {
 			if err := writeReportAtomically(options.ReportPath, data); err != nil {
-				fmt.Fprintln(stderr, "Failed to save report:", err)
+				_, _ = fmt.Fprintln(stderr, "Failed to save report:", err)
 				reportWriteFailed = true
 			}
 		}
 		if options.Format == "json" {
-			fmt.Fprintln(stdout, string(data))
+			_, _ = fmt.Fprintln(stdout, string(data))
 		} else {
 			printTaskVerifyText(stdout, report)
 		}
@@ -1038,7 +1039,7 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 		report := BuildTaskReady(model, options.TaskID, options.Strict)
 		if options.Format == "json" {
 			data, _ := json.MarshalIndent(report, "", "  ")
-			fmt.Fprintln(stdout, string(data))
+			_, _ = fmt.Fprintln(stdout, string(data))
 		} else {
 			printTaskReadyText(stdout, report)
 		}
@@ -1050,16 +1051,16 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	if options.Command == "task-context" {
 		report, err := BuildTaskContext(model, options.TaskID)
 		if err != nil {
-			fmt.Fprintln(stderr, "Error:", err)
+			_, _ = fmt.Fprintln(stderr, "Error:", err)
 			return 1
 		}
 		if options.Format == "json" {
 			data, marshalErr := json.MarshalIndent(report, "", "  ")
 			if marshalErr != nil {
-				fmt.Fprintln(stderr, "Error:", marshalErr)
+				_, _ = fmt.Fprintln(stderr, "Error:", marshalErr)
 				return 1
 			}
-			fmt.Fprintln(stdout, string(data))
+			_, _ = fmt.Fprintln(stdout, string(data))
 		} else {
 			printTaskContextText(stdout, report)
 		}
@@ -1068,16 +1069,16 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	if options.Command == "task-tree" {
 		report, err := BuildTaskTree(model, options.TaskID)
 		if err != nil {
-			fmt.Fprintln(stderr, "Error:", err)
+			_, _ = fmt.Fprintln(stderr, "Error:", err)
 			return 1
 		}
 		if options.Format == "json" {
 			data, marshalErr := json.MarshalIndent(report, "", "  ")
 			if marshalErr != nil {
-				fmt.Fprintln(stderr, "Error:", marshalErr)
+				_, _ = fmt.Fprintln(stderr, "Error:", marshalErr)
 				return 1
 			}
-			fmt.Fprintln(stdout, string(data))
+			_, _ = fmt.Fprintln(stdout, string(data))
 		} else {
 			printTaskTreeText(stdout, report)
 		}
@@ -1086,7 +1087,7 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	if options.Command == "check" {
 		if options.Format == "json" {
 			data, _ := json.MarshalIndent(BuildReport(model), "", "  ")
-			fmt.Fprintln(stdout, string(data))
+			_, _ = fmt.Fprintln(stdout, string(data))
 		} else {
 			printCheckText(stdout, model)
 		}
@@ -1097,13 +1098,13 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	}
 	result, err := GenerateSite(model, options)
 	if err != nil {
-		fmt.Fprintln(stderr, "Error:", err)
+		_, _ = fmt.Fprintln(stderr, "Error:", err)
 		return 1
 	}
-	fmt.Fprintf(stdout, "\nDocumentation built.\nDirectory:      %s\nPages:          %d\nDocuments:      %d\nRoadmap tasks:  %d\nCompleted:      %d\nWarnings:       %d\nErrors:         %d\nHome:           %s\n", result.OutputDirectory, result.Pages, model.Stats.Documents, model.Stats.TotalTasks, model.Stats.CompletedTasks, model.Stats.Warnings, model.Stats.Errors, filepath.Join(result.OutputDirectory, "index.html"))
+	_, _ = fmt.Fprintf(stdout, "\nDocumentation built.\nDirectory:      %s\nPages:          %d\nDocuments:      %d\nRoadmap tasks:  %d\nCompleted:      %d\nWarnings:       %d\nErrors:         %d\nHome:           %s\n", result.OutputDirectory, result.Pages, model.Stats.Documents, model.Stats.TotalTasks, model.Stats.CompletedTasks, model.Stats.Warnings, model.Stats.Errors, filepath.Join(result.OutputDirectory, "index.html"))
 	if options.Open {
 		if err := openGeneratedSite(filepath.Join(result.OutputDirectory, "index.html")); err != nil {
-			fmt.Fprintln(stderr, "Failed to open the browser automatically:", err)
+			_, _ = fmt.Fprintln(stderr, "Failed to open the browser automatically:", err)
 		}
 	}
 	if model.Stats.Errors > 0 || (options.Strict && model.Stats.Warnings > 0) {

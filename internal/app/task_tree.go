@@ -110,7 +110,7 @@ func printTaskTreeText(w io.Writer, report TaskTreeReport) {
 		if status == "" {
 			status = node.Status
 		}
-		fmt.Fprintf(w, "%s%s%s  %-11s  %s\n", prefix, branch, node.ID, status, node.Title)
+		_, _ = fmt.Fprintf(w, "%s%s%s  %-11s  %s\n", prefix, branch, node.ID, status, node.Title)
 		if !root {
 			if last {
 				prefix += "    "

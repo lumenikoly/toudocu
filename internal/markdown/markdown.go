@@ -355,7 +355,7 @@ func (d *Document) analyze() Analysis {
 		case *ast.FencedCodeBlock:
 			info := ""
 			if v.Info != nil {
-				info = strings.TrimSpace(string(v.Info.Text(d.source)))
+				info = strings.TrimSpace(string(v.Info.Value(d.source)))
 			}
 			source := linesValue(v, d.source)
 			closed := fenceClosed(d.source, d.lineIndex, v, info)

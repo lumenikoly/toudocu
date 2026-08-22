@@ -27,10 +27,6 @@ func isMermaidFenceInfo(value string) bool {
 	return strings.EqualFold(strings.TrimSpace(value), "mermaid")
 }
 
-func mermaidDiagramType(source string) string {
-	return markdowncore.CheckMermaid(source).DiagramType
-}
-
 func containsMermaidConfiguration(source string) bool {
 	return markdowncore.CheckMermaid(source).ConfigurationForbidden
 }

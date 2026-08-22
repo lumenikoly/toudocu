@@ -68,7 +68,7 @@ func installNew(plan Plan, cliVersion string) error {
 	if err != nil {
 		return err
 	}
-	defer os.RemoveAll(stage)
+	defer func() { _ = os.RemoveAll(stage) }()
 	if err := publishStage(stage, plan.Target.Path); err != nil {
 		return &operationError{code: "SKILL_PUBLISH_FAILED", err: err}
 	}
@@ -80,7 +80,7 @@ func replaceManaged(plan Plan, cliVersion string) error {
 	if err != nil {
 		return err
 	}
-	defer os.RemoveAll(stage)
+	defer func() { _ = os.RemoveAll(stage) }()
 	backup, err := uniqueSibling(plan.Target.Path, "backup")
 	if err != nil {
 		return err
