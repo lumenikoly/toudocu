@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 architectureQuestion: Как компоненты программы делят ответственность?
 -->
 

@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 status: in-progress
 stage: Сопровождение версии 0.0.5
 updated: 2026-08-22

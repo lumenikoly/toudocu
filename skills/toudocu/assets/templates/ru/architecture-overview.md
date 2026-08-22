@@ -1,7 +1,3 @@
-<!-- toudocu
-version: 1
--->
-
 # Архитектура {{PROJECT_TITLE}}
 
 {{SYSTEM_BOUNDARY_SUMMARY}}

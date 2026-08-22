@@ -8,18 +8,18 @@ type semanticSchema struct {
 }
 
 var semanticSchemas = map[string]semanticSchema{
-	"status":   {[]string{"version", "status", "stage", "updated"}, []string{"version", "status"}},
-	"roadmap":  {[]string{"version", "updated"}, []string{"version"}},
-	"risks":    {[]string{"version", "updated"}, []string{"version"}},
-	"module":   {[]string{"version", "id", "status", "updated"}, []string{"version", "id", "status"}},
-	"use-case": {[]string{"version", "id", "status", "priority", "module", "screens", "startScreen", "terminalScreens", "allowCycle", "updated"}, []string{"version", "id", "status", "module"}},
-	"flow":     {[]string{"version", "id", "module", "useCase", "updated"}, []string{"version", "id"}},
-	"decision": {[]string{"version", "id", "status", "date", "author", "updated"}, []string{"version", "id", "status"}},
-	"contract": {[]string{"version", "id", "status", "updated"}, []string{"version", "id"}},
-	"standard": {[]string{"version", "id", "status", "scope", "updated", "supersededBy"}, []string{"version", "id", "status", "scope", "updated"}},
-	"runbook":  {[]string{"version", "id", "status", "environment", "risk", "lastVerified"}, []string{"version", "id", "status", "risk", "lastVerified"}},
-	"work":     {[]string{"version", "id", "status", "taskType", "priority", "severity", "reproducibility", "regression", "observedIn", "module", "useCase", "flow", "screens", "transitions", "standards", "runbooks", "dependsOn", "parentTask", "updated"}, []string{"version", "id", "status", "taskType"}},
-	"screen":   {[]string{"version", "id", "screenKind", "module", "status", "route", "preview", "parentScreen", "component", "updated"}, []string{"version", "id", "screenKind", "module", "status"}},
+	"status":   {[]string{"status", "stage", "updated"}, []string{"status"}},
+	"roadmap":  {[]string{"updated"}, nil},
+	"risks":    {[]string{"updated"}, nil},
+	"module":   {[]string{"id", "status", "updated"}, []string{"id", "status"}},
+	"use-case": {[]string{"id", "status", "priority", "module", "screens", "startScreen", "terminalScreens", "allowCycle", "updated"}, []string{"id", "status", "module"}},
+	"flow":     {[]string{"id", "module", "useCase", "updated"}, []string{"id"}},
+	"decision": {[]string{"id", "status", "date", "author", "updated"}, []string{"id", "status"}},
+	"contract": {[]string{"id", "status", "updated"}, []string{"id"}},
+	"standard": {[]string{"id", "status", "scope", "updated", "supersededBy"}, []string{"id", "status", "scope", "updated"}},
+	"runbook":  {[]string{"id", "status", "environment", "risk", "lastVerified"}, []string{"id", "status", "risk", "lastVerified"}},
+	"work":     {[]string{"id", "status", "taskType", "priority", "severity", "reproducibility", "regression", "observedIn", "module", "useCase", "flow", "screens", "transitions", "standards", "runbooks", "dependsOn", "parentTask", "updated"}, []string{"id", "status", "taskType"}},
+	"screen":   {[]string{"id", "screenKind", "module", "status", "route", "preview", "parentScreen", "component", "updated"}, []string{"id", "screenKind", "module", "status"}},
 }
 
 var semanticSectionKinds = map[SectionKind]bool{
@@ -57,9 +57,9 @@ func validateSemanticAnnotations(model *Model, document *Document) {
 	}
 	schema, typed := semanticSchemas[document.Type]
 	if document.SourcePath == "architecture/overview.md" {
-		schema, typed = semanticSchema{allowed: []string{"version", "updated"}, required: []string{"version"}}, true
+		schema, typed = semanticSchema{allowed: []string{"updated"}}, true
 	} else if document.Type == "architecture" {
-		schema, typed = semanticSchema{allowed: []string{"version", "architectureQuestion", "updated"}, required: []string{"version", "architectureQuestion"}}, true
+		schema, typed = semanticSchema{allowed: []string{"architectureQuestion", "updated"}, required: []string{"architectureQuestion"}}, true
 	}
 	if typed {
 		allowed := semanticSet(schema.allowed)
@@ -73,9 +73,6 @@ func validateSemanticAnnotations(model *Model, document *Document) {
 				addDocumentIssue(model, document, newIssue("error", "missing-semantic-field", "Missing required semantic field "+key+".", document.SourcePath, 0))
 			}
 		}
-	}
-	if version := document.Metadata["version"]; version != "" && version != "1" {
-		addDocumentIssue(model, document, newIssue("error", "unsupported-toudocu-version", "Unsupported Toudocu annotation version "+version+".", document.SourcePath, document.metadataLocations["version"]))
 	}
 	validateSemanticValues(model, document)
 	validateSemanticSections(model, document)

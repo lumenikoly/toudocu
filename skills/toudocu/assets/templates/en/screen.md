@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: {{SCREEN_ID}}
 status: {{SCREEN_STATUS}}
 screenKind: {{SCREEN_TYPE}}

@@ -19,7 +19,6 @@ toudocu build ./docs --no-screen-map
 
 ```md
 <!-- toudocu
-version: 1
 id: SC-AUTH-LOGIN
 screenKind: screen
 module: MOD-AUTH

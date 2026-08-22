@@ -11,7 +11,6 @@ One file contains exactly one work item:
 
 ```md
 <!-- toudocu
-version: 1
 id: TASK-AUTH-014
 status: draft
 taskType: feature
@@ -237,7 +236,6 @@ archived by mistake. Identifiers and dependencies span all of `work/**`, so
 
 ```md
 <!-- toudocu
-version: 1
 id: TASK-AUTH-014
 status: ready
 taskType: feature

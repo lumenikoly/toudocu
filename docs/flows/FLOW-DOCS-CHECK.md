@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: FLOW-DOCS-CHECK
 module: MOD-MODEL
 useCase: UC-DOCS-02

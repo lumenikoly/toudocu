@@ -8,7 +8,6 @@ import (
 )
 
 const sampleMarkdown = `<!-- toudocu
-version: 1
 status: in-progress
 -->
 
@@ -69,7 +68,7 @@ func TestMarkdownPolicyErrorsFailCheckAndBuild(t *testing.T) {
 }
 
 func TestMetadataInlineCodePreservesRouteUnderscores(t *testing.T) {
-	doc := analyzeMarkdown("<!-- toudocu\nversion: 1\nroute: /_toudocu/api-docs/\n-->\n\n# SC-SITE-API-DOCS: API\n")
+	doc := analyzeMarkdown("<!-- toudocu\nroute: /_toudocu/api-docs/\n-->\n\n# SC-SITE-API-DOCS: API\n")
 	if got := doc.Metadata["route"]; got != "/_toudocu/api-docs/" {
 		t.Fatalf("route = %q", got)
 	}

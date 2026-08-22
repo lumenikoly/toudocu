@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: {{ADR_ID}}
 status: {{STATUS}}
 date: {{DATE}}

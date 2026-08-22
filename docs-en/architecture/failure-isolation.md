@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 architectureQuestion: Как изолируются ошибки документации и запускаемых проверок?
 -->
 

@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: TASK-RELEASE-001
 status: done
 taskType: maintenance

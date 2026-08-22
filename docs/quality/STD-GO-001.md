@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: STD-GO-001
 status: active
 scope: Go-код и тесты репозитория

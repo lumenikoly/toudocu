@@ -1,7 +1,3 @@
-<!-- toudocu
-version: 1
--->
-
 # Architecture
 
 

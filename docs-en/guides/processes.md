@@ -20,7 +20,6 @@ alternative scenarios, acceptance criteria, and start and terminal screens:
 
 ```md
 <!-- toudocu
-version: 1
 id: UC-AUTH-01
 status: ready
 module: MOD-AUTH
@@ -53,7 +52,6 @@ remain in API contracts, so a `FLOW-*` is not needed for every request:
 
 ````md
 <!-- toudocu
-version: 1
 id: FLOW-AUTH-LOGIN
 module: MOD-AUTH
 useCase: UC-AUTH-01, UC-AUTH-02

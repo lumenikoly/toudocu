@@ -52,7 +52,7 @@ func TestEditorRoadmapStateAndSuggestedID(t *testing.T) {
 }
 
 func TestEditorRoadmapAddPreservesMarkdownAndRebuilds(t *testing.T) {
-	content := "<!-- toudocu\r\nversion: 1\r\n-->\r\n\r\n# Roadmap\r\n\r\nIntro.\r\n\r\n<!-- toudocu:section roadmap-stage -->\r\n<!-- toudocu\r\nstatus: in-progress\r\n-->\r\n\r\n## Planned\r\n\r\n- [ ] `DLV-KEEP-001` Existing.\r\n\r\nClosing note.\r\n\r\n## Later\r\n\r\nText.\r\n"
+	content := "# Roadmap\r\n\r\nIntro.\r\n\r\n<!-- toudocu:section roadmap-stage -->\r\n<!-- toudocu\r\nstatus: in-progress\r\n-->\r\n\r\n## Planned\r\n\r\n- [ ] `DLV-KEEP-001` Existing.\r\n\r\nClosing note.\r\n\r\n## Later\r\n\r\nText.\r\n"
 	server, docs := roadmapTestServer(t, content)
 	state := roadmapStateRequest(t, server)
 	response := addRoadmapRequest(server, map[string]any{"stageAnchor": "planned", "id": "dlv-roadmap-003", "text": "Added result.", "expectedDigest": state.Digest})

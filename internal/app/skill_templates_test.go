@@ -416,7 +416,7 @@ func TestToudocuArchitectureTemplates(t *testing.T) {
 		t.Run(language, func(t *testing.T) {
 			overview := readSkillTemplate(t, language, "architecture-overview.md")
 			detail := readSkillTemplate(t, language, "architecture-detail.md")
-			for _, expected := range []string{"<!-- toudocu", "{{SYSTEM_BOUNDARY}}", "{{ARCHITECTURE_QUESTION_LINKS}}", "{{OPTIONAL_CONTEXT_DIAGRAM}}"} {
+			for _, expected := range []string{"{{SYSTEM_BOUNDARY}}", "{{ARCHITECTURE_QUESTION_LINKS}}", "{{OPTIONAL_CONTEXT_DIAGRAM}}"} {
 				if !strings.Contains(overview, expected) {
 					t.Errorf("%s architecture overview does not contain %q", language, expected)
 				}

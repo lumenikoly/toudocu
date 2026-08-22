@@ -1,7 +1,3 @@
-<!-- toudocu
-version: 1
--->
-
 # {{PROJECT_TITLE}} architecture
 
 {{SYSTEM_BOUNDARY_SUMMARY}}

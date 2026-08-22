@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: MOD-MARKDOWN
 status: done
 updated: 2026-08-10

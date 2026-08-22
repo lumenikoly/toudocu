@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: FLOW-DOCS-CHANGES
 module: MOD-CHANGES
 useCase: UC-DOCS-05

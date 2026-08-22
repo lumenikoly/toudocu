@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: FLOW-TASK-WORKFLOW
 module: MOD-CLI
 useCase: UC-TASK-01, UC-TASK-02, UC-TASK-03

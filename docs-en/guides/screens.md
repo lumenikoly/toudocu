@@ -25,7 +25,6 @@ a selected scenario are embedded in its canonical
 
 ```md
 <!-- toudocu
-version: 1
 id: SC-AUTH-LOGIN
 screenKind: screen
 module: MOD-AUTH

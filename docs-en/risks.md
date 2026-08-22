@@ -1,7 +1,3 @@
-<!-- toudocu
-version: 1
--->
-
 # Risks
 
 This page lists risks that still need attention or permanent safeguards. A

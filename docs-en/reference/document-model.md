@@ -94,7 +94,6 @@ Outside fenced code blocks, Toudocu recognizes only these exact forms:
 
 ```markdown
 <!-- toudocu
-version: 1
 id: UC-AUTH-01
 status: planned
 module: MOD-AUTH
@@ -173,7 +172,6 @@ For example, a use case declares its module relationship in metadata:
 
 ```markdown
 <!-- toudocu
-version: 1
 id: UC-AUTH-01
 status: planned
 module: MOD-AUTH
@@ -186,7 +184,6 @@ A flow that visualizes this use case refers to it separately:
 
 ```markdown
 <!-- toudocu
-version: 1
 id: FLOW-AUTH-01
 useCase: UC-AUTH-01
 -->

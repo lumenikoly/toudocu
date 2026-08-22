@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 architectureQuestion: {{ARCHITECTURE_QUESTION}}
 -->
 

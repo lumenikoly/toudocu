@@ -15,7 +15,7 @@ import (
 
 const Version = "0.0.5"
 
-var fieldOrder = []string{"id", "status", "taskType", "screenKind", "version", "author", "priority", "severity", "reproducibility", "regression", "module", "useCase", "flow", "screens", "transitions", "standards", "runbooks", "parentTask", "startScreen", "terminalScreens", "allowCycle", "route", "preview", "parentScreen", "component", "environment", "risk", "lastVerified", "supersededBy", "dependsOn", "date", "plannedDate", "updated", "probability", "impact", "scope"}
+var fieldOrder = []string{"id", "status", "taskType", "screenKind", "author", "priority", "severity", "reproducibility", "regression", "module", "useCase", "flow", "screens", "transitions", "standards", "runbooks", "parentTask", "startScreen", "terminalScreens", "allowCycle", "route", "preview", "parentScreen", "component", "environment", "risk", "lastVerified", "supersededBy", "dependsOn", "date", "plannedDate", "updated", "probability", "impact", "scope"}
 
 var typeIcons = map[string]string{"overview": "⌂", "status": "◐", "roadmap": "→", "risks": "!", "ideas": "✦", "notes": "✎", "changelog": "↻", "use-case": "◎", "module": "▦", "architecture": "◇", "contract": "⇄", "decision": "◆", "flow": "⇢", "screen-map": "⌗", "screen-index": "⌗", "screen": "▣", "guide": "◫", "work": "☐", "draft": "✎", "reference": "≡", "standard": "✓", "quality-index": "✓", "runbook": "↻", "runbook-index": "↻", "document": "•"}
 
@@ -1121,7 +1121,7 @@ func renderDashboardFocus(model *Model) string {
 func renderDashboard(model *Model) string {
 	ui := portalUI(model)
 	meta := ""
-	if values := nonEmpty([]string{model.Project.Stage, model.Project.Version, model.Project.Updated}); len(values) > 0 {
+	if values := nonEmpty([]string{model.Project.Stage, model.Project.Updated}); len(values) > 0 {
 		meta = `<div class="hero-meta">` + escapeHTML(strings.Join(values, " · ")) + `</div>`
 	}
 	overview := ""
@@ -1318,8 +1318,7 @@ func BuildReport(model *Model) ProjectReport {
 	}
 	project := ReportProject{
 		Title: model.Project.Title, Description: model.Project.Description, Status: model.Project.Status,
-		Stage: model.Project.Stage, Version: model.Project.Version,
-		Updated: model.Project.Updated, Summary: model.Project.Summary,
+		Stage: model.Project.Stage, Updated: model.Project.Updated, Summary: model.Project.Summary,
 	}
 	screens := make([]ReportScreen, 0, len(model.Knowledge.Screens))
 	for _, screen := range model.Knowledge.Screens {

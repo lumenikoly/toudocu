@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: {{TASK_ID}}
 status: ready
 taskType: feature

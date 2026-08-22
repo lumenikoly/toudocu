@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: {{BUG_ID}}
 status: ready
 taskType: bug

@@ -29,7 +29,6 @@ name both its scope and its check precisely:
 
 ```markdown
 <!-- toudocu
-version: 1
 id: STD-GO-001
 status: active
 scope: Go code and tests

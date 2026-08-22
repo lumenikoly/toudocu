@@ -50,7 +50,6 @@ outgoing transition table are the machine-readable source of truth:
 
 ```md
 <!-- toudocu
-version: 1
 id: SC-PUBLIC-HOME
 screenKind: page
 module: MOD-PUBLIC

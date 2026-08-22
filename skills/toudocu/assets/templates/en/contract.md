@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: {{CONTRACT_ID}}
 status: {{STATUS}}
 updated: {{DATE}}

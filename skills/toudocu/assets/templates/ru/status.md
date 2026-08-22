@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 status: {{STATUS}}
 stage: {{STAGE}}
 updated: {{DATE}}

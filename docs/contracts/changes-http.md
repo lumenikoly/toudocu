@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: CON-CHANGES-HTTP-V1
 status: done
 updated: 2026-08-12

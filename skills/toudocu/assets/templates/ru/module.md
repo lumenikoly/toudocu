@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: {{MODULE_ID}}
 status: {{STATUS}}
 updated: {{DATE}}

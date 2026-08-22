@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: FLOW-DOCS-SERVE
 module: MOD-SITE
 useCase: UC-DOCS-03

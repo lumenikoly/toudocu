@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: {{STANDARD_ID}}
 status: {{STATUS}}
 scope: {{SCOPE}}

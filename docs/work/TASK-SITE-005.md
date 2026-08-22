@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: TASK-SITE-005
 status: done
 taskType: feature

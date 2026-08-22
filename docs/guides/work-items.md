@@ -11,7 +11,6 @@
 
 ```md
 <!-- toudocu
-version: 1
 id: TASK-AUTH-014
 status: draft
 taskType: feature
@@ -129,7 +128,6 @@ toudocu task tree TASK-AUTH-100 ./docs
 
 ```md
 <!-- toudocu
-version: 1
 id: TASK-AUTH-101
 status: draft
 taskType: feature
@@ -304,7 +302,6 @@ toudocu task restore TASK-AUTH-009 ./docs --format json
 
 ```md
 <!-- toudocu
-version: 1
 id: TASK-AUTH-014
 status: ready
 taskType: feature

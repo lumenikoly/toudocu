@@ -1535,7 +1535,7 @@ func buildProjectInfo(model *Model, requestedTitle string) ProjectInfo {
 			updated = overview.UpdatedAt.Format("2006-01-02")
 		}
 	}
-	return ProjectInfo{Title: title, Description: description, Status: StatusFor(merged["status"]), Stage: merged["stage"], Version: merged["version"], Updated: updated, Summary: summary, OverviewDocument: overview, StatusDocument: statusDoc}
+	return ProjectInfo{Title: title, Description: description, Status: StatusFor(merged["status"]), Stage: merged["stage"], Updated: updated, Summary: summary, OverviewDocument: overview, StatusDocument: statusDoc}
 }
 
 func pathBase(value string) string {

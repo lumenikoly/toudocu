@@ -73,7 +73,6 @@ Toudocu распознаёт только три точные формы вне 
 
 ```markdown
 <!-- toudocu
-version: 1
 id: UC-AUTH-01
 status: planned
 module: MOD-AUTH
@@ -154,7 +153,6 @@ HTML, извлечённый текст и поиск и не распознаё
 
 ```markdown
 <!-- toudocu
-version: 1
 id: UC-AUTH-01
 status: planned
 module: MOD-AUTH
@@ -167,7 +165,6 @@ module: MOD-AUTH
 
 ```markdown
 <!-- toudocu
-version: 1
 id: FLOW-AUTH-01
 useCase: UC-AUTH-01
 -->

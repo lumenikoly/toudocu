@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: TASK-API-001
 status: done
 taskType: feature

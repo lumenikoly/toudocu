@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 architectureQuestion: Что делает Go-часть, а что — код в браузере?
 -->
 

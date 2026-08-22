@@ -249,7 +249,7 @@ test("serve exposes rebuild, editor CAS, and changes workspace", async ({ page }
     await page.setViewportSize({ width: 1280, height: 720 });
     await roadmapDialog.locator('input[name="id"]').fill("DLV-BROWSER-001");
     await roadmapDialog.locator('input[name="text"]').fill("Browser value survives conflict.");
-    writeFileSync(roadmapPath, `${readFileSync(roadmapPath, "utf8")}\n## Browser stage\n\n- Status: Planned\n\n- [ ] \`DLV-ROADMAP-007\` External result.\n`);
+    writeFileSync(roadmapPath, `${readFileSync(roadmapPath, "utf8")}\n<!-- toudocu:section roadmap-stage -->\n<!-- toudocu\nstatus: planned\n-->\n\n## Browser stage\n\n- Status: Planned\n\n- [ ] \`DLV-ROADMAP-007\` External result.\n`);
     await roadmapDialog.locator('button[type="submit"]').click();
     await expect(roadmapDialog.locator("[data-state='conflict']")).toContainText("введённые данные сохранены");
     await expect(roadmapDialog.locator('input[name="id"]')).toHaveValue("DLV-BROWSER-001");
@@ -468,7 +468,7 @@ test("Changes loads only the selected file detail and ignores stale responses", 
   const output = mkdtempSync(join(tmpdir(), "toudocu-detail-site-"));
   mkdirSync(join(fixture, "docs", "architecture"), { recursive: true });
   mkdirSync(join(fixture, ".toudocu"));
-  writeFileSync(join(fixture, ".toudocu", "config.yml"), "project:\n  locale: ru\n");
+  writeFileSync(join(fixture, ".toudocu", "config.yml"), "documentationVersion: 2\nproject:\n  locale: ru\n");
   writeFileSync(join(fixture, "docs", "index.md"), "# Detail test\n");
   writeFileSync(join(fixture, "docs", "architecture", "overview.md"), "# Architecture\n\n- Тип документа: Architecture Overview\n");
   for (const name of ["a", "b", "c"]) writeFileSync(join(fixture, `${name}.go`), `package detail\n\nconst ${name.toUpperCase()} = "old"\n`);
@@ -560,7 +560,7 @@ test("Portal and Changes share documentation discussions with the agent CLI", as
   const stateRoot = mkdtempSync(join(tmpdir(), "toudocu-agent-feedback-state-"));
   mkdirSync(join(fixture, "docs", "architecture"), { recursive: true });
   mkdirSync(join(fixture, ".toudocu"));
-  writeFileSync(join(fixture, ".toudocu", "config.yml"), "project:\n  locale: ru\n");
+  writeFileSync(join(fixture, ".toudocu", "config.yml"), "documentationVersion: 2\nproject:\n  locale: ru\n");
   writeFileSync(join(fixture, "docs", "index.md"), "# Review\n");
   writeFileSync(join(fixture, "docs", "architecture", "overview.md"), "# Architecture\n\n- Тип документа: Architecture Overview\n\n## Boundary\n\n```mermaid\nflowchart LR\n  A[\"Rendered<br>label\"]\n```\n\nUpdated.\n\nRepeated.\n\nRepeated.\n");
   writeFileSync(join(fixture, "server.go"), "package main\n\nfunc oldName() {}\n");

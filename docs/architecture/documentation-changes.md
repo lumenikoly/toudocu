@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 architectureQuestion: Как состояния Git превращаются в единый отчёт об изменениях документации?
 -->
 

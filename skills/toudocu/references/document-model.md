@@ -76,7 +76,6 @@ semantics in exact, non-localized annotations:
 
 ```md
 <!-- toudocu
-version: 1
 id: UC-AUTH-01
 status: planned
 module: MOD-AUTH

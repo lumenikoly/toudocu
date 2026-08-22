@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 architectureQuestion: Где проходят границы доверия?
 -->
 

@@ -1,7 +1,3 @@
-<!-- toudocu
-version: 1
--->
-
 # Roadmap
 
 The roadmap defines the project's global product scope.

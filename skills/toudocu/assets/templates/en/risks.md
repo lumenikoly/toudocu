@@ -1,7 +1,3 @@
-<!-- toudocu
-version: 1
--->
-
 # Risks
 
 Current project risks and mitigation plans.

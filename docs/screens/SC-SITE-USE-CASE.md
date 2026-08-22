@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: SC-SITE-USE-CASE
 status: done
 screenKind: page

@@ -2,6 +2,8 @@
 
 ## 0.0.5
 
+- Removed redundant per-annotation `version: 1` metadata from the contract,
+  scaffolds, templates, and documentation.
 - Added an explicit documentation contract version. Projects on an older
   contract now receive one migration diagnostic, while projects created by a
   newer Toudocu version are rejected without partial parsing.

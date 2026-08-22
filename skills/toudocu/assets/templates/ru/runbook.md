@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: {{RUNBOOK_ID}}
 status: {{STATUS}}
 environment: {{ENVIRONMENT}}

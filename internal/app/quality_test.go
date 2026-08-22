@@ -27,7 +27,6 @@ func TestQualityCanonicalMetadataAndValidationBoundaries(t *testing.T) {
 		}
 	}
 	parsed := analyzeMarkdown(`<!-- toudocu
-version: 1
 scope: code
 environment: production
 risk: high

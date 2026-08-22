@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: {{FLOW_ID}}
 module: {{MODULE_ID}}
 updated: {{DATE}}

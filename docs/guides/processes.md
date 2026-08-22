@@ -17,7 +17,6 @@
 
 ```md
 <!-- toudocu
-version: 1
 id: UC-AUTH-01
 module: MOD-AUTH
 startScreen: SC-AUTH-LOGIN
@@ -51,7 +50,6 @@ status: done
 
 ````md
 <!-- toudocu
-version: 1
 id: FLOW-AUTH-LOGIN
 module: MOD-AUTH
 useCase: UC-AUTH-01, UC-AUTH-02

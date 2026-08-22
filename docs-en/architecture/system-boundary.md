@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 architectureQuestion: Где проходит системная граница Toudocu и кто с ней взаимодействует?
 -->
 

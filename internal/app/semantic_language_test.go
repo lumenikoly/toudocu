@@ -27,7 +27,7 @@ func TestRunbookMachineModelIsLanguageIndependent(t *testing.T) {
 			docs := filepath.Join(root, "docs")
 			writeTestFile(t, docs, "index.md", "# Project\n\nDescription.\n")
 			writeArchitectureOverview(t, docs, "")
-			content := "<!-- toudocu\nversion: 1\nid: RB-TEST\nstatus: active\nrisk: high\nlastVerified: 2026-08-20\n-->\n\n# " + labels[0] + "\n\nDescription.\n\n<!-- toudocu:section procedure -->\n## " + labels[1] + "\n\n1. Step.\n\n<!-- toudocu:section verification -->\n## " + labels[2] + "\n\nVerified.\n"
+			content := "<!-- toudocu\nid: RB-TEST\nstatus: active\nrisk: high\nlastVerified: 2026-08-20\n-->\n\n# " + labels[0] + "\n\nDescription.\n\n<!-- toudocu:section procedure -->\n## " + labels[1] + "\n\n1. Step.\n\n<!-- toudocu:section verification -->\n## " + labels[2] + "\n\nVerified.\n"
 			writeTestFile(t, docs, "runbooks/RB-TEST.md", content)
 			model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0, Now: time.Date(2026, 8, 22, 0, 0, 0, 0, time.UTC)})
 			if err != nil {
@@ -57,7 +57,7 @@ func TestRunbookMachineModelIsLanguageIndependent(t *testing.T) {
 }
 
 func TestSemanticDiffUsesAnnotationsNotReaderLabels(t *testing.T) {
-	metadata := "<!-- toudocu\nversion: 1\nid: RB-TEST\nstatus: active\nrisk: high\nlastVerified: 2026-08-20\n-->\n\n"
+	metadata := "<!-- toudocu\nid: RB-TEST\nstatus: active\nrisk: high\nlastVerified: 2026-08-20\n-->\n\n"
 	oldContent := []byte(metadata + "# Deployment\n\n<!-- toudocu:section procedure -->\n## Procedure\n\n1. Step.\n")
 	translated := []byte(metadata + "# Déploiement\n\n<!-- toudocu:section procedure -->\n## Procédure\n\n1. Step.\n")
 	entity := []ChangeEntity{{ID: "RB-TEST", Type: "runbook"}}
@@ -87,7 +87,6 @@ func TestSemanticAnnotationDiagnostics(t *testing.T) {
 	writeTestFile(t, docs, "index.md", "# Project\n\nDescription.\n")
 	writeArchitectureOverview(t, docs, "")
 	writeTestFile(t, docs, "runbooks/RB-BAD.md", `<!-- toudocu
-version: 2
 id: RB-BAD
 status: Draft
 risk: high
@@ -125,14 +124,14 @@ id: RB-BAD
 
 <!-- toudocu:section verification -->
 `)
-	writeTestFile(t, docs, "runbooks/RB-MISSING.md", "<!-- toudocu\nversion: 1\nid: RB-MISSING\nstatus: active\n-->\n\n# Missing\n")
+	writeTestFile(t, docs, "runbooks/RB-MISSING.md", "<!-- toudocu\nid: RB-MISSING\nstatus: active\n-->\n\n# Missing\n")
 	writeTestFile(t, docs, "guides/bad.md", "# Bad\n\n<!-- toudocu:section -->\n")
 	model, err := BuildDocumentationModel(Options{InputDirectory: docs, RepositoryRoot: root, StaleDays: 0})
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, code := range []string{
-		"invalid-toudocu-annotation", "duplicate-toudocu-metadata", "unsupported-toudocu-version",
+		"invalid-toudocu-annotation", "duplicate-toudocu-metadata",
 		"unknown-semantic-field", "missing-semantic-field", "invalid-semantic-value",
 		"unknown-section-kind", "duplicate-section-kind", "orphan-section-marker",
 		"unknown-table-kind", "invalid-table-columns",

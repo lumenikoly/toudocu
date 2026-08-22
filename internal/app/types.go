@@ -533,7 +533,6 @@ type ProjectInfo struct {
 	Description      string
 	Status           StatusInfo
 	Stage            string
-	Version          string
 	Updated          string
 	Summary          string
 	OverviewDocument *Document

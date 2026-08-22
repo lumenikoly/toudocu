@@ -239,7 +239,6 @@ type ReportProject struct {
 	Description string     `json:"description"`
 	Status      StatusInfo `json:"status"`
 	Stage       string     `json:"stage"`
-	Version     string     `json:"version"`
 	Updated     string     `json:"updated"`
 	Summary     string     `json:"summary"`
 }

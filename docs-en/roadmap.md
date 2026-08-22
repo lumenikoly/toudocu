@@ -1,7 +1,3 @@
-<!-- toudocu
-version: 1
--->
-
 # Roadmap
 
 The roadmap shows what Toudocu already includes and which areas continue to

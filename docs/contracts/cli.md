@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: CON-CLI-V1
 status: done
 updated: 2026-08-21

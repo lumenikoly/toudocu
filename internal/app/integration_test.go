@@ -484,7 +484,7 @@ func TestArchitectureSchemaContract(t *testing.T) {
 			if document.Type != "architecture" {
 				t.Fatalf("overview type=%q", document.Type)
 			}
-			if document.Metadata["version"] != "1" || document.Metadata["documentType"] != "" {
+			if document.Metadata["documentType"] != "" {
 				t.Fatalf("overview metadata=%#v", document.Metadata)
 			}
 			return

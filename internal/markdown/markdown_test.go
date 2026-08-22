@@ -32,10 +32,10 @@ func TestParseGoldmarkDialectAndRanges(t *testing.T) {
 }
 
 func TestSemanticAnnotationsAreTypedHiddenAndFenceSafe(t *testing.T) {
-	source := "<!-- toudocu\nversion: 1\nid: RB-TEST\nstatus: active\n-->\n# Reader title\n\n<!-- toudocu:section procedure -->\n## Banana spaceship\n\n1. Step\n\n<!-- toudocu:table transitions columns=id,action,condition,target -->\n| Whatever | You | Like | Here |\n|---|---|---|---|\n| TR-X-001 | Go | Always | SC-X-END |\n\n```md\n<!-- toudocu:section verification -->\n```\n"
+	source := "<!-- toudocu\nid: RB-TEST\nstatus: active\n-->\n# Reader title\n\n<!-- toudocu:section procedure -->\n## Banana spaceship\n\n1. Step\n\n<!-- toudocu:table transitions columns=id,action,condition,target -->\n| Whatever | You | Like | Here |\n|---|---|---|---|\n| TR-X-001 | Go | Always | SC-X-END |\n\n```md\n<!-- toudocu:section verification -->\n```\n"
 	doc := Parse([]byte(source), "test.md")
 	a := doc.Analysis()
-	if len(a.Metadata) != 3 || a.Metadata[1].Key != "id" || a.Metadata[1].Value != "RB-TEST" {
+	if len(a.Metadata) != 2 || a.Metadata[0].Key != "id" || a.Metadata[0].Value != "RB-TEST" {
 		t.Fatalf("metadata = %#v", a.Metadata)
 	}
 	if len(a.Sections) != 1 || a.Sections[0].Kind != "procedure" {
@@ -54,7 +54,7 @@ func TestSemanticAnnotationsAreTypedHiddenAndFenceSafe(t *testing.T) {
 }
 
 func TestOnlyExactToudocuAnnotationsBypassRawHTMLPolicy(t *testing.T) {
-	source := "<!-- toudocu\nversion: 1\n-->\n# H\n\n<!-- toudocuX -->\n<div>unsafe</div>\n"
+	source := "<!-- toudocu\nid: X\n-->\n# H\n\n<!-- toudocuX -->\n<div>unsafe</div>\n"
 	a := Parse([]byte(source), "test.md").Analysis()
 	forbidden := 0
 	for _, diagnostic := range a.Diagnostics {
@@ -62,7 +62,7 @@ func TestOnlyExactToudocuAnnotationsBypassRawHTMLPolicy(t *testing.T) {
 			forbidden++
 		}
 	}
-	if forbidden != 2 || a.MetadataBlocks != 1 || strings.Contains(a.PlainText, "toudocu\nversion") {
+	if forbidden != 2 || a.MetadataBlocks != 1 || strings.Contains(a.PlainText, "toudocu\nid") {
 		t.Fatalf("exact annotation boundary failed: metadata=%d plain=%q diagnostics=%#v", a.MetadataBlocks, a.PlainText, a.Diagnostics)
 	}
 }

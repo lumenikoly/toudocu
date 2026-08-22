@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: BUG-CHANGES-003
 status: done
 taskType: bug

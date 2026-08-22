@@ -23,8 +23,8 @@ documentationVersion: 2
    v2 annotations. Do not rewrite free-form prose merely because the project is
    being migrated.
 3. Move recognized document metadata from the list below the H1 into one
-   `<!-- toudocu ... -->` block before the H1. Use `version: 1` inside that
-   annotation, exact current field names, and the current contract described in
+   `<!-- toudocu ... -->` block before the H1. Use exact current field names
+   and the current contract described in
    [document-model.md](../document-model.md),
    [work-item-model.md](../work-item-model.md), and
    [screen-model.md](../screen-model.md). Remove a legacy metadata line only

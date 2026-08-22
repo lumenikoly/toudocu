@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: STD-DOCS-001
 status: active
 scope: Исходная документация, шаблоны встроенного skill и сгенерированные порталы

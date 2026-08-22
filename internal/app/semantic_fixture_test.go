@@ -140,7 +140,7 @@ func canonicalizeTestMarkdown(relative, content string) string {
 	if h1 < 0 {
 		return content
 	}
-	metadata := map[string]string{"version": "1"}
+	metadata := map[string]string{}
 	id := stableEntityIDRE.FindString(lines[h1])
 	if id != "" {
 		metadata["id"] = id
@@ -187,7 +187,7 @@ func canonicalizeTestMarkdown(relative, content string) string {
 		lines = canonicalizeTestRepeatedSections(lines, kind)
 	}
 	lines = canonicalizeTestSectionsAndTables(lines)
-	order := []string{"version", "id", "status", "taskType", "screenKind", "severity", "priority", "reproducibility", "regression", "observedIn", "module", "useCase", "flow", "screens", "transitions", "standards", "runbooks", "dependsOn", "parentTask", "startScreen", "terminalScreens", "allowCycle", "route", "preview", "parentScreen", "component", "stage", "date", "scope", "updated", "environment", "risk", "lastVerified", "supersededBy", "architectureQuestion"}
+	order := []string{"id", "status", "taskType", "screenKind", "severity", "priority", "reproducibility", "regression", "observedIn", "module", "useCase", "flow", "screens", "transitions", "standards", "runbooks", "dependsOn", "parentTask", "startScreen", "terminalScreens", "allowCycle", "route", "preview", "parentScreen", "component", "stage", "date", "scope", "updated", "environment", "risk", "lastVerified", "supersededBy", "architectureQuestion"}
 	block := []string{"<!-- toudocu"}
 	seen := map[string]bool{}
 	for _, key := range order {
@@ -205,6 +205,9 @@ func canonicalizeTestMarkdown(relative, content string) string {
 	sort.Strings(extra)
 	for _, key := range extra {
 		block = append(block, key+": "+metadata[key])
+	}
+	if len(block) == 1 {
+		return strings.Join(lines, "\n") + "\n"
 	}
 	block = append(block, "-->", "")
 	for i, line := range lines {

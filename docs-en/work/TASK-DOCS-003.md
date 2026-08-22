@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: TASK-DOCS-003
 status: done
 taskType: documentation

@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: {{USE_CASE_ID}}
 status: {{STATUS}}
 priority: {{PRIORITY}}

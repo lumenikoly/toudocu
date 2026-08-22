@@ -1,5 +1,4 @@
 <!-- toudocu
-version: 1
 id: TASK-MODEL-001
 status: done
 taskType: maintenance
