@@ -451,7 +451,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   gap: 14px;
   margin: 20px 0 28px;
 }
-.metric-card, .card, .document-card {
+.metric-card, .card, .document-card, .task-decomposition .task-hierarchy-breadcrumb, .task-decomposition > p, .task-decomposition .related-list li {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
@@ -471,6 +471,32 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .progress-track.is-complete .progress-fill { background: var(--success); }
 
 .dashboard-section { margin: 34px 0; }
+.task-decomposition .task-hierarchy-breadcrumb,
+.task-decomposition > p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  padding: 14px 16px;
+}
+.task-decomposition .task-hierarchy-breadcrumb { margin: 12px 0 10px; }
+.task-decomposition > p { margin: 10px 0 0; }
+.task-decomposition .task-hierarchy-breadcrumb a,
+.task-decomposition > p a { overflow-wrap: anywhere; }
+.task-decomposition .related-list {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.task-decomposition .related-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+}
+.task-decomposition .related-list li > .badge { margin-left: auto; }
 .dashboard-support-panel {
   padding: 24px;
   border: 1px solid var(--border);
