@@ -13,7 +13,7 @@ import (
 	frontend "toudocu/internal/site"
 )
 
-const Version = "0.0.4"
+const Version = "0.0.5"
 
 var fieldOrder = []string{"id", "status", "taskType", "screenKind", "version", "author", "priority", "severity", "reproducibility", "regression", "module", "useCase", "flow", "screens", "transitions", "standards", "runbooks", "parentTask", "startScreen", "terminalScreens", "allowCycle", "route", "preview", "parentScreen", "component", "environment", "risk", "lastVerified", "supersededBy", "dependsOn", "date", "plannedDate", "updated", "probability", "impact", "scope"}
 

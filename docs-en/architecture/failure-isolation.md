@@ -21,6 +21,12 @@ editor. The user-facing sequences are in
 
 ## Documentation errors
 
+Before scanning Markdown, Toudocu compares `documentationVersion` with the
+current contract. An older version produces a single migration diagnostic,
+while a newer version requires a CLI update. The main parser therefore never
+mixes the current model with legacy constructs or emits a cascade of
+new-format errors for a project known to use an older contract.
+
 Scanning continues through documents that can still be read. Validation adds
 problems to the project model and to the affected files. An error makes the
 operation fail; a warning changes the exit code only with `--strict`. No

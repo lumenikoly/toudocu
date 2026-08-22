@@ -1,17 +1,33 @@
 # Configuration reference
 
-Toudocu works without a configuration file. When
-`.toudocu/config.yml` exists at the repository root, Toudocu parses the whole
-file before running the command. An invalid shared setting or branding asset
-can therefore stop an operation that does not use that field directly.
+The current documentation contract requires `.toudocu/config.yml` at the
+repository root. If the file is missing, Toudocu treats the project as using
+contract v1 and requires a migration. Toudocu parses the whole configuration
+before running the command, so an invalid shared setting or branding asset can
+stop an operation that does not use that field directly.
 
 `build`, `check`, and `serve` use project and site settings; `changes` and
 `task changes` use `changes`; `task init` and `scaffold` use the project locale.
+
+The root-level `documentationVersion` field selects the source-documentation
+contract:
+
+```yaml
+documentationVersion: 2
+```
+
+The current contract version is `2`. A missing field means version `1` and
+requires migration through the Toudocu skill. A value below the current
+version stops processing before Markdown is read and returns
+`DOCS_MIGRATION_REQUIRED`; a value above it returns
+`DOCUMENTATION_VERSION_UNSUPPORTED`. The field must be a positive integer. It
+describes the expected format, not the result of the latest check.
 
 ## Defaults
 
 | Setting | Default |
 |---|---|
+| Documentation contract | `2`; a missing field means legacy v1 |
 | Documentation root | `./docs` |
 | Output | Neighboring `project-docs` directory |
 | Repository root | Parent of the documentation root |
