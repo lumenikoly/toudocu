@@ -128,6 +128,10 @@ func TestNavigationIconsReflectDocumentStatus(t *testing.T) {
 
 func writeTestFile(t *testing.T, root, relative, content string) {
 	t.Helper()
+	ensureTestDocumentationVersion(t, root)
+	if relative == ".toudocu/config.yml" && !strings.Contains(content, "documentationVersion:") {
+		content = "documentationVersion: 2\n" + content
+	}
 	target := filepath.Join(root, filepath.FromSlash(relative))
 	if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil {
 		t.Fatal(err)

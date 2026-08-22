@@ -843,12 +843,25 @@ func openGeneratedSite(file string) error {
 func printCheckText(w io.Writer, model *Model) {
 	fmt.Fprintf(w, "Documents: %d\nWarnings: %d\nErrors: %d\n", model.Stats.Documents, model.Stats.Warnings, model.Stats.Errors)
 	for _, issue := range model.Issues {
+		if issue.Code == "DOCS_MIGRATION_REQUIRED" {
+			fmt.Fprintf(w, "\n%s\n\nMigration: %s\nFile: %s\n", issue.Code, issue.Migration, issue.DocumentPath)
+			continue
+		}
 		location := issue.DocumentPath
 		if issue.Line > 0 {
 			location += fmt.Sprintf(":%d", issue.Line)
 		}
 		fmt.Fprintf(w, "[%s] %s %s — %s\n", strings.ToUpper(issue.Severity), issue.Code, location, issue.Message)
 	}
+}
+
+func hasDocumentationVersionIssue(model *Model) bool {
+	for _, issue := range model.Issues {
+		if issue.Code == "DOCS_MIGRATION_REQUIRED" || issue.Code == "DOCUMENTATION_VERSION_UNSUPPORTED" {
+			return true
+		}
+	}
+	return false
 }
 
 // RunCLI executes one command and returns a process exit code.
@@ -950,6 +963,15 @@ func RunCLI(argv []string, stdout, stderr io.Writer) int {
 	model, err := BuildDocumentationModel(options)
 	if err != nil {
 		fmt.Fprintln(stderr, "Error:", err)
+		return 1
+	}
+	if hasDocumentationVersionIssue(model) {
+		if options.Format == "json" {
+			data, _ := json.MarshalIndent(BuildReport(model), "", "  ")
+			fmt.Fprintln(stdout, string(data))
+		} else {
+			printCheckText(stdout, model)
+		}
 		return 1
 	}
 	if options.Command == "search" {

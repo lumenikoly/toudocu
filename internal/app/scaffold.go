@@ -323,6 +323,9 @@ func InitTask(options Options) (TaskInitReport, error) {
 	if err := rejectTranslationRootMutation(options); err != nil {
 		return TaskInitReport{}, err
 	}
+	if err := requireCurrentDocumentationVersion(options); err != nil {
+		return TaskInitReport{}, err
+	}
 	if info, err := os.Stat(options.InputDirectory); err != nil || !info.IsDir() {
 		return TaskInitReport{}, fmt.Errorf("documentation directory not found: %s", options.InputDirectory)
 	}
@@ -505,6 +508,9 @@ func renderEntityScaffold(kind, id, title, language, date string) string {
 
 func Scaffold(options Options) (ScaffoldReport, error) {
 	if err := rejectTranslationRootMutation(options); err != nil {
+		return ScaffoldReport{}, err
+	}
+	if err := requireCurrentDocumentationVersion(options); err != nil {
 		return ScaffoldReport{}, err
 	}
 	if info, err := os.Stat(options.InputDirectory); err != nil || !info.IsDir() {

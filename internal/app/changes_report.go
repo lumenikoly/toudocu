@@ -142,6 +142,10 @@ func printChangesText(w io.Writer, report *ChangeSetReport) {
 		}
 	}
 	for _, diagnostic := range report.Diagnostics {
+		if diagnostic.Code == "DOCS_MIGRATION_REQUIRED" {
+			fmt.Fprintf(w, "\n%s\n\nMigration: %s\nFile: %s\n", diagnostic.Code, diagnostic.Migration, diagnostic.DocumentPath)
+			continue
+		}
 		fmt.Fprintf(w, "[%s] %s — %s\n", strings.ToUpper(diagnostic.Severity), diagnostic.Code, diagnostic.Message)
 	}
 }

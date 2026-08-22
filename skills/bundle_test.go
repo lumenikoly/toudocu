@@ -16,7 +16,7 @@ func TestLoadContainsCompleteSkill(t *testing.T) {
 	foundSkill, foundReference, foundArchitectureGate := false, false, false
 	foundScreenModel, foundWorkItemModel := false, false
 	foundWritingQuality, foundEnglishGuidance := false, false
-	foundTriggerEvals := false
+	foundTriggerEvals, foundMigration := false, false
 	foundEnglish, foundRussian := false, false
 	var skillText, workflowText, documentModelText, writingText, openAIText, triggerCSV string
 	var embeddedText strings.Builder
@@ -40,6 +40,8 @@ func TestLoadContainsCompleteSkill(t *testing.T) {
 			foundScreenModel = true
 		case "references/work-item-model.md":
 			foundWorkItemModel = true
+		case "references/migrations/v1-to-v2.md":
+			foundMigration = true
 		case "references/writing-quality.md":
 			foundWritingQuality = true
 			writingText = string(file.Data)
@@ -58,7 +60,7 @@ func TestLoadContainsCompleteSkill(t *testing.T) {
 			foundRussian = true
 		}
 	}
-	if !foundSkill || !foundReference || !foundArchitectureGate || !foundScreenModel || !foundWorkItemModel || !foundWritingQuality || !foundEnglishGuidance || !foundTriggerEvals || !foundEnglish || !foundRussian {
+	if !foundSkill || !foundReference || !foundArchitectureGate || !foundScreenModel || !foundWorkItemModel || !foundMigration || !foundWritingQuality || !foundEnglishGuidance || !foundTriggerEvals || !foundEnglish || !foundRussian {
 		t.Fatal("bundle does not include metadata, review references, English guidance, trigger evals, and both template locales")
 	}
 	if !strings.Contains(skillText, "description: >-") || !strings.Contains(skillText, "references/writing-quality.md") {

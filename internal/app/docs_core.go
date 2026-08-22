@@ -654,6 +654,11 @@ func buildDocumentationModel(options Options, overlay map[string][]byte) (*Model
 	if model.RepositoryRef == "" {
 		model.RepositoryRef = "main"
 	}
+	if issue := documentationVersionIssue(siteConfig); issue != nil {
+		model.Issues = append(model.Issues, *issue)
+		model.Stats = buildStats(model)
+		return model, nil
+	}
 	files := scanMarkdownFiles(root, options.Excludes, &model.Issues)
 	// A repository-root scan is canonical by definition. Translation trees are
 	// independent portals and must never leak into task context or ProjectModel.

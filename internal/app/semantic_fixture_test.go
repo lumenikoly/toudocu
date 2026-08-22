@@ -1,9 +1,11 @@
 package toudocu
 
 import (
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
+	"testing"
 )
 
 var testMetadataKeys = map[string]string{
@@ -213,6 +215,27 @@ func canonicalizeTestMarkdown(relative, content string) string {
 	}
 	lines = append(lines[:h1], append(block, lines[h1:]...)...)
 	return strings.Join(lines, "\n") + "\n"
+}
+
+func ensureTestDocumentationVersion(t testing.TB, root string) {
+	t.Helper()
+	repositoryRoot := root
+	base := filepath.Base(root)
+	if base == "docs" || strings.HasPrefix(base, "docs-") {
+		repositoryRoot = filepath.Dir(root)
+	}
+	configPath := filepath.Join(repositoryRoot, ".toudocu", "config.yml")
+	if _, err := os.Stat(configPath); err == nil {
+		return
+	} else if !os.IsNotExist(err) {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(configPath, []byte("documentationVersion: 2\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func canonicalizeTestRepeatedSections(lines []string, kind string) []string {

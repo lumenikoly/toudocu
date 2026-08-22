@@ -36,6 +36,9 @@ func BuildDocumentationChanges(options Options) (*ChangeSetReport, error) {
 	if configErr != nil {
 		return nil, configErr
 	}
+	if issue := documentationVersionIssue(config); issue != nil {
+		return &ChangeSetReport{SchemaVersion: 1, Changes: []DocumentationChange{}, Diagnostics: []Issue{*issue}}, nil
+	}
 	if options.ChangeBase == "" && options.ChangeBranchBase == "" {
 		options.ChangeBase = config.Changes.DefaultBaseRef
 	}

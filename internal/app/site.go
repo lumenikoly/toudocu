@@ -1393,6 +1393,9 @@ func generateServeSite(model *Model, options Options) (GenerateResult, error) {
 }
 
 func generateSite(model *Model, options Options, serve bool) (GenerateResult, error) {
+	if issue := documentationVersionIssue(model.SiteConfig); issue != nil {
+		return GenerateResult{}, documentationVersionError(issue)
+	}
 	model.serveMode = serve
 	defer func() { model.serveMode = false }()
 	model.ScreenMapEnabled = !options.NoScreenMap

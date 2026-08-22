@@ -45,9 +45,10 @@ func newChangesRepository(t *testing.T) (string, string) {
 	gitTestRun(t, root, "init", "-q")
 	gitTestRun(t, root, "config", "user.email", "test@example.test")
 	gitTestRun(t, root, "config", "user.name", "Toudocu Test")
+	writeSiteConfig(t, root, "")
 	writeChangesTestFile(t, filepath.Join(docs, "modules", "MOD-CORE.md"), "# MOD-CORE: Core\n\n- Status: Active\n\n## Rules\n\nOriginal.\n")
 	writeChangesTestFile(t, filepath.Join(docs, "use-cases", "UC-CORE-01.md"), "# UC-CORE-01: Open\n\n## Result\n\nOpened.\n")
-	gitTestRun(t, root, "add", "docs")
+	gitTestRun(t, root, "add", "docs", ".toudocu")
 	gitTestRun(t, root, "commit", "-q", "-m", "baseline")
 	return root, docs
 }

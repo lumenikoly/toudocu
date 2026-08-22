@@ -194,6 +194,7 @@ type Issue struct {
 	Severity     string `json:"severity"`
 	Code         string `json:"code"`
 	Message      string `json:"message"`
+	Migration    string `json:"migration,omitempty"`
 	DocumentPath string `json:"documentPath,omitempty"`
 	Line         int    `json:"line,omitempty"`
 	Column       int    `json:"column,omitempty"`
