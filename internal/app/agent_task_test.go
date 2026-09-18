@@ -87,14 +87,37 @@ func TestStartTask(t *testing.T) {
 	}
 }
 
+func TestCompleteTask(t *testing.T) {
+	server, path, _ := agentTaskTestServer(t, strings.Replace(completeTaskFixture("In-progress"), "- [ ] `AC-01`", "- [x] `AC-01`", 1))
+	content, _ := os.ReadFile(path)
+	response := httptest.NewRecorder()
+	server.ServeHTTP(response, agentConsoleRequest(http.MethodPost, "/_toudocu/api/tasks/TASK-AUTH-021/actions/complete-task", "task-action-execute", `{"delivery":"direct","expectedDigest":"`+contentDigest(content)+`","input":{"text":""}}`))
+	if response.Code != http.StatusConflict || !strings.Contains(response.Body.String(), "task_completion_confirmation_required") {
+		t.Fatalf("status=%d body=%s", response.Code, response.Body.String())
+	}
+	result, err := server.executeTaskAction(context.Background(), "TASK-AUTH-021", "complete-task", "direct", contentDigest(content), "", AgentLaunchDefault)
+	updated, _ := os.ReadFile(path)
+	if err != nil || result.Projection == nil || result.Projection.Task.Status != "done" || !strings.Contains(string(updated), "status: done") {
+		t.Fatalf("result=%+v err=%v\n%s", result, err, updated)
+	}
+
+	server, path, _ = agentTaskTestServer(t, completeTaskFixture("In-progress"))
+	content, _ = os.ReadFile(path)
+	_, err = server.executeTaskAction(context.Background(), "TASK-AUTH-021", "complete-task", "direct", contentDigest(content), "", AgentLaunchDefault)
+	var conflict *agentTaskConflict
+	if !errors.As(err, &conflict) || conflict.code != "task_completion_not_ready" {
+		t.Fatalf("error=%v", err)
+	}
+}
+
 func TestTaskActionResolver(t *testing.T) {
 	for _, state := range []string{"ready", "in-progress", "waiting", "needs-attention", "draft", "blocked", "done"} {
-		if len(preparedTaskActions(state, true)) == 0 {
+		if len(preparedTaskActions(state, true, false)) == 0 {
 			t.Fatalf("no actions for %s", state)
 		}
 	}
 	fixProblems := agentTaskActions["fix-problems"]
-	if len(preparedTaskActions("cancelled", true)) != 0 || agentTaskActions["ask"].policy != AgentTurnReadOnly || agentTaskActions["clarify"].policy == AgentTurnReadOnly || fixProblems.policy == AgentTurnReadOnly || !fixProblems.states["draft"] || !fixProblems.states["needs-attention"] {
+	if len(preparedTaskActions("cancelled", true, false)) != 0 || agentTaskActions["ask"].policy != AgentTurnReadOnly || agentTaskActions["clarify"].policy == AgentTurnReadOnly || fixProblems.policy == AgentTurnReadOnly || !fixProblems.states["draft"] || !fixProblems.states["needs-attention"] {
 		t.Fatal("invalid action policy or terminal-state actions")
 	}
 }
@@ -113,7 +136,7 @@ func TestTaskActionFixProblemsCanModifyTaskContract(t *testing.T) {
 
 func TestTaskActionRegistry(t *testing.T) {
 	for id, action := range agentTaskActions {
-		if action.ID != id || action.build == nil || action.build("TASK-X-001", "question") == "" {
+		if action.ID != id || !action.direct && (action.build == nil || action.build("TASK-X-001", "question") == "") {
 			t.Fatalf("invalid action %s: %+v", id, action)
 		}
 	}

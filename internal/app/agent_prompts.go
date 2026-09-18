@@ -19,6 +19,7 @@ type AgentTaskAction struct {
 	Deliveries []TaskActionDelivery `json:"deliveries,omitempty"`
 	policy     AgentTurnPolicy
 	mutates    bool
+	direct     bool
 	treeGoal   bool
 	states     map[string]bool
 	build      func(string, string) string
@@ -29,6 +30,7 @@ func taskPrompt(format string) func(string, string) string {
 }
 
 var agentTaskActions = map[string]AgentTaskAction{
+	"complete-task": {ID: "complete-task", Label: "Complete task", Input: "none", mutates: true, direct: true, states: states("in-progress")},
 	"complete-tree": {ID: "complete-tree", Label: "Complete task tree", Input: "none", mutates: true, treeGoal: true, states: states("ready", "in-progress"), build: taskPrompt("Complete task %s and all its descendants sequentially. Use the authoritative Toudocu task contracts, dependencies, acceptance criteria, and verification. Work on one task at a time; finish dependencies and children before their parents, using TASK-ID order when several tasks are ready. For each task, move Ready to In progress, implement and verify it, check only proven acceptance criteria, and set Done only after every declared check passes. If work cannot continue, set the current task to Blocked with a concrete blocker.")},
 	"start-work":    {ID: "start-work", Label: "Start work", Input: "none", mutates: true, states: states("ready"), build: taskPrompt("Implement task %s using its Toudocu task context and acceptance criteria. Do not mark it Done automatically.")},
 	"continue-work": {ID: "continue-work", Label: "Continue work", Input: "none", states: states("in-progress"), build: taskPrompt("Continue task %s. Re-read its current Toudocu task context and repository state before acting; do not assume a previous provider thread is available. Do not mark the task Done automatically.")},
@@ -45,7 +47,7 @@ var agentTaskActions = map[string]AgentTaskAction{
 var taskActionOrder = map[string][]string{
 	"ready":           {"complete-tree", "start-work", "ask", "clarify"},
 	"ready-candidate": {"clarify", "ask", "fix-problems"},
-	"in-progress":     {"complete-tree", "continue-work", "ask", "clarify", "next"},
+	"in-progress":     {"complete-task", "complete-tree", "continue-work", "ask", "clarify", "next"},
 	"waiting":         {"explain-blocker", "ask"},
 	"needs-attention": {"clarify", "ask", "fix-problems"},
 	"draft":           {"clarify", "ask", "fix-problems"},
@@ -61,15 +63,22 @@ func states(values ...string) map[string]bool {
 	return result
 }
 
-func preparedTaskActions(state string, hasChildren bool) []AgentTaskAction {
+func preparedTaskActions(state string, hasChildren, canComplete bool) []AgentTaskAction {
 	result := []AgentTaskAction{}
 	for _, id := range taskActionOrder[state] {
 		action := agentTaskActions[id]
+		if action.direct && !canComplete {
+			continue
+		}
 		if action.treeGoal && !hasChildren {
 			continue
 		}
 		if action.states[state] {
-			action.Deliveries = []TaskActionDelivery{{Type: "handoff", Available: true}}
+			if action.direct {
+				action.Deliveries = []TaskActionDelivery{{Type: "direct", Available: true}}
+			} else {
+				action.Deliveries = []TaskActionDelivery{{Type: "handoff", Available: true}}
+			}
 			result = append(result, action)
 		}
 	}

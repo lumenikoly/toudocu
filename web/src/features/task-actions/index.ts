@@ -1,7 +1,7 @@
 import { text } from "../../core/locale";
 import { createIcon } from "../../design/icons";
 
-export type Delivery = { type: "agent-console" | "handoff"; available: boolean; unavailableReason?: string; openSession?: boolean };
+export type Delivery = { type: "agent-console" | "handoff" | "direct"; available: boolean; unavailableReason?: string; openSession?: boolean };
 export type Action = { id: string; label: string; input: "none" | "text"; deliveries: Delivery[] };
 export type TaskTreeGoal = { status: "active" | "blocked" | "complete"; rootTaskID: string; currentTaskID?: string; completedTasks: number; totalTasks: number; message?: string };
 export type AgentState = { relation: "none" | "current-task" | "other-task" | "unbound"; status: "off" | "idle" | "running" | "stopping" | "failed"; needsAttention: boolean; goal?: TaskTreeGoal };
@@ -82,7 +82,7 @@ export function mountTaskActions(signal: AbortSignal, onProjection?: (projection
   const execute = async (projection: Projection, action: Action, delivery: Delivery, input: string, status?: HTMLElement): Promise<Outcome> => {
     if (delivery.openSession) { document.dispatchEvent(new CustomEvent("toudocu:agent-open")); return "done"; }
     const generation = begin(projection.task.id);
-    const response = await fetch(`${endpoint}/${encodeURIComponent(projection.task.id)}/actions/${encodeURIComponent(action.id)}`, { method: "POST", headers: { "Content-Type": "application/json", "X-Toudocu-Action": "task-action-execute" }, body: JSON.stringify({ delivery: delivery.type, expectedDigest: projection.task.digest, input: { text: input } }), signal });
+    const response = await fetch(`${endpoint}/${encodeURIComponent(projection.task.id)}/actions/${encodeURIComponent(action.id)}`, { method: "POST", headers: { "Content-Type": "application/json", "X-Toudocu-Action": "task-action-execute" }, body: JSON.stringify({ delivery: delivery.type, expectedDigest: projection.task.digest, confirmed: delivery.type === "direct", input: { text: input } }), signal });
     const result = await response.json() as Result;
     if (!response.ok) {
       if (status) { status.textContent = `${result.error?.code || "task_action_failed"}: ${result.error?.message || text("work.agent.failed")}`; status.dataset.state = "error"; }
@@ -95,6 +95,7 @@ export function mountTaskActions(signal: AbortSignal, onProjection?: (projection
     if (result.projection) {
       commit(result.projection, generation);
     }
+    if (delivery.type === "direct" && document.querySelector(`[data-task-actions][data-task-id="${CSS.escape(projection.task.id)}"]`)?.closest("[data-task-workspace-item]")) window.location.reload();
     if (result.handoff?.text && await copyHandoff(result.handoff.text, signal)) return "copied";
     return "done";
   };
@@ -104,7 +105,7 @@ export function mountTaskActions(signal: AbortSignal, onProjection?: (projection
     if (!button) return;
     button.disabled = pending || button.dataset.available === "false"; button.toggleAttribute("aria-busy", pending); button.dataset.state = pending ? "pending" : "";
     const status = button.closest<HTMLElement>("[data-task-agent-action]")?.querySelector<HTMLElement>("[data-task-action-status]");
-    if (status && pending) { status.dataset.state = ""; status.textContent = text(delivery.type === "agent-console" ? "work.agent.sending" : "work.agent.preparing"); }
+    if (status && pending) { status.dataset.state = ""; status.textContent = text(delivery.type === "direct" ? "work.agent.completing" : delivery.type === "agent-console" ? "work.agent.sending" : "work.agent.preparing"); }
     else if (status?.dataset.state !== "error") status!.textContent = "";
   };
   const showOutcome = (taskID: string, actionID: string, delivery: Delivery, outcome: Outcome) => {
@@ -146,6 +147,25 @@ export function mountTaskActions(signal: AbortSignal, onProjection?: (projection
     if (action.input === "text") enterText(projection, action, delivery);
     else return execute(projection, action, delivery, "", status);
   };
+  const confirmCompletion = (projection: Projection, action: Action, delivery: Delivery) => {
+    const view = dialog(text("work.agent.complete-confirm-title", [projection.task.id]), signal);
+    const message = document.createElement("p"); message.className = "task-action-dialog-copy"; message.textContent = text("work.agent.complete-confirm-copy");
+    const actions = document.createElement("footer"); actions.className = "task-action-deliveries";
+    const cancel = document.createElement("button"); cancel.type = "button"; cancel.textContent = text("work.agent.cancel"); cancel.addEventListener("click", view.close, { signal });
+    const complete = document.createElement("button"); complete.type = "button"; complete.className = "is-primary"; complete.textContent = text("work.agent.complete-task");
+    complete.addEventListener("click", async () => {
+      complete.disabled = true; setPending(projection.task.id, action.id, delivery, true);
+      try {
+        const outcome = await execute(projection, action, delivery, "", view.status);
+        if (outcome !== "failed") view.close();
+      } catch (error) {
+        view.status.textContent = error instanceof Error ? error.message : text("work.agent.failed"); view.status.dataset.state = "error";
+      } finally {
+        setPending(projection.task.id, action.id, delivery, false); complete.disabled = false;
+      }
+    }, { signal });
+    actions.append(cancel, complete); view.body.append(message, actions); complete.focus();
+  };
   const render = (root: HTMLElement, projection: Projection) => {
     root.dataset.taskDigest = projection.task.digest;
     root.replaceChildren();
@@ -180,19 +200,21 @@ export function mountTaskActions(signal: AbortSignal, onProjection?: (projection
       const row = document.createElement("div"); row.className = "task-agent-action"; row.dataset.taskAgentAction = action.id;
       const label = document.createElement("span"); label.textContent = actionLabel(action); row.append(label);
       const controls = document.createElement("span"); controls.className = "task-agent-action-controls";
-      (["agent-console", "handoff"] as const).forEach((type) => {
+      (["direct", "agent-console", "handoff"] as const).forEach((type) => {
         const delivery = action.deliveries.find((candidate) => candidate.type === type);
         if (!delivery) return;
         const button = document.createElement("button"); button.type = "button"; button.disabled = !delivery.available; button.dataset.delivery = type; button.dataset.available = String(delivery.available);
-        if (type === "agent-console") button.append(createIcon("terminal"));
+        if (type === "direct") button.append(createIcon("checkCircle"));
+        else if (type === "agent-console") button.append(createIcon("terminal"));
         else {
           const idle = createIcon("clipboard"); idle.classList.add("task-action-icon-idle");
           const success = createIcon("checkCircle"); success.classList.add("task-action-icon-success"); button.append(idle, success);
         }
-        const description = `${actionLabel(action, delivery)} — ${deliveryLabel(delivery)}`;
+        const description = type === "direct" ? actionLabel(action) : `${actionLabel(action, delivery)} — ${deliveryLabel(delivery)}`;
         button.setAttribute("aria-label", description); button.title = delivery.unavailableReason ? `${description}: ${text(`work.agent.reason.${delivery.unavailableReason}`)}` : description;
         button.addEventListener("click", () => {
           const status = row.querySelector<HTMLElement>("[data-task-action-status]")!;
+          if (type === "direct") { confirmCompletion(projection, action, delivery); return; }
           if (action.input === "text" || delivery.openSession) { void run(projection, action, delivery, status); return; }
           setPending(projection.task.id, action.id, delivery, true);
           void run(projection, action, delivery, status).then((outcome) => {
@@ -201,7 +223,7 @@ export function mountTaskActions(signal: AbortSignal, onProjection?: (projection
         }, { signal });
         controls.append(button);
       });
-      if (action.input === "none") {
+      if (action.input === "none" && !action.deliveries.some((delivery) => delivery.type === "direct")) {
         const customize = document.createElement("button"); customize.type = "button"; customize.dataset.customize = ""; customize.append(createIcon("plus"));
         customize.setAttribute("aria-label", text("work.agent.customize", [actionLabel(action)])); customize.title = customize.getAttribute("aria-label")!;
         customize.addEventListener("click", () => enterText(projection, action), { signal }); controls.append(customize);

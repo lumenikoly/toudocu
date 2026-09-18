@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-var readyTaskStatusRE = regexp.MustCompile(`(?mi)^(?:-[ \t]+)?status:[ \t]*ready[ \t]*$`)
+var updatedTaskDateRE = regexp.MustCompile(`(?m)^updated:[ \t]*[^\r\n]+$`)
 
 type agentTaskConflict struct {
 	code, message, command string
@@ -57,21 +57,21 @@ func (s *documentationServer) ensureAgentTaskReady(taskID, digest string) (*Docu
 	return document, content, nil
 }
 
-func (s *documentationServer) markTaskInProgress(document *Document, content []byte, digest string) error {
+func (s *documentationServer) markTaskStatus(document *Document, content []byte, digest, from, to string) error {
+	statusRE := regexp.MustCompile(`(?mi)^(?:-[ \t]+)?status:[ \t]*` + regexp.QuoteMeta(from) + `[ \t]*$`)
 	statusUpdated := false
-	updated := readyTaskStatusRE.ReplaceAllFunc(content, func(line []byte) []byte {
+	updated := statusRE.ReplaceAllFunc(content, func(line []byte) []byte {
 		if statusUpdated {
 			return line
 		}
 		statusUpdated = true
-		return []byte("status: in-progress")
+		return []byte("status: " + to)
 	})
 	if !statusUpdated {
-		return errors.New("task status metadata is not Ready")
+		return errors.New("task status metadata is not " + from)
 	}
-	updatedRE := regexp.MustCompile(`(?m)^updated:[ \t]*[^\r\n]+$`)
 	dateUpdated := false
-	updated = updatedRE.ReplaceAllFunc(updated, func(line []byte) []byte {
+	updated = updatedTaskDateRE.ReplaceAllFunc(updated, func(line []byte) []byte {
 		if dateUpdated {
 			return line
 		}
@@ -80,6 +80,28 @@ func (s *documentationServer) markTaskInProgress(document *Document, content []b
 	})
 	_, err := s.workspace.save(document.SourcePath, updated, digest)
 	return err
+}
+
+func taskCanComplete(model *Model, item *WorkItem) bool {
+	if item.statusName != WorkItemInProgress || len(item.Criteria) == 0 {
+		return false
+	}
+	for _, criterion := range item.Criteria {
+		if !criterion.Completed {
+			return false
+		}
+	}
+	byID := workItemsByID(model)
+	readiness := taskWorkspaceReadiness(model, item, model.strictPolicy, byID)
+	if !readiness.ContractComplete || !readiness.DependenciesSatisfied {
+		return false
+	}
+	for _, childID := range item.ChildIDs {
+		if child := byID[childID]; child == nil || child.statusName != WorkItemDone {
+			return false
+		}
+	}
+	return true
 }
 
 type taskActionTask struct {
@@ -126,7 +148,7 @@ func (s *documentationServer) resolveTaskActions(taskID string) (taskActionProje
 
 func (s *documentationServer) resolveTaskActionsFrom(model *Model, item *WorkItem, content []byte) taskActionProjection {
 	state := taskWorkspaceState(item, taskWorkspaceReadiness(model, item, model.strictPolicy, workItemsByID(model)))
-	projection := taskActionProjection{SchemaVersion: 1, Task: taskActionTask{ID: item.ID, Status: string(item.statusName), WorkspaceState: state, Digest: contentDigest(content)}, Agent: taskActionAgent{Relation: "none", Status: "off"}, Actions: preparedTaskActions(state, len(item.ChildIDs) > 0)}
+	projection := taskActionProjection{SchemaVersion: 1, Task: taskActionTask{ID: item.ID, Status: string(item.statusName), WorkspaceState: state, Digest: contentDigest(content)}, Agent: taskActionAgent{Relation: "none", Status: "off"}, Actions: preparedTaskActions(state, len(item.ChildIDs) > 0, taskCanComplete(model, item))}
 	if s.agentConsole == nil {
 		return projection
 	}
@@ -148,6 +170,10 @@ func (s *documentationServer) resolveTaskActionsFrom(model *Model, item *WorkIte
 	actions := projection.Actions[:0]
 	for index := range projection.Actions {
 		action := projection.Actions[index]
+		if action.direct {
+			actions = append(actions, action)
+			continue
+		}
 		if active && currentTask && action.ID == "continue-work" && reason != "" {
 			continue
 		}
@@ -233,7 +259,7 @@ func (s *documentationServer) executeTaskAction(ctx context.Context, taskID, act
 	if !ok {
 		return taskActionResult{}, &agentTaskConflict{code: "invalid_action", message: "Unsupported task action"}
 	}
-	if delivery != "agent-console" && delivery != "handoff" {
+	if delivery != "agent-console" && delivery != "handoff" && delivery != "direct" {
 		return taskActionResult{}, &agentTaskConflict{code: "unavailable_delivery", message: "Unsupported task action delivery"}
 	}
 	if action.Input == "text" && input == "" {
@@ -257,6 +283,19 @@ func (s *documentationServer) executeTaskAction(ctx context.Context, taskID, act
 			message += ": " + issues[0].Message
 		}
 		return taskActionResult{}, &agentTaskConflict{code: "invalid_state", message: message}
+	}
+	if action.direct {
+		if delivery != "direct" || !taskCanComplete(model, item) {
+			return taskActionResult{}, &agentTaskConflict{code: "task_completion_not_ready", message: "Task does not satisfy the completion requirements"}
+		}
+		if err = s.markTaskStatus(document, content, expectedDigest, "in-progress", "done"); err != nil {
+			return taskActionResult{}, err
+		}
+		result := taskActionResult{SchemaVersion: 1, ActionID: actionID, Delivery: delivery}
+		if projection, projectionErr := s.resolveTaskActions(taskID); projectionErr == nil {
+			result.Projection = &projection
+		}
+		return result, nil
 	}
 	var treeGoal *taskTreeGoal
 	if action.treeGoal {
@@ -282,7 +321,7 @@ func (s *documentationServer) executeTaskAction(ctx context.Context, taskID, act
 	if delivery == "handoff" {
 		if action.mutates {
 			if item.statusName == WorkItemReady {
-				err = s.markTaskInProgress(document, content, expectedDigest)
+				err = s.markTaskStatus(document, content, expectedDigest, "ready", "in-progress")
 			}
 			if err != nil {
 				return taskActionResult{}, err
@@ -309,7 +348,7 @@ func (s *documentationServer) executeTaskAction(ctx context.Context, taskID, act
 		}
 		if action.mutates {
 			if item.statusName == WorkItemReady {
-				err = s.markTaskInProgress(document, content, expectedDigest)
+				err = s.markTaskStatus(document, content, expectedDigest, "ready", "in-progress")
 			}
 			if err != nil {
 				if started {

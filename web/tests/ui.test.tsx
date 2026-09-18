@@ -209,4 +209,25 @@ describe("shared UI accessibility", () => {
     expect(JSON.parse(String(vi.mocked(fetch).mock.calls[1][1]?.body)).input.text).toBe("Check the migration first.");
     controller.abort();
   });
+
+  test("confirms direct task completion", async () => {
+    const active: Projection = {
+      schemaVersion: 1,
+      task: { id: "TASK-X", status: "in-progress", workspaceState: "in-progress", digest: "digest" },
+      agent: { relation: "none", status: "off", needsAttention: false },
+      actions: [{ id: "complete-task", label: "Complete task", input: "none", deliveries: [{ type: "direct", available: true }] }],
+    };
+    const done: Projection = { ...active, task: { ...active.task, status: "done", workspaceState: "done", digest: "done-digest" }, actions: [] };
+    vi.stubGlobal("CSS", { escape: (value: string) => value });
+    const fetch = vi.fn(async (_input, init?: RequestInit) => new Response(JSON.stringify(init?.method === "POST" ? { schemaVersion: 1, actionID: "complete-task", delivery: "direct", projection: done } : active), { status: 200 }));
+    vi.stubGlobal("fetch", fetch); window.ToudocuPage = { ui: { locale: "en" }, endpoints: { taskActions: "/tasks" } } as typeof window.ToudocuPage;
+    document.body.innerHTML = '<div data-task-actions data-task-id="TASK-X"></div>';
+    const controller = new AbortController(); mountTaskActions(controller.signal);
+    await userEvent.click(await screen.findByRole("button", { name: /Complete task/ }));
+    expect(fetch).toHaveBeenCalledTimes(1);
+    await userEvent.click(screen.getAllByRole("button", { name: "Complete task" })[1]);
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+    expect(JSON.parse(String(fetch.mock.calls[1][1]?.body))).toMatchObject({ delivery: "direct", confirmed: true, expectedDigest: "digest" });
+    controller.abort();
+  });
 });

@@ -724,6 +724,7 @@ func (s *documentationServer) serveTaskActions(w http.ResponseWriter, r *http.Re
 	var input struct {
 		Delivery       string `json:"delivery"`
 		ExpectedDigest string `json:"expectedDigest"`
+		Confirmed      bool   `json:"confirmed"`
 		Input          struct {
 			Text string `json:"text"`
 		} `json:"input"`
@@ -733,6 +734,10 @@ func (s *documentationServer) serveTaskActions(w http.ResponseWriter, r *http.Re
 	}
 	if input.ExpectedDigest == "" {
 		writeEditorError(w, http.StatusBadRequest, "invalid_input", "expectedDigest is required", nil)
+		return
+	}
+	if parts[2] == "complete-task" && !input.Confirmed {
+		writeEditorError(w, http.StatusConflict, "task_completion_confirmation_required", "Task completion requires explicit confirmation", nil)
 		return
 	}
 	preset := AgentLaunchDefault
