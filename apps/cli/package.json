@@ -1,0 +1,21 @@
+{
+  "name": "toudocu-ts",
+  "version": "0.0.7",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "toudocu-ts": "dist/main.js"
+  },
+  "dependencies": {
+    "@toudocu/application": "workspace:*",
+    "@toudocu/platform-node": "workspace:*",
+    "@toudocu/server": "workspace:*",
+    "@toudocu/contracts": "workspace:*",
+    "@toudocu/web-app": "workspace:*",
+    "commander": "15.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

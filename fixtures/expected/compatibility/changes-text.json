@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "name": "changes-text",
+  "args": [
+    "changes",
+    "docs",
+    "--base",
+    "HEAD",
+    "--target",
+    "index"
+  ],
+  "exitCode": 0,
+  "stdout": "Documentation changes\nBase: HEAD — e446bb5\nTarget: index\nBranch: master\nState: dirty\n\nAdded: 0  Modified: 1  Deleted: 0  Renamed: 0\nLines: +2 −0\n~ docs/index.md  +2 −0\n",
+  "stderr": ""
+}

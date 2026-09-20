@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "name": "changes-filter-type",
+  "args": [
+    "changes",
+    "docs",
+    "--base",
+    "HEAD",
+    "--target",
+    "index",
+    "--type",
+    "overview",
+    "--format",
+    "json"
+  ],
+  "exitCode": 0,
+  "stdout": "{\n  \"schemaVersion\": 1,\n  \"repository\": {\n    \"root\": \"<TEMP>\",\n    \"branch\": \"master\",\n    \"head\": \"e446bb5\",\n    \"dirty\": true\n  },\n  \"comparison\": {\n    \"base\": {\n      \"type\": \"commit\",\n      \"revision\": \"HEAD\",\n      \"resolved\": \"e446bb5e66e746ceab80096459d870e896a73228\",\n      \"displayRef\": \"HEAD\"\n    },\n    \"target\": {\n      \"type\": \"index\",\n      \"displayRef\": \"index\"\n    }\n  },\n  \"changeSetDigest\": \"sha256:71bdaf42ea6548b9e7a9baa5519678bb3bc2d60da5da723aa2f297d101fc628e\",\n  \"summary\": {\n    \"files\": {\n      \"added\": 0,\n      \"modified\": 1,\n      \"deleted\": 0,\n      \"renamed\": 0,\n      \"copied\": 0,\n      \"typeChanged\": 0,\n      \"untracked\": 0\n    },\n    \"lines\": {\n      \"added\": 2,\n      \"deleted\": 0\n    },\n    \"entities\": {\n      \"overview\": 1\n    },\n    \"classifications\": {\n      \"permanent-documentation\": 1\n    }\n  },\n  \"changes\": [\n    {\n      \"status\": \"modified\",\n      \"path\": \"docs/index.md\",\n      \"gitState\": {\n        \"staged\": true,\n        \"unstaged\": false,\n        \"untracked\": false\n      },\n      \"lines\": {\n        \"added\": 2,\n        \"deleted\": 0\n      },\n      \"binary\": false,\n      \"oldSize\": 214,\n      \"newSize\": 230,\n      \"classification\": \"permanent-documentation\",\n      \"entitiesBefore\": [\n        {\n          \"type\": \"overview\",\n          \"title\": \"Compatibility fixture\"\n        }\n      ],\n      \"entitiesAfter\": [\n        {\n          \"type\": \"overview\",\n          \"title\": \"Compatibility fixture\"\n        }\n      ],\n      \"sourceDiffAvailable\": true,\n      \"renderedDiffAvailable\": true,\n      \"semanticDiffAvailable\": true,\n      \"sourceDiff\": \"diff --git a/docs/index.md b/docs/index.md\\nindex cedcb9d9ebd156bcceca24c917f3ec56d7bdf18a..d023b336d864df70f4829070c79775573adf947f 100644\\n--- a/docs/index.md\\n+++ b/docs/index.md\\n@@ -7,3 +7,5 @@ updated: 2026-09-01\\n Small project used by the stage 0 legacy contract corpus.\\n \\n It links to [the core module](modules/core.md) and exercises Unicode: Привет, мир.\\n+\\n+Staged change.\\n\",\n      \"sourceDiffHunks\": [\n        {\n          \"id\": \"hunk-7-7\",\n          \"header\": \"@@ -7,3 +7,5 @@ updated: 2026-09-01\",\n          \"oldStart\": 7,\n          \"oldLines\": 3,\n          \"newStart\": 7,\n          \"newLines\": 5,\n          \"patch\": \"@@ -7,3 +7,5 @@ updated: 2026-09-01\\n Small project used by the stage 0 legacy contract corpus.\\n \\n It links to [the core module](modules/core.md) and exercises Unicode: Привет, мир.\\n+\\n+Staged change.\\n\"\n        }\n      ],\n      \"renderedSections\": [],\n      \"mermaidBlocks\": [],\n      \"semanticChanges\": [],\n      \"relationChanges\": [],\n      \"diagnostics\": []\n    }\n  ],\n  \"diagnostics\": []\n}\n",
+  "stderr": ""
+}

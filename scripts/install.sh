@@ -4,28 +4,22 @@ set -eu
 
 repository="lumenikoly/toudocu"
 version="${TOUDOCU_VERSION:-latest}"
-default_install_dir="${HOME:?HOME is required}/.local/bin"
-install_dir="${TOUDOCU_INSTALL_DIR:-$default_install_dir}"
+install_dir="${TOUDOCU_INSTALL_DIR:-${HOME:?HOME is required}/.local/bin}"
+data_dir="${TOUDOCU_DATA_DIR:-${HOME}/.local/share/toudocu}"
 no_modify_path="${TOUDOCU_NO_MODIFY_PATH:-0}"
-stage_file=""
 temp_dir=""
+stage_dir=""
+backup_dir=""
 
 fail() {
     printf 'toudocu installer: %s\n' "$*" >&2
     exit 1
 }
 
-warn() {
-    printf 'toudocu installer warning: %s\n' "$*" >&2
-}
-
 cleanup() {
-    if [ -n "$stage_file" ] && [ -f "$stage_file" ]; then
-        rm -f "$stage_file"
-    fi
-    if [ -n "$temp_dir" ] && [ -d "$temp_dir" ]; then
-        rm -rf "$temp_dir"
-    fi
+    [ -z "$temp_dir" ] || rm -rf "$temp_dir"
+    [ -z "$stage_dir" ] || rm -rf "$stage_dir"
+    [ -z "$backup_dir" ] || rm -rf "$backup_dir"
 }
 
 trap cleanup EXIT HUP INT TERM
@@ -40,163 +34,97 @@ esac
 
 [ "$no_modify_path" = "0" ] || [ "$no_modify_path" = "1" ] ||
     fail "TOUDOCU_NO_MODIFY_PATH must be 0 or 1"
+case "$install_dir:$data_dir" in
+    /*:/*) ;;
+    *) fail "installation directories must be absolute" ;;
+esac
+[ "$install_dir" != "/" ] && [ "$data_dir" != "/" ] || fail "refusing to install into /"
 
+command -v node >/dev/null 2>&1 || fail "Node.js 24 or newer is required; install it first"
+node_major=$(node -p "Number(process.versions.node.split('.')[0])") || fail "cannot read Node.js version"
+[ "$node_major" -ge 24 ] 2>/dev/null || fail "Node.js 24 or newer is required; found $(node --version)"
 command -v curl >/dev/null 2>&1 || fail "curl is required"
+command -v tar >/dev/null 2>&1 || fail "tar is required"
 
-os_name=$(uname -s 2>/dev/null || true)
-arch_name=$(uname -m 2>/dev/null || true)
-
-case "$os_name" in
+case "$(uname -s 2>/dev/null || true)" in
     Linux) os="linux" ;;
     Darwin) os="darwin" ;;
-    *) fail "unsupported operating system: ${os_name:-unknown}" ;;
+    *) fail "unsupported operating system" ;;
 esac
-
-case "$arch_name" in
-    x86_64 | amd64) arch="amd64" ;;
+case "$(uname -m 2>/dev/null || true)" in
+    x86_64 | amd64) arch="x64" ;;
     arm64 | aarch64) arch="arm64" ;;
-    *) fail "unsupported architecture: ${arch_name:-unknown}" ;;
+    *) fail "unsupported architecture" ;;
 esac
 
-asset="toudocu-$os-$arch"
+asset="toudocu-$os-$arch.tar.gz"
 if [ "$version" = "latest" ]; then
     release_url="https://github.com/$repository/releases/latest/download"
 else
     release_url="https://github.com/$repository/releases/download/$version"
 fi
 
-temp_dir=$(mktemp -d "${TMPDIR:-/tmp}/toudocu-install.XXXXXX") ||
-    fail "cannot create a temporary directory"
-downloaded="$temp_dir/$asset"
+temp_dir=$(mktemp -d "${TMPDIR:-/tmp}/toudocu-install.XXXXXX") || fail "cannot create temporary directory"
+archive="$temp_dir/$asset"
 checksums="$temp_dir/checksums.txt"
-
 curl -fsSL --retry 3 --proto '=https' --tlsv1.2 -o "$checksums" "$release_url/checksums.txt" ||
-    fail "cannot download checksums.txt from $release_url"
-curl -fsSL --retry 3 --proto '=https' --tlsv1.2 -o "$downloaded" "$release_url/$asset" ||
-    fail "cannot download $asset from $release_url"
+    fail "cannot download checksums.txt"
+curl -fsSL --retry 3 --proto '=https' --tlsv1.2 -o "$archive" "$release_url/$asset" ||
+    fail "cannot download $asset"
 
-expected=$(awk -v file="$asset" '
-    ($2 == file || $2 == "*" file) { count++; digest=$1 }
-    END { if (count == 1) print digest }
-' "$checksums")
-printf '%s\n' "$expected" | grep -Eq '^[0-9A-Fa-f]{64}$' ||
-    fail "checksums.txt has no unique SHA-256 entry for $asset"
-
+expected=$(awk -v file="$asset" '($2 == file || $2 == "*" file) { count++; digest=$1 } END { if (count == 1) print digest }' "$checksums")
+printf '%s\n' "$expected" | grep -Eq '^[0-9A-Fa-f]{64}$' || fail "invalid checksum entry for $asset"
 if command -v sha256sum >/dev/null 2>&1; then
-    actual=$(sha256sum "$downloaded" | awk '{print $1}')
+    actual=$(sha256sum "$archive" | awk '{print $1}')
 elif command -v shasum >/dev/null 2>&1; then
-    actual=$(shasum -a 256 "$downloaded" | awk '{print $1}')
-elif command -v openssl >/dev/null 2>&1; then
-    actual=$(openssl dgst -sha256 "$downloaded" | awk '{print $NF}')
+    actual=$(shasum -a 256 "$archive" | awk '{print $1}')
 else
-    fail "sha256sum, shasum, or openssl is required to verify the download"
+    command -v openssl >/dev/null 2>&1 || fail "a SHA-256 tool is required"
+    actual=$(openssl dgst -sha256 "$archive" | awk '{print $NF}')
 fi
-
 [ "$(printf '%s' "$actual" | tr 'A-F' 'a-f')" = "$(printf '%s' "$expected" | tr 'A-F' 'a-f')" ] ||
     fail "SHA-256 mismatch for $asset"
 
-chmod 0755 "$downloaded" || fail "cannot make the downloaded binary executable"
-downloaded_version=$("$downloaded" version 2>/dev/null | tr -d '\r\n') ||
-    fail "the downloaded binary cannot report its version"
-printf '%s\n' "$downloaded_version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' ||
-    fail "the downloaded binary reported an invalid version: $downloaded_version"
-expected_version=${version%%-rc.*}
-if [ "$version" != "latest" ] && [ "$downloaded_version" != "$expected_version" ]; then
-    fail "the downloaded binary reported $downloaded_version, expected $expected_version"
+tar -xzf "$archive" -C "$temp_dir" || fail "cannot extract $asset"
+extracted="$temp_dir/toudocu"
+[ -f "$extracted/dist/main.js" ] || fail "release archive has no CLI entry point"
+downloaded_version=$(node "$extracted/dist/main.js" version | tr -d '\r\n') || fail "downloaded CLI failed"
+if [ "$version" != "latest" ] && [ "$downloaded_version" != "$version" ]; then
+    fail "downloaded CLI reported $downloaded_version, expected $version"
 fi
 
-mkdir -p "$install_dir" || fail "cannot create install directory: $install_dir"
-target="$install_dir/toudocu"
-
-already_installed=0
-if [ -f "$target" ]; then
-    if command -v sha256sum >/dev/null 2>&1; then
-        installed=$(sha256sum "$target" | awk '{print $1}')
-    elif command -v shasum >/dev/null 2>&1; then
-        installed=$(shasum -a 256 "$target" | awk '{print $1}')
-    else
-        installed=$(openssl dgst -sha256 "$target" | awk '{print $NF}')
-    fi
-    if [ "$(printf '%s' "$installed" | tr 'A-F' 'a-f')" = "$(printf '%s' "$expected" | tr 'A-F' 'a-f')" ]; then
-        chmod 0755 "$target" || fail "cannot make $target executable"
-        already_installed=1
-    fi
+mkdir -p "$(dirname "$data_dir")" "$install_dir" || fail "cannot create installation directories"
+stage_dir="$data_dir.new.$$"
+backup_dir="$data_dir.old.$$"
+mv "$extracted" "$stage_dir" || fail "cannot stage release"
+if [ -e "$data_dir" ]; then
+    mv "$data_dir" "$backup_dir" || fail "cannot preserve existing installation"
 fi
-
-if [ "$already_installed" = "0" ]; then
-    stage_file="$install_dir/.toudocu.new.$$"
-    cp "$downloaded" "$stage_file" || fail "cannot stage the downloaded binary in $install_dir"
-    chmod 0755 "$stage_file" || fail "cannot make the staged binary executable"
-    mv -f "$stage_file" "$target" || fail "cannot replace $target"
-    stage_file=""
+if ! mv "$stage_dir" "$data_dir"; then
+    [ ! -e "$backup_dir" ] || mv "$backup_dir" "$data_dir"
+    fail "cannot activate release"
 fi
+stage_dir=""
+rm -rf "$backup_dir"
+backup_dir=""
 
-path_changed=0
-path_activation_needed=0
-profile_file=""
-if [ "$install_dir" = "$default_install_dir" ]; then
+launcher="$install_dir/.toudocu.new.$$"
+ln -s "$data_dir/dist/main.js" "$launcher" || fail "cannot create launcher"
+mv -f "$launcher" "$install_dir/toudocu" || fail "cannot activate launcher"
+
+default_bin="$HOME/.local/bin"
+if [ "$install_dir" = "$default_bin" ] && [ "$no_modify_path" = "0" ]; then
     case ":${PATH:-}:" in
-        *":$default_install_dir:"*) ;;
+        *":$default_bin:"*) ;;
         *)
-            path_activation_needed=1
-            if [ "$no_modify_path" = "0" ]; then
-                shell_name=$(basename "${SHELL:-sh}")
-                case "$shell_name" in
-                    zsh)
-                        profile_file="${ZDOTDIR:-$HOME}/.zshrc"
-                        path_line='export PATH="$HOME/.local/bin:$PATH"'
-                        ;;
-                    bash)
-                        profile_file="$HOME/.bashrc"
-                        path_line='export PATH="$HOME/.local/bin:$PATH"'
-                        ;;
-                    fish)
-                        profile_file="${XDG_CONFIG_HOME:-$HOME/.config}/fish/conf.d/toudocu.fish"
-                        path_line='fish_add_path "$HOME/.local/bin"'
-                        ;;
-                    *)
-                        profile_file="$HOME/.profile"
-                        path_line='export PATH="$HOME/.local/bin:$PATH"'
-                        ;;
-                esac
-                if ! mkdir -p "$(dirname "$profile_file")"; then
-                    warn "cannot create the profile directory; add $default_install_dir to PATH manually"
-                    profile_file=""
-                elif [ ! -f "$profile_file" ] || ! grep -Fq '# toudocu installer' "$profile_file"; then
-                    if {
-                        printf '\n# toudocu installer\n'
-                        printf '%s\n' "$path_line"
-                    } >> "$profile_file"; then
-                        path_changed=1
-                    else
-                        warn "cannot update $profile_file; add $default_install_dir to PATH manually"
-                        profile_file=""
-                    fi
-                fi
+            profile="$HOME/.profile"
+            line='export PATH="$HOME/.local/bin:$PATH"'
+            if [ ! -f "$profile" ] || ! grep -Fq '# toudocu installer' "$profile"; then
+                printf '\n# toudocu installer\n%s\n' "$line" >> "$profile" ||
+                    printf 'Add %s to PATH manually.\n' "$default_bin" >&2
             fi
             ;;
     esac
 fi
 
-if [ "$already_installed" = "1" ]; then
-    printf 'toudocu %s is already installed at %s\n' "$downloaded_version" "$target"
-else
-    printf 'Installed toudocu %s at %s\n' "$downloaded_version" "$target"
-fi
-if [ "$install_dir" != "$default_install_dir" ]; then
-    case ":${PATH:-}:" in
-        *":$install_dir:"*) ;;
-        *) printf 'Add %s to PATH to run toudocu by name.\n' "$install_dir" ;;
-    esac
-elif [ "$no_modify_path" = "1" ] && [ "$path_activation_needed" = "1" ]; then
-    printf 'Add %s to PATH to run toudocu by name.\n' "$default_install_dir"
-elif [ "$path_activation_needed" = "1" ] && [ -n "$profile_file" ]; then
-    case "$(basename "${SHELL:-sh}")" in
-        bash) printf 'Run: . "%s"\n' "$profile_file" ;;
-        zsh) printf 'Run: source "%s"\n' "$profile_file" ;;
-        fish) printf 'Run: source "%s"\n' "$profile_file" ;;
-        *) printf 'Start a new login shell, or run: . "%s"\n' "$profile_file" ;;
-    esac
-elif [ "$path_activation_needed" = "1" ]; then
-    printf 'Add %s to PATH to run toudocu by name.\n' "$default_install_dir"
-fi
+printf 'Installed toudocu %s at %s\n' "$downloaded_version" "$install_dir/toudocu"

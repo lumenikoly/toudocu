@@ -1,0 +1,23 @@
+{
+  "kind": "static-route-baseline",
+  "version": 1,
+  "project": "compat-basic",
+  "routes": [
+    "/",
+    "/architecture/",
+    "/architecture/overview.html",
+    "/modules/",
+    "/modules/core.html",
+    "/processes/",
+    "/use-cases/",
+    "/use-cases/UC-COMPAT.html",
+    "/work/",
+    "/work/TASK-COMPAT-001.html",
+    "/work/TASK-COMPAT-002.html",
+    "/404.html",
+    "/health.html",
+    "/report.json",
+    "/search.html"
+  ],
+  "note": "Checked TypeScript route set after the final runtime switch."
+}

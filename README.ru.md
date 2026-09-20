@@ -4,8 +4,7 @@
 
 [![CI](https://github.com/lumenikoly/toudocu/actions/workflows/test.yml/badge.svg)](https://github.com/lumenikoly/toudocu/actions/workflows/test.yml)
 [![Docs contract](https://github.com/lumenikoly/toudocu/actions/workflows/docs.yml/badge.svg)](https://github.com/lumenikoly/toudocu/actions/workflows/docs.yml)
-[![Go Version](https://img.shields.io/github/go-mod/go-version/lumenikoly/toudocu)](https://go.dev/)
-[![golangci-lint](https://img.shields.io/badge/linted%20by-golangci--lint-brightgreen)](https://golangci-lint.run/)
+[![Node.js](https://img.shields.io/badge/Node.js-24%2B-339933)](https://nodejs.org/)
 [![License](https://img.shields.io/github/license/lumenikoly/toudocu)](LICENSE)
 
 ## Зачем нужен Toudocu
@@ -18,8 +17,8 @@ Markdown удобно хранить рядом с кодом, но со вре�
 Toudocu оставляет Markdown в Git источником истины и добавляет то, чего ему не
 хватает для постоянной работы: проверку структуры и связей, локальный портал,
 просмотр изменений, рабочие задачи с точным контекстом и статическую
-публикацию. Всё это работает локально из одного Go-бинарника, без базы данных,
-npm и отдельной системы управления документацией.
+публикацию. Всё это работает локально на Node.js, без базы данных и отдельной
+системы управления документацией.
 
 ### Выберите свой первый шаг
 
@@ -38,7 +37,7 @@ npm и отдельной системы управления документа
 словами, например: «обнови документацию для этой функции» или «подготовь
 контекст задачи TASK-AUTH-123».
 
-**Один бинарник. Markdown в Git. Проверяемая документация рядом с кодом.**
+**Один CLI. Markdown в Git. Проверяемая документация рядом с кодом.**
 
 [Посмотреть документацию Toudocu →](https://lumenikoly.github.io/toudocu/project-docs/)
 
@@ -371,7 +370,7 @@ $toudocu translate en --from ru --base HEAD
 `$toudocu init`, `$toudocu refresh` и `$toudocu translate` — действия навыка,
 которые выполняет AI-агент.
 
-Это не верхнеуровневые команды Go CLI.
+Это не верхнеуровневые команды CLI.
 
 ---
 
@@ -452,8 +451,7 @@ toudocu serve ./docs
 
 ## Поддерживаемый Markdown
 
-Toudocu использует Goldmark 1.8.5 и единый обработчик CommonMark/GFM во всех
-командах.
+Toudocu использует единый обработчик CommonMark/GFM во всех командах.
 
 Поддерживаются:
 
@@ -530,46 +528,35 @@ toudocu serve --no-update-check ./docs
 
 ---
 
-## Публичный Go API
-
-Корневой Go-пакет предоставляет типизированные операции модели, генератора и отчётов.
-
-Module path проекта — `toudocu`, поэтому API предназначен прежде всего для программ, которые собираются внутри этого исходного дерева или используют явный локальный `replace`.
-
-Для обычного использования поддерживаемым интерфейсом поставки остаётся CLI.
-
----
-
 ## Разработка Toudocu
 
-Пользователю готового Toudocu не нужно собирать проект из исходников.
+Пользователю готового пакета Toudocu не нужны TypeScript, pnpm, Go, Python,
+`node-gyp` или компилятор. Требуется Node.js 24 или новее.
 
-Если вы хотите разрабатывать сам Toudocu, потребуется Go 1.22 или новее.
+Для разработки самого Toudocu используйте Node.js 24+ и pnpm 11.0.0.
 
 ```bash
 git clone https://github.com/lumenikoly/toudocu.git
 cd toudocu
-go build -o toudocu ./cmd/toudocu
+pnpm install --frozen-lockfile
+pnpm build
 ```
 
 Основные команды разработки:
 
 ```bash
-make fmt
-make fmt-check
-make lint
-make test
-make web
-make web-check
-make browser-test
-make check
-make build
-make docs
-make docs-serve
-make release
+pnpm format
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm test:browser
+pnpm build
+pnpm check
 ```
 
-Node.js нужен только для разработки браузерной части самого Toudocu и не требуется пользователю готового бинарника.
+`pnpm check` проверяет форматирование, lint, строгую типизацию, unit/integration,
+совместимость CLI и контракт канонической документации. Browser-тесты запускаются
+отдельной командой `pnpm test:browser`.
 
 ---
 

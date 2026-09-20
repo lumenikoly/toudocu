@@ -193,13 +193,13 @@ transitions: TR-AUTH-001
 ## Проверка
 
 - `AC-01` → `TR-AUTH-001` → `TestSuccessfulLogin`
-- `AC-01` → `go test ./... -run TestSuccessfulLogin`
+- `AC-01` → `pnpm test -- --run TestSuccessfulLogin`
 ```
 
 Портал создаёт каталог `/screens/index.html`, страницы `SC-*`, вкладки
 `#overview`, `#map`, `#play`, `#links` у `UC-*`, `/traceability.html` и экранную
 модель в `report.json` версии 1. Всё работает на обычном HTTP-хостинге без
-Go-сервера.
+серверного runtime.
 
 ## Что проверяет Toudocu
 

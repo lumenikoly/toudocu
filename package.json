@@ -1,0 +1,32 @@
+{
+  "name": "toudocu-workspace",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.0.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @toudocu/web-app exec vite",
+    "build": "node scripts/architecture-boundaries.mjs && pnpm -r --if-present run build",
+    "build:packages": "node scripts/architecture-boundaries.mjs && pnpm --filter './packages/*' -r --if-present run build",
+    "lint": "eslint . && node scripts/architecture-boundaries.mjs",
+    "format": "prettier --check \"apps/*/{src,app,renderer,tests}/**/*.{ts,tsx,mjs}\" \"packages/*/src/**/*.{ts,tsx}\" \"apps/*/*.{json,ts}\" \"packages/*/*.json\" package.json pnpm-workspace.yaml tsconfig.base.json eslint.config.js prettier.config.mjs vitest.config.ts scripts/architecture-boundaries.mjs scripts/architecture-boundaries.test.mjs scripts/cli-stage1.test.mjs scripts/compatibility.mjs scripts/compatibility.test.mjs scripts/release.mjs",
+    "typecheck": "pnpm build:packages && pnpm -r --if-present run typecheck",
+    "test": "pnpm --filter toudocu-ts... -r build && vitest run && node --test scripts/architecture-boundaries.test.mjs scripts/cli-stage1.test.mjs scripts/compatibility.test.mjs && pnpm --filter @toudocu/web-app test",
+    "test:browser": "pnpm --filter @toudocu/web-app test:browser",
+    "test:compat": "node scripts/compatibility.mjs",
+    "release:native": "node scripts/release.mjs collect-native --output dist/native",
+    "release:package": "node scripts/release.mjs package --native-root dist/native --output dist/release",
+    "release:smoke": "node scripts/release.mjs smoke",
+    "check": "pnpm format && pnpm lint && pnpm typecheck && pnpm test && pnpm test:compat && node apps/cli/dist/main.js check ./docs --repository-root . --strict --stale-days 0"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.5",
+    "@typescript-eslint/parser": "8.70.0",
+    "eslint": "10.11.0",
+    "prettier": "3.9.8",
+    "typescript": "5.9.2",
+    "vitest": "5.0.1"
+  }
+}

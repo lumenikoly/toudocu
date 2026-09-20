@@ -1,0 +1,20 @@
+documentationVersion: 3
+project:
+  defaultLocale: en
+locales:
+  en:
+    root: docs
+    sections:
+      architecture: Architecture
+      modules: Modules
+      use-cases: Use Cases
+      flows: Processes
+      screens: Screens
+      decisions: Decisions
+      contracts: Contracts
+      quality: Quality
+      runbooks: Runbooks
+      reference: Reference
+      work: Work Items
+      drafts: Drafts
+      guides: Guides

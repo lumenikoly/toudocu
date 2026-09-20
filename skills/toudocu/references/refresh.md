@@ -2,7 +2,7 @@
 
 Use this workflow only when the user explicitly invokes `$toudocu refresh`
 or `$toudocu refresh diff`. Both forms review documentation currency and
-apply evidence-backed updates. They are skill workflows, not Toudocu Go CLI
+apply evidence-backed updates. They are skill workflows, not Toudocu CLI
 commands.
 
 Refresh never performs initialization. Do not create a new documentation tree,

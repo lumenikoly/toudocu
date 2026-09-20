@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "name": "task-changes",
+  "args": [
+    "task",
+    "changes",
+    "TASK-COMPAT-001",
+    "docs",
+    "--base",
+    "HEAD",
+    "--target",
+    "index",
+    "--format",
+    "json"
+  ],
+  "exitCode": 0,
+  "stdout": "{\n  \"schemaVersion\": 1,\n  \"repository\": {\n    \"root\": \"<TEMP>\",\n    \"branch\": \"master\",\n    \"head\": \"e446bb5\",\n    \"dirty\": true\n  },\n  \"comparison\": {\n    \"base\": {\n      \"type\": \"commit\",\n      \"revision\": \"HEAD\",\n      \"resolved\": \"e446bb5e66e746ceab80096459d870e896a73228\",\n      \"displayRef\": \"HEAD\"\n    },\n    \"target\": {\n      \"type\": \"index\",\n      \"displayRef\": \"index\"\n    }\n  },\n  \"changeSetDigest\": \"sha256:9013969ec45a0d31a126fc0dd6f3fe1015cbe31a5d7ae3a718f473e0f5dca8da\",\n  \"summary\": {\n    \"files\": {\n      \"added\": 0,\n      \"modified\": 0,\n      \"deleted\": 0,\n      \"renamed\": 0,\n      \"copied\": 0,\n      \"typeChanged\": 0,\n      \"untracked\": 0\n    },\n    \"lines\": {\n      \"added\": 0,\n      \"deleted\": 0\n    },\n    \"entities\": {},\n    \"classifications\": {}\n  },\n  \"changes\": [],\n  \"taskImpact\": {\n    \"taskId\": \"TASK-COMPAT-001\",\n    \"declared\": [],\n    \"actual\": [\n      {\n        \"path\": \"docs/index.md\",\n        \"declared\": false,\n        \"changed\": true\n      }\n    ],\n    \"taskChanges\": [],\n    \"diagnostics\": [\n      {\n        \"severity\": \"warning\",\n        \"code\": \"undeclared-document-change\",\n        \"message\": \"docs/index.md changed but is not declared by the task.\",\n        \"documentPath\": \"docs/index.md\"\n      },\n      {\n        \"severity\": \"warning\",\n        \"code\": \"documentation-change-outside-task-scope\",\n        \"message\": \"docs/index.md is outside task scope.\",\n        \"documentPath\": \"docs/index.md\"\n      },\n      {\n        \"severity\": \"warning\",\n        \"code\": \"missing-documentation-impact-entry\",\n        \"message\": \"The task changes durable documentation without an explicit documentation impact entry.\",\n        \"documentPath\": \"docs/index.md\"\n      }\n    ]\n  },\n  \"diagnostics\": []\n}\n",
+  "stderr": ""
+}

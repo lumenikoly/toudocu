@@ -1,7 +1,7 @@
 <!-- toudocu
 id: MOD-AGENT-CONSOLE
 status: in-progress
-updated: 2026-09-04
+updated: 2026-09-19
 -->
 
 # MOD-AGENT-CONSOLE: Интегрированная работа с coding agent
@@ -16,11 +16,11 @@ updated: 2026-09-04
 <!-- toudocu:section code-location -->
 ## Расположение в коде
 
-- `internal/app/agent_provider.go`, `agent_events.go`, `agent_session.go` и
-  `agent_task_goal.go` — общие контракты, события и жизненный цикл;
-- `internal/app/agent_codex.go` и `agent_opencode.go` — provider adapters;
-- `internal/app/agent_console_http.go` и `agent_pty*.go` — локальный transport и PTY;
-- `web/src/features/agent-console/` — Agent Console и Project Terminal в браузере.
+- `packages/contracts/src/agent-console.ts` — transport и runtime schemas;
+- `packages/platform-node/src/agent/` — provider adapters, session и history;
+- `packages/platform-node/src/pty/` и `process-runner.ts` — PTY и процессы;
+- `packages/server/src/` — loopback-only HTTP/WebSocket и task handoff;
+- `apps/web/app/agent-console.tsx` — постоянная React-панель.
 
 <!-- toudocu:section boundaries -->
 ## Границы

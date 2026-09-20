@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "name": "error-task-invalid",
+  "args": [
+    "task",
+    "check",
+    "TASK-COMPAT-001",
+    "docs"
+  ],
+  "exitCode": 1,
+  "stdout": "",
+  "stderr": "Error: usage: toudocu task init|ready|candidates|context|verify|archive|restore\n"
+}

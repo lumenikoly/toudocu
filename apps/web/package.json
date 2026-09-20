@@ -1,0 +1,41 @@
+{
+  "name": "@toudocu/web-app",
+  "version": "0.0.0-migration",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./renderer": {
+      "types": "./renderer/index.d.ts",
+      "default": "./dist/server/index.js"
+    }
+  },
+  "scripts": {
+    "build": "vite build --mode client && vite build --ssr renderer/index.tsx --mode renderer",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:browser": "pnpm --filter toudocu-ts... -r build && playwright test"
+  },
+  "dependencies": {
+    "@base-ui/react": "1.7.0",
+    "@toudocu/contracts": "workspace:*",
+    "@xterm/addon-fit": "0.11.0",
+    "@xterm/xterm": "6.0.0",
+    "mermaid": "12.0.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-router": "8.4.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1",
+    "@testing-library/react": "16.3.2",
+    "@testing-library/user-event": "14.6.6",
+    "@toudocu/core": "workspace:*",
+    "@toudocu/portal": "workspace:*",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
+    "jsdom": "29.1.1",
+    "typescript": "5.9.2",
+    "vite": "8.2.2",
+    "vitest": "5.0.1"
+  }
+}

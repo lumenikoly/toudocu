@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "name": "changes-markdown",
+  "args": [
+    "changes",
+    "docs",
+    "--base",
+    "HEAD",
+    "--target",
+    "index",
+    "--format",
+    "markdown"
+  ],
+  "exitCode": 0,
+  "stdout": "# Documentation changes\n\nBase: `HEAD` (`e446bb5`)  \nTarget: `index`\n\n## Summary\n\n- Added: 0\n- Modified: 1\n- Deleted: 0\n- Renamed: 0\n- Lines: +2 −0\n\n## Semantic changes\n",
+  "stderr": ""
+}

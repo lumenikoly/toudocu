@@ -1,25 +1,28 @@
 <!-- toudocu
 id: MOD-MODEL
 status: done
-updated: 2026-08-29
+updated: 2026-09-19
 -->
 
 # Проектная модель и проверка
 
 Модуль читает каталог документации, связывает известные сущности и создаёт
 сообщения о структуре, ID, путях и зависимостях. Результат используют `check`,
-портал и JSON-отчёты. `BuildDocumentationModel` всегда строит одну одноязычную
-Model выбранного `locales.<locale>.root`: документы, KnowledgeModel, roadmap,
+портал и JSON-отчёты. Компилятор всегда строит одну одноязычную модель
+выбранного `locales.<locale>.root`: документы, KnowledgeModel, roadmap,
 search index и work items других локалей не подмешиваются, а межлокальная
 диагностика ID и task state не создаётся.
 
 <!-- toudocu:section code-location -->
 ## Расположение в коде
 
-- `internal/app/docs_core.go`, `types.go` — документы и модель;
-- `internal/app/knowledge.go` — известные сущности и задачи;
-- `internal/app/documentation_links.go` — ссылки;
-- `internal/app/utils.go` — безопасные пути.
+- `packages/core/src/documents/` — документы, конфигурация и связи;
+- `packages/core/src/knowledge/` — известные сущности, roadmap и задачи;
+- `packages/core/src/markdown/` и `openapi/` — входные форматы;
+- `packages/platform-node/src/project.ts` — безопасная загрузка проекта.
+
+Корневой `CHANGELOG.md` загружается отдельно как журнал проекта, не считается
+обычным документом выбранной локали и не смешивается с `docs/changelog.md`.
 
 <!-- toudocu:section boundaries -->
 ## Границы
@@ -108,7 +111,7 @@ search index и work items других локалей не подмешиваю
 <!-- toudocu:section stable-interfaces -->
 ## Стабильные интерфейсы
 
-- `BuildDocumentationModel(Options)` и остальные экспорты `api.go`;
+- `compileProject`, `buildProjectSummary` и Node-адаптер `loadProject`;
 - `ProjectReport` версии 1;
 - `WorkItem.parentId` и вычисленный `childIds`;
 - `TaskCandidatesReport.candidates[].workState`,

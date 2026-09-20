@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "name": "version",
+  "args": [
+    "version"
+  ],
+  "exitCode": 0,
+  "stdout": "<VERSION>\n",
+  "stderr": ""
+}

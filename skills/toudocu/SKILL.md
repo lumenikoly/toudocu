@@ -86,7 +86,7 @@ continue with the ordinary current-format workflow.
    documentation request.
 4. Treat `$toudocu init`, `$toudocu refresh`, `$toudocu refresh diff`,
    translation workflows, and `$toudocu clarify` as agent workflows, not
-   Toudocu Go CLI commands.
+   Toudocu CLI commands.
 5. Enter clarification only when the user explicitly requests
    `$toudocu clarify` or asks Toudocu for a clarification interview. It
    authorizes the investigation and documentation actions in `clarify.md`,

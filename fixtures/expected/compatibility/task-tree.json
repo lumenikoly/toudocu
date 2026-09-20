@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "name": "task-tree",
+  "args": [
+    "task",
+    "tree",
+    "TASK-COMPAT-001",
+    "docs",
+    "--format",
+    "json",
+    "--stale-days",
+    "0"
+  ],
+  "exitCode": 0,
+  "stdout": "{\n  \"schemaVersion\": 1,\n  \"kind\": \"task-tree\",\n  \"generator\": {\n    \"name\": \"Toudocu\",\n    \"version\": \"<VERSION>\"\n  },\n  \"taskId\": \"TASK-COMPAT-001\",\n  \"tree\": {\n    \"id\": \"TASK-COMPAT-001\",\n    \"status\": \"ready\",\n    \"workState\": \"ready\",\n    \"title\": \"Implement the compatibility path\",\n    \"children\": []\n  }\n}\n",
+  "stderr": ""
+}

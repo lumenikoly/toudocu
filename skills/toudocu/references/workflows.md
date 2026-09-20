@@ -18,11 +18,11 @@ Before choosing flags:
 4. fall back to `./docs` and its parent only when no convention exists.
 
 Use `toudocu` from `PATH`. In the Toudocu source repository, substitute
-`go run ./cmd/toudocu`. The Go CLI has no `init` command. The explicit
+`node apps/cli/dist/main.js`. The CLI has no `init` command. The explicit
 `$toudocu init` prompt follows [init.md](init.md); other document creation
 uses the bundled templates.
 
-The Go CLI also has no `refresh` command. Explicit `$toudocu refresh` and
+The CLI also has no `refresh` command. Explicit `$toudocu refresh` and
 `$toudocu refresh diff` prompts follow [refresh.md](refresh.md). The first
 reviews all source documentation; the second scopes evidence from the current
 worktree relative to `HEAD` and includes affected documentation.

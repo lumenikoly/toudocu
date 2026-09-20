@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "name": "check-text",
+  "args": [
+    "check",
+    "docs",
+    "--stale-days",
+    "0"
+  ],
+  "exitCode": 0,
+  "stdout": "Documents: 6\nWarnings: 0\nErrors: 0\n",
+  "stderr": ""
+}
