@@ -11,6 +11,13 @@ const project = join(temporary, 'project');
 const output = join(temporary, 'site');
 const prefix = '/project/docs';
 await cp(join(repository, 'fixtures/projects/compat-basic'), project, { recursive: true });
+const completedTask = join(project, 'docs/work/TASK-COMPAT-001.md');
+await writeFile(
+  completedTask,
+  (await readFile(completedTask, 'utf8'))
+    .replace('status: ready', 'status: done')
+    .replace('- [ ] `AC-01`', '- [x] `AC-01`'),
+);
 await writeFile(
   join(project, 'docs/roadmap.md'),
   '# Roadmap\n\n<!-- toudocu:section roadmap-stage -->\n<!-- toudocu\nstatus: planned\n-->\n\n## Next\n\n- [ ] `DLV-STATIC-001` Publish the static portal.\n',

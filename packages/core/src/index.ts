@@ -37,6 +37,7 @@ export {
 } from './tasks/readiness.js';
 export type { DocumentationPathStatus } from './tasks/readiness.js';
 export type { WorkItem } from './tasks/work-items.js';
+export { buildTaskWorkspace } from './tasks/workspace.js';
 export { buildSkillPlan, deduplicateSkillTargets } from './skills/planner.js';
 export type {
   SkillBundleMetadata,

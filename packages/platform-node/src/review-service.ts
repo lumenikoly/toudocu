@@ -9,8 +9,10 @@ import {
   CreateDiscussionRequestSchema,
   CreateReviewMessageRequestSchema,
   ReviewStateSchema,
+  ReviewMutationGuardSchema,
   ToudocuError,
   UpdateDiscussionRequestSchema,
+  UpdateReviewMessageRequestSchema,
   type AgentResponse,
   type AgentRequest,
   type AgentResponseAck,
@@ -123,6 +125,7 @@ function normalizeState(state: ReviewState): ReviewState {
         discussion.messages = [];
       }
       for (const message of discussion.messages) {
+        if (message.intent === 'change') message.intent = 'change_request';
         if (!message.evidence) {
           message.evidence = [];
         }
@@ -439,6 +442,7 @@ export async function createReviewDiscussion(
   options: AgentReviewOptions = {},
 ): Promise<ReviewState> {
   const request = CreateDiscussionRequestSchema.parse(value);
+  validateHumanText(request.text);
   const store = await repositoryStore(options);
   const captured = await captureAnchor(store, options, request);
   return withStoreLock(store, async () => {
@@ -498,6 +502,7 @@ export async function createReviewMessage(
   options: AgentReviewOptions = {},
 ): Promise<ReviewState> {
   const request: CreateReviewMessageRequest = CreateReviewMessageRequestSchema.parse(value);
+  validateHumanText(request.text);
   const store = await repositoryStore(options);
   return withStoreLock(store, async () => {
     const state = await loadState(store);
@@ -555,6 +560,153 @@ export async function updateReviewDiscussion(
     if (!discussion) throw agentError('AGENT_DISCUSSION_NOT_FOUND', 'discussion not found');
     discussion.state = request.state;
     discussion.updatedAt = timestamp();
+    state.revision += 1;
+    await writeState(store, state);
+    return presentation(store, state);
+  });
+}
+
+function validateHumanText(text: string): void {
+  if (!text.trim()) throw agentError('AGENT_INVALID_MESSAGE', 'message must not be empty');
+  if (Buffer.byteLength(text.trim(), 'utf8') > messageLimit) {
+    throw agentError('AGENT_PAYLOAD_TOO_LARGE', 'human message exceeds 64 KiB');
+  }
+}
+
+function editableMessage(
+  state: ReviewState,
+  discussion: NonNullable<ReviewState['session']>['discussions'][number],
+  id: string,
+) {
+  const message = messageByID(discussion, id);
+  if (
+    message?.author !== 'human' ||
+    !(
+      (message.state === 'draft' && !message.deliveryId) ||
+      state.deliveries.some(
+        (delivery) => delivery.id === message.deliveryId && delivery.state === 'pending',
+      )
+    )
+  ) {
+    throw agentError(
+      'AGENT_INVALID_MESSAGE',
+      'a human message can be changed only before an agent claims it',
+    );
+  }
+  return message;
+}
+
+export async function updateReviewMessage(
+  discussionID: string,
+  messageID: string,
+  value: unknown,
+  options: AgentReviewOptions = {},
+): Promise<ReviewState> {
+  const request = UpdateReviewMessageRequestSchema.parse(value);
+  validateHumanText(request.text);
+  const store = await repositoryStore(options);
+  return withStoreLock(store, async () => {
+    const state = await loadState(store);
+    assertGuard(state, request);
+    const discussion = discussionByID(state, discussionID);
+    if (!discussion) throw agentError('AGENT_DISCUSSION_NOT_FOUND', 'discussion not found');
+    const message = editableMessage(state, discussion, messageID);
+    const now = timestamp();
+    if (message.state === 'draft') {
+      if (discussion.state !== 'open')
+        throw agentError('AGENT_INVALID_MESSAGE', 'discussion is resolved');
+      if (unfinished(state).some((delivery) => delivery.discussionId === discussionID)) {
+        throw agentError('AGENT_INBOX_BUSY', 'this discussion already has an unfinished delivery');
+      }
+      await reanchorDiscussion(store.root, discussion);
+      if (discussion.placement.status === 'deleted' && discussion.target.kind !== 'file') {
+        throw agentError('AGENT_INVALID_TARGET', 'the selected document or fragment was deleted');
+      }
+      if (discussion.placement.range) discussion.target.range = discussion.placement.range;
+      try {
+        const captured = await captureAnchor(store, options, {
+          ...request,
+          target: discussion.target,
+        });
+        if (!captured.anchor.range && discussion.anchor?.selectedText) {
+          captured.anchor.selectedText = discussion.anchor.selectedText;
+        }
+        discussion.anchor = captured.anchor;
+      } catch {
+        // Keep the historical anchor when the current source cannot be captured.
+      }
+      message.state = 'submitted';
+      message.deliveryId = reviewID('DEL');
+      message.submittedAt = now;
+      state.nextSequence = (state.nextSequence ?? 0) + 1;
+      state.deliveries.push({
+        schemaVersion: 1,
+        id: message.deliveryId,
+        sequence: state.nextSequence,
+        state: 'pending',
+        discussionId: discussionID,
+        messageIds: [messageID],
+        createdAt: now,
+      });
+    }
+    message.intent = request.intent;
+    message.text = request.text.trim();
+    message.editedAt = now;
+    discussion.updatedAt = now;
+    state.revision += 1;
+    await writeState(store, state);
+    return presentation(store, state);
+  });
+}
+
+export async function deleteReviewMessage(
+  discussionID: string,
+  messageID: string,
+  value: unknown,
+  options: AgentReviewOptions = {},
+): Promise<ReviewState> {
+  const guard = ReviewMutationGuardSchema.parse(value);
+  const store = await repositoryStore(options);
+  return withStoreLock(store, async () => {
+    const state = await loadState(store);
+    assertGuard(state, guard);
+    const discussion = discussionByID(state, discussionID);
+    if (!discussion) throw agentError('AGENT_DISCUSSION_NOT_FOUND', 'discussion not found');
+    const message = editableMessage(state, discussion, messageID);
+    discussion.messages = discussion.messages.filter((item) => item.id !== messageID);
+    state.deliveries = state.deliveries.filter((delivery) => delivery.id !== message.deliveryId);
+    if (discussion.messages.length === 0 && state.session) {
+      state.session.discussions = state.session.discussions.filter(
+        (item) => item.id !== discussionID,
+      );
+    } else {
+      discussion.updatedAt = timestamp();
+    }
+    state.revision += 1;
+    await writeState(store, state);
+    return presentation(store, state);
+  });
+}
+
+export async function deleteReviewDiscussion(
+  discussionID: string,
+  value: unknown,
+  options: AgentReviewOptions = {},
+): Promise<ReviewState> {
+  const guard = ReviewMutationGuardSchema.parse(value);
+  const store = await repositoryStore(options);
+  return withStoreLock(store, async () => {
+    const state = await loadState(store);
+    assertGuard(state, guard);
+    if (!discussionByID(state, discussionID) || !state.session) {
+      throw agentError('AGENT_DISCUSSION_NOT_FOUND', 'discussion not found');
+    }
+    state.session.discussions = state.session.discussions.filter(
+      (item) => item.id !== discussionID,
+    );
+    state.deliveries = state.deliveries.filter(
+      (delivery) => delivery.discussionId !== discussionID,
+    );
     state.revision += 1;
     await writeState(store, state);
     return presentation(store, state);

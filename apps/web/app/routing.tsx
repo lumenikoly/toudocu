@@ -22,21 +22,38 @@ export function relativePortalHref(from: string, to: string): string {
   return `${[...fromParts.map(() => '..'), ...toParts].join('/') || '.'}${target.suffix}`;
 }
 
-export function PortalLink({ to, children }: { to: string; children: ReactNode }) {
+export function PortalLink({
+  to,
+  children,
+  label,
+  className,
+}: {
+  to: string;
+  children: ReactNode;
+  label?: string;
+  className?: string;
+}) {
   const from = useContext(CurrentOutputPath);
   const location = useLocation();
   const navigate = useNavigate();
   const href = relativePortalHref(from, to);
   const target = splitTarget(to);
   const route = `${target.path.startsWith('/') ? '' : '/'}${target.path}`;
-  const current = route === location.pathname;
+  const current =
+    route === location.pathname || (route === '/index.html' && location.pathname === '/');
   const follow = (event: MouseEvent<HTMLAnchorElement>): void => {
     if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
     void navigate(`${route}${target.suffix}`);
   };
   return (
-    <a href={href} aria-current={current ? 'page' : undefined} onClick={follow}>
+    <a
+      className={className}
+      href={href}
+      aria-label={label}
+      aria-current={current ? 'page' : undefined}
+      onClick={follow}
+    >
       {children}
     </a>
   );

@@ -1,6 +1,9 @@
 import { z } from 'zod';
 
 const timestamp = z.string();
+const humanIntent = z
+  .enum(['question', 'change_request', 'change'])
+  .transform((intent) => (intent === 'change' ? 'change_request' : intent));
 
 export const ReviewPositionSchema = z.strictObject({
   line: z.int().positive(),
@@ -45,7 +48,7 @@ export const CreateDiscussionRequestSchema = ReviewMutationGuardSchema.extend({
   selection: z
     .strictObject({ selectedText: z.string(), occurrence: z.int().nonnegative().exactOptional() })
     .exactOptional(),
-  intent: z.enum(['question', 'change']),
+  intent: humanIntent,
   text: z
     .string()
     .min(1)
@@ -53,7 +56,7 @@ export const CreateDiscussionRequestSchema = ReviewMutationGuardSchema.extend({
 });
 
 export const CreateReviewMessageRequestSchema = ReviewMutationGuardSchema.extend({
-  intent: z.enum(['question', 'change']),
+  intent: humanIntent,
   text: z
     .string()
     .min(1)
@@ -63,6 +66,8 @@ export const CreateReviewMessageRequestSchema = ReviewMutationGuardSchema.extend
 export const UpdateDiscussionRequestSchema = ReviewMutationGuardSchema.extend({
   state: z.enum(['open', 'resolved']),
 });
+
+export const UpdateReviewMessageRequestSchema = CreateReviewMessageRequestSchema;
 
 const DocumentAnchorSchema = z.strictObject({
   kind: z.string(),
@@ -166,3 +171,5 @@ export type AgentResponseAck = z.infer<typeof AgentResponseAckSchema>;
 export type CreateDiscussionRequest = z.infer<typeof CreateDiscussionRequestSchema>;
 export type CreateReviewMessageRequest = z.infer<typeof CreateReviewMessageRequestSchema>;
 export type UpdateDiscussionRequest = z.infer<typeof UpdateDiscussionRequestSchema>;
+export type ReviewMutationGuard = z.infer<typeof ReviewMutationGuardSchema>;
+export type UpdateReviewMessageRequest = z.infer<typeof UpdateReviewMessageRequestSchema>;

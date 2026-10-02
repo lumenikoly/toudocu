@@ -21,9 +21,23 @@ import {
   WorkItemSchema,
 } from './project.js';
 import { IssueSchema } from './issue.js';
+import { TaskDescendantsSummarySchema } from './tasks.js';
 
 const text = z.string();
 const optionalText = text.exactOptional();
+
+const portalTaskStateSchema = z.strictObject({
+  status: text,
+  workState: text,
+  contractComplete: z.boolean(),
+  dependenciesSatisfied: z.boolean(),
+  readyForWork: z.boolean(),
+  canComplete: z.boolean(),
+  issues: z.array(IssueSchema),
+  descendants: TaskDescendantsSummarySchema,
+});
+
+const portalWorkItemSchema = WorkItemSchema.extend({ workspace: portalTaskStateSchema });
 
 export const PortalPageKindSchema = z.enum([
   'home',
@@ -46,6 +60,16 @@ export const PortalPageKindSchema = z.enum([
   'discussions',
   'api-docs',
 ]);
+
+export const PortalAppearanceV1Schema = z.strictObject({
+  theme: z.enum(['classic', 'paper', 'terminal']),
+  colorScheme: z.enum(['light', 'dark', 'system']),
+  accent: z.enum(['indigo', 'blue', 'teal', 'green', 'amber', 'rose', 'violet']),
+  density: z.enum(['compact', 'comfortable']),
+  logo: text,
+  artwork: text,
+});
+export type PortalAppearanceV1 = z.infer<typeof PortalAppearanceV1Schema>;
 
 export const PortalRouteSchema = z.strictObject({
   pageId: text,
@@ -187,7 +211,7 @@ const taskPageSchema = z.strictObject({
   pageId: text,
   route: PortalRouteSchema,
   document: PortalDocumentViewSchema,
-  workItem: WorkItemSchema,
+  workItem: portalWorkItemSchema,
   hierarchy: z.array(TaskHierarchyNodeSchema),
   relations: z.strictObject({ related: z.array(text), backlinks: z.array(text) }),
 });
@@ -251,13 +275,19 @@ const taskWorkspacePageSchema = z.strictObject({
   kind: z.literal('task-workspace'),
   pageId: text,
   route: PortalRouteSchema,
-  workItems: z.array(WorkItemSchema),
+  workItems: z.array(portalWorkItemSchema),
   hierarchy: z.array(TaskHierarchyNodeSchema),
 });
 const serveSurfacePageSchema = z.strictObject({
-  kind: z.enum(['editor', 'changes', 'discussions', 'api-docs']),
+  kind: z.enum(['editor', 'changes', 'discussions']),
   pageId: text,
   route: PortalRouteSchema,
+});
+const apiDocsPageSchema = z.strictObject({
+  kind: z.literal('api-docs'),
+  pageId: text,
+  route: PortalRouteSchema,
+  specs: z.array(z.strictObject({ path: text, title: text, version: text })),
 });
 const notFoundPageSchema = z.strictObject({
   kind: z.literal('not-found'),
@@ -280,6 +310,7 @@ export const PageViewV1Schema = z.discriminatedUnion('kind', [
   taskWorkspacePageSchema,
   notFoundPageSchema,
   serveSurfacePageSchema,
+  apiDocsPageSchema,
 ]);
 export type PageViewV1 = z.infer<typeof PageViewV1Schema>;
 
@@ -289,6 +320,7 @@ export const PortalSnapshotV1Schema = z.strictObject({
   generator: GeneratorSchema,
   capabilities: RuntimeCapabilitiesV1Schema,
   project: projectSchema,
+  appearance: PortalAppearanceV1Schema.exactOptional(),
   navigation: NavigationViewV1Schema,
   routes: z.array(PortalRouteSchema),
   pages: z.array(PageViewV1Schema),

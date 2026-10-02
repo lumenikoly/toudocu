@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TaskVerifyReportV1Schema } from './verification.js';
 
 const nonEmpty = z.string().min(1);
 
@@ -100,6 +101,8 @@ export const AgentSessionStateSchema = z.strictObject({
   pending: z.array(AgentPendingMessageSchema).optional(),
   approvals: z.array(AgentApprovalSchema).optional(),
   failure: z.string().optional(),
+  verification: TaskVerifyReportV1Schema.optional(),
+  verificationRunning: z.boolean().optional(),
   settings: AgentSettingsSchema.optional(),
   terminal: z.strictObject({
     available: z.boolean(),
@@ -113,6 +116,7 @@ export const AgentConsoleStateSchema = z.strictObject({
   setup: z.strictObject({
     availableProviders: z.array(nonEmpty).min(1),
     selectedProvider: nonEmpty,
+    verificationAvailable: z.boolean().optional(),
     preference: AgentPreferenceSchema,
     models: z.array(AgentModelSchema).optional(),
     skill: z.strictObject({

@@ -8,8 +8,11 @@ import {
 } from '@toudocu/contracts';
 import {
   buildProjectSummary,
+  buildTaskWorkspace,
+  blockingReadinessIssues,
   naturalCompare,
   type CompiledProject,
+  type DocumentationPathStatus,
   type Document,
 } from '@toudocu/core';
 import {
@@ -20,6 +23,7 @@ import {
 } from './routes.js';
 
 export interface PortalMapperOptions {
+  appearance?: PortalSnapshotV1['appearance'];
   version: string;
   sourceDirectory?: string;
   title?: string;
@@ -34,6 +38,7 @@ export interface PortalMapperOptions {
   agentConsole?: boolean;
   terminal?: boolean;
   taskActions?: boolean;
+  taskReadiness?: { strict: boolean; pathStatus: DocumentationPathStatus };
 }
 
 function optional(value: string): string | undefined {
@@ -252,7 +257,43 @@ function pages(
   registry: PortalRouteRegistry,
   views: ReadonlyMap<string, ReturnType<typeof documentView>>,
   summary: ReturnType<typeof projectInfo>,
+  options: PortalMapperOptions,
 ): PageViewV1[] {
+  const readinessOptions = options.taskReadiness ?? {
+    strict: false,
+    pathStatus: () => 'found' as const,
+  };
+  const graph = buildTaskWorkspace(project, readinessOptions);
+  const workItems = project.knowledge.workItems.map((item) => {
+    const readiness = graph.ready(item);
+    const status = graph.status(item);
+    const descendants = graph.descendants(item);
+    return {
+      ...workItemView(item),
+      workspace: {
+        status,
+        workState: item.archived ? 'archive' : graph.state(item).replaceAll('_', '-'),
+        contractComplete: readiness.contractComplete,
+        dependenciesSatisfied: readiness.dependenciesSatisfied,
+        readyForWork:
+          !item.archived &&
+          status === 'ready' &&
+          readiness.contractComplete &&
+          readiness.dependenciesSatisfied,
+        canComplete:
+          !item.archived &&
+          status === 'in-progress' &&
+          readiness.contractComplete &&
+          readiness.dependenciesSatisfied &&
+          item.criteria.length > 0 &&
+          item.criteria.every((criterion) => criterion.completed) &&
+          (!descendants.total || descendants.complete),
+        issues: blockingReadinessIssues(readiness.issues, readinessOptions.strict),
+        descendants,
+      },
+    };
+  });
+  const workItemViews = new Map(workItems.map((item) => [item.id, item]));
   const get = (pageId: string) => {
     const result = registry.get(pageId);
     if (!result) {
@@ -293,7 +334,7 @@ function pages(
         pageId: route.pageId,
         route,
         document: view,
-        workItem: workItemView(workItem),
+        workItem: workItemViews.get(workItem.id)!,
         hierarchy: taskHierarchy(project, workItem.id),
         relations: { related: view.relatedDocuments, backlinks: view.backlinks },
       });
@@ -438,15 +479,19 @@ function pages(
       kind: 'task-workspace',
       pageId: workspace.pageId,
       route: workspace,
-      workItems: project.knowledge.workItems.map(workItemView),
+      workItems,
       hierarchy: taskHierarchy(project),
     });
   }
-  for (const pageId of ['editor', 'changes', 'discussions', 'api-docs'] as const) {
+  for (const pageId of ['editor', 'changes', 'discussions'] as const) {
     const route = registry.get(pageId);
     if (route) {
       pages.push({ kind: pageId, pageId, route });
     }
+  }
+  const apiDocs = registry.get('api-docs');
+  if (apiDocs) {
+    pages.push({ kind: 'api-docs', pageId: 'api-docs', route: apiDocs, specs: project.openAPI });
   }
   for (const route of registry.routes.filter(
     (item) => item.kind === 'catalog' && item.pageId.startsWith('directory:'),
@@ -674,7 +719,7 @@ export function buildPortalSnapshot(
   const registry = buildPortalRouteRegistry(project, options);
   const views = allDocumentViews(project);
   const summary = projectInfo(project, sourceDirectory, options.title);
-  const mappedPages = pages(project, registry, views, summary);
+  const mappedPages = pages(project, registry, views, summary, options);
   const totalTasks = summary.stats.totalTasks;
   const completedTasks = summary.stats.completedTasks;
   return PortalSnapshotV1Schema.parse({
@@ -683,6 +728,7 @@ export function buildPortalSnapshot(
     generator: { name: 'Toudocu', version: options.version },
     capabilities: capabilities(options),
     project: summary.project,
+    ...(options.appearance ? { appearance: options.appearance } : {}),
     navigation: { schemaVersion: 1, items: navigation(project, registry) },
     routes: registry.routes,
     pages: mappedPages,

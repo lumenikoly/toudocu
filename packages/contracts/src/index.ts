@@ -58,6 +58,18 @@ export type { SearchReportV1 } from './search.js';
 export { ChangeSetReportV1Schema } from './changes.js';
 export type { ChangeSetReportV1 } from './changes.js';
 export {
+  RepositoryFilesQuerySchema,
+  RepositoryFileQuerySchema,
+  RepositoryFileListSchema,
+  RepositoryFileResponseSchema,
+} from './repository-review.js';
+export type {
+  RepositoryFilesQuery,
+  RepositoryFileQuery,
+  RepositoryFileList,
+  RepositoryFileResponse,
+} from './repository-review.js';
+export {
   TaskReadyReportV1Schema,
   TaskCandidatesReportV1Schema,
   TaskTreeReportV1Schema,
@@ -81,6 +93,7 @@ export {
   NavigationViewV1Schema,
   PageViewV1Schema,
   PortalPageKindSchema,
+  PortalAppearanceV1Schema,
   PortalRouteSchema,
   PortalSearchEntrySchema,
   PortalSnapshotV1Schema,
@@ -90,6 +103,7 @@ export {
 export type {
   NavigationItem,
   NavigationViewV1,
+  PortalAppearanceV1,
   PageViewV1,
   PortalRoute,
   PortalSnapshotV1,
@@ -108,6 +122,7 @@ export {
   ReviewMutationGuardSchema,
   ReviewStateSchema,
   UpdateDiscussionRequestSchema,
+  UpdateReviewMessageRequestSchema,
 } from './review.js';
 export type {
   AgentEvidence,
@@ -118,6 +133,8 @@ export type {
   CreateDiscussionRequest,
   CreateReviewMessageRequest,
   UpdateDiscussionRequest,
+  ReviewMutationGuard,
+  UpdateReviewMessageRequest,
 } from './review.js';
 export {
   SkillFileChecksumSchema,

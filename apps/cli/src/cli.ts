@@ -7,6 +7,8 @@ import { createInterface } from 'node:readline/promises';
 import { cwd } from 'node:process';
 import {
   buildDocumentationChanges,
+  listRepositoryReviewFiles,
+  readRepositoryReviewFile,
   buildStaticPortal,
   loadProject,
   documentationImpactPathStatus,
@@ -33,6 +35,9 @@ import {
   EditorWorkspace,
   loadReviewState,
   updateReviewDiscussion,
+  updateReviewMessage,
+  deleteReviewMessage,
+  deleteReviewDiscussion,
   AgentConsoleRuntime,
   CodexProvider,
   OpenCodeProvider,
@@ -1041,12 +1046,17 @@ export async function runCLI(
       const bundle = await loadStaticBundle();
       const snapshot = createPortalSnapshot(project, {
         version,
+        taskReadiness: taskOptions,
         environment: 'static',
         sourceDirectory: project.snapshot.root,
         ...(options.title ? { title: options.title } : {}),
         screenMapEnabled: !options.noScreenMap,
       });
-      const files = new Map([...project.links.assets, ...project.screenAssets]);
+      const files = new Map([
+        ...project.links.assets,
+        ...project.screenAssets,
+        ...project.branding,
+      ]);
       const result = await buildStaticPortal({
         outputDirectory: resolve(options.output ?? './build/project-docs'),
         protectedRoots: [project.snapshot.root],
@@ -1080,6 +1090,7 @@ export async function runCLI(
       const agentConsoleEnabled = isLoopbackHost(options.host);
       const snapshotOptions = {
         version,
+        taskReadiness: taskOptions,
         environment: 'serve' as const,
         sourceDirectory: project.snapshot.root,
         agentConsole: agentConsoleEnabled,
@@ -1108,8 +1119,36 @@ export async function runCLI(
                 : []),
             ],
             skill: await codexSkillSetup(project.inventory.root),
+            verifyTask: async (taskID, mode, verificationSignal) => {
+              const current = await loadProject(inputDirectory, {
+                ...loadOptions,
+                now: new Date(),
+                signal: verificationSignal,
+              });
+              return executeTaskVerification(
+                current,
+                taskID,
+                {
+                  version,
+                  strict: options.strict ?? false,
+                  mode,
+                  repositoryRoot: current.inventory.root,
+                  pathStatus: (value, document) =>
+                    documentationImpactPathStatus(current, value, document),
+                  signal: verificationSignal,
+                },
+                mode === 'run'
+                  ? (command, repositoryRoot, runSignal) =>
+                      runTaskVerificationCommand(command, repositoryRoot, {
+                        ...(runSignal ? { signal: runSignal } : {}),
+                      })
+                  : undefined,
+              );
+            },
           })
         : undefined;
+      const brandingFiles = new Map(project.branding);
+      const projectFiles = new Map([...project.links.assets, ...project.screenAssets]);
       const server = createDocumentationServer({
         initialSnapshot: createPortalSnapshot(project, snapshotOptions),
         rebuild: async (rebuildSignal) => {
@@ -1118,10 +1157,22 @@ export async function runCLI(
             ...loadOptions,
             signal: rebuildSignal,
           });
-          return createPortalSnapshot(rebuilt, {
+          const snapshot = createPortalSnapshot(rebuilt, {
             ...snapshotOptions,
+            taskReadiness: {
+              strict: options.strict ?? false,
+              pathStatus: (value: string, document: string) =>
+                documentationImpactPathStatus(rebuilt, value, document),
+            },
             sourceDirectory: rebuilt.snapshot.root,
           });
+          brandingFiles.clear();
+          for (const [path, source] of rebuilt.branding) brandingFiles.set(path, source);
+          projectFiles.clear();
+          for (const [path, source] of [...rebuilt.links.assets, ...rebuilt.screenAssets]) {
+            projectFiles.set(path, source);
+          }
+          return snapshot;
         },
         watchPaths: [
           project.snapshot.root,
@@ -1131,6 +1182,8 @@ export async function runCLI(
           ...project.branding.values(),
         ],
         assetsDirectory: bundle.assetsDirectory,
+        brandingFiles,
+        projectFiles,
         html: renderServeShell({
           locale,
           title: options.title ?? project.config.site.title,
@@ -1165,11 +1218,22 @@ export async function runCLI(
             includeRenderedHTML: true,
             signal: requestSignal,
           }),
+        repositoryReview: {
+          list: (query, requestSignal) =>
+            listRepositoryReviewFiles(project.inventory.root, query, requestSignal),
+          read: (query, requestSignal) =>
+            readRepositoryReviewFile(project.inventory.root, query, requestSignal),
+        },
         discussions: {
           list: () => loadReviewState(reviewOptions),
           create: (input) => createReviewDiscussion(input, reviewOptions),
           message: (id, input) => createReviewMessage(id, input, reviewOptions),
           update: (id, input) => updateReviewDiscussion(id, input, reviewOptions),
+          delete: (id, input) => deleteReviewDiscussion(id, input, reviewOptions),
+          updateMessage: (id, messageId, input) =>
+            updateReviewMessage(id, messageId, input, reviewOptions),
+          deleteMessage: (id, messageId, input) =>
+            deleteReviewMessage(id, messageId, input, reviewOptions),
         },
         ...(agentConsole ? { agentConsole } : {}),
         onError: (error) => stderr(`Rebuild failed: ${argumentError(error)}\n`),

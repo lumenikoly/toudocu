@@ -1,10 +1,12 @@
 import { readFile, realpath } from 'node:fs/promises';
-import { extname, isAbsolute, relative, resolve } from 'node:path';
+import { basename, dirname, extname, isAbsolute, relative, resolve } from 'node:path';
 import fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify';
 import websocket from '@fastify/websocket';
 import {
   AgentConsoleInputSchema,
   AgentConsoleMessageSchema,
+  RepositoryFileQuerySchema,
+  RepositoryFilesQuerySchema,
   ToudocuError,
   type AgentConsoleState,
   type AgentConsoleMessage,
@@ -21,6 +23,10 @@ import {
   type EditorSaveRequest,
   type EditorValidationResponse,
   type ReviewState,
+  type RepositoryFilesQuery,
+  type RepositoryFileQuery,
+  type RepositoryFileList,
+  type RepositoryFileResponse,
   type PortalSnapshotV1,
 } from '@toudocu/contracts';
 import { PortalState } from './state.js';
@@ -32,6 +38,8 @@ export interface DocumentationServerOptions {
   rebuild(signal: AbortSignal): Promise<PortalSnapshotV1>;
   watchPaths?: readonly string[];
   assetsDirectory: string;
+  brandingFiles?: ReadonlyMap<string, string>;
+  projectFiles?: ReadonlyMap<string, string>;
   html: string;
   debounceMs?: number;
   onError?: (error: unknown) => void;
@@ -52,6 +60,23 @@ export interface DocumentationServerOptions {
     create(input: unknown, signal: AbortSignal): Promise<ReviewState>;
     message(id: string, input: unknown, signal: AbortSignal): Promise<ReviewState>;
     update(id: string, input: unknown, signal: AbortSignal): Promise<ReviewState>;
+    delete(id: string, input: unknown, signal: AbortSignal): Promise<ReviewState>;
+    updateMessage(
+      id: string,
+      messageId: string,
+      input: unknown,
+      signal: AbortSignal,
+    ): Promise<ReviewState>;
+    deleteMessage(
+      id: string,
+      messageId: string,
+      input: unknown,
+      signal: AbortSignal,
+    ): Promise<ReviewState>;
+  };
+  repositoryReview?: {
+    list(query: RepositoryFilesQuery, signal: AbortSignal): Promise<RepositoryFileList>;
+    read(query: RepositoryFileQuery, signal: AbortSignal): Promise<RepositoryFileResponse>;
   };
   agentConsole?: AgentConsoleService;
 }
@@ -78,6 +103,13 @@ export interface AgentConsoleService {
   interrupt(signal?: AbortSignal): Promise<void>;
   approve(requestID: string, decision: 'accept' | 'decline' | 'cancel'): Promise<void>;
   cancelPending(id: string): Promise<void>;
+  verifyTask?(
+    taskID: string,
+    mode: 'dry-run' | 'run',
+    confirmed: boolean,
+    signal?: AbortSignal,
+  ): Promise<void>;
+  sendVerificationFailure?(signal?: AbortSignal): Promise<void>;
   stop(discardPending: boolean): Promise<void>;
   cleanup(): Promise<void>;
   savePreference(preference: AgentPreference, confirmed: boolean): Promise<void>;
@@ -121,6 +153,12 @@ const contentTypes: Readonly<Record<string, string>> = {
   '.js': 'text/javascript; charset=utf-8',
   '.map': 'application/json; charset=utf-8',
   '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
+  '.gif': 'image/gif',
+  '.ico': 'image/x-icon',
   '.woff2': 'font/woff2',
 };
 
@@ -149,12 +187,17 @@ function apiStatus(error: unknown): number {
       'file_exists',
       'AGENT_REVISION_CONFLICT',
       'AGENT_INBOX_BUSY',
+      'AGENT_INVALID_MESSAGE',
       'agent_session_active',
       'agent_session_inactive',
       'agent_pending_conflict',
       'agent_pending_missing',
       'agent_cleanup_conflict',
       'agent_queue_full',
+      'verification_confirmation_required',
+      'verification_task_mismatch',
+      'verification_running',
+      'verification_not_failed',
       'terminal_active',
       'terminal_inactive',
     ].includes(error.code)
@@ -169,7 +212,7 @@ function apiStatus(error: unknown): number {
     return 403;
   if (error.code === 'unsupported_extension') return 415;
   if (error.code === 'agent_history_unsupported') return 501;
-  if (error.code === 'content_too_large') return 413;
+  if (['content_too_large', 'AGENT_PAYLOAD_TOO_LARGE'].includes(error.code)) return 413;
   return 400;
 }
 
@@ -361,14 +404,21 @@ export function createDocumentationServer(
             type: 'object',
             additionalProperties: false,
             required: ['path'],
-            properties: { path: { type: 'string', minLength: 1 } },
+            properties: {
+              path: { type: 'string', minLength: 1 },
+              raw: { type: 'string', enum: ['1'] },
+            },
           },
         },
       },
       async (request, reply) => {
         const scope = requestSignal(request);
         try {
-          return await options.editor!.read((request.query as { path: string }).path, scope.signal);
+          const query = request.query as { path: string; raw?: string };
+          const result = await options.editor!.read(query.path, scope.signal);
+          return query.raw === '1'
+            ? reply.type('text/plain; charset=utf-8').send(result.file.content)
+            : result;
         } catch (error) {
           return sendApiError(reply, error);
         } finally {
@@ -479,6 +529,29 @@ export function createDocumentationServer(
     );
   }
 
+  if (options.repositoryReview) {
+    app.get('/_toudocu/api/changes/review/repository/files', async (request, reply) =>
+      reviewAction(request, reply, async (signal) => {
+        assertLoopback(request);
+        reply.header('Cache-Control', 'no-store');
+        const parsed = RepositoryFilesQuerySchema.safeParse(request.query);
+        if (!parsed.success)
+          throw new ToudocuError('invalid_query', 'invalid repository file query');
+        return options.repositoryReview!.list(parsed.data, signal);
+      }),
+    );
+    app.get('/_toudocu/api/changes/review/repository/file', async (request, reply) =>
+      reviewAction(request, reply, async (signal) => {
+        assertLoopback(request);
+        reply.header('Cache-Control', 'no-store');
+        const parsed = RepositoryFileQuerySchema.safeParse(request.query);
+        if (!parsed.success)
+          throw new ToudocuError('invalid_query', 'invalid repository file query');
+        return options.repositoryReview!.read(parsed.data, signal);
+      }),
+    );
+  }
+
   if (options.discussions) {
     app.get('/_toudocu/api/agent/discussions', async (request, reply) =>
       reviewAction(request, reply, (signal) => options.discussions!.list(signal), false),
@@ -522,6 +595,44 @@ export function createDocumentationServer(
           options.discussions!.update((request.params as { id: string }).id, request.body, signal),
         ),
     );
+    app.delete(
+      '/_toudocu/api/agent/discussions/:id',
+      {
+        schema: {
+          headers: actionHeaders('agent-discussion-delete'),
+          params: { type: 'object', required: ['id'], properties: { id: { type: 'string' } } },
+          body: { type: 'object', additionalProperties: true },
+        },
+      },
+      async (request, reply) =>
+        reviewAction(request, reply, (signal) =>
+          options.discussions!.delete((request.params as { id: string }).id, request.body, signal),
+        ),
+    );
+    for (const method of ['PATCH', 'DELETE'] as const) {
+      app.route({
+        method,
+        url: '/_toudocu/api/agent/discussions/:id/messages/:messageId',
+        schema: {
+          headers: actionHeaders(
+            method === 'PATCH' ? 'agent-message-update' : 'agent-message-delete',
+          ),
+          params: {
+            type: 'object',
+            required: ['id', 'messageId'],
+            properties: { id: { type: 'string' }, messageId: { type: 'string' } },
+          },
+          body: { type: 'object', additionalProperties: true },
+        },
+        handler: async (request, reply) =>
+          reviewAction(request, reply, (signal) => {
+            const { id, messageId } = request.params as { id: string; messageId: string };
+            return method === 'PATCH'
+              ? options.discussions!.updateMessage(id, messageId, request.body, signal)
+              : options.discussions!.deleteMessage(id, messageId, request.body, signal);
+          }),
+      });
+    }
   }
 
   if (options.agentConsole && agentTransport) {
@@ -582,6 +693,42 @@ export function createDocumentationServer(
       },
     );
     action('/_toudocu/api/agent-console/cleanup', 'agent-session-cleanup', () => runtime.cleanup());
+    const verifyTask = runtime.verifyTask?.bind(runtime);
+    if (verifyTask) {
+      const taskBody = {
+        type: 'object',
+        additionalProperties: false,
+        required: ['taskID'],
+        properties: { taskID: { type: 'string', minLength: 1, maxLength: 256 } },
+      };
+      action(
+        '/_toudocu/api/agent-console/verification/plan',
+        'agent-verification-plan',
+        (request, signal) =>
+          verifyTask((request.body as { taskID: string }).taskID, 'dry-run', false, signal),
+        taskBody,
+      );
+      action(
+        '/_toudocu/api/agent-console/verify',
+        'agent-task-verify',
+        (request, signal) => {
+          const input = request.body as { taskID: string; confirmed: boolean };
+          return verifyTask(input.taskID, 'run', input.confirmed, signal);
+        },
+        {
+          ...taskBody,
+          required: ['taskID', 'confirmed'],
+          properties: { ...taskBody.properties, confirmed: { type: 'boolean' } },
+        },
+      );
+    }
+    const sendVerificationFailure = runtime.sendVerificationFailure?.bind(runtime);
+    if (sendVerificationFailure)
+      action(
+        '/_toudocu/api/agent-console/verification/send',
+        'agent-verification-send',
+        (_, signal) => sendVerificationFailure(signal),
+      );
     action(
       '/_toudocu/api/agent-console/resume',
       'agent-session-resume',
@@ -709,7 +856,11 @@ export function createDocumentationServer(
     const path = (request.params as { '*': string })['*'];
     const requestScope = requestSignal(request);
     try {
-      const asset = await readAsset(options.assetsDirectory, path, requestScope.signal);
+      const branding =
+        options.brandingFiles?.get(`assets/${path}`) ?? options.projectFiles?.get(`assets/${path}`);
+      const asset = branding
+        ? await readAsset(dirname(branding), basename(branding), requestScope.signal)
+        : await readAsset(options.assetsDirectory, path, requestScope.signal);
       if (!asset) return reply.code(404).send({ error: 'not found' });
       return reply.type(asset.type).send(asset.content);
     } finally {
@@ -720,6 +871,18 @@ export function createDocumentationServer(
   const serveSpa = async (request: FastifyRequest, reply: FastifyReply) => {
     if (request.url.startsWith('/_toudocu/api/')) {
       return reply.code(404).send({ error: 'not found' });
+    }
+    const path = (request.params as { '*'?: string })['*'];
+    const source = path ? options.projectFiles?.get(path) : undefined;
+    if (source) {
+      const scope = requestSignal(request);
+      try {
+        const asset = await readAsset(dirname(source), basename(source), scope.signal);
+        if (!asset) return reply.code(404).send({ error: 'not found' });
+        return reply.type(asset.type).send(asset.content);
+      } finally {
+        scope.close();
+      }
     }
     return reply.type('text/html; charset=utf-8').send(options.html);
   };

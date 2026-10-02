@@ -154,4 +154,26 @@ describe('portal routes and snapshot', () => {
     ).toBe(false);
     expect(JSON.stringify(staticSnapshot)).not.toContain('"byPath"');
   });
+
+  it('keeps appearance at snapshot level and omits it for legacy defaults', () => {
+    const compiled = project();
+    const configured = buildPortalSnapshot(compiled, {
+      version: 'test',
+      environment: 'static',
+      appearance: {
+        theme: 'paper',
+        colorScheme: 'dark',
+        accent: 'teal',
+        density: 'compact',
+        logo: 'assets/branding/logo.svg',
+        artwork: '',
+      },
+    });
+    const legacy = buildPortalSnapshot(compiled, { version: 'test', environment: 'static' });
+    const home = configured.pages.find((page) => page.kind === 'home');
+
+    expect(configured.appearance).toMatchObject({ theme: 'paper', colorScheme: 'dark' });
+    expect(home).not.toHaveProperty('appearance');
+    expect(legacy).not.toHaveProperty('appearance');
+  });
 });

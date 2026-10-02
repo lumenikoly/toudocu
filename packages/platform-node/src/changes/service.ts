@@ -297,7 +297,7 @@ async function resolveConfigurationRoot(
   return (await PathPolicy.create(root, { allowHidden: true })).root;
 }
 
-async function resolveBase(
+export async function resolveBase(
   repository: Awaited<ReturnType<typeof openGitRepository>>,
   baseRef: string,
   branchBase?: string,
@@ -330,7 +330,7 @@ async function resolveBase(
   return { git, side };
 }
 
-async function resolveTarget(
+export async function resolveTarget(
   repository: Awaited<ReturnType<typeof openGitRepository>>,
   targetRef: string,
 ): Promise<{ git: GitSide; side: ChangeSide }> {

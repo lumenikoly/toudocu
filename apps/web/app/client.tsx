@@ -2,6 +2,7 @@ import { createRoot, hydrateRoot } from 'react-dom/client';
 import { PortalApp } from './root.js';
 import { ServeApiDataSource, StaticBrowserDataSource } from './data.js';
 import './styles/app.css';
+import './styles/document.css';
 
 async function start(): Promise<void> {
   const root = document.querySelector('#root');

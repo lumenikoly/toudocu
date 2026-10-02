@@ -36,6 +36,7 @@ export {
 } from './task-verify.js';
 export type { TaskCommandProcessOptions } from './task-verify.js';
 export { openGitRepository } from './git/repository.js';
+export { listRepositoryReviewFiles, readRepositoryReviewFile } from './repository-review.js';
 export type { GitReadOptions, GitSide } from './git/repository.js';
 export { buildAssetDiffMetadata, inspectAsset } from './changes/assets.js';
 export type { AssetDiffMetadata, AssetMetadata } from './changes/assets.js';
@@ -48,6 +49,9 @@ export {
   loadReviewState,
   respondAgentDelivery,
   updateReviewDiscussion,
+  updateReviewMessage,
+  deleteReviewMessage,
+  deleteReviewDiscussion,
 } from './review-service.js';
 export type { AgentReviewOptions } from './review-service.js';
 export { publishNoReplace, tryLockReviewFile, unlockReviewFile } from './native-helper.js';

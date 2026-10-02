@@ -1,4 +1,4 @@
-import { lstat, readFile, readdir, realpath } from 'node:fs/promises';
+import { lstat, open, readFile, readdir, realpath } from 'node:fs/promises';
 import { relative, resolve, sep } from 'node:path';
 import { parseMarkdown } from '@toudocu/core';
 import { ToudocuError } from '@toudocu/contracts';
@@ -194,6 +194,67 @@ export async function openGitRepository(documentRoot: string, options: GitReadOp
     }
     if (side.type === 'index') return run(['show', `:${scoped.relative}`]);
     return run(['cat-file', 'blob', `${resolveSideCommit(side)}:${scoped.relative}`]);
+  };
+  const filePaths = async (side: GitSide): Promise<string[]> => {
+    const output =
+      side.type === 'working-tree'
+        ? await run([
+            'ls-files',
+            '-z',
+            '--cached',
+            '--others',
+            '--exclude-standard',
+            '--',
+            docsRelative,
+          ])
+        : side.type === 'index'
+          ? await run(['ls-files', '-z', '--stage', '--', docsRelative])
+          : await run(['ls-tree', '-r', '-z', resolveSideCommit(side), '--', docsRelative]);
+    const paths = new TextDecoder('utf-8', { fatal: true }).decode(output).split('\0');
+    return [
+      ...new Set(
+        paths.flatMap((entry) => {
+          if (!entry) return [];
+          if (side.type === 'working-tree') return [entry];
+          if (!/^100(?:644|755) /u.test(entry)) return [];
+          if (side.type === 'index' && !/ 0\t/u.test(entry)) return [];
+          return [entry.slice(entry.indexOf('\t') + 1)];
+        }),
+      ),
+    ];
+  };
+  const limitedContent = async (
+    side: GitSide,
+    path: string,
+    maxBytes: number,
+  ): Promise<{ size: number; content?: Buffer }> => {
+    const scoped = resolveScopedPath(path);
+    if (side.type === 'working-tree') {
+      const file = await open(await pathPolicy.resolveFile(scoped.relative), 'r');
+      try {
+        options.signal?.throwIfAborted();
+        const info = await file.stat();
+        if (!info.isFile()) invalidPath(path);
+        if (info.size > maxBytes) return { size: info.size };
+        const buffer = Buffer.alloc(maxBytes + 1);
+        let bytes = 0;
+        while (bytes < buffer.length) {
+          options.signal?.throwIfAborted();
+          const read = await file.read(buffer, bytes, buffer.length - bytes, null);
+          if (!read.bytesRead) break;
+          bytes += read.bytesRead;
+        }
+        return bytes > maxBytes
+          ? { size: bytes }
+          : { size: bytes, content: buffer.subarray(0, bytes) };
+      } finally {
+        await file.close();
+      }
+    }
+    const object = `${side.type === 'index' ? '' : resolveSideCommit(side)}:${scoped.relative}`;
+    const size = Number((await run(['cat-file', '-s', object])).toString('utf8').trim());
+    if (!Number.isSafeInteger(size) || size < 0) invalidPath(path);
+    return size > maxBytes ? { size } : { size, content: await content(side, path) };
   };
   const taskDocuments = async (
     side: GitSide,
@@ -416,6 +477,8 @@ export async function openGitRepository(documentRoot: string, options: GitReadOp
     status,
     changes,
     content,
+    filePaths,
+    limitedContent,
     diff,
     repositoryState,
     mergeBase,

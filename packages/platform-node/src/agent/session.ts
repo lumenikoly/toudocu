@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import {
   AgentConsoleStateSchema,
   AgentSessionStateSchema,
+  TaskVerifyReportV1Schema,
   ToudocuError,
   type AgentConsoleState,
   type AgentEvent,
@@ -10,6 +11,7 @@ import {
   type AgentPreference,
   type AgentSessionState,
   type AgentThread,
+  type TaskVerifyReportV1,
 } from '@toudocu/contracts';
 import { ProjectTerminal, type TerminalEvent } from '../pty/session.js';
 import type {
@@ -40,6 +42,11 @@ export interface AgentConsoleRuntimeOptions {
   providers: readonly AgentProvider[];
   skill: AgentConsoleState['setup']['skill'];
   preferenceStore?: Pick<AgentPreferenceStore, 'load' | 'save'>;
+  verifyTask?(
+    taskID: string,
+    mode: 'dry-run' | 'run',
+    signal: AbortSignal,
+  ): Promise<TaskVerifyReportV1>;
 }
 
 export class AgentConsoleRuntime {
@@ -57,6 +64,10 @@ export class AgentConsoleRuntime {
   #pending: PendingMessage[] = [];
   #approvals = new Map<string, NonNullable<AgentEvent['approval']>>();
   #operation: Promise<void> = Promise.resolve();
+  readonly #verifyTask: AgentConsoleRuntimeOptions['verifyTask'];
+  #verification: TaskVerifyReportV1 | undefined;
+  #verificationController: AbortController | undefined;
+  #verificationJob: Promise<TaskVerifyReportV1> | undefined;
 
   constructor(options: AgentConsoleRuntimeOptions) {
     if (!options.providers.length)
@@ -67,6 +78,7 @@ export class AgentConsoleRuntime {
     this.#cwd = options.cwd;
     this.#providers = new Map(options.providers.map((provider) => [provider.name, provider]));
     this.#skill = options.skill;
+    this.#verifyTask = options.verifyTask;
     this.#preferences = options.preferenceStore ?? new AgentPreferenceStore(options.cwd);
     this.#terminal = new ProjectTerminal(options.cwd);
     this.#terminal.subscribe((terminal) => {
@@ -94,6 +106,7 @@ export class AgentConsoleRuntime {
       setup: {
         availableProviders: [...this.#providers.keys()],
         selectedProvider: selected,
+        verificationAvailable: Boolean(this.#verifyTask),
         preference: await this.#preferences.load(),
         ...(models ? { models } : {}),
         skill: this.#skill,
@@ -158,6 +171,8 @@ export class AgentConsoleRuntime {
   snapshot(): AgentSessionState {
     return AgentSessionStateSchema.parse({
       active: Boolean(this.#session),
+      ...(this.#verification ? { verification: this.#verification } : {}),
+      ...(this.#verificationController ? { verificationRunning: true } : {}),
       ...(this.#session
         ? {
             status: this.#status,
@@ -226,6 +241,63 @@ export class AgentConsoleRuntime {
     return this.#exclusive(() => this.#send(text, policy, signal));
   }
 
+  async verifyTask(
+    taskID: string,
+    mode: 'dry-run' | 'run',
+    confirmed: boolean,
+    signal?: AbortSignal,
+  ): Promise<void> {
+    if (mode === 'run' && !confirmed)
+      throw new ToudocuError(
+        'verification_confirmation_required',
+        'Task verification requires confirmation',
+      );
+    if (!this.#verifyTask)
+      throw new ToudocuError('verification_unavailable', 'Task verification is unavailable');
+    if (!taskID || this.#session?.settings.launch.taskID !== taskID)
+      throw new ToudocuError(
+        'verification_task_mismatch',
+        'Verification requires the active session task',
+      );
+    if (this.#verificationController)
+      throw new ToudocuError('verification_running', 'Task verification is already running');
+    const controller = new AbortController();
+    this.#verificationController = controller;
+    const verificationSignal = signal
+      ? AbortSignal.any([signal, controller.signal])
+      : controller.signal;
+    this.#state();
+    try {
+      this.#verificationJob = this.#verifyTask(taskID, mode, verificationSignal);
+      const report = await this.#verificationJob;
+      verificationSignal.throwIfAborted();
+      this.#verification = TaskVerifyReportV1Schema.parse(report);
+    } finally {
+      this.#verificationController = undefined;
+      this.#verificationJob = undefined;
+      this.#state();
+    }
+  }
+
+  sendVerificationFailure(signal?: AbortSignal): Promise<void> {
+    return this.#exclusive(async () => {
+      const report = this.#verification;
+      if (!report || report.status !== 'failed')
+        throw new ToudocuError('verification_not_failed', 'Latest verification did not fail');
+      if (this.#session?.settings.launch.taskID !== report.task.id)
+        throw new ToudocuError(
+          'verification_task_mismatch',
+          'Verification requires the active session task',
+        );
+      const prefix =
+        'Review this failed Toudocu task verification and propose a fix. Do not make changes until the user asks.\n\n';
+      const bytes = Buffer.from(prefix + JSON.stringify(report));
+      let end = Math.min(bytes.length, 65_536);
+      while (end < bytes.length && end > 0 && (bytes[end]! & 0xc0) === 0x80) end -= 1;
+      await this.#send(bytes.subarray(0, end).toString('utf8'), 'normal', signal);
+    });
+  }
+
   interrupt(signal?: AbortSignal): Promise<void> {
     return this.#exclusive(async () => {
       if (!this.#session || !this.#activeTurn) return;
@@ -275,8 +347,10 @@ export class AgentConsoleRuntime {
           details: { count: this.#pending.length },
         });
       this.#status = 'stopping';
+      this.#verificationController?.abort();
       this.#state();
       try {
+        await this.#verificationJob?.catch(() => undefined);
         await session.stop();
       } catch (error) {
         this.#status = 'failed';
@@ -328,6 +402,8 @@ export class AgentConsoleRuntime {
   }
 
   async close(): Promise<void> {
+    this.#verificationController?.abort();
+    await this.#verificationJob?.catch(() => undefined);
     await this.#exclusive(async () => {
       const session = this.#session;
       const results = await Promise.allSettled([session?.stop(), this.#terminal.close()]);
@@ -452,6 +528,7 @@ export class AgentConsoleRuntime {
   }
 
   #clearSession(): void {
+    this.#verificationController?.abort();
     this.#unsubscribeSession?.();
     this.#unsubscribeSession = undefined;
     this.#session = undefined;

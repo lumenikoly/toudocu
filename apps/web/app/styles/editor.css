@@ -1,0 +1,180 @@
+.editor-workspace .workspace-grid {
+  align-items: start;
+}
+.editor-main {
+  min-inline-size: 0;
+}
+.editor-file-tree {
+  max-block-size: calc(100dvh - 15rem);
+}
+.editor-file-tree .editor-file-group > ul {
+  padding-inline-start: 0.65rem;
+}
+.editor-file-tree button[aria-current='true'] {
+  background: var(--td-accent-soft);
+  color: var(--td-accent-strong);
+}
+.editor-dirty {
+  display: inline-block;
+  margin-inline-start: 0.75rem;
+  color: var(--td-status-warning);
+  font-size: 0.8rem;
+}
+.editor-code {
+  block-size: 34rem;
+  font-size: 0.85rem;
+}
+.editor-source-pane {
+  min-inline-size: 0;
+  overflow: hidden;
+}
+.editor-panes.is-preview {
+  grid-template-columns: minmax(0, 1fr);
+}
+.editor-panes .preview {
+  overflow: auto;
+  max-block-size: 34rem;
+  padding: var(--td-space-4);
+}
+.editor-conflict {
+  margin-block-end: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--td-status-warning);
+  background: var(--td-status-warning-soft);
+  border-radius: var(--td-radius-panel);
+}
+.editor-conflict p {
+  margin-block-start: 0;
+}
+.editor-diagnostics {
+  border-block-start: 1px solid var(--td-border);
+}
+.editor-diagnostics > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.75rem;
+}
+.editor-diagnostics h2 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+.editor-diagnostics h2 span {
+  color: var(--td-text-muted);
+  font-weight: normal;
+}
+.editor-diagnostics ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-block-size: 18rem;
+  overflow: auto;
+}
+.editor-diagnostics li > button {
+  display: grid;
+  gap: 0.3rem;
+  inline-size: 100%;
+  text-align: start;
+  padding: 0.75rem;
+  border: 0;
+  border-block-end: 1px solid var(--td-border);
+  background: transparent;
+  color: inherit;
+}
+.editor-diagnostics li > button:hover {
+  background: var(--td-surface-muted);
+}
+.editor-diagnostics code {
+  color: var(--td-text-muted);
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+}
+.editor-create-dialog {
+  inline-size: min(32rem, calc(100vw - 2rem));
+  max-block-size: calc(100dvh - 2rem);
+  padding: 1.5rem;
+  border: 1px solid var(--td-border);
+  border-radius: var(--td-radius-panel);
+  color: var(--td-text);
+  background: var(--td-surface);
+  box-shadow: var(--td-shadow-raised);
+}
+.editor-create-dialog::backdrop {
+  background: rgb(0 0 0 / 35%);
+}
+.editor-create-dialog form {
+  display: grid;
+  gap: 1rem;
+}
+.editor-create-dialog header,
+.editor-create-dialog footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.editor-create-dialog h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+.editor-create-dialog label {
+  display: grid;
+  gap: 0.4rem;
+}
+.editor-create-dialog input,
+.editor-create-dialog select {
+  inline-size: 100%;
+  min-block-size: 2.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--td-border);
+  border-radius: var(--td-radius-control);
+  color: var(--td-text);
+  background: var(--td-surface);
+  font: inherit;
+}
+.editor-create-dialog button {
+  min-block-size: 2.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--td-border);
+  border-radius: var(--td-radius-control);
+  background: var(--td-surface-muted);
+  color: var(--td-text);
+  font: inherit;
+}
+.editor-create-dialog button[type='submit'] {
+  background: var(--td-accent);
+  color: var(--td-text-on-accent);
+}
+.editor-tree-toggle {
+  display: none;
+}
+@media (max-width: 720px) {
+  .editor-workspace .workspace-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .editor-toolbar {
+    align-items: start;
+    flex-wrap: wrap;
+  }
+  .editor-toolbar code {
+    overflow-wrap: anywhere;
+  }
+  .editor-tree-toggle {
+    display: inline-block;
+  }
+  .editor-file-tree {
+    display: none;
+    max-block-size: 45dvh;
+  }
+  .editor-file-tree.is-open {
+    display: block;
+  }
+  .editor-workspace .editor-panes.is-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .editor-panes.is-split > :first-child {
+    border-inline-end: 0;
+    border-block-end: 1px solid var(--td-border);
+  }
+}
