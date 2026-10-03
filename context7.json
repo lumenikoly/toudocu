@@ -3,7 +3,7 @@
   "url": "https://context7.com/lumenikoly/toudocu",
   "public_key": "pk_WuJDFJAekVT4QaJlYdHHW",
   "projectTitle": "Toudocu",
-  "description": "A local Go CLI and optional AI skill for creating, validating, maintaining, reviewing, translating, and publishing verifiable Markdown project documentation.",
+  "description": "A local TypeScript CLI, React workspace, and optional AI skill for creating, validating, maintaining, reviewing, translating, and publishing verifiable Markdown project documentation.",
   "folders": [
     "docs-en/guides",
     "docs-en/reference",
@@ -25,7 +25,7 @@
     "changes-http.md"
   ],
   "rules": [
-    "In user repositories, use the installed `toudocu` binary. Use `go run ./cmd/toudocu` only inside the Toudocu source repository.",
+    "In user repositories, use the installed `toudocu` CLI. Inside the Toudocu source repository, use package scripts and `node apps/cli/dist/main.js` after building.",
     "Treat `toudocu ...` as shell CLI and `$toudocu ...` as AI-skill workflows. `init`, `refresh`, `translate`, and `feedback` are not top-level CLI commands.",
     "Before changing documentation, follow the target repository's instructions and `.toudocu/config.yml`; reuse its canonical docs root, repository root, excludes, locale, and output.",
     "Do not invoke `$toudocu init`, `$toudocu refresh`, `$toudocu translate`, `$toudocu feedback`, or `task verify --run` implicitly; they require explicit user intent.",

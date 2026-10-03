@@ -193,7 +193,7 @@ components:
         pending: {type: array, maxItems: 32, items: {type: object, required: [id, text, state, reason, position, notSent], properties: {id: {type: string}, text: {type: string, maxLength: 65536}, state: {type: string, enum: [queued, not-sent]}, reason: {type: string}, position: {type: integer, minimum: 1}, notSent: {type: boolean}}}}
         approvals: {type: array, items: {type: object, required: [requestID, kind, reason], properties: {requestID: {type: string}, kind: {type: string}, reason: {type: string}}}}
         failure: {type: string}
-        verification: {type: object, description: "TaskVerifyReport produced by the existing Go verification service; separate from AgentEvent command output."}
+        verification: {type: object, description: "TaskVerifyReport produced by the CLI verification service; separate from AgentEvent command output."}
         terminal: {type: object, required: [available, active], properties: {available: {type: boolean}, active: {type: boolean}, failure: {type: string}}}
         settings:
           type: object

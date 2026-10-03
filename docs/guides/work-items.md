@@ -260,9 +260,9 @@ parentTask: TASK-AUTH-100
 <!-- toudocu:section verification -->
 ## Проверка
 
-- `AC-01` → `go test ./internal/auth -run TestInvalidToken`
-- `AC-02` → `go test ./internal/auth -run TestResetPassword`
-- `ALL` → `go test ./...`
+- `AC-01` → `pnpm test -- --run InvalidToken`
+- `AC-02` → `pnpm test -- --run ResetPassword`
+- `ALL` → `pnpm test`
 - `DOCS` → `toudocu check ./docs --strict`
 ```
 
@@ -446,9 +446,9 @@ updated: 2026-07-27
 <!-- toudocu:section verification -->
 ## Проверка
 
-- `AC-01` → `go test ./internal/auth -run TestExpiredResetToken`
-- `AC-02` → `go test ./internal/auth -run TestResetTokenSingleUse`
-- `ALL` → `go test ./...`
+- `AC-01` → `pnpm test -- --run ExpiredResetToken`
+- `AC-02` → `pnpm test -- --run ResetTokenSingleUse`
+- `ALL` → `pnpm test`
 - `DOCS` → `toudocu check ./docs --strict`
 
 <!-- toudocu:section documentation-impact -->

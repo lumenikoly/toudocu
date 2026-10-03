@@ -1,0 +1,346 @@
+.project-topology {
+  margin-block: var(--td-space-8);
+  padding-block: var(--td-space-6);
+  border-block: 1px solid var(--td-border);
+}
+
+.topology-kind {
+  color: var(--td-text-muted);
+  font: 650 0.65rem/1.2 var(--td-font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.project-topology .section-heading h2 {
+  margin-block: var(--td-space-1) 0;
+}
+
+.topology-canvas {
+  position: relative;
+  display: grid;
+  gap: var(--td-space-2);
+  margin-block-start: var(--td-space-5);
+  padding: var(--td-space-4);
+  overflow: auto;
+  background-image: radial-gradient(var(--td-border) 0.75px, transparent 0.75px);
+  background-size: 1rem 1rem;
+}
+
+.topology-branch {
+  display: grid;
+  grid-template-columns: minmax(14rem, 0.8fr) minmax(18rem, 2fr);
+  align-items: center;
+  min-inline-size: 36rem;
+}
+
+.topology-children {
+  position: relative;
+  display: grid;
+  gap: var(--td-space-2);
+  padding-inline-start: 2rem;
+  border-inline-start: 1px solid var(--td-border-strong);
+}
+
+.topology-children::before {
+  position: absolute;
+  inset-block: 50% auto;
+  inset-inline: -2rem auto;
+  inline-size: 2rem;
+  border-block-start: 1px solid var(--td-border-strong);
+  content: '';
+}
+
+.topology-node {
+  position: relative;
+  min-inline-size: 9.5rem;
+  padding: var(--td-space-3);
+  border: 1px solid var(--td-border);
+  border-radius: var(--td-radius-sm);
+  background: color-mix(in srgb, var(--td-surface) 92%, transparent);
+}
+
+.topology-node::before {
+  position: absolute;
+  inset-block: 50% auto;
+  inset-inline: -2rem auto;
+  inline-size: 2rem;
+  border-block-start: 1px solid var(--td-border-strong);
+  content: '';
+}
+
+.topology-module {
+  border-inline-start: 2px solid var(--td-accent);
+}
+
+.topology-module::before {
+  display: none;
+}
+
+.topology-task {
+  border-inline-start: 2px solid var(--td-status-warning);
+}
+
+.topology-node a {
+  display: block;
+  margin-block-start: var(--td-space-1);
+  color: var(--td-text);
+  font-size: 0.82rem;
+  text-decoration: none;
+}
+
+.topology-node .entity-id {
+  display: block;
+  color: var(--td-accent);
+  font-size: 0.7rem;
+}
+
+.topology-node .entity-title {
+  display: block;
+  overflow: hidden;
+  margin-block-start: 0.15rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topology-node small {
+  display: block;
+  margin-block-start: var(--td-space-2);
+  color: var(--td-text-muted);
+  font: 0.68rem var(--td-font-mono);
+}
+
+.topology-more {
+  align-self: center;
+  color: var(--td-text-muted);
+  font: 0.75rem var(--td-font-mono);
+}
+
+@media (max-width: 52rem) {
+  .topology-canvas {
+    padding: var(--td-space-2);
+  }
+
+  .topology-branch {
+    grid-template-columns: minmax(0, 1fr);
+    min-inline-size: 0;
+    gap: var(--td-space-3);
+  }
+
+  .topology-children {
+    margin-inline-start: var(--td-space-3);
+    padding-inline-start: var(--td-space-4);
+  }
+
+  .topology-children::before {
+    display: none;
+  }
+
+  .topology-node::before {
+    inset-inline-start: calc(-1 * var(--td-space-4));
+    inline-size: var(--td-space-4);
+  }
+
+  .topology-node .entity-title {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
+.mode-heading h2 {
+  margin-block: var(--td-space-1) 0;
+}
+
+.flow-map {
+  display: grid;
+  gap: var(--td-space-4);
+  margin-block: var(--td-space-5);
+  padding: var(--td-space-6);
+  overflow: auto;
+  border: 1px solid var(--td-border);
+  background-image: radial-gradient(var(--td-border) 0.75px, transparent 0.75px);
+  background-size: 1rem 1rem;
+}
+
+.flow-step {
+  display: flex;
+  flex: none;
+  align-items: center;
+}
+
+.flow-node {
+  inline-size: 15rem;
+  min-block-size: 7rem;
+  padding: var(--td-space-4);
+  border: 1px solid var(--td-border-strong);
+  border-block-start: 3px solid var(--td-accent);
+  border-radius: var(--td-radius-control);
+  background: var(--td-surface);
+}
+
+.flow-node[data-terminal] {
+  border-block-start-color: var(--td-status-success);
+}
+
+.flow-node a {
+  display: block;
+  margin-block-start: var(--td-space-2);
+  color: var(--td-text);
+  text-decoration: none;
+}
+
+.flow-node .entity-id,
+.flow-node > code {
+  display: block;
+  color: var(--td-accent);
+  font-size: 0.75rem;
+}
+
+.flow-node .entity-title,
+.flow-node small {
+  display: block;
+  margin-block-start: var(--td-space-1);
+}
+
+.flow-node small {
+  color: var(--td-text-muted);
+  font-size: 0.75rem;
+}
+
+.flow-connectors {
+  position: relative;
+  display: grid;
+  inline-size: 10rem;
+  gap: var(--td-space-2);
+  padding: var(--td-space-2) var(--td-space-4);
+}
+
+.flow-connectors::before {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline: 0;
+  border-block-start: 1px solid var(--td-border-strong);
+  content: '';
+}
+
+.flow-connectors::after {
+  position: absolute;
+  inset-block-start: calc(50% - 0.25rem);
+  inset-inline-end: 0;
+  inline-size: 0.45rem;
+  block-size: 0.45rem;
+  border-block-start: 1px solid var(--td-border-strong);
+  border-inline-end: 1px solid var(--td-border-strong);
+  content: '';
+  rotate: 45deg;
+}
+
+.flow-connector {
+  z-index: 1;
+  padding: var(--td-space-1) var(--td-space-2);
+  border: 1px solid var(--td-border);
+  background: var(--td-surface-canvas);
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+.flow-connector code,
+.flow-connector span,
+.flow-connector small {
+  display: block;
+}
+
+.flow-connector code {
+  color: var(--td-accent);
+}
+
+.flow-connector small {
+  color: var(--td-text-muted);
+}
+
+.flow-data {
+  margin-block-start: var(--td-space-5);
+}
+
+.flow-data > summary {
+  cursor: pointer;
+  color: var(--td-text-muted);
+  font-size: 0.8rem;
+}
+
+.workspace-title {
+  padding-block-end: var(--td-space-5);
+  border-block-end: 1px solid var(--td-border);
+}
+
+.workspace-title h1 {
+  margin-block: var(--td-space-1) 0;
+  font-size: 2.25rem;
+  letter-spacing: -0.035em;
+}
+
+.workspace-title p {
+  margin-block: var(--td-space-2) 0;
+  color: var(--td-text-muted);
+}
+
+.process-board {
+  display: grid;
+  gap: var(--td-space-2);
+  margin-block-start: var(--td-space-6);
+  padding: var(--td-space-4);
+  overflow: auto;
+  background-image: radial-gradient(var(--td-border) 0.75px, transparent 0.75px);
+  background-size: 1rem 1rem;
+}
+
+.process-lane {
+  display: grid;
+  grid-template-columns: minmax(13rem, 0.8fr) minmax(22rem, 2fr);
+  align-items: stretch;
+  min-inline-size: 42rem;
+}
+
+.process-links {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: var(--td-space-2);
+  padding-inline-start: 2rem;
+}
+
+.process-links::before {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 0;
+  inline-size: 2rem;
+  border-block-start: 1px solid var(--td-border-strong);
+  content: '';
+}
+
+.process-node {
+  min-inline-size: 11rem;
+  padding: var(--td-space-3);
+  border: 1px solid var(--td-border);
+  border-radius: var(--td-radius-sm);
+  background: var(--td-surface);
+}
+
+.process-flow {
+  border-inline-start: 2px solid var(--td-accent);
+}
+
+.process-node a,
+.process-node code {
+  display: block;
+  margin-block-start: var(--td-space-1);
+}
+
+.process-node a {
+  color: var(--td-text);
+  text-decoration: none;
+}
+
+.process-node code {
+  color: var(--td-text-muted);
+  font-size: 0.7rem;
+}

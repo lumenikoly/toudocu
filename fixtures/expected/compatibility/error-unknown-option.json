@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "name": "error-unknown-option",
+  "args": [
+    "check",
+    "docs",
+    "--unknown-option"
+  ],
+  "exitCode": 1,
+  "stdout": "",
+  "stderr": "Error: unknown option: --unknown-option\n"
+}

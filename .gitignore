@@ -4,6 +4,14 @@
 /project-docs/
 /web/node_modules/
 /node_modules/
+/packages/*/node_modules/
+/packages/*/dist/
+/packages/platform-node/native/build/
+/packages/platform-node/native/prebuilds/
+/apps/*/node_modules/
+/apps/*/dist/
+/apps/web/test-results/
+/apps/web/playwright-report/
 /web/dist/
 /web/test-results/
 /web/playwright-report/

@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "name": "static-routes",
+  "args": [
+    "build",
+    "docs",
+    "--output",
+    "$OUTPUT",
+    "--clean",
+    "--stale-days",
+    "0"
+  ],
+  "exitCode": 0,
+  "stdout": "\nDocumentation built.\nDirectory:      <TEMP>\nPages:          14\nDocuments:      6\nRoadmap tasks:  0\nCompleted:      0\nWarnings:       0\nErrors:         0\nHome:           <TEMP>/index.html\n",
+  "stderr": "",
+  "routes": [
+    "/",
+    "/404.html",
+    "/architecture/",
+    "/architecture/overview.html",
+    "/health.html",
+    "/modules/",
+    "/modules/core.html",
+    "/processes/",
+    "/report.json",
+    "/search.html",
+    "/use-cases/",
+    "/use-cases/UC-COMPAT.html",
+    "/work/",
+    "/work/TASK-COMPAT-001.html",
+    "/work/TASK-COMPAT-002.html"
+  ]
+}

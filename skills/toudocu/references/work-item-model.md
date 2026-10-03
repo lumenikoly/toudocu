@@ -84,7 +84,7 @@ criteria.
 <!-- toudocu:section verification -->
 ## Verification
 
-- `AC-01` -> `go test ./internal/auth -run TestInvalidToken`
+- `AC-01` -> `pnpm test -- --run InvalidToken`
 ```
 
 Completed tasks require all criteria checked, plus `ALL` and `DOCS` targets and

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "name": "changes-file",
+  "args": [
+    "changes",
+    "file",
+    "$DOCS/index.md",
+    "docs",
+    "--base",
+    "HEAD",
+    "--target",
+    "index",
+    "--format",
+    "json"
+  ],
+  "exitCode": 0,
+  "stdout": "{\n  \"schemaVersion\": 1,\n  \"repository\": {\n    \"root\": \"<TEMP>\",\n    \"branch\": \"master\",\n    \"head\": \"e446bb5\",\n    \"dirty\": true\n  },\n  \"comparison\": {\n    \"base\": {\n      \"type\": \"commit\",\n      \"revision\": \"HEAD\",\n      \"resolved\": \"e446bb5e66e746ceab80096459d870e896a73228\",\n      \"displayRef\": \"HEAD\"\n    },\n    \"target\": {\n      \"type\": \"index\",\n      \"displayRef\": \"index\"\n    }\n  },\n  \"changeSetDigest\": \"sha256:ef1f10996c269629fbce0a4434a0dd77e41238368dc72c17b9c32e1453038a22\",\n  \"summary\": {\n    \"files\": {\n      \"added\": 0,\n      \"modified\": 0,\n      \"deleted\": 0,\n      \"renamed\": 0,\n      \"copied\": 0,\n      \"typeChanged\": 0,\n      \"untracked\": 0\n    },\n    \"lines\": {\n      \"added\": 0,\n      \"deleted\": 0\n    },\n    \"entities\": {},\n    \"classifications\": {}\n  },\n  \"changes\": [],\n  \"diagnostics\": []\n}\n",
+  "stderr": ""
+}

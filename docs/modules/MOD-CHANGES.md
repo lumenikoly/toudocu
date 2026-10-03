@@ -17,15 +17,11 @@ updated: 2026-08-10
 <!-- toudocu:section code-location -->
 ## Расположение в коде
 
-- `internal/app/changes_*.go` — чтение Git, сравнение, отчёт и специальные
-  представления;
-- `internal/app/server.go` — локальный API и обновление отчёта после изменения
-  рабочего дерева;
-- `internal/app/changes_http.go` — список HTTP-маршрутов и единый формат ошибок
-  версии 1;
-- `web/src/features/changes/`, `web/src/styles/changes.css` — интерфейс,
-  доступный только при `serve`. Собранные ресурсы встраиваются из
-  `internal/site/assets/generated/`.
+- `packages/core/src/changes/` — семантика и специальные представления;
+- `packages/platform-node/src/changes/` и `git/` — Git/filesystem adapters;
+- `packages/application/src/` — сборка `ChangeSetReport`;
+- `packages/server/src/` — локальный API и revision;
+- `apps/web/app/` — интерфейс, доступный только при `serve`.
 
 <!-- toudocu:section boundaries -->
 ## Границы

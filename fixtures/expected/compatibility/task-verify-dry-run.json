@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "name": "task-verify-dry-run",
+  "args": [
+    "task",
+    "verify",
+    "TASK-COMPAT-001",
+    "docs",
+    "--dry-run",
+    "--format",
+    "json",
+    "--stale-days",
+    "0"
+  ],
+  "exitCode": 0,
+  "stdout": "{\n  \"schemaVersion\": 1,\n  \"kind\": \"task-verify\",\n  \"generator\": {\n    \"name\": \"Toudocu\",\n    \"version\": \"<VERSION>\"\n  },\n  \"task\": {\n    \"id\": \"TASK-COMPAT-001\",\n    \"title\": \"Implement the compatibility path\",\n    \"status\": {\n      \"kind\": \"planned\",\n      \"symbol\": \"~\",\n      \"label\": \"ready\",\n      \"recognized\": true\n    },\n    \"type\": \"feature\",\n    \"document\": \"work/TASK-COMPAT-001.md\"\n  },\n  \"startedAt\": \"<TIMESTAMP>\",\n  \"finishedAt\": \"<TIMESTAMP>\",\n  \"durationMillis\": \"<DURATION>\",\n  \"status\": \"planned\",\n  \"mode\": \"dry-run\",\n  \"fullVerification\": true,\n  \"validationIssues\": [],\n  \"issues\": [],\n  \"commands\": [\n    {\n      \"sequence\": 1,\n      \"command\": \"go version\",\n      \"targets\": [\n        \"AC-01\",\n        \"ALL\",\n        \"DOCS\"\n      ],\n      \"status\": \"planned\",\n      \"exitCode\": null,\n      \"startedAt\": \"<TIMESTAMP>\",\n      \"finishedAt\": \"<TIMESTAMP>\",\n      \"durationMillis\": \"<DURATION>\",\n      \"stdout\": \"\",\n      \"stderr\": \"\",\n      \"stdoutTruncated\": false,\n      \"stderrTruncated\": false\n    }\n  ],\n  \"criteria\": [\n    {\n      \"id\": \"AC-01\",\n      \"description\": \"The path returns the expected report.\",\n      \"documentCompleted\": false,\n      \"status\": \"planned\"\n    }\n  ],\n  \"targets\": [\n    {\n      \"target\": \"AC-01\",\n      \"status\": \"planned\"\n    },\n    {\n      \"target\": \"ALL\",\n      \"status\": \"planned\"\n    },\n    {\n      \"target\": \"DOCS\",\n      \"status\": \"planned\"\n    }\n  ],\n  \"summary\": {\n    \"totalCommands\": 1,\n    \"passedCommands\": 0,\n    \"failedCommands\": 0,\n    \"timedOutCommands\": 0,\n    \"criteriaPassed\": 0,\n    \"criteriaFailed\": 0\n  }\n}\n",
+  "stderr": ""
+}

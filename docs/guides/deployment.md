@@ -52,19 +52,23 @@ pages` GitHub Actions создаёт временный артефакт Pages: 
 ## Что проверить после публикации
 
 1. Откройте главную страницу и один вложенный документ через HTTP.
-2. Убедитесь, что загружаются `portal.css`, `portal.js` и
-   `data/search-index.json`.
+2. Убедитесь, что загружаются hashed-ресурсы из `assets/` и
+   `_toudocu/search.json`.
 3. Проверьте поиск, переключение темы и понятное сообщение для неверной Mermaid-
    диаграммы.
 4. Повторите те же действия по вложенному URL, если портал публикуется не в
    корне.
 
-Для совместного локального просмотра входной страницы и обоих языковых
-порталов в этом репозитории используются `make docs`, затем
-`make landing-serve`. Они создают маршруты, совпадающие с Pages.
+Для локальной проверки канонического портала используйте:
+
+```bash
+pnpm build
+node apps/cli/dist/main.js build ./docs --output ./build/project-docs --repository-root . --clean
+node apps/cli/dist/main.js serve ./docs --repository-root . --no-open
+```
 
 ## Связанные документы
 
 - [UC-DOCS-01: Создать статический HTTP-портал](../use-cases/build-portal.md)
-- [Граница Go и браузера](../architecture/frontend-runtime-boundary.md)
+- [Граница runtime и браузера](../architecture/frontend-runtime-boundary.md)
 - [CLI-контракт](../contracts/cli.md)

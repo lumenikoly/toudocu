@@ -59,7 +59,7 @@ updated: 2026-08-12
 <!-- toudocu:section automated-checks -->
 ## Автоматические проверки
 
-- `go run ./cmd/toudocu check ./docs --strict --stale-days 0` проверяет
+- `node apps/cli/dist/main.js check ./docs --repository-root . --strict --stale-days 0` проверяет
   каноническую документацию в строгом режиме;
 - тесты контролируют целостность шаблонов и публичной JSON-схемы;
 - отдельные тесты проверяют ссылки, стабильные идентификаторы, контекст рабочих

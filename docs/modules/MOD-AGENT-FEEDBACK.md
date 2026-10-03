@@ -22,15 +22,11 @@ updated: 2026-08-28
 <!-- toudocu:section code-location -->
 ## Расположение в коде
 
-- `internal/app/review_types.go`, `review_store.go` и `review_service.go` —
-  модель, локальное хранилище, очередь по порядку поступления и
-  детерминированные привязки;
-- `internal/app/review_http.go` — локальный API версии 1;
-- `internal/app/review_cli.go` — `agent next|respond`;
-- `web/src/features/discussions/` — отложенно активируемые React-компоненты,
-  composer и синхронизация состояния Portal;
-- `web/src/features/changes/index.ts` — представление того же серверного
-  состояния в Changes;
+- `packages/contracts/src/` — модель HTTP/CLI сообщений версии 1;
+- `packages/platform-node/src/reviews/` — локальное хранилище и FIFO-очередь;
+- `packages/server/src/` — локальный API;
+- `apps/cli/src/` — `agent next|respond`;
+- `apps/web/app/` — Discussions и представление того же состояния в Changes;
 - `.agents/skills/toudocu/references/agent-feedback.md` — правила обработки
   очереди встроенным навыком.
 

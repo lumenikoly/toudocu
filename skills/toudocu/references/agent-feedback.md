@@ -17,7 +17,7 @@ Resolve the canonical Git repository root and run:
 toudocu agent next --repository-root <root> --json
 ```
 
-Inside the Toudocu source repository use `go run ./cmd/toudocu`. If
+Inside the Toudocu source repository use `node apps/cli/dist/main.js`. If
 `pending=false`, stop successfully without reading or changing files. Do not
 read documentation, the roadmap, use cases, work items, acceptance criteria,
 or status before this command. Process exactly the one returned delivery and

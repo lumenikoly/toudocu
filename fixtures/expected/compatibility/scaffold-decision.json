@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "name": "scaffold-decision",
+  "args": [
+    "scaffold",
+    "decision",
+    "ADR-CORPUS",
+    "docs",
+    "--title",
+    "Corpus decision",
+    "--format",
+    "json"
+  ],
+  "exitCode": 0,
+  "stdout": "{\n  \"schemaVersion\": 1,\n  \"kind\": \"scaffold\",\n  \"generator\": {\n    \"name\": \"Toudocu\",\n    \"version\": \"<VERSION>\"\n  },\n  \"entityType\": \"decision\",\n  \"id\": \"ADR-CORPUS\",\n  \"title\": \"Corpus decision\",\n  \"language\": \"en\",\n  \"path\": \"decisions/ADR-CORPUS.md\"\n}\n",
+  "stderr": "",
+  "sideEffects": [
+    {
+      "path": ".toudocu/config.yml",
+      "type": "file",
+      "size": 420,
+      "sha256": "e7c58132a2d032d2b9862f984e9f013409dde4d846d885163c6c3b9ad1c260e8"
+    },
+    {
+      "path": "docs/architecture/overview.md",
+      "type": "file",
+      "size": 258,
+      "sha256": "1bb53ab1d2e228d8ef5bee26c0c794559c8beedd6611b527ce450ff1c852813f"
+    },
+    {
+      "path": "docs/decisions/ADR-CORPUS.md",
+      "type": "file",
+      "size": 240,
+      "sha256": "ce646e40633feed4ab618014ab4b98fb6acd4cacf0e904c05f56b584b43449b4"
+    },
+    {
+      "path": "docs/index.md",
+      "type": "file",
+      "size": 214,
+      "sha256": "d62eafde4fc150377ce607a29022736ff5168fc9336774f117b9b720a708594d"
+    },
+    {
+      "path": "docs/modules/core.md",
+      "type": "file",
+      "size": 822,
+      "sha256": "69745ee0baba5c164470bd058e0eb75d56fc5ce8ea9e5ec4919303bf8ebc4bf2"
+    },
+    {
+      "path": "docs/use-cases/compatibility.md",
+      "type": "file",
+      "size": 602,
+      "sha256": "cf5a426f22d2dcc0ca295491dca149bda17cfd506f8102ac1dd0438c3d0ac42a"
+    },
+    {
+      "path": "docs/work/TASK-COMPAT-001.md",
+      "type": "file",
+      "size": 1064,
+      "sha256": "7aa3c862b8cf7c30b222b979572fc5163267457b7237bef5c70e27b485734321"
+    },
+    {
+      "path": "docs/work/TASK-COMPAT-002.md",
+      "type": "file",
+      "size": 901,
+      "sha256": "9af323492931e8310ec87c94b210b994f3ce9d2f005df5d3f893f2792e50e3a4"
+    }
+  ]
+}
