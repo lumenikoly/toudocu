@@ -3,6 +3,8 @@ import { useLocation } from 'react-router';
 import type { NavigationItem, PortalRoute } from '@toudocu/contracts';
 import { translator, type Locale, type MessageKey } from './i18n.js';
 import { PortalLink } from './routing.js';
+import { Icon } from './ui/index.js';
+import type { IconName } from './design/icons.js';
 
 export function Navigation({
   items,
@@ -16,9 +18,14 @@ export function Navigation({
   const { text } = translator(locale);
   const location = useLocation();
   const [openGroups, setOpenGroups] = useState<Set<string>>(() => {
-    if (typeof localStorage === 'undefined') return new Set();
     try {
-      return new Set(JSON.parse(localStorage.getItem('toudocu-navigation-groups') ?? '[]'));
+      if (typeof localStorage === 'undefined') return new Set();
+      const stored: unknown = JSON.parse(localStorage.getItem('toudocu-navigation-groups') ?? '[]');
+      return new Set(
+        Array.isArray(stored)
+          ? stored.filter((value): value is string => typeof value === 'string')
+          : [],
+      );
     } catch {
       return new Set();
     }
@@ -32,7 +39,11 @@ export function Navigation({
       const next = new Set(current);
       if (open) next.add(folder);
       else next.delete(folder);
-      localStorage.setItem('toudocu-navigation-groups', JSON.stringify([...next]));
+      try {
+        localStorage.setItem('toudocu-navigation-groups', JSON.stringify([...next]));
+      } catch {
+        /* Storage is optional. */
+      }
       return next;
     });
   };
@@ -55,13 +66,12 @@ export function Navigation({
     const key = keys[item.pageId];
     return key ? text(key) : item.title;
   };
-  const glyph = (item: NavigationItem): string => {
-    if (item.kind === 'task' || item.pageId === 'task-workspace') return 'TK';
-    if (item.pageId === 'health') return 'HL';
-    if (item.pageId === 'changes') return 'CH';
-    if (item.pageId === 'editor') return 'ED';
-    if (item.pageId === 'home') return 'PR';
-    return item.kind.slice(0, 2).toUpperCase();
+  const glyph = (item: NavigationItem): IconName => {
+    if (item.kind === 'task' || item.pageId === 'task-workspace') return 'clipboard';
+    if (item.pageId === 'health') return 'checkCircle';
+    if (item.pageId === 'changes' || item.pageId === 'changelog') return 'history';
+    if (item.pageId === 'editor') return 'edit';
+    return 'file';
   };
   const render = (entries: NavigationItem[]): ReactNode => (
     <ul>
@@ -84,7 +94,7 @@ export function Navigation({
               </span>
             ) : (
               <span className="nav-item-glyph" aria-hidden="true">
-                {glyph(item)}
+                <Icon name={glyph(item)} />
               </span>
             )}
             <span className="nav-item-label">{generatedTitle(item)}</span>

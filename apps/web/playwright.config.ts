@@ -15,5 +15,10 @@ export default defineConfig({
       url: 'http://127.0.0.1:4175/_toudocu/api/state',
       reuseExistingServer: false,
     },
+    {
+      command: 'node tests/serve-live.mjs --canonical',
+      url: 'http://127.0.0.1:4177/_toudocu/api/state',
+      reuseExistingServer: false,
+    },
   ],
 });

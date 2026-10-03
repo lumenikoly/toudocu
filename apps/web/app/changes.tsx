@@ -177,7 +177,7 @@ export function ChangesWorkspace({ locale }: { locale: Locale }) {
     if (selectedPath) params.set('path', selectedPath);
     if (tab !== 'source') params.set('tab', tab);
     const next = `${globalThis.location.pathname}?${params}`;
-    globalThis.history.replaceState(null, '', next);
+    globalThis.history.replaceState(globalThis.history.state, '', next);
   }, [appliedRange, filters, selectedPath, tab]);
 
   const shownChanges = useMemo(

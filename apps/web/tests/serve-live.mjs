@@ -1,4 +1,4 @@
-import { cp, mkdtemp, rm } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -14,9 +14,17 @@ for (const signal of ['SIGINT', 'SIGTERM']) {
 const repository = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const temporary = await mkdtemp(join(tmpdir(), 'toudocu-live-browser-'));
 const project = join(temporary, 'project');
+const canonical = process.argv.includes('--canonical');
 const execute = promisify(execFile);
 try {
-  await cp(resolve(repository, 'fixtures/projects/compat-basic'), project, { recursive: true });
+  if (canonical) {
+    await cp(join(repository, 'docs'), join(project, 'docs'), { recursive: true });
+    await mkdir(join(project, '.toudocu'));
+    await cp(join(repository, '.toudocu/config.yml'), join(project, '.toudocu/config.yml'));
+    await cp(join(repository, 'CHANGELOG.md'), join(project, 'CHANGELOG.md'));
+  } else {
+    await cp(resolve(repository, 'fixtures/projects/compat-basic'), project, { recursive: true });
+  }
   await execute('git', ['init', '-q'], { cwd: project });
   await execute('git', ['add', '.'], { cwd: project });
   await execute(
@@ -42,7 +50,7 @@ try {
       '--host',
       '127.0.0.1',
       '--port',
-      '4175',
+      canonical ? '4177' : '4175',
       '--no-update-check',
     ],
     () => {},

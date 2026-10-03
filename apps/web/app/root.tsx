@@ -150,8 +150,10 @@ function AppearanceControls({
           value={appearance.accent}
           onChange={(event) => set('accent', event.currentTarget.value as Appearance['accent'])}
         >
-          {['indigo', 'blue', 'teal', 'green', 'amber', 'rose', 'violet'].map((value) => (
-            <option key={value}>{value}</option>
+          {appearanceValues.accent.map((value) => (
+            <option key={value} value={value}>
+              {text(value)}
+            </option>
           ))}
         </select>
       </label>
@@ -277,8 +279,12 @@ function Shell({ snapshot, locale }: { snapshot: PortalSnapshotV1; locale: Local
     }
   }, [location.pathname]);
   useEffect(() => {
-    const stored = Number(localStorage.getItem('toudocu-sidebar-width'));
-    if (stored >= 220 && stored <= 440) setSidebarWidth(stored);
+    try {
+      const stored = Number(localStorage.getItem('toudocu-sidebar-width'));
+      if (stored >= 220 && stored <= 440) setSidebarWidth(stored);
+    } catch {
+      /* Storage is optional. */
+    }
   }, []);
   const resizeSidebar = (event: ReactPointerEvent<HTMLButtonElement>): void => {
     if (event.button !== 0) return;
@@ -289,7 +295,11 @@ function Shell({ snapshot, locale }: { snapshot: PortalSnapshotV1; locale: Local
   const saveSidebarWidth = (width: number): void => {
     const bounded = Math.min(440, Math.max(220, width));
     setSidebarWidth(bounded);
-    localStorage.setItem('toudocu-sidebar-width', String(bounded));
+    try {
+      localStorage.setItem('toudocu-sidebar-width', String(bounded));
+    } catch {
+      /* Storage is optional. */
+    }
   };
   const current = snapshot.routes.find(
     (route) =>
@@ -317,13 +327,18 @@ function Shell({ snapshot, locale }: { snapshot: PortalSnapshotV1; locale: Local
             </span>
             <span className="site-brand-copy">
               <strong>{snapshot.project.title}</strong>
-              <small>{text('projectLabel')}</small>
             </span>
           </PortalLink>
           <GlobalSearch snapshot={snapshot} locale={locale} />
           <nav className="workspace-tabs" aria-label={text('workspaceNavigation')}>
             {workspaceItems.map((item) => (
-              <PortalLink key={item.id} to={item.href}>
+              <PortalLink
+                key={item.id}
+                to={item.href}
+                active={
+                  item.pageId === 'home' && !['editor', 'changes'].includes(current?.pageId ?? '')
+                }
+              >
                 {item.pageId === 'home'
                   ? text('portal')
                   : item.pageId === 'editor'
@@ -401,10 +416,6 @@ function Shell({ snapshot, locale }: { snapshot: PortalSnapshotV1; locale: Local
           </div>
         </header>
         <aside className="sidebar">
-          <div className="sidebar-context">
-            <span>{text('projectMapLabel')}</span>
-            <strong>{snapshot.project.title}</strong>
-          </div>
           <details className="navigation-disclosure" ref={navigation}>
             <summary>{text('menu')}</summary>
             <Navigation

@@ -84,7 +84,7 @@ export function HomePage({
         )}
       </header>
       {page.document && (
-        <details className="project-about project-about--home" open>
+        <details className="project-about project-about--home">
           <summary>{text('about')}</summary>
           <DocumentBody document={page.document} locale={locale} />
         </details>

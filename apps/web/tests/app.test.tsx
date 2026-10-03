@@ -1,19 +1,114 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen, within, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { PortalApp } from '../app/root.js';
 import { insertRoadmapItem } from '../app/pages.js';
 import { portalFixture } from './fixture.js';
+import { ApiDocsWorkspace } from '../app/workspaces.js';
+import { SwaggerUIBundle } from 'swagger-ui-dist';
+
+vi.mock('swagger-ui-dist', () => ({
+  SwaggerUIBundle: Object.assign(vi.fn(), { presets: { apis: {} } }),
+}));
 
 vi.mock('mermaid', () => ({
   default: { initialize: vi.fn(), run: vi.fn(async () => undefined) },
 }));
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
 
 describe('portal application', () => {
+  it('switches the displayed API contract with the single specification selector', async () => {
+    const user = userEvent.setup();
+    const route = portalFixture().routes[0]!;
+    const specs = [
+      { path: 'contracts/agent.openapi.yaml', title: 'Agent API', version: '1' },
+      { path: 'contracts/editor.openapi.yaml', title: 'Editor API', version: '2' },
+    ];
+    render(
+      <ApiDocsWorkspace
+        page={{ kind: 'api-docs', pageId: 'api-docs', route, specs }}
+        locale="en"
+      />,
+    );
+    await waitFor(() =>
+      expect(SwaggerUIBundle).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: expect.stringContaining('agent.openapi.yaml'),
+          layout: 'BaseLayout',
+        }),
+      ),
+    );
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: 'Specification' }),
+      specs[1]!.path,
+    );
+    await waitFor(() =>
+      expect(SwaggerUIBundle).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          url: expect.stringContaining('editor.openapi.yaml'),
+          supportedSubmitMethods: ['get', 'head'],
+        }),
+      ),
+    );
+    expect(new URLSearchParams(location.search).get('spec')).toBe(specs[1]!.path);
+    expect(screen.getByRole('link', { name: 'Open source' }).getAttribute('href')).toContain(
+      'editor.openapi.yaml',
+    );
+  });
+
+  it('keeps the overview collapsed until requested and the portal tab active on documents', async () => {
+    const user = userEvent.setup();
+    const view = render(<PortalApp snapshot={portalFixture()} initialPath="/" />);
+    const about = view.container.querySelector<HTMLDetailsElement>('.project-about')!;
+    expect(about.open).toBe(false);
+    await user.click(screen.getByText('About the project'));
+    expect(about.open).toBe(true);
+    await user.click(within(about).getByRole('link', { name: 'Deep guide' }));
+    expect(
+      within(screen.getByRole('navigation', { name: 'Workspace navigation' }))
+        .getByRole('link', { name: 'Portal' })
+        .getAttribute('aria-current'),
+    ).toBe('page');
+  });
+
+  it('shows the introduction once when Markdown contains inline markup and entities', () => {
+    const snapshot = portalFixture();
+    const page = snapshot.pages.find(
+      (entry) => entry.kind === 'document' && entry.document.sourcePath === 'guides/deep.md',
+    );
+    if (!page || page.kind !== 'document') throw new Error('Missing guide fixture');
+    page.document.description = 'Useful searchable material & details.';
+    page.document.html = '<p>Useful <strong>searchable</strong> material &amp; details.</p>';
+    render(<PortalApp snapshot={snapshot} initialPath="/guides/deep.html" />);
+    expect(
+      screen.getByRole('main').textContent?.match(/Useful searchable material & details\./gu),
+    ).toHaveLength(1);
+  });
+
+  it('keeps navigation and resizing usable when browser storage is blocked', async () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new DOMException('Blocked', 'SecurityError');
+    });
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('Blocked', 'SecurityError');
+    });
+    const user = userEvent.setup();
+    render(<PortalApp snapshot={portalFixture()} initialPath="/" />);
+    await user.click(screen.getByText('Navigation', { selector: 'summary' }));
+    await user.click(screen.getByRole('link', { name: 'Tasks' }));
+    expect(screen.getByRole('main')).toBeTruthy();
+    const resizer = screen.getByRole('separator', { name: 'Resize navigation' });
+    resizer.focus();
+    await user.keyboard('{ArrowRight}');
+    expect(resizer.getAttribute('aria-valuenow')).toBe('288');
+  });
+
   it('inserts roadmap outcomes into the selected stage', () => {
     const source =
       '# Roadmap\n\n## Next\n\n- [ ] DLV-001 First\n\n## Later\n\n- [ ] DLV-002 Second\n';

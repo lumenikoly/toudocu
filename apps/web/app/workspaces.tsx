@@ -17,60 +17,43 @@ export function ApiDocsWorkspace({
   const [selected, setSelected] = useState(
     page.specs.find((spec) => spec.path === requested)?.path ?? page.specs[0]?.path ?? '',
   );
-  const [source, setSource] = useState('');
   const [error, setError] = useState('');
   const host = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!selected) return;
-    const controller = new AbortController();
-    setError('');
-    void fetch(`/_toudocu/api/editor/file?raw=1&path=${encodeURIComponent(selected)}`, {
-      signal: controller.signal,
-    })
-      .then(async (response) => {
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return response.text();
-      })
-      .then(setSource)
-      .catch((reason: unknown) => {
-        if (!controller.signal.aborted)
-          setError(reason instanceof Error ? reason.message : String(reason));
-      });
     const url = new URL(location.href);
     url.searchParams.set('spec', selected);
     history.replaceState(history.state, '', `${url.pathname}${url.search}`);
-    return () => controller.abort();
   }, [selected]);
   useEffect(() => {
-    if (!host.current || page.specs.length === 0) return;
+    if (!host.current || !selected) return;
     let active = true;
-    void import('swagger-ui-dist').then(({ SwaggerUIBundle, SwaggerUIStandalonePreset }) => {
-      if (!active || !host.current) return;
-      host.current.replaceChildren();
-      SwaggerUIBundle({
-        domNode: host.current,
-        urls: page.specs.map((spec) => ({
-          name: `${spec.title} · ${spec.version}`,
-          url: `/_toudocu/api/editor/file?raw=1&path=${encodeURIComponent(spec.path)}`,
-        })),
-        ...(page.specs.find((spec) => spec.path === selected)?.title
-          ? { 'urls.primaryName': page.specs.find((spec) => spec.path === selected)!.title }
-          : {}),
-        deepLinking: true,
-        displayRequestDuration: true,
-        filter: true,
-        validatorUrl: null,
-        supportedSubmitMethods: ['get', 'head'],
-        presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
-        layout: 'StandaloneLayout',
-        requestInterceptor: (request: { method?: string }) => {
-          const method = (request.method ?? 'GET').toUpperCase();
-          if (method !== 'GET' && method !== 'HEAD')
-            throw new Error('Only GET and HEAD requests are allowed.');
-          return request;
-        },
+    setError('');
+    void import('swagger-ui-dist')
+      .then(({ SwaggerUIBundle }) => {
+        if (!active || !host.current) return;
+        host.current.replaceChildren();
+        SwaggerUIBundle({
+          domNode: host.current,
+          url: `/_toudocu/api/editor/file?raw=1&path=${encodeURIComponent(selected)}`,
+          deepLinking: true,
+          displayRequestDuration: true,
+          filter: true,
+          validatorUrl: null,
+          supportedSubmitMethods: ['get', 'head'],
+          presets: [SwaggerUIBundle.presets.apis],
+          layout: 'BaseLayout',
+          requestInterceptor: (request: { method?: string }) => {
+            const method = (request.method ?? 'GET').toUpperCase();
+            if (method !== 'GET' && method !== 'HEAD')
+              throw new Error('Only GET and HEAD requests are allowed.');
+            return request;
+          },
+        });
+      })
+      .catch((reason: unknown) => {
+        if (active) setError(reason instanceof Error ? reason.message : String(reason));
       });
-    });
     return () => {
       active = false;
     };
@@ -108,7 +91,7 @@ export function ApiDocsWorkspace({
       {page.specs.length === 0 ? (
         <p className="empty-note">{text('noApiContracts')}</p>
       ) : (
-        <div className="swagger-workspace" ref={host} data-source-size={source.length} />
+        <div className="swagger-workspace" ref={host} />
       )}
     </div>
   );

@@ -464,9 +464,6 @@ export function DocumentContent({
           {document.status.kind && <Status status={document.status} locale={locale} />}
         </div>
         <h1>{documentTitle(document)}</h1>
-        {document.description && !document.html.includes(document.description) && (
-          <p className="document-lead">{document.description}</p>
-        )}
         <dl className="document-metadata">
           {document.metadata.owner && (
             <div>
@@ -490,7 +487,7 @@ export function DocumentContent({
               </div>
             ))}
           <div className="document-path">
-            <dt>Path</dt>
+            <dt>{text('path')}</dt>
             <dd>
               <code>{document.sourcePath}</code>
             </dd>

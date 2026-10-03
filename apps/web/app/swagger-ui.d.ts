@@ -6,8 +6,7 @@ declare module 'swagger-ui-dist' {
 
   interface SwaggerOptions {
     domNode: HTMLElement;
-    urls: Array<{ name: string; url: string }>;
-    'urls.primaryName'?: string;
+    url: string;
     deepLinking?: boolean;
     displayRequestDuration?: boolean;
     filter?: boolean;

@@ -77,10 +77,14 @@ export function AgentConsoleWorkspace({
   const draftRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    setOpen(sessionStorage.getItem(PANEL_STORAGE) === 'open');
-    if (sessionStorage.getItem(TAB_STORAGE) === 'output') setTab('output');
-    const savedWidth = Number(localStorage.getItem(WIDTH_STORAGE));
-    if (savedWidth > 0 && Number.isFinite(savedWidth)) setWidth(clampPanelWidth(savedWidth));
+    try {
+      setOpen(sessionStorage.getItem(PANEL_STORAGE) === 'open');
+      if (sessionStorage.getItem(TAB_STORAGE) === 'output') setTab('output');
+      const savedWidth = Number(localStorage.getItem(WIDTH_STORAGE));
+      if (savedWidth > 0 && Number.isFinite(savedWidth)) setWidth(clampPanelWidth(savedWidth));
+    } catch {
+      /* Storage is optional. */
+    }
     const openConsole = (): void => setOpen(true);
     const constrain = (): void => setWidth((current) => clampPanelWidth(current));
     const select = (): void => {
@@ -99,12 +103,20 @@ export function AgentConsoleWorkspace({
   }, []);
 
   useEffect(() => {
-    sessionStorage.setItem(PANEL_STORAGE, open ? 'open' : 'closed');
+    try {
+      sessionStorage.setItem(PANEL_STORAGE, open ? 'open' : 'closed');
+    } catch {
+      /* Storage is optional. */
+    }
     if (open) panelRef.current?.focus();
   }, [open]);
 
   useEffect(() => {
-    sessionStorage.setItem(TAB_STORAGE, tab);
+    try {
+      sessionStorage.setItem(TAB_STORAGE, tab);
+    } catch {
+      /* Storage is optional. */
+    }
   }, [tab]);
 
   useEffect(() => {
@@ -349,7 +361,11 @@ export function AgentConsoleWorkspace({
     setWidth(next);
     if (event.type === 'pointerup') {
       event.currentTarget.releasePointerCapture(event.pointerId);
-      localStorage.setItem(WIDTH_STORAGE, String(next));
+      try {
+        localStorage.setItem(WIDTH_STORAGE, String(next));
+      } catch {
+        /* Storage is optional. */
+      }
     }
   };
 
@@ -413,7 +429,11 @@ export function AgentConsoleWorkspace({
           event.preventDefault();
           const value = clampPanelWidth(next);
           setWidth(value);
-          localStorage.setItem(WIDTH_STORAGE, String(value));
+          try {
+            localStorage.setItem(WIDTH_STORAGE, String(value));
+          } catch {
+            /* Storage is optional. */
+          }
         }}
       />
       <header className="agent-console-header">

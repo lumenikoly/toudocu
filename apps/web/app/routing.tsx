@@ -27,11 +27,13 @@ export function PortalLink({
   children,
   label,
   className,
+  active,
 }: {
   to: string;
   children: ReactNode;
   label?: string;
   className?: string;
+  active?: boolean;
 }) {
   const from = useContext(CurrentOutputPath);
   const location = useLocation();
@@ -51,7 +53,7 @@ export function PortalLink({
       className={className}
       href={href}
       aria-label={label}
-      aria-current={current ? 'page' : undefined}
+      aria-current={current || active ? 'page' : undefined}
       onClick={follow}
     >
       {children}

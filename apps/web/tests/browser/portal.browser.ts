@@ -299,8 +299,43 @@ test('opens workspace settings, dismisses the popover, and keeps static/live hea
   expect(mobileAgentBounds).not.toBeNull();
   if (!mobileSearchBounds || !mobileAgentBounds)
     throw new Error('Mobile header controls are missing');
-  expect(mobileSearchBounds.x + mobileSearchBounds.width).toBeLessThanOrEqual(mobileAgentBounds.x);
+  expect(mobileAgentBounds.y + mobileAgentBounds.height).toBeLessThanOrEqual(mobileSearchBounds.y);
+  await expect(page.locator('.workspace-tabs')).toHaveCSS('overflow-y', 'hidden');
   await page.screenshot({ path: '/tmp/toudocu-header-mobile.png', fullPage: true });
+});
+
+test('mobile navigation stays inside the available viewport and scrolls to project tools', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 500 });
+  await page.goto('./');
+  await page.locator('.navigation-disclosure > summary').click();
+  const sidebar = page.locator('.sidebar');
+  const bounds = await sidebar.boundingBox();
+  if (!bounds) throw new Error('Navigation is missing');
+  expect(bounds.y + bounds.height).toBeLessThanOrEqual(500);
+  const roadmap = sidebar.getByRole('link', { name: 'Roadmap' });
+  await roadmap.scrollIntoViewIfNeeded();
+  await roadmap.click();
+  await expect(page).toHaveURL(/roadmap\.html$/u);
+});
+
+test('live portal remains usable when browser preferences are unavailable', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.addInitScript(() => {
+    Storage.prototype.getItem = () => {
+      throw new DOMException('Blocked', 'SecurityError');
+    };
+    Storage.prototype.setItem = () => {
+      throw new DOMException('Blocked', 'SecurityError');
+    };
+  });
+  await page.goto('http://127.0.0.1:4175/architecture/overview.html');
+  await expect(page.getByRole('heading', { name: 'Architecture' })).toBeVisible();
+  await page.getByRole('button', { name: 'Agent', exact: true }).click();
+  await expect(page.locator('aside.agent-console')).toBeVisible();
+  expect(errors).toEqual([]);
 });
 
 test('keeps generated routes readable without JavaScript', async ({ browser }) => {

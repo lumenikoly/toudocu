@@ -5,15 +5,12 @@ import type { PortalSnapshotV1 } from '@toudocu/contracts';
 import { translator, type Locale } from './i18n.js';
 import { Icon } from './ui/index.js';
 
-type SearchEntry = Extract<PortalSnapshotV1['pages'][number], { kind: 'search' }>['entries'][number];
+type SearchEntry = Extract<
+  PortalSnapshotV1['pages'][number],
+  { kind: 'search' }
+>['entries'][number];
 
-export function GlobalSearch({
-  snapshot,
-  locale,
-}: {
-  snapshot: PortalSnapshotV1;
-  locale: Locale;
-}) {
+export function GlobalSearch({ snapshot, locale }: { snapshot: PortalSnapshotV1; locale: Locale }) {
   const { text, documentType } = translator(locale);
   const input = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
