@@ -1,7 +1,7 @@
 <!-- toudocu
 id: CON-CLI-V1
 status: done
-updated: 2026-08-29
+updated: 2026-10-03
 -->
 
 # CLI Toudocu v1
@@ -23,6 +23,7 @@ updated: 2026-08-29
 | `agent respond` | Добавляет структурированный ответ агента | Только локальное пользовательское состояние вне репозитория |
 | `task changes` | Сопоставляет Git diff с обещаниями задачи | Ничего, кроме явно указанного `-o` |
 | `task init` | Создаёт черновик `TASK-*` или `BUG-*` | Один новый файл без перезаписи |
+| `task list` | Показывает неархивированные задачи с текстом и связями | Ничего |
 | `task tree` | Показывает дерево декомпозиции | Ничего |
 | `scaffold` | Создаёт документ выбранного типа | Один новый файл без перезаписи |
 | `task ready`, `task candidates`, `task context` | Проверяет полноту, возвращает фронт работы или контекст | Ничего |
@@ -118,6 +119,25 @@ toudocu skill install|status|update|uninstall
   `changes.exclude`. Исключаются только `generated/**` и `cache/**` внутри
   выбранного каталога. С `--permanent-only` этот режим несовместим.
 
+## Обнаружение проекта и возможностей
+
+Интеграции вызывают `toudocu project info --format json` из своего рабочего
+каталога. CLI ищет ближайший `.toudocu/config.yml` вверх по дереву и возвращает
+`ProjectInfoV1`: абсолютные `projectRoot`, `documentationRoot`, `configPath` и
+`project` с `id` и `title`. Корень документации берётся из настроенного языка
+по умолчанию. `id` — имя каталога проекта, `title` — `site.title` либо то же имя.
+Этот ID не является глобальным идентификатором и может различаться между
+worktree; внешняя система хранит собственную идентичность проекта. Discovery
+читает конфигурацию без компиляции документов. Если конфигурация не найдена,
+CLI возвращает код 1 и JSON-ошибку `PROJECT_NOT_FOUND` в stderr.
+
+`toudocu capabilities --format json` работает и вне проекта. Ответ
+`ToudocuCapabilitiesV1` содержит `schemaVersion`, установленную `version`,
+`cliContractVersion` и список `capabilities`. Клиент проверяет версию CLI-контракта
+и наличие нужной возможности; номер релиза не заменяет эту проверку.
+Обе схемы доступны в `@toudocu/contracts`, текущие версии контрактов — 1.
+Команды не изменяют файлы и принимают только `--format text|json` и справку.
+
 ## JSON-ответы
 
 Все публичные отчёты содержат `schemaVersion: 1`.
@@ -128,7 +148,7 @@ toudocu skill install|status|update|uninstall
   критерии приёмки; `completionSource` остаётся `use-case-status`. Версия схемы
   остаётся `1`, поле `completionBlockers` не добавляется.
 - `SearchReport`, `TaskInitReport`, `ScaffoldReport`, `TaskReadyReport`,
-  `TaskCandidatesReport`, `TaskContextReport`, `TaskTreeReport`,
+  `TaskListReport`, `TaskCandidatesReport`, `TaskContextReport`, `TaskTreeReport`,
   `TaskMoveReport` и `TaskVerifyReport` принадлежат своим командам.
 - `ChangeSetReport` — самостоятельный отчёт изменений и не входит в
   `ProjectReport`.
@@ -140,6 +160,16 @@ toudocu skill install|status|update|uninstall
 
 Пустые коллекции записываются как `[]`, номера строк начинаются с единицы. Новое
 необязательное поле может появиться без смены версии схемы.
+
+`task list --format json` возвращает `TaskListReport` со снимком всех
+неархивированных `TASK-*` и `BUG-*`, включая черновики и завершённые задачи.
+Каждый элемент `tasks[]` содержит `task` с `parentId` и `childIds`, канонический
+текст документа в `markdown` и `ready`. Для Draft и Ready `ready` содержит
+обычный `TaskReadyReport`, для остальных статусов — `null`. `--strict` применяет
+те же правила готовности, что `task ready`. Просмотр списка не запускает Git
+changes, команды проверки или изменение файлов. Клиенты могут строить дерево
+и читать задачи из одного снимка; перед запуском работы готовность проверяется
+заново в текущей рабочей копии.
 
 `ProjectReport.knowledge.workItems[]` содержит добавочные поля `parentId` и
 вычисленный `childIds`. `TaskContextReport.hierarchy` хранит только компактные

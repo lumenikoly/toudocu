@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import type { PageViewV1, PortalSnapshotV1, TaskHierarchyNode } from '@toudocu/contracts';
-import { EntityIdentity } from './document.js';
+import { EntityIdentity, EntityReference, Status } from './document.js';
 import { translator, type Locale } from './i18n.js';
 import { PortalLink } from './routing.js';
+import { Icon } from './ui/index.js';
 import { TaskItemActions } from './task-actions.js';
 
 type TaskPage = Extract<PageViewV1, { kind: 'task-workspace' }>;
@@ -146,7 +147,7 @@ function TaskDetails({ item, items, snapshot, locale }: ItemProps) {
           <>
             <dt>{text('useCaseFilter')}</dt>
             <dd>
-              <code>{item.useCaseId}</code>
+              <EntityReference value={item.useCaseId} snapshot={snapshot} />
             </dd>
           </>
         )}
@@ -203,16 +204,13 @@ function TaskCard(props: ItemProps) {
         <ItemLink id={item.id} snapshot={snapshot}>
           <EntityIdentity document={item} />
         </ItemLink>
-        <span className="task-row-title">{item.title}</span>
       </div>
-      <span className="status-badge" data-status={state}>
-        {status(state)}
-      </span>
+      <Status status={{ kind: state, label: state }} locale={locale} />
       <span className="task-row-context">
         {item.type && <span>{status(item.type)}</span>}
         {item.priority && <span>{status(item.priority)}</span>}
         {item.severity && <span>{status(item.severity)}</span>}
-        {item.moduleId && <code>{item.moduleId}</code>}
+        {item.moduleId && <EntityReference value={item.moduleId} snapshot={snapshot} />}
       </span>
       {reason && <p className="task-workspace-reason">{reason}</p>}
       <TaskProgress item={item} locale={locale} />
@@ -257,10 +255,21 @@ function TaskList({
                 </ItemLink>
                 <TaskDetails item={item} items={items} snapshot={snapshot} locale={locale} />
               </td>
-              <td>{status(item.workspace.workState)}</td>
+              <td>
+                <Status
+                  status={{ kind: item.workspace.workState, label: item.workspace.workState }}
+                  locale={locale}
+                />
+              </td>
               <td>{item.priority ? status(item.priority) : '—'}</td>
               <td>{item.type ? status(item.type) : '—'}</td>
-              <td>{item.moduleId ?? '—'}</td>
+              <td>
+                {item.moduleId ? (
+                  <EntityReference value={item.moduleId} snapshot={snapshot} />
+                ) : (
+                  '—'
+                )}
+              </td>
               <td>
                 <TaskProgress item={item} locale={locale} />
               </td>
@@ -532,9 +541,11 @@ export function TaskWorkspace({
             key={value}
             type="button"
             aria-pressed={mode === value}
+            aria-label={text(value)}
+            title={text(value)}
             onClick={() => update('mode', value)}
           >
-            {text(value)}
+            <Icon name={value} />
           </button>
         ))}
       </nav>

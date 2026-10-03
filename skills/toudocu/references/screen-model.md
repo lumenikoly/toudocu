@@ -115,3 +115,7 @@ Markdown links to the listed use cases or to the architecture document.
 `FLOW_DIAGRAM` and `TRANSITION_ROWS` must be replaced with complete,
 evidence-backed Mermaid source or table rows; templates provide no default
 topology or wording.
+
+Transitions describe navigation, not a mandatory test inventory. Add test links
+only when useful for the current acceptance criteria; do not manufacture tasks
+or tests for every `TR-*`. Explicitly declared traceability must remain valid.

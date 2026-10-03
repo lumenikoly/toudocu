@@ -79,3 +79,6 @@ export type {
   AssetMetadataResolver,
   DocumentationChangesOptions,
 } from './changes/service.js';
+export { discoverProject } from './project-info.js';
+export { discoverServeInstance, registerServeInstance } from './serve-instance.js';
+export type { RegisteredServeInstance, ServeInstanceOptions } from './serve-instance.js';

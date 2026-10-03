@@ -236,7 +236,15 @@ function taskFromMarkdown(task: Task): WorkItemTask {
 
 function commandsForVerificationLine(line: string, target: string): string[] {
   const commands: string[] = [];
-  for (const match of line.matchAll(codeSpan)) {
+  const delimiter = /→|->|=>/u.exec(line);
+  const delimiterInCode =
+    delimiter &&
+    [...line.matchAll(codeSpan)].some(
+      (match) => match.index <= delimiter.index && delimiter.index < match.index + match[0].length,
+    );
+  const commandText =
+    delimiter && !delimiterInCode ? line.slice(delimiter.index + delimiter[0].length) : line;
+  for (const match of commandText.matchAll(codeSpan)) {
     const value = match[1]?.trim() ?? '';
     if (value && value !== target) commands.push(value);
   }
@@ -275,7 +283,7 @@ function traceabilityForVerificationLine(
     .split(/\s*(?:→|->|=>)\s*/u)
     .map((part) => part.trim())
     .filter(Boolean);
-  if (parts.length < 3 || parts[0]?.toUpperCase() !== id) return undefined;
+  if (parts.length < 3 || !targetsForVerificationLine(line).includes(id)) return undefined;
   const transitions = splitReferences(parts[1])
     .filter((value) => value.toUpperCase().startsWith('TR-'))
     .map((value) => value.toUpperCase());
@@ -347,88 +355,63 @@ function parseCriteriaAndVerification(
   const commandsById = new Map<string, string[]>();
   const transitionsById = new Map<string, string[]>();
   const referencesById = new Map<string, string[]>();
-  const seenTargets = new Set<string>();
   const verificationSection = workSection(item, 'verification');
   if (verificationSection) {
     for (const [localIndex, line] of verificationSection.markdown.split('\n').entries()) {
       const issueLine = verificationSection.heading.range.start.line + 1 + localIndex;
       const targets = targetsForVerificationLine(line);
       if (!targets.length) continue;
-      if (targets.length > 1) {
-        issues.push(
-          issue(
-            item.document.sourcePath,
-            'ambiguous-verification-target',
-            'A verification entry must reference exactly one AC-*, ALL, DOCS, or QUALITY target.',
-            issueLine,
-          ),
-        );
-        continue;
-      }
-      const target = targets[0] ?? '';
-      if (target.startsWith('AC-') && !byId.has(target)) {
-        issues.push(
-          issue(
-            item.document.sourcePath,
-            'unknown-criterion-verification',
-            `Verification references unknown criterion ${target}.`,
-            issueLine,
-          ),
-        );
-        continue;
-      }
-      if (target.startsWith('AC-')) {
-        const trace = traceabilityForVerificationLine(line, target);
-        if (trace) {
-          const references = referencesById.get(target) ?? [];
-          transitionsById.set(target, [
-            ...(transitionsById.get(target) ?? []),
-            ...trace.transitions,
-          ]);
-          if (!trace.reference) {
-            issues.push(
-              issue(
-                item.document.sourcePath,
-                'empty-traceability-verification',
-                `No verification is defined for the relationship between ${target} and the transition.`,
-                issueLine,
-              ),
-            );
-          } else {
-            referencesById.set(target, [...references, trace.reference]);
-          }
+      for (const target of targets) {
+        if (target.startsWith('AC-') && !byId.has(target)) {
+          issues.push(
+            issue(
+              item.document.sourcePath,
+              'unknown-criterion-verification',
+              `Verification references unknown criterion ${target}.`,
+              issueLine,
+            ),
+          );
           continue;
         }
+        if (target.startsWith('AC-')) {
+          const trace = traceabilityForVerificationLine(line, target);
+          if (trace) {
+            const references = referencesById.get(target) ?? [];
+            transitionsById.set(target, [
+              ...(transitionsById.get(target) ?? []),
+              ...trace.transitions,
+            ]);
+            if (!trace.reference) {
+              issues.push(
+                issue(
+                  item.document.sourcePath,
+                  'empty-traceability-verification',
+                  `No verification is defined for the relationship between ${target} and the transition.`,
+                  issueLine,
+                ),
+              );
+            } else {
+              referencesById.set(target, [...references, trace.reference]);
+            }
+            continue;
+          }
+        }
+        const commands = commandsForVerificationLine(line, target);
+        if (!commands.length) {
+          issues.push(
+            issue(
+              item.document.sourcePath,
+              'empty-criterion-verification',
+              `No verification command is defined for target ${target}.`,
+              issueLine,
+            ),
+          );
+          continue;
+        }
+        checks.push({ target, commands, line: issueLine });
+        if (target.startsWith('AC-'))
+          commandsById.set(target, [...(commandsById.get(target) ?? []), ...commands]);
       }
-      const commands = commandsForVerificationLine(line, target);
-      if (!commands.length) {
-        issues.push(
-          issue(
-            item.document.sourcePath,
-            'empty-criterion-verification',
-            `No verification command is defined for target ${target}.`,
-            issueLine,
-          ),
-        );
-        continue;
-      }
-      if (seenTargets.has(target)) {
-        const code = target.startsWith('AC-')
-          ? 'duplicate-criterion-verification'
-          : 'duplicate-verification-target';
-        issues.push(
-          issue(
-            item.document.sourcePath,
-            code,
-            `Multiple verification entries are defined for target ${target}.`,
-            issueLine,
-          ),
-        );
-      }
-      seenTargets.add(target);
-      checks.push({ target, commands, line: issueLine });
-      if (target.startsWith('AC-'))
-        commandsById.set(target, [...(commandsById.get(target) ?? []), ...commands]);
     }
   }
   const criteria: WorkItemTask[] = [];
@@ -875,15 +858,6 @@ function validateWorkItem(
           item.headingLine,
         ),
       );
-    if (strict && !workSection(item, 'regression-test')?.text.trim())
-      issues.push(
-        issue(
-          item.document.sourcePath,
-          'missing-bug-regression-test',
-          'A bug requires a regression-test criterion or a Regression test section explaining why automation is not possible.',
-          item.headingLine,
-        ),
-      );
     if (statusName === 'done' && !workSection(item, 'cause')?.text.trim())
       issues.push(
         issue(
@@ -897,21 +871,6 @@ function validateWorkItem(
   if (statusName === 'blocked') requiredSection(item, 'blocker', 'Blocker', issues);
   if (statusName === 'cancelled')
     requiredSection(item, 'cancellation-reason', 'Cancellation reason', issues);
-  if (strict) {
-    const declared = new Set(parsed.checks.map((check) => check.target));
-    const targets = ['ALL', 'DOCS'];
-    if (splitReferences(item.metadata.standards).length) targets.push('QUALITY');
-    for (const target of targets)
-      if (!declared.has(target))
-        issues.push(
-          issue(
-            item.document.sourcePath,
-            statusName === 'done' ? 'missing-completed-task-check' : 'missing-task-check',
-            `The task must contain verification for ${target}.`,
-            item.headingLine,
-          ),
-        );
-  }
   let terminalHistory = statusName === 'cancelled';
   if (statusName === 'done') {
     terminalHistory = true;

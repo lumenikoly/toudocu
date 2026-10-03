@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { GeneratorSchema, TaskRefSchema } from './common.js';
 import { IssueSchema } from './issue.js';
+import { WorkItemSchema } from './project.js';
 
 export const TaskDescendantsSummarySchema = z.strictObject({
   total: z.int().nonnegative(),
@@ -41,6 +42,18 @@ export const TaskCandidateSchema = z.strictObject({
   readyForWork: z.boolean(),
   blockedBy: z.array(z.strictObject({ id: z.string(), status: z.string() })).nullable(),
   issues: z.array(IssueSchema),
+});
+export const TaskListReportV1Schema = z.strictObject({
+  schemaVersion: z.literal(1),
+  kind: z.literal('task-list'),
+  generator: GeneratorSchema,
+  tasks: z.array(
+    z.strictObject({
+      task: WorkItemSchema,
+      markdown: z.string(),
+      ready: TaskReadyReportV1Schema.nullable(),
+    }),
+  ),
 });
 export const TaskCandidatesReportV1Schema = z.strictObject({
   schemaVersion: z.literal(1),
@@ -84,6 +97,7 @@ export const TaskMoveReportV1Schema = z.strictObject({
   issues: z.array(IssueSchema),
 });
 export type TaskReadyReportV1 = z.infer<typeof TaskReadyReportV1Schema>;
+export type TaskListReportV1 = z.infer<typeof TaskListReportV1Schema>;
 export type TaskCandidatesReportV1 = z.infer<typeof TaskCandidatesReportV1Schema>;
 export type TaskTreeReportV1 = z.infer<typeof TaskTreeReportV1Schema>;
 export type TaskMoveReportV1 = z.infer<typeof TaskMoveReportV1Schema>;

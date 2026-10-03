@@ -1,0 +1,11 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM"],
+    "paths": {
+      "@toudocu/contracts": ["./node_modules/@toudocu/contracts/src/index.ts"]
+    }
+  },
+  "include": ["src"]
+}

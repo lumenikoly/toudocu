@@ -122,6 +122,11 @@ diagnostics.
 
 ## Validate
 
+Choose checks proportional to the changed behavior and its risks. Reuse existing
+coverage and group criteria served by the same command. Do not manufacture new
+tests or duplicate suite runs to fill verification labels; see
+[references/work-item-model.md](references/work-item-model.md) for work items.
+
 Ordinary source-documentation mutations require the ordinary project check
 unless the selected operation reference defines its own validation or delivery
 policy. Run strict validation only when repository policy or the user requires

@@ -882,7 +882,6 @@ function buildTraceability(
   issues: Issue[],
 ): TraceabilityRow[] {
   const rows: TraceabilityRow[] = [];
-  const covered = new Set<string>();
   for (const item of workItems) {
     const declared = new Set(item.transitionIDs);
     const traced = new Set<string>();
@@ -930,7 +929,6 @@ function buildTraceability(
             'missing-traceability-verification',
           );
         traced.add(transitionID);
-        covered.add(transitionID);
         rows.push({
           useCaseID: transition.useCaseID,
           screenID: transition.fromID,
@@ -964,16 +962,6 @@ function buildTraceability(
       else screen.workItemIDs.push(item.id);
     }
   }
-  for (const transition of transitions.values())
-    if (!covered.has(transition.id))
-      addIssue(
-        issues,
-        'warning',
-        `Transition ${transition.id} is not linked to a verification.`,
-        transition.document,
-        transition.line,
-        'transition-without-test',
-      );
   return rows;
 }
 

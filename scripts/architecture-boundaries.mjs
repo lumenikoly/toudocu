@@ -13,6 +13,19 @@ const nodeBuiltins = new Set([
 
 const rules = [
   {
+    prefix: 'packages/integrations/bb/src/',
+    forbidden: (specifier) =>
+      isPackage(specifier, [
+        'core',
+        'application',
+        'platform-node',
+        'server',
+        'portal',
+        'skills',
+      ]) || specifier.startsWith('apps/web/'),
+    message: 'bb integration uses only public CLI and contracts',
+  },
+  {
     prefix: 'packages/contracts/src/',
     forbidden: (specifier) =>
       isNode(specifier) ||
@@ -171,15 +184,17 @@ export function checkArchitecture(
       const targetPath = target ? relative(root, target).replaceAll('\\', '/') : undefined;
       const forbiddenTarget =
         targetPath !== undefined &&
-        ((relativePath.startsWith('packages/contracts/src/') &&
-          isLayerPath(targetPath, [
-            'core',
-            'application',
-            'platform-node',
-            'portal',
-            'server',
-            'skills',
-          ])) ||
+        ((relativePath.startsWith('packages/integrations/bb/src/') &&
+          !targetPath.startsWith('packages/integrations/bb/')) ||
+          (relativePath.startsWith('packages/contracts/src/') &&
+            isLayerPath(targetPath, [
+              'core',
+              'application',
+              'platform-node',
+              'portal',
+              'server',
+              'skills',
+            ])) ||
           (relativePath.startsWith('packages/core/src/') &&
             isLayerPath(targetPath, ['application', 'platform-node', 'portal', 'server'])) ||
           (relativePath.startsWith('packages/application/src/') &&

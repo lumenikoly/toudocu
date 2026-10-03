@@ -40,6 +40,13 @@ const restricted = (patterns, message) => ({
 });
 
 export default defineConfig([
+  {
+    files: ['packages/integrations/bb/src/**/*.{ts,tsx}'],
+    rules: restricted(
+      [nodePackages, corePackages, ['@toudocu/portal', '@toudocu/portal/*', 'apps/web/*']],
+      'bb integration uses public CLI and contracts only.',
+    ),
+  },
   globalIgnores([
     '**/node_modules/**',
     '**/dist/**',

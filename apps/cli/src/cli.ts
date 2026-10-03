@@ -1,11 +1,14 @@
 import { Command } from 'commander';
+import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { lstat, readFile } from 'node:fs/promises';
+import { lstat, readFile, realpath } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { resolve } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { cwd } from 'node:process';
 import {
+  discoverProject,
+  registerServeInstance,
   buildDocumentationChanges,
   listRepositoryReviewFiles,
   readRepositoryReviewFile,
@@ -51,6 +54,8 @@ import {
   searchDocumentation,
   formatSearchText,
   buildTaskReady,
+  buildTaskList,
+  formatTaskListText,
   formatTaskReadyText,
   buildTaskCandidates,
   buildTaskTree,
@@ -98,6 +103,8 @@ const help: Readonly<Record<string, string>> = {
     'Returns compact read-only context for a Ready+ task.\n\nUsage:\n  toudocu task context TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]\n',
   'task-candidates':
     'Lists Draft and Ready work candidates without changing files.\n\nUsage:\n  toudocu task candidates [docs-dir] [--parent TASK-ID] [--strict] [--format text|json]\n\nWithout --parent, candidates come from all active work items. With --parent,\nonly descendants of that TASK-* are included.\n',
+  'task-list':
+    'Lists all nonarchived work items with canonical Markdown and readiness without changing files.\n\nUsage:\n  toudocu task list [docs-dir] [--strict] [--repository-root DIR] [--format text|json]\n',
   'task-tree':
     'Shows a read-only TASK-* decomposition tree.\n\nUsage:\n  toudocu task tree TASK-ID [docs-dir] [--repository-root DIR] [--format text|json]\n',
   'task-ready':
@@ -612,6 +619,72 @@ export async function runCLI(
     stdout(`${version}\n`);
     return 0;
   }
+  if (argv[0] === 'capabilities' || (argv[0] === 'project' && argv[1] === 'info')) {
+    try {
+      const parser = new Command(
+        argv[0] === 'project' ? 'toudocu project info' : 'toudocu capabilities',
+      )
+        .description(
+          argv[0] === 'project'
+            ? 'Discover the current project and its default documentation root.'
+            : 'List the public CLI contract version and supported capabilities.',
+        )
+        .exitOverride()
+        .configureOutput({ writeErr: () => {}, writeOut: stdout })
+        .option('--format <format>', '', 'text')
+        .allowExcessArguments(false);
+      parser.parse([...argv.slice(argv[0] === 'project' ? 2 : 1)], { from: 'user' });
+      const { format } = parser.opts<{ format: string }>();
+      if (!['text', 'json'].includes(format)) throw new Error('--format must be text or json');
+      const report =
+        argv[0] === 'project'
+          ? await discoverProject(cwd(), signal)
+          : {
+              schemaVersion: 1,
+              version,
+              cliContractVersion: 1,
+              capabilities: [
+                'project-info',
+                'workspace-discovery',
+                'task-candidates',
+                'task-list',
+                'task-context',
+                'task-ready',
+                'task-changes',
+                'task-verify',
+                'search',
+                'changes',
+                'check',
+                'agent-feedback',
+              ],
+            };
+      stdout(
+        format === 'json'
+          ? json(report)
+          : Object.entries(report)
+              .map(
+                ([key, value]) =>
+                  `${key}: ${typeof value === 'object' ? JSON.stringify(value) : value}`,
+              )
+              .join('\n') + '\n',
+      );
+      return 0;
+    } catch (error) {
+      if (signal?.aborted) return interruptionExitCode(signal);
+      if (error instanceof Error && 'code' in error && error.code === 'commander.helpDisplayed')
+        return 0;
+      stderr(
+        json({
+          schemaVersion: 1,
+          error: {
+            code: error instanceof ToudocuError ? error.code : 'INVALID_ARGUMENT',
+            message: argumentError(error),
+          },
+        }),
+      );
+      return 1;
+    }
+  }
   if (argv[0] === 'agent') {
     return runAgentCLI(argv, stdout, stderr);
   }
@@ -625,7 +698,9 @@ export async function runCLI(
   }
   if (!command || !Object.hasOwn(help, command)) {
     if (argv[0] === 'task') {
-      stderr('Error: usage: toudocu task init|ready|candidates|context|verify|archive|restore\n');
+      stderr(
+        'Error: usage: toudocu task init|list|ready|candidates|context|verify|archive|restore\n',
+      );
       return 1;
     }
     stderr(
@@ -740,7 +815,10 @@ export async function runCLI(
     if (command !== 'search' && parser.getOptionValueSource('limit') === 'cli') {
       throw new Error('--limit is available only for search');
     }
-    if (options.strict && !['build', 'check', 'task-ready', 'task-candidates'].includes(command)) {
+    if (
+      options.strict &&
+      !['build', 'check', 'task-ready', 'task-candidates', 'task-list'].includes(command)
+    ) {
       throw new Error('--strict is not available for this command');
     }
     if (options.clean && command !== 'build') {
@@ -992,6 +1070,11 @@ export async function runCLI(
       stdout(options.format === 'json' ? json(report) : formatTaskCandidatesText(report));
       return 0;
     }
+    if (command === 'task-list' && !versionIssue) {
+      const report = buildTaskList(project, taskOptions);
+      stdout(options.format === 'json' ? json(report) : formatTaskListText(report));
+      return 0;
+    }
     if (command === 'task-tree' && !versionIssue) {
       const report = buildTaskTree(project, taskID, taskOptions);
       stdout(options.format === 'json' ? json(report) : formatTaskTreeText(report));
@@ -1149,7 +1232,13 @@ export async function runCLI(
         : undefined;
       const brandingFiles = new Map(project.branding);
       const projectFiles = new Map([...project.links.assets, ...project.screenAssets]);
+      const instance = {
+        instanceId: randomUUID(),
+        projectRoot: await realpath(project.inventory.root),
+        documentationRoot: await realpath(project.snapshot.root),
+      };
       const server = createDocumentationServer({
+        instance,
         initialSnapshot: createPortalSnapshot(project, snapshotOptions),
         rebuild: async (rebuildSignal) => {
           const rebuilt = await loadProject(inputDirectory, {
@@ -1238,8 +1327,14 @@ export async function runCLI(
         ...(agentConsole ? { agentConsole } : {}),
         onError: (error) => stderr(`Rebuild failed: ${argumentError(error)}\n`),
       });
+      let registration: Awaited<ReturnType<typeof registerServeInstance>> | undefined;
       try {
         const address = await server.app.listen({ host: options.host, port: Number(options.port) });
+        registration = await registerServeInstance({
+          ...instance,
+          url: address,
+          ...(signal ? { signal } : {}),
+        });
         stdout(`Documentation server started at ${address}\n`);
         if (signal) {
           if (!signal.aborted) {
@@ -1251,7 +1346,11 @@ export async function runCLI(
           await new Promise<never>(() => undefined);
         }
       } finally {
-        await server.close();
+        try {
+          await server.close();
+        } finally {
+          await registration?.unregister();
+        }
       }
       return signal?.aborted ? interruptionExitCode(signal) : 0;
     }

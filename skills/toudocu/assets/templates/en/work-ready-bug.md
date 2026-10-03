@@ -68,15 +68,11 @@ updated: {{DATE}}
 ## Acceptance criteria
 
 - [ ] `AC-01` {{ACCEPTANCE_CRITERION}}
-- [ ] `AC-02` Regression test: {{REGRESSION_CRITERION}}
 
 <!-- toudocu:section verification -->
 ## Verification
 
 - `AC-01` -> `{{ACCEPTANCE_COMMAND}}`
-- `AC-02` -> `{{REGRESSION_COMMAND}}`
-- `ALL` -> `{{ALL_COMMAND}}`
-- `DOCS` -> `{{DOCS_COMMAND}}`
 
 <!-- toudocu:section documentation-impact -->
 ## Documentation impact

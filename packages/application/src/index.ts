@@ -20,6 +20,7 @@ export {
 } from './task-write.js';
 export { searchDocumentation, formatSearchText } from './search.js';
 export { buildTaskReady, formatTaskReadyText } from './task-ready.js';
+export { buildTaskList, formatTaskListText } from './task-list.js';
 export { moveTask, planTaskMove, formatTaskMoveText } from './task-archive.js';
 export type { TaskMoveOperation, TaskMoveOptions, TaskMovePlan } from './task-archive.js';
 export { buildTaskContext, formatTaskContextText } from './task-context.js';

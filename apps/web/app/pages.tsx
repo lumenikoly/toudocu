@@ -5,7 +5,7 @@ import {
   type PageViewV1,
   type PortalSnapshotV1,
 } from '@toudocu/contracts';
-import { EmptyState } from './ui/index.js';
+import { EmptyState, Icon } from './ui/index.js';
 import { translator, type Locale, type MessageKey } from './i18n.js';
 import { PortalLink } from './routing.js';
 import { ApiDocsWorkspace, EditorWorkspace } from './workspaces.js';
@@ -16,6 +16,7 @@ import {
   DocumentReadingView,
   DocumentLink,
   EntityIdentity,
+  EntityReference,
   MermaidEnhancer,
   Relations,
   Status,
@@ -91,7 +92,10 @@ function CatalogPage({
   const documents = page.data.documents.filter(
     (document) =>
       (!status || document.status.kind === status) &&
-      (!needle || document.sourcePath.toLocaleLowerCase(locale).includes(needle)),
+      (!needle ||
+        `${document.id} ${document.title} ${document.sourcePath}`
+          .toLocaleLowerCase(locale)
+          .includes(needle)),
   );
   return (
     <>
@@ -111,7 +115,9 @@ function CatalogPage({
         >
           <option value="">{text('allStatuses')}</option>
           {statuses.map((value) => (
-            <option key={value}>{value}</option>
+            <option key={value} value={value}>
+              {translator(locale).status(value)}
+            </option>
           ))}
         </select>
         <span>
@@ -120,12 +126,15 @@ function CatalogPage({
         {(query || status) && (
           <button
             type="button"
+            className="ui-icon-button"
+            aria-label={text('reset')}
+            title={text('reset')}
             onClick={() => {
               setQuery('');
               setStatus('');
             }}
           >
-            {text('reset')}
+            <Icon name="close" />
           </button>
         )}
       </div>
@@ -259,7 +268,7 @@ function ProcessesPage({
             <div className="process-node process-flow">
               <span className="topology-kind">FLOW</span>
               <DocumentLink snapshot={snapshot} sourcePath={flow.document} />
-              {flow.moduleId && <code>{flow.moduleId}</code>}
+              {flow.moduleId && <EntityReference value={flow.moduleId} snapshot={snapshot} />}
             </div>
             <div className="process-links">
               {flow.useCaseIds.map((id) => {
@@ -288,9 +297,11 @@ function ProcessesPage({
 
 function TraceabilityPage({
   page,
+  snapshot,
   locale,
 }: {
   page: Extract<PageViewV1, { kind: 'traceability' }>;
+  snapshot: PortalSnapshotV1;
   locale: Locale;
 }) {
   const { text } = translator(locale);
@@ -332,8 +343,12 @@ function TraceabilityPage({
         <tbody>
           {rows.map((row, index) => (
             <tr key={`${row.screen}:${row.task}:${index}`}>
-              <td>{row.screen}</td>
-              <td>{row.task}</td>
+              <td>
+                <EntityReference value={row.screen} snapshot={snapshot} />
+              </td>
+              <td>
+                <EntityReference value={row.task} snapshot={snapshot} />
+              </td>
               <td>{row.verification}</td>
             </tr>
           ))}
@@ -386,7 +401,9 @@ function HealthPage({
         >
           <option value="">{text('allSeverities')}</option>
           {severities.map((value) => (
-            <option key={value}>{value}</option>
+            <option key={value} value={value}>
+              {translator(locale).status(value)}
+            </option>
           ))}
         </select>
         <span>
@@ -689,7 +706,7 @@ export function Page({
       );
       break;
     case 'traceability': {
-      content = <TraceabilityPage page={page} locale={locale} />;
+      content = <TraceabilityPage page={page} snapshot={snapshot} locale={locale} />;
       break;
     }
     case 'health': {

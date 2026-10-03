@@ -1,4 +1,13 @@
 export const icons = {
+  helpCircle: '<circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 0 1 6 0c0 2-3 2-3 4M12 17h.01"/>',
+  wrench: '<path d="M14 6a5 5 0 0 0-6 6L3 17a2.8 2.8 0 0 0 4 4l5-5a5 5 0 0 0 6-6l-3 3-4-4z"/>',
+  arrowRight: '<path d="M4 12h16m-6-6 6 6-6 6"/>',
+
+  board:
+    '<rect x="3" y="4" width="7" height="16" rx="1"/><rect x="14" y="4" width="7" height="10" rx="1"/>',
+  list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  tree: '<path d="M5 3v14h5M5 7h5M14 7h7M14 17h7"/><rect x="10" y="5" width="4" height="4" rx="1"/><rect x="10" y="15" width="4" height="4" rx="1"/>',
+
   close: '<path d="M18 6 6 18M6 6l12 12"/>',
   menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
   search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',

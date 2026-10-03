@@ -250,7 +250,7 @@ Run `--run` only when all of these are true:
 - the report path is outside source documentation.
 
 The command executes each unique shell command from `AC-*`, `ALL`, `DOCS`, and
-the required `QUALITY` target when standards are declared, once from repository
+optional `QUALITY` targets, once from repository
 root. A failure does not stop remaining commands.
 
 ## Build and serve

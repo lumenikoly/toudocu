@@ -17,7 +17,12 @@ test('task metadata and supporting sections stay structured', async ({ page }) =
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('./work/TASK-COMPAT-001.html');
 
+  const properties = page.locator('.document-properties');
+  await expect(properties).not.toHaveAttribute('open');
+  await properties.locator('summary').click();
+  await expect(properties).toHaveAttribute('open', '');
   const metadata = page.locator('.document-metadata');
+  await expect(metadata).toBeVisible();
   await expect(metadata).toHaveJSProperty('tagName', 'DL');
   await expect(metadata.locator('dt')).toContainText([
     'Updated',

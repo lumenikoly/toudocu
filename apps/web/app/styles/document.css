@@ -406,6 +406,7 @@
 }
 
 .relations-section {
+  max-inline-size: none;
   inline-size: min(100%, 72rem);
   margin: var(--td-space-5) auto 0;
   padding: var(--td-space-4) var(--td-space-5);
@@ -446,19 +447,27 @@
 
 @container (max-width: 48rem) {
   .document-header {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .document-identity {
+    grid-column: 1 / -1;
+  }
+  .document-properties {
+    grid-column: 1;
+    grid-row: 3;
   }
 
   .document-header h1,
   .document-metadata,
-  .document-signals,
-  .document-actions {
-    grid-column: 1;
+  .document-signals {
+    grid-column: 1 / -1;
   }
 
   .document-actions {
-    grid-row: auto;
-    justify-content: start;
+    grid-column: 2;
+    grid-row: 3;
+    justify-content: end;
   }
 
   .document-layout {
@@ -488,5 +497,62 @@
 
   .relations-section {
     padding: var(--td-space-3) var(--td-space-4);
+  }
+}
+
+.document-properties {
+  grid-column: 1 / -1;
+  min-inline-size: 0;
+}
+.document-properties > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--td-space-2);
+  min-block-size: 2.5rem;
+  color: var(--td-text-muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+  list-style: none;
+}
+.document-properties > summary::-webkit-details-marker {
+  display: none;
+}
+.document-properties[open] > summary .ui-icon {
+  rotate: 180deg;
+}
+.document-properties > summary:hover {
+  color: var(--td-accent);
+}
+.document-properties .document-metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--td-space-2) var(--td-space-5);
+  padding-block: var(--td-space-3);
+}
+.document-properties .document-metadata > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--td-space-2);
+  max-inline-size: 100%;
+}
+.document-properties .document-metadata dd {
+  margin: 0;
+}
+.document-properties .document-path {
+  flex-basis: 100%;
+}
+.document-header {
+  row-gap: var(--td-space-2);
+}
+
+@container (max-width: 28rem) {
+  .document-properties {
+    grid-column: 1 / -1;
+  }
+  .document-actions {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    justify-content: start;
   }
 }

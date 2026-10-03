@@ -181,6 +181,7 @@ test('validates bug metadata independently of the ordinary feature contract', ()
     '<!-- toudocu\nid: BUG-AUTH-120\nstatus: ready\ntaskType: bug\nmodule: MOD-AUTH\nuseCase: UC-AUTH-01\nregression: true\n-->\n# BUG-AUTH-120: Broken login\n\nDescription.\n',
   );
   const result = compileWorkItems([bug], repository());
+  expect(result.issues.map((issue) => issue.code)).not.toContain('missing-bug-regression-test');
   expect(result.issues.map((issue) => issue.code)).toEqual(
     expect.arrayContaining([
       'missing-bug-field',
@@ -190,3 +191,30 @@ test('validates bug metadata independently of the ordinary feature contract', ()
     ]),
   );
 });
+
+test.each(['ready', 'done'])(
+  'accepts grouped checks without mandatory suite labels for %s tasks',
+  (status) => {
+    const content = readyFeature('TASK-AUTH-100', 'standards: STD-TS-001\n')
+      .replace('status: ready', `status: ${status}`)
+      .replace(
+        '- [ ] `AC-01` Login succeeds.',
+        '- [x] `AC-01` Login succeeds.\n- [x] `AC-02` Session is restored.',
+      )
+      .replace(
+        /- `AC-01` ->[^\n]+\n- `ALL` ->[^\n]+\n- `DOCS` ->[^\n]+/u,
+        '- `AC-01`, `AC-02` -> `node -e "(() => true)()"`\n- `AC-01` `node -e "(() => false)()"`',
+      );
+    const result = compileWorkItems(
+      [document('work/TASK-AUTH-100.md', content)],
+      repository(['src/auth.ts', 'docs/index.md']),
+    );
+    expect(result.issues).toEqual([]);
+    expect(
+      result.items[0]?.verification.map(({ criterionId, commands }) => ({ criterionId, commands })),
+    ).toEqual([
+      { criterionId: 'AC-01', commands: ['node -e "(() => true)()"', 'node -e "(() => false)()"'] },
+      { criterionId: 'AC-02', commands: ['node -e "(() => true)()"'] },
+    ]);
+  },
+);

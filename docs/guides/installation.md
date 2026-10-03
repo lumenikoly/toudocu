@@ -59,3 +59,7 @@ pnpm install --frozen-lockfile
 pnpm build
 node apps/cli/dist/main.js version
 ```
+
+`pnpm build` и `make update-local` собирают Toudocu без установленного bb.
+Интеграция bb собирается отдельно через
+`pnpm --filter @toudocu/bb-plugin build`; только этой команде нужен CLI bb.

@@ -7,7 +7,7 @@ import { PortalLink } from './routing.js';
 import { createIcon, type IconName } from './design/icons.js';
 
 export type DocumentView = Extract<PageViewV1, { kind: 'document' }>['document'];
-type DocumentPage = Extract<PageViewV1, { kind: 'document' | 'task' | 'changelog' }>;
+type DocumentPage = Extract<PageViewV1, { kind: 'document' | 'task' | 'changelog' | 'home' }>;
 
 export function documentTitle(document: Pick<DocumentView, 'id' | 'title'>): string {
   return document.id && document.title.startsWith(`${document.id}:`)
@@ -31,8 +31,11 @@ export function EntityIdentity({ document }: { document: Pick<DocumentView, 'id'
 function pageForDocument(snapshot: PortalSnapshotV1, sourcePath: string): DocumentPage | undefined {
   for (const page of snapshot.pages) {
     if (
-      (page.kind === 'document' || page.kind === 'task' || page.kind === 'changelog') &&
-      page.document.sourcePath === sourcePath
+      (page.kind === 'document' ||
+        page.kind === 'task' ||
+        page.kind === 'changelog' ||
+        page.kind === 'home') &&
+      page.document?.sourcePath === sourcePath
     ) {
       return page;
     }
@@ -50,13 +53,30 @@ export function DocumentLink({
   children?: ReactNode;
 }) {
   const page = pageForDocument(snapshot, sourcePath);
-  return page ? (
+  return page?.document ? (
     <PortalLink to={page.route.href}>
       {children ?? <EntityIdentity document={page.document} />}
     </PortalLink>
   ) : (
     (children ?? sourcePath)
   );
+}
+
+export function EntityReference({
+  value,
+  snapshot,
+}: {
+  value: string;
+  snapshot?: PortalSnapshotV1 | undefined;
+}) {
+  const target = snapshot?.pages.find(
+    (page) =>
+      (page.kind === 'document' || page.kind === 'task' || page.kind === 'changelog') &&
+      (page.document.id === value || page.document.sourcePath === value),
+  );
+  if (target) return <PortalLink to={target.route.href}>{value}</PortalLink>;
+  if (/^https?:\/\//u.test(value)) return <a href={value}>{value}</a>;
+  return <>{value}</>;
 }
 
 export function Status({
@@ -464,35 +484,45 @@ export function DocumentContent({
           {document.status.kind && <Status status={document.status} locale={locale} />}
         </div>
         <h1>{documentTitle(document)}</h1>
-        <dl className="document-metadata">
-          {document.metadata.owner && (
-            <div>
-              <dt>{text('owner')}</dt>
-              <dd>{document.metadata.owner}</dd>
-            </div>
-          )}
-          <div>
-            <dt>{text('updated')}</dt>
-            <dd>
-              <time dateTime={document.updatedAt}>{document.updatedAt.slice(0, 10)}</time>
-            </dd>
-          </div>
-          {Object.entries(document.metadata)
-            .filter(([key, value]) => value && !['id', 'owner', 'updated', 'status'].includes(key))
-            .slice(0, 6)
-            .map(([key, value]) => (
-              <div key={key}>
-                <dt>{key}</dt>
-                <dd>{value}</dd>
+        <details className="document-properties">
+          <summary>
+            {text('details')}
+            <Icon name="chevronDown" />
+          </summary>
+          <dl className="document-metadata">
+            {document.metadata.owner && (
+              <div>
+                <dt>{text('owner')}</dt>
+                <dd>{document.metadata.owner}</dd>
               </div>
-            ))}
-          <div className="document-path">
-            <dt>{text('path')}</dt>
-            <dd>
-              <code>{document.sourcePath}</code>
-            </dd>
-          </div>
-        </dl>
+            )}
+            <div>
+              <dt>{text('updated')}</dt>
+              <dd>
+                <time dateTime={document.updatedAt}>{document.updatedAt.slice(0, 10)}</time>
+              </dd>
+            </div>
+            {Object.entries(document.metadata)
+              .filter(
+                ([key, value]) => value && !['id', 'owner', 'updated', 'status'].includes(key),
+              )
+              .slice(0, 6)
+              .map(([key, value]) => (
+                <div key={key}>
+                  <dt>{key}</dt>
+                  <dd>
+                    <EntityReference value={value} snapshot={snapshot} />
+                  </dd>
+                </div>
+              ))}
+            <div className="document-path">
+              <dt>{text('path')}</dt>
+              <dd>
+                <code>{document.sourcePath}</code>
+              </dd>
+            </div>
+          </dl>
+        </details>
         {(document.warnings > 0 || document.errors > 0 || document.stale) && (
           <div className="document-signals" role="status">
             {document.errors > 0 && (

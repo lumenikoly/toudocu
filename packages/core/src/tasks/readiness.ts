@@ -126,16 +126,10 @@ export function taskReadiness(
     add('missing-acceptance-criterion', 'At least one AC-* criterion is required.');
   const count = (target: string) => item.checks.filter((check) => check.target === target).length;
   for (const criterion of item.verification)
-    if (count(criterion.criterionId) !== 1 || !criterion.commands.length)
+    if (count(criterion.criterionId) < 1 || !criterion.commands.length)
       add(
         'invalid-criterion-verification',
-        `Criterion ${criterion.criterionId} requires exactly one executable verification mapping.`,
-      );
-  for (const target of ['ALL', 'DOCS', ...(item.standardIds.length ? ['QUALITY'] : [])])
-    if (count(target) !== 1)
-      add(
-        'missing-verification-target',
-        `Exactly one verification mapping is required for ${target}.`,
+        `Criterion ${criterion.criterionId} requires an executable verification mapping.`,
       );
   const k = project.knowledge;
   const references: [string, string[], readonly { id: string }[]][] = [

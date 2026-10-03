@@ -3,6 +3,8 @@ import { cleanup, render, screen, within, waitFor } from '@testing-library/react
 import { userEvent } from '@testing-library/user-event';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { MemoryRouter } from 'react-router';
+import { DocumentLink, EntityReference } from '../app/document.js';
 import { PortalApp } from '../app/root.js';
 import { insertRoadmapItem } from '../app/pages.js';
 import { portalFixture } from './fixture.js';
@@ -23,6 +25,28 @@ afterEach(() => {
 });
 
 describe('portal application', () => {
+  it('links known entity IDs, source paths and the home document without inventing missing targets', () => {
+    const snapshot = portalFixture();
+    render(
+      <MemoryRouter>
+        <EntityReference value="TASK-WEB-001" snapshot={snapshot} />
+        <EntityReference value="guides/deep.md" snapshot={snapshot} />
+        <EntityReference value="TASK-MISSING" snapshot={snapshot} />
+        <DocumentLink sourcePath="index.md" snapshot={snapshot} />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole('link', { name: 'TASK-WEB-001' }).getAttribute('href')).toBe(
+      'work/TASK-WEB-001.html',
+    );
+    expect(screen.getByRole('link', { name: 'guides/deep.md' }).getAttribute('href')).toBe(
+      'guides/deep.html',
+    );
+    expect(screen.getByRole('link', { name: 'Example project' }).getAttribute('href')).toBe(
+      'index.html',
+    );
+    expect(screen.queryByRole('link', { name: 'TASK-MISSING' })).toBeNull();
+  });
+
   it('switches the displayed API contract with the single specification selector', async () => {
     const user = userEvent.setup();
     const route = portalFixture().routes[0]!;

@@ -7,10 +7,22 @@ import {
   type PortalSnapshotV1,
 } from '@toudocu/contracts';
 import { translator, type Locale, type MessageKey } from './i18n.js';
+import { Icon } from './ui/index.js';
+import type { IconName } from './design/icons.js';
 import { action, jsonRequest } from './workspace-api.js';
 
 type TaskPage = Extract<PageViewV1, { kind: 'task' }>;
 type WorkItem = TaskPage['workItem'];
+const actionIcons: Partial<Record<MessageKey, IconName>> = {
+  taskCompleteTree: 'tree',
+  startWork: 'play',
+  taskContinue: 'play',
+  taskExplainBlocker: 'shield',
+  taskAsk: 'messageSquare',
+  taskClarify: 'helpCircle',
+  taskFixProblems: 'wrench',
+  taskNext: 'arrowRight',
+};
 
 export function TaskItemActions({
   item,
@@ -91,14 +103,24 @@ export function TaskItemActions({
   return (
     <div className="task-item-actions">
       {snapshot.capabilities.editing && item.workspace.canComplete && (
-        <button type="button" disabled={busy} onClick={() => void complete()}>
-          {text('completeTask')}
+        <button
+          className="ui-icon-button"
+          type="button"
+          aria-label={text('completeTask')}
+          title={text('completeTask')}
+          disabled={busy}
+          onClick={() => void complete()}
+        >
+          <Icon name="checkCircle" />
         </button>
       )}
       {snapshot.capabilities.agentConsole &&
         actions.map((entry) => (
           <button
             key={entry.label}
+            className="ui-icon-button"
+            aria-label={text(entry.label)}
+            title={text(entry.label)}
             type="button"
             disabled={busy}
             onClick={() => {
@@ -112,7 +134,7 @@ export function TaskItemActions({
               );
             }}
           >
-            {text(entry.label)}
+            <Icon name={actionIcons[entry.label] ?? 'messageSquare'} />
           </button>
         ))}
       {error && <p role="alert">{error}</p>}

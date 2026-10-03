@@ -1,0 +1,48 @@
+{
+  "name": "@toudocu/bb-plugin",
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "bb": ">=0.45",
+    "bbPluginSdk": ">=0.6.15"
+  },
+  "bb": {
+    "name": "Toudocu",
+    "description": "Toudocu tasks and project context in your thread.",
+    "branding": {
+      "icon": "BookOpen"
+    },
+    "server": "./src/plugin.ts",
+    "app": "./src/ui.tsx",
+    "host": "./src/host.ts",
+    "skills": [
+      "skills"
+    ]
+  },
+  "dependencies": {
+    "@toudocu/contracts": "file:../../contracts"
+  },
+  "devDependencies": {
+    "@get-bb/plugin-sdk": "0.6.15",
+    "@types/react": "^19.0.0",
+    "better-sqlite3": "12.10.0",
+    "cron-parser": "5.5.0",
+    "hono": "4.11.9",
+    "react": "^19.0.0"
+  },
+  "files": [
+    "dist",
+    "src",
+    "skills",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "bb plugin build",
+    "typecheck": "tsc --noEmit",
+    "package": "bb plugin build && node scripts/package.mjs"
+  },
+  "publishConfig": {
+    "directory": "build/package",
+    "access": "public"
+  }
+}

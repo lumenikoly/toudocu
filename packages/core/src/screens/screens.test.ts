@@ -193,13 +193,13 @@ screens: SC-MISSING
     expect(result.issues.some((issue) => issue.code === 'unsafe-screen-preview')).toBe(false);
   });
 
-  it('builds traceability and diagnoses an unverified transition', () => {
+  it('builds explicit traceability without requiring tests for other transitions', () => {
     const home = screen(
       'SC-AUTH-HOME',
       '/',
       '',
       transitionTable(
-        '| TR-AUTH-001 | UC-AUTH-01 | Open login | Always | SC-AUTH-LOGIN | | | | | navigation |',
+        '| TR-AUTH-001 | UC-AUTH-01 | Open login | Always | SC-AUTH-LOGIN | | | | | navigation |\n| TR-AUTH-002 | UC-AUTH-01 | Retry login | Retry | SC-AUTH-LOGIN | | | | | navigation |',
       ),
     );
     const login = screen('SC-AUTH-LOGIN', '/login');

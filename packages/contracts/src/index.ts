@@ -71,12 +71,14 @@ export type {
 } from './repository-review.js';
 export {
   TaskReadyReportV1Schema,
+  TaskListReportV1Schema,
   TaskCandidatesReportV1Schema,
   TaskTreeReportV1Schema,
   TaskMoveReportV1Schema,
 } from './tasks.js';
 export type {
   TaskReadyReportV1,
+  TaskListReportV1,
   TaskCandidatesReportV1,
   TaskTreeReportV1,
   TaskMoveReportV1,
@@ -150,3 +152,4 @@ export type {
   SkillScope,
   SkillState,
 } from './skill.js';
+export * from './integration.js';

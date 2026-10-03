@@ -7,6 +7,7 @@ import {
   AgentConsoleMessageSchema,
   RepositoryFileQuerySchema,
   RepositoryFilesQuerySchema,
+  ServeInstanceIdentityV1Schema,
   ToudocuError,
   type AgentConsoleState,
   type AgentConsoleMessage,
@@ -28,12 +29,14 @@ import {
   type RepositoryFileList,
   type RepositoryFileResponse,
   type PortalSnapshotV1,
+  type ServeInstanceIdentityV1,
 } from '@toudocu/contracts';
 import { PortalState } from './state.js';
 import { isLoopbackHost } from './loopback.js';
 import { watchProject, type ProjectWatcher } from './watcher.js';
 
 export interface DocumentationServerOptions {
+  instance?: ServeInstanceIdentityV1;
   initialSnapshot: PortalSnapshotV1;
   rebuild(signal: AbortSignal): Promise<PortalSnapshotV1>;
   watchPaths?: readonly string[];
@@ -359,6 +362,16 @@ export function createDocumentationServer(
     ? new AgentConsoleTransport(options.agentConsole)
     : undefined;
   let watcher: ProjectWatcher | undefined;
+
+  if (options.instance) {
+    const instance = ServeInstanceIdentityV1Schema.parse(options.instance);
+    app.get('/_toudocu/api/instance', async (_request, reply) =>
+      reply
+        .header('cache-control', 'no-store')
+        .header('access-control-allow-origin', '*')
+        .send(instance),
+    );
+  }
 
   app.get(
     '/_toudocu/api/portal',

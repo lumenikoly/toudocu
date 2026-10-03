@@ -9,5 +9,5 @@
   ],
   "exitCode": 1,
   "stdout": "",
-  "stderr": "Error: usage: toudocu task init|ready|candidates|context|verify|archive|restore\n"
+  "stderr": "Error: usage: toudocu task init|list|ready|candidates|context|verify|archive|restore\n"
 }

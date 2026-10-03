@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import test from 'node:test';
 import { ESLint } from 'eslint';
@@ -16,6 +16,7 @@ test('core cannot reach runtime or browser globals without an adapter', async ()
 
 function fixture(relativePath, source) {
   const file = join(process.cwd(), relativePath);
+  mkdirSync(file.slice(0, file.lastIndexOf('/')), { recursive: true });
   writeFileSync(file, source);
   return { file };
 }
@@ -86,5 +87,26 @@ test('contracts cannot import implementations and core cannot import HTTP or CLI
   } finally {
     rmSync(contracts.file, { force: true });
     rmSync(core.file, { force: true });
+  }
+});
+
+test('bb integration depends on contracts and SDK, never Toudocu implementations', () => {
+  const { file } = fixture(
+    'packages/integrations/bb/src/architecture-boundary-fixture.ts',
+    "import '@get-bb/plugin-sdk'; import '@toudocu/contracts'; import '@toudocu/core'; import '@toudocu/application'; import '@toudocu/platform-node'; import '@toudocu/server'; import '../../../core/src/index.js';",
+  );
+  try {
+    assert.deepEqual(
+      checkArchitecture([file]).map(({ specifier }) => specifier),
+      [
+        '@toudocu/core',
+        '@toudocu/application',
+        '@toudocu/platform-node',
+        '@toudocu/server',
+        '../../../core/src/index.js',
+      ],
+    );
+  } finally {
+    rmSync(file, { force: true });
   }
 });

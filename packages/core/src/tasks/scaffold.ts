@@ -171,9 +171,6 @@ ${parent}-->
 <!-- toudocu:section verification -->
 ## Проверка
 
-<!-- toudocu:section regression-test -->
-## Регрессионный тест
-
 <!-- toudocu:section documentation-impact -->
 ## Влияние на документацию
 `;
@@ -221,9 +218,6 @@ Not established.
 
 <!-- toudocu:section verification -->
 ## Verification
-
-<!-- toudocu:section regression-test -->
-## Regression test
 
 <!-- toudocu:section documentation-impact -->
 ## Documentation impact

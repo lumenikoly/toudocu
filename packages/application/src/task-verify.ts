@@ -103,11 +103,9 @@ export function planTaskCommands(item: WorkItem): PlannedTaskCommand[] {
 }
 
 function fullVerification(item: WorkItem): boolean {
-  const targets = new Set(item.checks.map((check) => check.target));
   return (
-    targets.has('ALL') &&
-    targets.has('DOCS') &&
-    (!item.standardIds.length || targets.has('QUALITY'))
+    item.verification.length > 0 &&
+    item.verification.every((criterion) => criterion.commands.length > 0)
   );
 }
 

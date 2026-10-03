@@ -193,3 +193,31 @@ test('run rejects task states outside the legacy allow-list', async () => {
   expect(report.status).toBe('blocked');
   expect(report.validationIssues.map((issue) => issue.code)).toContain('invalid-task-verify-state');
 });
+
+test('runs a minimal criterion plan once without optional targets', async () => {
+  const commands: string[] = [];
+  const report = await executeTaskVerification(
+    project('- `AC-01` -> `echo first`\n- `AC-01` -> `echo first`'),
+    'TASK-VERIFY-001',
+    { ...options, mode: 'run' },
+    async (command) => {
+      commands.push(command);
+      return {
+        status: 'passed',
+        exitCode: 0,
+        startedAt: now.toISOString(),
+        finishedAt: now.toISOString(),
+        durationMillis: 0,
+        stdout: '',
+        stderr: '',
+        stdoutTruncated: false,
+        stderrTruncated: false,
+      };
+    },
+  );
+  expect(commands).toEqual(['echo first']);
+  expect(report.validationIssues).toEqual([]);
+  expect(report.status).toBe('passed');
+  expect(report.fullVerification).toBe(true);
+  expect(report.summary.criteriaPassed).toBe(1);
+});
