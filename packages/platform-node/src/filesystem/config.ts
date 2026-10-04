@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { extname, resolve } from 'node:path';
+import { extname } from 'node:path';
 import { ToudocuError } from '@toudocu/contracts';
 import {
   defaultSiteConfig,
@@ -9,7 +9,7 @@ import {
   type LocaleProfile,
   type SiteConfig,
 } from '@toudocu/core';
-import { isInside, PathPolicy } from './path-policy.js';
+import { isInside, PathPolicy, resolveForSafety } from './path-policy.js';
 
 export interface LoadedConfig {
   config: SiteConfig;
@@ -89,8 +89,11 @@ export interface SelectedLocale {
 }
 
 /** Select one tree; all peer roots remain excluded from discovery and context. */
-export function selectLocaleProfile(loaded: LoadedConfig, inputRoot: string): SelectedLocale {
-  const root = resolve(inputRoot);
+export async function selectLocaleProfile(
+  loaded: LoadedConfig,
+  inputRoot: string,
+): Promise<SelectedLocale> {
+  const root = await resolveForSafety(inputRoot);
   const selected = [...loaded.localeRoots].find(([, candidate]) => candidate === root);
   if (!selected) {
     if (loaded.config.documentationVersion === documentationVersion)

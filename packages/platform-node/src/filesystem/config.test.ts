@@ -4,6 +4,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { sectionTypes } from '@toudocu/core';
 import { loadSiteConfig, selectLocaleProfile } from './config.js';
+import { readRepositoryInventory } from './inventory.js';
+import { readSourceSnapshot } from './sources.js';
 
 const temporary: string[] = [];
 afterEach(async () => {
@@ -28,12 +30,12 @@ test('missing config returns legacy defaults; configured roots are selected with
   const root = await project(config());
   // The trees need not exist to validate configuration. No translation content is read.
   const loaded = await loadSiteConfig(root);
-  expect(selectLocaleProfile(loaded, join(root, 'docs'))).toMatchObject({
+  expect(await selectLocaleProfile(loaded, join(root, 'docs'))).toMatchObject({
     locale: 'ru',
     root: join(root, 'docs'),
     excludedRoots: [join(root, 'docs-en')],
   });
-  expect(() => selectLocaleProfile(loaded, root)).toThrow(/input root must match/);
+  await expect(selectLocaleProfile(loaded, root)).rejects.toThrow(/input root must match/);
 });
 
 test('rejects overlapping, escaping and symlink locale roots', async () => {
@@ -49,13 +51,32 @@ test('rejects overlapping, escaping and symlink locale roots', async () => {
   await expect(loadSiteConfig(root)).rejects.toThrow(/symbolic links/);
 });
 
+test('locale selection and peer exclusions use canonical paths through a repository alias', async () => {
+  const root = await project(config());
+  const alias = `${root}-alias`;
+  await symlink(root, alias, 'dir');
+  temporary.push(alias);
+  const loaded = await loadSiteConfig(alias);
+  // Canonicalization must also work before a configured locale directory exists.
+  expect((await selectLocaleProfile(loaded, join(alias, 'docs'))).root).toBe(join(root, 'docs'));
+  await mkdir(join(root, 'docs'));
+  await mkdir(join(root, 'docs-en'));
+  await writeFile(join(root, 'docs/index.md'), '# Source');
+  await writeFile(join(root, 'docs-en/foreign.md'), '# Translation');
+  const excludedRoots = [join(alias, 'docs-en')];
+  const inventory = await readRepositoryInventory(alias, { excludedRoots });
+  expect(inventory.exists('docs-en/foreign.md')).toBe(false);
+  const snapshot = await readSourceSnapshot(alias, { excludedRoots });
+  expect(snapshot.markdown.map((file) => file.sourcePath)).toEqual(['docs/index.md']);
+});
+
 test('rejects incomplete profiles and empty titles when selected', async () => {
   await expect(
     loadSiteConfig(await project(config().replace('      modules: modules\n', ''))),
   ).rejects.toThrow(/every built-in section/);
   const root = await project(config().replace('      modules: modules', '      modules: ""'));
   const loaded = await loadSiteConfig(root);
-  expect(() => selectLocaleProfile(loaded, join(root, 'docs'))).toThrow(/non-empty/);
+  await expect(selectLocaleProfile(loaded, join(root, 'docs'))).rejects.toThrow(/non-empty/);
 });
 
 test('branding assets remain within regular non-symlink files under .toudocu/assets', async () => {

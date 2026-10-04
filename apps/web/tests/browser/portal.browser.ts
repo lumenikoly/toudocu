@@ -18,22 +18,25 @@ test('task metadata and supporting sections stay structured', async ({ page }) =
   await page.goto('./work/TASK-COMPAT-001.html');
 
   const properties = page.locator('.document-properties');
-  await expect(properties).not.toHaveAttribute('open');
-  await properties.locator('summary').click();
   await expect(properties).toHaveAttribute('open', '');
   const metadata = page.locator('.document-metadata');
   await expect(metadata).toBeVisible();
   await expect(metadata).toHaveJSProperty('tagName', 'DL');
   await expect(metadata.locator('dt')).toContainText([
+    'Status',
+    'Priority',
+    'Module',
     'Updated',
-    'module',
-    'priority',
-    'taskType',
-    'useCase',
+    'Type',
+    'Use case',
     'Path',
   ]);
   await expect(page.locator('.document-identity .status')).toHaveAttribute('data-tone', 'success');
   await expect(page.locator('.document-identity .status svg')).toHaveCount(1);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(properties).not.toHaveAttribute('open');
+  await properties.locator('summary').click();
+  await expect(properties).toHaveAttribute('open', '');
 });
 
 test('search stays inline, supports keyboard navigation, and works from nested routes', async ({
@@ -215,7 +218,7 @@ test('navigates and searches through React Router', async ({ page }) => {
   expect(documentRequests).toBe(1);
 
   await page.goto('./search.html');
-  await page.getByRole('textbox').fill('task');
+  await page.getByRole('searchbox').fill('task');
   await expect(page.locator('main').getByRole('link').first()).toBeVisible();
 });
 
@@ -282,7 +285,7 @@ test('opens workspace settings, dismisses the popover, and keeps static/live hea
   await page.getByRole('button', { name: 'Appearance', exact: true }).click();
   await page.getByLabel('Interface density').selectOption('compact');
   await expect(page.locator('html')).toHaveAttribute('data-density', 'compact');
-  await page.getByRole('heading', { name: 'Compatibility fixture' }).click();
+  await page.getByRole('heading', { name: 'Project overview' }).click();
   await expect(settings).toBeHidden();
 
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -349,7 +352,7 @@ test('keeps generated routes readable without JavaScript', async ({ browser }) =
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto('./');
-  await expect(page.getByRole('heading', { name: 'Compatibility fixture' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Project overview' })).toBeVisible();
 
   await page
     .locator('.nav-group')
@@ -386,7 +389,7 @@ test('keeps generated routes readable without JavaScript', async ({ browser }) =
   await context.close();
 });
 
-test('keeps document title, prose and relations on one axis at desktop and mobile widths', async ({
+test('keeps the document title aligned with its reading panel and prose with relations', async ({
   page,
 }) => {
   const canonical = 'http://127.0.0.1:4177';
@@ -401,12 +404,14 @@ test('keeps document title, prose and relations on one axis at desktop and mobil
   expect(geometry.left).toBeGreaterThan(0);
   expect(geometry.right).toBeLessThan(1440);
   const titleBounds = await page.locator('.document-header h1').boundingBox();
+  const panelBounds = await page.locator('.document-main').boundingBox();
   const relatedBounds = await page.locator('.relations-section').first().boundingBox();
   expect(titleBounds).not.toBeNull();
+  expect(panelBounds).not.toBeNull();
   expect(relatedBounds).not.toBeNull();
-  expect(Math.abs(geometry.left - titleBounds!.x)).toBeLessThan(2);
+  expect(Math.abs(panelBounds!.x - titleBounds!.x)).toBeLessThan(2);
   expect(Math.abs(geometry.left - relatedBounds!.x)).toBeLessThan(2);
-  await expect(page.locator('.document-header h1')).toHaveCSS('font-size', '28px');
+  await expect(page.locator('.document-header h1')).toHaveCSS('font-size', '36px');
   await expect(page.locator('.document-header')).toHaveCSS('border-radius', '0px');
   await page.screenshot({ path: '/tmp/toudocu-document-desktop.png' });
 

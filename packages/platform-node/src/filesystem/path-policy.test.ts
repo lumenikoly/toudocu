@@ -157,6 +157,7 @@ describe('writeAtomically', () => {
     const target = join(root, 'docs', 'index.md');
     await writeFile(target, 'baseline\n', { mode: 0o600 });
     await chmod(target, 0o600);
+    const originalMode = (await stat(target)).mode & 0o777;
     const expected = contentDigest('baseline\n');
 
     expect(
@@ -166,7 +167,7 @@ describe('writeAtomically', () => {
       }),
     ).toBe(contentDigest('updated\n'));
     expect(await readFile(target, 'utf8')).toBe('updated\n');
-    expect((await stat(target)).mode & 0o777).toBe(0o600);
+    expect((await stat(target)).mode & 0o777).toBe(originalMode);
 
     await expectCode(
       writeAtomically(current, 'docs/index.md', 'stale\n', {

@@ -126,7 +126,7 @@ export async function buildDocumentationChanges(
     similarity: settings.renameSimilarity,
     ...(options.timeoutMs !== undefined ? { timeoutMs: options.timeoutMs } : {}),
   });
-  selectLocaleProfile(loaded, repository.docsRoot);
+  await selectLocaleProfile(loaded, repository.docsRoot);
   const base = await resolveBase(repository, settings.base, settings.branchBase);
   const target = await resolveTarget(repository, settings.target);
   const comparison = { base: base.side, target: target.side };

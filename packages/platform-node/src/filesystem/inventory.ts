@@ -1,6 +1,6 @@
 import { lstat, readdir } from 'node:fs/promises';
 import { join, relative, resolve } from 'node:path';
-import { isInside, PathPolicy } from './path-policy.js';
+import { isInside, PathPolicy, resolveForSafety } from './path-policy.js';
 
 export interface InventoryEntry {
   kind: 'file' | 'directory';
@@ -101,9 +101,10 @@ export async function readRepositoryInventory(
   options: { excludedRoots?: readonly string[]; signal?: AbortSignal } = {},
 ) {
   const policy = await PathPolicy.create(root, { allowHidden: true });
+  const excludedRoots = await Promise.all((options.excludedRoots ?? []).map(resolveForSafety));
   const entries = new Map<string, InventoryEntry>([['.', { kind: 'directory', safe: true }]]);
   const excluded = (path: string): boolean =>
-    options.excludedRoots?.some((exclusion) => isInside(exclusion, path)) ?? false;
+    excludedRoots.some((exclusion) => isInside(exclusion, path));
   const walk = async (directory: string): Promise<void> => {
     options.signal?.throwIfAborted();
     if (directory) await policy.resolveDirectory(directory);

@@ -17,5 +17,8 @@
     "build": "tsc -p tsconfig.json && node scripts/build-native.mjs",
     "build:native": "node scripts/build-native.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "node-gyp": "12.2.0"
   }
 }

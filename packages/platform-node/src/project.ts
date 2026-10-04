@@ -324,7 +324,7 @@ export async function loadProject(
   const staleDays =
     options.staleDays === undefined || options.staleDays < 0 ? 90 : options.staleDays;
   const loaded = await loadSiteConfig(repositoryRoot);
-  const locale = selectLocaleProfile(loaded, input);
+  const locale = await selectLocaleProfile(loaded, input);
   const version = documentationVersionDiagnostic(loaded.config);
   if (version) {
     const emptyIndex: DocumentIndex = {

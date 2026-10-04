@@ -1,6 +1,6 @@
 import { lstat, readFile, readdir } from 'node:fs/promises';
 import { join, relative } from 'node:path';
-import { PathPolicy, isInside } from './path-policy.js';
+import { PathPolicy, isInside, resolveForSafety } from './path-policy.js';
 
 export interface SourceFile {
   sourcePath: string;
@@ -47,6 +47,7 @@ export async function readSourceSnapshot(
   } = {},
 ): Promise<SourceSnapshot> {
   const policy = await PathPolicy.create(root, { allowHidden: true });
+  const excludedRoots = await Promise.all((options.excludedRoots ?? []).map(resolveForSafety));
   const snapshot: SourceSnapshot = { root: policy.root, markdown: [], openAPI: [], issues: [] };
   const excludes = new Set(
     [...defaultExcludes, ...(options.excludes ?? [])]
@@ -85,7 +86,7 @@ export async function readSourceSnapshot(
       const path = directory ? `${directory}/${entry.name}` : entry.name;
       const absolute = join(policy.root, path);
       if (options.excludeMarkdown?.includes(path)) continue;
-      if (options.excludedRoots?.some((excluded) => isInside(excluded, absolute))) continue;
+      if (excludedRoots.some((excluded) => isInside(excluded, absolute))) continue;
       let info;
       try {
         info = await lstat(absolute);
@@ -131,7 +132,6 @@ export async function readSourceSnapshot(
       }
     }
   };
-  if (!options.excludedRoots?.some((excluded) => relative(excluded, policy.root) === ''))
-    await walk('');
+  if (!excludedRoots.some((excluded) => relative(excluded, policy.root) === '')) await walk('');
   return snapshot;
 }

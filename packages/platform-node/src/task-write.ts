@@ -162,7 +162,7 @@ export async function loadTaskWriteProject(
   const input = resolve(inputRoot);
   const repository = resolve(repositoryRoot ?? dirname(input));
   const loaded = await loadSiteConfig(repository, signal);
-  const locale = selectLocaleProfile(loaded, input);
+  const locale = await selectLocaleProfile(loaded, input);
   const version = documentationVersionDiagnostic(loaded.config);
   if (version) {
     throw new ToudocuError(version.code, version.message, { path: '.toudocu/config.yml' });

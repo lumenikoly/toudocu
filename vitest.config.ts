@@ -4,6 +4,7 @@ export default defineConfig({
   test: {
     name: 'workspace',
     environment: 'node',
+    setupFiles: ['./scripts/test-platform-paths.mjs'],
     include: [
       'apps/*/src/**/*.test.ts',
       'packages/*/src/**/*.test.ts',
