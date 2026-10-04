@@ -128,6 +128,20 @@ const help: Readonly<Record<string, string>> = {
   skill:
     'Manages the bundled offline Toudocu AI-skill package.\n\nUsage:\n  toudocu skill install|status|update|uninstall [--agent auto|codex|claude-code|copilot|all]\n                  [--scope project|user] [--repository-root DIR]\n\n--repository-root is available only for project scope. status changes nothing.\n',
 };
+const rootHelp =
+  'Toudocu — validate documentation and build a local portal.\n\n' +
+  'Usage:\n  toudocu <command> [options]\n\nCommands:\n' +
+  Object.entries(help)
+    .map(
+      ([command, description]) =>
+        `  ${command.replace('-', ' ').padEnd(18)} ${description.split('\n')[0]}\n`,
+    )
+    .join('') +
+  '  project info       Discover the project and its documentation root.\n' +
+  '  capabilities       List supported CLI capabilities.\n' +
+  '  version            Print the installed version.\n\n' +
+  'Options:\n  -h, --help         Show this help.\n  -V, --version      Print the installed version.\n\n' +
+  'Run toudocu <command> --help for command usage and options.\n';
 interface ReadOptions {
   format: string;
   staleDays: string;
@@ -609,6 +623,10 @@ export async function runCLI(
   if (signal?.aborted) {
     return interruptionExitCode(signal);
   }
+  if (argv.length === 0 || argv[0] === '--help' || argv[0] === '-h') {
+    stdout(rootHelp);
+    return 0;
+  }
   const command =
     argv[0] === 'changes' && argv[1] === 'file'
       ? 'changes-file'
@@ -703,9 +721,7 @@ export async function runCLI(
       );
       return 1;
     }
-    stderr(
-      `toudocu-ts: command ${command ?? '(missing command)'} is not implemented in migration stage 1\n`,
-    );
+    stderr(`Error: unknown command '${command}'. Run toudocu --help for available commands.\n`);
     return 2;
   }
   const logger = createLogger({
