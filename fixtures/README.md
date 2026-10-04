@@ -15,7 +15,8 @@ Coverage includes:
 
 Allowed normalization is limited to temporary absolute paths, timestamps and
 generated archive years, generator/version output, and task verification's
-nondeterministic `durationMillis`. Change reports additionally validate the
+nondeterministic `durationMillis`, plus the installed Go version and platform
+in the `go version` verification command's stdout. Change reports additionally validate the
 legacy `changeSetDigest` against the unnormalized report, then recalculate it
 after replacing only the temporary repository root; the resulting digest is
 compared, so a field mismatch cannot be hidden by normalization.

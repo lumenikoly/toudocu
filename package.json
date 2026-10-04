@@ -8,8 +8,8 @@
   },
   "scripts": {
     "dev": "pnpm --filter @toudocu/web-app exec vite",
-    "build": "node scripts/architecture-boundaries.mjs && pnpm --filter '!@toudocu/bb-plugin' -r --if-present run build",
-    "build:packages": "node scripts/architecture-boundaries.mjs && pnpm --filter './packages/*' -r --if-present run build",
+    "build": "node scripts/architecture-boundaries.mjs && pnpm --filter \"!@toudocu/bb-plugin\" -r --if-present run build",
+    "build:packages": "node scripts/architecture-boundaries.mjs && pnpm --filter \"./packages/*\" -r --if-present run build",
     "lint": "eslint . && node scripts/architecture-boundaries.mjs",
     "format": "prettier --check \"packages/integrations/bb/{src,tests,scripts}/**/*.{ts,tsx,mjs,css}\" \"packages/integrations/bb/*.json\" \"apps/*/{src,app,renderer,tests}/**/*.{ts,tsx,mjs}\" \"packages/*/src/**/*.{ts,tsx}\" \"apps/*/*.{json,ts}\" \"packages/*/*.json\" package.json pnpm-workspace.yaml tsconfig.base.json eslint.config.js prettier.config.mjs vitest.config.ts scripts/architecture-boundaries.mjs scripts/architecture-boundaries.test.mjs scripts/cli-stage1.test.mjs scripts/compatibility.mjs scripts/compatibility.test.mjs scripts/release.mjs",
     "typecheck": "pnpm build:packages && pnpm -r --if-present run typecheck",

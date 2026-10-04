@@ -26,7 +26,7 @@
 #endif
 #if defined(__APPLE__)
 #include <sys/param.h>
-#include <sys/rename.h>
+#include <stdio.h>
 #endif
 #endif
 

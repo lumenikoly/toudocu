@@ -366,6 +366,11 @@ function normalize(value, path = [], roots = [], normalizeDigest = false) {
       output[key] = '<TIMESTAMP>';
     // Command timing is a nondeterministic time field in task reports.
     else if (key === 'durationMillis') output[key] = '<DURATION>';
+    else if (key === 'stdout' && value.command === 'go version')
+      output[key] = child.replace(
+        /^go version go\S+ \S+\r?\n$/,
+        'go version <GO_VERSION> <GO_PLATFORM>\n',
+      );
     else output[key] = normalize(child, [...path, key], roots, normalizeDigest);
   }
   return output;

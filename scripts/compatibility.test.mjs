@@ -11,6 +11,7 @@ const mismatch = join(root, 'fixtures', 'candidate-mismatch.mjs');
 const sideEffect = join(root, 'fixtures', 'candidate-side-effect.mjs');
 const invalidDigest = join(root, 'fixtures', 'candidate-invalid-digest.mjs');
 const candidateVersion = join(root, 'fixtures', 'candidate-version.mjs');
+const candidateTaskReport = join(root, 'fixtures', 'candidate-task-report.mjs');
 
 function run(candidate, name, environment = { PATH: '' }) {
   return spawnSync(process.execPath, [harness, '--candidate', candidate, '--case', name], {
@@ -30,6 +31,21 @@ test('plain version output uses the allowed generator-version normalization', ()
   const result = run(candidateVersion, 'version');
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /compatibility corpus passed/);
+});
+
+test('task verification ignores the Go toolchain version and platform but preserves command output mismatches', () => {
+  for (const stdout of [
+    'go version go1.24.13 linux/amd64\n',
+    'go version go1.25.0 windows/amd64\r\n',
+  ]) {
+    const result = run(candidateTaskReport, 'task-verify-run', { COMPAT_GO_STDOUT: stdout });
+    assert.equal(result.status, 0, result.stderr);
+  }
+  const mismatch = run(candidateTaskReport, 'task-verify-run', {
+    COMPAT_GO_STDOUT: 'unexpected output\n',
+  });
+  assert.equal(mismatch.status, 1);
+  assert.match(mismatch.stderr, /FAIL task-verify-run/);
 });
 
 test('compatibility catches a candidate side effect', () => {
