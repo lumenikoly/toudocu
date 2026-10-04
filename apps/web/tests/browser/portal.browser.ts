@@ -32,11 +32,8 @@ test('task metadata and supporting sections stay structured', async ({ page }) =
     'useCase',
     'Path',
   ]);
-  await expect(page.locator('.task-actions')).toHaveCSS('background-color', 'rgb(255, 253, 250)');
-  await expect(page.locator('.execution-context')).toHaveCSS(
-    'background-color',
-    'rgb(255, 253, 250)',
-  );
+  await expect(page.locator('.document-identity .status')).toHaveAttribute('data-tone', 'success');
+  await expect(page.locator('.document-identity .status svg')).toHaveCount(1);
 });
 
 test('search stays inline, supports keyboard navigation, and works from nested routes', async ({
@@ -92,11 +89,11 @@ test('search stays inline, supports keyboard navigation, and works from nested r
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('./modules/core.html');
   const mobileToc = page.locator('.document-toc');
-  await expect(mobileToc).toHaveAttribute('open', '');
+  await expect(mobileToc).not.toHaveAttribute('open');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await captureLightAndDark(page, 'mobile-document');
   await mobileToc.locator('summary').click();
-  await expect(mobileToc).not.toHaveAttribute('open');
+  await expect(mobileToc).toHaveAttribute('open', '');
   await page.getByRole('combobox', { name: 'Search' }).fill('Compare CLI contracts');
   await expect(popup).toBeVisible();
   await captureLightAndDark(page, 'mobile-search-open');
@@ -157,6 +154,8 @@ test('docked agent shrinks the page, resizes, and leaves terminal stopped until 
   await captureLightAndDark(page, 'desktop-agent-open');
 
   await expect(page.locator('.console-mode-switch')).toHaveCount(0);
+  await expect(page.locator('.agent-configuration')).not.toHaveAttribute('open');
+  await page.locator('.agent-configuration > summary').click();
   await expect(page.getByRole('combobox', { name: 'Model' })).toBeVisible();
   await expect(page.getByRole('combobox', { name: 'Access' })).toBeVisible();
   await page.getByRole('button', { name: 'Project terminal' }).click();
@@ -266,7 +265,9 @@ test('resizes and persists the sidebar, shows task states, and contains mobile c
 test('opens workspace settings, dismisses the popover, and keeps static/live headers within mobile width', async ({
   page,
 }) => {
-  const settingsButton = page.getByRole('button', { name: 'View and tools' });
+  const settingsButton = page
+    .locator('.site-header')
+    .getByRole('button', { name: 'View and tools' });
   const settings = page.locator('#workspace-settings');
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('./');
@@ -278,7 +279,7 @@ test('opens workspace settings, dismisses the popover, and keeps static/live hea
   await page.keyboard.press('Escape');
   await expect(settings).toBeHidden();
 
-  await settingsButton.click();
+  await page.getByRole('button', { name: 'Appearance', exact: true }).click();
   await page.getByLabel('Interface density').selectOption('compact');
   await expect(page.locator('html')).toHaveAttribute('data-density', 'compact');
   await page.getByRole('heading', { name: 'Compatibility fixture' }).click();
@@ -292,7 +293,9 @@ test('opens workspace settings, dismisses the popover, and keeps static/live hea
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('http://127.0.0.1:4175/architecture/overview.html');
   await expect(page.getByRole('button', { name: 'Agent' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'View and tools' })).toBeVisible();
+  await expect(
+    page.locator('.site-header').getByRole('button', { name: 'View and tools' }),
+  ).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: '/tmp/toudocu-header-desktop.png', fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
@@ -305,7 +308,6 @@ test('opens workspace settings, dismisses the popover, and keeps static/live hea
   if (!mobileSearchBounds || !mobileAgentBounds)
     throw new Error('Mobile header controls are missing');
   expect(mobileAgentBounds.y + mobileAgentBounds.height).toBeLessThanOrEqual(mobileSearchBounds.y);
-  await expect(page.locator('.workspace-tabs')).toHaveCSS('overflow-y', 'hidden');
   await page.screenshot({ path: '/tmp/toudocu-header-mobile.png', fullPage: true });
 });
 
@@ -384,7 +386,9 @@ test('keeps generated routes readable without JavaScript', async ({ browser }) =
   await context.close();
 });
 
-test('captures canonical centered document at desktop and mobile widths', async ({ page }) => {
+test('keeps document title, prose and relations on one axis at desktop and mobile widths', async ({
+  page,
+}) => {
   const canonical = 'http://127.0.0.1:4177';
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto(`${canonical}/modules/site.html`);
@@ -396,7 +400,14 @@ test('captures canonical centered document at desktop and mobile widths', async 
   });
   expect(geometry.left).toBeGreaterThan(0);
   expect(geometry.right).toBeLessThan(1440);
-  expect(geometry.marginLeft).not.toBe('0px');
+  const titleBounds = await page.locator('.document-header h1').boundingBox();
+  const relatedBounds = await page.locator('.relations-section').first().boundingBox();
+  expect(titleBounds).not.toBeNull();
+  expect(relatedBounds).not.toBeNull();
+  expect(Math.abs(geometry.left - titleBounds!.x)).toBeLessThan(2);
+  expect(Math.abs(geometry.left - relatedBounds!.x)).toBeLessThan(2);
+  await expect(page.locator('.document-header h1')).toHaveCSS('font-size', '28px');
+  await expect(page.locator('.document-header')).toHaveCSS('border-radius', '0px');
   await page.screenshot({ path: '/tmp/toudocu-document-desktop.png' });
 
   await page.setViewportSize({ width: 390, height: 844 });
@@ -404,6 +415,29 @@ test('captures canonical centered document at desktop and mobile widths', async 
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await expect(page.locator('.document-body')).toBeVisible();
   await page.screenshot({ path: '/tmp/toudocu-document-mobile.png' });
+});
+
+test('top-level collections stay inside desktop and narrow viewports', async ({ page }) => {
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const route of [
+      '/',
+      '/work/index.html',
+      '/use-cases/index.html',
+      '/processes/index.html',
+      '/traceability.html',
+      '/health.html',
+      '/roadmap.html',
+    ]) {
+      await page.goto(`http://127.0.0.1:4177${route}`);
+      await expect(page.locator('#main-content')).toBeVisible();
+      await expect(page.locator('.page-not-found')).toHaveCount(0);
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+        `${route} at ${width}px`,
+      ).toBe(true);
+    }
+  }
 });
 
 test('renders canonical screen map and Mermaid gestures at desktop and mobile widths', async ({

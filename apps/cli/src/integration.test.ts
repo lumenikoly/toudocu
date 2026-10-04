@@ -84,14 +84,36 @@ test('serve discovery reports only the matching project until the server shuts d
     const url = await started;
     expect(stderr).toBe('');
 
-    const matching = await run(['project', 'info', '--format', 'json']);
-    expect(matching.code).toBe(0);
-    const matchingInfo = ProjectInfoV1Schema.parse(JSON.parse(matching.stdout));
-    expect(ProjectWorkspaceV1Schema.parse(matchingInfo.workspace)).toEqual({
+    const instanceResponse = await fetch(`${url}/_toudocu/api/instance`);
+    expect(instanceResponse.status).toBe(200);
+    expect(instanceResponse.headers.get('cache-control')).toBe('no-store');
+    expect(instanceResponse.headers.get('access-control-allow-origin')).toBe('*');
+    const identity = await instanceResponse.json();
+
+    const deadline = Date.now() + 1_500;
+    let matchingInfo: ReturnType<typeof ProjectInfoV1Schema.parse> | undefined;
+    while (Date.now() < deadline) {
+      const matching = await run(['project', 'info', '--format', 'json']);
+      expect(matching.code).toBe(0);
+      const info = ProjectInfoV1Schema.parse(JSON.parse(matching.stdout));
+      if (info.workspace) {
+        matchingInfo = info;
+        break;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    expect(matchingInfo).toBeDefined();
+    const workspace = ProjectWorkspaceV1Schema.parse(matchingInfo?.workspace);
+    expect(workspace).toEqual({
       instanceId: expect.any(String),
       projectRoot: root,
       documentationRoot: join(root, 'docs'),
       url,
+    });
+    expect(identity).toEqual({
+      instanceId: workspace.instanceId,
+      projectRoot: workspace.projectRoot,
+      documentationRoot: workspace.documentationRoot,
     });
 
     chdir(join(root, 'nested'));

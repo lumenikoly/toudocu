@@ -135,6 +135,28 @@ test('fake CLI receives separate argv values and preserves workspace cwd', async
   }
 });
 
+test('fresh project info bypasses cached discovery for workspace identity', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'bb adapter fresh project '));
+  try {
+    const { executable } = await fakeCLI(root);
+    const client = new ToudocuClient(root, executable);
+    expect((await client.call('project_info')).workspace).toBeUndefined();
+
+    const workspace = {
+      instanceId: '11111111-1111-4111-8111-111111111111',
+      projectRoot: root,
+      documentationRoot: join(root, 'docs'),
+      url: 'http://127.0.0.1:4567',
+    };
+    await fakeCLI(root, { project: reports(root, { project: { workspace } }).project });
+    expect((await client.call('project_info', undefined, undefined, true)).workspace).toEqual(
+      workspace,
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test('fake CLI rejects malformed, incompatible, unsupported, and missing installations', async () => {
   const root = await mkdtemp(join(tmpdir(), 'bb adapter errors '));
   try {

@@ -27,15 +27,14 @@
   align-items: center;
   flex: none;
   flex-wrap: nowrap;
-  min-block-size: 3.25rem;
-  gap: var(--td-space-2);
-  padding: var(--td-space-2) var(--td-space-3);
+  min-block-size: 4rem;
+  padding: var(--td-space-3) var(--td-space-4);
   border-block-end: 1px solid var(--td-border);
 }
 
 .agent-console-header > strong {
   flex: 1;
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 600;
 }
 
@@ -58,7 +57,7 @@
   gap: var(--td-space-3);
   flex: 1;
   min-block-size: 0;
-  padding: var(--td-space-3);
+  padding: var(--td-space-4);
   overflow: hidden;
 }
 
@@ -80,18 +79,36 @@
 
 .agent-configuration {
   flex: 1 0 100%;
+  min-inline-size: 0;
   font-size: 0.75rem;
+}
+
+.agent-configuration > summary {
+  width: fit-content;
+  padding: var(--td-space-2) 0;
+  cursor: pointer;
+  color: var(--td-text-muted);
+  font-size: 0.75rem;
+}
+
+.agent-configuration[open] {
+  max-block-size: min(calc(70dvh - 5rem), 32rem);
+  overflow: auto;
+  padding-block-end: var(--td-space-2);
+}
+
+.agent-configuration[open] > summary {
+  margin-block-end: var(--td-space-3);
+  color: var(--td-text);
 }
 
 .agent-settings {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--td-space-2);
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .agent-settings label {
   display: grid;
-  gap: var(--td-space-1);
   min-inline-size: 0;
   color: var(--td-text-muted);
   font-size: 0.75rem;
@@ -126,11 +143,10 @@
   align-items: center;
   flex-wrap: wrap;
   flex: none;
-  gap: var(--td-space-2);
-  min-block-size: 3.25rem;
-  padding: var(--td-space-1) var(--td-space-3);
+  min-block-size: 4rem;
   border-block-start: 1px solid var(--td-border);
   background: var(--td-surface);
+  max-block-size: 70dvh;
 }
 
 .agent-console .workspace-actions {
@@ -145,7 +161,14 @@
 .agent-session-status {
   margin-inline-end: auto;
   color: var(--td-text-muted);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
+}
+.agent-session-status[data-status='running'],
+.agent-session-status[data-status='ready'] {
+  color: var(--td-status-success);
+}
+.agent-session-status[data-status='failed'] {
+  color: var(--td-status-danger);
 }
 
 .agent-console .ui-tabs {
@@ -172,18 +195,12 @@
   display: flex;
   justify-content: space-between;
   inline-size: 100%;
-  gap: var(--td-space-2);
-  padding: var(--td-space-2);
   border: 1px solid var(--td-border);
-  background: var(--td-surface-muted);
   color: inherit;
-  text-align: start;
 }
 
 .agent-console .command-output {
   min-block-size: 12rem;
-  max-block-size: 24rem;
-  overflow: auto;
   padding: var(--td-space-3);
   background: var(--td-surface-muted);
   white-space: pre-wrap;
@@ -192,8 +209,7 @@
 .agent-console .command-workspace {
   display: grid;
   flex: 1;
-  grid-template-columns: minmax(6rem, 30%) minmax(0, 1fr);
-  border: 1px solid var(--td-border);
+  grid-template-columns: minmax(7rem, 38%) minmax(0, 1fr);
   overflow: hidden;
 }
 
@@ -205,8 +221,7 @@
 .agent-console .command-workspace > aside button {
   display: grid;
   inline-size: 100%;
-  gap: var(--td-space-1);
-  padding: var(--td-space-2);
+  padding: var(--td-space-3);
   border: 0;
   border-block-end: 1px solid var(--td-border);
   background: transparent;
@@ -217,6 +232,7 @@
 
 .agent-console .command-workspace > aside button[aria-current='true'] {
   background: var(--td-accent-soft);
+  color: var(--td-accent-strong);
 }
 
 .agent-console .command-workspace > aside :is(code, span) {
@@ -228,14 +244,11 @@
 .agent-console .command-workspace > aside span,
 .agent-console .command-workspace > section > header span {
   color: var(--td-text-muted);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
 }
 
 .agent-console .command-workspace > section > header {
   display: flex;
-  align-items: center;
-  gap: var(--td-space-2);
-  padding: var(--td-space-2);
   border-block-end: 1px solid var(--td-border);
 }
 
@@ -273,9 +286,13 @@
 }
 
 .console-empty {
-  padding: var(--td-space-6) var(--td-space-3);
+  display: grid;
+  place-items: center;
+  flex: 1;
+  padding: var(--td-space-8) var(--td-space-4);
   color: var(--td-text-muted);
   line-height: 1.6;
+  text-align: center;
 }
 
 .terminal-toolbar {
@@ -308,7 +325,6 @@
 }
 
 .agent-conversation-message {
-  padding: var(--td-space-3) var(--td-space-2);
   border-block-end: 1px solid var(--td-border);
   overflow-wrap: anywhere;
 }
@@ -320,28 +336,20 @@
   font-size: 0.75rem;
 }
 
-.agent-conversation-message.is-user {
-  background: var(--td-surface-muted);
-}
-
 .agent-console .agent-command code {
   overflow-wrap: anywhere;
 }
 
 .agent-console .agent-command span {
   flex-shrink: 0;
-  color: var(--td-text-muted);
   font-size: 0.75rem;
 }
 
 .agent-console .agent-timeline {
-  flex: 1 1 18rem;
-  min-block-size: 10rem;
   max-block-size: none;
 }
 
 .agent-console .agent-message {
-  display: flex;
   gap: var(--td-space-2);
   position: relative;
   flex-wrap: wrap;
@@ -351,19 +359,16 @@
 
 .agent-message .ui-icon-button[type='submit'] {
   position: absolute;
-  inset-inline-end: var(--td-space-2);
-  inset-block-end: var(--td-space-2);
   background: var(--td-accent);
   color: var(--td-text-on-accent);
 }
 
 .agent-console .agent-message textarea {
   inline-size: 100%;
-  min-block-size: 5rem;
   padding: var(--td-space-3) 3.5rem var(--td-space-3) var(--td-space-3);
   resize: vertical;
   border: 1px solid var(--td-border);
-  border-radius: var(--td-radius-control);
+  border-radius: var(--td-radius-panel);
   background: var(--td-surface);
   color: var(--td-text);
   font: inherit;
@@ -373,12 +378,44 @@
   flex-wrap: wrap;
 }
 
+.agent-console .command-workspace > section > header .ui-button {
+  min-block-size: var(--td-control-height);
+  font-size: 0.75rem;
+}
+
+.agent-verification-output {
+  flex: none;
+  max-block-size: min(35dvh, 20rem);
+  overflow: auto;
+  padding-block: var(--td-space-2);
+  font-size: 0.8rem;
+}
+
+.agent-verification-output h3 {
+  margin: 0 0 var(--td-space-2);
+  font-size: 0.875rem;
+}
+
+.agent-verification-output details {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.agent-verification-output summary {
+  padding-block: var(--td-space-2);
+  cursor: pointer;
+}
+
+.agent-verification-output pre {
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
 .agent-console .project-terminal {
   flex: 1 1 20rem;
   block-size: 20rem;
   min-block-size: 0;
   padding: var(--td-space-2);
-  background: var(--td-surface);
   overflow: hidden;
 }
 
@@ -409,6 +446,24 @@
   text-align: start;
   text-overflow: ellipsis;
 }
+.agent-console :is(.ui-button, .ui-icon-button, .ui-tabs [role='tab']) {
+  border-radius: 999px;
+}
+.agent-console .ui-tabs {
+  border-block-end: 0;
+}
+.agent-console .ui-tabs [role='tab'] {
+  border: 1px solid var(--td-border);
+  background: var(--td-surface);
+}
+.agent-console .ui-tabs [role='tab'][aria-selected='true'] {
+  border-color: var(--td-accent);
+  background: var(--td-accent-soft);
+  color: var(--td-accent-strong);
+}
+.agent-console :is(input, select) {
+  border-radius: 999px;
+}
 
 @media (max-width: 72rem) {
   .app-shell > .agent-console {
@@ -422,4 +477,432 @@
   .agent-console-resizer {
     display: none;
   }
+}
+
+/* Console composition follows the same compact workbench hierarchy as documents. */
+.agent-console .agent-console-header {
+  gap: var(--td-space-3);
+  padding-inline: var(--td-space-5);
+  background: var(--td-surface);
+}
+.agent-console-title {
+  display: flex;
+  flex: 1;
+  min-inline-size: 0;
+  align-items: center;
+  gap: var(--td-space-2);
+}
+.agent-console-title > .ui-icon {
+  inline-size: 1.1rem;
+  block-size: 1.1rem;
+  color: var(--td-accent);
+}
+.agent-console-title strong {
+  font: 700 1rem/1.3 var(--td-font-heading);
+}
+.agent-console .connection-mark {
+  inline-size: 0.6rem;
+  block-size: 0.6rem;
+  box-shadow: 0 0 0 3px var(--td-surface-muted);
+}
+.agent-console .agent-workspace,
+.agent-console .terminal-workspace {
+  gap: 0;
+  padding: 0;
+}
+.agent-view-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--td-space-2);
+  flex: none;
+  padding: var(--td-space-3) var(--td-space-4);
+  border-block-end: 1px solid var(--td-border);
+  background: var(--td-surface);
+}
+.agent-console .ui-tabs {
+  gap: var(--td-space-1);
+}
+.agent-console .ui-tabs [role='tab'] {
+  min-block-size: var(--td-control-height-sm);
+  padding-inline: var(--td-space-3);
+  border-radius: var(--td-radius-control);
+  font-weight: 600;
+}
+.agent-follow {
+  font-weight: 550;
+  white-space: nowrap;
+}
+.agent-follow input {
+  margin: 0;
+  accent-color: var(--td-accent);
+}
+.agent-console .agent-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--td-space-3);
+  flex: 1 1 auto;
+  min-block-size: 0;
+  padding: var(--td-space-5) var(--td-space-4);
+  background: var(--td-surface-canvas);
+}
+.agent-conversation-empty {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: var(--td-space-3);
+  min-block-size: 100%;
+  padding: var(--td-space-8) var(--td-space-4);
+  color: var(--td-text-muted);
+  text-align: center;
+}
+.agent-conversation-empty > .ui-icon {
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  color: var(--td-accent);
+}
+.agent-conversation-message {
+  inline-size: min(100%, 70ch);
+  padding: var(--td-space-3) var(--td-space-4);
+  border: 1px solid var(--td-border);
+  border-radius: var(--td-radius-panel);
+  background: var(--td-surface);
+}
+.agent-conversation-message.is-user {
+  align-self: flex-end;
+  border-color: var(--td-accent);
+  background: var(--td-accent-soft);
+}
+.agent-conversation-message.is-error {
+  border-color: var(--td-status-danger);
+  background: var(--td-status-danger-soft);
+}
+.agent-conversation-message.is-error > strong {
+  color: var(--td-status-danger);
+}
+.agent-conversation-message.is-files > strong {
+  color: var(--td-status-success);
+}
+.agent-conversation-message > strong {
+  font: 650 0.76rem/1.5 var(--td-font-interface);
+}
+.agent-conversation-message pre {
+  color: var(--td-text);
+  font: 0.83rem/1.65 var(--td-font-interface);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.agent-console .agent-command {
+  align-items: center;
+  flex: none;
+  gap: var(--td-space-2);
+  padding: var(--td-space-3);
+  border-radius: var(--td-radius-control);
+  background: var(--td-surface);
+  text-align: start;
+  cursor: pointer;
+}
+.agent-console .agent-command:hover {
+  border-color: var(--td-accent);
+  background: var(--td-accent-soft);
+}
+.agent-console .agent-command .ui-icon {
+  flex: none;
+  inline-size: 1rem;
+  block-size: 1rem;
+  color: var(--td-accent);
+}
+.agent-console .agent-command code {
+  flex: 1;
+  min-inline-size: 0;
+  font: 0.78rem/1.4 var(--td-font-mono);
+}
+.agent-console .agent-command span {
+  color: var(--td-status-info);
+  font-weight: 600;
+}
+.agent-console .agent-command span[data-status='completed'],
+.agent-console .agent-command span[data-status='passed'] {
+  color: var(--td-status-success);
+}
+.agent-console .agent-command span[data-status='failed'] {
+  color: var(--td-status-danger);
+}
+.agent-console .agent-approval,
+.agent-console .agent-pending {
+  padding: var(--td-space-3);
+  border: 1px solid var(--td-border);
+  border-radius: var(--td-radius-panel);
+  background: var(--td-surface);
+}
+.agent-console .agent-approval {
+  border-color: var(--td-status-warning);
+  background: var(--td-status-warning-soft);
+}
+.agent-console .agent-approval p,
+.agent-console .agent-pending > span:first-child {
+  flex-basis: 100%;
+  color: var(--td-text);
+  line-height: 1.5;
+}
+.agent-console .agent-message {
+  display: block;
+  margin: 0;
+  padding: var(--td-space-3) var(--td-space-4) var(--td-space-4);
+  border-block-start: 1px solid var(--td-border);
+  background: var(--td-surface);
+}
+.agent-console .agent-message textarea {
+  min-block-size: 5.5rem;
+  padding-inline-end: 3.5rem;
+}
+.agent-console .agent-message .ui-badge,
+.agent-console .agent-message > .ui-button {
+  margin-block-end: var(--td-space-2);
+}
+.agent-message .ui-icon-button[type='submit'] {
+  inset-inline-end: calc(var(--td-space-4) + var(--td-space-2));
+  inset-block-end: calc(var(--td-space-4) + var(--td-space-2));
+}
+.agent-console .command-workspace {
+  border: 0;
+  border-radius: 0;
+}
+.agent-console .command-workspace > aside {
+  background: var(--td-surface-canvas);
+}
+.agent-console .command-workspace > aside button {
+  gap: var(--td-space-2);
+}
+.agent-console .command-workspace > aside button:hover {
+  background: var(--td-surface-muted);
+}
+.agent-console .command-workspace > aside button[aria-current='true'] {
+  box-shadow: inset 2px 0 0 var(--td-accent);
+}
+.agent-console .command-workspace > aside code {
+  font: 0.75rem/1.4 var(--td-font-mono);
+}
+.agent-console .command-workspace > section > header {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: var(--td-space-3);
+  padding: var(--td-space-4);
+}
+.command-detail-heading {
+  display: grid;
+  gap: var(--td-space-2);
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+.agent-console .command-workspace > section > header .command-detail-heading code {
+  flex-basis: auto;
+  font: 600 0.78rem/1.5 var(--td-font-mono);
+}
+.command-detail-heading span[data-status='failed'] {
+  color: var(--td-status-danger);
+}
+.command-detail-heading span[data-status='completed'],
+.command-detail-heading span[data-status='passed'] {
+  color: var(--td-status-success);
+}
+.command-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--td-space-2);
+}
+.agent-console .command-workspace > section > p {
+  padding: var(--td-space-2) var(--td-space-4);
+  overflow-wrap: anywhere;
+}
+.agent-console .command-workspace .command-output {
+  padding: var(--td-space-4);
+  color: var(--td-text);
+  font: 0.76rem/1.6 var(--td-font-mono);
+}
+.agent-console .terminal-workspace > .console-empty {
+  margin: var(--td-space-4);
+}
+.agent-console .terminal-workspace > [role='alert'] {
+  padding: var(--td-space-3) var(--td-space-4);
+  color: var(--td-status-danger);
+}
+.agent-console .project-terminal {
+  background: var(--td-surface-canvas);
+}
+.agent-console-dock {
+  gap: var(--td-space-1);
+  padding: var(--td-space-3) var(--td-space-4);
+}
+.agent-session-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--td-space-2);
+  font-weight: 600;
+}
+.agent-session-status::before {
+  content: '';
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+.agent-session-status[data-status='starting'],
+.agent-session-status[data-status='stopping'] {
+  color: var(--td-status-warning);
+}
+.agent-configuration > summary {
+  display: flex;
+  align-items: center;
+  gap: var(--td-space-2);
+  min-block-size: 2rem;
+  font-weight: 600;
+}
+.agent-configuration > summary:hover {
+  color: var(--td-accent);
+}
+.agent-settings {
+  gap: var(--td-space-3);
+  padding-block-start: var(--td-space-2);
+  border-block-start: 1px solid var(--td-border);
+}
+.agent-settings label {
+  gap: var(--td-space-2);
+  font-weight: 600;
+}
+.agent-effective-access {
+  padding: var(--td-space-2) var(--td-space-3);
+  border-radius: var(--td-radius-sm);
+  background: var(--td-surface-muted);
+}
+.agent-history .ui-button {
+  min-block-size: var(--td-control-height);
+  border-radius: var(--td-radius-control);
+}
+.agent-verification-output {
+  padding: var(--td-space-3) var(--td-space-4);
+  border-block-start: 1px solid var(--td-border);
+  background: var(--td-surface);
+}
+.agent-verification-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--td-space-1) var(--td-space-2);
+}
+.agent-verification-heading h3 {
+  margin: 0;
+  font-size: 0.83rem;
+}
+.agent-verification-heading code {
+  color: var(--td-text-muted);
+  font: 0.73rem var(--td-font-mono);
+}
+.agent-verification-output .workspace-actions {
+  margin-block: var(--td-space-3);
+}
+.agent-verification-output .workspace-actions .ui-button {
+  min-block-size: var(--td-control-height-sm);
+}
+.agent-verification-report {
+  margin-block-start: var(--td-space-2);
+  border-block-start: 1px solid var(--td-border);
+}
+.agent-verification-output summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--td-space-2);
+  min-inline-size: 0;
+}
+.agent-verification-output summary code {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.73rem;
+}
+.agent-verification-output .agent-verification-report > details {
+  margin-block-start: var(--td-space-2);
+  padding: 0 var(--td-space-3);
+  border: 1px solid var(--td-border);
+  border-radius: var(--td-radius-control);
+}
+.agent-verification-output .agent-verification-report > details p {
+  padding-block-end: var(--td-space-2);
+  color: var(--td-text-muted);
+}
+.agent-verification-status {
+  flex: none;
+  color: var(--td-status-info);
+  font: 600 0.72rem var(--td-font-interface);
+}
+.agent-verification-status[data-status='passed'],
+.agent-verification-status[data-status='completed'] {
+  color: var(--td-status-success);
+}
+.agent-verification-status[data-status='failed'],
+.agent-verification-status[data-status='blocked'] {
+  color: var(--td-status-danger);
+}
+.agent-verification-status[data-status='planned'],
+.agent-verification-status[data-status='skipped'] {
+  color: var(--td-status-warning);
+}
+.agent-verification-issue {
+  padding: var(--td-space-2) var(--td-space-3);
+  border-radius: var(--td-radius-sm);
+  background: var(--td-status-danger-soft);
+  color: var(--td-status-danger);
+}
+.agent-verification-output ul {
+  display: grid;
+  gap: var(--td-space-2);
+  padding-inline-start: var(--td-space-5);
+}
+.agent-verification-output li {
+  line-height: 1.5;
+}
+.agent-verification-output li .agent-verification-status {
+  margin-inline-start: var(--td-space-1);
+}
+@media (max-width: 36rem) {
+  .agent-view-toolbar {
+    align-items: flex-start;
+  }
+  .agent-console .command-workspace {
+    grid-template-columns: minmax(5rem, 34%) minmax(0, 1fr);
+  }
+  .agent-console .command-workspace > section > header {
+    padding: var(--td-space-3);
+  }
+  .agent-console .command-workspace .command-output {
+    padding: var(--td-space-3);
+  }
+}
+.agent-console-error {
+  flex: none;
+  padding: var(--td-space-3) var(--td-space-4);
+  border-block-end: 1px solid var(--td-status-danger);
+  background: var(--td-status-danger-soft);
+  color: var(--td-status-danger);
+  overflow-wrap: anywhere;
+}
+.agent-console .command-workspace > aside span[data-status='failed'] {
+  color: var(--td-status-danger);
+}
+.agent-console .command-workspace > aside span[data-status='passed'],
+.agent-console .command-workspace > aside span[data-status='completed'] {
+  color: var(--td-status-success);
+}
+.agent-console .command-workspace > aside span[data-status='running'] {
+  color: var(--td-status-info);
+}
+.agent-console .terminal-workspace > .console-empty {
+  display: flex;
+  flex-direction: column;
+}
+.agent-console .terminal-workspace > .console-empty .ui-icon {
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  color: var(--td-accent);
 }

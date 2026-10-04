@@ -437,7 +437,10 @@ export function AgentConsoleWorkspace({
         }}
       />
       <header className="agent-console-header">
-        <strong>{view === 'terminal' ? text('consoleTerminal') : text('agentMode')}</strong>
+        <div className="agent-console-title">
+          <Icon name={view === 'terminal' ? 'terminal' : 'messageSquare'} />
+          <strong>{view === 'terminal' ? text('consoleTerminal') : text('agentMode')}</strong>
+        </div>
         <span
           className="connection-mark"
           data-connected={connected}
@@ -457,38 +460,44 @@ export function AgentConsoleWorkspace({
           <Icon name="close" />
         </IconButton>
       </header>
-      {error && <p role="alert">{error}</p>}
+      {error && (
+        <p className="agent-console-error" role="alert">
+          {error}
+        </p>
+      )}
       <div className="agent-workspace" hidden={view !== 'agent'}>
-        <div className="ui-tabs" role="tablist">
-          <button
-            type="button"
-            role="tab"
-            id="agent-conversation-tab"
-            aria-controls="agent-conversation-panel"
-            aria-selected={tab === 'agent'}
-            onClick={() => setTab('agent')}
-          >
-            {text('consoleAgentView')}
-          </button>
-          <button
-            type="button"
-            role="tab"
-            id="agent-output-tab"
-            aria-controls="agent-output-panel"
-            aria-selected={tab === 'output'}
-            onClick={() => setTab('output')}
-          >
-            {text('consoleCommandOutput')}
-          </button>
+        <div className="agent-view-toolbar">
+          <div className="ui-tabs" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              id="agent-conversation-tab"
+              aria-controls="agent-conversation-panel"
+              aria-selected={tab === 'agent'}
+              onClick={() => setTab('agent')}
+            >
+              {text('consoleAgentView')}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              id="agent-output-tab"
+              aria-controls="agent-output-panel"
+              aria-selected={tab === 'output'}
+              onClick={() => setTab('output')}
+            >
+              {text('consoleCommandOutput')}
+            </button>
+          </div>
+          <label className="agent-follow">
+            <input
+              type="checkbox"
+              checked={followLatest}
+              onChange={(event) => setFollowLatest(event.currentTarget.checked)}
+            />
+            {text('consoleFollowLatest')}
+          </label>
         </div>
-        <label className="agent-follow">
-          <input
-            type="checkbox"
-            checked={followLatest}
-            onChange={(event) => setFollowLatest(event.currentTarget.checked)}
-          />
-          {text('consoleFollowLatest')}
-        </label>
         {tab === 'agent' ? (
           <AgentView
             timelineRef={timelineRef}
@@ -525,48 +534,54 @@ export function AgentConsoleWorkspace({
                   }}
                 >
                   <code>{command.command || command.id}</code>
-                  <span>{status(command.status || 'running')}</span>
+                  <span data-status={command.status || 'running'}>
+                    {status(command.status || 'running')}
+                  </span>
                 </button>
               ))}
             </aside>
             <section>
               {selected && (
                 <header>
-                  <code>{selected.command}</code>
-                  <span>
-                    {status(selected.status)}
-                    {selected.exitCode !== undefined
-                      ? ` · ${text('consoleExitCode')} ${selected.exitCode}`
-                      : ''}
-                    {selected.durationMillis !== undefined
-                      ? ` · ${selected.durationMillis} ${text('consoleMilliseconds')}`
-                      : ''}
-                  </span>
-                  <button
-                    type="button"
-                    className="ui-button"
-                    onClick={() =>
-                      void navigator.clipboard
-                        .writeText(selected.output || selected.command)
-                        .catch((reason: unknown) => setError(String(reason)))
-                    }
-                  >
-                    {text('copy')}
-                  </button>
-                  <button
-                    type="button"
-                    className="ui-button"
-                    onClick={() => {
-                      setMessage(
-                        `${text('consoleOutputPrompt')}\n\n${selected.command}\n${selected.output}`,
-                      );
-                      setPolicy('normal');
-                      setTab('agent');
-                      requestAnimationFrame(() => draftRef.current?.focus());
-                    }}
-                  >
-                    {text('consoleSendOutput')}
-                  </button>
+                  <div className="command-detail-heading">
+                    <code title={selected.command}>{selected.command}</code>
+                    <span data-status={selected.status}>
+                      {status(selected.status)}
+                      {selected.exitCode !== undefined
+                        ? ` · ${text('consoleExitCode')} ${selected.exitCode}`
+                        : ''}
+                      {selected.durationMillis !== undefined
+                        ? ` · ${selected.durationMillis} ${text('consoleMilliseconds')}`
+                        : ''}
+                    </span>
+                  </div>
+                  <div className="command-detail-actions">
+                    <button
+                      type="button"
+                      className="ui-button"
+                      onClick={() =>
+                        void navigator.clipboard
+                          .writeText(selected.output || selected.command)
+                          .catch((reason: unknown) => setError(String(reason)))
+                      }
+                    >
+                      {text('copy')}
+                    </button>
+                    <button
+                      type="button"
+                      className="ui-button"
+                      onClick={() => {
+                        setMessage(
+                          `${text('consoleOutputPrompt')}\n\n${selected.command}\n${selected.output}`,
+                        );
+                        setPolicy('normal');
+                        setTab('agent');
+                        requestAnimationFrame(() => draftRef.current?.focus());
+                      }}
+                    >
+                      {text('consoleSendOutput')}
+                    </button>
+                  </div>
                 </header>
               )}
               {selected?.cwd && (
@@ -647,7 +662,12 @@ export function AgentConsoleWorkspace({
         </form>
       </div>
       <div className="terminal-workspace" hidden={view !== 'terminal'}>
-        {!state?.terminal.active && <p className="console-empty">{text('terminalStartHint')}</p>}
+        {!state?.terminal.active && (
+          <div className="console-empty">
+            <Icon name="terminal" />
+            <p>{text('terminalStartHint')}</p>
+          </div>
+        )}
         {state?.terminal.failure && <p role="alert">{state.terminal.failure}</p>}
         {state?.terminal.active && (
           <ProjectTerminal
@@ -661,7 +681,11 @@ export function AgentConsoleWorkspace({
       <footer className="agent-console-dock">
         {view === 'agent' ? (
           <div className="workspace-actions">
-            {state?.status && <span className="agent-session-status">{status(state.status)}</span>}
+            {state?.status && (
+              <span className="agent-session-status" data-status={state.status} role="status">
+                {status(state.status)}
+              </span>
+            )}
             {!state?.active ? (
               <IconButton
                 type="button"
@@ -745,7 +769,10 @@ export function AgentConsoleWorkspace({
           )
         )}
         {view === 'agent' && setup && (
-          <div className="agent-configuration">
+          <details className="agent-configuration">
+            <summary>
+              {text('consoleProvider')} / {text('consoleModel')}
+            </summary>
             <div className="agent-settings">
               <label>
                 {text('consoleProvider')}
@@ -840,7 +867,7 @@ export function AgentConsoleWorkspace({
                 {text('saveSettings')}
               </button>
             </div>
-          </div>
+          </details>
         )}
         {view === 'agent' && !state?.active && historyOpen && (
           <ul className="agent-history">
@@ -952,7 +979,12 @@ function AgentView({
           </button>
         </div>
       ))}
-      {conversation.length === 0 && <p>{text('consoleEmpty')}</p>}
+      {conversation.length === 0 && (
+        <div className="agent-conversation-empty">
+          <Icon name="messageSquare" />
+          <p>{text('consoleEmpty')}</p>
+        </div>
+      )}
       {conversation.map((entry) => {
         if (entry.kind === 'command') {
           return (
@@ -962,8 +994,11 @@ function AgentView({
               key={`${entry.kind}:${entry.id}`}
               onClick={() => selectCommand(entry.id)}
             >
+              <Icon name="terminal" />
               <code>{entry.text || text('consoleCommand')}</code>
-              <span>{status(entry.status || 'running')}</span>
+              <span data-status={entry.status || 'running'}>
+                {status(entry.status || 'running')}
+              </span>
             </button>
           );
         }

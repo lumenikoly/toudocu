@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
 import { RepositoryFileResponseSchema, type RepositoryFileResponse } from '@toudocu/contracts';
 import { translator, type Locale } from './i18n.js';
+import { Icon } from './ui/index.js';
 import { rangeQuery, type Change, type RangeState } from './changes-model.js';
 
 type TabId =
@@ -247,8 +248,14 @@ function SourceDiff({
             <section id={'change-hunk-' + index} className="source-diff-hunk" key={hunk.id}>
               <header>
                 <code>{hunk.header}</code>
-                <button type="button" onClick={() => copy(hunk.patch)}>
-                  {text('copyHunk')}
+                <button
+                  type="button"
+                  className="ui-icon-button"
+                  aria-label={text('copyHunk')}
+                  title={text('copyHunk')}
+                  onClick={() => copy(hunk.patch)}
+                >
+                  <Icon name="clipboard" />
                 </button>
               </header>
               <div
@@ -1022,7 +1029,7 @@ export function ChangesDetail({
 }) {
   const { text } = translator(locale);
   if (!change && linkedPath) return <FileView path={linkedPath} range={range} locale={locale} />;
-  if (!change) return <p className="empty-note">{text('noChangeSelected')}</p>;
+  if (!change) return <p className="empty-note ui-empty-state">{text('noChangeSelected')}</p>;
   const tabs = tabsFor(change, locale);
   const discuss = (): void => {
     const selectedText = globalThis.getSelection?.()?.toString().trim();
@@ -1040,23 +1047,45 @@ export function ChangesDetail({
     <article className="change-detail">
       <header className="change-detail-header">
         <div>
-          <span className={`change-status status-${change.status}`}>
-            {statusLabel(locale, change.status)}
-          </span>
-          <h2>{change.path.split('/').pop()}</h2>
+          <div className="change-file-identity">
+            <h2>{change.path.split('/').pop()}</h2>
+            <span className={`change-status status-${change.status}`}>
+              {statusLabel(locale, change.status)}
+            </span>
+          </div>
           <p>
             <code>{change.oldPath ? `${change.oldPath} → ${change.path}` : change.path}</code> · +
             {change.lines.added} −{change.lines.deleted}
           </p>
         </div>
         <div className="workspace-actions">
-          <a href={`/_toudocu/editor/?path=${encodeURIComponent(change.path)}`}>{text('edit')}</a>
-          <button type="button" disabled={!reviewEnabled} onClick={discuss}>
-            {text('discuss')}
+          <a
+            className="ui-icon-button"
+            aria-label={text('edit')}
+            title={text('edit')}
+            href={`/_toudocu/editor/?path=${encodeURIComponent(change.path)}`}
+          >
+            <Icon name="edit" />
+          </a>
+          <button
+            type="button"
+            className="ui-icon-button"
+            aria-label={text('discuss')}
+            title={text('discuss')}
+            disabled={!reviewEnabled}
+            onClick={discuss}
+          >
+            <Icon name="messageSquare" />
           </button>
           {change.sourceDiff && (
-            <button type="button" onClick={() => copy(change.sourceDiff ?? '')}>
-              {text('copyPatch')}
+            <button
+              type="button"
+              className="ui-icon-button"
+              aria-label={text('copyPatch')}
+              title={text('copyPatch')}
+              onClick={() => copy(change.sourceDiff ?? '')}
+            >
+              <Icon name="clipboard" />
             </button>
           )}
         </div>

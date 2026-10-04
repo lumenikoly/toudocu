@@ -10,7 +10,7 @@
     "name": "Toudocu",
     "description": "Toudocu tasks and project context in your thread.",
     "branding": {
-      "icon": "BookOpen"
+      "icon": "FileText"
     },
     "server": "./src/plugin.ts",
     "app": "./src/ui.tsx",

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import type { PageViewV1, PortalSnapshotV1, TaskHierarchyNode } from '@toudocu/contracts';
-import { EntityIdentity, EntityReference, Status } from './document.js';
+import { EntityReference, Status } from './document.js';
 import { translator, type Locale } from './i18n.js';
 import { PortalLink } from './routing.js';
 import { Icon } from './ui/index.js';
@@ -53,7 +53,10 @@ function itemMatches(item: WorkItem, filters: Filters, items: Map<string, WorkIt
       `${item.id} ${item.title} ${item.moduleId ?? ''} ${item.type ?? ''}`
         .toLocaleLowerCase()
         .includes(query)) &&
-    (!filters.status || item.workspace.workState === filters.status) &&
+    (!filters.status ||
+      (filters.status === 'archive'
+        ? item.archived
+        : item.workspace.workState === filters.status)) &&
     (!filters.type || item.type === filters.type) &&
     (!filters.module || item.moduleId === filters.module) &&
     (!filters.priority || item.priority === filters.priority)
@@ -64,21 +67,25 @@ function ItemLink({
   id,
   snapshot,
   children,
+  label,
 }: {
   id: string;
   snapshot: PortalSnapshotV1;
   children?: ReactNode;
+  label?: string;
 }) {
   const route = snapshot.routes.find((candidate) => candidate.pageId === `task:${id}`);
   return route ? (
-    <PortalLink to={route.href}>{children ?? <code>{id}</code>}</PortalLink>
+    <PortalLink to={route.href} {...(label ? { label } : {})}>
+      {children ?? <code>{id}</code>}
+    </PortalLink>
   ) : (
     (children ?? <code>{id}</code>)
   );
 }
 
 function TaskProgress({ item, locale }: Pick<ItemProps, 'item' | 'locale'>) {
-  const { format, text } = translator(locale);
+  const { format } = translator(locale);
   const completed = item.criteria.filter((criterion) => criterion.completed).length;
   const descendants = item.workspace.descendants;
   return (
@@ -97,9 +104,14 @@ function TaskProgress({ item, locale }: Pick<ItemProps, 'item' | 'locale'>) {
         </span>
       )}
       {descendants.total > 0 && (
-        <span>
-          {descendants.started && <>{text('taskBranchStarted')} </>}
-          {format('taskDescendants', { done: descendants.counts.done, total: descendants.total })}
+        <span
+          title={format('taskDescendants', {
+            done: descendants.counts.done,
+            total: descendants.total,
+          })}
+        >
+          <Icon name="tree" />
+          {descendants.counts.done} / {descendants.total}
         </span>
       )}
     </div>
@@ -197,25 +209,53 @@ function TaskCard(props: ItemProps) {
             : state === 'blocked'
               ? item.blocker
               : '';
+  const preview = item.result || item.behaviorChange || reason;
+  const hasRoute = snapshot.routes.some((route) => route.pageId === `task:${item.id}`);
   return (
     <article className="task-workspace-row" data-status={state}>
       <span className="task-row-marker" aria-hidden="true" />
       <div className="task-row-main">
         <ItemLink id={item.id} snapshot={snapshot}>
-          <EntityIdentity document={item} />
+          <span className="task-row-id">{item.id}</span>
+          <strong className="task-row-title">{item.title}</strong>
         </ItemLink>
+        <div className="task-row-context">
+          {item.priority && (
+            <span className="task-row-badge" data-priority={item.priority}>
+              {status(item.priority)}
+            </span>
+          )}
+          {item.severity && (
+            <span className="task-row-badge" data-severity={item.severity}>
+              {status(item.severity)}
+            </span>
+          )}
+          {item.moduleId && (
+            <span className="task-row-badge task-row-module">
+              <EntityReference value={item.moduleId} snapshot={snapshot} />
+            </span>
+          )}
+          {item.type && <span className="task-row-type">{status(item.type)}</span>}
+        </div>
+        {preview && <p className="task-row-preview">{preview}</p>}
       </div>
-      <Status status={{ kind: state, label: state }} locale={locale} />
-      <span className="task-row-context">
-        {item.type && <span>{status(item.type)}</span>}
-        {item.priority && <span>{status(item.priority)}</span>}
-        {item.severity && <span>{status(item.severity)}</span>}
-        {item.moduleId && <EntityReference value={item.moduleId} snapshot={snapshot} />}
-      </span>
-      {reason && <p className="task-workspace-reason">{reason}</p>}
       <TaskProgress item={item} locale={locale} />
+      <div className="task-row-end">
+        <Status status={{ kind: state, label: state }} locale={locale} />
+        {hasRoute && (
+          <ItemLink
+            id={item.id}
+            snapshot={snapshot}
+            label={`${text('openDocument')}: ${item.title}`}
+          >
+            <span className="task-row-open">
+              <Icon name="arrowRight" />
+            </span>
+          </ItemLink>
+        )}
+        <TaskItemActions item={item} snapshot={snapshot} locale={locale} />
+      </div>
       <TaskDetails {...props} />
-      <TaskItemActions item={item} snapshot={snapshot} locale={locale} />
     </article>
   );
 }
@@ -226,68 +266,11 @@ function TaskList({
   snapshot,
   locale,
 }: Omit<ItemProps, 'item'> & { list: WorkItem[] }) {
-  const { text, status } = translator(locale);
   return (
-    <div className="data-table task-workspace-table">
-      <table>
-        <thead>
-          <tr>
-            <th>{text('editorIdentifier')}</th>
-            <th>{text('editorTitle')}</th>
-            <th>{text('status')}</th>
-            <th>{text('priority')}</th>
-            <th>{text('type')}</th>
-            <th>{text('module')}</th>
-            <th>{text('criteriaProgress')}</th>
-            <th>{text('dependencies')}</th>
-            <th>{text('taskActions')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {list.map((item) => (
-            <tr key={item.id} data-status={item.workspace.workState}>
-              <td>
-                <ItemLink id={item.id} snapshot={snapshot} />
-              </td>
-              <td>
-                <ItemLink id={item.id} snapshot={snapshot}>
-                  {item.title}
-                </ItemLink>
-                <TaskDetails item={item} items={items} snapshot={snapshot} locale={locale} />
-              </td>
-              <td>
-                <Status
-                  status={{ kind: item.workspace.workState, label: item.workspace.workState }}
-                  locale={locale}
-                />
-              </td>
-              <td>{item.priority ? status(item.priority) : '—'}</td>
-              <td>{item.type ? status(item.type) : '—'}</td>
-              <td>
-                {item.moduleId ? (
-                  <EntityReference value={item.moduleId} snapshot={snapshot} />
-                ) : (
-                  '—'
-                )}
-              </td>
-              <td>
-                <TaskProgress item={item} locale={locale} />
-              </td>
-              <td>
-                {item.dependsOn.map((id) => (
-                  <span className="task-dependency" key={id}>
-                    <ItemLink id={id} snapshot={snapshot} /> ·{' '}
-                    {status(items.get(id)?.workspace.workState ?? 'unknown')}
-                  </span>
-                ))}
-              </td>
-              <td>
-                <TaskItemActions item={item} snapshot={snapshot} locale={locale} />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="task-workspace-table">
+      {list.map((item) => (
+        <TaskCard key={item.id} item={item} items={items} snapshot={snapshot} locale={locale} />
+      ))}
     </div>
   );
 }
@@ -367,6 +350,17 @@ export function TaskWorkspace({
   };
   const showCompleted = params.get('completed') === '1';
   const showArchive = params.get('archive') === '1';
+  const [filtersOpen, setFiltersOpen] = useState(() =>
+    Boolean(
+      filters.type ||
+      filters.module ||
+      filters.priority ||
+      filters.parent ||
+      showCompleted ||
+      showArchive ||
+      (filters.status && !['in-progress', 'ready', 'waiting', 'blocked'].includes(filters.status)),
+    ),
+  );
   const items = useMemo(
     () => new Map(page.workItems.map((item) => [item.id, item])),
     [page.workItems],
@@ -416,9 +410,13 @@ export function TaskWorkspace({
     void navigate(`${location.pathname}${next.size ? `?${next}` : ''}`, { replace: true });
   };
   const matched = ordered.filter((item) => itemMatches(item, filters, items));
-  const active = matched.filter((item) => activeStates.includes(item.workspace.workState));
-  const done = matched.filter((item) => item.workspace.workState === 'done');
-  const cancelled = matched.filter((item) => item.workspace.workState === 'cancelled');
+  const active = matched.filter(
+    (item) => !item.archived && activeStates.includes(item.workspace.workState),
+  );
+  const done = matched.filter((item) => !item.archived && item.workspace.workState === 'done');
+  const cancelled = matched.filter(
+    (item) => !item.archived && item.workspace.workState === 'cancelled',
+  );
   const archived = matched.filter((item) => item.archived);
   const archiveYears = [...new Set(archived.map((item) => item.archiveYear ?? '—'))]
     .sort()
@@ -450,7 +448,19 @@ export function TaskWorkspace({
     parent: ordered.filter((item) => item.childIds.length).map((item) => item.id),
   };
   const common = { items, snapshot, locale };
-  const currentWork = active.filter((item) => item.workspace.workState === 'in-progress');
+  const quickStates = ['', 'in-progress', 'ready', 'waiting', 'blocked'] as const;
+  const advancedFilterCount = [
+    filters.status && !quickStates.some((value) => value === filters.status),
+    filters.type,
+    filters.module,
+    filters.priority,
+    filters.parent,
+    showCompleted,
+    showArchive,
+  ].filter(Boolean).length;
+  const hasFilters = Boolean(
+    filters.query || filters.status || advancedFilterCount || showCompleted || showArchive,
+  );
   return (
     <section className="task-workspace" aria-labelledby="task-workspace-title">
       <header className="workspace-heading">
@@ -460,7 +470,7 @@ export function TaskWorkspace({
         </span>
       </header>
       <nav className="task-workspace-quick" aria-label={text('status')}>
-        {(['', 'in-progress', 'ready', 'waiting', 'blocked'] as const).map((value) => (
+        {quickStates.map((value) => (
           <button
             key={value}
             type="button"
@@ -470,10 +480,12 @@ export function TaskWorkspace({
             {value ? status(value) : text('allActive')}{' '}
             <strong>
               {
-                ordered.filter((item) =>
-                  value
-                    ? item.workspace.workState === value
-                    : activeStates.includes(item.workspace.workState),
+                ordered.filter(
+                  (item) =>
+                    !item.archived &&
+                    (value
+                      ? item.workspace.workState === value
+                      : activeStates.includes(item.workspace.workState)),
                 ).length
               }
             </strong>
@@ -488,67 +500,79 @@ export function TaskWorkspace({
           placeholder={text('searchTasks')}
           aria-label={text('searchTasksLabel')}
         />
-        {(['status', 'type', 'module', 'priority', 'parent'] as const).map((key) => (
-          <select
-            key={key}
-            value={filters[key]}
-            onChange={(event) => update(key, event.currentTarget.value)}
-            aria-label={text(key)}
-          >
-            <option value="">{text(key)}</option>
-            {options[key].map((value) => (
-              <option key={value} value={value}>
-                {key === 'parent' ? `${value} · ${items.get(value)?.title ?? ''}` : status(value)}
-              </option>
+        <details
+          className="task-workspace-filters"
+          open={filtersOpen}
+          onToggle={(event) => setFiltersOpen(event.currentTarget.open)}
+        >
+          <summary>
+            <Icon name="settings" />
+            {text('taskFilters')}
+            {advancedFilterCount > 0 && <strong>{advancedFilterCount}</strong>}
+          </summary>
+          <div className="task-workspace-filter-fields">
+            {(['status', 'type', 'module', 'priority', 'parent'] as const).map((key) => (
+              <select
+                key={key}
+                value={filters[key]}
+                onChange={(event) => update(key, event.currentTarget.value)}
+                aria-label={text(key)}
+              >
+                <option value="">{text(key)}</option>
+                {options[key].map((value) => (
+                  <option key={value} value={value}>
+                    {key === 'parent'
+                      ? `${value} · ${items.get(value)?.title ?? ''}`
+                      : status(value)}
+                  </option>
+                ))}
+              </select>
             ))}
-          </select>
-        ))}
-        <label>
-          <input
-            type="checkbox"
-            checked={showCompleted}
-            onChange={(event) => update('completed', event.currentTarget.checked)}
-          />{' '}
-          {text('completed')}
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={showArchive}
-            onChange={(event) => update('archive', event.currentTarget.checked)}
-          />{' '}
-          {text('archive')}
-        </label>
-        <button type="button" onClick={() => void navigate(location.pathname, { replace: true })}>
-          {text('reset')}
-        </button>
-      </div>
-      {currentWork.length > 0 && (
-        <section className="task-workspace-current">
-          <h2>{text('currentWorkSection')}</h2>
-          <ul>
-            {currentWork.map((item) => (
-              <li key={item.id}>
-                <TaskCard item={item} {...common} />
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-      <nav className="task-workspace-modes" aria-label={text('taskView')}>
-        {(['board', 'list', 'tree'] as const).map((value) => (
+            <label>
+              <input
+                type="checkbox"
+                checked={showCompleted}
+                onChange={(event) => update('completed', event.currentTarget.checked)}
+              />{' '}
+              {text('completed')}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={showArchive}
+                onChange={(event) => update('archive', event.currentTarget.checked)}
+              />{' '}
+              {text('archive')}
+            </label>
+          </div>
+        </details>
+        {hasFilters && (
           <button
-            key={value}
+            className="task-workspace-reset"
             type="button"
-            aria-pressed={mode === value}
-            aria-label={text(value)}
-            title={text(value)}
-            onClick={() => update('mode', value)}
+            onClick={() => {
+              setFiltersOpen(false);
+              void navigate(location.pathname, { replace: true });
+            }}
           >
-            <Icon name={value} />
+            {text('reset')}
           </button>
-        ))}
-      </nav>
+        )}
+        <nav className="task-workspace-modes" aria-label={text('taskView')}>
+          {(['board', 'list', 'tree'] as const).map((value) => (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={mode === value}
+              aria-label={text(value)}
+              title={text(value)}
+              onClick={() => update('mode', value)}
+            >
+              <Icon name={value} />
+            </button>
+          ))}
+        </nav>
+      </div>
       {visibleItems.length === 0 ? (
         <p className="empty-note">{text('noMatchingWork')}</p>
       ) : mode === 'tree' ? (

@@ -50,10 +50,11 @@ export function EditorTree({
             <button
               type="button"
               aria-current={entry.file.path === active ? 'true' : undefined}
+              title={entry.file.path}
               onClick={() => onOpen(entry.file.path)}
             >
               <span>{entry.file.title ?? entry.file.path.split('/').at(-1)}</span>
-              <code>{entry.file.path}</code>
+              <code>{entry.file.path.split('/').at(-1)}</code>
             </button>
           </li>
         ) : (

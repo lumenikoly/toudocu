@@ -1,30 +1,41 @@
+@font-face {
+  font-family: 'Golos Text';
+  src: url('../assets/golos-text.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+}
+
 :root {
   color-scheme: light;
   --td-font-body:
-    ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    'Golos Text', ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --td-font-interface: var(--td-font-body);
   --td-font-heading: var(--td-font-body);
+  --td-reading-size: 1rem;
   --td-font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
-  --td-surface-canvas: light-dark(#f6f4f1, #151514);
-  --td-surface: light-dark(#fffdfa, #1c1b19);
-  --td-surface-muted: light-dark(#faf7f3, #23211e);
-  --td-surface-raised: light-dark(#f0ebe5, #2d2a26);
-  --td-text: light-dark(#24211e, #eee9e3);
-  --td-text-muted: light-dark(#706963, #b8afa6);
-  --td-text-on-accent: #ffffff;
-  --td-border: light-dark(#e2ddd6, #3a3631);
-  --td-border-strong: light-dark(#cec6bd, #504a43);
-  --td-accent: light-dark(#315fbd, #82aaff);
-  --td-accent-soft: light-dark(#e9effc, color-mix(in srgb, #82aaff 20%, transparent));
-  --td-accent-strong: light-dark(#23498f, #b5cbff);
-  --td-status-success: light-dark(#197447, #72d49a);
-  --td-status-success-soft: light-dark(#e6f5ed, #193e2d);
-  --td-status-warning: light-dark(#946200, #f0bd58);
-  --td-status-warning-soft: light-dark(#fff4d8, #4a3818);
-  --td-status-danger: light-dark(#b3261e, #f1847b);
-  --td-status-danger-soft: light-dark(#fdebea, #4b2624);
-  --td-status-info: light-dark(#23658c, #7fc8ed);
-  --td-status-info-soft: light-dark(#e7f3fa, #1e3b4b);
+  --td-surface-canvas: light-dark(#f7f8fc, #14171f);
+  --td-surface: light-dark(#ffffff, #1c202a);
+  --td-surface-muted: light-dark(#f8f9fc, #232834);
+  --td-surface-raised: light-dark(#f0f3f9, #2c3342);
+  --td-text: light-dark(#252d40, #edf0f7);
+  --td-text-muted: light-dark(#6a7489, #a9b2c6);
+  --td-text-on-accent: light-dark(#ffffff, #17213c);
+  --td-border: light-dark(#e5e9f1, #303746);
+  --td-border-strong: light-dark(#ccd4e2, #465166);
+  --td-accent: light-dark(#4263dc, #a5b8ff);
+  --td-accent-soft: light-dark(#edf1ff, #2b3655);
+  --td-accent-strong: light-dark(#304fb9, #ced8ff);
+  --td-status-success: light-dark(#13734a, #83deb1);
+  --td-status-success-soft: light-dark(#e4f5eb, #163d32);
+  --td-status-warning: light-dark(#895500, #f6c66a);
+  --td-status-warning-soft: light-dark(#fff2d9, #42321b);
+  --td-status-danger: light-dark(#b12c40, #ff9ba9);
+  --td-status-danger-soft: light-dark(#ffeaee, #48232e);
+  --td-status-info: light-dark(#245fa8, #9ac7ff);
+  --td-status-info-soft: light-dark(#e7f0ff, #203650);
+  --td-accent-strong: var(--td-accent);
+  --td-canvas: var(--td-surface-canvas);
   --td-focus: var(--td-accent);
   --td-selection: var(--td-accent-soft);
   --td-space-1: 0.25rem;
@@ -34,12 +45,12 @@
   --td-space-5: 1.25rem;
   --td-space-6: 1.5rem;
   --td-space-8: 2rem;
-  --td-radius-sm: 0.25rem;
-  --td-radius-control: 0.375rem;
-  --td-radius-panel: 0.5rem;
+  --td-radius-sm: 0.375rem;
+  --td-radius-control: 0.5rem;
+  --td-radius-panel: 0.75rem;
   --td-control-height-sm: 2rem;
   --td-control-height: 2.5rem;
-  --td-control-height-lg: 2.75rem;
+  --td-control-height-lg: 2.5rem;
   --td-motion-fast: 120ms;
   --td-motion-normal: 180ms;
   --td-motion-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -81,9 +92,9 @@ html[data-accent='violet'] {
 
 html[data-site-theme='paper'] {
   --td-font-body: Georgia, 'Times New Roman', ui-serif, serif;
-  --td-font-heading: var(--td-font-body);
-  --td-font-interface: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --td-radius-panel: 5px;
+  --td-font-heading: var(--td-font-interface);
+  --td-font-interface: 'Golos Text', ui-sans-serif, sans-serif;
+  --td-radius-panel: 0.75rem;
   --td-surface-canvas: light-dark(#f3efe5, #181612);
   --td-surface: light-dark(#fffdf7, #211e19);
   --td-surface-muted: light-dark(#f8f3e8, #28241d);
@@ -95,6 +106,13 @@ html[data-site-theme='paper'] {
 }
 
 html[data-site-theme='terminal'] {
+  --td-surface-canvas: light-dark(#f0f5f3, #101a19);
+  --td-surface: light-dark(#fbfefd, #172321);
+  --td-surface-muted: light-dark(#edf4f1, #1e2d29);
+  --td-surface-raised: light-dark(#e3ece7, #283c34);
+  --td-border: light-dark(#d6e3dd, #34483e);
+  --td-text: light-dark(#263c32, #e1efe7);
+  --td-text-muted: light-dark(#5c7164, #9fb7a7);
   --td-font-interface: var(--td-font-mono);
   --td-font-heading: var(--td-font-interface);
   --td-radius-panel: 3px;
@@ -103,7 +121,7 @@ html[data-site-theme='terminal'] {
 
 html[data-density='compact'] {
   --td-control-height-sm: 1.875rem;
-  --td-control-height: 2.25rem;
+  --td-control-height: 2.5rem;
   --td-control-height-lg: 2.5rem;
   --td-space-2: 0.375rem;
   --td-space-3: 0.625rem;

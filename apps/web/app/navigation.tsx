@@ -67,6 +67,10 @@ export function Navigation({
     return key ? text(key) : item.title;
   };
   const glyph = (item: NavigationItem): IconName => {
+    if (item.pageId === 'home') return 'home';
+    if (item.pageId === 'traceability' || item.pageId === 'screen-map') return 'network';
+    if (item.pageId === 'roadmap') return 'route';
+    if (item.pageId === 'api-docs') return 'book';
     if (item.kind === 'task' || item.pageId === 'task-workspace') return 'clipboard';
     if (item.pageId === 'health') return 'checkCircle';
     if (item.pageId === 'changes' || item.pageId === 'changelog') return 'history';
@@ -77,7 +81,7 @@ export function Navigation({
     <ul>
       {entries.map((item) => (
         <li key={item.id}>
-          <PortalLink to={item.href}>
+          <PortalLink to={item.href} label={generatedTitle(item)}>
             {item.status?.kind ? (
               <span
                 className="nav-status"
@@ -104,6 +108,20 @@ export function Navigation({
       ))}
     </ul>
   );
+  const folderIcons: Record<string, IconName> = {
+    architecture: 'network',
+    modules: 'layers',
+    'use-cases': 'route',
+    flows: 'route',
+    screens: 'board',
+    decisions: 'book',
+    contracts: 'book',
+    quality: 'shield',
+    work: 'clipboard',
+    guides: 'book',
+    reference: 'book',
+    drafts: 'edit',
+  };
   const groups = new Map<string, NavigationItem[]>();
   const tools: NavigationItem[] = [];
   for (const item of items) {
@@ -120,9 +138,23 @@ export function Navigation({
     groups.set(folder, [...(groups.get(folder) ?? []), item]);
   }
   const primaryIds = new Set(['home', 'changes', 'health', 'editor']);
-  const primary = tools.filter(
-    (item) => primaryIds.has(item.pageId) && !['editor', 'changes'].includes(item.pageId),
+  const primary = ['home', 'editor', 'changes', 'health'].flatMap((id) =>
+    tools.filter((item) => item.pageId === id),
   );
+  const folderOrder = [
+    'architecture',
+    'modules',
+    'use-cases',
+    'flows',
+    'screens',
+    'decisions',
+    'contracts',
+    'quality',
+    'work',
+    'guides',
+    'reference',
+    'drafts',
+  ];
   const groupPageIds = new Set([
     'task-workspace',
     'use-cases',
@@ -149,40 +181,47 @@ export function Navigation({
     <nav aria-label={text('navigation')}>
       {render(primary)}
       <div className="nav-section-label">{text('knowledge')}</div>
-      {[...groups].map(([folder, entries]) => {
-        const overview = entries.find(
-          (item) => item.id === `${folder}/index.md` || item.id === `${folder}/overview.md`,
-        );
-        const route = overview ?? groupRoute(folder);
-        const children = entries.filter(
-          (item) => item !== overview && item.pageId !== route?.pageId,
-        );
-        const title = overview?.title ?? translator(locale).sectionTitle(folder);
-        return (
-          <details
-            className="nav-group"
-            key={folder}
-            open={openGroups.has(folder)}
-            onToggle={(event) => toggleGroup(folder, event.currentTarget.open)}
-          >
-            <summary
-              onClick={(event) => {
-                if ((event.target as HTMLElement).closest('a')) event.preventDefault();
-              }}
+      {[...groups]
+        .sort(
+          ([a], [b]) =>
+            (folderOrder.indexOf(a) < 0 ? 99 : folderOrder.indexOf(a)) -
+            (folderOrder.indexOf(b) < 0 ? 99 : folderOrder.indexOf(b)),
+        )
+        .map(([folder, entries]) => {
+          const overview = entries.find(
+            (item) => item.id === `${folder}/index.md` || item.id === `${folder}/overview.md`,
+          );
+          const route = overview ?? groupRoute(folder);
+          const children = entries.filter(
+            (item) => item !== overview && item.pageId !== route?.pageId,
+          );
+          const title = overview?.title ?? translator(locale).sectionTitle(folder);
+          return (
+            <details
+              className="nav-group"
+              key={folder}
+              open={openGroups.has(folder)}
+              onToggle={(event) => toggleGroup(folder, event.currentTarget.open)}
             >
-              {route ? (
-                <PortalLink className="nav-group-title" to={route.href}>
-                  {title}
-                </PortalLink>
-              ) : (
-                <span className="nav-group-title">{title}</span>
-              )}
-              <span>{children.length}</span>
-            </summary>
-            {render(children)}
-          </details>
-        );
-      })}
+              <summary
+                onClick={(event) => {
+                  if ((event.target as HTMLElement).closest('a')) event.preventDefault();
+                }}
+              >
+                {route ? (
+                  <PortalLink className="nav-group-title" to={route.href}>
+                    <Icon name={folderIcons[folder] ?? 'folder'} />
+                    {title}
+                  </PortalLink>
+                ) : (
+                  <span className="nav-group-title">{title}</span>
+                )}
+                <span>{children.length}</span>
+              </summary>
+              {render(children)}
+            </details>
+          );
+        })}
       {project.length > 0 && (
         <details className="nav-group project-navigation" open>
           <summary>

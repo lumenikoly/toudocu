@@ -8,6 +8,7 @@ import { createIcon, type IconName } from './design/icons.js';
 
 export type DocumentView = Extract<PageViewV1, { kind: 'document' }>['document'];
 type DocumentPage = Extract<PageViewV1, { kind: 'document' | 'task' | 'changelog' | 'home' }>;
+const emptyNavigation: readonly { id: string; title: string }[] = [];
 
 export function documentTitle(document: Pick<DocumentView, 'id' | 'title'>): string {
   return document.id && document.title.startsWith(`${document.id}:`)
@@ -88,8 +89,36 @@ export function Status({
 }) {
   if (!status.kind || status.kind === 'neutral') return null;
   const value = status.label || status.kind;
+  const tone = [
+    'done',
+    'completed',
+    'implemented',
+    'ready',
+    'accepted',
+    'risk-accepted',
+    'valid',
+  ].includes(status.kind)
+    ? 'success'
+    : ['blocked', 'failed', 'error', 'obsolete'].includes(status.kind)
+      ? 'danger'
+      : ['review', 'pending', 'planned', 'waiting', 'ready-candidate', 'needs-attention'].includes(
+            status.kind,
+          )
+        ? 'warning'
+        : ['in-progress', 'changed', 'info'].includes(status.kind)
+          ? 'info'
+          : 'neutral';
+  const icon =
+    tone === 'success'
+      ? 'checkCircle'
+      : tone === 'danger'
+        ? 'alertCircle'
+        : tone === 'info'
+          ? 'play'
+          : 'circle';
   return (
-    <Badge className="status" data-status={status.kind}>
+    <Badge className="status" data-status={status.kind} data-tone={tone}>
+      <Icon name={icon} />
       {translator(locale).status(status.kind || value)}
     </Badge>
   );
@@ -400,10 +429,15 @@ export function DocumentBody({ document, locale }: { document: DocumentView; loc
       button.type = 'button';
       button.className = 'section-toggle';
       button.setAttribute('aria-expanded', 'true');
-      button.setAttribute('aria-label', `${text('collapseSection')}: ${heading.textContent ?? ''}`);
+      const headingLabel = heading.textContent ?? '';
+      button.setAttribute('aria-label', `${text('collapseSection')}: ${headingLabel}`);
       button.addEventListener('click', () => {
         const collapsed = button.getAttribute('aria-expanded') === 'true';
         button.setAttribute('aria-expanded', String(!collapsed));
+        button.setAttribute(
+          'aria-label',
+          `${collapsed ? text('expandSection') : text('collapseSection')}: ${headingLabel}`,
+        );
         for (
           let node = heading.nextElementSibling;
           node && node.tagName !== 'H2';
@@ -460,69 +494,58 @@ export function DocumentContent({
   snapshot,
   children,
   content,
+  task,
+  navigation = emptyNavigation,
 }: {
   document: DocumentView;
   locale: Locale;
   snapshot?: PortalSnapshotV1 | undefined;
   children?: ReactNode;
   content?: ReactNode;
+  task?:
+    | {
+        priority?: string | undefined;
+        moduleId?: string | undefined;
+        workspace: { workState: string };
+      }
+    | undefined;
+  navigation?: readonly { id: string; title: string }[] | undefined;
 }) {
   const { text } = translator(locale);
+  const shownStatus = task
+    ? { kind: task.workspace.workState, label: task.workspace.workState }
+    : document.status;
+  const properties = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    const element = properties.current;
+    if (!element || typeof ResizeObserver === 'undefined') return;
+    let compact: boolean | undefined;
+    const observer = new ResizeObserver(() => {
+      const next = getComputedStyle(element.querySelector('summary')!).display !== 'none';
+      if (next !== compact) element.open = !next;
+      compact = next;
+    });
+    observer.observe(element.parentElement ?? element);
+    return () => observer.disconnect();
+  }, [document.sourcePath]);
   return (
     <article className="document">
       <header className="document-header">
-        <div className="document-identity">
-          <span>
-            {translator(locale).documentType(document.type)}
-            {document.id && (
-              <>
-                {' '}
-                · <code>{document.id}</code>
-              </>
-            )}
-          </span>
-          {document.status.kind && <Status status={document.status} locale={locale} />}
+        <div className="document-topline">
+          <h1>{documentTitle(document)}</h1>
+          <DocumentActions document={document} snapshot={snapshot} locale={locale} />
         </div>
-        <h1>{documentTitle(document)}</h1>
-        <details className="document-properties">
-          <summary>
-            {text('details')}
-            <Icon name="chevronDown" />
-          </summary>
-          <dl className="document-metadata">
-            {document.metadata.owner && (
-              <div>
-                <dt>{text('owner')}</dt>
-                <dd>{document.metadata.owner}</dd>
-              </div>
-            )}
-            <div>
-              <dt>{text('updated')}</dt>
-              <dd>
-                <time dateTime={document.updatedAt}>{document.updatedAt.slice(0, 10)}</time>
-              </dd>
-            </div>
-            {Object.entries(document.metadata)
-              .filter(
-                ([key, value]) => value && !['id', 'owner', 'updated', 'status'].includes(key),
-              )
-              .slice(0, 6)
-              .map(([key, value]) => (
-                <div key={key}>
-                  <dt>{key}</dt>
-                  <dd>
-                    <EntityReference value={value} snapshot={snapshot} />
-                  </dd>
-                </div>
-              ))}
-            <div className="document-path">
-              <dt>{text('path')}</dt>
-              <dd>
-                <code>{document.sourcePath}</code>
-              </dd>
-            </div>
-          </dl>
-        </details>
+        <div className="document-identity">
+          {document.id && <code>{document.id}</code>}
+          {shownStatus.kind && <Status status={shownStatus} locale={locale} />}
+          {task?.priority && (
+            <span className="document-priority" data-priority={task.priority}>
+              {translator(locale).status(task.priority)}
+            </span>
+          )}
+          {task?.moduleId && <EntityReference value={task.moduleId} snapshot={snapshot} />}
+          {!task && <span>{translator(locale).documentType(document.type)}</span>}
+        </div>
         {(document.warnings > 0 || document.errors > 0 || document.stale) && (
           <div className="document-signals" role="status">
             {document.errors > 0 && (
@@ -538,10 +561,102 @@ export function DocumentContent({
             {document.stale && <span>{text('staleLabel')}</span>}
           </div>
         )}
-        <DocumentActions document={document} snapshot={snapshot} locale={locale} />
       </header>
-      {children}
-      {content ?? <DocumentReadingView document={document} locale={locale} />}
+      <div className="document-detail-grid">
+        <div className="document-main">
+          {content ?? <DocumentReadingView document={document} locale={locale} />}
+          {children}
+        </div>
+        <aside
+          className="document-aside"
+          aria-label={task ? text('aboutTask') : text('aboutDocument')}
+        >
+          <details className="document-properties" ref={properties} open>
+            <summary>
+              {task ? text('aboutTask') : text('aboutDocument')}
+              <Icon name="chevronDown" />
+            </summary>
+            <div className="document-properties-content">
+              <h2>{task ? text('aboutTask') : text('aboutDocument')}</h2>
+              <dl className="document-metadata">
+                {shownStatus.kind && (
+                  <div>
+                    <dt>{text('status')}</dt>
+                    <dd>
+                      <Status status={shownStatus} locale={locale} />
+                    </dd>
+                  </div>
+                )}
+                {task?.priority && (
+                  <div>
+                    <dt>{text('priority')}</dt>
+                    <dd>
+                      <span className="document-priority" data-priority={task.priority}>
+                        {translator(locale).status(task.priority)}
+                      </span>
+                    </dd>
+                  </div>
+                )}
+                {task?.moduleId && (
+                  <div>
+                    <dt>{text('module')}</dt>
+                    <dd>
+                      <EntityReference value={task.moduleId} snapshot={snapshot} />
+                    </dd>
+                  </div>
+                )}
+                {document.metadata.owner && (
+                  <div>
+                    <dt>{text('owner')}</dt>
+                    <dd>{document.metadata.owner}</dd>
+                  </div>
+                )}
+                <div>
+                  <dt>{text('updated')}</dt>
+                  <dd>
+                    <time dateTime={document.updatedAt}>{document.updatedAt.slice(0, 10)}</time>
+                  </dd>
+                </div>
+                {Object.entries(document.metadata)
+                  .filter(
+                    ([key, value]) =>
+                      value &&
+                      ![
+                        'id',
+                        'owner',
+                        'updated',
+                        'status',
+                        ...(task ? ['priority', 'module', 'moduleId'] : []),
+                      ].includes(key),
+                  )
+                  .map(([key, value]) => (
+                    <div key={key}>
+                      <dt>
+                        {key === 'taskType' || key === 'type'
+                          ? text('type')
+                          : key === 'useCase'
+                            ? text('useCaseFilter')
+                            : key === 'module'
+                              ? text('module')
+                              : key}
+                      </dt>
+                      <dd>
+                        <EntityReference value={value} snapshot={snapshot} />
+                      </dd>
+                    </div>
+                  ))}
+                <div className="document-path">
+                  <dt>{text('path')}</dt>
+                  <dd>
+                    <code>{document.sourcePath}</code>
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </details>
+          <DocumentToc document={document} locale={locale} navigation={navigation} />
+        </aside>
+      </div>
     </article>
   );
 }
@@ -583,6 +698,16 @@ function DocumentActions({
   };
   return (
     <div className="document-actions" role="toolbar" aria-label={text('documentActions')}>
+      {editor && (
+        <PortalLink
+          className="icon-button is-primary"
+          to={`${editor.href}?path=${encodeURIComponent(document.sourcePath)}`}
+          label={text('edit')}
+        >
+          <Icon name="edit" />
+          <span className="action-label">{text('edit')}</span>
+        </PortalLink>
+      )}
       <button
         className="icon-button"
         type="button"
@@ -592,15 +717,6 @@ function DocumentActions({
       >
         <Icon name={copied ? 'checkCircle' : 'clipboard'} />
       </button>
-      {editor && (
-        <PortalLink
-          className="icon-button is-primary"
-          to={`${editor.href}?path=${encodeURIComponent(document.sourcePath)}`}
-          label={text('edit')}
-        >
-          <Icon name="edit" />
-        </PortalLink>
-      )}
       {changes && (
         <PortalLink
           className="icon-button"
@@ -644,9 +760,38 @@ export function DocumentReadingView({
   document: DocumentView;
   locale: Locale;
 }) {
+  return <DocumentBody document={document} locale={locale} />;
+}
+
+function DocumentToc({
+  document,
+  locale,
+  navigation,
+}: {
+  document: DocumentView;
+  locale: Locale;
+  navigation: readonly { id: string; title: string }[];
+}) {
   const { text } = translator(locale);
-  const sections = document.sections.filter((section) => section.level > 1 && section.level < 4);
+  const sections = [
+    ...document.sections.filter((section) => section.level > 1 && section.level < 4),
+    ...navigation.map((section) => ({ ...section, level: 2 })),
+  ];
   const [active, setActive] = useState('');
+  const toc = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    const element = toc.current;
+    if (!element || typeof ResizeObserver === 'undefined') return;
+    let compact: boolean | undefined;
+    const observer = new ResizeObserver(() => {
+      const next = getComputedStyle(element.parentElement!).position !== 'sticky';
+      if (next !== compact) element.open = !next;
+      compact = next;
+    });
+    observer.observe(element.parentElement ?? element);
+    return () => observer.disconnect();
+  }, [document.sourcePath]);
+
   useEffect(() => {
     if (typeof IntersectionObserver === 'undefined') return;
     const headings = sections.flatMap((section) => {
@@ -663,24 +808,19 @@ export function DocumentReadingView({
     headings.forEach((heading) => observer.observe(heading));
     return () => observer.disconnect();
   }, [document.sourcePath]);
-  return (
-    <div className="document-layout">
-      <DocumentBody document={document} locale={locale} />
-      {sections.length > 0 && (
-        <details className="document-toc" open>
-          <summary>{text('contents')}</summary>
-          <nav aria-label={text('contents')}>
-            {sections.map((section) => (
-              <a key={section.id} href={`#${section.id}`} data-level={section.level}>
-                {active === section.id && <span className="toc-marker" aria-hidden="true" />}
-                {section.title}
-              </a>
-            ))}
-          </nav>
-        </details>
-      )}
-    </div>
-  );
+  return sections.length > 0 ? (
+    <details className="document-toc" ref={toc} open>
+      <summary>{text('contents')}</summary>
+      <nav aria-label={text('contents')}>
+        {sections.map((section) => (
+          <a key={section.id} href={`#${section.id}`} data-level={section.level}>
+            {active === section.id && <span className="toc-marker" aria-hidden="true" />}
+            {section.title}
+          </a>
+        ))}
+      </nav>
+    </details>
+  ) : null;
 }
 
 export function Relations({
@@ -695,9 +835,9 @@ export function Relations({
   locale: Locale;
 }) {
   const { text } = translator(locale);
-  const list = (title: string, paths: readonly string[]) =>
+  const list = (title: string, paths: readonly string[], id: string) =>
     paths.length > 0 && (
-      <section className="relations-section">
+      <section className="relations-section" id={id}>
         <h2>{title}</h2>
         <ul className="relations">
           {paths.map((path) => (
@@ -710,8 +850,8 @@ export function Relations({
     );
   return (
     <>
-      {list(text('related'), related)}
-      {list(text('backlinks'), backlinks)}
+      {list(text('related'), related, 'document-related')}
+      {list(text('backlinks'), backlinks, 'document-backlinks')}
     </>
   );
 }

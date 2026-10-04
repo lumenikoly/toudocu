@@ -21,17 +21,41 @@ snapshot while keeping the current content visible. The first load still compile
 through the CLI. Readiness is checked live before starting work. **Checks** and **Changes** load
 only when opened.
 
+Status markers and labels distinguish completed tasks in green, pending tasks in amber, work in
+progress in blue and blocked tasks with bb's error color. **Done** filters completed tasks without
+flattening the hierarchy. Task titles stay readable in both themes.
+
+**Clarify task** starts a clarification thread in the current workspace and invokes the supplied
+`toudocu-bb` workflow. It uses the project's `$toudocu clarify` skill when available, otherwise its
+compact clarification instructions; the flow stops before implementation. **Review task** is the
+main action for tasks already in progress or completed. The **More task actions** menu includes
+**Run task checks**, **Use in this thread** and **Copy task ID**. Review and verification threads
+reuse the selected workspace, so they see its uncommitted changes. Starting implementation still
+requires live readiness and creates a separate managed worktree. Pending workflow actions reuse
+the panel snapshot instead of compiling task data again.
+
 **Checks** reads the verification plan without running commands. All nine agent tools are read-only,
-including `toudocu_task_verify`. Execution remains an explicit trusted CLI workflow. `@toudocu`
+including `toudocu_task_verify`. **Run task checks** explicitly asks a verification thread to execute
+the configured commands through the trusted CLI; it does not change the plan tool into an executor.
+`@toudocu`
 lists existing tasks; typing a task ID or document title searches source documentation. Suggestions
 use a bounded, 30-second title index per workspace; while it loads, a search mention fetches results
 when sent. Selected references are re-read through the CLI. Mentions on New thread use the selected
 project's default local checkout; after thread creation they use its workspace. Choose a project
 first if the New thread composer has none selected.
 
-Set **Toudocu workspace URL** in plugin settings to enable **Open in Toudocu**. Use an existing
-reachable portal. The plugin never starts `toudocu serve`. The configured URL is shared by this
-plugin installation; it is not workspace discovery.
+**Open in Toudocu** appears only when `project info` finds a live `toudocu serve` for this exact
+workspace and documentation root. There is no URL setting. Task browsing works without a server;
+the plugin never starts one. Start `toudocu serve` in the checkout or worktree you want to open.
+Workspace discovery refreshes separately from the task snapshot, on opening the panel, returning
+to the window and every 30 seconds while the panel is open. The action checks again before opening.
+
+A direct address is opened only after the client verifies the server's instance identity. For a
+remote machine, bb Connect forwards the discovered loopback port through its owner-authenticated
+HTTPS gate. Connect enrollment is required when the address is unreachable from the client; errors
+are shown only on opening and do not block tasks. Shared ports are reconciled while in use and
+released on server shutdown detection or plugin unload. A worktree never falls back to the main
+checkout's server, even if their project IDs match.
 
 ## Install from this checkout
 
@@ -70,8 +94,9 @@ and CLI versions are independent.
 
 Only the SDK and public contracts are imported. The host entry spawns `toudocu` with argument
 arrays, `shell: false`, cancellation, a 30-second timeout and a 4 MiB output ceiling. Tools limit
-returned JSON to 1 MB. JSON reports are validated; there is no human-output parser, private HTTP API
-or persistent CLI daemon.
+returned JSON to 1 MB. JSON reports are validated; there is no human-output parser or persistent
+CLI daemon. Task data comes only from CLI JSON. The public instance-identity endpoint is used solely
+to verify that the browser can reach the discovered server before opening it.
 
 `project info` chooses the configured default documentation locale. Unavailable capabilities and
 incompatible contracts fail explicitly. Refresh reloads panel state; task status and readiness are

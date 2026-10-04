@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { PageViewV1 } from '@toudocu/contracts';
 import { translator, type Locale } from './i18n.js';
+import { EmptyState, Icon } from './ui/index.js';
 
 export { EditorWorkspace } from './editor-workspace.js';
 
@@ -66,30 +67,41 @@ export function ApiDocsWorkspace({
           <p>{text('apiContractsDescription')}</p>
         </div>
       </header>
-      <div className="api-docs-toolbar">
-        <label>
-          <span>{text('specification')}</span>
-          <select value={selected} onChange={(event) => setSelected(event.currentTarget.value)}>
-            {page.specs.map((spec) => (
-              <option key={spec.path} value={spec.path}>
-                {spec.title} · {spec.version}
-              </option>
-            ))}
-          </select>
-        </label>
-        {selected && (
-          <a
-            href={`/_toudocu/api/editor/file?raw=1&path=${encodeURIComponent(selected)}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {text('openSource')}
-          </a>
-        )}
-      </div>
-      {error && <p role="alert">{error}</p>}
+      {page.specs.length > 0 && (
+        <div className="api-docs-toolbar">
+          <label>
+            <span>{text('specification')}</span>
+            <select value={selected} onChange={(event) => setSelected(event.currentTarget.value)}>
+              {page.specs.map((spec) => (
+                <option key={spec.path} value={spec.path}>
+                  {spec.title} · {spec.version}
+                </option>
+              ))}
+            </select>
+          </label>
+          {selected && (
+            <a
+              className="ui-button api-source-link"
+              href={`/_toudocu/api/editor/file?raw=1&path=${encodeURIComponent(selected)}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Icon name="file" />
+              {text('openSource')}
+            </a>
+          )}
+        </div>
+      )}
+      {error && (
+        <p className="api-docs-error" role="alert">
+          <Icon name="alertCircle" />
+          {error}
+        </p>
+      )}
       {page.specs.length === 0 ? (
-        <p className="empty-note">{text('noApiContracts')}</p>
+        <EmptyState className="api-docs-empty" title={text('noApiContracts')}>
+          <Icon name="file" />
+        </EmptyState>
       ) : (
         <div className="swagger-workspace" ref={host} />
       )}

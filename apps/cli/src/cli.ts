@@ -1330,12 +1330,12 @@ export async function runCLI(
       let registration: Awaited<ReturnType<typeof registerServeInstance>> | undefined;
       try {
         const address = await server.app.listen({ host: options.host, port: Number(options.port) });
+        stdout(`Documentation server started at ${address}\n`);
         registration = await registerServeInstance({
           ...instance,
           url: address,
           ...(signal ? { signal } : {}),
         });
-        stdout(`Documentation server started at ${address}\n`);
         if (signal) {
           if (!signal.aborted) {
             await new Promise<void>((resolveAbort) =>

@@ -105,7 +105,7 @@ function MessageView({
           {new Date(message.createdAt).toLocaleString(locale)}
         </time>
       </header>
-      <p>{message.text}</p>
+      <p className="discussion-message-body">{message.text}</p>
       {message.editedAt && <p className="discussion-meta">{text('discussionEdited')}</p>}
       {editable && (
         <div className="discussion-message-actions">
@@ -192,14 +192,21 @@ function DiscussionCard({
     <article className={`discussion-thread is-${discussion.state}`}>
       <header className="discussion-thread-header">
         <div>
-          <code>{discussion.id}</code>
           <h2>{target}</h2>
-          <p className="discussion-meta">
-            {discussion.state === 'open' ? text('openDiscussions') : text('resolvedDiscussions')}
-            {' · '}
-            {text('placement')}: {placementLabel(discussion.placement.status, locale)}
-            {delivery && ` · ${text('delivery')}: ${deliveryLabel(delivery.state, locale)}`}
-          </p>
+          <div className="discussion-thread-meta">
+            <span className={`discussion-state is-${discussion.state}`}>
+              {discussion.state === 'open' ? text('openDiscussions') : text('resolvedDiscussions')}
+            </span>
+            <span className={`discussion-placement is-${discussion.placement.status}`}>
+              {text('placement')}: {placementLabel(discussion.placement.status, locale)}
+            </span>
+            {delivery && (
+              <span className={`discussion-delivery is-${delivery.state}`}>
+                {text('delivery')}: {deliveryLabel(delivery.state, locale)}
+              </span>
+            )}
+          </div>
+          <code className="discussion-thread-id">{discussion.id}</code>
         </div>
         <div className="discussion-thread-actions">
           <IconButton
@@ -227,7 +234,7 @@ function DiscussionCard({
         </blockquote>
       )}
       {discussion.placement.range && (
-        <p className="discussion-meta">
+        <p className="discussion-location">
           {text('path')}: <code>{target}</code> · {discussion.placement.range.start.line}:
           {discussion.placement.range.start.column}–{discussion.placement.range.end.line}:
           {discussion.placement.range.end.column}
@@ -259,6 +266,7 @@ function DiscussionCard({
           className="discussion-reply"
           onClick={onReply}
         >
+          <Icon name="arrowRight" />
           {text('reply')}
         </button>
       )}
@@ -475,7 +483,7 @@ export function DiscussionPanel({
   const content = (
     <>
       <header className="workspace-heading">
-        <div>
+        <div className="discussion-heading-copy">
           <h1>{text('discussions')}</h1>
           {target && <code className="discussion-target-path">{target.path}</code>}
         </div>
@@ -524,7 +532,16 @@ export function DiscussionPanel({
           </button>
         </div>
       )}
-      {!error && discussions.length === 0 && <p className="empty-note">{text('noDiscussions')}</p>}
+      {!error && state && discussions.length === 0 && (
+        <div className="discussion-empty">
+          <Icon name="messageSquare" />
+          <p>{text('noDiscussions')}</p>
+          <button type="button" onClick={() => setComposer(target ? { target } : {})}>
+            <Icon name="plus" />
+            {text('newDiscussion')}
+          </button>
+        </div>
+      )}
       <Composer
         mode={composer}
         locale={locale}

@@ -4,6 +4,7 @@ import {
   Markdown,
   useRpc,
   useBbNavigate,
+  experimental_Icon as Icon,
   type PluginThreadPanelProps,
   type PluginNewThreadPanelProps,
 } from '@get-bb/plugin-sdk/app';
@@ -21,6 +22,32 @@ type View = {
 };
 const views = new Map<string, View>();
 const finished = (entry: TaskEntry) => ['done', 'cancelled'].includes(entry.task.status.kind);
+function Status({ entry, marker = false }: { entry: TaskEntry; marker?: boolean }) {
+  const kind = entry.task.status.kind;
+  return (
+    <span
+      className={marker ? 'td-status-marker' : 'td-status'}
+      data-status={kind}
+      title={entry.task.status.label}
+      aria-hidden={marker || undefined}
+    >
+      <Icon
+        name={
+          kind === 'done'
+            ? 'CircleCheck'
+            : kind === 'cancelled'
+              ? 'CircleX'
+              : kind === 'blocked'
+                ? 'AlertCircle'
+                : kind === 'in-progress'
+                  ? 'Target'
+                  : 'Circle'
+        }
+      />
+      {!marker && entry.task.status.label}
+    </span>
+  );
+}
 function Chevron({ back = false }: { back?: boolean }) {
   return (
     <svg
@@ -138,7 +165,11 @@ function ToudocuPanel({ scope, scopeKey }: { scope: Scope | null; scopeKey: stri
   const matches = (entry: TaskEntry) =>
     (!term || `${entry.task.id} ${entry.task.title}`.toLocaleLowerCase().includes(term)) &&
     (view.filter === 'all' ||
-      (view.filter === 'active' ? !finished(entry) : entry.ready?.readyForWork));
+      (view.filter === 'active'
+        ? !finished(entry)
+        : view.filter === 'done'
+          ? entry.task.status.kind === 'done'
+          : entry.ready?.readyForWork));
   function visible(entry: TaskEntry, path = new Set<string>()): boolean {
     if (path.has(entry.task.id)) return false;
     const next = new Set(path).add(entry.task.id);
@@ -147,6 +178,8 @@ function ToudocuPanel({ scope, scopeKey }: { scope: Scope | null; scopeKey: stri
     );
   }
   const selected = view.selected ? byId.get(view.selected) : undefined;
+  const reviewPrimary =
+    selected && (finished(selected) || selected.task.status.kind === 'in-progress');
   const ancestors: TaskEntry[] = [];
   const seen = new Set<string>();
   let parentId = selected?.task.parentId;
@@ -165,6 +198,7 @@ function ToudocuPanel({ scope, scopeKey }: { scope: Scope | null; scopeKey: stri
     setError('');
   }
   async function act(name: string, action: () => Promise<void>) {
+    if (pending) return;
     setPending(name);
     setError('');
     try {
@@ -174,6 +208,13 @@ function ToudocuPanel({ scope, scopeKey }: { scope: Scope | null; scopeKey: stri
     } finally {
       setPending('');
     }
+  }
+  function workflow(action: 'clarify' | 'review' | 'verify') {
+    if (!scope || !selected) return;
+    void act(action, async () => {
+      const result = await rpc.call('workflow', { ...scope, taskId: selected.task.id, action });
+      navigate.toThread(result.threadId);
+    });
   }
   function tree(parent: string | null, path = new Set<string>()) {
     return (
@@ -207,14 +248,16 @@ function ToudocuPanel({ scope, scopeKey }: { scope: Scope | null; scopeKey: stri
                   ) : (
                     <span className="td-disclosure" />
                   )}
+                  <Status entry={entry} marker />
                   <button
                     className="td-task"
+                    title={entry.task.title}
                     onClick={() => select(id)}
                     aria-current={view.selected === id ? 'true' : undefined}
                   >
                     <span className="td-row-meta">
                       <span title={id}>{id}</span>
-                      <span className="td-status" data-status={entry.task.status.kind}>
+                      <span className="td-row-status" data-status={entry.task.status.kind}>
                         {entry.task.status.label}
                       </span>
                     </span>
@@ -240,8 +283,14 @@ function ToudocuPanel({ scope, scopeKey }: { scope: Scope | null; scopeKey: stri
           <header className="td-toolbar">
             <strong>Tasks</strong>
             <span className="td-count">{view.data ? entries.length : ''}</span>
-            <button className="td-refresh" disabled={loading} onClick={() => void load(true)}>
-              {loading && view.data ? 'Updating…' : 'Refresh'}
+            <button
+              className={`td-refresh${loading ? ' is-loading' : ''}`}
+              disabled={loading}
+              aria-label={loading ? 'Refreshing tasks' : 'Refresh tasks'}
+              title="Refresh tasks"
+              onClick={() => void load(true)}
+            >
+              <Icon name="RotateCcw" />
             </button>
           </header>
           <div className="td-filters">
@@ -256,6 +305,7 @@ function ToudocuPanel({ scope, scopeKey }: { scope: Scope | null; scopeKey: stri
                 ['all', 'All'],
                 ['active', 'Active'],
                 ['ready', 'Ready'],
+                ['done', 'Done'],
               ].map(([value, label]) => (
                 <button
                   key={value}
@@ -321,9 +371,7 @@ function ToudocuPanel({ scope, scopeKey }: { scope: Scope | null; scopeKey: stri
                 Tasks
               </button>
               <span>{selected.task.id}</span>
-              <span className="td-status" data-status={selected.task.status.kind}>
-                {selected.task.status.label}
-              </span>
+              <Status entry={selected} />
             </header>
             <div className="td-detail-scroll">
               {ancestors.length > 0 && (
@@ -338,10 +386,28 @@ function ToudocuPanel({ scope, scopeKey }: { scope: Scope | null; scopeKey: stri
               )}
               <h1>{selected.task.title}</h1>
               <div className="td-task-actions">
-                {scope && (
+                {scope && reviewPrimary && (
                   <button
                     className="td-primary"
+                    disabled={Boolean(pending)}
+                    title="Start a read-only review thread in this workspace"
+                    onClick={() => workflow('review')}
+                  >
+                    <Icon name="SecurityCheck" />
+                    {pending === 'review' ? 'Starting…' : 'Review task'}
+                  </button>
+                )}
+                {scope && !reviewPrimary && (
+                  <button
+                    className={selected.ready?.readyForWork ? 'td-primary' : ''}
                     disabled={Boolean(pending) || !selected.ready?.readyForWork}
+                    title={
+                      selected.ready?.readyForWork
+                        ? 'Start an implementation thread in a new worktree'
+                        : selected.task.status.kind === 'in-progress'
+                          ? 'This task is already in progress'
+                          : 'Resolve task readiness before starting implementation'
+                    }
                     onClick={() =>
                       void act('work', async () => {
                         const result = await rpc.call('work', {
@@ -352,30 +418,95 @@ function ToudocuPanel({ scope, scopeKey }: { scope: Scope | null; scopeKey: stri
                       })
                     }
                   >
+                    <Icon name="Play" />
                     {pending === 'work' ? 'Starting…' : 'Work on task'}
                   </button>
                 )}
-                {scope &&
-                  'threadId' in scope &&
-                  view.data?.binding?.taskId !== selected.task.id && (
-                    <button
-                      disabled={Boolean(pending)}
-                      onClick={() =>
-                        void act('bind', async () => {
-                          const binding = await rpc.call('bind', {
-                            threadId: scope.threadId,
-                            taskId: selected.task.id,
-                          });
-                          if (current.current.data)
-                            update({ data: { ...current.current.data, binding } });
-                        })
+                {scope && (
+                  <button
+                    className={!reviewPrimary && !selected.ready?.readyForWork ? 'td-primary' : ''}
+                    disabled={Boolean(pending)}
+                    title="Start a clarification thread in this workspace"
+                    onClick={() => workflow('clarify')}
+                  >
+                    <Icon name="MessageQuestion" />
+                    {pending === 'clarify' ? 'Starting…' : 'Clarify task'}
+                  </button>
+                )}
+                {scope && (
+                  <details
+                    className="td-actions-menu"
+                    onBlur={(event) => {
+                      if (!event.currentTarget.contains(event.relatedTarget))
+                        event.currentTarget.open = false;
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Escape') {
+                        event.preventDefault();
+                        event.currentTarget.open = false;
+                        event.currentTarget.querySelector('summary')?.focus();
                       }
+                    }}
+                  >
+                    <summary aria-label="More task actions" title="More task actions">
+                      <Icon name="MoreHorizontal" />
+                    </summary>
+                    <div
+                      className="td-action-list"
+                      onClick={(event) => {
+                        event.currentTarget.closest('details')?.removeAttribute('open');
+                      }}
                     >
-                      {pending === 'bind' ? 'Binding…' : 'Use in this thread'}
-                    </button>
-                  )}
+                      {!reviewPrimary && (
+                        <button disabled={Boolean(pending)} onClick={() => workflow('review')}>
+                          <Icon name="SecurityCheck" />
+                          Review implementation
+                        </button>
+                      )}
+                      <button
+                        disabled={Boolean(pending) || selected.task.status.kind === 'draft'}
+                        title="Execute this task's configured verification commands in this workspace"
+                        onClick={() => workflow('verify')}
+                      >
+                        <Icon name="ListTodo" />
+                        Run task checks
+                      </button>
+                      {scope &&
+                        'threadId' in scope &&
+                        view.data?.binding?.taskId !== selected.task.id && (
+                          <button
+                            disabled={Boolean(pending)}
+                            onClick={() =>
+                              void act('bind', async () => {
+                                const binding = await rpc.call('bind', {
+                                  threadId: scope.threadId,
+                                  taskId: selected.task.id,
+                                });
+                                if (current.current.data)
+                                  update({ data: { ...current.current.data, binding } });
+                              })
+                            }
+                          >
+                            <Icon name="MessageSquare" />
+                            {pending === 'bind' ? 'Binding…' : 'Use in this thread'}
+                          </button>
+                        )}
+                      <button
+                        onClick={() =>
+                          void act('copy', () => navigator.clipboard.writeText(selected.task.id))
+                        }
+                      >
+                        <Icon name="Copy" />
+                        Copy task ID
+                      </button>
+                    </div>
+                  </details>
+                )}
                 {view.data?.binding?.taskId === selected.task.id && (
-                  <span className="td-muted">Linked to this thread</span>
+                  <span className="td-binding" title="Linked to this thread">
+                    <Icon name="MessageSquare" />
+                    This thread
+                  </span>
                 )}
               </div>
               {error && (
@@ -387,7 +518,7 @@ function ToudocuPanel({ scope, scopeKey }: { scope: Scope | null; scopeKey: stri
                 !selected.ready.readyForWork &&
                 selected.ready.issues.length > 0 && (
                   <details className="td-readiness">
-                    <summary>Readiness · {selected.ready.issues.length} issues</summary>
+                    <summary>Not ready · {selected.ready.issues.length} issues</summary>
                     <ul>
                       {selected.ready.issues.map((issue, index) => (
                         <li key={index}>{issue.message}</li>
@@ -544,7 +675,7 @@ export default definePluginApp((app) => {
   app.slots.threadPanelAction({
     id: 'toudocu',
     title: 'Toudocu',
-    icon: 'BookOpen',
+    icon: 'FileText',
     layout: 'flush',
     component: ({ threadId }: PluginThreadPanelProps) => (
       <ToudocuPanel key={threadId} scope={{ threadId }} scopeKey={`thread:${threadId}`} />
@@ -553,7 +684,7 @@ export default definePluginApp((app) => {
   app.slots.experimental_newThreadPanelAction({
     id: 'toudocu',
     title: 'Toudocu',
-    icon: 'BookOpen',
+    icon: 'FileText',
     layout: 'flush',
     component: ({ projectId }: PluginNewThreadPanelProps) => (
       <ToudocuPanel

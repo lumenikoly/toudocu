@@ -4,6 +4,7 @@ import { DocumentBody, DocumentLink } from './document.js';
 import { translator, type Locale } from './i18n.js';
 import { CurrentOutputPath, relativePortalHref } from './routing.js';
 import { ScreenMap } from './screen-map.js';
+import { Icon } from './ui/index.js';
 
 type DocumentPage = Extract<PageViewV1, { kind: 'document' }>;
 type ScreensPage = Extract<PageViewV1, { kind: 'screens' }>;
@@ -26,7 +27,7 @@ function Documents({
 }) {
   if (paths.length === 0) return null;
   return (
-    <div>
+    <div className="use-case-relations">
       {title && <h3>{title}</h3>}
       <ul className="relations">
         {paths.map((path) => (
@@ -49,7 +50,7 @@ function TransitionTable({
   const { text } = translator(locale);
   if (transitions.length === 0) return null;
   return (
-    <table>
+    <table className="use-case-transition-table">
       <thead>
         <tr>
           <th>{text('transitionSource')}</th>
@@ -127,7 +128,9 @@ function PlayMode({
 
   return (
     <section className="use-case-mode">
-      <h2>{text('play')}</h2>
+      <div className="mode-heading">
+        <h2>{text('play')}</h2>
+      </div>
       <div className="use-case-player">
         <div className="use-case-player-screen">
           <span className="document-identity">{text('screen')}</span>
@@ -162,26 +165,35 @@ function PlayMode({
           )}
         </div>
         <div className="use-case-player-actions">
+          <h3>{text('transitions')}</h3>
           {availableTransitions.map((transition) => (
             <button key={transition.id} type="button" onClick={() => move(transition)}>
-              <Identity id={transition.id} /> {transition.action}
+              <span>
+                <Icon name="arrowRight" /> {transition.action}
+              </span>
+              <Identity id={transition.id} />
               {transition.condition && <small> · {transition.condition}</small>}
               {transition.message && <small>{transition.message}</small>}
               {transition.error && <small data-status="blocked">{transition.error}</small>}
             </button>
           ))}
-          <button type="button" onClick={back} disabled={history.length === 0}>
-            {text('previous')}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setHistory([]);
-              setCurrentScreenId(flow.startScreen);
-            }}
-          >
-            {text('restart')}
-          </button>
+          {availableTransitions.length === 0 && !terminal && (
+            <p className="empty-note">{text('noConnections')}</p>
+          )}
+          <div className="use-case-player-navigation">
+            <button type="button" onClick={back} disabled={history.length === 0}>
+              {text('previous')}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setHistory([]);
+                setCurrentScreenId(flow.startScreen);
+              }}
+            >
+              {text('restart')}
+            </button>
+          </div>
         </div>
         {terminal && flow.result && (
           <p className="use-case-player-result">
@@ -342,10 +354,13 @@ export function UseCaseModes({
 
       {mode === 'links' && hasLinks && (
         <section className="use-case-mode">
-          <h2>{text('links')}</h2>
+          <div className="mode-heading">
+            <h2>{text('links')}</h2>
+          </div>
           {useCase.moduleId && (
-            <p>
-              <Identity id={useCase.moduleId} />
+            <p className="use-case-module">
+              <Icon name="layers" />
+              {text('moduleLabel')} <Identity id={useCase.moduleId} />
             </p>
           )}
           <Documents

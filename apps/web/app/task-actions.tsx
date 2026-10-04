@@ -8,6 +8,7 @@ import {
 } from '@toudocu/contracts';
 import { translator, type Locale, type MessageKey } from './i18n.js';
 import { Icon } from './ui/index.js';
+import { Status } from './document.js';
 import type { IconName } from './design/icons.js';
 import { action, jsonRequest } from './workspace-api.js';
 
@@ -100,45 +101,56 @@ export function TaskItemActions({
     }
   };
 
+  const canComplete = snapshot.capabilities.editing && item.workspace.canComplete;
+  if (!canComplete && (!snapshot.capabilities.agentConsole || actions.length === 0)) return null;
   return (
-    <div className="task-item-actions">
-      {snapshot.capabilities.editing && item.workspace.canComplete && (
-        <button
-          className="ui-icon-button"
-          type="button"
-          aria-label={text('completeTask')}
-          title={text('completeTask')}
-          disabled={busy}
-          onClick={() => void complete()}
-        >
-          <Icon name="checkCircle" />
-        </button>
-      )}
-      {snapshot.capabilities.agentConsole &&
-        actions.map((entry) => (
-          <button
-            key={entry.label}
-            className="ui-icon-button"
-            aria-label={text(entry.label)}
-            title={text(entry.label)}
-            type="button"
-            disabled={busy}
-            onClick={() => {
-              document.dispatchEvent(
-                new CustomEvent('toudocu:agent-compose', {
-                  detail: {
-                    text: format(entry.prompt, { id: item.id }),
-                    policy: entry.readOnly ? 'filesystem-read-only' : 'normal',
-                  },
-                }),
-              );
-            }}
-          >
-            <Icon name={actionIcons[entry.label] ?? 'messageSquare'} />
+    <details
+      className="task-item-actions"
+      onKeyDown={(event) => {
+        if (event.key !== 'Escape' || !event.currentTarget.open) return;
+        event.preventDefault();
+        event.currentTarget.open = false;
+        event.currentTarget.querySelector('summary')?.focus();
+      }}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false;
+      }}
+    >
+      <summary aria-label={text('taskActions')} title={text('taskActions')}>
+        <Icon name="more" />
+      </summary>
+      <div className="task-item-actions-menu">
+        {canComplete && (
+          <button type="button" disabled={busy} onClick={() => void complete()}>
+            <Icon name="checkCircle" />
+            {text('completeTask')}
           </button>
-        ))}
-      {error && <p role="alert">{error}</p>}
-    </div>
+        )}
+        {snapshot.capabilities.agentConsole &&
+          actions.map((entry) => (
+            <button
+              key={entry.label}
+              type="button"
+              disabled={busy}
+              onClick={(event) => {
+                document.dispatchEvent(
+                  new CustomEvent('toudocu:agent-compose', {
+                    detail: {
+                      text: format(entry.prompt, { id: item.id }),
+                      policy: entry.readOnly ? 'filesystem-read-only' : 'normal',
+                    },
+                  }),
+                );
+                event.currentTarget.closest('details')?.removeAttribute('open');
+              }}
+            >
+              <Icon name={actionIcons[entry.label] ?? 'messageSquare'} />
+              {text(entry.label)}
+            </button>
+          ))}
+        {error && <p role="alert">{error}</p>}
+      </div>
+    </details>
   );
 }
 
@@ -151,11 +163,17 @@ export function TaskActions({
   snapshot: PortalSnapshotV1;
   locale: Locale;
 }) {
-  const { text, status } = translator(locale);
+  const { text } = translator(locale);
   return (
     <section className="task-actions">
       <h2>{text('taskActions')}</h2>
-      <p>{status(page.workItem.workspace.workState)}</p>
+      <Status
+        status={{
+          kind: page.workItem.workspace.workState,
+          label: page.workItem.workspace.workState,
+        }}
+        locale={locale}
+      />
       {page.workItem.workspace.issues.length > 0 && (
         <details>
           <summary>

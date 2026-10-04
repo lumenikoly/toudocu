@@ -4,7 +4,7 @@ import {
   type PageViewV1,
   type PortalSnapshotV1,
 } from '@toudocu/contracts';
-import { DocumentLink } from './document.js';
+import { DocumentLink, Status } from './document.js';
 import { translator, type Locale } from './i18n.js';
 import { CurrentOutputPath, relativePortalHref } from './routing.js';
 import { Icon, IconButton } from './ui/index.js';
@@ -133,8 +133,8 @@ export function layoutScreenMap(
 
 function ScreenStatus({ status, locale }: { status: string; locale: Locale }) {
   return (
-    <span className="screen-map-status status" data-status={status}>
-      {translator(locale).status(status) || '—'}
+    <span className="screen-map-status">
+      <Status status={{ kind: status, label: status }} locale={locale} />
     </span>
   );
 }
@@ -218,7 +218,7 @@ function ScreenNode({
           title={text('inspect')}
           onClick={onInspect}
         >
-          <Icon name="plus" />
+          <Icon name="search" />
         </IconButton>
       </header>
       <h3>
@@ -475,12 +475,16 @@ export function ScreenMap({
   return (
     <section className="screen-map" aria-labelledby="screen-map-title" ref={workspace}>
       <header className="section-heading screen-map-heading">
-        <h2 id="screen-map-title">{text('screenMap')}</h2>
-        <div className="workspace-actions">
-          <span>
-            {page.screens.length} {text('screensCount')} · {page.transitions.length}{' '}
-            {text('transitionsCount')}
+        <div className="screen-map-heading-copy">
+          <h2 id="screen-map-title">{text('screenMap')}</h2>
+          <span className="screen-map-counts">
+            {visibleScreens.length === page.screens.length
+              ? page.screens.length
+              : `${visibleScreens.length} / ${page.screens.length}`}{' '}
+            {text('screensCount')} · {visibleTransitions.length} {text('transitionsCount')}
           </span>
+        </div>
+        <div className="workspace-actions">
           <button
             type="button"
             aria-pressed={representation === 'map'}
@@ -497,7 +501,7 @@ export function ScreenMap({
           </button>
         </div>
       </header>
-      <div className="screen-map-toolbar" aria-label={text('mapControls')}>
+      <div className="screen-map-toolbar" role="group" aria-label={text('mapControls')}>
         <div className="screen-map-modes">
           {(['all', 'module', 'usecase', 'unfinished', 'hierarchy'] as const).map((item) => (
             <button
@@ -518,113 +522,120 @@ export function ScreenMap({
             </button>
           ))}
         </div>
-        <input
-          type="search"
-          value={query}
-          placeholder={text('screenFilterPlaceholder')}
-          aria-label={text('search')}
-          onChange={(event) => setQuery(event.currentTarget.value)}
-        />
-        {mode === 'module' && (
+        <div className="screen-map-filters">
+          <label className="screen-map-search">
+            <Icon name="search" />
+            <input
+              type="search"
+              value={query}
+              placeholder={text('screenFilterPlaceholder')}
+              aria-label={text('search')}
+              onChange={(event) => setQuery(event.currentTarget.value)}
+            />
+          </label>
+          {mode === 'module' && (
+            <select
+              aria-label={text('moduleLabel')}
+              value={module}
+              onChange={(event) => setModule(event.currentTarget.value)}
+            >
+              <option value="">{text('allModules')}</option>
+              {modules.map((value) => (
+                <option key={value}>{value}</option>
+              ))}
+            </select>
+          )}
+          {mode === 'usecase' && (
+            <select
+              aria-label={text('useCaseFilter')}
+              value={useCase}
+              onChange={(event) => setUseCase(event.currentTarget.value)}
+            >
+              <option value="">{text('allUseCases')}</option>
+              {useCases.map((value) => (
+                <option key={value}>{value}</option>
+              ))}
+            </select>
+          )}
           <select
-            aria-label={text('moduleLabel')}
-            value={module}
-            onChange={(event) => setModule(event.currentTarget.value)}
+            aria-label={text('status')}
+            value={status}
+            onChange={(event) => setStatus(event.currentTarget.value)}
           >
-            <option value="">{text('allModules')}</option>
-            {modules.map((value) => (
+            <option value="">{text('allStatuses')}</option>
+            {statuses.map((value) => (
               <option key={value}>{value}</option>
             ))}
           </select>
-        )}
-        {mode === 'usecase' && (
-          <select
-            aria-label={text('useCaseFilter')}
-            value={useCase}
-            onChange={(event) => setUseCase(event.currentTarget.value)}
-          >
-            <option value="">{text('allUseCases')}</option>
-            {useCases.map((value) => (
-              <option key={value}>{value}</option>
-            ))}
-          </select>
-        )}
-        <select
-          aria-label={text('status')}
-          value={status}
-          onChange={(event) => setStatus(event.currentTarget.value)}
-        >
-          <option value="">{text('allStatuses')}</option>
-          {statuses.map((value) => (
-            <option key={value}>{value}</option>
-          ))}
-        </select>
-        {snapshot.capabilities.changes && (
-          <button type="button" aria-pressed={changesActive} onClick={() => void toggleChanges()}>
-            {text('showChanges')}
-          </button>
-        )}
-        {changesActive && (
-          <select
-            aria-label={text('changeStatus')}
-            value={changeStatus}
-            onChange={(event) => setChangeStatus(event.currentTarget.value)}
-          >
-            <option value="">{text('allChanges')}</option>
-            {[...new Set(changedScreens.values())].map((value) => (
-              <option key={value}>{value}</option>
-            ))}
-          </select>
-        )}
-        <div className="screen-map-zoom">
-          <IconButton
-            aria-label={text('zoomOut')}
-            title={text('zoomOut')}
-            onClick={() => {
-              setAutoFit(false);
-              setZoom((value) => Math.max(0.08, value / 1.2));
-            }}
-          >
-            <Icon name="minus" />
-          </IconButton>
-          <button
-            type="button"
-            title={text('resetZoom')}
-            onClick={() => {
-              setAutoFit(false);
-              setZoom(1);
-            }}
-          >
-            {Math.round(zoom * 100)}%
-          </button>
-          <IconButton
-            aria-label={text('zoomIn')}
-            title={text('zoomIn')}
-            onClick={() => {
-              setAutoFit(false);
-              setZoom((value) => Math.min(2, value * 1.2));
-            }}
-          >
-            <Icon name="plus" />
-          </IconButton>
-          <IconButton
-            aria-label={text('fitDiagram')}
-            title={text('fitDiagram')}
-            onClick={() => setAutoFit(true)}
-          >
-            <Icon name="fit" />
-          </IconButton>
-          <IconButton
-            aria-label={text('fullScreen')}
-            title={text('fullScreen')}
-            onClick={() => {
-              if (document.fullscreenElement) void document.exitFullscreen();
-              else void workspace.current?.requestFullscreen();
-            }}
-          >
-            <Icon name="maximize" />
-          </IconButton>
+          {snapshot.capabilities.changes && (
+            <button type="button" aria-pressed={changesActive} onClick={() => void toggleChanges()}>
+              {text('showChanges')}
+            </button>
+          )}
+          {changesActive && (
+            <select
+              aria-label={text('changeStatus')}
+              value={changeStatus}
+              onChange={(event) => setChangeStatus(event.currentTarget.value)}
+            >
+              <option value="">{text('allChanges')}</option>
+              {[...new Set(changedScreens.values())].map((value) => (
+                <option key={value}>{value}</option>
+              ))}
+            </select>
+          )}
         </div>
+        {representation === 'map' && (
+          <div className="screen-map-zoom">
+            <IconButton
+              aria-label={text('zoomOut')}
+              title={text('zoomOut')}
+              onClick={() => {
+                setAutoFit(false);
+                setZoom((value) => Math.max(0.08, value / 1.2));
+              }}
+            >
+              <Icon name="minus" />
+            </IconButton>
+            <button
+              type="button"
+              title={text('resetZoom')}
+              onClick={() => {
+                setAutoFit(false);
+                setZoom(1);
+              }}
+            >
+              {Math.round(zoom * 100)}%
+            </button>
+            <IconButton
+              aria-label={text('zoomIn')}
+              title={text('zoomIn')}
+              onClick={() => {
+                setAutoFit(false);
+                setZoom((value) => Math.min(2, value * 1.2));
+              }}
+            >
+              <Icon name="plus" />
+            </IconButton>
+            <IconButton
+              aria-label={text('fitDiagram')}
+              title={text('fitDiagram')}
+              onClick={() => setAutoFit(true)}
+            >
+              <Icon name="fit" />
+            </IconButton>
+            <IconButton
+              aria-label={text('fullScreen')}
+              title={text('fullScreen')}
+              onClick={() => {
+                if (document.fullscreenElement) void document.exitFullscreen();
+                else void workspace.current?.requestFullscreen();
+              }}
+            >
+              <Icon name="maximize" />
+            </IconButton>
+          </div>
+        )}
       </div>
       {visibleScreens.length > 0 && representation === 'table' ? (
         <div className="data-table screen-catalog-table">
@@ -898,18 +909,39 @@ export function ScreenMap({
           </div>
         </div>
       ) : (
-        <p className="empty-note">{text('noScreens')}</p>
+        <div className="screen-map-empty">
+          <Icon name="layers" />
+          <p>{page.screens.length > 0 ? text('noResults') : text('noScreens')}</p>
+          {page.screens.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                setMode('all');
+                setQuery('');
+                setModule('');
+                setUseCase('');
+                setStatus('');
+                setChangeStatus('');
+                setChangesActive(false);
+              }}
+            >
+              {text('all')}
+            </button>
+          )}
+        </div>
       )}
       {changeError && <p role="alert">{changeError}</p>}
       {selectedScreen && (
         <aside className="screen-map-inspector">
           <header>
-            <code>{selectedScreen.id}</code>
+            <strong>{text('screen')}</strong>
             <button type="button" onClick={() => setSelected('')} aria-label={text('close')}>
-              ×
+              <Icon name="close" />
             </button>
           </header>
+          <code className="screen-map-inspector-id">{selectedScreen.id}</code>
           <h3>{selectedScreen.title}</h3>
+          <ScreenStatus status={selectedScreen.status} locale={locale} />
           {selectedScreen.description && <p>{selectedScreen.description}</p>}
           <dl>
             <div>
@@ -939,6 +971,13 @@ export function ScreenMap({
               alt={selectedScreen.title}
             />
           )}
+          <ConnectionList
+            transitions={page.transitions.filter(
+              (transition) =>
+                transition.source === selectedScreen.id || transition.target === selectedScreen.id,
+            )}
+            locale={locale}
+          />
           <DocumentLink snapshot={snapshot} sourcePath={selectedScreen.document}>
             {text('openDocument')}
           </DocumentLink>
@@ -953,11 +992,11 @@ export function ScreenMap({
               onClick={() => setSelectedTransitionId('')}
               aria-label={text('close')}
             >
-              ×
+              <Icon name="close" />
             </button>
           </header>
-          <code>{selectedTransition.id}</code>
-          <p>
+          <code className="screen-map-inspector-id">{selectedTransition.id}</code>
+          <p className="screen-map-inspector-route">
             <code>{selectedTransition.source}</code> → <code>{selectedTransition.target}</code>
           </p>
           {selectedTransition.action && <p>{selectedTransition.action}</p>}
@@ -972,6 +1011,9 @@ export function ScreenMap({
             </p>
           )}
           {selectedTransition.error && <p role="alert">{selectedTransition.error}</p>}
+          <DocumentLink snapshot={snapshot} sourcePath={selectedTransition.document}>
+            {text('openDocument')}
+          </DocumentLink>
         </aside>
       )}
       <ConnectionList transitions={visibleTransitions} locale={locale} />

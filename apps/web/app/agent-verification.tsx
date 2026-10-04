@@ -58,10 +58,10 @@ export function AgentVerification({
   };
   return (
     <section className="agent-verification-output" aria-label={text('verification')}>
-      <h3>
-        {text('verification')}
-        {taskID ? ` · ${taskID}` : ''}
-      </h3>
+      <div className="agent-verification-heading">
+        <h3>{text('verification')}</h3>
+        {taskID && <code>{taskID}</code>}
+      </div>
       {available && state?.active && taskID && (
         <div className="workspace-actions">
           <button
@@ -86,12 +86,15 @@ export function AgentVerification({
         <p role="status">{text('consoleVerificationWorking')}</p>
       )}
       {report && (
-        <details open>
+        <details className="agent-verification-report" open>
           <summary>
-            {report.task.id} · {status(report.status)}
+            <code>{report.task.id}</code>
+            <span className="agent-verification-status" data-status={report.status}>
+              {status(report.status)}
+            </span>
           </summary>
           {report.validationIssues.map((issue, index) => (
-            <p role="alert" key={`${issue.code}:${index}`}>
+            <p className="agent-verification-issue" role="alert" key={`${issue.code}:${index}`}>
               {issue.message}
             </p>
           ))}
@@ -107,7 +110,10 @@ export function AgentVerification({
               open={command.status !== 'passed' && command.status !== 'planned'}
             >
               <summary>
-                <code>{command.command}</code> · {status(command.status)}
+                <code>{command.command}</code>
+                <span className="agent-verification-status" data-status={command.status}>
+                  {status(command.status)}
+                </span>
               </summary>
               <p>
                 {command.targets.join(', ')}
@@ -129,7 +135,10 @@ export function AgentVerification({
             <ul>
               {report.criteria.map((criterion) => (
                 <li key={criterion.id}>
-                  {criterion.id}: {criterion.description} · {status(criterion.status)}
+                  <code>{criterion.id}</code>: {criterion.description}
+                  <span className="agent-verification-status" data-status={criterion.status}>
+                    {status(criterion.status)}
+                  </span>
                 </li>
               ))}
             </ul>

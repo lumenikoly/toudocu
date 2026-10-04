@@ -38,6 +38,10 @@ export const projectInput = empty.extend({ projectId: text });
 export const scopeInput = threadInput.or(projectInput);
 export type Scope = ReturnType<typeof scopeInput.parse>;
 export const scopedTaskInput = taskInput.or(projectInput.extend({ taskId }));
+const workflowAction = text.regex(/^(clarify|review|verify)$/u);
+export const workflowInput = taskInput
+  .extend({ action: workflowAction })
+  .or(projectInput.extend({ taskId, action: workflowAction }));
 export const bindingSchema = taskInput.extend({ projectId: text });
 export type ThreadTaskBinding = ReturnType<typeof bindingSchema.parse>;
 const operation = text.refine(
@@ -93,6 +97,7 @@ export const rpcContract = defineRpcContract({
   },
   bind: { input: schema(taskInput), output: schema(bindingSchema) },
   work: { input: schema(scopedTaskInput), output: schema(threadInput) },
+  workflow: { input: schema(workflowInput), output: schema(threadInput) },
   changes: { input: schema(scopedTaskInput), output: schema(ChangeSetReportV1Schema) },
   verify: { input: schema(scopedTaskInput), output: schema(TaskVerifyReportV1Schema) },
 });

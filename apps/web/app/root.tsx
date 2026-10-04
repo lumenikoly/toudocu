@@ -7,7 +7,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react';
 import { BrowserRouter, MemoryRouter, Outlet, Route, Routes, useLocation } from 'react-router';
-import type { NavigationItem, PageViewV1, PortalSnapshotV1 } from '@toudocu/contracts';
+import type { PageViewV1, PortalSnapshotV1 } from '@toudocu/contracts';
 import { Page } from './pages.js';
 import { Navigation } from './navigation.js';
 import { translator, type Locale } from './i18n.js';
@@ -27,17 +27,6 @@ export interface PortalAppProps {
 function routePath(href: string): string {
   const path = href.split(/[?#]/u, 1)[0]?.replace(/^\/+|\/+$/gu, '') ?? '';
   return href.endsWith('/') ? `${path}/*` : path;
-}
-
-function flattenNavigation(items: PortalSnapshotV1['navigation']['items']): NavigationItem[] {
-  return items.flatMap((item) => [item, ...flattenNavigation(item.children)]);
-}
-
-function workspaceLink(
-  items: PortalSnapshotV1['navigation']['items'],
-  pageId: string,
-): NavigationItem | undefined {
-  return flattenNavigation(items).find((item) => item.pageId === pageId);
 }
 
 type Appearance = NonNullable<PortalSnapshotV1['appearance']>;
@@ -102,6 +91,7 @@ function AppearanceControls({
             ? 'dark'
             : 'light'
           : appearance.colorScheme;
+      root.classList.toggle('dark-mode', root.dataset.theme === 'dark');
     };
     applyScheme();
     if (appearance.colorScheme === 'system') media?.addEventListener('change', applyScheme);
@@ -119,55 +109,94 @@ function AppearanceControls({
     setAppearance((current) => ({ ...current, [key]: value }));
   };
   return (
-    <div className="appearance-controls">
-      <label>
-        <span>{text('style')}</span>
-        <select
-          value={appearance.theme}
-          onChange={(event) => set('theme', event.currentTarget.value as Appearance['theme'])}
-        >
-          <option value="classic">{text('classicTheme')}</option>
-          <option value="paper">{text('paperTheme')}</option>
-          <option value="terminal">{text('terminalTheme')}</option>
-        </select>
-      </label>
-      <label>
-        <span>{text('theme')}</span>
-        <select
-          value={appearance.colorScheme}
-          onChange={(event) =>
-            set('colorScheme', event.currentTarget.value as Appearance['colorScheme'])
-          }
-        >
-          <option value="system">{text('systemTheme')}</option>
-          <option value="light">{text('lightTheme')}</option>
-          <option value="dark">{text('darkTheme')}</option>
-        </select>
-      </label>
-      <label>
-        <span>{text('accent')}</span>
-        <select
-          value={appearance.accent}
-          onChange={(event) => set('accent', event.currentTarget.value as Appearance['accent'])}
-        >
-          {appearanceValues.accent.map((value) => (
-            <option key={value} value={value}>
-              {text(value)}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label>
-        <span>{text('interfaceDensity')}</span>
-        <select
-          value={appearance.density}
-          onChange={(event) => set('density', event.currentTarget.value as Appearance['density'])}
-        >
-          <option value="comfortable">{text('comfortableDensity')}</option>
-          <option value="compact">{text('compactDensity')}</option>
-        </select>
-      </label>
-    </div>
+    <>
+      <IconButton
+        className="appearance-trigger"
+        popoverTarget="appearance-settings"
+        title={text('appearance')}
+        aria-label={text('appearance')}
+      >
+        <Icon name={appearance.colorScheme === 'dark' ? 'moon' : 'sun'} />
+      </IconButton>
+      <div id="appearance-settings" className="header-settings appearance-settings" popover="auto">
+        <h2>{text('appearance')}</h2>
+        <div className="appearance-controls">
+          <fieldset className="theme-picker">
+            <legend>{text('style')}</legend>
+            <div>
+              {appearanceValues.theme.map((theme) => (
+                <button
+                  key={theme}
+                  type="button"
+                  data-theme-preview={theme}
+                  aria-pressed={appearance.theme === theme}
+                  onClick={() => set('theme', theme)}
+                >
+                  <span className="theme-preview" aria-hidden="true">
+                    <i />
+                    <span>
+                      <b />
+                      <b />
+                      <b />
+                    </span>
+                  </span>
+                  {text(
+                    theme === 'classic'
+                      ? 'classicTheme'
+                      : theme === 'paper'
+                        ? 'paperTheme'
+                        : 'terminalTheme',
+                  )}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+          <label>
+            <span>{text('theme')}</span>
+            <select
+              value={appearance.colorScheme}
+              onChange={(event) =>
+                set('colorScheme', event.currentTarget.value as Appearance['colorScheme'])
+              }
+            >
+              <option value="system">{text('systemTheme')}</option>
+              <option value="light">{text('lightTheme')}</option>
+              <option value="dark">{text('darkTheme')}</option>
+            </select>
+          </label>
+          <fieldset className="accent-picker">
+            <legend>{text('accent')}</legend>
+            <div>
+              {appearanceValues.accent.map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  data-accent-swatch={value}
+                  aria-label={text(value)}
+                  title={text(value)}
+                  aria-pressed={appearance.accent === value}
+                  onClick={() => set('accent', value)}
+                >
+                  <span>{appearance.accent === value && <Icon name="checkCircle" />}</span>
+                </button>
+              ))}
+            </div>
+          </fieldset>
+          <label>
+            <span>{text('interfaceDensity')}</span>
+            <select
+              value={appearance.density}
+              onChange={(event) =>
+                set('density', event.currentTarget.value as Appearance['density'])
+              }
+            >
+              <option value="comfortable">{text('comfortableDensity')}</option>
+              <option value="compact">{text('compactDensity')}</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -263,13 +292,8 @@ function Shell({ snapshot, locale }: { snapshot: PortalSnapshotV1; locale: Local
   const { text } = translator(locale);
   const navigation = useRef<HTMLDetailsElement>(null);
   const previousPath = useRef(location.pathname);
-  const [sidebarWidth, setSidebarWidth] = useState(272);
+  const [sidebarWidth, setSidebarWidth] = useState(240);
   const resizeStart = useRef<{ x: number; width: number } | null>(null);
-  const workspaceItems = [
-    workspaceLink(snapshot.navigation.items, 'home'),
-    workspaceLink(snapshot.navigation.items, 'editor'),
-    workspaceLink(snapshot.navigation.items, 'changes'),
-  ].filter((item): item is NavigationItem => item !== undefined);
   useEffect(() => {
     if (navigation.current) navigation.current.open = false;
     if (previousPath.current !== location.pathname) {
@@ -326,28 +350,12 @@ function Shell({ snapshot, locale }: { snapshot: PortalSnapshotV1; locale: Local
               </svg>
             </span>
             <span className="site-brand-copy">
-              <strong>{snapshot.project.title}</strong>
+              <strong title={snapshot.project.title}>{snapshot.project.title}</strong>
             </span>
           </PortalLink>
           <GlobalSearch snapshot={snapshot} locale={locale} />
-          <nav className="workspace-tabs" aria-label={text('workspaceNavigation')}>
-            {workspaceItems.map((item) => (
-              <PortalLink
-                key={item.id}
-                to={item.href}
-                active={
-                  item.pageId === 'home' && !['editor', 'changes'].includes(current?.pageId ?? '')
-                }
-              >
-                {item.pageId === 'home'
-                  ? text('portal')
-                  : item.pageId === 'editor'
-                    ? text('editor')
-                    : text('changes')}
-              </PortalLink>
-            ))}
-          </nav>
           <div className="header-tools">
+            <AppearanceControls defaults={snapshot.appearance} locale={locale} />
             {snapshot.capabilities.rebuild && <RevisionNotice locale={locale} />}
             {snapshot.capabilities.agentConsole && (
               <div className="header-tool-group">
@@ -380,21 +388,11 @@ function Shell({ snapshot, locale }: { snapshot: PortalSnapshotV1; locale: Local
               title={text('workspaceSettings')}
               aria-label={text('workspaceSettings')}
             >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <circle cx="5" cy="12" r="1.5" />
-                <circle cx="12" cy="12" r="1.5" />
-                <circle cx="19" cy="12" r="1.5" />
-              </svg>
+              <Icon name="settings" />
             </button>
             <div id="workspace-settings" className="header-settings" popover="auto">
               <h2>{text('workspaceSettings')}</h2>
-              <AppearanceControls defaults={snapshot.appearance} locale={locale} />
+
               <div className="header-settings-actions">
                 {snapshot.capabilities.discussions && (
                   <button
@@ -417,7 +415,10 @@ function Shell({ snapshot, locale }: { snapshot: PortalSnapshotV1; locale: Local
         </header>
         <aside className="sidebar">
           <details className="navigation-disclosure" ref={navigation}>
-            <summary>{text('menu')}</summary>
+            <summary>
+              <Icon name="menu" />
+              {text('menu')}
+            </summary>
             <Navigation
               items={snapshot.navigation.items}
               routes={snapshot.routes}
@@ -425,8 +426,11 @@ function Shell({ snapshot, locale }: { snapshot: PortalSnapshotV1; locale: Local
             />
           </details>
           <div className="sidebar-footer">
-            <span>Toudocu</span>
-            <code>{snapshot.generator.version}</code>
+            <button type="button" popoverTarget="workspace-settings">
+              <Icon name="settings" />
+              {text('workspaceSettings')}
+            </button>
+            <code title="Toudocu">{snapshot.generator.version}</code>
           </div>
           <button
             className="sidebar-resizer"

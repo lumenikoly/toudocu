@@ -3,6 +3,14 @@ import { PortalApp } from './root.js';
 import { ServeApiDataSource, StaticBrowserDataSource } from './data.js';
 import './styles/app.css';
 import './styles/document.css';
+import './styles/graph.css';
+import './styles/agent-console.css';
+import './styles/editor.css';
+import './styles/search.css';
+import './styles/changes.css';
+import './styles/discussions.css';
+import './styles/collections.css';
+import './styles/api-docs.css';
 
 async function start(): Promise<void> {
   const root = document.querySelector('#root');

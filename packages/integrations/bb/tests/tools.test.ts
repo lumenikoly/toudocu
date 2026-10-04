@@ -79,20 +79,24 @@ function setup(
     hostId: string;
     signal?: AbortSignal;
   }) => unknown,
+  sharedPortTunnelIdentities?: Record<string, { label: string; baseDomain: string }>,
 ) {
   const threads: Record<string, { id: string; projectId: string; environmentId: string }> = {
     'thread-a': { id: 'thread-a', projectId: 'project-test', environmentId: 'env-a' },
     'thread-b': { id: 'thread-b', projectId: 'project-test', environmentId: 'env-b' },
+    'thread-c': { id: 'thread-c', projectId: 'project-test', environmentId: 'env-c' },
     'thread-created': { id: 'thread-created', projectId: 'project-test', environmentId: 'env-a' },
     'thread-no-env': { id: 'thread-no-env', projectId: 'project-test', environmentId: '' },
   };
   const environments: Record<string, ReturnType<typeof environment>> = {
     'env-a': environment('env-a', '/workspaces/a', 'host-a'),
     'env-b': environment('env-b', '/workspaces/b', 'host-b'),
+    'env-c': environment('env-c', '/workspaces/c', 'host-a'),
   };
   const host = createFakePluginHost({
     pluginId: 'toudocu-bb',
     agentSkillIds: ['toudocu-bb'],
+    sharedPortTunnelIdentities,
     sdk: {
       threads: {
         get: async ({ threadId }) => threads[threadId],
@@ -134,6 +138,98 @@ function setup(
   });
   return host;
 }
+
+test('workspace reads fresh identity for each thread without loading task data', async () => {
+  const { bb, harness } = setup(({ cwd }) => ({
+    ...reports.project_info,
+    workspace:
+      cwd === '/projects/project'
+        ? null
+        : {
+            instanceId: cwd.endsWith('/a')
+              ? '11111111-1111-4111-8111-111111111111'
+              : '22222222-2222-4222-8222-222222222222',
+            projectRoot: cwd,
+            documentationRoot: `${cwd}/docs`,
+            url: 'http://127.0.0.1:4567',
+          },
+  }));
+  await plugin(bb);
+  const a = await harness.behavior.callRpc('workspace', { threadId: 'thread-a' });
+  const b = await harness.behavior.callRpc('workspace', { threadId: 'thread-b' });
+  expect(a).toMatchObject({ projectRoot: '/workspaces/a' });
+  expect(b).toMatchObject({ projectRoot: '/workspaces/b' });
+  await expect(
+    harness.behavior.callRpc('workspace', { projectId: 'project-test' }),
+  ).resolves.toBeNull();
+  const reads = harness.inspection.experimental_hostRpcCalls;
+  expect(reads).toHaveLength(3);
+  expect(reads.map(({ hostId, input }) => [hostId, input])).toEqual([
+    ['host-a', { cwd: '/workspaces/a', operation: 'project_info', fresh: true }],
+    ['host-b', { cwd: '/workspaces/b', operation: 'project_info', fresh: true }],
+    ['host-project', { cwd: '/projects/project', operation: 'project_info', fresh: true }],
+  ]);
+  await harness.lifecycle.dispose();
+});
+
+test('sharing checks instance identity and declares ports on the workspace host', async () => {
+  const { bb, harness } = setup(
+    ({ cwd }) => ({
+      ...reports.project_info,
+      workspace: {
+        instanceId: '11111111-1111-4111-8111-111111111111',
+        projectRoot: cwd,
+        documentationRoot: `${cwd}/docs`,
+        url: 'http://localhost:4567',
+      },
+    }),
+    { 'host-a': { label: 'machine', baseDomain: 'bb.test' } },
+  );
+  await plugin(bb);
+  const url = await harness.behavior.callRpc('shareWorkspace', {
+    threadId: 'thread-a',
+    instanceId: '11111111-1111-4111-8111-111111111111',
+  });
+  expect(url).toBe('https://machine--4567.bb.test');
+  expect(harness.inspection.sharedPortDeclarations.at(-1)).toMatchObject({
+    hostId: 'host-a',
+    ports: [4567],
+  });
+  await expect(
+    harness.behavior.callRpc('shareWorkspace', {
+      threadId: 'thread-a',
+      instanceId: '22222222-2222-4222-8222-222222222222',
+    }),
+  ).rejects.toThrow(/no longer running/i);
+  expect(harness.inspection.sharedPortDeclarations).toHaveLength(1);
+  await harness.lifecycle.dispose();
+});
+
+test('shared ports from multiple workspaces on one host are declared together', async () => {
+  const { bb, harness } = setup(
+    ({ cwd }) => ({
+      ...reports.project_info,
+      workspace: {
+        instanceId: '11111111-1111-4111-8111-111111111111',
+        projectRoot: cwd,
+        documentationRoot: `${cwd}/docs`,
+        url: cwd.endsWith('/c') ? 'http://localhost:4568' : 'http://localhost:4567',
+      },
+    }),
+    { 'host-a': { label: 'machine', baseDomain: 'bb.test' } },
+  );
+  await plugin(bb);
+  for (const threadId of ['thread-a', 'thread-c'])
+    await harness.behavior.callRpc('shareWorkspace', {
+      threadId,
+      instanceId: '11111111-1111-4111-8111-111111111111',
+    });
+  expect(harness.inspection.sharedPortDeclarations.at(-1)).toEqual({
+    hostId: 'host-a',
+    ports: [4567, 4568],
+  });
+  await harness.lifecycle.dispose();
+});
 
 test('all semantic tools use their calling thread workspace and host', async () => {
   const { bb, harness } = setup();
@@ -217,7 +313,7 @@ test('bind persists in plugin KV and work starts with compact bootstrap only whe
     hostId: 'host-a',
     workspace: { type: 'managed-worktree', baseBranch: { kind: 'named', name: 'task-branch' } },
   });
-  expect(spawn.prompt).toContain(`Toudocu task: ${taskId}`);
+  expect(spawn.prompt).toContain(`$toudocu-bb implement ${taskId}`);
   expect(spawn.prompt).toContain('Use the toudocu-bb skill.');
   expect(spawn.prompt.length).toBeLessThan(1_500);
 
@@ -233,6 +329,79 @@ test('bind persists in plugin KV and work starts with compact bootstrap only whe
   reports.task_ready = readyReport;
   expect(harness.inspection.sdk.callsTo('threads.spawn')).toHaveLength(1);
   await harness.lifecycle.dispose();
+});
+
+test('workflow actions start in the calling thread workspace and persist task binding', async () => {
+  const { bb, harness } = setup();
+  await plugin(bb);
+
+  for (const action of ['clarify', 'review', 'verify'] as const) {
+    await expect(
+      harness.behavior.callRpc('workflow', { threadId: 'thread-b', taskId, action }),
+    ).resolves.toEqual({ threadId: 'thread-created' });
+    const spawn = harness.inspection.sdk.callsTo('threads.spawn').at(-1)![0] as {
+      environment: unknown;
+      prompt: string;
+    };
+    expect(spawn.environment).toEqual({ type: 'reuse', environmentId: 'env-b' });
+    expect(spawn.prompt).toMatch(new RegExp(`^\\$toudocu-bb ${action} ${taskId}\\nGoal: `));
+    expect(spawn.prompt).toContain('Implement the compatibility path');
+  }
+  expect(harness.inspection.sdk.callsTo('threads.spawn')).toHaveLength(3);
+  const reads = harness.inspection.experimental_hostRpcCalls;
+  expect(reads).toHaveLength(2);
+  expect(reads.map(({ hostId, input }) => [hostId, input])).toEqual([
+    ['host-b', { cwd: '/workspaces/b', operation: 'project_info', fresh: true }],
+    ['host-b', { cwd: '/workspaces/b', operation: 'task_list' }],
+  ]);
+  expect(await harness.behavior.callRpc('panel', { threadId: 'thread-created' })).toMatchObject({
+    binding: { threadId: 'thread-created', projectId: 'project-test', taskId },
+  });
+  expect(
+    harness.inspection.experimental_hostRpcCalls.some(
+      (call) => (call.input as { operation: string }).operation === 'task_context',
+    ),
+  ).toBe(false);
+  await harness.lifecycle.dispose();
+});
+
+test('project workflow uses its default source path and rejects invalid or missing tasks', async () => {
+  const { bb, harness } = setup((request) =>
+    request.operation === 'task_list' ? { ...reports.task_list, tasks: [] } : undefined,
+  );
+  await plugin(bb);
+
+  await expect(
+    harness.behavior.callRpc('workflow', { projectId: 'project-test', taskId, action: 'review' }),
+  ).rejects.toThrow(/task not found/i);
+  await expect(
+    harness.behavior.callRpc('workflow', {
+      projectId: 'project-test',
+      taskId,
+      action: 'implement',
+    }),
+  ).rejects.toThrow();
+  expect(harness.inspection.sdk.callsTo('threads.spawn')).toHaveLength(0);
+
+  const { bb: validBb, harness: validHarness } = setup();
+  await plugin(validBb);
+  await expect(
+    validHarness.behavior.callRpc('workflow', {
+      projectId: 'project-test',
+      taskId,
+      action: 'clarify',
+    }),
+  ).resolves.toEqual({ threadId: 'thread-created' });
+  const spawn = validHarness.inspection.sdk.callsTo('threads.spawn')[0]![0] as {
+    environment: unknown;
+  };
+  expect(spawn.environment).toEqual({
+    type: 'host',
+    hostId: 'host-project',
+    workspace: { type: 'unmanaged', path: '/projects/project' },
+  });
+  await harness.lifecycle.dispose();
+  await validHarness.lifecycle.dispose();
 });
 
 test('panel task snapshots stay isolated by thread workspace', async () => {

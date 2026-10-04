@@ -6,6 +6,7 @@ import {
   type RepositoryFileList,
 } from '@toudocu/contracts';
 import { translator, type Locale } from './i18n.js';
+import { Icon } from './ui/index.js';
 import { ChangesDetail } from './changes-detail.js';
 import {
   buildChangeTree,
@@ -79,15 +80,18 @@ function Tree({
         <button
           type="button"
           className={`changes-file${selected === change.path ? ' is-active' : ''}`}
+          aria-current={selected === change.path ? 'true' : undefined}
           key={change.path}
           onClick={() => onSelect(change)}
         >
           <strong>{change.path.split('/').pop()}</strong>
-          <span className="changes-line-stats">
-            +{change.lines.added} −{change.lines.deleted}
-          </span>
-          <span className={`changes-file-status status-${change.status}`}>
-            {changeStatus(change.status)}
+          <span className="changes-file-meta">
+            <span className={`changes-file-status status-${change.status}`}>
+              {changeStatus(change.status)}
+            </span>
+            <span className="changes-line-stats">
+              +{change.lines.added} −{change.lines.deleted}
+            </span>
           </span>
         </button>
       ))}
@@ -235,8 +239,14 @@ export function ChangesWorkspace({ locale }: { locale: Locale }) {
           <h1>{text('changes')}</h1>
           <p>{text('changesDescription')}</p>
         </div>
-        <button type="button" onClick={() => void refresh()}>
-          {text('refresh')}
+        <button
+          type="button"
+          className="ui-icon-button"
+          aria-label={text('refresh')}
+          title={text('refresh')}
+          onClick={() => void refresh()}
+        >
+          <Icon name="refresh" />
         </button>
       </header>
       <details className="changes-range-details">
@@ -362,6 +372,7 @@ export function ChangesWorkspace({ locale }: { locale: Locale }) {
                 <button
                   type="button"
                   className={`changes-file${selectedPath === path ? ' is-active' : ''}`}
+                  aria-current={selectedPath === path ? 'true' : undefined}
                   key={path}
                   onClick={() => {
                     setSelectedPath(path);

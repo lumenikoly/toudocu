@@ -1,9 +1,17 @@
 .td-shell {
+  --td-done: light-dark(#15803d, #4ade80);
+  --td-pending: light-dark(#b45309, #fbbf24);
+  --td-progress: light-dark(#2563eb, #60a5fa);
   height: 100%;
   container-type: inline-size;
   color: var(--foreground);
   font-size: 13px;
   line-height: 1.5;
+}
+.td-shell svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
 }
 .td-workspace {
   height: 100%;
@@ -58,6 +66,11 @@
 }
 .td-refresh {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
 }
 .td-filters {
   padding: 0 16px 8px;
@@ -115,14 +128,21 @@
   min-width: 0;
   text-align: left;
 }
+.td-task[aria-current='true'] .td-title {
+  font-weight: 600;
+}
 .td-row-meta {
   display: flex;
   align-items: center;
   gap: 8px;
   justify-content: space-between;
+  font-size: 11px;
 }
 .td-title {
-  display: block;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
   line-height: 1.45;
   margin-top: 2px;
   overflow-wrap: anywhere;
@@ -145,14 +165,53 @@
 .td-row > .td-count {
   padding: 0 6px;
 }
-.td-status {
+.td-status,
+.td-row-status {
   white-space: nowrap;
   font-size: 11px;
+  flex-shrink: 0;
+}
+.td-status,
+.td-status-marker {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.td-status-marker {
+  flex-shrink: 0;
+  margin-left: 2px;
+}
+.td-status-marker svg {
+  width: 14px;
+  height: 14px;
+}
+.td-status[data-status='done'],
+.td-status-marker[data-status='done'],
+.td-row-status[data-status='done'] {
+  color: var(--td-done);
+}
+.td-status[data-status='draft'],
+.td-status[data-status='ready'],
+.td-status-marker[data-status='draft'],
+.td-status-marker[data-status='ready'],
+.td-row-status[data-status='draft'],
+.td-row-status[data-status='ready'] {
+  color: var(--td-pending);
 }
 .td-status[data-status='in-progress'],
-.td-status[data-status='ready'] {
-  color: var(--foreground);
-  font-weight: 600;
+.td-status-marker[data-status='in-progress'],
+.td-row-status[data-status='in-progress'] {
+  color: var(--td-progress);
+}
+.td-status[data-status='cancelled'],
+.td-status-marker[data-status='cancelled'],
+.td-row-status[data-status='cancelled'] {
+  color: var(--muted-foreground);
+}
+.td-status[data-status='blocked'],
+.td-status-marker[data-status='blocked'],
+.td-row-status[data-status='blocked'] {
+  color: var(--destructive);
 }
 .td-detail {
   display: none;
@@ -220,6 +279,10 @@
 .td-task-actions button {
   border: 1px solid var(--border);
   padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
 }
 .td-task-actions .td-primary {
   background: var(--foreground);
@@ -228,6 +291,62 @@
 }
 .td-task-actions .td-primary:hover {
   opacity: 0.85;
+}
+.td-actions-menu {
+  position: relative;
+}
+.td-actions-menu > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  cursor: pointer;
+}
+.td-actions-menu > summary::-webkit-details-marker {
+  display: none;
+}
+.td-actions-menu > summary:hover,
+.td-actions-menu[open] > summary {
+  background: var(--muted);
+}
+.td-action-list {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 5px);
+  right: 0;
+  min-width: 220px;
+  padding: 4px;
+  background: var(--popover, var(--background));
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.td-action-list button {
+  width: 100%;
+  border: 0;
+  justify-content: flex-start;
+  text-align: left;
+  padding: 8px;
+}
+.td-binding {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted-foreground);
+  font-size: 11px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .td-refresh.is-loading svg {
+    animation: td-refresh-spin 1s linear infinite;
+  }
+}
+@keyframes td-refresh-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 .td-detail-tabs {
   display: flex;
@@ -312,9 +431,10 @@
   margin: 12px 16px;
   color: var(--destructive);
 }
-.td-portal {
+.td-shell .td-portal {
   background: none;
   border: 0;
+  border-radius: 0;
   text-align: left;
   cursor: pointer;
   padding: 10px 16px;

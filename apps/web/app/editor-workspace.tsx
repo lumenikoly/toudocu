@@ -15,6 +15,7 @@ import { buildEditorTree, EditorTree } from './editor-tree.js';
 import { EditorCreateDialog } from './editor-create.js';
 import { MermaidEnhancer } from './document.js';
 import { translator, type Locale } from './i18n.js';
+import { Icon } from './ui/index.js';
 
 type View = 'editor' | 'preview' | 'split';
 type Conflict = { kind: 'removed' } | { kind: 'changed'; digest: string };
@@ -380,27 +381,31 @@ export function EditorWorkspace({ locale }: { locale: Locale }) {
       <header className="workspace-title editor-toolbar">
         <div>
           <h1>{text('editor')}</h1>
-          <code>{current?.file.path ?? text('editorChooseFile')}</code>
           {dirty && <span className="editor-dirty">{text('editorModified')}</span>}
         </div>
         <div className="workspace-actions">
           <button
             ref={treeToggle}
-            className="editor-tree-toggle"
+            className="editor-tree-toggle ui-icon-button"
+            aria-label={text('files')}
+            title={text('files')}
             type="button"
             aria-expanded={treeOpen}
             aria-controls="editor-files"
             onClick={() => setTreeOpen(!treeOpen)}
           >
-            {text('files')}
+            <Icon name="folder" />
           </button>
           {current && (
             <a
+              className="ui-icon-button"
+              aria-label={text('source')}
+              title={text('source')}
               target="_blank"
               rel="noopener"
               href={`/_toudocu/api/editor/file?raw=1&path=${encodeURIComponent(current.file.path)}`}
             >
-              {text('source')}
+              <Icon name="file" />
             </a>
           )}
           <button
@@ -410,10 +415,12 @@ export function EditorWorkspace({ locale }: { locale: Locale }) {
               if (!dirty || window.confirm(text('discardChanges'))) setCreateOpen(true);
             }}
           >
+            <Icon name="plus" />
             {text('create')}
           </button>
           <button
             type="button"
+            className="is-primary"
             disabled={!dirty || busy || conflict?.kind === 'removed'}
             onClick={() => void save()}
           >
@@ -488,6 +495,10 @@ export function EditorWorkspace({ locale }: { locale: Locale }) {
           )}
           {current ? (
             <>
+              <div className="editor-file-heading">
+                <h2>{current.file.path.split('/').at(-1)}</h2>
+                <code title={current.file.path}>{current.file.path}</code>
+              </div>
               <div className="editor-view-tabs" role="tablist" aria-label={text('editorView')}>
                 {(['editor', 'preview', 'split'] as const).map((mode) => (
                   <button
@@ -611,7 +622,11 @@ export function EditorWorkspace({ locale }: { locale: Locale }) {
               </section>
             </>
           ) : (
-            <p>{text(list ? 'editorEmpty' : 'editorLoading')}</p>
+            <p className="ui-empty-state">
+              {text(
+                list ? (list.files.length ? 'editorSelectFile' : 'editorEmpty') : 'editorLoading',
+              )}
+            </p>
           )}
         </section>
       </div>

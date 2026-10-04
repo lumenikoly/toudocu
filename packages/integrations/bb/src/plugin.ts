@@ -56,7 +56,12 @@ export default function plugin(bb: BbPluginApi) {
     const { hostId, cwd } = await resolveScope(scope);
     return host.call(
       'read',
-      { cwd, operation, ...(value === undefined ? {} : { value }) },
+      {
+        cwd,
+        operation,
+        ...(operation === 'project_info' ? { fresh: true } : {}),
+        ...(value === undefined ? {} : { value }),
+      },
       {
         hostId,
         signal: signal ? AbortSignal.any([signal, lifecycle.signal]) : lifecycle.signal,
@@ -95,7 +100,6 @@ export default function plugin(bb: BbPluginApi) {
     ]);
   }
   let checkingPorts = false;
-  let portTimer: ReturnType<typeof setInterval> | undefined;
   async function reconcilePorts() {
     if (checkingPorts) return;
     checkingPorts = true;
@@ -109,17 +113,25 @@ export default function plugin(bb: BbPluginApi) {
           }
         }),
       );
-      if (!shared.size && portTimer) {
-        clearInterval(portTimer);
-        portTimer = undefined;
-      }
     } finally {
       checkingPorts = false;
     }
   }
-  bb.onDispose(() => {
-    if (portTimer) clearInterval(portTimer);
-    shared.clear();
+  bb.onDispose(() => shared.clear());
+  bb.background.service('workspace-links', {
+    async start(signal) {
+      const timer = setInterval(() => {
+        if (shared.size) void reconcilePorts();
+      }, 30_000);
+      try {
+        if (!signal.aborted)
+          await new Promise<void>((done) =>
+            signal.addEventListener('abort', () => done(), { once: true }),
+          );
+      } finally {
+        clearInterval(timer);
+      }
+    },
   });
   const names = (Object.keys(reports) as Operation[]).filter((name) => name !== 'task_list');
   for (const operation of names) {
@@ -211,6 +223,9 @@ export default function plugin(bb: BbPluginApi) {
       } catch {
         throw new Error('Connect this workspace machine to bb Connect to open Toudocu remotely.');
       }
+      const current = await liveWorkspace(scope);
+      if (current?.instanceId !== workspace.instanceId || current.url !== workspace.url)
+        throw new Error('This Toudocu workspace is no longer running.');
       const port = Number(address.port || 80);
       const key = JSON.stringify([hostId, cwd]);
       shared.set(key, { hostId, scope, instanceId: workspace.instanceId, port });
@@ -220,10 +235,6 @@ export default function plugin(bb: BbPluginApi) {
         shared.delete(key);
         throw error;
       }
-      if (!portTimer)
-        portTimer = setInterval(() => {
-          void reconcilePorts();
-        }, 30_000);
       return `https://${tunnel.label}--${port}.${tunnel.baseDomain}`;
     },
     async panel(input) {
@@ -246,6 +257,38 @@ export default function plugin(bb: BbPluginApi) {
       const scope: Scope =
         'threadId' in input ? { threadId: input.threadId } : { projectId: input.projectId };
       return ChangeSetReportV1Schema.parse(await read(scope, 'task_changes', input.taskId));
+    },
+    async workflow(input) {
+      const scope: Scope =
+        'threadId' in input ? { threadId: input.threadId } : { projectId: input.projectId };
+      const location = await resolveScope(scope);
+      const tasks = (await snapshot(scope)).tasks;
+      const entry = tasks.find(({ task }) => task.id === input.taskId);
+      if (!entry) throw new Error('Task not found in this workspace. Refresh the tasks.');
+      const titles: Record<string, string> = {
+        clarify: 'Clarify',
+        review: 'Review',
+        verify: 'Verify',
+      };
+      const created = await bb.sdk.threads.spawn({
+        projectId: location.projectId,
+        environment:
+          'threadId' in scope
+            ? { type: 'reuse', environmentId: (await workspace(scope.threadId)).environment.id }
+            : {
+                type: 'host',
+                hostId: location.hostId,
+                workspace: { type: 'unmanaged', path: location.cwd },
+              },
+        title: `${titles[input.action]} ${input.taskId}: ${entry.task.title}`.slice(0, 200),
+        prompt: `$toudocu-bb ${input.action} ${input.taskId}\nGoal: ${entry.task.title.slice(0, 300)}\nUse this workspace's task and current changes.`,
+      });
+      await bb.storage.kv.set(`thread:${created.id}`, {
+        threadId: created.id,
+        projectId: location.projectId,
+        taskId: input.taskId,
+      });
+      return { threadId: created.id };
     },
     async work(input) {
       const { taskId } = input;

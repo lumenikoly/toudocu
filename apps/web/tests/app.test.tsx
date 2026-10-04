@@ -7,6 +7,7 @@ import { MemoryRouter } from 'react-router';
 import { DocumentLink, EntityReference } from '../app/document.js';
 import { PortalApp } from '../app/root.js';
 import { insertRoadmapItem } from '../app/pages.js';
+import { TaskWorkspace } from '../app/task-workspace.js';
 import { portalFixture } from './fixture.js';
 import { ApiDocsWorkspace } from '../app/workspaces.js';
 import { SwaggerUIBundle } from 'swagger-ui-dist';
@@ -86,7 +87,7 @@ describe('portal application', () => {
     );
   });
 
-  it('keeps the overview collapsed until requested and the portal tab active on documents', async () => {
+  it('keeps the overview collapsed until requested and highlights the opened document', async () => {
     const user = userEvent.setup();
     const view = render(<PortalApp snapshot={portalFixture()} initialPath="/" />);
     const about = view.container.querySelector<HTMLDetailsElement>('.project-about')!;
@@ -95,8 +96,8 @@ describe('portal application', () => {
     expect(about.open).toBe(true);
     await user.click(within(about).getByRole('link', { name: 'Deep guide' }));
     expect(
-      within(screen.getByRole('navigation', { name: 'Workspace navigation' }))
-        .getByRole('link', { name: 'Portal' })
+      within(screen.getByRole('navigation', { name: 'Documentation navigation' }))
+        .getByRole('link', { name: 'Deep guide' })
         .getAttribute('aria-current'),
     ).toBe('page');
   });
@@ -128,9 +129,10 @@ describe('portal application', () => {
     await user.click(screen.getByRole('link', { name: 'Tasks' }));
     expect(screen.getByRole('main')).toBeTruthy();
     const resizer = screen.getByRole('separator', { name: 'Resize navigation' });
+    const width = Number(resizer.getAttribute('aria-valuenow'));
     resizer.focus();
     await user.keyboard('{ArrowRight}');
-    expect(resizer.getAttribute('aria-valuenow')).toBe('288');
+    expect(Number(resizer.getAttribute('aria-valuenow'))).toBe(width + 16);
   });
 
   it('inserts roadmap outcomes into the selected stage', () => {
@@ -193,7 +195,7 @@ describe('portal application', () => {
     render(<PortalApp snapshot={portalFixture()} initialPath="/search.html" locale="ru" />);
 
     expect(screen.getByRole('heading', { name: 'Поиск' })).toBeTruthy();
-    await user.type(screen.getByRole('textbox'), 'Deep');
+    await user.type(within(screen.getByRole('main')).getByRole('searchbox'), 'Deep');
     expect(within(screen.getByRole('main')).getByRole('link', { name: 'Deep guide' })).toBeTruthy();
     expect(screen.queryByText('Глубокое руководство')).toBeNull();
   });
@@ -231,5 +233,65 @@ describe('portal application', () => {
     expect(screen.getByRole('link', { name: 'Tasks' }).getAttribute('href')).toBe(
       'work/index.html',
     );
+  });
+
+  it('keeps secondary task filters behind a disclosure while allowing a status filter to be applied and reset', async () => {
+    const snapshot = portalFixture();
+    const page = snapshot.pages.find((entry) => entry.kind === 'task-workspace');
+    if (!page || page.kind !== 'task-workspace') throw new Error('Missing task workspace fixture');
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <TaskWorkspace page={page} snapshot={snapshot} locale="en" />
+      </MemoryRouter>,
+    );
+
+    const filterSummary = screen.getByText('Filters', { selector: 'summary' });
+    const disclosure = filterSummary.closest('details')!;
+    expect(disclosure.open).toBe(false);
+    expect(screen.getByRole('searchbox', { name: 'Search tasks' })).toBeTruthy();
+    await user.click(filterSummary);
+    expect(disclosure.open).toBe(true);
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Status' }), 'done');
+    expect(screen.getByText('No work items match these filters.')).toBeTruthy();
+    await user.click(screen.getByRole('button', { name: 'Reset' }));
+    expect(disclosure.open).toBe(false);
+    expect(screen.getByText('Build web app')).toBeTruthy();
+  });
+
+  it('keeps archived tasks out of active counts and shows each archived task once when filtered', async () => {
+    const snapshot = portalFixture();
+    const page = snapshot.pages.find((entry) => entry.kind === 'task-workspace');
+    if (!page || page.kind !== 'task-workspace') throw new Error('Missing task workspace fixture');
+    const task = page.workItems[0];
+    if (!task) throw new Error('Missing task fixture');
+    page.workItems.push({
+      ...task,
+      id: 'TASK-WEB-099',
+      title: 'Archived task',
+      archived: true,
+      archiveYear: '2025',
+    });
+    const user = userEvent.setup();
+    const view = render(
+      <MemoryRouter>
+        <TaskWorkspace page={page} snapshot={snapshot} locale="en" />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole('button', { name: 'All active 1' })).toBeTruthy();
+    expect(screen.queryByText('Archived task')).toBeNull();
+    await user.click(screen.getByText('Filters', { selector: 'summary' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Archive' }));
+    expect(
+      view.container.querySelectorAll('.task-workspace-terminal-section .task-workspace-row'),
+    ).toHaveLength(1);
+    expect(screen.getAllByText('Archived task')).toHaveLength(1);
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Status' }), 'archive');
+    expect(screen.getByText('1 / 2')).toBeTruthy();
+    expect(
+      view.container.querySelectorAll('.task-workspace-terminal-section .task-workspace-row'),
+    ).toHaveLength(1);
+    expect(screen.getAllByText('Archived task')).toHaveLength(1);
   });
 });

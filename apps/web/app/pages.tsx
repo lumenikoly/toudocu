@@ -5,7 +5,7 @@ import {
   type PageViewV1,
   type PortalSnapshotV1,
 } from '@toudocu/contracts';
-import { EmptyState, Icon } from './ui/index.js';
+import { Badge, EmptyState, Icon } from './ui/index.js';
 import { translator, type Locale, type MessageKey } from './i18n.js';
 import { PortalLink } from './routing.js';
 import { ApiDocsWorkspace, EditorWorkspace } from './workspaces.js';
@@ -99,7 +99,12 @@ function CatalogPage({
   );
   return (
     <>
-      <h1>{key ? text(key) : page.data.title}</h1>
+      <header className="collection-heading">
+        <h1>{key ? text(key) : page.data.title}</h1>
+        <span className="collection-count">
+          {documents.length} / {page.data.documents.length}
+        </span>
+      </header>
       <div className="collection-toolbar">
         <input
           type="search"
@@ -120,9 +125,6 @@ function CatalogPage({
             </option>
           ))}
         </select>
-        <span>
-          {documents.length} / {page.data.documents.length}
-        </span>
         {(query || status) && (
           <button
             type="button"
@@ -141,11 +143,44 @@ function CatalogPage({
       <ul className="catalog">
         {documents.map((document) => (
           <li key={document.sourcePath}>
-            <DocumentLink snapshot={snapshot} sourcePath={document.sourcePath} />
-            {document.status.kind && <Status status={document.status} locale={locale} />}
+            <DocumentLink snapshot={snapshot} sourcePath={document.sourcePath}>
+              <span className="catalog-icon">
+                <Icon
+                  name={
+                    page.data.section === 'screens'
+                      ? 'board'
+                      : page.data.section === 'use-cases'
+                        ? 'route'
+                        : 'file'
+                  }
+                />
+              </span>
+              <span className="catalog-content">
+                <span className="catalog-identity">
+                  <EntityIdentity document={document} />
+                </span>
+                {document.description && (
+                  <span className="catalog-description">{document.description}</span>
+                )}
+              </span>
+              <span className="catalog-context">
+                {document.status.kind && <Status status={document.status} locale={locale} />}
+                {document.updatedAt && (
+                  <time dateTime={document.updatedAt}>
+                    {new Intl.DateTimeFormat(locale, {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    }).format(new Date(document.updatedAt))}
+                  </time>
+                )}
+              </span>
+              <Icon name="arrowRight" className="catalog-arrow" />
+            </DocumentLink>
           </li>
         ))}
       </ul>
+      {documents.length === 0 && <p className="empty-note">{text('noResults')}</p>}
     </>
   );
 }
@@ -171,12 +206,20 @@ function SearchPage({
   }, [locale, page.entries, query]);
   return (
     <>
-      <h1>{text('search')}</h1>
+      <header className="collection-heading">
+        <h1>{text('search')}</h1>
+        <span className="collection-count">
+          {entries.length} / {page.entries.length}
+        </span>
+      </header>
       <form className="search-form" role="search" onSubmit={(event) => event.preventDefault()}>
         <label>
           <span>{text('searchPlaceholder')}</span>
-          <br />
-          <input value={query} onChange={(event) => setQuery(event.currentTarget.value)} />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.currentTarget.value)}
+          />
         </label>
       </form>
       {entries.length > 0 ? (
@@ -253,44 +296,56 @@ function ProcessesPage({
         {(query || module) && (
           <button
             type="button"
+            className="ui-icon-button"
+            aria-label={text('reset')}
+            title={text('reset')}
             onClick={() => {
               setQuery('');
               setModule('');
             }}
           >
-            {text('reset')}
+            <Icon name="close" />
           </button>
         )}
       </div>
-      <div className="process-board">
-        {flows.map((flow) => (
-          <section className="process-lane" key={flow.id}>
-            <div className="process-node process-flow">
-              <span className="topology-kind">FLOW</span>
-              <DocumentLink snapshot={snapshot} sourcePath={flow.document} />
-              {flow.moduleId && <EntityReference value={flow.moduleId} snapshot={snapshot} />}
-            </div>
-            <div className="process-links">
-              {flow.useCaseIds.map((id) => {
-                const useCase = page.useCases.find((item) => item.id === id);
-                return (
-                  <div className="process-node" key={id}>
-                    <span className="topology-kind">USE CASE</span>
-                    {useCase ? (
-                      <DocumentLink snapshot={snapshot} sourcePath={useCase.document} />
-                    ) : (
-                      <code>{id}</code>
-                    )}
-                  </div>
-                );
-              })}
-              {flow.useCaseIds.length === 0 && (
-                <span className="empty-note">{text('noLinkedUseCases')}</span>
-              )}
-            </div>
-          </section>
-        ))}
-      </div>
+      {flows.length === 0 && <EmptyState title={text('noResults')} />}
+      {flows.length > 0 && (
+        <div className="process-board">
+          {flows.map((flow) => (
+            <section className="process-lane" key={flow.id}>
+              <div className="process-node process-flow">
+                <span className="topology-kind">
+                  <Icon name="route" />
+                  {text('processes')}
+                </span>
+                <DocumentLink snapshot={snapshot} sourcePath={flow.document} />
+                {flow.moduleId && <EntityReference value={flow.moduleId} snapshot={snapshot} />}
+              </div>
+              <div className="process-links">
+                {flow.useCaseIds.map((id) => {
+                  const useCase = page.useCases.find((item) => item.id === id);
+                  return (
+                    <div className="process-node" key={id}>
+                      <span className="topology-kind">
+                        <Icon name="book" />
+                        {text('useCases')}
+                      </span>
+                      {useCase ? (
+                        <DocumentLink snapshot={snapshot} sourcePath={useCase.document} />
+                      ) : (
+                        <code>{id}</code>
+                      )}
+                    </div>
+                  );
+                })}
+                {flow.useCaseIds.length === 0 && (
+                  <span className="empty-note">{text('noLinkedUseCases')}</span>
+                )}
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
     </>
   );
 }
@@ -314,7 +369,12 @@ function TraceabilityPage({
   );
   return (
     <>
-      <h1>{text('traceability')}</h1>
+      <header className="collection-heading">
+        <h1>{text('traceability')}</h1>
+        <span className="collection-count">
+          {rows.length} / {page.rows.length}
+        </span>
+      </header>
       <div className="collection-toolbar">
         <input
           type="search"
@@ -323,37 +383,50 @@ function TraceabilityPage({
           aria-label={text('search')}
           onChange={(event) => setQuery(event.currentTarget.value)}
         />
-        <span>
-          {rows.length} / {page.rows.length}
-        </span>
+
         {query && (
-          <button type="button" onClick={() => setQuery('')}>
-            {text('reset')}
+          <button
+            type="button"
+            className="ui-icon-button"
+            aria-label={text('reset')}
+            title={text('reset')}
+            onClick={() => setQuery('')}
+          >
+            <Icon name="close" />
           </button>
         )}
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>{text('screen')}</th>
-            <th>{text('task')}</th>
-            <th>{text('verification')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, index) => (
-            <tr key={`${row.screen}:${row.task}:${index}`}>
-              <td>
-                <EntityReference value={row.screen} snapshot={snapshot} />
-              </td>
-              <td>
-                <EntityReference value={row.task} snapshot={snapshot} />
-              </td>
-              <td>{row.verification}</td>
+      {rows.length === 0 && <EmptyState title={text('noResults')} />}
+      <div
+        className="traceability-table"
+        hidden={rows.length === 0}
+        role="region"
+        aria-label={text('traceability')}
+        tabIndex={0}
+      >
+        <table>
+          <thead>
+            <tr>
+              <th>{text('screen')}</th>
+              <th>{text('task')}</th>
+              <th>{text('verification')}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((row, index) => (
+              <tr key={`${row.screen}:${row.task}:${index}`}>
+                <td>
+                  <EntityReference value={row.screen} snapshot={snapshot} />
+                </td>
+                <td>
+                  <EntityReference value={row.task} snapshot={snapshot} />
+                </td>
+                <td>{row.verification}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }
@@ -382,10 +455,19 @@ function HealthPage({
   );
   return (
     <>
-      <h1>{text('health')}</h1>
-      <p>
-        {page.stats.errors} {text('errors')}, {page.stats.warnings} {text('warnings')}
-      </p>
+      <header className="collection-heading health-heading">
+        <h1>{text('health')}</h1>
+        <div className="health-summary" aria-label={text('issues')}>
+          <Badge data-tone={page.stats.errors ? 'danger' : 'success'}>
+            <Icon name={page.stats.errors ? 'alertCircle' : 'checkCircle'} />
+            {page.stats.errors} {text('errors')}
+          </Badge>
+          <Badge data-tone={page.stats.warnings ? 'warning' : 'neutral'}>
+            <Icon name="alertCircle" />
+            {page.stats.warnings} {text('warnings')}
+          </Badge>
+        </div>
+      </header>
       <div className="collection-toolbar">
         <input
           type="search"
@@ -412,22 +494,46 @@ function HealthPage({
         {(query || severity) && (
           <button
             type="button"
+            className="ui-icon-button"
+            aria-label={text('reset')}
+            title={text('reset')}
             onClick={() => {
               setQuery('');
               setSeverity('');
             }}
           >
-            {text('reset')}
+            <Icon name="close" />
           </button>
         )}
       </div>
-      <h2>{text('issues')}</h2>
-      <ul className="diagnostic-list">
+      {issues.length === 0 && (
+        <EmptyState
+          className="health-empty"
+          title={page.issues.length === 0 ? text('valid') : text('noResults')}
+        >
+          <Icon name={page.issues.length === 0 ? 'checkCircle' : 'search'} />
+        </EmptyState>
+      )}
+      <ul className="diagnostic-list" hidden={issues.length === 0}>
         {issues.map((issue, index) => (
-          <li key={`${issue.code}:${issue.documentPath}:${index}`}>
-            <code data-severity={issue.severity}>{issue.code}</code>
+          <li key={`${issue.code}:${issue.documentPath}:${index}`} data-severity={issue.severity}>
+            <Icon name="alertCircle" />
             <div>
-              {issue.message}
+              <div className="diagnostic-identity">
+                <code>{issue.code}</code>
+                <Badge
+                  data-tone={
+                    issue.severity === 'error'
+                      ? 'danger'
+                      : issue.severity === 'warning'
+                        ? 'warning'
+                        : 'info'
+                  }
+                >
+                  {translator(locale).status(issue.severity)}
+                </Badge>
+              </div>
+              <p>{issue.message}</p>
               {issue.documentPath && (
                 <DocumentLink snapshot={snapshot} sourcePath={issue.documentPath} />
               )}
@@ -507,7 +613,8 @@ function RoadmapPage({
       <header className="workspace-title roadmap-heading">
         <h1>{text('roadmap')}</h1>
         {snapshot.capabilities.editing && (
-          <button type="button" onClick={() => setOpen(true)}>
+          <button type="button" className="ui-button is-primary" onClick={() => setOpen(true)}>
+            <Icon name="plus" />
             {text('addOutcome')}
           </button>
         )}
@@ -517,16 +624,33 @@ function RoadmapPage({
           <section key={item.anchor} id={item.anchor}>
             <header>
               <div>
-                <code>{item.status.label || item.status.kind}</code>
                 <h2>{item.title}</h2>
+                {item.plannedDate && <span className="roadmap-date">{item.plannedDate}</span>}
               </div>
               <Status status={item.status} locale={locale} />
             </header>
             <ul>
               {item.items.map((entry) => (
-                <li key={`${entry.id}:${entry.text}`}>
-                  <code>{entry.id}</code>
-                  <span>{entry.text}</span>
+                <li key={`${entry.id}:${entry.text}`} data-completed={entry.effectiveCompleted}>
+                  <span className="roadmap-item-id">
+                    <span
+                      className="roadmap-completion"
+                      title={translator(locale).status(
+                        entry.effectiveCompleted ? 'done' : 'planned',
+                      )}
+                      aria-label={translator(locale).status(
+                        entry.effectiveCompleted ? 'done' : 'planned',
+                      )}
+                    >
+                      <Icon name={entry.effectiveCompleted ? 'checkCircle' : 'circle'} />
+                    </span>
+                    <EntityReference value={entry.id} snapshot={snapshot} />
+                  </span>
+                  <span>
+                    {entry.text.startsWith(`${entry.id} `)
+                      ? entry.text.slice(entry.id.length + 1)
+                      : entry.text}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -539,7 +663,9 @@ function RoadmapPage({
           <ul>
             {page.risks.map((risk) => (
               <li key={risk.id}>
-                <code>{risk.id}</code>
+                <span className="roadmap-item-id">
+                  <EntityReference value={risk.id} snapshot={snapshot} />
+                </span>
                 <span>{risk.title}</span>
                 <Status status={risk.status} locale={locale} />
               </li>
@@ -548,12 +674,25 @@ function RoadmapPage({
         </section>
       )}
       {open && (
-        <dialog className="roadmap-dialog" open>
+        <dialog
+          className="roadmap-dialog"
+          aria-labelledby="roadmap-form-title"
+          ref={(element) => {
+            if (element && !element.open) element.showModal();
+          }}
+          onClose={() => setOpen(false)}
+        >
           <form onSubmit={(event) => void add(event)}>
             <header>
-              <h2>{text('newOutcome')}</h2>
-              <button type="button" onClick={() => setOpen(false)}>
-                ×
+              <h2 id="roadmap-form-title">{text('newOutcome')}</h2>
+              <button
+                type="button"
+                className="ui-icon-button"
+                aria-label={text('close')}
+                title={text('close')}
+                onClick={(event) => event.currentTarget.closest('dialog')?.close()}
+              >
+                <Icon name="close" />
               </button>
             </header>
             <label>
@@ -583,10 +722,15 @@ function RoadmapPage({
             </label>
             {notice && <p role="alert">{notice}</p>}
             <div className="workspace-actions">
-              <button type="button" onClick={() => setOpen(false)}>
+              <button
+                type="button"
+                onClick={(event) => event.currentTarget.closest('dialog')?.close()}
+              >
                 {text('cancel')}
               </button>
-              <button type="submit">{text('add')}</button>
+              <button type="submit" className="is-primary">
+                {text('add')}
+              </button>
             </div>
           </form>
         </dialog>
@@ -612,65 +756,84 @@ export function Page({
       break;
     case 'document':
       content = (
-        <>
-          <DocumentContent
-            document={page.document}
-            locale={locale}
-            snapshot={snapshot}
-            content={
-              page.document.type === 'use-case' ? (
-                <UseCaseModes key={page.pageId} page={page} snapshot={snapshot} locale={locale}>
-                  <DocumentReadingView document={page.document} locale={locale} />
-                </UseCaseModes>
-              ) : undefined
-            }
-          />
+        <DocumentContent
+          document={page.document}
+          locale={locale}
+          snapshot={snapshot}
+          navigation={[
+            ...(page.relations.related.length > 0
+              ? [{ id: 'document-related', title: text('related') }]
+              : []),
+            ...(page.relations.backlinks.length > 0
+              ? [{ id: 'document-backlinks', title: text('backlinks') }]
+              : []),
+          ]}
+          content={
+            page.document.type === 'use-case' ? (
+              <UseCaseModes key={page.pageId} page={page} snapshot={snapshot} locale={locale}>
+                <DocumentReadingView document={page.document} locale={locale} />
+              </UseCaseModes>
+            ) : undefined
+          }
+        >
           <Relations snapshot={snapshot} {...page.relations} locale={locale} />
-        </>
+        </DocumentContent>
       );
       break;
     case 'task':
       content = (
-        <>
-          <DocumentContent document={page.document} locale={locale} snapshot={snapshot}>
-            <TaskActions page={page} snapshot={snapshot} locale={locale} />
-            {(page.workItem.dependsOn.length > 0 || page.workItem.moduleId) && (
-              <div className="execution-context">
-                {page.workItem.dependsOn.length > 0 && (
-                  <section>
-                    <h2>{text('dependencies')}</h2>
-                    <ul className="relations">
-                      {page.workItem.dependsOn.map((id) => {
-                        const target = snapshot.pages.find(
-                          (item) => item.kind === 'task' && item.workItem.id === id,
-                        );
-                        return (
-                          <li key={id}>
-                            {target && target.kind === 'task' ? (
-                              <DocumentLink
-                                snapshot={snapshot}
-                                sourcePath={target.document.sourcePath}
-                              />
-                            ) : (
-                              <code>{id}</code>
-                            )}
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </section>
-                )}
-                {page.workItem.moduleId && (
-                  <section>
-                    <h2>{text('context')}</h2>
-                    <code>{page.workItem.moduleId}</code>
-                  </section>
-                )}
-              </div>
-            )}
-          </DocumentContent>
+        <DocumentContent
+          document={page.document}
+          locale={locale}
+          snapshot={snapshot}
+          task={page.workItem}
+          navigation={[
+            ...(page.workItem.dependsOn.length > 0
+              ? [{ id: 'task-dependencies', title: text('dependencies') }]
+              : []),
+            ...(page.workItem.criteria.length > 0
+              ? [{ id: 'task-criteria', title: text('criteria') }]
+              : []),
+            ...(page.hierarchy.some((node) => node.children.length > 0)
+              ? [{ id: 'task-children', title: text('children') }]
+              : []),
+            ...(page.relations.related.length > 0
+              ? [{ id: 'document-related', title: text('related') }]
+              : []),
+            ...(page.relations.backlinks.length > 0
+              ? [{ id: 'document-backlinks', title: text('backlinks') }]
+              : []),
+          ]}
+        >
+          <TaskActions page={page} snapshot={snapshot} locale={locale} />
+          {page.workItem.dependsOn.length > 0 && (
+            <div className="execution-context">
+              <section id="task-dependencies">
+                <h2>{text('dependencies')}</h2>
+                <ul className="relations">
+                  {page.workItem.dependsOn.map((id) => {
+                    const target = snapshot.pages.find(
+                      (item) => item.kind === 'task' && item.workItem.id === id,
+                    );
+                    return (
+                      <li key={id}>
+                        {target && target.kind === 'task' ? (
+                          <DocumentLink
+                            snapshot={snapshot}
+                            sourcePath={target.document.sourcePath}
+                          />
+                        ) : (
+                          <code>{id}</code>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            </div>
+          )}
           {page.workItem.criteria.length > 0 && (
-            <section className="workbench-section">
+            <section className="workbench-section" id="task-criteria">
               <h2>{text('criteria')}</h2>
               <ul className="criteria-list">
                 {page.workItem.criteria.map((criterion) => (
@@ -685,10 +848,13 @@ export function Page({
             </section>
           )}
           {page.hierarchy.some((node) => node.children.length > 0) && (
-            <TaskTree snapshot={snapshot} nodes={page.hierarchy} locale={locale} />
+            <section className="workbench-section" id="task-children">
+              <h2>{text('children')}</h2>
+              <TaskTree snapshot={snapshot} nodes={page.hierarchy} locale={locale} />
+            </section>
           )}
           <Relations snapshot={snapshot} {...page.relations} locale={locale} />
-        </>
+        </DocumentContent>
       );
       break;
     case 'catalog':
@@ -728,8 +894,14 @@ export function Page({
     case 'not-found':
       content = (
         <>
-          <h1>{text('notFound')}</h1>
-          <PortalLink to="index.html">{text('home')}</PortalLink>
+          <div className="not-found-surface">
+            <Icon name="search" />
+            <h1>{text('notFound')}</h1>
+            <PortalLink className="ui-button" to="index.html">
+              <Icon name="home" />
+              {text('home')}
+            </PortalLink>
+          </div>
         </>
       );
       break;
@@ -754,9 +926,9 @@ export function Page({
           <span aria-hidden="true">/</span>
           <span>
             {'document' in page
-              ? page.document?.id || page.document?.type
+              ? page.document?.id || translator(locale).documentType(page.document?.type ?? '')
               : page.kind === 'catalog'
-                ? page.data.title
+                ? translator(locale).sectionTitle(page.data.section)
                 : page.kind === 'task-workspace'
                   ? text('tasks')
                   : page.kind === 'not-found'

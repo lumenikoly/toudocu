@@ -7,11 +7,11 @@ import { PortalApp } from '../app/root.js';
 import { relativePortalHref } from '../app/routing.js';
 
 const designContract = `<!--
-THESIS: A project knowledge workbench, not a SaaS dashboard or landing page.
-OWN-WORLD: An engineering control surface: neutral planes, a persistent command bar, monospace IDs, topology lines and semantic status marks.
-STORY: Orient in the project, see active work, inspect the knowledge graph and move from entities into execution or Agent Console.
-FIRST VIEWPORT: A two-row workspace header separates centered search and compact tools from navigation; the project tree stays left and the agent docks right.
-FORM: User-pinned structured workbench, first and only eligible direction; seed37148608. Entity diagrams and centered reading surfaces separate identity, content and context.
+THESIS: A friendly project workspace: real work and knowledge in clear, comfortably sized panels.
+OWN-WORLD: Golos Text, softly tinted canvas, rounded white or charcoal panels, quiet navigation, blue links and meaningful status colors; Paper and Terminal retain their own materials.
+STORY: Scan current work and project health, open knowledge, read and edit with consistent controls.
+FIRST VIEWPORT: One 64px command bar above a 240px project rail; heading then current-work and knowledge panels beside project health, with topology below.
+FORM: User-pinned workspace reference takes precedence over seed 55df197c; friendly rather than corporate, no invented features.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->`;
 

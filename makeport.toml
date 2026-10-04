@@ -1,0 +1,59 @@
+[[ports]]
+remote = 5173
+description = "Веб-интерфейс Toudocu"
+
+[[tasks]]
+target = "dev"
+description = "Запустить веб-интерфейс"
+
+[[tasks]]
+target = "fmt"
+description = "Отформатировать проект"
+
+[[tasks]]
+target = "format"
+description = "Отформатировать проект"
+
+[[tasks]]
+target = "install"
+description = "Установить зависимости"
+
+[[tasks]]
+target = "browser-test"
+description = "Запустить браузерные тесты"
+
+[[tasks]]
+target = "test"
+description = "Запустить тесты проекта"
+
+[[tasks]]
+target = "lint"
+description = "Проверить стиль и границы архитектуры"
+
+[[tasks]]
+target = "typecheck"
+description = "Проверить типы проекта"
+
+[[tasks]]
+target = "build"
+description = "Собрать проект"
+
+[[tasks]]
+target = "check"
+description = "Выполнить полную проверку проекта"
+
+[[tasks]]
+target = "update-local"
+description = "Собрать и установить локальную команду toudocu"
+
+[[tasks]]
+target = "docs"
+description = "Собрать документационный портал"
+
+[[tasks]]
+target = "docs-serve"
+description = "Запустить документационный портал"
+
+[[tasks]]
+target = "clean"
+description = "Удалить артефакты сборки"
