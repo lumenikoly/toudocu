@@ -24,14 +24,7 @@ import { fileURLToPath } from 'node:url';
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const platformPackage = join(repositoryRoot, 'packages', 'platform-node');
 const requireFromPlatform = createRequire(join(platformPackage, 'package.json'));
-const targets = [
-  'linux-x64',
-  'linux-arm64',
-  'darwin-x64',
-  'darwin-arm64',
-  'win32-x64',
-  'win32-arm64',
-];
+const targets = ['linux-x64', 'linux-arm64', 'darwin-arm64', 'win32-x64'];
 
 function option(name, fallback) {
   const index = process.argv.indexOf(`--${name}`);

@@ -1,7 +1,7 @@
 <!-- toudocu
 status: in-progress
 stage: Сопровождение версии 0.0.7
-updated: 2026-08-31
+updated: 2026-10-04
 -->
 
 # Текущее состояние
@@ -46,7 +46,7 @@ HTML, диаграммы, HTTP-раздачу и ограничение врем
 TypeScript, Python, `node-gyp` или compiler toolchain. `pnpm check` проверяет
 форматирование, lint, строгую типизацию, unit/integration и compatibility tests,
 а затем каноническую документацию. Отдельный browser suite проверяет React UI.
-Release workflow собирает native PTY на Linux/macOS/Windows x64/arm64,
+Release workflow собирает native PTY на Linux x64/arm64, macOS arm64 и Windows x64,
 формирует npm tarball, архивы, checksums и notices, а затем устанавливает
 готовый пакет в чистый каталог и запускает CLI/FS/Git/process/PTY smoke test.
 

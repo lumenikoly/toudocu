@@ -33,7 +33,7 @@ Compatibility corpus в `fixtures/` хранит зафиксированные 
 не требует старого runtime.
 
 Release workflow дополнительно выполняет реальные filesystem, Git, process и
-PTY tests на Linux/macOS/Windows x64/arm64, собирает шесть native artifacts,
+PTY tests на Linux x64/arm64, macOS arm64 и Windows x64, собирает четыре нативных артефакта,
 устанавливает созданный npm tarball в чистый каталог и запускает smoke test.
 
 `task verify --run` запускается только по явному решению пользователя; обычные

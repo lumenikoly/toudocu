@@ -42,10 +42,8 @@ irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 |
 |---|---|---|
 | Linux | x64 | `toudocu-linux-x64.tar.gz` |
 | Linux | arm64 | `toudocu-linux-arm64.tar.gz` |
-| macOS | x64 | `toudocu-darwin-x64.tar.gz` |
 | macOS | arm64 | `toudocu-darwin-arm64.tar.gz` |
 | Windows | x64 | `toudocu-win32-x64.tar.gz` |
-| Windows | arm64 | `toudocu-win32-arm64.tar.gz` |
 
 Архив и контрольная сумма приходят из одного GitHub Release, поэтому сумма
 обнаруживает повреждение передачи, но не заменяет независимую подпись.
