@@ -4,8 +4,7 @@
 
 [![CI](https://github.com/lumenikoly/toudocu/actions/workflows/test.yml/badge.svg)](https://github.com/lumenikoly/toudocu/actions/workflows/test.yml)
 [![Docs contract](https://github.com/lumenikoly/toudocu/actions/workflows/docs.yml/badge.svg)](https://github.com/lumenikoly/toudocu/actions/workflows/docs.yml)
-[![Go Version](https://img.shields.io/github/go-mod/go-version/lumenikoly/toudocu)](https://go.dev/)
-[![golangci-lint](https://img.shields.io/badge/linted%20by-golangci--lint-brightgreen)](https://golangci-lint.run/)
+[![Node.js](https://img.shields.io/badge/Node.js-24%2B-339933)](https://nodejs.org/)
 [![License](https://img.shields.io/github/license/lumenikoly/toudocu)](LICENSE)
 
 ## Why Toudocu exists
@@ -17,8 +16,8 @@ requirements and verification commands copied into every request.
 
 Toudocu keeps Markdown in Git as the source of truth and adds the missing
 working tools: relationship checks, a local portal, change review, work items
-with focused context, and static publication. It all runs locally from one Go
-binary, without a database, npm, or a separate documentation platform.
+with focused context, and static publication. It runs locally on Node.js,
+without a database or a separate documentation platform.
 
 ### Choose your first step
 
@@ -37,7 +36,7 @@ bundled skill, not terminal commands. For routine work, plain requests such as
 “update the documentation for this feature” or “prepare context for task
 TASK-AUTH-123” work as well.
 
-**One binary. Markdown in Git. Verifiable documentation next to your code.**
+**One CLI. Markdown in Git. Verifiable documentation next to your code.**
 
 [View the Toudocu documentation →](https://lumenikoly.github.io/toudocu/project-docs/)
 
@@ -221,7 +220,9 @@ Verify the installation:
 toudocu version
 ```
 
-The installer selects the appropriate binary for your operating system and architecture, downloads `checksums.txt`, and verifies SHA-256 before replacing the binary.
+The installer requires Node.js 24+, selects the archive for your operating
+system and architecture, downloads `checksums.txt`, and verifies SHA-256 before
+atomically activating the release.
 
 See the [installation guide](docs-en/guides/installation.md) for details.
 
@@ -358,7 +359,7 @@ $toudocu translate en --from ru --base HEAD
 
 `$toudocu init`, `$toudocu refresh`, and `$toudocu translate` are skill workflows executed by an AI agent.
 
-They are not top-level Go CLI commands.
+They are not top-level CLI commands.
 
 ---
 
@@ -437,7 +438,7 @@ toudocu serve ./docs
 
 ## Supported Markdown
 
-Toudocu uses Goldmark 1.8.5 and one CommonMark/GFM parser across all commands.
+Toudocu uses one CommonMark/GFM parser across all commands.
 
 Supported syntax includes:
 
@@ -510,46 +511,35 @@ toudocu serve --no-update-check ./docs
 
 ---
 
-## Public Go API
-
-The root Go package exposes typed model, generator, and reporting operations.
-
-The project module path is `toudocu`, so the API is primarily intended for programs built inside this source tree or projects using an explicit local `replace`.
-
-For normal distribution and use, the CLI remains the supported interface.
-
----
-
 ## Developing Toudocu
 
-Users of the released Toudocu binary do not need to build the project from source.
+Users of a released Toudocu package do not need TypeScript, pnpm, Go, Python,
+`node-gyp`, or a compiler toolchain. Node.js 24 or newer is required.
 
-To work on Toudocu itself, you need Go 1.22 or newer.
+To work on Toudocu itself, use Node.js 24+ and pnpm 11.0.0.
 
 ```bash
 git clone https://github.com/lumenikoly/toudocu.git
 cd toudocu
-go build -o toudocu ./cmd/toudocu
+pnpm install --frozen-lockfile
+pnpm build
 ```
 
 Common development commands:
 
 ```bash
-make fmt
-make fmt-check
-make lint
-make test
-make web
-make web-check
-make browser-test
-make check
-make build
-make docs
-make docs-serve
-make release
+pnpm format
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm test:browser
+pnpm build
+pnpm check
 ```
 
-Node.js is only needed for development of Toudocu's browser-side code and is not required to use a released binary.
+`pnpm check` covers formatting, linting, strict type checks, unit and
+compatibility tests, and the canonical documentation contract. Browser tests
+remain a separate `pnpm test:browser` command.
 
 ---
 

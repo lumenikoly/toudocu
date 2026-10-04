@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "name": "search",
+  "args": [
+    "search",
+    "compatibility",
+    "docs",
+    "--format",
+    "json"
+  ],
+  "exitCode": 0,
+  "stdout": "{\n  \"schemaVersion\": 1,\n  \"kind\": \"search\",\n  \"generator\": {\n    \"name\": \"Toudocu\",\n    \"version\": \"<VERSION>\"\n  },\n  \"query\": \"compatibility\",\n  \"total\": 5,\n  \"limit\": 20,\n  \"results\": [\n    {\n      \"type\": \"overview\",\n      \"title\": \"Compatibility fixture\",\n      \"path\": \"index.md\",\n      \"archived\": false,\n      \"matchedSections\": []\n    },\n    {\n      \"id\": \"TASK-COMPAT-001\",\n      \"type\": \"work\",\n      \"title\": \"TASK-COMPAT-001: Implement the compatibility path\",\n      \"path\": \"work/TASK-COMPAT-001.md\",\n      \"archived\": false,\n      \"matchedSections\": [\n        \"Result\",\n        \"Documentation impact\"\n      ]\n    },\n    {\n      \"id\": \"UC-COMPAT\",\n      \"type\": \"use-case\",\n      \"title\": \"UC-COMPAT: Compare CLI contracts\",\n      \"path\": \"use-cases/compatibility.md\",\n      \"archived\": false,\n      \"matchedSections\": []\n    },\n    {\n      \"type\": \"architecture\",\n      \"title\": \"Architecture\",\n      \"path\": \"architecture/overview.md\",\n      \"archived\": false,\n      \"matchedSections\": []\n    },\n    {\n      \"id\": \"MOD-COMPAT\",\n      \"type\": \"module\",\n      \"title\": \"Core module\",\n      \"path\": \"modules/core.md\",\n      \"archived\": false,\n      \"matchedSections\": [\n        \"Related use cases\"\n      ]\n    }\n  ]\n}\n",
+  "stderr": ""
+}

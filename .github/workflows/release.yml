@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Release version (for example, 0.0.2)
+        description: Release version (for example, 0.0.7)
         required: true
         type: string
       channel:
@@ -12,11 +12,9 @@ on:
         required: true
         default: stable
         type: choice
-        options:
-          - stable
-          - rc
+        options: [stable, rc]
       rc_number:
-        description: RC number (used only for the rc channel)
+        description: RC number
         required: true
         default: '1'
         type: string
@@ -29,24 +27,19 @@ permissions:
   contents: read
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  validate:
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v6
-        with:
-          go-version: 'stable'
-          cache: true
-      - uses: golangci/golangci-lint-action@v9
-        with:
-          install-only: true
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: npm
-          cache-dependency-path: web/package-lock.json
-      - run: npm ci --prefix web
-      - name: Validate release
+          node-version: '24'
+      - run: npm install --global pnpm@11.0.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @toudocu/web-app exec playwright install --with-deps chromium
+      - run: pnpm check
+      - run: pnpm test:browser
+      - name: Validate release input
         shell: bash
         env:
           VERSION: ${{ inputs.version }}
@@ -54,103 +47,173 @@ jobs:
           RC_NUMBER: ${{ inputs.rc_number }}
         run: |
           set -euo pipefail
-
-          if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
-            echo "Release workflow must run from main, got $GITHUB_REF" >&2
-            exit 1
-          fi
-          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Release version must use X.Y.Z format, got $VERSION" >&2
-            exit 1
-          fi
-          if [[ "$CHANNEL" != "stable" && "$CHANNEL" != "rc" ]]; then
-            echo "Release channel must be stable or rc, got $CHANNEL" >&2
-            exit 1
-          fi
+          [[ "$GITHUB_REF" == "refs/heads/main" ]]
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
           if [[ "$CHANNEL" == "rc" ]]; then
-            if [[ ! "$RC_NUMBER" =~ ^[1-9][0-9]*$ ]]; then
-              echo "RC number must be a positive integer, got $RC_NUMBER" >&2
-              exit 1
-            fi
+            [[ "$RC_NUMBER" =~ ^[1-9][0-9]*$ ]]
             release_version="$VERSION-rc.$RC_NUMBER"
           else
             release_version="$VERSION"
           fi
-
-          actual_version="$(go run ./cmd/toudocu version)"
-          if [[ "$actual_version" != "$VERSION" ]]; then
-            echo "CLI version $actual_version does not match release version $VERSION" >&2
-            exit 1
-          fi
-
-          heading_count="$(awk -v heading="## $VERSION" '$0 == heading { count++ } END { print count + 0 }' CHANGELOG.md)"
-          if [[ "$heading_count" != "1" ]]; then
-            echo "CHANGELOG.md must contain exactly one '## $VERSION' heading" >&2
-            exit 1
-          fi
-          awk -v heading="## $VERSION" '
-            $0 == heading { capture=1; next }
-            /^## / && capture { exit }
-            capture
-          ' CHANGELOG.md > release-notes.md
-          if ! grep -q '[^[:space:]]' release-notes.md; then
-            echo "CHANGELOG.md section for $VERSION is empty" >&2
-            exit 1
-          fi
-
-          if git ls-remote --exit-code --tags origin "refs/tags/$release_version" >/dev/null 2>&1; then
-            echo "Tag $release_version already exists" >&2
-            exit 1
-          fi
-      - run: make release
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release-bundle
-          path: dist/*
-
-  publish:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: release-bundle
-          path: dist
-      - name: Extract release notes
-        shell: bash
-        env:
-          VERSION: ${{ inputs.version }}
-        run: |
-          set -euo pipefail
+          [[ "$(node apps/cli/dist/main.js version)" == "$VERSION" ]]
+          [[ "$(grep -Fxc "## $VERSION" CHANGELOG.md)" == "1" ]]
           awk -v heading="## $VERSION" '
             $0 == heading { capture=1; next }
             /^## / && capture { exit }
             capture
           ' CHANGELOG.md > release-notes.md
           grep -q '[^[:space:]]' release-notes.md
-      - name: Publish release
+          ! git ls-remote --exit-code --tags origin "refs/tags/$release_version"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-notes
+          path: release-notes.md
+
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: linux-x64
+            runner: ubuntu-24.04
+          - target: linux-arm64
+            runner: ubuntu-24.04-arm
+          - target: darwin-arm64
+            runner: macos-15
+          - target: win32-x64
+            runner: windows-2025
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --global pnpm@11.0.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Exercise platform services
+        run: >-
+          pnpm exec vitest run
+          packages/platform-node/src/filesystem
+          packages/platform-node/src/git
+          packages/platform-node/src/process-runner.test.ts
+          packages/platform-node/src/project.test.ts
+          packages/platform-node/src/pty
+      - run: node scripts/release.mjs collect-native --output dist/native
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-${{ matrix.target }}
+          path: dist/native
+          if-no-files-found: error
+
+  package:
+    needs: [validate, native]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --global pnpm@11.0.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: native-*
+          path: dist/native
+          merge-multiple: true
+      - name: Build release artifacts
         shell: bash
         env:
-          GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.version }}
           CHANNEL: ${{ inputs.channel }}
           RC_NUMBER: ${{ inputs.rc_number }}
         run: |
           set -euo pipefail
           release_version="$VERSION"
+          if [[ "$CHANNEL" == "rc" ]]; then
+            release_version="$VERSION-rc.$RC_NUMBER"
+          fi
+          node scripts/release.mjs package \
+            --native-root dist/native \
+            --output dist/release \
+            --version "$release_version"
+          cp "dist/release/toudocu-$release_version.tgz" dist/toudocu-package.tgz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-bundle
+          path: dist/release/*
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-package
+          path: dist/toudocu-package.tgz
+          if-no-files-found: error
+
+  smoke:
+    needs: package
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+          - runner: ubuntu-24.04-arm
+          - runner: macos-15
+          - runner: windows-2025
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-package
+          path: dist
+      - run: node scripts/release.mjs smoke --package dist/toudocu-package.tgz
+
+  publish:
+    needs: smoke
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-notes
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-bundle
+          path: dist/release
+      - name: Publish npm package and GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          VERSION: ${{ inputs.version }}
+          CHANNEL: ${{ inputs.channel }}
+          RC_NUMBER: ${{ inputs.rc_number }}
+        run: |
+          set -euo pipefail
+          release_version="$VERSION"
+          npm_tag="latest"
           release_flags=()
           if [[ "$CHANNEL" == "rc" ]]; then
             release_version="$VERSION-rc.$RC_NUMBER"
+            npm_tag="next"
             release_flags+=(--prerelease)
           fi
-          if git ls-remote --exit-code --tags origin "refs/tags/$release_version" >/dev/null 2>&1; then
-            echo "Tag $release_version already exists" >&2
-            exit 1
-          fi
-          gh release create "$release_version" dist/* \
+          npm publish "dist/release/toudocu-$release_version.tgz" \
+            --access public \
+            --tag "$npm_tag" \
+            --provenance
+          gh release create "$release_version" dist/release/* \
             --target "$GITHUB_SHA" \
             --title "$release_version" \
             --notes-file release-notes.md \

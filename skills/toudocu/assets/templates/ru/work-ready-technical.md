@@ -40,8 +40,6 @@ updated: {{DATE}}
 ## Проверка
 
 - `AC-01` → `{{ACCEPTANCE_COMMAND}}`
-- `ALL` → `{{ALL_COMMAND}}`
-- `DOCS` → `{{DOCS_COMMAND}}`
 
 <!-- toudocu:section documentation-impact -->
 ## Влияние на документацию

@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "name": "help-check",
+  "args": [
+    "check",
+    "--help"
+  ],
+  "exitCode": 0,
+  "stdout": "Validates structure, links, IDs, and explicit relationships without changing files.\n\nUsage:\n  toudocu check [docs-dir] [--strict] [--format text|json]\n                [--exclude PATHS] [--stale-days N] [--repository-root DIR]\n\nExample:\n  toudocu check ./docs --strict\n\nSide effects: none. Without --strict, warnings do not change the exit code.\n",
+  "stderr": ""
+}

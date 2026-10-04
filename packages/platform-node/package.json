@@ -1,0 +1,24 @@
+{
+  "name": "@toudocu/platform-node",
+  "version": "0.0.0-migration",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "dependencies": {
+    "@toudocu/contracts": "workspace:*",
+    "@toudocu/core": "workspace:*",
+    "@toudocu/skills": "workspace:*",
+    "node-pty": "1.1.0",
+    "saxes": "6.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/build-native.mjs",
+    "build:native": "node scripts/build-native.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "node-gyp": "12.2.0"
+  }
+}

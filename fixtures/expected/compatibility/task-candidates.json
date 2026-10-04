@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "name": "task-candidates",
+  "args": [
+    "task",
+    "candidates",
+    "docs",
+    "--format",
+    "json",
+    "--stale-days",
+    "0"
+  ],
+  "exitCode": 0,
+  "stdout": "{\n  \"schemaVersion\": 1,\n  \"kind\": \"task-candidates\",\n  \"generator\": {\n    \"name\": \"Toudocu\",\n    \"version\": \"<VERSION>\"\n  },\n  \"candidates\": [\n    {\n      \"id\": \"TASK-COMPAT-001\",\n      \"title\": \"Implement the compatibility path\",\n      \"status\": \"ready\",\n      \"workState\": \"ready\",\n      \"priority\": \"high\",\n      \"contractComplete\": true,\n      \"dependenciesSatisfied\": true,\n      \"readyForWork\": true,\n      \"blockedBy\": null,\n      \"issues\": []\n    },\n    {\n      \"id\": \"TASK-COMPAT-002\",\n      \"title\": \"Keep the baseline small\",\n      \"status\": \"draft\",\n      \"workState\": \"draft\",\n      \"priority\": \"low\",\n      \"contractComplete\": false,\n      \"dependenciesSatisfied\": true,\n      \"readyForWork\": false,\n      \"blockedBy\": null,\n      \"issues\": [\n        {\n          \"severity\": \"error\",\n          \"code\": \"missing-task-module\",\n          \"message\": \"A task ready for work requires a linked module.\",\n          \"documentPath\": \"work/TASK-COMPAT-002.md\",\n          \"line\": 9\n        },\n        {\n          \"severity\": \"error\",\n          \"code\": \"missing-use-case-omission-reason\",\n          \"message\": \"A technical task without a use case requires a use-case omission reason.\",\n          \"documentPath\": \"work/TASK-COMPAT-002.md\",\n          \"line\": 9\n        }\n      ]\n    }\n  ]\n}\n",
+  "stderr": ""
+}

@@ -3,11 +3,15 @@ Set-StrictMode -Version Latest
 
 $Repository = "lumenikoly/toudocu"
 $Version = if ($env:TOUDOCU_VERSION) { $env:TOUDOCU_VERSION } else { "latest" }
-$DefaultInstallDir = Join-Path ([Environment]::GetFolderPath("LocalApplicationData")) "Programs\toudocu"
-$InstallDir = if ($env:TOUDOCU_INSTALL_DIR) { $env:TOUDOCU_INSTALL_DIR } else { $DefaultInstallDir }
+$InstallDir = if ($env:TOUDOCU_INSTALL_DIR) {
+    $env:TOUDOCU_INSTALL_DIR
+} else {
+    Join-Path ([Environment]::GetFolderPath("LocalApplicationData")) "Programs\toudocu"
+}
 $NoModifyPath = if ($env:TOUDOCU_NO_MODIFY_PATH) { $env:TOUDOCU_NO_MODIFY_PATH } else { "0" }
 $TempDir = $null
-$StageFile = $null
+$StageDir = $null
+$BackupDir = $null
 
 function Fail([string]$Message) {
     throw "toudocu installer: $Message"
@@ -24,14 +28,26 @@ try {
         Fail "TOUDOCU_NO_MODIFY_PATH must be 0 or 1"
     }
 
+    $Node = Get-Command node -ErrorAction SilentlyContinue
+    if (-not $Node) {
+        Fail "Node.js 24 or newer is required; install it first"
+    }
+    $NodeVersion = (& node -p "process.versions.node" | Out-String).Trim()
+    if ($LASTEXITCODE -ne 0 -or [int]($NodeVersion.Split('.')[0]) -lt 24) {
+        Fail "Node.js 24 or newer is required; found $NodeVersion"
+    }
+    if (-not (Get-Command tar -ErrorAction SilentlyContinue)) {
+        Fail "tar is required"
+    }
+
     $Architecture = [Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()
     if ($Architecture -eq "X64" -and $env:PROCESSOR_ARCHITEW6432 -eq "ARM64") {
         $Architecture = "Arm64"
     }
     $Asset = switch ($Architecture) {
-        "X64" { "toudocu-windows-amd64.exe"; break }
-        "Arm64" { "toudocu-windows-arm64.exe"; break }
-        default { Fail "unsupported Windows architecture: $Architecture; only AMD64 and ARM64 are published" }
+        "X64" { "toudocu-win32-x64.tar.gz"; break }
+        "Arm64" { "toudocu-win32-arm64.tar.gz"; break }
+        default { Fail "unsupported Windows architecture: $Architecture" }
     }
 
     $ReleaseUrl = if ($Version -eq "latest") {
@@ -39,102 +55,82 @@ try {
     } else {
         "https://github.com/$Repository/releases/download/$Version"
     }
-
     $TempDir = Join-Path ([IO.Path]::GetTempPath()) ("toudocu-install-" + [Guid]::NewGuid().ToString("N"))
     [void](New-Item -ItemType Directory -Path $TempDir)
-    $Downloaded = Join-Path $TempDir $Asset
+    $Archive = Join-Path $TempDir $Asset
     $Checksums = Join-Path $TempDir "checksums.txt"
-
     Invoke-WebRequest -UseBasicParsing -Uri "$ReleaseUrl/checksums.txt" -OutFile $Checksums
-    Invoke-WebRequest -UseBasicParsing -Uri "$ReleaseUrl/$Asset" -OutFile $Downloaded
+    Invoke-WebRequest -UseBasicParsing -Uri "$ReleaseUrl/$Asset" -OutFile $Archive
 
     $Pattern = '^(?<hash>[0-9A-Fa-f]{64})\s+\*?' + [Regex]::Escape($Asset) + '$'
-    $ChecksumMatches = @(Get-Content -LiteralPath $Checksums | ForEach-Object {
+    $MatchesFound = @(Get-Content -LiteralPath $Checksums | ForEach-Object {
         if ($_ -match $Pattern) { $Matches['hash'] }
     })
-    if ($ChecksumMatches.Count -ne 1) {
-        Fail "checksums.txt has no unique SHA-256 entry for $Asset"
+    if ($MatchesFound.Count -ne 1) {
+        Fail "invalid checksum entry for $Asset"
     }
-    $Expected = $ChecksumMatches[0].ToLowerInvariant()
-    $Actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $Downloaded).Hash.ToLowerInvariant()
+    $Expected = $MatchesFound[0].ToLowerInvariant()
+    $Actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $Archive).Hash.ToLowerInvariant()
     if ($Actual -ne $Expected) {
         Fail "SHA-256 mismatch for $Asset"
     }
 
-    $DownloadedVersion = (& $Downloaded version | Out-String).Trim()
-    if ($LASTEXITCODE -ne 0 -or $DownloadedVersion -notmatch '^\d+\.\d+\.\d+$') {
-        Fail "the downloaded binary cannot report a valid version"
+    & tar -xzf $Archive -C $TempDir
+    if ($LASTEXITCODE -ne 0) {
+        Fail "cannot extract $Asset"
     }
-    $ExpectedVersion = $Version -replace '-rc\.\d+$', ''
-    if ($Version -ne "latest" -and $DownloadedVersion -ne $ExpectedVersion) {
-        Fail "the downloaded binary reported $DownloadedVersion, expected $ExpectedVersion"
+    $Extracted = Join-Path $TempDir "toudocu"
+    $EntryPoint = Join-Path $Extracted "dist\main.js"
+    if (-not (Test-Path -LiteralPath $EntryPoint -PathType Leaf)) {
+        Fail "release archive has no CLI entry point"
+    }
+    $DownloadedVersion = (& node $EntryPoint version | Out-String).Trim()
+    if ($Version -ne "latest" -and $DownloadedVersion -ne $Version) {
+        Fail "downloaded CLI reported $DownloadedVersion, expected $Version"
     }
 
-    [void](New-Item -ItemType Directory -Force -Path $InstallDir)
-    $Target = Join-Path $InstallDir "toudocu.exe"
-    $AlreadyInstalled = $false
-    if (Test-Path -LiteralPath $Target -PathType Leaf) {
-        $Installed = (Get-FileHash -Algorithm SHA256 -LiteralPath $Target).Hash.ToLowerInvariant()
-        if ($Installed -eq $Expected) {
-            $AlreadyInstalled = $true
+    [void](New-Item -ItemType Directory -Force -Path (Split-Path -Parent $InstallDir))
+    $StageDir = "$InstallDir.new.$([Guid]::NewGuid().ToString('N'))"
+    $BackupDir = "$InstallDir.old.$([Guid]::NewGuid().ToString('N'))"
+    Move-Item -LiteralPath $Extracted -Destination $StageDir
+    if (Test-Path -LiteralPath $InstallDir) {
+        Move-Item -LiteralPath $InstallDir -Destination $BackupDir
+    }
+    try {
+        Move-Item -LiteralPath $StageDir -Destination $InstallDir
+        $StageDir = $null
+    } catch {
+        if (Test-Path -LiteralPath $BackupDir) {
+            Move-Item -LiteralPath $BackupDir -Destination $InstallDir
         }
+        throw
     }
-
-    if (-not $AlreadyInstalled) {
-        $StageFile = Join-Path $InstallDir (".toudocu.new." + [Guid]::NewGuid().ToString("N"))
-        Copy-Item -LiteralPath $Downloaded -Destination $StageFile
-        if (Test-Path -LiteralPath $Target -PathType Leaf) {
-            $Backup = Join-Path $InstallDir (".toudocu.backup." + [Guid]::NewGuid().ToString("N"))
-            [IO.File]::Replace($StageFile, $Target, $Backup, $true)
-            $StageFile = $null
-            Remove-Item -LiteralPath $Backup -Force -ErrorAction SilentlyContinue
-        } else {
-            [IO.File]::Move($StageFile, $Target)
-            $StageFile = $null
-        }
+    if (Test-Path -LiteralPath $BackupDir) {
+        Remove-Item -LiteralPath $BackupDir -Recurse -Force
     }
+    $BackupDir = $null
 
-    $PathChanged = $false
-    $PathUpdateFailed = $false
-    if ($InstallDir -eq $DefaultInstallDir) {
+    $Launcher = Join-Path $InstallDir "toudocu.cmd"
+    "@echo off`r`nnode `"%~dp0dist\main.js`" %*`r`n" |
+        Set-Content -LiteralPath $Launcher -Encoding Ascii
+    if ($NoModifyPath -eq "0") {
         $UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
         $Entries = @($UserPath -split ';' | Where-Object { $_ })
-        $AlreadyPresent = $Entries | Where-Object { $_.TrimEnd('\') -ieq $DefaultInstallDir.TrimEnd('\') }
-        if (-not $AlreadyPresent -and $NoModifyPath -eq "0") {
-            $NewUserPath = (($Entries + $DefaultInstallDir) -join ';')
-            try {
-                [Environment]::SetEnvironmentVariable("Path", $NewUserPath, "User")
-                $PathChanged = $true
-            } catch {
-                $PathUpdateFailed = $true
-                Write-Warning "Cannot update user PATH; add $DefaultInstallDir manually."
-            }
+        $Present = $Entries | Where-Object {
+            $_.TrimEnd('\') -ieq $InstallDir.TrimEnd('\')
+        }
+        if (-not $Present) {
+            [Environment]::SetEnvironmentVariable("Path", (($Entries + $InstallDir) -join ';'), "User")
         }
     }
-
-    if ($AlreadyInstalled) {
-        Write-Output "toudocu $DownloadedVersion is already installed at $Target"
-    } else {
-        Write-Output "Installed toudocu $DownloadedVersion at $Target"
-    }
-    if ($InstallDir -ne $DefaultInstallDir) {
-        $CurrentEntries = @($env:Path -split ';')
-        if (-not ($CurrentEntries | Where-Object { $_.TrimEnd('\') -ieq $InstallDir.TrimEnd('\') })) {
-            Write-Output "Add $InstallDir to PATH to run toudocu by name."
-        }
-    } elseif ($NoModifyPath -eq "1" -or $PathUpdateFailed) {
-        Write-Output "Add $DefaultInstallDir to PATH to run toudocu by name."
-    } elseif ($PathChanged) {
-        Write-Output "Open a new terminal to use toudocu by name."
-    }
+    Write-Output "Installed toudocu $DownloadedVersion at $Launcher"
 } catch {
     Write-Error $_.Exception.Message
     exit 1
 } finally {
-    if ($StageFile -and (Test-Path -LiteralPath $StageFile)) {
-        Remove-Item -LiteralPath $StageFile -Force
-    }
-    if ($TempDir -and (Test-Path -LiteralPath $TempDir)) {
-        Remove-Item -LiteralPath $TempDir -Recurse -Force
+    foreach ($Path in @($StageDir, $BackupDir, $TempDir)) {
+        if ($Path -and (Test-Path -LiteralPath $Path)) {
+            Remove-Item -LiteralPath $Path -Recurse -Force
+        }
     }
 }

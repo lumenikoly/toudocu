@@ -1,0 +1,11 @@
+{
+  "$schema": "https://getbb.app/schemas/plugins.schema.json",
+  "schemaVersion": 1,
+  "name": "toudocu",
+  "plugins": [
+    {
+      "name": "toudocu",
+      "source": "./packages/integrations/bb"
+    }
+  ]
+}

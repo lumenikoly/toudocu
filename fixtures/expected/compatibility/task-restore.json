@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "name": "task-restore",
+  "args": [
+    "task",
+    "restore",
+    "TASK-COMPAT-001",
+    "docs",
+    "--format",
+    "json"
+  ],
+  "exitCode": 0,
+  "stdout": "{\n  \"schemaVersion\": 1,\n  \"kind\": \"task-restore\",\n  \"generator\": {\n    \"name\": \"Toudocu\",\n    \"version\": \"<VERSION>\"\n  },\n  \"status\": \"restored\",\n  \"task\": {\n    \"id\": \"TASK-COMPAT-001\",\n    \"title\": \"Implement the compatibility path\",\n    \"status\": {\n      \"kind\": \"done\",\n      \"symbol\": \"+\",\n      \"label\": \"done\",\n      \"recognized\": true\n    },\n    \"type\": \"feature\"\n  },\n  \"sourcePath\": \"work/archive/<YEAR>/TASK-COMPAT-001.md\",\n  \"destinationPath\": \"work/TASK-COMPAT-001.md\",\n  \"archiveYear\": \"2026\",\n  \"issues\": []\n}\n",
+  "stderr": "",
+  "sideEffects": [
+    {
+      "path": ".toudocu/config.yml",
+      "type": "file",
+      "size": 420,
+      "sha256": "e7c58132a2d032d2b9862f984e9f013409dde4d846d885163c6c3b9ad1c260e8"
+    },
+    {
+      "path": "docs/architecture/overview.md",
+      "type": "file",
+      "size": 258,
+      "sha256": "1bb53ab1d2e228d8ef5bee26c0c794559c8beedd6611b527ce450ff1c852813f"
+    },
+    {
+      "path": "docs/index.md",
+      "type": "file",
+      "size": 214,
+      "sha256": "d62eafde4fc150377ce607a29022736ff5168fc9336774f117b9b720a708594d"
+    },
+    {
+      "path": "docs/modules/core.md",
+      "type": "file",
+      "size": 822,
+      "sha256": "69745ee0baba5c164470bd058e0eb75d56fc5ce8ea9e5ec4919303bf8ebc4bf2"
+    },
+    {
+      "path": "docs/use-cases/compatibility.md",
+      "type": "file",
+      "size": 602,
+      "sha256": "cf5a426f22d2dcc0ca295491dca149bda17cfd506f8102ac1dd0438c3d0ac42a"
+    },
+    {
+      "path": "docs/work/TASK-COMPAT-001.md",
+      "type": "file",
+      "size": 1063,
+      "sha256": "cdbe7cfd62f9c34d9bdce91b77ae1088c44b0a6f122afdcb2134c677dbba1591"
+    },
+    {
+      "path": "docs/work/TASK-COMPAT-002.md",
+      "type": "file",
+      "size": 901,
+      "sha256": "9af323492931e8310ec87c94b210b994f3ce9d2f005df5d3f893f2792e50e3a4"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "name": "search-text",
+  "args": [
+    "search",
+    "compatibility",
+    "docs"
+  ],
+  "exitCode": 0,
+  "stdout": "Compatibility fixture [overview] index.md\nTASK-COMPAT-001 — TASK-COMPAT-001: Implement the compatibility path [work] work/TASK-COMPAT-001.md\n  Sections: Result, Documentation impact\nUC-COMPAT — UC-COMPAT: Compare CLI contracts [use-case] use-cases/compatibility.md\nArchitecture [architecture] architecture/overview.md\nMOD-COMPAT — Core module [module] modules/core.md\n  Sections: Related use cases\nFound: 5\n",
+  "stderr": ""
+}

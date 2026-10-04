@@ -3,7 +3,7 @@
 Use this workflow only when the user explicitly invokes `$toudocu init` or
 unambiguously asks to run the skill's init workflow. Do not infer initialization
 from a missing `AGENTS.md` block, an ordinary documentation request, a check, or
-another implicit skill trigger. The Toudocu Go CLI has no `init` command.
+another implicit skill trigger. The Toudocu CLI has no `init` command.
 
 ## Preflight before changing files
 

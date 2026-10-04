@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "name": "serve-read-only",
+  "args": [
+    "serve",
+    "docs",
+    "--output",
+    "$OUTPUT",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "18080",
+    "--no-update-check",
+    "--stale-days",
+    "0"
+  ],
+  "exitCode": 1,
+  "stdout": "{\n  \"ready\": true,\n  \"requests\": [\n    {\n      \"path\": \"/\",\n      \"method\": \"GET\",\n      \"status\": 200,\n      \"content\": \"html\",\n      \"bodySha256\": \"bdeb1aff13d44ad16ff97655395633a8a6992ecf26e584243fec8ad15da44e5b\"\n    },\n    {\n      \"path\": \"/health.html\",\n      \"method\": \"GET\",\n      \"status\": 200,\n      \"content\": \"html\",\n      \"bodySha256\": \"bdeb1aff13d44ad16ff97655395633a8a6992ecf26e584243fec8ad15da44e5b\"\n    },\n    {\n      \"path\": \"/_toudocu/api/version\",\n      \"method\": \"GET\",\n      \"status\": 404,\n      \"content\": \"json\",\n      \"bodySha256\": \"51d0a9e3bd9ffc25483790aaffe7a3597e642edd040dddb16aafc324e6e922ed\"\n    },\n    {\n      \"path\": \"/\",\n      \"method\": \"POST\",\n      \"status\": 404,\n      \"content\": \"json\",\n      \"bodySha256\": \"80a702b31aff22dca2d9c46040ca9d0d43a333d0abbad7bc849660333ba154b9\"\n    }\n  ],\n  \"readOnly\": true,\n  \"shutdown\": true,\n  \"serverStdout\": \"Documentation server started at http://127.0.0.1:<PORT>\\n\",\n  \"serverStderr\": \"\"\n}\n",
+  "stderr": ""
+}

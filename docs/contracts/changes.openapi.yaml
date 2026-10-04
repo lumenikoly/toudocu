@@ -188,27 +188,34 @@ paths:
   /_toudocu/api/changes/review/repository/files:
     get:
       operationId: getRepositoryReviewFiles
-      summary: Search tracked and untracked non-ignored paths by path or name
+      summary: Search regular repository paths from both selected comparison sides
+      description: Requires same-origin metadata and a loopback connection and Host. Includes tracked files, untracked non-ignored files and paths present only on the before side. Returns Cache-Control no-store. No write action header is required.
       parameters:
+        - {$ref: "#/components/parameters/Base"}
+        - {$ref: "#/components/parameters/BranchBase"}
+        - {$ref: "#/components/parameters/Target"}
         - {name: q, in: query, schema: {type: string, maxLength: 512}}
         - {name: limit, in: query, schema: {type: integer, minimum: 1, maximum: 200, default: 50}}
       responses:
-        "200": {description: File picker results, content: {application/json: {schema: {type: object, required: [schemaVersion, files], properties: {schemaVersion: {type: integer, const: 1}, files: {type: array, maxItems: 200, items: {$ref: "#/components/schemas/RepositoryReviewFile"}}}}, example: {schemaVersion: 1, files: [{status: linked, path: internal/app/server.go, gitState: {staged: false, unstaged: false, untracked: false}, lines: {added: 0, deleted: 0}, binary: false, language: go}]}}}}
-        "400": {$ref: "#/components/responses/ReviewError"}
-        "405": {$ref: "#/components/responses/MethodNotAllowed"}
-        "503": {$ref: "#/components/responses/ReviewError"}
+        "200": {description: File picker results; truncated means the search should be narrowed, content: {application/json: {schema: {$ref: "#/components/schemas/RepositoryFileList"}, example: {schemaVersion: 1, files: [{path: packages/server/src/server.ts}], truncated: false}}}}
+        "400": {$ref: "#/components/responses/RepositoryReadError"}
+        "403": {$ref: "#/components/responses/RepositoryReadError"}
   /_toudocu/api/changes/review/repository/file:
     get:
       operationId: getRepositoryReviewFile
-      summary: Lazily read UTF-8 content, rendered Markdown, patch and hunks
-      parameters: [{$ref: "#/components/parameters/Path"}, {$ref: "#/components/parameters/Base"}, {$ref: "#/components/parameters/BranchBase"}, {$ref: "#/components/parameters/Target"}]
+      summary: Read UTF-8 file content on both comparison sides
+      description: Requires same-origin metadata and a loopback connection and Host. Reads only regular Git-visible paths inside the configured repository root. Each side reports missing, binary or over-2-MiB content without returning that content. Deleted files remain readable on the before side. No write action header is required.
+      parameters:
+        - {$ref: "#/components/parameters/Path"}
+        - {$ref: "#/components/parameters/Base"}
+        - {$ref: "#/components/parameters/BranchBase"}
+        - {$ref: "#/components/parameters/Target"}
+        - {name: oldPath, in: query, description: Previous repository-relative path for a renamed file, schema: {type: string, minLength: 1, maxLength: 4096}}
       responses:
-        "200": {description: Review file detail, content: {application/json: {schema: {$ref: "#/components/schemas/RepositoryReviewFileDetail"}, example: {schemaVersion: 1, repositoryRevision: abc123, file: {status: modified, path: server.go, gitState: {staged: false, unstaged: true, untracked: false}, lines: {added: 1, deleted: 1}, binary: false, language: go}, before: package, current: package, patch: "@@ -1 +1 @@", hunks: []}}}}
-        "403": {$ref: "#/components/responses/ReviewError"}
-        "404": {$ref: "#/components/responses/ReviewError"}
-        "413": {$ref: "#/components/responses/ReviewError"}
-        "415": {$ref: "#/components/responses/ReviewError"}
-        "503": {$ref: "#/components/responses/ReviewError"}
+        "200": {description: Bounded file contents and availability on each side, content: {application/json: {schema: {$ref: "#/components/schemas/RepositoryFileResponse"}}}}
+        "400": {$ref: "#/components/responses/RepositoryReadError"}
+        "403": {$ref: "#/components/responses/RepositoryReadError"}
+        "404": {$ref: "#/components/responses/RepositoryReadError"}
 components:
   headers:
     NoStore: {schema: {type: string, const: no-store}}
@@ -226,6 +233,22 @@ components:
     Path: {name: path, in: query, required: true, schema: {type: string, minLength: 1}, example: docs/index.md}
     Side: {name: side, in: query, required: true, schema: {type: string, enum: [before, after]}}
   responses:
+    RepositoryReadError:
+      description: Invalid query, unavailable Git comparison, forbidden path or origin, or file absent from both sides
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [schemaVersion, error]
+            properties:
+              schemaVersion: {type: integer, const: 1}
+              error:
+                type: object
+                required: [code, message]
+                properties:
+                  code: {type: string}
+                  message: {type: string}
+                  details: {}
     ChangesError:
       description: Changes API error
       headers: {Cache-Control: {$ref: "#/components/headers/NoStore"}}
@@ -239,6 +262,40 @@ components:
       headers: {Cache-Control: {$ref: "#/components/headers/NoStore"}}
       content: {application/json: {schema: {$ref: "#/components/schemas/DiagnosticEnvelope"}, example: {schemaVersion: 1, diagnostics: [{severity: error, code: REVIEW_CONFLICT, message: review revision is stale}]}}}
   schemas:
+    RepositoryFileList:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, files, truncated]
+      properties:
+        schemaVersion: {type: integer, const: 1}
+        files:
+          type: array
+          maxItems: 200
+          items:
+            type: object
+            additionalProperties: false
+            required: [path]
+            properties: {path: {type: string}}
+        truncated: {type: boolean}
+    RepositoryFileSide:
+      type: object
+      additionalProperties: false
+      required: [path, available, binary, tooLarge, size]
+      properties:
+        path: {type: string}
+        available: {type: boolean}
+        binary: {type: boolean}
+        tooLarge: {type: boolean}
+        size: {type: integer, minimum: 0}
+        content: {type: string, maxLength: 2097152}
+    RepositoryFileResponse:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, before, current]
+      properties:
+        schemaVersion: {type: integer, const: 1}
+        before: {$ref: "#/components/schemas/RepositoryFileSide"}
+        current: {$ref: "#/components/schemas/RepositoryFileSide"}
     Issue:
       type: object
       required: [severity, code, message]

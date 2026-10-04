@@ -46,10 +46,10 @@ Editor. `Stop response` прерывает текущий turn, а `Stop agent` 
 <!-- toudocu:section scope -->
 ## Область изменения
 
-- `internal/app/`;
-- `internal/site/`;
-- `web/src/`;
-- `web/package.json`;
+- `packages/server/src/`;
+- `packages/platform-node/src/`;
+- `apps/web/app/`;
+- `apps/web/package.json`;
 - `docs/`.
 
 <!-- toudocu:section out-of-scope -->
@@ -90,12 +90,12 @@ Editor. `Stop response` прерывает текущий turn, а `Stop agent` 
 <!-- toudocu:section verification -->
 ## Проверка
 
-- `AC-01` → `go run ./cmd/toudocu task tree TASK-AGENT-001 ./docs --repository-root . && make browser-test`
-- `AC-02` → `make web-check && make browser-test`
-- `AC-03` → `make browser-test`
-- `AC-04` → `make check && make browser-test`
-- `ALL` → `make check && make browser-test && make build`
-- `DOCS` → `go run ./cmd/toudocu check ./docs --repository-root . --strict --stale-days 0`
+- `AC-01` → `node apps/cli/dist/main.js task tree TASK-AGENT-001 ./docs --repository-root . && pnpm test:browser`
+- `AC-02` → `pnpm test && pnpm test:browser`
+- `AC-03` → `pnpm test:browser`
+- `AC-04` → `pnpm check && pnpm test:browser`
+- `ALL` → `pnpm check && pnpm test:browser && pnpm build`
+- `DOCS` → `node apps/cli/dist/main.js check ./docs --repository-root . --strict --stale-days 0`
 
 <!-- toudocu:section documentation-impact -->
 ## Влияние на документацию

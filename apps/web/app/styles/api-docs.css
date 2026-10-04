@@ -1,0 +1,234 @@
+.api-docs-workspace .api-docs-toolbar {
+  gap: var(--td-space-4);
+  margin-block: var(--td-space-4);
+  padding: var(--td-space-4);
+  border: 1px solid var(--td-border);
+  border-radius: var(--td-radius-panel);
+  background: var(--td-surface);
+}
+
+.api-docs-workspace .api-docs-toolbar label {
+  display: grid;
+  flex: 1 1 20rem;
+  gap: var(--td-space-2);
+  min-inline-size: 0;
+  max-inline-size: 40rem;
+  color: var(--td-text-muted);
+  font-size: 0.75rem;
+}
+.api-docs-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+}
+.api-docs-toolbar select {
+  inline-size: 100%;
+  font-size: 0.875rem;
+}
+.api-docs-toolbar .api-source-link {
+  gap: var(--td-space-2);
+  margin-inline-start: auto;
+  text-decoration: none;
+  font-size: 0.8125rem;
+}
+.api-docs-error {
+  display: flex;
+  align-items: start;
+  gap: var(--td-space-2);
+  padding: var(--td-space-4);
+  border-radius: var(--td-radius-control);
+  background: var(--td-status-danger-soft);
+  color: var(--td-status-danger);
+}
+.api-docs-empty {
+  min-block-size: 14rem;
+}
+.api-docs-empty > .ui-icon {
+  order: -1;
+  inline-size: 2rem;
+  block-size: 2rem;
+  color: var(--td-accent);
+}
+
+.api-docs-workspace .api-docs-toolbar :is(select, a) {
+  min-block-size: var(--td-control-height);
+  border-radius: var(--td-radius-control);
+  line-height: 1.4;
+}
+
+.api-docs-workspace .api-docs-toolbar a {
+  display: inline-flex;
+  align-items: center;
+}
+
+.swagger-workspace {
+  min-inline-size: 0;
+  overflow: hidden;
+  border: 1px solid var(--td-border);
+  border-radius: var(--td-radius-panel);
+  background: var(--td-surface);
+}
+
+html .api-docs-workspace .swagger-ui {
+  color: var(--td-text);
+  font-family: var(--td-font-interface);
+}
+
+html .api-docs-workspace .swagger-ui :is(h1, h2, h3, h4, h5, p, li, label) {
+  font-family: var(--td-font-interface);
+}
+
+html .api-docs-workspace .swagger-ui .info {
+  margin-block: var(--td-space-6);
+}
+
+html .api-docs-workspace .swagger-ui .info :is(.title, p, li),
+html .api-docs-workspace .swagger-ui .opblock-tag {
+  color: var(--td-text);
+}
+
+html .api-docs-workspace .swagger-ui .scheme-container {
+  padding-block: var(--td-space-4);
+  border-block: 1px solid var(--td-border);
+  background: var(--td-surface-muted);
+  box-shadow: none;
+}
+
+html .api-docs-workspace .swagger-ui .opblock-tag {
+  border-block-end-color: var(--td-border);
+}
+
+html .api-docs-workspace .swagger-ui :is(input, select, textarea) {
+  border-color: var(--td-border-strong);
+  background: var(--td-surface);
+  color: var(--td-text);
+  font-family: var(--td-font-interface);
+}
+
+html .api-docs-workspace .swagger-ui :is(input, select, textarea):focus-visible {
+  outline: 2px solid var(--td-focus);
+  outline-offset: 2px;
+}
+
+html .api-docs-workspace .swagger-ui :is(.model-box, .model-container) {
+  background: var(--td-surface-muted);
+}
+
+@media (max-width: 52rem) {
+  .api-docs-workspace .api-docs-toolbar {
+    align-items: stretch;
+    padding: var(--td-space-3);
+  }
+
+  .api-docs-workspace .api-docs-toolbar label {
+    flex: 1 1 100%;
+  }
+
+  .api-docs-workspace .api-docs-toolbar select {
+    inline-size: 100%;
+  }
+}
+
+/* Keep the embedded reference at the same density as native workspaces. */
+html .api-docs-workspace .swagger-ui .wrapper {
+  padding-inline: var(--td-space-5);
+}
+html .api-docs-workspace .swagger-ui .info .title {
+  font-size: 1.5rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+html .api-docs-workspace .swagger-ui .info .title small {
+  vertical-align: middle;
+  font-size: 0.6875rem;
+}
+html .api-docs-workspace .swagger-ui .info :is(p, li) {
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+html .api-docs-workspace .swagger-ui .opblock-tag {
+  gap: var(--td-space-3);
+  padding: var(--td-space-4) 0;
+  font-size: 1rem;
+}
+html .api-docs-workspace .swagger-ui .opblock-tag small {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+html .api-docs-workspace .swagger-ui .opblock {
+  border-radius: var(--td-radius-control);
+  box-shadow: none;
+}
+html .api-docs-workspace .swagger-ui .opblock .opblock-summary {
+  padding: var(--td-space-2);
+  gap: var(--td-space-2);
+}
+html .api-docs-workspace .swagger-ui .opblock .opblock-summary-method {
+  min-width: 4rem;
+  border-radius: var(--td-radius-sm);
+  font-size: 0.6875rem;
+  text-shadow: none;
+}
+html .api-docs-workspace .swagger-ui .opblock .opblock-summary-path {
+  font-family: var(--td-font-mono);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+html .api-docs-workspace .swagger-ui .opblock .opblock-summary-description {
+  font-family: var(--td-font-interface);
+  font-size: 0.8125rem;
+}
+html .api-docs-workspace .swagger-ui .opblock-section-header {
+  background: var(--td-surface-muted);
+  box-shadow: none;
+}
+html .api-docs-workspace .swagger-ui .opblock-section-header :is(h4, label) {
+  color: var(--td-text);
+}
+html .api-docs-workspace .swagger-ui .btn {
+  border-radius: var(--td-radius-control);
+  box-shadow: none;
+  font-size: 0.8125rem;
+}
+html .api-docs-workspace .swagger-ui section.models {
+  border-color: var(--td-border);
+  border-radius: var(--td-radius-control);
+}
+html
+  .api-docs-workspace
+  .swagger-ui
+  :is(
+    .model-title,
+    .model,
+    .parameter__name,
+    .parameter__type,
+    .response-col_status,
+    table thead tr th,
+    table thead tr td
+  ) {
+  color: var(--td-text);
+}
+html .api-docs-workspace .swagger-ui :is(.markdown, .renderedMarkdown) :is(p, li) {
+  line-height: 1.6;
+}
+html .api-docs-workspace .swagger-ui .responses-inner {
+  overflow-x: auto;
+}
+@container (max-width: 40rem) {
+  html .api-docs-workspace .swagger-ui .wrapper {
+    padding-inline: var(--td-space-3);
+  }
+  html .api-docs-workspace .swagger-ui .opblock-summary {
+    flex-wrap: wrap;
+  }
+  html .api-docs-workspace .swagger-ui .opblock-summary-description {
+    flex-basis: 100%;
+    padding-inline: var(--td-space-2);
+  }
+  html .api-docs-workspace .swagger-ui .opblock-tag {
+    flex-wrap: wrap;
+  }
+  html .api-docs-workspace .swagger-ui .opblock-tag small {
+    flex-basis: 100%;
+  }
+}

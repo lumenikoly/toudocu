@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "name": "task-ready",
+  "args": [
+    "task",
+    "ready",
+    "TASK-COMPAT-001",
+    "docs",
+    "--format",
+    "json",
+    "--stale-days",
+    "0"
+  ],
+  "exitCode": 0,
+  "stdout": "{\n  \"schemaVersion\": 1,\n  \"kind\": \"task-ready\",\n  \"generator\": {\n    \"name\": \"Toudocu\",\n    \"version\": \"<VERSION>\"\n  },\n  \"task\": {\n    \"id\": \"TASK-COMPAT-001\",\n    \"title\": \"Implement the compatibility path\",\n    \"status\": {\n      \"kind\": \"planned\",\n      \"symbol\": \"~\",\n      \"label\": \"ready\",\n      \"recognized\": true\n    },\n    \"type\": \"feature\",\n    \"document\": \"work/TASK-COMPAT-001.md\"\n  },\n  \"status\": \"ready\",\n  \"contractComplete\": true,\n  \"readyForWork\": true,\n  \"issues\": []\n}\n",
+  "stderr": ""
+}

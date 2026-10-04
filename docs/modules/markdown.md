@@ -1,7 +1,7 @@
 <!-- toudocu
 id: MOD-MARKDOWN
 status: done
-updated: 2026-08-10
+updated: 2026-09-20
 -->
 
 # Безопасный Markdown
@@ -19,16 +19,16 @@ updated: 2026-08-10
 <!-- toudocu:section code-location -->
 ## Расположение в коде
 
-- `internal/markdown/` — разбор, анализ и создание HTML;
-- `internal/app/markdown_parse.go` — преобразование в модель проекта;
-- `internal/app/markdown_render.go` — использование в портале;
-- `internal/app/utils.go` — нормализация и экранирование.
+- `packages/core/src/markdown/` — разбор и нормализованный анализ;
+- `packages/core/src/documents/` — преобразование в модель проекта;
+- `apps/web/renderer/` — безопасная серверная отрисовка;
+- `apps/web/` — отображение готового HTML и интерактивность.
 
 <!-- toudocu:section boundaries -->
 ## Границы
 
-Внутреннее дерево Goldmark не входит в публичный Go API и JSON. Включены
-CommonMark, Table, TaskList, Strikethrough и Linkify. Attributes, front matter,
+Внутреннее дерево parser не входит в публичные JSON-отчёты. Включены CommonMark
+и используемые GFM-возможности. Attributes, front matter,
 footnotes, definition lists и typographer не поддерживаются. Репозиторные
 ссылки и копирование ресурсов проверяет модель проекта.
 

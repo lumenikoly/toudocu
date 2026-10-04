@@ -1,3 +1,0 @@
-*, *::before, *::after { box-sizing: border-box; }
-button, input, select, textarea { font: inherit; }
-button, [role="button"], a { -webkit-tap-highlight-color: transparent; }

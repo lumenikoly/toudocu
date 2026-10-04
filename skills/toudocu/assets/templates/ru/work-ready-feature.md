@@ -56,8 +56,6 @@ updated: {{DATE}}
 
 - `AC-01` → `{{TRANSITION_ID}}` → `{{VERIFICATION_REFERENCE}}`
 - `AC-01` → `{{ACCEPTANCE_COMMAND}}`
-- `ALL` → `{{ALL_COMMAND}}`
-- `DOCS` → `{{DOCS_COMMAND}}`
 
 <!-- toudocu:section documentation-impact -->
 ## Влияние на документацию

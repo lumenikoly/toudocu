@@ -86,7 +86,7 @@ continue with the ordinary current-format workflow.
    documentation request.
 4. Treat `$toudocu init`, `$toudocu refresh`, `$toudocu refresh diff`,
    translation workflows, and `$toudocu clarify` as agent workflows, not
-   Toudocu Go CLI commands.
+   Toudocu CLI commands.
 5. Enter clarification only when the user explicitly requests
    `$toudocu clarify` or asks Toudocu for a clarification interview. It
    authorizes the investigation and documentation actions in `clarify.md`,
@@ -121,6 +121,11 @@ request. Read-only review needs no check unless the answer depends on structural
 diagnostics.
 
 ## Validate
+
+Choose checks proportional to the changed behavior and its risks. Reuse existing
+coverage and group criteria served by the same command. Do not manufacture new
+tests or duplicate suite runs to fill verification labels; see
+[references/work-item-model.md](references/work-item-model.md) for work items.
 
 Ordinary source-documentation mutations require the ordinary project check
 unless the selected operation reference defines its own validation or delivery

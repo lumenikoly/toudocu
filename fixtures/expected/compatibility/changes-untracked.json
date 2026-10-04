@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "name": "changes-untracked",
+  "args": [
+    "changes",
+    "docs",
+    "--base",
+    "HEAD",
+    "--target",
+    "working-tree",
+    "--format",
+    "json"
+  ],
+  "exitCode": 0,
+  "stdout": "{\n  \"schemaVersion\": 1,\n  \"repository\": {\n    \"root\": \"<TEMP>\",\n    \"branch\": \"master\",\n    \"head\": \"e446bb5\",\n    \"dirty\": true\n  },\n  \"comparison\": {\n    \"base\": {\n      \"type\": \"commit\",\n      \"revision\": \"HEAD\",\n      \"resolved\": \"e446bb5e66e746ceab80096459d870e896a73228\",\n      \"displayRef\": \"HEAD\"\n    },\n    \"target\": {\n      \"type\": \"working-tree\",\n      \"displayRef\": \"working-tree\"\n    }\n  },\n  \"changeSetDigest\": \"sha256:032f2db11ff982796d3beaf7e3c33f176ce8b0ef40088a2a71d0d96c61442394\",\n  \"summary\": {\n    \"files\": {\n      \"added\": 0,\n      \"modified\": 0,\n      \"deleted\": 0,\n      \"renamed\": 0,\n      \"copied\": 0,\n      \"typeChanged\": 0,\n      \"untracked\": 1\n    },\n    \"lines\": {\n      \"added\": 1,\n      \"deleted\": 0\n    },\n    \"entities\": {\n      \"document\": 1\n    },\n    \"classifications\": {\n      \"permanent-documentation\": 1\n    }\n  },\n  \"changes\": [\n    {\n      \"status\": \"untracked\",\n      \"path\": \"docs/untracked.md\",\n      \"gitState\": {\n        \"staged\": false,\n        \"unstaged\": true,\n        \"untracked\": true\n      },\n      \"lines\": {\n        \"added\": 1,\n        \"deleted\": 0\n      },\n      \"binary\": false,\n      \"newSize\": 20,\n      \"classification\": \"permanent-documentation\",\n      \"entitiesBefore\": [],\n      \"entitiesAfter\": [\n        {\n          \"type\": \"document\"\n        }\n      ],\n      \"sourceDiffAvailable\": true,\n      \"renderedDiffAvailable\": true,\n      \"semanticDiffAvailable\": false,\n      \"sourceDiff\": \"diff --git a/docs/untracked.md b/docs/untracked.md\\nnew file mode 100644\\n--- /dev/null\\n+++ b/docs/untracked.md\\n@@ -0,0 +1,1 @@\\n+Untracked document.\\n\",\n      \"sourceDiffHunks\": [\n        {\n          \"id\": \"hunk-0-1\",\n          \"header\": \"@@ -0,0 +1,1 @@\",\n          \"oldStart\": 0,\n          \"oldLines\": 0,\n          \"newStart\": 1,\n          \"newLines\": 1,\n          \"patch\": \"@@ -0,0 +1,1 @@\\n+Untracked document.\\n\"\n        }\n      ],\n      \"renderedSections\": [],\n      \"mermaidBlocks\": [],\n      \"semanticChanges\": [],\n      \"relationChanges\": [],\n      \"diagnostics\": [\n        {\n          \"severity\": \"warning\",\n          \"code\": \"semantic-new-version-invalid\",\n          \"message\": \"The new Markdown version is invalid for semantic diff; source diff remains available.\",\n          \"documentPath\": \"docs/untracked.md\"\n        }\n      ]\n    }\n  ],\n  \"diagnostics\": []\n}\n",
+  "stderr": ""
+}

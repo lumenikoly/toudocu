@@ -11,7 +11,7 @@ as a design tree, work through every reachable decision frontier, preserve the
 confirmed durable result in its proper source of truth, and stop before
 implementation.
 
-Clarification is not a Go CLI command. It permits read-only investigation,
+Clarification is not a CLI command. It permits read-only investigation,
 questions, and only the canonical documentation mutations and ordinary
 documentation checks defined below. By default, mutations wait for the
 shared-understanding gate; the user may explicitly request immediate

@@ -37,7 +37,7 @@
 - Use `$toudocu refresh` for a full evidence-based review of canonical source
   documentation and `$toudocu refresh diff` for staged, unstaged, and untracked
   changes relative to `HEAD` plus affected documents. These are mutating skill
-  workflows, not Go CLI commands or initialization.
+  workflows, not CLI commands or initialization.
 - Create a new `TASK-*` only when the user or repository policy explicitly
   requires one, or when substantial multi-step work needs durable scope,
   acceptance criteria, verification, or handoff. Do not create a task for every

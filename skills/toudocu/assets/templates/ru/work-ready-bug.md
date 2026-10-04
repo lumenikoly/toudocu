@@ -68,15 +68,11 @@ updated: {{DATE}}
 ## Критерии приёмки
 
 - [ ] `AC-01` {{ACCEPTANCE_CRITERION}}
-- [ ] `AC-02` Регрессионный тест: {{REGRESSION_CRITERION}}
 
 <!-- toudocu:section verification -->
 ## Проверка
 
 - `AC-01` → `{{ACCEPTANCE_COMMAND}}`
-- `AC-02` → `{{REGRESSION_COMMAND}}`
-- `ALL` → `{{ALL_COMMAND}}`
-- `DOCS` → `{{DOCS_COMMAND}}`
 
 <!-- toudocu:section documentation-impact -->
 ## Влияние на документацию
