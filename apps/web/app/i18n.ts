@@ -53,6 +53,8 @@ const catalogs = {
     documentActions: 'Document actions',
     copied: 'Copied',
     copyContext: 'Copy context',
+    copyPrompt: 'Copy prompt',
+    copyPromptFailed: 'Could not copy the prompt. Allow clipboard access and try again.',
     edit: 'Edit',
     source: 'Source',
     close: 'Close',
@@ -512,6 +514,9 @@ const catalogs = {
     documentActions: 'Действия с документом',
     copied: 'Скопировано',
     copyContext: 'Копировать контекст',
+    copyPrompt: 'Копировать промпт',
+    copyPromptFailed:
+      'Не удалось скопировать промпт. Разрешите доступ к буферу обмена и повторите.',
     edit: 'Редактировать',
     source: 'Исходник',
     close: 'Закрыть',
@@ -1038,6 +1043,18 @@ export type MessageKey = keyof (typeof catalogs)['en'];
 
 export function translator(locale: Locale) {
   return {
+    diagnosticCount: (severity: 'error' | 'warning', count: number): string => {
+      const forms =
+        locale === 'ru'
+          ? severity === 'error'
+            ? ['ошибка', 'ошибки', 'ошибок']
+            : ['предупреждение', 'предупреждения', 'предупреждений']
+          : severity === 'error'
+            ? ['error', 'errors', 'errors']
+            : ['warning', 'warnings', 'warnings'];
+      const plural = new Intl.PluralRules(locale).select(count);
+      return `${count} ${forms[plural === 'one' ? 0 : plural === 'few' ? 1 : 2]}`;
+    },
     sectionTitle: (value: string): string => {
       const labels: Record<string, [string, string]> = {
         architecture: ['Architecture', 'Архитектура'],

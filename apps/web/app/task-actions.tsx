@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   EditorFileResponseSchema,
   EditorSavedFileResponseSchema,
@@ -8,7 +8,6 @@ import {
 } from '@toudocu/contracts';
 import { translator, type Locale, type MessageKey } from './i18n.js';
 import { Icon } from './ui/index.js';
-import { Status } from './document.js';
 import type { IconName } from './design/icons.js';
 import { action, jsonRequest } from './workspace-api.js';
 
@@ -29,15 +28,20 @@ export function TaskItemActions({
   item,
   snapshot,
   locale,
+  inline = false,
 }: {
   item: WorkItem;
   snapshot: PortalSnapshotV1;
   locale: Locale;
+  inline?: boolean;
 }) {
   const { text, format } = translator(locale);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  if (!snapshot.capabilities.taskActions || item.archived) return null;
+  const [copied, setCopied] = useState<MessageKey>();
+  const copyTimer = useRef<number>(undefined);
+  useEffect(() => () => window.clearTimeout(copyTimer.current), []);
+  if (item.archived) return null;
   const state = item.workspace.workState;
   if (state === 'cancelled') return null;
   const actions: { label: MessageKey; prompt: MessageKey; readOnly?: boolean }[] = [];
@@ -101,9 +105,95 @@ export function TaskItemActions({
     }
   };
 
-  const canComplete = snapshot.capabilities.editing && item.workspace.canComplete;
-  if (!canComplete && (!snapshot.capabilities.agentConsole || actions.length === 0)) return null;
-  return (
+  const canComplete =
+    snapshot.capabilities.taskActions &&
+    snapshot.capabilities.editing &&
+    item.workspace.canComplete;
+  const copyPrompt = async (entry: (typeof actions)[number]): Promise<void> => {
+    setError('');
+    try {
+      await navigator.clipboard.writeText(format(entry.prompt, { id: item.id }));
+      setCopied(entry.label);
+      window.clearTimeout(copyTimer.current);
+      copyTimer.current = window.setTimeout(() => setCopied(undefined), 1600);
+    } catch {
+      setError(text('copyPromptFailed'));
+    }
+  };
+  const commands = (
+    <div className={inline ? 'task-prompt-actions' : 'task-item-actions-menu'}>
+      {canComplete && (
+        <button
+          className="task-complete-action"
+          type="button"
+          disabled={busy}
+          onClick={() => void complete()}
+        >
+          <Icon name="checkCircle" />
+          {text('completeTask')}
+        </button>
+      )}
+      {actions.map((entry) => (
+        <div className="task-prompt-action" key={entry.label}>
+          {snapshot.capabilities.agentConsole ? (
+            <button
+              className="task-prompt-send"
+              type="button"
+              disabled={busy}
+              title={`${text('sendToAgent')}: ${text(entry.label)}`}
+              onClick={(event) => {
+                document.dispatchEvent(
+                  new CustomEvent('toudocu:agent-compose', {
+                    detail: {
+                      text: format(entry.prompt, { id: item.id }),
+                      policy: entry.readOnly ? 'filesystem-read-only' : 'normal',
+                    },
+                  }),
+                );
+                event.currentTarget.closest('.task-item-actions')?.removeAttribute('open');
+              }}
+            >
+              <Icon name={actionIcons[entry.label] ?? 'messageSquare'} />
+              <span>{text(entry.label)}</span>
+            </button>
+          ) : (
+            <span className="task-prompt-label">
+              <Icon name={actionIcons[entry.label] ?? 'messageSquare'} />
+              {text(entry.label)}
+            </span>
+          )}
+          <button
+            className="task-prompt-copy"
+            type="button"
+            disabled={busy}
+            aria-label={`${text('copyPrompt')}: ${text(entry.label)}`}
+            title={
+              copied === entry.label
+                ? text('copied')
+                : `${text('copyPrompt')}: ${text(entry.label)}`
+            }
+            data-copied={copied === entry.label || undefined}
+            onClick={() => void copyPrompt(entry)}
+          >
+            <Icon name={copied === entry.label ? 'checkCircle' : 'clipboard'} />
+          </button>
+        </div>
+      ))}
+      {copied && (
+        <span className="task-prompt-feedback" role="status">
+          {text('copied')}
+        </span>
+      )}
+      {error && (
+        <p className="task-prompt-error" role="alert">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+  return inline ? (
+    commands
+  ) : (
     <details
       className="task-item-actions"
       onKeyDown={(event) => {
@@ -119,37 +209,7 @@ export function TaskItemActions({
       <summary aria-label={text('taskActions')} title={text('taskActions')}>
         <Icon name="more" />
       </summary>
-      <div className="task-item-actions-menu">
-        {canComplete && (
-          <button type="button" disabled={busy} onClick={() => void complete()}>
-            <Icon name="checkCircle" />
-            {text('completeTask')}
-          </button>
-        )}
-        {snapshot.capabilities.agentConsole &&
-          actions.map((entry) => (
-            <button
-              key={entry.label}
-              type="button"
-              disabled={busy}
-              onClick={(event) => {
-                document.dispatchEvent(
-                  new CustomEvent('toudocu:agent-compose', {
-                    detail: {
-                      text: format(entry.prompt, { id: item.id }),
-                      policy: entry.readOnly ? 'filesystem-read-only' : 'normal',
-                    },
-                  }),
-                );
-                event.currentTarget.closest('details')?.removeAttribute('open');
-              }}
-            >
-              <Icon name={actionIcons[entry.label] ?? 'messageSquare'} />
-              {text(entry.label)}
-            </button>
-          ))}
-        {error && <p role="alert">{error}</p>}
-      </div>
+      {commands}
     </details>
   );
 }
@@ -167,13 +227,6 @@ export function TaskActions({
   return (
     <section className="task-actions">
       <h2>{text('taskActions')}</h2>
-      <Status
-        status={{
-          kind: page.workItem.workspace.workState,
-          label: page.workItem.workspace.workState,
-        }}
-        locale={locale}
-      />
       {page.workItem.workspace.issues.length > 0 && (
         <details>
           <summary>
@@ -186,7 +239,7 @@ export function TaskActions({
           </ul>
         </details>
       )}
-      <TaskItemActions item={page.workItem} snapshot={snapshot} locale={locale} />
+      <TaskItemActions item={page.workItem} snapshot={snapshot} locale={locale} inline />
     </section>
   );
 }

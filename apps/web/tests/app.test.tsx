@@ -4,7 +4,10 @@ import { userEvent } from '@testing-library/user-event';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router';
-import { DocumentLink, EntityReference } from '../app/document.js';
+import { DocumentContent, DocumentLink, EntityReference } from '../app/document.js';
+import { EditorWorkspace } from '../app/editor-workspace.js';
+import { PortalLink } from '../app/routing.js';
+import { TaskItemActions } from '../app/task-actions.js';
 import { PortalApp } from '../app/root.js';
 import { insertRoadmapItem } from '../app/pages.js';
 import { TaskWorkspace } from '../app/task-workspace.js';
@@ -20,12 +23,140 @@ vi.mock('mermaid', () => ({
   default: { initialize: vi.fn(), run: vi.fn(async () => undefined) },
 }));
 
+vi.mock('../app/code-editor.js', () => ({
+  CodeEditor: ({
+    file,
+    content,
+    onChange,
+  }: {
+    file: { path: string };
+    content: string;
+    onChange: (value: string) => void;
+  }) => (
+    <textarea
+      aria-label={file.path}
+      value={content}
+      onChange={(event) => onChange(event.currentTarget.value)}
+    />
+  ),
+}));
+
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 describe('portal application', () => {
+  it('opens the requested editor file instead of the remembered file and follows subsequent query navigation', async () => {
+    const user = userEvent.setup();
+    const files = ['index.md', 'guides/deep.md', 'work/TASK-WEB-001.md'].map((path) => ({
+      path,
+      language: 'markdown',
+      size: 20,
+      digest: path,
+    }));
+    sessionStorage.setItem('toudocu-editor-path', 'index.md');
+    const fetch = vi.fn(async (input: string) => {
+      const url = new URL(input, 'http://localhost');
+      if (url.pathname.endsWith('/files'))
+        return Response.json({ schemaVersion: 1, revision: 'test', files, templates: [] });
+      if (url.pathname.endsWith('/validate'))
+        return Response.json({ schemaVersion: 1, path: 'guides/deep.md', diagnostics: [] });
+      const file = files.find((entry) => entry.path === url.searchParams.get('path'));
+      if (!file) throw new Error(`Unexpected editor request: ${input}`);
+      return Response.json({
+        schemaVersion: 1,
+        revision: 'test',
+        file: { ...file, content: `# ${file.path}`, diagnostics: [] },
+      });
+    });
+    vi.stubGlobal('fetch', fetch);
+    render(
+      <MemoryRouter initialEntries={['/_toudocu/editor/?path=guides%2Fdeep.md']}>
+        <PortalLink to="_toudocu/editor/?path=work%2FTASK-WEB-001.md">Edit task</PortalLink>
+        <EditorWorkspace locale="en" />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByRole('textbox', { name: 'guides/deep.md' })).toBeTruthy();
+    expect(
+      fetch.mock.calls.filter(([path]) => path.includes('/file?')).map(([path]) => path),
+    ).toEqual(['/_toudocu/api/editor/file?path=guides%2Fdeep.md']);
+    await user.click(screen.getByRole('link', { name: 'Edit task' }));
+    expect(await screen.findByRole('textbox', { name: 'work/TASK-WEB-001.md' })).toBeTruthy();
+    expect(sessionStorage.getItem('toudocu-editor-path')).toBe('work/TASK-WEB-001.md');
+  });
+
+  it('copies the task skill prompt without an agent and sends the same prompt when the console is available', async () => {
+    const user = userEvent.setup();
+    const write = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
+    const snapshot = portalFixture();
+    const page = snapshot.pages.find((entry) => entry.kind === 'task');
+    if (!page || page.kind !== 'task') throw new Error('Missing task fixture');
+    const view = render(
+      <TaskItemActions item={page.workItem} snapshot={snapshot} locale="en" inline />,
+    );
+    await user.click(screen.getByRole('button', { name: 'Copy prompt: Clarify task' }));
+    expect(write).toHaveBeenCalledWith('$toudocu clarify TASK-WEB-001');
+    expect(screen.getByRole('status').textContent).toBe('Copied');
+    view.rerender(
+      <TaskItemActions
+        item={page.workItem}
+        snapshot={{ ...snapshot, capabilities: { ...snapshot.capabilities, agentConsole: true } }}
+        locale="en"
+        inline
+      />,
+    );
+    const compose = vi.fn();
+    document.addEventListener('toudocu:agent-compose', compose);
+    try {
+      await user.click(screen.getByRole('button', { name: 'Clarify task' }));
+      expect(compose).toHaveBeenCalledOnce();
+      expect((compose.mock.calls[0]![0] as CustomEvent).detail).toEqual({
+        text: '$toudocu clarify TASK-WEB-001',
+        policy: 'normal',
+      });
+    } finally {
+      document.removeEventListener('toudocu:agent-compose', compose);
+    }
+  });
+
+  it('discloses the document warning with its message, code and linked source', async () => {
+    const user = userEvent.setup();
+    const snapshot = portalFixture('serve');
+    const page = snapshot.pages.find((entry) => entry.kind === 'task');
+    if (!page || page.kind !== 'task') throw new Error('Missing task fixture');
+    page.document.errors = 0;
+    page.document.warnings = 1;
+    snapshot.issues = [
+      {
+        severity: 'warning',
+        code: 'DOC-WARNING',
+        message: 'The task needs an owner.',
+        documentPath: page.document.sourcePath,
+        line: 7,
+        column: 1,
+      },
+    ];
+    const view = render(
+      <MemoryRouter>
+        <DocumentContent document={page.document} snapshot={snapshot} locale="ru" />
+      </MemoryRouter>,
+    );
+    const disclosure = view.container.querySelector<HTMLDetailsElement>('.document-diagnostics')!;
+    expect(disclosure.open).toBe(false);
+    await user.click(screen.getByText('1 предупреждение'));
+    expect(disclosure.open).toBe(true);
+    expect(within(disclosure).getByText('DOC-WARNING')).toBeTruthy();
+    expect(within(disclosure).getByText('The task needs an owner.')).toBeTruthy();
+    expect(
+      within(disclosure)
+        .getByRole('link', { name: 'work/TASK-WEB-001.md:7:1' })
+        .getAttribute('href'),
+    ).toBe('_toudocu/editor?path=work%2FTASK-WEB-001.md');
+    expect(screen.getByRole('link', { name: 'Редактировать' }).textContent).toBe('');
+  });
+
   it('links known entity IDs, source paths and the home document without inventing missing targets', () => {
     const snapshot = portalFixture();
     render(

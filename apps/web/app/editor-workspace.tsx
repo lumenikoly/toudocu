@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import {
   EditorFileListSchema,
   EditorFileResponseSchema,
@@ -22,6 +23,11 @@ type Conflict = { kind: 'removed' } | { kind: 'changed'; digest: string };
 
 export function EditorWorkspace({ locale }: { locale: Locale }) {
   const { text } = translator(locale);
+  const routerLocation = useLocation();
+  const navigate = useNavigate();
+  const route = useRef(routerLocation);
+  route.current = routerLocation;
+  const requestedPath = new URLSearchParams(routerLocation.search).get('path');
   const [list, setList] = useState<EditorFileList>();
   const [current, setCurrent] = useState<EditorFileResponse>();
   const [content, setContent] = useState('');
@@ -43,65 +49,112 @@ export function EditorWorkspace({ locale }: { locale: Locale }) {
   const dirty = Boolean(current && content !== current.file.content);
   const latest = useRef({ current, content, dirty, busy });
   latest.current = { current, content, dirty, busy };
+  const files = useRef(list);
+  files.current = list;
+  const filesLoaded = Boolean(list);
 
-  const applyFile = useCallback((file: EditorFileResponse) => {
-    generation.current += 1;
-    latest.current = { ...latest.current, current: file, content: file.file.content, dirty: false };
-    setCurrent(file);
-    setContent(file.file.content);
-    setDiagnostics(file.file.diagnostics);
-    setConflict(undefined);
-    setPreview('');
-    setPreviewError('');
-    setError('');
-    setNotice('');
-    if (file.file.language !== 'markdown') setView('editor');
-    const url = new URL(location.href);
-    url.searchParams.set('path', file.file.path);
-    history.replaceState(history.state, '', `${url.pathname}${url.search}`);
-    try {
-      sessionStorage.setItem('toudocu-editor-path', file.file.path);
-    } catch {
-      /* Storage is optional. */
-    }
-    document.dispatchEvent(
-      new CustomEvent('toudocu:editorpathchange', { detail: { path: file.file.path } }),
-    );
-  }, []);
+  const selectPath = useCallback(
+    (path: string) => {
+      const params = new URLSearchParams(route.current.search);
+      if (params.get('path') === path) return;
+      params.set('path', path);
+      void navigate(`${route.current.pathname}?${params}${route.current.hash}`, { replace: true });
+    },
+    [navigate],
+  );
 
-  const open = async (path: string, target?: { line: number; column: number }): Promise<void> => {
-    if (latest.current.busy || (latest.current.dirty && !window.confirm(text('discardChanges'))))
-      return;
-    const request = ++generation.current;
-    const before = latest.current.content;
-    setError('');
-    try {
-      const file = EditorFileResponseSchema.parse(
-        await jsonRequest(`/_toudocu/api/editor/file?path=${encodeURIComponent(path)}`),
-      );
-      if (generation.current !== request) return;
-      if (
-        latest.current.content !== before &&
-        latest.current.dirty &&
-        !window.confirm(text('discardChanges'))
-      )
-        return;
-      applyFile(file);
-      setTreeOpen(false);
-      if (target) {
-        setView('editor');
-        requestAnimationFrame(() => editor.current?.goto(target.line, target.column));
+  const applyFile = useCallback(
+    (file: EditorFileResponse) => {
+      generation.current += 1;
+      latest.current = {
+        ...latest.current,
+        current: file,
+        content: file.file.content,
+        dirty: false,
+      };
+      setCurrent(file);
+      setContent(file.file.content);
+      setDiagnostics(file.file.diagnostics);
+      setConflict(undefined);
+      setPreview('');
+      setPreviewError('');
+      setError('');
+      setNotice('');
+      if (file.file.language !== 'markdown') setView('editor');
+      selectPath(file.file.path);
+      try {
+        sessionStorage.setItem('toudocu-editor-path', file.file.path);
+      } catch {
+        /* Storage is optional. */
       }
-    } catch (reason) {
-      if (generation.current === request)
-        setError(reason instanceof Error ? reason.message : String(reason));
+      document.dispatchEvent(
+        new CustomEvent('toudocu:editorpathchange', { detail: { path: file.file.path } }),
+      );
+    },
+    [selectPath],
+  );
+
+  const open = useCallback(
+    async (path: string, target?: { line: number; column: number }): Promise<void> => {
+      if (
+        latest.current.busy ||
+        (latest.current.dirty && !window.confirm(text('discardChanges')))
+      ) {
+        if (latest.current.current) selectPath(latest.current.current.file.path);
+        return;
+      }
+      const request = ++generation.current;
+      const before = latest.current.content;
+      setError('');
+      try {
+        const file = EditorFileResponseSchema.parse(
+          await jsonRequest(`/_toudocu/api/editor/file?path=${encodeURIComponent(path)}`),
+        );
+        if (generation.current !== request) return;
+        if (
+          latest.current.content !== before &&
+          latest.current.dirty &&
+          !window.confirm(text('discardChanges'))
+        ) {
+          if (latest.current.current) selectPath(latest.current.current.file.path);
+          return;
+        }
+        applyFile(file);
+        setTreeOpen(false);
+        if (target) {
+          setView('editor');
+          requestAnimationFrame(() => editor.current?.goto(target.line, target.column));
+        }
+      } catch (reason) {
+        if (generation.current === request)
+          setError(reason instanceof Error ? reason.message : String(reason));
+      }
+    },
+    [applyFile, selectPath, locale],
+  );
+
+  useEffect(() => {
+    if (!filesLoaded) return;
+    let path = requestedPath;
+    if (!path) {
+      if (latest.current.current) return;
+      let stored: string | null = null;
+      try {
+        stored = sessionStorage.getItem('toudocu-editor-path');
+      } catch {
+        /* Storage is optional. */
+      }
+      path =
+        files.current?.files.find((file) => file.path === stored)?.path ??
+        files.current?.files[0]?.path ??
+        null;
     }
-  };
+    if (path && path !== latest.current.current?.file.path) void open(path);
+  }, [requestedPath, filesLoaded, open]);
 
   useEffect(() => {
     const controller = new AbortController();
     let refreshing = false;
-    let initialized = false;
     const refresh = async (): Promise<void> => {
       if (refreshing || latest.current.busy) return;
       refreshing = true;
@@ -111,19 +164,6 @@ export function EditorWorkspace({ locale }: { locale: Locale }) {
         );
         if (controller.signal.aborted) return;
         setList(next);
-        if (!initialized) {
-          initialized = true;
-          let requested = new URLSearchParams(location.search).get('path');
-          try {
-            requested ||= sessionStorage.getItem('toudocu-editor-path');
-          } catch {
-            /* Storage is optional. */
-          }
-          const path =
-            next.files.find((file) => file.path === requested)?.path ?? next.files[0]?.path;
-          if (path && !latest.current.current) await open(path);
-          return;
-        }
         const active = latest.current.current;
         if (!active || latest.current.busy) return;
         const fresh = next.files.find((file) => file.path === active.file.path);
@@ -168,9 +208,10 @@ export function EditorWorkspace({ locale }: { locale: Locale }) {
     const interval = window.setInterval(() => void refresh(), 2500);
     return () => {
       controller.abort();
+      generation.current += 1;
       window.clearInterval(interval);
     };
-  }, [locale]);
+  }, [locale, applyFile]);
 
   useEffect(() => {
     try {

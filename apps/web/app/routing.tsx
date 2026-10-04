@@ -26,12 +26,14 @@ export function PortalLink({
   to,
   children,
   label,
+  title,
   className,
   active,
 }: {
   to: string;
   children: ReactNode;
   label?: string;
+  title?: string;
   className?: string;
   active?: boolean;
 }) {
@@ -53,6 +55,7 @@ export function PortalLink({
       className={className}
       href={href}
       aria-label={label}
+      title={title}
       aria-current={current || active ? 'page' : undefined}
       onClick={follow}
     >

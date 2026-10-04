@@ -16,7 +16,22 @@ colors:
   portal-blue: "#e1f5fe"
   context-violet: "#e8eaf6"
   focus-indigo: "#002d72"
+  portal-priority-high: '#cc3c22'
+  portal-priority-high-dark: '#ff9c7c'
+  portal-priority-high-soft: '#fff0e9'
+  portal-priority-high-soft-dark: '#432c28'
+  portal-accent-blue-dark: '#78b3ff'
+  portal-accent-teal-dark: '#6bd3c8'
+  portal-accent-green-dark: '#8edb94'
+  portal-accent-amber-dark: '#f2c46d'
+  portal-accent-violet-dark: '#c09eff'
+  portal-accent-rose-dark: '#f18aaa'
 typography:
+  portal-body:
+    fontFamily: 'Golos Text, ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif'
+    fontSize: '1rem'
+    fontWeight: 400
+    lineHeight: 1.6
   display:
     fontFamily: "ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif"
     fontSize: "clamp(5.4rem, 7.25vw, 6.5rem)"
@@ -138,6 +153,10 @@ components:
 
 ## Overview
 
+The engineering-board guidance below applies to the public landing page. The documentation portal
+uses a compact, friendly workspace with local Golos Text, restrained borders, and configurable
+light/dark themes. Its runtime tokens live in `apps/web/app/styles/tokens.css`.
+
 **Design direction: an engineering board**
 
 Toudocu uses a parchment canvas, large cobalt statements, precise monospace
@@ -157,6 +176,11 @@ Real product UI sits inside soft white insets and replaces invented diagrams. Pu
 
 ## Colors
 
+In the portal, color communicates state alongside text and icons. High task priority uses coral
+(`#cc3c22` on `#fff0e9` in light mode, `#ff9c7c` on `#432c28` in dark mode), distinct from amber
+diagnostics. Configurable blue, teal, green, amber, violet, and rose accents remain independent of
+priority and diagnostic colors.
+
 Parchment and cobalt dominate. Soft color identifies the kind of evidence carried by a whole region.
 
 - **Parchment** (`#f5e6ca`): page canvas.
@@ -173,6 +197,9 @@ Parchment and cobalt dominate. Soft color identifies the kind of evidence carrie
 **The Field Color Rule.** Color owns a complete evidence block; do not scatter small decorative accents across the parchment canvas.
 
 ## Typography
+
+The portal bundles Golos Text locally for interface labels and default body text. Paper uses serif
+body text, while Terminal uses monospace. File paths, IDs, and commands use the system monospace stack.
 
 Display, headings, and body all use the local system sans stack. Commands and compact labels use the local mono stack. No webfont request is allowed.
 
@@ -198,6 +225,14 @@ Colored cards remain flat. Only the terminal, screenshot insets, and install com
 Feature blocks use 24px radii, reduced to 20px on mobile. UI insets and command surfaces use 12px; small structural details use 8px. Actions and compact state chips are fully pill-shaped. Image edges receive a low-opacity pure-black optical outline.
 
 ## Components
+
+### Portal document and task actions
+
+Document editing uses a 40px square pencil control with an accessible name and tooltip. Task prompt
+actions use compact paired controls: the labelled action sends to the available agent sidebar, and
+the adjacent clipboard copies the same prompt. Copy success replaces the clipboard with a green
+check and announces the result. Diagnostic counters disclose the actual messages, codes, and
+available locations when activated.
 
 ### Pill actions
 

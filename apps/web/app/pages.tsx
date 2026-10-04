@@ -787,6 +787,12 @@ export function Page({
           locale={locale}
           snapshot={snapshot}
           task={page.workItem}
+          content={
+            <>
+              <TaskActions page={page} snapshot={snapshot} locale={locale} />
+              <DocumentReadingView document={page.document} locale={locale} />
+            </>
+          }
           navigation={[
             ...(page.workItem.dependsOn.length > 0
               ? [{ id: 'task-dependencies', title: text('dependencies') }]
@@ -805,7 +811,6 @@ export function Page({
               : []),
           ]}
         >
-          <TaskActions page={page} snapshot={snapshot} locale={locale} />
           {page.workItem.dependsOn.length > 0 && (
             <div className="execution-context">
               <section id="task-dependencies">

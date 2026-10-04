@@ -511,7 +511,12 @@ export function DocumentContent({
     | undefined;
   navigation?: readonly { id: string; title: string }[] | undefined;
 }) {
-  const { text } = translator(locale);
+  const { text, diagnosticCount } = translator(locale);
+  const issues =
+    snapshot?.issues.filter(
+      (issue) => issue.documentPath === document.sourcePath && issue.severity !== 'info',
+    ) ?? [];
+  const editorRoute = snapshot?.routes.find((route) => route.pageId === 'editor');
   const shownStatus = task
     ? { kind: task.workspace.workState, label: task.workspace.workState }
     : document.status;
@@ -547,18 +552,59 @@ export function DocumentContent({
           {!task && <span>{translator(locale).documentType(document.type)}</span>}
         </div>
         {(document.warnings > 0 || document.errors > 0 || document.stale) && (
-          <div className="document-signals" role="status">
-            {document.errors > 0 && (
-              <span data-severity="error">
-                {document.errors} {text('errorsCount')}
+          <div className="document-signals">
+            {issues.length > 0 && (
+              <details className="document-diagnostics">
+                <summary>
+                  {document.errors > 0 && (
+                    <span data-severity="error">
+                      <Icon name="alertCircle" />
+                      {diagnosticCount('error', document.errors)}
+                    </span>
+                  )}
+                  {document.warnings > 0 && (
+                    <span data-severity="warning">
+                      <Icon name="alertCircle" />
+                      {diagnosticCount('warning', document.warnings)}
+                    </span>
+                  )}
+                  <Icon name="chevronDown" />
+                </summary>
+                <ul>
+                  {issues.map((issue, index) => (
+                    <li key={`${issue.code}:${index}`} data-severity={issue.severity}>
+                      <Icon name="alertCircle" />
+                      <div>
+                        <code>{issue.code}</code>
+                        <p>{issue.message}</p>
+                        {issue.migration && <p>{issue.migration}</p>}
+                        {editorRoute ? (
+                          <PortalLink
+                            to={`${editorRoute.href}?path=${encodeURIComponent(document.sourcePath)}`}
+                          >
+                            {document.sourcePath}
+                            {issue.line !== undefined && `:${issue.line}`}
+                            {issue.column !== undefined && `:${issue.column}`}
+                          </PortalLink>
+                        ) : (
+                          <code>
+                            {document.sourcePath}
+                            {issue.line !== undefined && `:${issue.line}`}
+                            {issue.column !== undefined && `:${issue.column}`}
+                          </code>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
+            {document.stale && (
+              <span className="document-stale">
+                <Icon name="history" />
+                {text('staleLabel')}
               </span>
             )}
-            {document.warnings > 0 && (
-              <span data-severity="warning">
-                {document.warnings} {text('warningsCount')}
-              </span>
-            )}
-            {document.stale && <span>{text('staleLabel')}</span>}
           </div>
         )}
       </header>
@@ -703,9 +749,9 @@ function DocumentActions({
           className="icon-button is-primary"
           to={`${editor.href}?path=${encodeURIComponent(document.sourcePath)}`}
           label={text('edit')}
+          title={text('edit')}
         >
           <Icon name="edit" />
-          <span className="action-label">{text('edit')}</span>
         </PortalLink>
       )}
       <button

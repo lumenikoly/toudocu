@@ -34,6 +34,8 @@
   --td-status-danger-soft: light-dark(#ffeaee, #48232e);
   --td-status-info: light-dark(#245fa8, #9ac7ff);
   --td-status-info-soft: light-dark(#e7f0ff, #203650);
+  --td-priority-high: light-dark(#cc3c22, #ff9c7c);
+  --td-priority-high-soft: light-dark(#fff0e9, #432c28);
   --td-accent-strong: var(--td-accent);
   --td-canvas: var(--td-surface-canvas);
   --td-focus: var(--td-accent);
