@@ -75,14 +75,7 @@ function CatalogPage({
   locale: Locale;
 }) {
   const { text } = translator(locale);
-  const keys: Partial<Record<string, MessageKey>> = {
-    'use-cases': 'useCases',
-    screens: 'screens',
-    quality: 'quality',
-    runbooks: 'runbooks',
-    drafts: 'drafts',
-  };
-  const key = keys[page.data.section];
+  const sectionTitle = translator(locale).sectionTitle(page.data.section);
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('');
   const statuses = [
@@ -100,7 +93,7 @@ function CatalogPage({
   return (
     <>
       <header className="collection-heading">
-        <h1>{key ? text(key) : page.data.title}</h1>
+        <h1>{sectionTitle === page.data.section ? page.data.title : sectionTitle}</h1>
         <span className="collection-count">
           {documents.length} / {page.data.documents.length}
         </span>
@@ -143,7 +136,11 @@ function CatalogPage({
       <ul className="catalog">
         {documents.map((document) => (
           <li key={document.sourcePath}>
-            <DocumentLink snapshot={snapshot} sourcePath={document.sourcePath}>
+            <DocumentLink
+              snapshot={snapshot}
+              sourcePath={document.sourcePath}
+              className="catalog-row"
+            >
               <span className="catalog-icon">
                 <Icon
                   name={

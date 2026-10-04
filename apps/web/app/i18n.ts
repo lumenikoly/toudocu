@@ -460,6 +460,7 @@ const catalogs = {
     fullscreen: 'Fullscreen',
     exitFullscreen: 'Exit fullscreen',
     diagramUnavailable: 'Diagram unavailable. Mermaid source is preserved below.',
+    diagramErrorDetails: 'Error details',
     collapseSection: 'Collapse section',
   },
   ru: {
@@ -922,6 +923,7 @@ const catalogs = {
     fullscreen: 'На весь экран',
     exitFullscreen: 'Выйти из полноэкранного режима',
     diagramUnavailable: 'Диаграмма недоступна. Исходный код Mermaid сохранён ниже.',
+    diagramErrorDetails: 'Причина ошибки',
     collapseSection: 'Свернуть раздел',
   },
 } as const;
@@ -1043,6 +1045,23 @@ export type MessageKey = keyof (typeof catalogs)['en'];
 
 export function translator(locale: Locale) {
   return {
+    metadataLabel: (key: string): string => {
+      const labels: Partial<Record<string, MessageKey>> = {
+        priority: 'priority',
+        severity: 'severity',
+        taskType: 'type',
+        type: 'type',
+        useCase: 'useCaseFilter',
+        module: 'module',
+        moduleId: 'module',
+        parent: 'parent',
+        parentId: 'parent',
+        dependsOn: 'dependencies',
+        source: 'source',
+      };
+      const label = labels[key];
+      return label ? catalogs[locale][label] : key;
+    },
     diagnosticCount: (severity: 'error' | 'warning', count: number): string => {
       const forms =
         locale === 'ru'

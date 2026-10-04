@@ -128,6 +128,12 @@ describe('portal application', () => {
     if (!page || page.kind !== 'task') throw new Error('Missing task fixture');
     page.document.errors = 0;
     page.document.warnings = 1;
+    page.document.metadata = {
+      ...page.document.metadata,
+      priority: 'high',
+      taskType: 'feature',
+      severity: 'major',
+    };
     snapshot.issues = [
       {
         severity: 'warning',
@@ -155,6 +161,53 @@ describe('portal application', () => {
         .getAttribute('href'),
     ).toBe('_toudocu/editor?path=work%2FTASK-WEB-001.md');
     expect(screen.getByRole('link', { name: 'Редактировать' }).textContent).toBe('');
+    const properties = view.container.querySelector('.document-metadata')!;
+    expect(within(properties as HTMLElement).getByText('Приоритет')).toBeTruthy();
+    expect(within(properties as HTMLElement).getByText('Высокий')).toBeTruthy();
+    expect(within(properties as HTMLElement).getByText('Функциональность')).toBeTruthy();
+    expect(within(properties as HTMLElement).getByText('Серьёзность')).toBeTruthy();
+    expect(within(properties as HTMLElement).queryByText('priority')).toBeNull();
+    expect(within(properties as HTMLElement).queryByText('high')).toBeNull();
+  });
+
+  it('localizes root section titles and keeps linked and unavailable catalog rows in the same layout', () => {
+    const snapshot = portalFixture();
+    const guide = snapshot.pages.find((entry) => entry.kind === 'document');
+    if (!guide || guide.kind !== 'document') throw new Error('Missing document fixture');
+    const route = {
+      ...guide.route,
+      pageId: 'directory:modules',
+      href: 'modules/index.html',
+      outputPath: 'modules/index.html',
+    };
+    snapshot.routes.push(route);
+    snapshot.pages.push({
+      kind: 'catalog',
+      pageId: route.pageId,
+      route,
+      data: {
+        section: 'modules',
+        title: 'modules',
+        entities: [],
+        documents: [
+          guide.document,
+          {
+            ...guide.document,
+            sourcePath: 'modules/unavailable.md',
+            title: 'Unavailable document',
+          },
+        ],
+      },
+    });
+    const view = render(
+      <PortalApp snapshot={snapshot} initialPath="/modules/index.html" locale="ru" />,
+    );
+    expect(screen.getByRole('heading', { level: 1, name: 'Модули' })).toBeTruthy();
+    const rows = view.container.querySelectorAll('.catalog-row');
+    expect(rows).toHaveLength(2);
+    expect(rows[0]?.tagName).toBe('A');
+    expect(rows[1]?.tagName).toBe('SPAN');
+    expect(screen.queryByRole('link', { name: 'Unavailable document' })).toBeNull();
   });
 
   it('links known entity IDs, source paths and the home document without inventing missing targets', () => {
@@ -340,6 +393,49 @@ describe('portal application', () => {
     expect(run).toHaveBeenCalledOnce();
     expect(run.mock.calls[0]?.[0].nodes).toHaveLength(1);
     delete (window as Window & { mermaid?: unknown }).mermaid;
+  });
+
+  it('preserves source and explains a Mermaid failure without failing other diagrams', async () => {
+    const snapshot = portalFixture();
+    const page = snapshot.pages.find((entry) => entry.kind === 'document');
+    if (!page || page.kind !== 'document') throw new Error('Missing document fixture');
+    const invalid = 'flowchart TD\nA --> Public[GET /i/{slug}]';
+    const valid = 'flowchart TD\nA --> B';
+    page.document.html = `<pre data-mermaid><code>${invalid}</code></pre><pre data-mermaid><code>${valid}</code></pre>`;
+    const run = vi.fn(async ({ nodes }: { nodes: Element[] }) => {
+      const node = nodes[0]!;
+      if (node.textContent === invalid) {
+        node.innerHTML = '<svg>Syntax error</svg>';
+        throw { message: "Parse error: got 'DIAMOND_START' at /i/{slug}" };
+      }
+      node.innerHTML = '<svg aria-label="Valid flowchart"></svg>';
+    });
+    (window as Window & { mermaid?: { run: typeof run } }).mermaid = { run };
+    try {
+      const view = render(
+        <PortalApp snapshot={snapshot} initialPath="/guides/deep.html" locale="ru" />,
+      );
+      await waitFor(() => expect(run).toHaveBeenCalledTimes(2));
+      await waitFor(() =>
+        expect(view.container.querySelectorAll('.mermaid-frame')).toHaveLength(2),
+      );
+      expect(view.container.querySelector('[data-mermaid-error] > code')?.textContent).toBe(
+        invalid,
+      );
+      expect(view.container.querySelectorAll('[data-mermaid-error]')).toHaveLength(1);
+      expect(view.container.querySelector('[aria-label="Valid flowchart"]')).toBeTruthy();
+      const details = screen
+        .getByText('Причина ошибки', { selector: 'summary' })
+        .closest('details')!;
+      expect(details.open).toBe(false);
+      await userEvent.setup().click(screen.getByText('Причина ошибки', { selector: 'summary' }));
+      expect(details.open).toBe(true);
+      expect(
+        within(details).getByText("Parse error: got 'DIAMOND_START' at /i/{slug}"),
+      ).toBeTruthy();
+    } finally {
+      delete (window as Window & { mermaid?: unknown }).mermaid;
+    }
   });
 
   it('shows workbench data and preserves a single title with document identity and TOC', () => {
