@@ -1,11 +1,11 @@
 import { expect, test } from 'vitest';
-import { mkdtemp, mkdir, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdtemp, realpath, mkdir, rm, symlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { readRepositoryInventory, scopePattern } from './inventory.js';
 
 test('inventory prunes peer locales and symlink trees; scope globs retain Go semantics', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'toudocu-inventory-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'toudocu-inventory-')));
   try {
     await mkdir(join(root, 'src/deep'), { recursive: true });
     await mkdir(join(root, 'docs-en'));
@@ -44,7 +44,7 @@ test('inventory prunes peer locales and symlink trees; scope globs retain Go sem
 });
 
 test('scope matching preserves Unicode runes and Go character-class failures', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'toudocu-inventory-unicode-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'toudocu-inventory-unicode-')));
   try {
     await mkdir(join(root, 'unicode'), { recursive: true });
     await writeFile(join(root, 'unicode/é.ts'), '');

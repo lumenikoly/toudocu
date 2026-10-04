@@ -3,6 +3,7 @@ import {
   mkdir,
   chmod,
   mkdtemp,
+  realpath,
   readFile,
   readdir,
   rm,
@@ -20,8 +21,8 @@ let root = '';
 let outside = '';
 
 beforeEach(async () => {
-  root = await mkdtemp(join(tmpdir(), 'toudocu-path-policy-'));
-  outside = await mkdtemp(join(tmpdir(), 'toudocu-path-policy-outside-'));
+  root = await realpath(await mkdtemp(join(tmpdir(), 'toudocu-path-policy-')));
+  outside = await realpath(await mkdtemp(join(tmpdir(), 'toudocu-path-policy-outside-')));
   await mkdir(join(root, 'docs'), { recursive: true });
   await mkdir(join(root, 'private'), { recursive: true });
   await writeFile(join(root, 'docs', 'index.md'), 'original\n');

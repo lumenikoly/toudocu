@@ -1,5 +1,5 @@
 import { afterEach, expect, test } from 'vitest';
-import { mkdtemp, mkdir, writeFile, symlink, rm } from 'node:fs/promises';
+import { mkdtemp, realpath, mkdir, writeFile, symlink, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { sectionTypes } from '@toudocu/core';
@@ -12,7 +12,7 @@ afterEach(async () => {
   await Promise.all(temporary.splice(0).map((path) => rm(path, { recursive: true, force: true })));
 });
 async function project(config?: string): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), 'toudocu-config-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'toudocu-config-')));
   temporary.push(root);
   await mkdir(join(root, '.toudocu'));
   if (config !== undefined) await writeFile(join(root, '.toudocu/config.yml'), config);

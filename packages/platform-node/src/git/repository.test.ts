@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process';
-import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, realpath, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
@@ -20,7 +20,7 @@ async function git(root: string, args: readonly string[]): Promise<string> {
 }
 
 async function fixture(documentRelative = 'docs') {
-  const root = await mkdtemp(join(tmpdir(), 'toudocu-git-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'toudocu-git-')));
   const docsRoot = join(root, documentRelative);
   await mkdir(docsRoot, { recursive: true });
   await mkdir(join(root, 'docs-other'));
@@ -321,7 +321,7 @@ test('builds tracked and untracked diffs without shell or external diff', async 
 
 test('reports repository state, merge base, and rejects working-tree symlinks', async () => {
   const { root, docsRoot, initial } = await fixture();
-  const outside = await mkdtemp(join(tmpdir(), 'toudocu-git-outside-'));
+  const outside = await realpath(await mkdtemp(join(tmpdir(), 'toudocu-git-outside-')));
   try {
     const repository = await openGitRepository(docsRoot);
     const clean = await repository.repositoryState();

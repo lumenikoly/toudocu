@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { tmpdir } from 'node:os';
 import { loadProject, documentationImpactPathStatus } from './project.js';
@@ -44,7 +44,7 @@ function config(): string {
 }
 
 async function projectFixture() {
-  const root = await mkdtemp(join(tmpdir(), 'toudocu-project-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'toudocu-project-')));
   await mkdir(join(root, 'docs-en', 'architecture'), { recursive: true });
   await mkdir(join(root, 'docs-en', 'modules'), { recursive: true });
   await mkdir(join(root, 'docs-en', 'screens', 'previews'), { recursive: true });
@@ -220,7 +220,7 @@ test('overlay is used for Markdown and hotspots without filesystem/network reads
 });
 
 test('surfaces documentation-version migration and aborts before filesystem work', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'toudocu-project-version-'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'toudocu-project-version-')));
   try {
     await mkdir(join(root, 'docs'), { recursive: true });
     await mkdir(join(root, '.toudocu'));
@@ -262,7 +262,7 @@ test('inventory marks symlinked screen assets unsafe', async () => {
 
 test('documentation impact resolves bounded files and directories without admitting symlinks or peer roots', async () => {
   const root = await projectFixture();
-  const outside = await mkdtemp(join(tmpdir(), 'toudocu-impact-outside-'));
+  const outside = await realpath(await mkdtemp(join(tmpdir(), 'toudocu-impact-outside-')));
   try {
     await writeFile(join(outside, 'existing.md'), 'Outside content must not be loaded.');
     await symlink(join(root, 'src', 'ui', 'home.tsx'), join(root, 'src', 'ui', 'link.tsx'));
