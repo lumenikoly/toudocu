@@ -7,6 +7,9 @@ import { expect, test } from 'vitest';
 import { openGitRepository } from './repository.js';
 
 const execFileAsync = promisify(execFile);
+const separator = process.platform === 'win32' ? ' ' : '\n';
+const stagedName = `staged café${separator}name.md`;
+const untrackedName = `new space café${separator}name.md`;
 
 async function git(root: string, args: readonly string[]): Promise<string> {
   const result = await execFileAsync('git', ['-C', root, ...args], {
@@ -22,7 +25,7 @@ async function fixture(documentRelative = 'docs') {
   await mkdir(docsRoot, { recursive: true });
   await mkdir(join(root, 'docs-other'));
   for (const [path, content] of [
-    ['staged café\nname.md', 'staged'],
+    [stagedName, 'staged'],
     ['unstaged 東京 name.md', 'unstaged'],
     ['old name.md', 'rename me'],
     ['keep.md', 'keep'],
@@ -41,12 +44,12 @@ async function fixture(documentRelative = 'docs') {
 test('reads scoped status and working-tree changes without refreshing the index', async () => {
   const { root, docsRoot, initial } = await fixture();
   try {
-    const staged = join(docsRoot, 'staged café\nname.md');
+    const staged = join(docsRoot, stagedName);
     const unstaged = join(docsRoot, 'unstaged 東京 name.md');
     await writeFile(staged, 'staged changed');
-    await git(root, ['add', '--', 'docs/staged café\nname.md']);
+    await git(root, ['add', '--', `docs/${stagedName}`]);
     await writeFile(unstaged, 'unstaged changed');
-    await writeFile(join(docsRoot, 'new space café\nname.md'), 'new');
+    await writeFile(join(docsRoot, untrackedName), 'new');
     await writeFile(join(root, 'docs-other', 'excluded.md'), 'excluded');
 
     const indexBefore = await readFile(join(root, '.git/index'));
@@ -59,7 +62,7 @@ test('reads scoped status and working-tree changes without refreshing the index'
     const indexAfter = await readFile(join(root, '.git/index'));
 
     expect(indexAfter).toEqual(indexBefore);
-    expect(status.get('docs/staged café\nname.md')).toMatchObject({
+    expect(status.get(`docs/${stagedName}`)).toMatchObject({
       staged: true,
       unstaged: false,
       untracked: false,
@@ -69,7 +72,7 @@ test('reads scoped status and working-tree changes without refreshing the index'
       unstaged: true,
       untracked: false,
     });
-    expect(status.get('docs/new space café\nname.md')).toMatchObject({
+    expect(status.get(`docs/${untrackedName}`)).toMatchObject({
       staged: false,
       unstaged: true,
       untracked: true,
@@ -78,13 +81,13 @@ test('reads scoped status and working-tree changes without refreshing the index'
 
     expect(changes).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ path: 'docs/staged café\nname.md', status: 'modified' }),
+        expect.objectContaining({ path: `docs/${stagedName}`, status: 'modified' }),
         expect.objectContaining({ path: 'docs/unstaged 東京 name.md', status: 'modified' }),
-        expect.objectContaining({ path: 'docs/new space café\nname.md', status: 'untracked' }),
+        expect.objectContaining({ path: `docs/${untrackedName}`, status: 'untracked' }),
       ]),
     );
     expect(changes.map((change) => change.path)).not.toContain('docs-other/excluded.md');
-    expect(changes.find((change) => change.path === 'docs/new space café\nname.md')?.state).toEqual(
+    expect(changes.find((change) => change.path === `docs/${untrackedName}`)?.state).toEqual(
       expect.objectContaining({ untracked: true }),
     );
   } finally {

@@ -2,7 +2,7 @@ import { expect, test } from 'vitest';
 import { mkdtemp, mkdir, rm, symlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { readRepositoryInventory } from './inventory.js';
+import { readRepositoryInventory, scopePattern } from './inventory.js';
 
 test('inventory prunes peer locales and symlink trees; scope globs retain Go semantics', async () => {
   const root = await mkdtemp(join(tmpdir(), 'toudocu-inventory-'));
@@ -68,15 +68,8 @@ test('scope matching preserves Unicode runes and Go character-class failures', a
   }
 });
 
-test('scope matching supports Go backslash escapes for literal metacharacters', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'toudocu-inventory-escape-'));
-  try {
-    await mkdir(join(root, 'src'), { recursive: true });
-    await writeFile(join(root, 'src/*.ts'), '');
-    const inventory = await readRepositoryInventory(root);
-
-    expect(inventory.matches(String.raw`src/\*.ts`)).toEqual(['src/*.ts']);
-  } finally {
-    await rm(root, { recursive: true, force: true });
-  }
+test('scope matching supports Go backslash escapes for literal metacharacters', () => {
+  const pattern = scopePattern(String.raw`src/\*.ts`);
+  expect(pattern?.test('src/*.ts')).toBe(true);
+  expect(pattern?.test('src/a.ts')).toBe(false);
 });
