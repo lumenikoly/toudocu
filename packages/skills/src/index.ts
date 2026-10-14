@@ -5,7 +5,7 @@ import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const skillID = 'toudocu';
-export const skillVersion = '0.0.7';
+export const skillVersion = '0.0.8';
 
 const maxFileSize = 2 << 20;
 const maxBundleSize = 10 << 20;

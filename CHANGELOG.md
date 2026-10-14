@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.0.8
+
+- Migrated the production runtime from Go to strict TypeScript on Node.js 24+;
+  removed the public Go facade and standalone Go binaries.
+- Rebuilt static and local portals with shared React pages and React Router,
+  while keeping generated portals read-only and readable without JavaScript.
+- Added `project info`, `capabilities`, and `task list` for project discovery,
+  live workspace identification, and task snapshots.
+- Added top-level CLI help and clearer errors for unknown commands.
+- Preserved failed Mermaid diagrams as escaped source and localized document
+  metadata labels.
+- Split the embedded skill into operation-specific guidance, with compact text
+  context and bounded summaries of check and verification reports.
+- Changed distribution to a bundled npm package and release archives with
+  prebuilt native dependencies for Linux x64, macOS arm64, and Windows x64.
+  Removed Linux arm64 builds and tests from CI and releases.
+
 ## 0.0.7
 
 - Added a static Task Workspace with board, list, and tree views, task-state
