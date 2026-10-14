@@ -498,6 +498,24 @@
   padding: 0.75rem;
   color: var(--td-status-danger);
 }
+.document-body .mermaid-error-details {
+  padding: 0.75rem 1rem;
+  border-block-end: 1px solid var(--td-border);
+  background: var(--td-status-danger-soft);
+}
+.mermaid-error-details > summary {
+  color: var(--td-status-danger);
+  cursor: pointer;
+  font: 600 0.8rem/1.5 var(--td-font-interface);
+}
+.document-body .mermaid-error-details > pre {
+  margin: 0.75rem 0 0;
+  padding: 0.75rem;
+  max-block-size: 16rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 
 .document-toc {
   position: sticky;

@@ -1,100 +1,50 @@
 # Semantic gate
 
-Use this gate before creating or changing any source document. Toudocu validates
-the structure and explicit promises of a document; it does not prove that the
-document is useful, necessary, current, readable, or true.
-
-Apply [writing-quality.md](writing-quality.md) whenever the change affects
-reader-facing language. The writing gate checks expression; this semantic gate
-checks purpose, evidence, document boundaries, and truth.
-
-## Prepare the document
-
-1. State the intended audience, the durable question the document answers, and
-   the understanding, decision, or action the reader should gain.
-2. Select the target language from the existing document, active locale, or
-   the explicit translation target. Identify any project glossary that is
-   authoritative for this audience.
-3. Check whether an existing document should be updated instead. Do not create
-   a new file when it would duplicate another source of truth.
-4. Choose the document type from its purpose. Do not choose a typed path merely
-   to obtain IDs, portal features, or a green validation result.
-5. Identify authoritative evidence in requirements, code, tests, UI, contracts,
-   decisions, configuration, or confirmed user input. Mark unknowns instead of
-   completing them with plausible content.
-6. Draft from the evidence and apply the reader-first writing gate. Treat
-   templates as removable scaffolding: keep only sections that communicate
-   supported information, except fields required by a deliberately selected
-   typed contract.
-7. If a required typed field cannot be supported, stop and reconsider the
-   document type or report the missing product intent. Do not invent an entity,
-   relationship, status, date, transition, procedure, or verification
-   command.
+Before creating/changing source documentation, establish purpose and truth.
+Toudocu checks declared structure, not usefulness, necessity, currency or
+meaning. Apply [writing-quality](writing-quality.md) to reader-facing language;
+reuse the gate already read rather than loading it again.
 
 ## Author review
 
-Return `PASS` only when every answer is supported:
+For the changed document/affected sections, establish:
 
-- What useful question, decision, or task does this document serve for its
-  intended reader?
-- Why is this the correct document type and source-of-truth location?
-- Which evidence supports each important claim, boundary, status, and example?
-- Does the document distinguish current behavior, requirements, plans, and
-  known gaps accurately?
-- Does it duplicate, contradict, or improperly absorb another document type?
-- Can every entity, relationship, section, and status be explained without
-  referring to a template or Toudocu diagnostic?
-- Are uncertainty, exclusions, failure conditions, and intentionally absent
-  sections honest?
-- Did the reader-first writing gate pass for prose, tables, and diagrams?
-- Can a reader find the main understanding quickly without reconstructing raw
-  implementation details?
+1. Reader, durable question and useful understanding/decision/action.
+2. Correct language, document type and source-of-truth location; update an
+   existing owner instead of duplicating it.
+3. Authoritative evidence for every important claim, boundary, status, example,
+   entity and relationship; unknowns remain explicit, never filled to pass checks.
+4. Clear separation of current facts, requirements, plans and gaps, with honest
+   exclusions/failure conditions and no contradictions or misplaced content.
+5. Reader-first quality and easy discovery of the main conclusion without
+   reconstructing implementation details.
 
-Otherwise return `NEEDS_REWORK`, revise the draft, and repeat both applicable
-gates.
+Return `PASS` only when all apply; otherwise `NEEDS_REWORK`, revise and repeat.
+Templates are removable scaffolding except deliberately selected typed fields.
+If a required field lacks evidence, reconsider the type or report missing intent.
 
 ## Independent review
 
-Require an independent semantic review for:
+Require another agent or human reviewer for new typed documents and changes to:
+requirements/behavior/boundaries/contracts/architecture/decisions/risks/roadmap
+scope/current status; stable IDs/relationships; task scope/acceptance/verification;
+flow topology, screen maps or other machine-readable models. Meaning-preserving
+spelling, formatting, terminology and link repairs need only author/writing review.
 
-- every new typed document;
-- changes to requirements, behavior, boundaries, contracts, architecture,
-  decisions, risks, roadmap scope, or current status;
-- stable IDs or relationships;
-- task scope, acceptance criteria, or verification;
-- flow topology, screen maps, or another machine-readable model.
+Give the reviewer changed drafts and raw evidence, not a desired verdict or a
+passing CLI report as proof. Bound the packet to affected sections and evidence;
+full documents are needed only when boundaries/meaning cannot be judged locally.
+Ask whether reasonable readers could infer unsupported claims. Resolve concrete
+`NEEDS_REWORK` findings. If required independent review is unavailable, report
+it pending and do not declare documentation complete.
 
-A spelling, formatting, link repair, terminology normalization, or other
-meaning-preserving change needs the author review and writing gate but not an
-independent semantic review.
+## Boundaries
 
-Use another agent or a human reviewer. Give the reviewer the draft and the raw
-product or repository evidence, without the author's desired verdict or a
-Toudocu result presented as proof of quality. Ask the reviewer to check both
-semantic accuracy and whether the wording could cause a reasonable reader to
-infer more than the evidence supports. The reviewer returns `PASS` or
-`NEEDS_REWORK` with concrete reasons. If an independent reviewer is required
-but unavailable, report the gate as pending and do not declare the document
-complete.
-
-## Document boundaries
-
-Keep neighboring document types distinct:
-
-- a module explains a stable ownership or behavior boundary, not every folder;
-- a use case describes observable actor behavior, not an implementation call
-  graph;
-- a flow visualizes one reusable scenario, not every branch in source code;
-- a screen map explains product-wide navigation, not the router catalog;
-- an ADR records a durable decision that was actually made, not a retrospective
-  justification invented for current code;
-- a roadmap declares global outcomes, not every local checklist;
-- a task defines authorized work and observable completion, not an aspirational
-  description padded to satisfy its schema;
-- status reports the current verified snapshot, not desired future state;
-- reference material catalogs facts, while a guide helps a reader achieve a
-  result.
-
-For architecture changes, continue with
-[architecture-gate.md](architecture-gate.md). For flows and screen maps,
-continue with [screen-model.md](screen-model.md).
+Keep ownership/rules in modules, observable behavior in use cases, reusable
+processes in flows, product navigation in screen models, actual durable decisions
+in ADRs, global outcomes in roadmaps, authorized work in tasks, verified snapshots
+in status, facts in references and procedures in runbooks/guides. Do not absorb
+neighboring document types or invent a typed document for portal features.
+Architecture changes also use [architecture-gate](architecture-gate.md);
+flow/screen changes use [screen-model](screen-model.md). Load other models only
+when the changed structure needs them.

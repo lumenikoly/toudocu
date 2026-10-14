@@ -26,6 +26,40 @@ async function run(args: string[]) {
   return { code, stdout, stderr };
 }
 
+test('bare invocation and root help list commands without requiring a project', async () => {
+  const result = await run([]);
+  expect(result.code).toBe(0);
+  expect(result.stderr).toBe('');
+  expect(result.stdout).toContain('Usage:\n  toudocu <command> [options]');
+  for (const command of [
+    'check',
+    'serve',
+    'task context',
+    'changes file',
+    'project info',
+    'capabilities',
+    'version',
+  ]) {
+    expect(result.stdout).toContain(`  ${command} `);
+  }
+  expect(await run(['--help'])).toEqual(result);
+  expect(await run(['-h'])).toEqual(result);
+});
+
+test('unknown commands report an error with a root help hint', async () => {
+  for (const args of [['unknown'], ['unknown', '--help']]) {
+    expect(await run(args)).toEqual({
+      code: 2,
+      stdout: '',
+      stderr: "Error: unknown command 'unknown'. Run toudocu --help for available commands.\n",
+    });
+  }
+  const result = await run(['check', '--help']);
+  expect(result.code).toBe(0);
+  expect(result.stderr).toBe('');
+  expect(result.stdout).toContain('toudocu check [docs-dir]');
+});
+
 test('formats creation dates from the local calendar', () => {
   const localMorning = new Date(2026, 8, 19, 0, 30);
 

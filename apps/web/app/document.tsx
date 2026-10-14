@@ -48,16 +48,20 @@ export function DocumentLink({
   snapshot,
   sourcePath,
   children,
+  className,
 }: {
   snapshot: PortalSnapshotV1;
   sourcePath: string;
   children?: ReactNode;
+  className?: string;
 }) {
   const page = pageForDocument(snapshot, sourcePath);
   return page?.document ? (
-    <PortalLink to={page.route.href}>
+    <PortalLink to={page.route.href} {...(className ? { className } : {})}>
       {children ?? <EntityIdentity document={page.document} />}
     </PortalLink>
+  ) : className ? (
+    <span className={className}>{children ?? sourcePath}</span>
   ) : (
     (children ?? sourcePath)
   );
@@ -315,7 +319,8 @@ export function MermaidEnhancer({ pageId, locale }: { pageId: string; locale: Lo
       });
       toolbar.append(fullscreen);
       diagram.replaceWith(frame);
-      frame.append(toolbar, viewport);
+      if (svg) frame.append(toolbar);
+      frame.append(viewport);
       viewport.append(diagram);
       const onFullscreenChange = (): void => {
         if (!frame.isConnected) return;
@@ -337,41 +342,66 @@ export function MermaidEnhancer({ pageId, locale }: { pageId: string; locale: Lo
         return root.contains(node) && !node.parentElement?.closest('.mermaid-frame');
       });
       if (fresh.length === 0) return;
+      const sources = new Map(fresh.map((node) => [node, node.textContent ?? '']));
+      const reportFailure = (node: HTMLElement, reason: unknown): void => {
+        const diagram = node.parentElement;
+        if (!mounted || !root.contains(node) || !diagram || diagram.closest('.mermaid-frame'))
+          return;
+        // Mermaid can replace the source with an error SVG before rejecting.
+        node.textContent = sources.get(node) ?? '';
+        node.removeAttribute('data-processed');
+        diagram.setAttribute('data-mermaid-error', 'true');
+        const message = document.createElement('p');
+        message.className = 'mermaid-error';
+        message.setAttribute('role', 'alert');
+        message.textContent = text('diagramUnavailable');
+        diagram.prepend(message);
+        addControls(node);
+        const details = document.createElement('details');
+        details.className = 'mermaid-error-details';
+        const summary = document.createElement('summary');
+        summary.textContent = text('diagramErrorDetails');
+        const explanation = document.createElement('pre');
+        explanation.textContent =
+          reason instanceof Error
+            ? reason.message
+            : typeof reason === 'object' &&
+                reason !== null &&
+                'message' in reason &&
+                typeof reason.message === 'string'
+              ? reason.message
+              : String(reason);
+        details.append(summary, explanation);
+        node.closest('.mermaid-frame')?.prepend(details);
+      };
       try {
         const provided = (
-          window as Window & { mermaid?: { run(options: { nodes: Element[] }): Promise<void> } }
+          window as Window & { mermaid?: { run(options: { nodes: HTMLElement[] }): Promise<void> } }
         ).mermaid;
-        if (provided) {
-          await provided.run({ nodes: fresh });
-        } else {
+        let renderer = provided;
+        if (!renderer) {
           const mermaid = (await import('mermaid')).default;
           if (!mounted) return;
           mermaid.initialize({
             securityLevel: 'strict',
             startOnLoad: false,
+            suppressErrorRendering: true,
             theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default',
           });
-          await mermaid.run({ nodes: fresh });
+          renderer = mermaid;
         }
-        if (!mounted) return;
         for (const node of fresh) {
-          if (root.contains(node)) addControls(node);
-        }
-      } catch {
-        if (!mounted) return;
-        for (const node of fresh) {
-          const diagram = node.parentElement;
-          if (!root.contains(node) || !diagram || diagram.closest('.mermaid-frame')) continue;
-          diagram.setAttribute('data-mermaid-error', 'true');
-          if (!diagram.querySelector('.mermaid-error')) {
-            const message = document.createElement('p');
-            message.className = 'mermaid-error';
-            message.setAttribute('role', 'alert');
-            message.textContent = text('diagramUnavailable');
-            diagram.prepend(message);
+          if (!mounted) return;
+          if (!root.contains(node)) continue;
+          try {
+            await renderer.run({ nodes: [node] });
+            if (mounted && root.contains(node)) addControls(node);
+          } catch (reason) {
+            reportFailure(node, reason);
           }
-          addControls(node);
         }
+      } catch (reason) {
+        for (const node of fresh) reportFailure(node, reason);
       }
     };
     const collectNodes = (element: Element, nodes: HTMLElement[]): void => {
@@ -677,17 +707,19 @@ export function DocumentContent({
                   )
                   .map(([key, value]) => (
                     <div key={key}>
-                      <dt>
-                        {key === 'taskType' || key === 'type'
-                          ? text('type')
-                          : key === 'useCase'
-                            ? text('useCaseFilter')
-                            : key === 'module'
-                              ? text('module')
-                              : key}
-                      </dt>
+                      <dt>{translator(locale).metadataLabel(key)}</dt>
                       <dd>
-                        <EntityReference value={value} snapshot={snapshot} />
+                        {key === 'priority' ? (
+                          <span className="document-priority" data-priority={value}>
+                            {translator(locale).status(value)}
+                          </span>
+                        ) : key === 'severity' || key === 'taskType' ? (
+                          translator(locale).status(value)
+                        ) : key === 'type' ? (
+                          translator(locale).documentType(translator(locale).status(value))
+                        ) : (
+                          <EntityReference value={value} snapshot={snapshot} />
+                        )}
                       </dd>
                     </div>
                   ))}

@@ -76,8 +76,6 @@ jobs:
         include:
           - target: linux-x64
             runner: ubuntu-24.04
-          - target: linux-arm64
-            runner: ubuntu-24.04-arm
           - target: darwin-arm64
             runner: macos-15
           - target: win32-x64
@@ -157,7 +155,6 @@ jobs:
       matrix:
         include:
           - runner: ubuntu-24.04
-          - runner: ubuntu-24.04-arm
           - runner: macos-15
           - runner: windows-2025
     runs-on: ${{ matrix.runner }}
