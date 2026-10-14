@@ -38,7 +38,8 @@ Input:
 
 Expected transcript:
 
-- the skill activates;
+- the skill activates and selects `references/task-workflow.md`, not the
+  former all-purpose workflow;
 - `task context --format text` runs before broad search across canonical
   documentation;
 - the returned paths and relationships form the starting map;
@@ -68,9 +69,11 @@ Input:
 Expected transcript:
 
 1. `task context --format text`, then the missing task contract details;
-2. `task verify --dry-run --format json`.
+2. `task verify --dry-run --format json` saved outside source documentation;
+3. a projected command/target/validation summary, without full logs.
 
-The agent does not run `task verify --run`.
+The producing CLI exit code is preserved. The agent does not run
+`task verify --run`.
 
 ### Find documentation
 
@@ -80,8 +83,9 @@ Input:
 
 Expected transcript:
 
-- `toudocu search` runs before any broad raw search across canonical
-  documentation;
+- `toudocu search --limit 5 --format text` runs before any broad raw search
+  across canonical documentation;
+- an ambiguous query is refined before its limit is increased;
 - broad `rg` does not replace `toudocu search`;
 - identified files may then be read directly.
 
@@ -151,10 +155,57 @@ For a fresh-context workflow case, the required Toudocu command must actually
 run before an equivalent broad raw search across canonical documentation. A
 continuation case with current evidence must reuse it instead of repeating
 discovery. Direct reading of a known file and later source-code search remain
-allowed. The
-transcript must not contain irrelevant Toudocu commands, an unauthorized
-`task verify --run`, or use of configured translation roots as canonical
-documentation or work-item context.
+allowed. The transcript must not contain irrelevant Toudocu commands, an
+unauthorized `task verify --run`, or use of configured translation roots as
+canonical documentation or work-item context.
+
+### Bounded instruction loading
+
+Input:
+
+> Prepare the context for TASK-CLI-014, without changing it.
+
+Expected transcript:
+
+- the task operation reference is selected; creation/portal/clarification
+  references and contract models are not loaded merely to obtain a map;
+- current instructions are reused, not reread through links or symlinks;
+- required repository standards and runbooks remain mandatory;
+- evals and the entire template/reference directory are not runtime inputs.
+
+### Large check report and strict validation
+
+The fixture's project JSON exceeds 1 MB, with diagnostics including failures
+beyond the first displayed page.
+
+Input:
+
+> Validate the documentation under the project's strict policy.
+
+Expected transcript:
+
+- one strict text check, not ordinary plus strict or a full project JSON dump;
+- if structured diagnostics are needed, JSON stays in a temporary report and
+  `scripts/report-summary.mjs check` projects counts and diagnostic pages;
+- the original CLI exit code is retained independently of formatter success;
+- omitted pages, truncation or helper errors are never proof of success;
+- generated reports are not reread as source documentation.
+
+### Explicit verification with large logs
+
+Input:
+
+> Run TASK-CLI-014's trusted verification commands.
+
+Expected transcript:
+
+- task-local validation and explicit execution authority remain required;
+- the JSON report/logs stay outside source documentation and model context;
+- `scripts/report-summary.mjs verify` returns commands/criterion outcomes and
+  page metadata, without stdout/stderr;
+- all reported failures are accounted for; relevant failure excerpts are read
+  selectively, without replaying successful suite output;
+- unchanged successful covering suites are not rerun alongside their subsets.
 
 ## Clarification workflow
 

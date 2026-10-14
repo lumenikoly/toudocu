@@ -1,106 +1,62 @@
 # Documentation refresh
 
-Use this workflow only when the user explicitly invokes `$toudocu refresh`
-or `$toudocu refresh diff`. Both forms review documentation currency and
-apply evidence-backed updates. They are skill workflows, not Toudocu CLI
-commands.
+Only explicit `$toudocu refresh` or `$toudocu refresh diff` activates this
+workflow. It updates source documentation from evidence, not code. Never
+initialize, create a new tree or install/update managed guidance; missing
+established documentation requires explicit init instead.
 
-Refresh never performs initialization. Do not create a new documentation tree,
-install or update managed `AGENTS.md` guidance, or infer `$toudocu init`
-from missing files. If no established documentation exists, stop and recommend
-explicit init.
+## Boundary and evidence
 
-## Establish the review boundary
+Resolve canonical root, language, CLI flags, standards/runbooks, strict and
+tracked-portal conventions from repository policy. Exclude configured
+translation roots from all ordinary search, inventory, semantic/implementation
+review and task context, including their changed/untracked files.
 
-1. Read repository instructions, standards, runbooks, CI, task contracts, and
-   documented Toudocu commands. Resolve the repository root, documentation
-   directory, language, strict policy, and tracked portal convention.
-   Use only the canonical documentation root. Exclude every configured
-   translation root from repository search, inventory, semantic review,
-   implementation evidence, and task context.
-2. Resolve Toudocu as described in `SKILL.md` and run the existing ordinary
-   project check with JSON output. Diagnostics describe structural state; they
-   are not evidence that a claim is current or useful.
-3. For `$toudocu refresh`, inventory every source Markdown document in the
-   canonical documentation root and the current repository evidence relevant to
-   it: code, tests, public interfaces, schemas, configuration, CI, requirements,
-   ADRs, and confirmed user input. Never inventory a configured translation root.
-4. For `$toudocu refresh diff`, require a Git worktree with a valid `HEAD`.
-   Determine changed tracked paths from `git diff --name-only HEAD --` and
-   untracked paths from `git ls-files --others --exclude-standard`. This includes
-   staged and unstaged tracked changes. Do not compare with a merge-base or
-   default branch. If Git or `HEAD` is unavailable, stop and recommend the full
-   refresh instead of silently expanding scope.
-5. In diff mode, begin with changed source documents and repository artifacts,
-   then add documentation affected through local links, backlinks, stable IDs,
-   task relationships, declared repository paths, and changed public behavior
-   or interfaces. Exclude generated portals, build output, caches, and vendored
-   artifacts as documentation sources even when they appear in the diff. Also
-   exclude configured translation roots, even when their files are changed or
-   untracked; translation review requires an explicit locale-specific request.
-6. If the resulting diff set is empty, run the structural check, report that no
-   semantic refresh candidates were found, and make no source changes.
+Run the project check initially with compact text and the effective strict
+policy. Structural diagnostics are not proof of truth; select only needed
+JSON fields if necessary. Preserve the exit code and all diagnostic counts.
 
-## Review currency before editing
+- Full mode: inventory every canonical source Markdown path and relevant code,
+  tests, interfaces, schemas, config, CI, requirements, ADRs and confirmed input.
+  Inventory paths/IDs first, not all document bodies in one output.
+- Diff mode: require Git + valid HEAD; use `git diff --name-only HEAD --` plus
+  `git ls-files --others --exclude-standard` (staged/unstaged/untracked). Never
+  substitute merge-base/default branch or silently expand to full mode.
+  Start with changed sources/artifacts and add affected documents through links,
+  backlinks, stable IDs, task relations, declared code paths and public behavior.
+  Exclude generated/build/cache/vendor artifacts as source documentation.
+- Empty diff scope: report no semantic candidates and make no source changes;
+  reuse the unchanged initial structural result instead of rerunning it.
 
-For every document in scope:
+Process one document or a small related group at a time. Track IDs/paths,
+classification, evidence handles and unresolved findings, not accumulated full
+texts/JSON/diffs. For each scoped document, identify reader/question/evidence;
+compare behavior, interfaces, boundaries, status, relationships, examples,
+commands and terminology. Classify current, needs update, unverifiable,
+obsolete, duplicated or misplaced. Detect translation-like/mixed-language or
+implementation-led wording. Distinguish documentation drift from product/code
+conflicts; report ambiguous ownership instead of changing code or guessing.
+Full mode still reviews every scoped document: batching never skips coverage.
 
-1. State its audience, durable question, and authoritative evidence.
-2. Compare behavioral claims, interfaces, boundaries, statuses, relationships,
-   examples, commands, and paths with current evidence.
-3. Classify it as current, needs update, unverifiable, obsolete, duplicated, or
-   misplaced. A Toudocu warning alone is not evidence for adding content.
-4. Review whether terminology and explanations still match the product and the
-   intended reader. Flag mixed-language fragments, unexplained identifiers,
-   literal translations, and implementation-led paragraphs that obscure the
-   actual behavior.
-5. Distinguish documentation drift from an implementation or product conflict.
-   Refresh updates documentation to established current truth; it does not
-   change code to make a document true. Report ambiguous conflicts as unresolved
-   findings and do not guess which side should win.
+## Update and validate
 
-## Apply evidence-backed updates
+Update the existing owner and required related sources using writing/semantic
+and applicable typed gates. Creation/deletion/rename/merge or ID changes require
+unambiguous evidence and consistent links, task relations, architecture map and
+routes; otherwise leave sources unchanged and report uncertainty. Preserve
+unrelated working-tree changes. Never invent facts/entities/tasks to fix warnings.
 
-1. Update the existing source of truth and every explicitly related document
-   required to keep the model honest. Apply the document model, reader-first
-   writing gate, and semantic gate from this skill. Rewrite unclear wording only
-   when evidence fixes the meaning unambiguously.
-2. Creating, deleting, renaming, or merging a document and changing a stable ID
-   are allowed when current evidence makes the change unambiguous. Update every
-   affected link, ID reference, task relationship, architecture overview entry,
-   and generated route together. If evidence is incomplete, leave the source
-   unchanged and report the unresolved finding.
-3. Change the document update date, stored under `Last updated` or `Последнее
-   обновление`, only when content or declared relationships actually change. Do
-   not create date-only churn for a document that was merely reviewed. Never
-   advance the runbook verification date, stored under `Last verified` or
-   `Последняя проверка`, unless its procedure was actually verified.
-4. Do not create statuses, entities, links, or procedures to silence a
-   diagnostic. Do not create a `TASK-*` merely because refresh is running; use
-   the normal task threshold.
-5. Ensure `project.defaultLocale` and the active locale's complete built-in `sections` map
-   exist. Use the selected `en`/`ru`
-   [locale pack](../assets/locale-packs.md) when available; for another valid
-   locale preserve an explicit one-time map. Update H1 only for existing
-   built-in entry documents, never custom section manifests.
-6. Never edit generated portal output as documentation. Preserve unrelated
-   working-tree changes, including changes that existed before refresh.
+Change update dates only with content/relationships; never advance runbook
+Last verified without executing its procedure. Preserve valid locale/config
+settings; complete the active built-in section-title map from established titles
+or the selected locale pack, not an inventory of all packs/templates. Change
+entry H1 only for existing built-in sections, not custom manifests.
 
-## Review, validate, and publish
-
-1. Complete the reader-first writing review and author semantic review for every
-   changed source document.
-2. Obtain independent semantic review wherever `semantic-gate.md` requires it.
-   Give the reviewer updated drafts and raw evidence, not a desired verdict or a
-   green Toudocu result. Resolve `NEEDS_REWORK` before continuing.
-3. Run the ordinary project-wide check. Run strict validation only when project
-   policy requires it. Fix errors at their sources and report any supported
-   warnings left intentionally unresolved.
-4. Rebuild a portal only when it is tracked or repository instructions require
-   it. Reconfirm the exact safe output path before `--clean`, and build only
-   after the writing, semantic, and structural gates pass.
-5. Report the command mode, reviewed boundary, evidence used, current documents,
-   changed/created/deleted/renamed documents, stable-ID migrations, unresolved
-   findings, writing-gate result, semantic reviewer and verdict, structural
-   diagnostics, date changes, and portal build result. State explicitly when
-   refresh produces no source diff.
+Review changed prose and semantics, obtain independent review where required,
+then run one final project check with the required strict policy after edits.
+Recheck after actual fixes; do not run ordinary and strict variants separately.
+No source changes means the initial current result can be reused. Rebuild only
+if tracked output or project policy requires it, after gates pass and safe
+output/clean paths are confirmed. Report mode/scope, changed paths, unresolved
+findings, review/check outcomes and any date/ID/portal effects concisely; keep
+full inventories/reports outside model context. State when no source diff exists.

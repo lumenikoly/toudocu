@@ -1,105 +1,59 @@
-# Explicit project initialization
+# Explicit initialization
 
-Use this workflow only when the user explicitly invokes `$toudocu init` or
-unambiguously asks to run the skill's init workflow. Do not infer initialization
-from a missing `AGENTS.md` block, an ordinary documentation request, a check, or
-another implicit skill trigger. The Toudocu CLI has no `init` command.
+Only explicit `$toudocu init` or an unambiguous request for this workflow
+permits initialization/managed guidance. No CLI init command exists; missing
+files or an ordinary documentation request never imply permission.
 
-## Preflight before changing files
+## Preflight
 
-1. Read the applicable repository instructions, documentation conventions, CI
-   commands, and existing Toudocu configuration.
-2. Resolve the narrowest repository root that contains the documentation and
-   every referenced scope path. Reuse the established documentation directory;
-   otherwise use `<repository-root>/docs`.
-3. Resolve the project locale from an existing valid `project.defaultLocale`, then
-   repository instructions, then existing canonical documentation. Use `en`
-   when none establishes a locale. Normalize an `en-*` locale to the `en`
-   bundled templates and a `ru-*` locale to `ru`. For another valid locale, use
-   the English templates only as structural scaffolding and continue only when
-   the repository supplies a complete 13-title `project.sections` map. Author
-   all headings and prose in the project locale. Managed agent instructions
-   remain English and do not determine the documentation language.
-4. Inspect the repository-root `AGENTS.md` for these exact markers:
+1. Resolve repository policy, config, CLI/root conventions and the narrowest
+   root containing docs and referenced paths; otherwise use `<root>/docs`.
+2. Choose language from valid default locale, repository instructions, existing
+   canonical docs, then en. Use en/ru templates for en-*/ru-*; another locale
+   needs a complete project-provided 13-section title map and target-language
+   prose. English guidance never determines the documentation language.
+3. Inspect root AGENTS markers:
+   `<!-- toudocu:project-guidance:start -->` and
+   `<!-- toudocu:project-guidance:end -->`. Both must be absent or occur once in
+   correct order. Missing/duplicate/reversed/nested markers or conflicting
+   unmanaged trigger/language/task policy block writes and require user direction.
+4. Inspect architecture before validation. Existing Markdown other than a
+   structurally valid `architecture/overview.md` is legacy for this workflow:
+   show compact structural diagnostics and stop, never migrate/rewrite it.
+5. With existing docs, run one read-only text check using effective strict
+   policy. Errors block except a sole missing-architecture-overview when there
+   is no architecture Markdown. Show warnings; under strict policy only
+   missing-index, missing-project-locale and incomplete-project-sections can be
+   nonblocking because init repairs them. Inspect every diagnostic/page, not a
+   truncated subset; use [report-output](report-output.md) only for needed JSON.
 
-   ```text
-   <!-- toudocu:project-guidance:start -->
-   <!-- toudocu:project-guidance:end -->
-   ```
+## Apply
 
-   Continue only when both markers are absent or each occurs exactly once in
-   the correct order. Stop before writing when a marker is missing, duplicated,
-   reversed, or nested. Also stop when an unmanaged instruction establishes a
-   conflicting Toudocu trigger, language, or task-creation policy; show the
-   conflict and request user direction.
-5. Inspect `<docs-root>/architecture/` before validation. If it contains
-   Markdown other than a structurally valid `architecture/overview.md`, treat
-   it as legacy architecture: run the ordinary read-only check with JSON
-   output, show its diagnostics, and stop without migrating or rewriting those
-   files.
-6. If the documentation directory already contains Markdown, run its ordinary
-   read-only Toudocu check with JSON output. Errors block initialization, with
-   one narrow exception: when `architecture/` contains no Markdown,
-   `missing-architecture-overview` may be the only error and is the expected
-   condition repaired by init. Warnings remain visible. Under established
-   strict policy, only `missing-index`, `missing-project-locale`, and
-   `incomplete-project-sections` may remain non-blocking because this workflow
-   repairs them; every other warning blocks initialization.
+Resolve the complete section map before creating entries: preserve configured
+nonempty titles, otherwise existing entry H1, otherwise the selected locale
+pack. Do not load every pack/template. For an unsupported pack, use the complete
+map established in preflight.
 
-## Apply the initialization
+- Create a missing neutral index in the selected language from repository facts.
+- Only when architecture has no Markdown, create its overview from the selected
+  architecture-overview template, with the resolved architecture H1 and overview
+  type. State evidenced system boundaries; leave the question map empty and
+  omit a context diagram unless useful and supported. Never invent details,
+  typed entities, statuses or relationships.
+- Complete `.toudocu/config.yml` with documentationVersion 3, default locale and
+  the selected locale profile's root/13 section titles. Preserve unrelated site,
+  changes and locale settings; do not rewrite existing H1 headings.
+- Use only `assets/project-guidance/en.md` for managed guidance in every locale;
+  it preserves source-language and translation isolation rules. Create AGENTS
+  with the full asset, append after one blank line when markers are absent, or
+  replace only the matched marker block. Preserve every byte outside the block.
+- No automatic task creation. Preserve unrelated source changes. On write
+  failure, report partial changes instead of claiming atomic completion.
 
-1. If the selected documentation directory has no `index.md`, create a neutral
-   `<docs-root>/index.md` in the project locale. Base its title, description,
-   and terminology on repository evidence. Apply the reader-first writing gate.
-2. Resolve the complete section map in memory before creating built-in entry
-   documents. Preserve an existing non-empty configured title; otherwise use
-   the H1 of an entry document that existed before init; otherwise use the
-   matching `en` or `ru` [locale pack](../assets/locale-packs.md). A project
-   locale without a bundled pack must use the complete project-provided map
-   established during preflight.
-3. If `architecture/` contains no Markdown, create
-   `<docs-root>/architecture/overview.md` using
-   `assets/templates/<template-language>/architecture-overview.md` only as a
-   structural cue. Set its H1 exactly to the resolved
-   `project.sections.architecture` title; never copy the template H1 when it
-   differs. For a locale without a bundled template, author headings and prose
-   in the project locale rather than copying English template text. Keep the
-   required `Architecture Overview` document type, state only the
-   evidence-backed system boundary, leave the architecture-question map empty,
-   and omit the optional context diagram unless repository evidence supports
-   it. Do not create detailed architecture documents, typed entities,
-   statuses, or relationships without evidence.
-4. Create or complete `<repository-root>/.toudocu/config.yml` without removing
-   existing `site`, `changes`, or `locales` settings. Set
-   `documentationVersion: 3`, the resolved `project.defaultLocale`, and the already
-   resolved 13 `project.sections` titles. Do not rewrite existing H1 headings.
-5. Use `assets/project-guidance/en.md` for every project locale. The managed
-   block is an agent instruction surface and therefore remains English. It must
-   still require source documentation in the selected project language and
-   isolate translation roots from ordinary work.
-6. Upsert the complete asset into the repository-root `AGENTS.md`:
-   - create the file with the block when it does not exist;
-   - append the block after one blank line when both markers are absent;
-   - replace from the start marker through the end marker when both occur once;
-   - preserve every byte outside the managed block.
-7. Do not create a `TASK-*` merely because init is running. Create one only when
-   the user or existing repository policy explicitly requires it.
+## Validate
 
-Do not install or refresh project guidance outside this explicit init workflow.
-If a write fails, report every file already changed instead of claiming that
-initialization completed atomically.
-
-## Validate and report
-
-1. Confirm that both managed markers occur exactly once and in the correct
-   order.
-2. Confirm that `<docs-root>/index.md` and
-   `<docs-root>/architecture/overview.md` exist and that overview has document
-   type `Architecture Overview`.
-3. Confirm that `.toudocu/config.yml` contains `documentationVersion: 3`.
-4. Complete the reader-first and semantic gates for the created documents.
-5. Run the ordinary project-wide Toudocu check. Run an additional strict check
-   only when strict validation is project policy.
-6. Report the resolved repository root, documentation directory, project locale,
-   template language, English guidance asset, created or updated files, errors,
-   and remaining warnings.
+Check unique/ordered markers, index + architecture overview/type, and config
+version 3. Complete writing/semantic reviews for created sources, then run one
+project check with required strict policy (not ordinary plus strict). Report
+roots, locale/template language, changed paths and remaining diagnostics.
+Do not install/update guidance through another workflow.

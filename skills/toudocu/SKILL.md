@@ -1,143 +1,93 @@
 ---
 name: toudocu
 description: >-
-  Create, update, review, validate, translate, or operate Toudocu-managed
-  documentation, the CLI and portal, discussions, the Agent Feedback queue,
-  explicit $toudocu workflows, and supported typed entities. Also use when code
-  or product changes affect documented behavior, public interfaces,
-  configuration, architecture, workflows, operational procedures, or
-  user-visible behavior. Produce evidence-backed, reader-first text in the
-  selected document language. Do not use for general code or text questions
-  unless they require Toudocu-managed documentation or affect its accuracy,
-  structure, or content. Do not use for code-only changes that explicitly
-  preserve public and documented behavior. Clarification is available only
-  through explicit `$toudocu clarify` or an explicit request for a Toudocu
-  clarification interview; ordinary questions and implementation requests do
-  not activate it. Never infer initialization or run `task verify --run`
-  without explicit authorization.
+  Maintain Toudocu source documentation, typed entities, tasks, CLI/portal,
+  discussions and Agent Feedback. Use for explicit $toudocu workflows or
+  code/product changes affecting documented behavior, interfaces, configuration,
+  architecture or user-visible behavior. Not for general questions or code-only
+  changes that preserve documented behavior. Clarification, initialization and
+  task verification execution require explicit requests; never infer them.
 ---
 
 # Toudocu
 
-Toudocu maintains source Markdown, explicit relationships, and safe repository
-paths. Use repository evidence to keep that documentation accurate and useful.
+Use repository facts to maintain source Markdown and explicit relationships.
+Never invent behavior, status, dates, entities, procedures or checks to silence
+warnings. Generated portals and reports are not editable sources.
 
-## Route the request
+## Load only the selected route
 
-Use the first matching route. Explicit `$toudocu` operations take precedence;
-do not add `workflows.md` when their operation reference already defines the
-workflow.
+Explicit operations take precedence. Read one operation reference, not the
+whole reference directory. Links are navigation, not instructions to load every
+linked file. Reuse current instructions already read in this session; reload
+only when changed, missing or uncertain. Do not read evals or inventory templates
+unless maintaining the skill or selecting a particular template.
 
-| Request | Read | Rule |
-|---|---|---|
-| `$toudocu init` | [references/init.md](references/init.md) | Only when explicitly invoked |
-| `$toudocu refresh` or `$toudocu refresh diff` | [references/refresh.md](references/refresh.md) | Only the requested refresh mode |
-| `$toudocu translate <target-locale> --from <source-locale>` | [references/translate.md](references/translate.md) | Only the explicitly selected locale pair and selection mode |
-| `$toudocu clarify <subject>` or an explicit request for a Toudocu clarification interview | [references/clarify.md](references/clarify.md) | Investigate facts, exhaust the decision frontier, and stop before implementation |
-| `$toudocu feedback`, Toudocu discussions, or the local Agent Feedback queue | [references/agent-feedback.md](references/agent-feedback.md) | Use its isolated transport and lifecycle |
-| Ordinary source-documentation mutation, CLI, portal, or task operation | [references/workflows.md](references/workflows.md) | Follow the requested operation |
-| Read-only review, analysis, or explanation | Only the applicable references below | Skip `workflows.md` unless CLI or diagnostics are required |
+| Request | Reference |
+|---|---|
+| Explicit `$toudocu init` | [init](references/init.md) |
+| Explicit `$toudocu refresh` / `refresh diff` | [refresh](references/refresh.md) |
+| Explicit translation of selected locales | [translate](references/translate.md) |
+| Explicit `$toudocu clarify` / Toudocu clarification interview | [clarify](references/clarify.md) |
+| Agent Feedback / Toudocu discussions | [agent-feedback](references/agent-feedback.md) |
+| Work-item context, selection, implementation or verification | [task-workflow](references/task-workflow.md) |
+| Build / serve | [portal](references/portal.md) |
+| Create source documents | [create-documents](references/create-documents.md) |
+| Check, search, changes or ordinary documentation edits | [workflows](references/workflows.md) |
+| Read-only review of a known file | Read that file; no discovery or check unless needed |
 
-Load additional references only when the request needs them:
+For prose changes/review apply [writing-quality](references/writing-quality.md).
+Before source mutations apply [semantic-gate](references/semantic-gate.md).
+Load a model only when authoring/reviewing its structure or relationships:
+[document-model](references/document-model.md),
+[work-item-model](references/work-item-model.md) for task contracts/lifecycle,
+[architecture-gate](references/architecture-gate.md) for architecture,
+[screen-model](references/screen-model.md) for flows/screens/transitions.
+Do not load a contract model merely to read its context map.
 
-- [references/writing-quality.md](references/writing-quality.md) when drafting,
-  revising, or reviewing reader-facing prose, headings, tables, diagram labels,
-  messages, or translations;
-- [references/semantic-gate.md](references/semantic-gate.md) before changing
-  source documentation;
-- [references/document-model.md](references/document-model.md) when creating,
-  selecting, or reviewing typed documents, stable IDs, or relationships;
-- [references/architecture-gate.md](references/architecture-gate.md) for
-  architecture documents;
-- [references/screen-model.md](references/screen-model.md) for `FLOW-*`, `SC-*`,
-  `TR-*`, screen states, or hotspots;
-- [references/work-item-model.md](references/work-item-model.md) for `TASK-*`,
-  `BUG-*`, or work-item lifecycle operations.
+## Conventions and authority
 
-## Gather context with Toudocu first
+- Follow repository instructions. Read all standards/runbooks explicitly named
+  in the task context; manually inspect other standards' scope. Reuse current
+  completed reads, but never waive unread mandatory evidence.
+- Use `toudocu` from PATH; in its source repository use
+  `node apps/cli/dist/main.js`. Resolve roots and flags from repository policy,
+  config and existing commands; use the narrowest root covering documentation
+  and referenced paths. Default to `./docs` and its parent only without a
+  convention. Reuse excludes, stale policy, strict policy and output paths.
+- Canonical documentation is the only ordinary documentation/backlog source.
+  Exclude configured translation roots from search, inventory, semantic review
+  and implementation/task context. Read a translation root only for an explicit
+  selected-locale operation; translation workflows read one source/target pair
+  at a time. Never hide translations in ignore files.
+- `init`, `refresh`, `translate` and `clarify` are agent workflows, not CLI
+  commands. Missing files never authorize init. Clarification stops before
+  implementation. `task verify --run` requires explicit execution permission
+  and trusted commands. Feedback follows only its isolated operation reference.
+- Create a work item only if requested/required or substantial work needs durable
+  scope, acceptance, verification or handoff; not for each prompt or small edit.
 
-For operations that activate this skill, use a purpose-built read-only Toudocu
-command as the first source when one provides the required information. Do not
-replace it with broad search across canonical documentation. Treat its result
-as a map, not a request to load every related document. For Ready+ task work,
-start with `task context --format text` as described in `workflows.md`, then
-read only the missing task details and relevant source sections.
+## Minimum context and validation
 
-Skip a Toudocu discovery command when the exact file is already known, no
-relationships or entity search are needed, and the task is to read that file's
-details. Ordinary code search remains valid for implementations, API consumers,
-symbols, tests, and other source-code details.
+Use purpose-built read-only discovery before broad documentation search:
+text task context, bounded search, or changes for the requested scope. Known
+files may be read directly; code search is separate. Read relevant sections,
+not every returned document. Reuse facts instead of loading both JSON and
+Markdown or the same file through aliases.
 
-If Toudocu returns `DOCS_MIGRATION_REQUIRED`, read `Migration` from the
-diagnostic and open `references/migrations/<Migration>.md`. Apply that guide
-only to canonical documentation, set the guide's target
-`documentationVersion` before validation, run `toudocu check`, and fix the
-remaining migration-related errors. Preserve unrelated information and never
-invent a value that project evidence cannot establish. After the check passes,
-continue with the ordinary current-format workflow.
+Default to compact text. Keep large JSON, diffs and test logs outside model
+context; select needed fields/excerpts before displaying them. For structured
+check/verification output use [report-output](references/report-output.md).
+Never treat truncation, omitted pages or a summary as proof of success. Preserve
+CLI exit codes. Retain only a checkpoint of scope, exclusions, decisions,
+changed paths, next step and latest checks; refresh uncertain/changed evidence
+and perform current readiness/digest checks before state-changing actions.
 
-## Preserve global invariants
-
-1. Give repository evidence priority over assumptions. Never invent behavior,
-   status, relationships, procedures, terminology, or other facts to fill gaps
-   or silence diagnostics.
-2. Treat generated portals, builds, reports, and example output as derived
-   artifacts, never as documentation sources to edit.
-3. Never infer `$toudocu init` from missing files, first use, or an ordinary
-   documentation request.
-4. Treat `$toudocu init`, `$toudocu refresh`, `$toudocu refresh diff`,
-   translation workflows, and `$toudocu clarify` as agent workflows, not
-   Toudocu CLI commands.
-5. Enter clarification only when the user explicitly requests
-   `$toudocu clarify` or asks Toudocu for a clarification interview. It
-   authorizes the investigation and documentation actions in `clarify.md`,
-   never implementation.
-6. Run `task verify --run` only when the user explicitly requests execution of
-   repository verification commands and the repository is trusted.
-7. Each configured locale root is an independent documentation and backlog
-   source when that root is selected. Read only the active root except for an
-   explicit translation workflow, which reads one source/target pair.
-8. Process Agent Feedback only through `toudocu agent next|respond`. Its
-   operation reference owns validation and delivery; do not run ordinary
-   checks, tests, or builds for feedback.
-9. Create a durable work item only when the user or repository explicitly
-   requires one, or substantial work needs durable scope, acceptance,
-   verification, or handoff. Do not create one for an ordinary request or small
-   local edit.
-
-## Gather minimum evidence
-
-Resolve or read paths, CLI, CI, glossary, standards, runbooks, and diagnostics
-only when required by the current operation. Follow repository instructions,
-start with the directly relevant sources, and expand evidence only when needed
-for a reliable result.
-
-When Toudocu provides documentation or task context, use it before generic
-filesystem search over canonical documentation. Search the filesystem after
-Toudocu narrows the context or for evidence outside Toudocu's model.
-
-Keep large reports out of the model context: when JSON is needed, select the
-required fields in a subprocess before displaying them. Do not read an entire
-saved report merely to extract a few fields. Reuse current evidence rather than
-loading the same facts from both JSON and Markdown, or reading the same file
-through another path or symlink. On continuation, retain a short checkpoint of
-the task, agreed scope, decisions, changed files, and latest check results;
-refresh only missing, changed, or uncertain evidence. This never waives a
-required read or a current readiness check before a state-changing action.
-
-An initial read-only check is optional when establishing a baseline for a large
-change, existing diagnostics, a validation or CI failure, or an explicit user
-request. Read-only review needs no check unless the answer depends on structural
-diagnostics.
-
-## Validate
-
-Choose checks proportional to the changed behavior and its risks. Reuse existing
-coverage and group criteria served by the same command. Do not manufacture new
-tests or duplicate suite runs to fill verification labels; see
-[references/work-item-model.md](references/work-item-model.md) for work items.
-
-Ordinary source-documentation mutations require the ordinary project check
-unless the selected operation reference defines its own validation or delivery
-policy. Run strict validation only when repository policy or the user requires
-it, and build the portal only when requested or needed for verification.
+A baseline check is optional unless the selected operation requires it. After
+source mutations run the project check once with `--strict` only when required;
+do not repeat ordinary + strict checks or successful suites and their subsets
+without new changes/failures. Respect prohibited checks, report unverified work,
+and build only when requested or necessary. Structural success is not semantic
+proof. If `DOCS_MIGRATION_REQUIRED` appears, read the named
+`references/migrations/<Migration>.md`, migrate only canonical sources, set its
+target version, validate, then resume the requested workflow.
