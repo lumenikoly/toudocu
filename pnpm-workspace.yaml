@@ -1,10 +1,8 @@
 packages:
   - apps/*
   - packages/*
-  - packages/integrations/*
 
 allowBuilds:
-  better-sqlite3: true
   '@scarf/scarf': true
   node-pty: true
 sharedWorkspaceLockfile: true

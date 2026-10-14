@@ -47,7 +47,7 @@ be:
 ```bash
 toudocu task context <ID> <docs-root> \
   --repository-root <repository-root> \
-  --format json
+  --format text
 ```
 
 For a free-form subject, discover relevant source documents first with:
@@ -60,17 +60,24 @@ When the subject concerns current repository changes, use the applicable
 read-only `toudocu changes`, `toudocu changes file`, or `toudocu task changes`
 command.
 
-Use returned documents, entities, dependencies, related standards, runbooks,
-screens, flows, and diagnostics as the initial investigation map.
+For an existing Ready+ work item, use the text report as the initial map and
+read the named task contract once. Request only the JSON fields needed for
+issue details, dependency states, or typed records, filtering them before they
+enter the model context. The full task-context JSON embeds source text and is
+not a compact brief. For a free-form subject, use the search results as the map;
+no task contract is assumed.
 
 Follow [workflows.md](workflows.md) for repository conventions, exact CLI
 usage, documentation roots, repository root, translation boundaries, and
 read-only command behavior.
 
-Use the returned relationships and paths to identify the minimum canonical
-documents that need full inspection. Then inspect the minimum relevant code,
-tests, contracts, configuration, CI, UI, history, or other repository evidence
-needed to understand the subject.
+Read every standard and runbook named in the selected context and inspect the
+scope of other standards manually, as required by repository policy. Use the
+returned relationships and paths to identify other canonical sections needed
+to understand the subject. Reuse already-read current evidence on subsequent
+rounds instead of reloading the task report and related documents. Then inspect
+the minimum relevant code, tests, contracts, configuration, CI, UI, history, or
+other repository evidence needed to understand the subject.
 
 Do not begin by grepping the entire documentation tree when Toudocu can provide
 the relevant document or task context directly. Generic repository search

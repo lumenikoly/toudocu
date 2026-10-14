@@ -39,9 +39,10 @@ Input:
 Expected transcript:
 
 - the skill activates;
-- `task context --format json` runs before broad search across canonical
+- `task context --format text` runs before broad search across canonical
   documentation;
-- the returned documents and relationships form the starting map;
+- the returned paths and relationships form the starting map;
+- the task Markdown is read once; related documents are read only as needed;
 - repository or code search may inspect source code afterward.
 
 ### Continue a bug investigation
@@ -52,8 +53,10 @@ Input:
 
 Expected transcript:
 
-- `task context --format json` first loads the existing Ready+ work item;
-- manual traversal of canonical documentation does not replace that command.
+- without a current map, `task context --format text` first maps the existing
+  Ready+ work item, then the agent reads its missing contract details;
+- with a current map and already-read contract, the agent reuses them;
+- manual traversal of canonical documentation does not replace initial discovery.
 
 ### Prepare context and a verification plan
 
@@ -64,7 +67,7 @@ Input:
 
 Expected transcript:
 
-1. `task context --format json`;
+1. `task context --format text`, then the missing task contract details;
 2. `task verify --dry-run --format json`.
 
 The agent does not run `task verify --run`.
@@ -101,14 +104,54 @@ Input:
 
 Expected transcript:
 
-1. `task context --format json`;
+1. `task context --format text`, then the missing task contract details;
 2. repository or code search for Go consumers.
 
 Toudocu maps the task context but does not replace source-code search.
 
-A workflow case passes only when the required Toudocu command actually runs
-before an equivalent broad raw search across canonical documentation. Direct
-reading of a known file and later source-code search remain allowed. The
+### Large task context
+
+The fixture has a Ready task whose JSON context embeds large related documents.
+
+Input:
+
+> Implement TASK-CLI-014.
+
+Expected transcript:
+
+- the initial context command uses `--format text`, not a full JSON dump;
+- the task contract and every context-linked standard and runbook are read
+  before changes; the scope of other standards is inspected manually;
+- related source sections are read only when needed;
+- if issue details or dependency states require JSON, the agent filters the
+  needed fields in a subprocess before displaying them;
+- the agent never reads the entire saved JSON and then repeats its source text
+  from Markdown.
+
+### Continue with current evidence
+
+The conversation already contains the task contract, applicable rules, relevant
+source sections, a checkpoint, and check results; none has changed.
+
+Input:
+
+> Continue TASK-CLI-014 with the agreed scope.
+
+Expected transcript:
+
+- no repeated context command or duplicate document reads merely for a new turn;
+- the checkpoint retains scope, exclusions, decisions, source paths, next step,
+  and check outcomes;
+- missing or uncertain evidence is refreshed selectively;
+- when the task or its relationships change, the compact map is refreshed;
+- an old saved report never proves current state, and state-changing actions
+  still perform their required readiness or digest checks.
+
+For a fresh-context workflow case, the required Toudocu command must actually
+run before an equivalent broad raw search across canonical documentation. A
+continuation case with current evidence must reuse it instead of repeating
+discovery. Direct reading of a known file and later source-code search remain
+allowed. The
 transcript must not contain irrelevant Toudocu commands, an unauthorized
 `task verify --run`, or use of configured translation roots as canonical
 documentation or work-item context.
@@ -124,7 +167,8 @@ Input:
 Expected transcript:
 
 - the skill activates and selects `references/clarify.md`;
-- `task context --format json` runs before broad documentation search;
+- `task context --format text` runs before broad documentation search;
+- the task contract is read once, with targeted source reads afterward;
 - implementation code does not change;
 - `task verify --run` does not run.
 

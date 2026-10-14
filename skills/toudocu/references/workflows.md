@@ -45,7 +45,7 @@ does not require running every listed command in sequence or make `check`,
 
 | Required information | First source |
 |---|---|
-| Context for an existing Ready+ `TASK-*` or `BUG-*` | `toudocu task context ... --format json` |
+| Context for an existing Ready+ `TASK-*` or `BUG-*` | `toudocu task context ... --format text`, then missing task details |
 | Documents or entities by ID, title, or topic | `toudocu search` |
 | Documentation changes | `toudocu changes`, `changes file`, or `task changes` |
 | Task verification plan | `toudocu task verify ... --dry-run --format json` |
@@ -85,7 +85,7 @@ reader-first gate, required semantic gates, and final structural check pass.
 | `task init` / `scaffold` | Creates one file | Create a neutral ID-based scaffold |
 | `task ready` | No | Validate a full Draft or Ready contract |
 | `task candidates` | No | List active Draft and Ready candidates with contract and dependency readiness |
-| `task context` | No | Read full Ready+ task-local context |
+| `task context` | No | Map Ready+ task-local context; JSON also embeds source text |
 | `task verify --dry-run` | Read-only unless `--report` writes JSON | Inspect the verification plan |
 | `task verify --run` | Executes trusted repository commands | Verify an explicitly requested task |
 | `task archive` | Moves one file | Archive one valid Done or Cancelled task |
@@ -93,7 +93,8 @@ reader-first gate, required semantic gates, and final structural check pass.
 | `skill status` / `version` | No | Inspect the installed skill or CLI version |
 | `skill install` / `update` / `uninstall` | Writes the selected skill target | Manage the offline skill package |
 
-Prefer JSON for agent diagnosis and text for human confirmation:
+Prefer JSON for structured diagnosis and text for a compact task map or human
+confirmation. Filter large JSON reports before displaying them to the agent:
 
 ```bash
 toudocu check <docs-root> --repository-root <repository-root> --format json
@@ -176,14 +177,14 @@ question, small local edit, or behavior-preserving refactor.
 For qualifying new work, start with `search`, `task init`, semantic filling and
 read-only `task ready`.
 
-For implementation, continuation, analysis, or debugging of an existing Ready+
-`TASK-*` or `BUG-*`, the first operation that gathers documentation context
-must be:
+When first gathering documentation context for implementation, continuation,
+analysis, or debugging of an existing Ready+ `TASK-*` or `BUG-*`, start with a
+compact map:
 
 ```bash
 toudocu task context <TASK-ID> <docs-root> \
   --repository-root <repository-root> \
-  --format json
+  --format text
 ```
 
 Before this command, read only what is required to determine the canonical
@@ -192,11 +193,33 @@ repository-specific CLI flags. Do not search canonical documentation with
 `rg`, traverse it with `find`, inventory `docs/` manually, or read related
 Markdown files in sequence as a substitute for `task context`.
 
-Use the returned work item, dependencies, related typed entities, `documents`,
-`requiredReads`, and diagnostics or issues as the starting map. If the compact
-context is insufficient, read those documents in full and inspect the
-implementation with ordinary repository or code search. `task context` is
-read-only and never implies `task verify --run`.
+The text report maps the task path, related IDs, scope paths, document paths,
+and counts; it does not contain the full task contract or issue details. Read
+the named task Markdown once for its result, scope, exclusions, acceptance
+criteria, plan, and verification commands. Read every standard and runbook named
+in task context before changes; inspect the declared scope of other standards
+manually, as required by repository policy. Other returned document paths are
+candidates for targeted reads, not a bulk-reading checklist.
+Inspect relevant module rules, scenario sections, and implementation only as
+needed; do not load whole documents when a section answers the question.
+
+Use JSON when issue details, dependency states, typed records, or automation
+require it. The JSON report includes source Markdown and can repeat facts from
+its typed records; it is not a compact brief. Filter the required fields in a
+subprocess before displaying output, or save it outside source documentation
+and extract those fields without reading the whole file. Do not infer readiness
+from text counts or status alone. `task context` is read-only and never implies
+`task verify --run`.
+
+On continuation, reuse the current map and already-read task, standards,
+runbooks, and source sections. Do not rerun discovery or reread them merely
+because another turn has started. Refresh the compact map when the task or its
+relationships change, or the prior map is missing or uncertain; reread only
+changed or missing evidence. A checkpoint should retain agreed scope and
+exclusions, key decisions, changed source paths, the next step, and latest
+checks with their outcomes. It does not replace mandatory evidence that was
+never read, and state-changing actions still require their current readiness
+or digest checks. Never reuse an old saved report as proof of current state.
 
 Never read a translated `TASK-*` or `BUG-*` as task context. The canonical root
 is the only task source even when a translation profile contains a complete

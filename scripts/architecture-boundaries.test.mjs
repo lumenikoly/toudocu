@@ -89,24 +89,3 @@ test('contracts cannot import implementations and core cannot import HTTP or CLI
     rmSync(core.file, { force: true });
   }
 });
-
-test('bb integration depends on contracts and SDK, never Toudocu implementations', () => {
-  const { file } = fixture(
-    'packages/integrations/bb/src/architecture-boundary-fixture.ts',
-    "import '@get-bb/plugin-sdk'; import '@toudocu/contracts'; import '@toudocu/core'; import '@toudocu/application'; import '@toudocu/platform-node'; import '@toudocu/server'; import '../../../core/src/index.js';",
-  );
-  try {
-    assert.deepEqual(
-      checkArchitecture([file]).map(({ specifier }) => specifier),
-      [
-        '@toudocu/core',
-        '@toudocu/application',
-        '@toudocu/platform-node',
-        '@toudocu/server',
-        '../../../core/src/index.js',
-      ],
-    );
-  } finally {
-    rmSync(file, { force: true });
-  }
-});

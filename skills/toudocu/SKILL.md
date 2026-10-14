@@ -59,8 +59,9 @@ Load additional references only when the request needs them:
 For operations that activate this skill, use a purpose-built read-only Toudocu
 command as the first source when one provides the required information. Do not
 replace it with broad search across canonical documentation. Treat its result
-as the map of documents, relationships, and entities, then read the identified
-Markdown files and inspect source code with ordinary repository tools.
+as a map, not a request to load every related document. For Ready+ task work,
+start with `task context --format text` as described in `workflows.md`, then
+read only the missing task details and relevant source sections.
 
 Skip a Toudocu discovery command when the exact file is already known, no
 relationships or entity search are needed, and the task is to read that file's
@@ -111,9 +112,18 @@ only when required by the current operation. Follow repository instructions,
 start with the directly relevant sources, and expand evidence only when needed
 for a reliable result.
 
-When Toudocu provides structured documentation or task context, use it before
-generic filesystem search over canonical documentation. Search the filesystem
-after Toudocu narrows the context or for evidence outside Toudocu's model.
+When Toudocu provides documentation or task context, use it before generic
+filesystem search over canonical documentation. Search the filesystem after
+Toudocu narrows the context or for evidence outside Toudocu's model.
+
+Keep large reports out of the model context: when JSON is needed, select the
+required fields in a subprocess before displaying them. Do not read an entire
+saved report merely to extract a few fields. Reuse current evidence rather than
+loading the same facts from both JSON and Markdown, or reading the same file
+through another path or symlink. On continuation, retain a short checkpoint of
+the task, agreed scope, decisions, changed files, and latest check results;
+refresh only missing, changed, or uncertain evidence. This never waives a
+required read or a current readiness check before a state-changing action.
 
 An initial read-only check is optional when establishing a baseline for a large
 change, existing diagnostics, a validation or CI failure, or an explicit user
