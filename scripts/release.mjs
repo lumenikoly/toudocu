@@ -89,6 +89,9 @@ async function verifyNativeArtifacts(nativeRoot) {
     }
     await stat(join(nativeRoot, target, 'toudocu-native.node'));
     await stat(join(nativeRoot, target, 'node-pty', 'pty.node'));
+    if (target.startsWith('darwin-')) {
+      await stat(join(nativeRoot, target, 'node-pty', 'spawn-helper'));
+    }
   }
 }
 
@@ -153,7 +156,12 @@ async function injectNativeArtifacts(stage, nativeRoot) {
 
   for (const target of targets) {
     const source = join(nativeRoot, target);
-    await copyDirectory(join(source, 'node-pty'), join(nodePty, 'prebuilds', target));
+    const ptyPrebuild = join(nodePty, 'prebuilds', target);
+    await copyDirectory(join(source, 'node-pty'), ptyPrebuild);
+    if (target.startsWith('darwin-')) {
+      // CI artifact downloads do not preserve executable permissions.
+      await chmod(join(ptyPrebuild, 'spawn-helper'), 0o755);
+    }
     await mkdir(join(platformNode, 'native', 'prebuilds', target), { recursive: true });
     await copyFile(
       join(source, 'toudocu-native.node'),
@@ -347,19 +355,31 @@ async function buildRelease(nativeRoot, output, version) {
   }
 }
 
-async function smokeTest(packagePath) {
+function npmInvocation(args, platform = process.platform) {
+  if (platform === 'win32') {
+    return {
+      file: process.execPath,
+      args: [join(dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js'), ...args],
+    };
+  }
+  return { file: 'npm', args };
+}
+
+async function smokeTest(packagePath, execute = execFileSync) {
   const temporary = await mkdtemp(join(tmpdir(), 'toudocu-install-'));
   try {
-    execFileSync('npm', ['install', '--prefix', temporary, packagePath], {
-      stdio: 'inherit',
-    });
-    const executable = join(
-      temporary,
-      'node_modules',
-      '.bin',
-      process.platform === 'win32' ? 'toudocu.cmd' : 'toudocu',
+    const npm = npmInvocation(['install', '--prefix', temporary, packagePath]);
+    execute(npm.file, npm.args, { stdio: 'inherit' });
+    await stat(
+      join(
+        temporary,
+        'node_modules',
+        '.bin',
+        process.platform === 'win32' ? 'toudocu.cmd' : 'toudocu',
+      ),
     );
-    execFileSync(executable, ['version'], { cwd: temporary, stdio: 'inherit' });
+    const entrypoint = join(temporary, 'node_modules', 'toudocu', 'dist', 'main.js');
+    execute(process.execPath, [entrypoint, 'version'], { cwd: temporary, stdio: 'inherit' });
 
     const testScript = `
       import { mkdtemp, writeFile } from 'node:fs/promises';
@@ -379,12 +399,12 @@ async function smokeTest(packagePath) {
         if (event.type === 'exit') resolve();
       }));
       terminal.start();
-      terminal.write('exit\\n');
+      terminal.write(process.platform === 'win32' ? 'exit\\r' : 'exit\\n');
       await exit;
     `;
     const smokePath = join(temporary, 'release-smoke.mjs');
     await writeFile(smokePath, testScript);
-    execFileSync(process.execPath, [smokePath], {
+    execute(process.execPath, [smokePath], {
       cwd: temporary,
       stdio: 'inherit',
     });
@@ -393,16 +413,20 @@ async function smokeTest(packagePath) {
   }
 }
 
-const command = process.argv[2];
-if (command === 'collect-native') {
-  await collectNative(option('output'));
-} else if (command === 'package') {
-  await buildRelease(option('native-root'), option('output'), await releaseVersion());
-} else if (command === 'smoke') {
-  const version = await releaseVersion();
-  await smokeTest(
-    option('package', join(repositoryRoot, 'dist', 'release', `toudocu-${version}.tgz`)),
-  );
-} else {
-  throw new Error(`unknown release command: ${command ?? '(missing)'}`);
+export { injectNativeArtifacts, npmInvocation, smokeTest, verifyNativeArtifacts };
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const command = process.argv[2];
+  if (command === 'collect-native') {
+    await collectNative(option('output'));
+  } else if (command === 'package') {
+    await buildRelease(option('native-root'), option('output'), await releaseVersion());
+  } else if (command === 'smoke') {
+    const version = await releaseVersion();
+    await smokeTest(
+      option('package', join(repositoryRoot, 'dist', 'release', `toudocu-${version}.tgz`)),
+    );
+  } else {
+    throw new Error(`unknown release command: ${command ?? '(missing)'}`);
+  }
 }

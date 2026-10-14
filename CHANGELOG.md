@@ -16,6 +16,8 @@
 - Changed distribution to a bundled npm package and release archives with
   prebuilt native dependencies for Linux x64, macOS arm64, and Windows x64.
   Removed Linux arm64 builds and tests from CI and releases.
+- Fixed Windows release smoke installation and restored macOS PTY spawn-helper
+  executable permissions after CI artifact downloads.
 
 ## 0.0.7
 
