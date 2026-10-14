@@ -41,7 +41,6 @@ irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 |
 | Система | Архитектура | Архив |
 |---|---|---|
 | Linux | x64 | `toudocu-linux-x64.tar.gz` |
-| Linux | arm64 | `toudocu-linux-arm64.tar.gz` |
 | macOS | arm64 | `toudocu-darwin-arm64.tar.gz` |
 | Windows | x64 | `toudocu-win32-x64.tar.gz` |
 
