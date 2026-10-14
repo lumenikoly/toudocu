@@ -368,8 +368,20 @@ function npmInvocation(args, platform = process.platform) {
 async function smokeTest(packagePath, execute = execFileSync) {
   const temporary = await mkdtemp(join(tmpdir(), 'toudocu-install-'));
   try {
-    const npm = npmInvocation(['install', '--prefix', temporary, packagePath]);
-    execute(npm.file, npm.args, { stdio: 'inherit' });
+    console.log('[release smoke] Installing package (timeout: 10 minutes).');
+    const npm = npmInvocation([
+      'install',
+      '--no-audit',
+      '--no-fund',
+      '--prefix',
+      temporary,
+      packagePath,
+    ]);
+    execute(npm.file, npm.args, {
+      stdio: 'inherit',
+      timeout: 10 * 60_000,
+      killSignal: 'SIGKILL',
+    });
     await stat(
       join(
         temporary,
@@ -379,36 +391,89 @@ async function smokeTest(packagePath, execute = execFileSync) {
       ),
     );
     const entrypoint = join(temporary, 'node_modules', 'toudocu', 'dist', 'main.js');
-    execute(process.execPath, [entrypoint, 'version'], { cwd: temporary, stdio: 'inherit' });
+    console.log('[release smoke] Checking CLI version (timeout: 30 seconds).');
+    execute(process.execPath, [entrypoint, 'version'], {
+      cwd: temporary,
+      stdio: 'inherit',
+      timeout: 30_000,
+      killSignal: 'SIGKILL',
+    });
 
-    const testScript = `
-      import { mkdtemp, writeFile } from 'node:fs/promises';
+    const testScript = String.raw`
+      import { randomUUID } from 'node:crypto';
+      import { mkdtemp, rm, writeFile } from 'node:fs/promises';
       import { tmpdir } from 'node:os';
       import { join } from 'node:path';
       import { execFileSync } from 'node:child_process';
+      console.log('[release smoke] Loading native platform module.');
       const platform = await import('./node_modules/toudocu/node_modules/@toudocu/platform-node/dist/index.js');
       const { ProjectTerminal, tryLockReviewFile, unlockReviewFile } = platform;
       const root = await mkdtemp(join(tmpdir(), 'toudocu-release-smoke-'));
-      await writeFile(join(root, 'file.txt'), 'ok');
-      execFileSync('git', ['init', '--quiet'], { cwd: root });
-      const lock = tryLockReviewFile(join(root, 'review.md'));
-      if (!lock) throw new Error('native lock unavailable');
-      unlockReviewFile(lock);
       const terminal = new ProjectTerminal(root);
-      const exit = new Promise((resolve) => terminal.subscribe((event) => {
-        if (event.type === 'exit') resolve();
-      }));
-      terminal.start();
-      terminal.write(process.platform === 'win32' ? 'exit\\r' : 'exit\\n');
-      await exit;
+      let timer;
+      let unsubscribe = () => {};
+      try {
+        console.log('[release smoke] Checking filesystem and Git.');
+        await writeFile(join(root, 'file.txt'), 'ok');
+        execFileSync('git', ['init', '--quiet'], {
+          cwd: root,
+          timeout: 30_000,
+          killSignal: 'SIGKILL',
+        });
+        console.log('[release smoke] Checking native file lock.');
+        const lock = tryLockReviewFile(join(root, 'review.md'));
+        if (!lock) throw new Error('native lock unavailable');
+        unlockReviewFile(lock);
+
+        // The marker is absent from the input, so terminal echo cannot pass the test.
+        const marker = 'toudocu-pty-' + randomUUID();
+        process.env.TOUDOCU_RELEASE_SMOKE_MARKER = marker;
+        const command = process.platform === 'win32'
+          ? 'echo %TOUDOCU_RELEASE_SMOKE_MARKER%\r'
+          : 'printf "%s\\n" "$TOUDOCU_RELEASE_SMOKE_MARKER"\n';
+        console.log('[release smoke] Checking PTY command output (timeout: 30 seconds).');
+        await new Promise((resolve, reject) => {
+          let output = '';
+          timer = setTimeout(() => reject(new Error('PTY command timed out')), 30_000);
+          unsubscribe = terminal.subscribe((event) => {
+            if (event.type === 'exit') {
+              reject(new Error('PTY exited before command output was verified'));
+            } else if (event.type === 'output') {
+              output = (output + Buffer.from(event.data, 'base64').toString('utf8')).slice(-65_536);
+              if (output.includes(marker)) resolve();
+            }
+          });
+          terminal.start();
+          terminal.write(command);
+        });
+        clearTimeout(timer);
+        console.log('[release smoke] PTY command verified; closing terminal.');
+        // Natural shell exit leaves a referenced ConPTY worker in node-pty 1.1.0.
+        await terminal.close();
+        if (terminal.snapshot().active) throw new Error('PTY remained active after close');
+        console.log('[release smoke] PTY closed.');
+      } finally {
+        clearTimeout(timer);
+        unsubscribe();
+        try {
+          await terminal.close();
+        } finally {
+          await rm(root, { recursive: true, force: true });
+        }
+      }
     `;
     const smokePath = join(temporary, 'release-smoke.mjs');
     await writeFile(smokePath, testScript);
+    console.log('[release smoke] Checking native services (timeout: 60 seconds).');
     execute(process.execPath, [smokePath], {
       cwd: temporary,
       stdio: 'inherit',
+      timeout: 60_000,
+      killSignal: 'SIGKILL',
     });
+    console.log('[release smoke] Native smoke completed.');
   } finally {
+    console.log('[release smoke] Removing temporary installation.');
     await rm(temporary, { recursive: true, force: true });
   }
 }

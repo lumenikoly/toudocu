@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { spawnSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { chmod, mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -46,6 +46,97 @@ function smokeExecutor(failure) {
     }
   };
   return { calls, execute };
+}
+
+function installedSmokeExecutor(echoOnly = false) {
+  const mock = smokeExecutor();
+  const execute = (file, args, options) => {
+    mock.execute(file, args, options);
+    const prefixIndex = args.indexOf('--prefix');
+    if (prefixIndex !== -1) {
+      const temporary = args[prefixIndex + 1];
+      const platform = join(
+        temporary,
+        'node_modules',
+        'toudocu',
+        'node_modules',
+        '@toudocu',
+        'platform-node',
+      );
+      mkdirSync(join(platform, 'dist'), { recursive: true });
+      writeFileSync(join(platform, 'package.json'), '{"type":"module"}');
+      writeFileSync(
+        join(platform, 'dist', 'index.js'),
+        String.raw`
+        import assert from 'node:assert/strict';
+        import { Worker } from 'node:worker_threads';
+        const echoOnly = ${echoOnly};
+        if (echoOnly) {
+          const schedule = globalThis.setTimeout;
+          globalThis.setTimeout = (callback, milliseconds, ...args) =>
+            schedule(callback, milliseconds === 30_000 ? 25 : milliseconds, ...args);
+        }
+        export const tryLockReviewFile = () => ({});
+        export const unlockReviewFile = () => {};
+        export class ProjectTerminal {
+          #listeners = new Set();
+          #active = false;
+          #worker;
+          subscribe(listener) {
+            this.#listeners.add(listener);
+            return () => this.#listeners.delete(listener);
+          }
+          #output(data) {
+            for (const listener of this.#listeners)
+              listener({ type: 'output', data: Buffer.from(data).toString('base64') });
+          }
+          #exit() {
+            for (const listener of this.#listeners) listener({ type: 'exit' });
+          }
+          start() {
+            this.#active = true;
+            this.#worker = new Worker('setInterval(() => {}, 1000)', { eval: true });
+          }
+          write(data) {
+            if (data.startsWith('exit')) {
+              // Mirror node-pty's natural-exit leak: exit arrives, but the worker stays alive.
+              this.#active = false;
+              this.#exit();
+              return;
+            }
+            const marker = process.env.TOUDOCU_RELEASE_SMOKE_MARKER;
+            assert.equal(typeof marker, 'string');
+            assert(!data.includes(marker), 'input echo must not contain the expected output');
+            this.#output(data);
+            if (!echoOnly) {
+              this.#output(marker.slice(0, 15));
+              this.#output(marker.slice(15));
+            }
+          }
+          snapshot() { return { active: this.#active }; }
+          async close() {
+            if (!this.#active) return;
+            this.#active = false;
+            await this.#worker.terminate();
+            console.log('[fixture] Worker closed.');
+            this.#exit();
+          }
+        }
+      `,
+      );
+    } else if (args[0].endsWith('release-smoke.mjs')) {
+      const temporary = join(options.cwd, 'tmp');
+      mkdirSync(temporary);
+      return execFileSync(file, args, {
+        ...options,
+        encoding: 'utf8',
+        stdio: 'pipe',
+        timeout: 3_000,
+        env: { ...process.env, TMPDIR: temporary, TMP: temporary, TEMP: temporary },
+      });
+    }
+  };
+  return { calls: mock.calls, execute };
 }
 
 test('Windows npm uses its JavaScript entrypoint without a command shell', () => {
@@ -134,18 +225,25 @@ test('smoke runs the installed CLI through Node and still exercises the PTY', as
     if (args[0].endsWith('release-smoke.mjs')) {
       const script = readFileSync(args[0], 'utf8');
       assert.match(script, /terminal\.start\(\)/);
-      assert(
-        script.includes("terminal.write(process.platform === 'win32' ? 'exit\\r' : 'exit\\n')"),
-      );
+      assert.match(script, /terminal\.write\(command\)/);
+      assert.match(script, /await terminal\.close\(\)/);
+      assert.match(script, /PTY command timed out/);
       assert.match(script, /tryLockReviewFile\(/);
     }
   });
   assert.equal(calls.length, 3);
+  assert(calls[0].args.includes('--no-audit'));
+  assert(calls[0].args.includes('--no-fund'));
+  assert.deepEqual(
+    calls.map(({ options }) => options.timeout),
+    [600_000, 30_000, 60_000],
+  );
+  assert(calls.every(({ options }) => options.killSignal === 'SIGKILL'));
   const temporary = calls[0].args[calls[0].args.indexOf('--prefix') + 1];
   assert.deepEqual(calls[1], {
     file: process.execPath,
     args: [join(temporary, 'node_modules', 'toudocu', 'dist', 'main.js'), 'version'],
-    options: { cwd: temporary, stdio: 'inherit' },
+    options: { cwd: temporary, stdio: 'inherit', timeout: 30_000, killSignal: 'SIGKILL' },
   });
   assert.equal(calls[2].file, process.execPath);
   assert.deepEqual(calls[2].args, [join(temporary, 'release-smoke.mjs')]);
@@ -159,6 +257,32 @@ test('smoke propagates PTY failures and cleans its temporary installation', asyn
   await assert.rejects(smokeTest('/tmp/package.tgz', execute), failure);
   const temporary = calls[0].args[calls[0].args.indexOf('--prefix') + 1];
   assert.equal(calls.length, 3);
+  await assert.rejects(stat(temporary), { code: 'ENOENT' });
+});
+
+test('native smoke verifies command output and closes the worker before exiting', async () => {
+  const { calls, execute } = installedSmokeExecutor();
+  let output;
+  await smokeTest('/tmp/package.tgz', (file, args, options) => {
+    const result = execute(file, args, options);
+    if (args[0].endsWith('release-smoke.mjs')) output = result;
+  });
+  assert.match(output, /PTY command verified/);
+  assert.match(output, /\[fixture\] Worker closed/);
+  assert.match(output, /PTY closed/);
+  const temporary = calls[0].args[calls[0].args.indexOf('--prefix') + 1];
+  await assert.rejects(stat(temporary), { code: 'ENOENT' });
+});
+
+test('native smoke times out on input echo alone and still closes its worker', async () => {
+  const { calls, execute } = installedSmokeExecutor(true);
+  await assert.rejects(smokeTest('/tmp/package.tgz', execute), (error) => {
+    assert.equal(error.status, 1);
+    assert.match(String(error.stderr), /PTY command timed out/);
+    assert.match(String(error.stdout), /\[fixture\] Worker closed/);
+    return true;
+  });
+  const temporary = calls[0].args[calls[0].args.indexOf('--prefix') + 1];
   await assert.rejects(stat(temporary), { code: 'ENOENT' });
 });
 
