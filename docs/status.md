@@ -43,7 +43,7 @@ HTML, диаграммы, HTTP-раздачу и ограничение врем
 
 ## Готовность
 
-Готовый npm/release-пакет требует Node.js 24+, но не требует Go, pnpm,
+Готовый release-пакет требует Node.js 24+, но не требует Go, pnpm,
 TypeScript, Python, `node-gyp` или compiler toolchain. `pnpm check` проверяет
 форматирование, lint, строгую типизацию, unit/integration и compatibility tests,
 а затем каноническую документацию. Отдельный browser suite проверяет React UI.
@@ -54,5 +54,5 @@ Release workflow собирает native PTY на Linux x64, macOS arm64 и Wind
 ## Следующий фокус
 
 Выпустить `0.0.8` после полного цикла проверок и установки готового пакета
-на Linux x64, macOS arm64 и Windows x64. Публикация npm-пакета и GitHub Release
-выполняется отдельным явным запуском release workflow из `main`.
+на Linux x64, macOS arm64 и Windows x64. Публикация GitHub Release выполняется
+отдельным явным запуском release workflow из `main`; публикации в npm registry нет.

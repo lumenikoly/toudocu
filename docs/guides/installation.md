@@ -4,15 +4,8 @@ Toudocu требует Node.js 24 или новее. Готовый выпуск
 браузерные ресурсы, skill и native PTY для выбранной платформы; Go, pnpm,
 TypeScript, Python, `node-gyp` и compiler toolchain пользователю не нужны.
 
-## npm
-
-```bash
-npm install --global toudocu
-toudocu version
-```
-
-Project-local установка использует тот же пакет через `npm install toudocu` и
-`npx toudocu`.
+Готовые выпуски распространяются через GitHub Releases, без публикации в
+npm registry.
 
 ## Release installer
 
@@ -26,6 +19,12 @@ Windows PowerShell:
 
 ```powershell
 irm https://github.com/lumenikoly/toudocu/releases/latest/download/install.ps1 | iex
+```
+
+Проверьте установку:
+
+```bash
+toudocu version
 ```
 
 Установщик проверяет Node.js, выбирает `linux|darwin|win32` и `x64|arm64`,

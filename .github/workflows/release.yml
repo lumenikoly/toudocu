@@ -91,12 +91,9 @@ jobs:
       - run: pnpm build
       - name: Exercise platform services
         run: >-
-          pnpm exec vitest run
-          packages/platform-node/src/filesystem
-          packages/platform-node/src/git
+          pnpm exec vitest run packages/platform-node/src/filesystem packages/platform-node/src/git
           packages/platform-node/src/process-runner.test.ts
-          packages/platform-node/src/project.test.ts
-          packages/platform-node/src/pty
+          packages/platform-node/src/project.test.ts packages/platform-node/src/pty
       - run: node scripts/release.mjs collect-native --output dist/native
       - uses: actions/upload-artifact@v4
         with:
@@ -175,13 +172,8 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write
-      id-token: write
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          registry-url: https://registry.npmjs.org
       - uses: actions/download-artifact@v4
         with:
           name: release-notes
@@ -189,28 +181,21 @@ jobs:
         with:
           name: release-bundle
           path: dist/release
-      - name: Publish npm package and GitHub release
+      - name: Publish GitHub release
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           VERSION: ${{ inputs.version }}
           CHANNEL: ${{ inputs.channel }}
           RC_NUMBER: ${{ inputs.rc_number }}
         run: |
           set -euo pipefail
           release_version="$VERSION"
-          npm_tag="latest"
           release_flags=()
           if [[ "$CHANNEL" == "rc" ]]; then
             release_version="$VERSION-rc.$RC_NUMBER"
-            npm_tag="next"
             release_flags+=(--prerelease)
           fi
-          npm publish "dist/release/toudocu-$release_version.tgz" \
-            --access public \
-            --tag "$npm_tag" \
-            --provenance
           gh release create "$release_version" dist/release/* \
             --target "$GITHUB_SHA" \
             --title "$release_version" \

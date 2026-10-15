@@ -13,9 +13,10 @@
   metadata labels.
 - Split the embedded skill into operation-specific guidance, with compact text
   context and bounded summaries of check and verification reports.
-- Changed distribution to a bundled npm package and release archives with
-  prebuilt native dependencies for Linux x64, macOS arm64, and Windows x64.
-  Removed Linux arm64 builds and tests from CI and releases.
+- Changed distribution to GitHub Release archives with bundled Node.js
+  dependencies and prebuilt native binaries for Linux x64, macOS arm64, and
+  Windows x64. Removed Linux arm64 builds and tests from CI and releases.
+  Publishing no longer requires npm registry credentials.
 - Fixed Windows release smoke installation and restored macOS PTY spawn-helper
   executable permissions after CI artifact downloads.
 - Prevented Windows release smoke from hanging on a lingering ConPTY worker;

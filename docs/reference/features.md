@@ -9,8 +9,8 @@
 
 ## CLI
 
-Toudocu поставляется как готовый npm/release-пакет и требует Node.js 24+; Go,
-pnpm, TypeScript и native toolchain пользователю не нужны.
+Toudocu поставляется как готовый пакет из GitHub Releases и требует Node.js 24+;
+Go, pnpm, TypeScript и native toolchain пользователю не нужны.
 
 | Возможность | Команда | Результат |
 |---|---|---|
