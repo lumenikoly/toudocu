@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.0.9
+
+- Replaced full snapshots embedded in every static HTML page with a compact
+  shared index and on-demand page data. Search loads only when opened, catalogs
+  contain document summaries, and unused Markdown copies are omitted.
+- Removed duplicate search payloads and compacted runtime JSON. Rebuilds replace
+  obsolete generated JSON and hashed assets even without `--clean`.
+- Restored native HTML navigation in static portals, including links in sidebar
+  group headings, while preserving SPA navigation in local `serve` and readable
+  content without JavaScript.
+- Added secure local viewing of linked repository files in `serve`, without
+  requiring Git or a repository URL. Only explicitly linked files inside the
+  repository are served, with path checks, a 2 MiB limit, plain-text responses,
+  and MIME-sniffing protection.
+- Allowed document text to use the full width of its reading panel.
+
 ## 0.0.8
 
 - Migrated the production runtime from Go to strict TypeScript on Node.js 24+;
