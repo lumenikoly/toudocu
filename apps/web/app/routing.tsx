@@ -2,6 +2,7 @@ import { createContext, useContext, type MouseEvent, type ReactNode } from 'reac
 import { useLocation, useNavigate } from 'react-router';
 
 export const CurrentOutputPath = createContext('index.html');
+export const StaticNavigation = createContext(false);
 
 function splitTarget(value: string): { path: string; suffix: string } {
   const boundary = value.search(/[?#]/u);
@@ -38,6 +39,7 @@ export function PortalLink({
   active?: boolean;
 }) {
   const from = useContext(CurrentOutputPath);
+  const staticNavigation = useContext(StaticNavigation);
   const location = useLocation();
   const navigate = useNavigate();
   const href = relativePortalHref(from, to);
@@ -46,7 +48,15 @@ export function PortalLink({
   const current =
     route === location.pathname || (route === '/index.html' && location.pathname === '/');
   const follow = (event: MouseEvent<HTMLAnchorElement>): void => {
-    if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (
+      staticNavigation ||
+      event.button ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    )
+      return;
     event.preventDefault();
     void navigate(`${route}${target.suffix}`);
   };

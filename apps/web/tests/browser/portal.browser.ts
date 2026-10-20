@@ -48,11 +48,19 @@ test('search stays inline, supports keyboard navigation, and works from nested r
   await expect(page.locator('#main-content')).toBeVisible();
   await captureLightAndDark(page, 'desktop-home');
 
+  const dataRequests: string[] = [];
+  page.on('request', (request) => {
+    if (request.url().includes('/_toudocu/')) dataRequests.push(request.url());
+  });
   const snapshotResponse = page.waitForResponse(
     (response) => new URL(response.url()).pathname === '/project/docs/_toudocu/portal.json',
   );
   await page.goto('./modules/core.html');
-  expect((await snapshotResponse).ok()).toBe(true);
+  const indexResponse = await snapshotResponse;
+  expect(indexResponse.ok()).toBe(true);
+  const index = await indexResponse.json();
+  expect(index.kind).toBe('static-portal-index');
+  expect(index.pages).toBeUndefined();
   await expect(page.locator('#toudocu-portal-data')).toHaveAttribute(
     'data-src',
     '../_toudocu/portal.json',
@@ -62,6 +70,8 @@ test('search stays inline, supports keyboard navigation, and works from nested r
   await expect(page.locator('.document-toc')).toHaveAttribute('open', '');
   await captureLightAndDark(page, 'desktop-document');
 
+  expect(dataRequests.filter((url) => url.endsWith('/search.json'))).toHaveLength(0);
+  expect(dataRequests.filter((url) => url.includes('/_toudocu/pages/'))).toHaveLength(1);
   const search = page.getByRole('combobox', { name: 'Search' });
   const popup = page.locator('.global-search-popup');
   await page.keyboard.press('Control+k');
@@ -94,7 +104,13 @@ test('search stays inline, supports keyboard navigation, and works from nested r
   await page.keyboard.press('Control+k');
   await expect(search).toBeFocused();
   await search.fill('Compare CLI contracts');
+  expect(dataRequests.filter((url) => url.endsWith('/search.json'))).toHaveLength(1);
+  const navigated = page.waitForRequest(
+    (request) =>
+      request.isNavigationRequest() && request.url().endsWith('/use-cases/UC-COMPAT.html'),
+  );
   await page.keyboard.press('Enter');
+  await navigated;
   await expect(page).toHaveURL(/\/project\/docs\/use-cases\/UC-COMPAT\.html$/u);
   await expect(page.getByRole('heading', { name: /Compare CLI contracts/u })).toBeVisible();
 
@@ -209,7 +225,9 @@ test('workbench adapts to mobile and keeps native navigation usable', async ({ p
   await expect(page.locator('html')).toHaveCSS('color-scheme', 'dark');
 });
 
-test('navigates and searches through React Router', async ({ page }) => {
+test('navigates between static HTML pages and loads the dedicated search page', async ({
+  page,
+}) => {
   let documentRequests = 0;
   page.on('request', (request) => {
     if (request.resourceType() === 'document') documentRequests += 1;
@@ -224,7 +242,7 @@ test('navigates and searches through React Router', async ({ page }) => {
   await expect(page).toHaveURL(/\/project\/docs\/architecture\/overview\.html$/u);
   await expect(page.getByRole('heading', { name: 'Architecture' })).toBeVisible();
   await expect(page.locator('main svg').first()).toBeVisible();
-  expect(documentRequests).toBe(1);
+  expect(documentRequests).toBe(2);
 
   await page.goto('./search.html');
   await page.getByRole('searchbox').fill('task');

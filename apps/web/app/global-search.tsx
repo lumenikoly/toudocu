@@ -1,9 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Autocomplete } from '@base-ui/react/autocomplete';
 import { Link } from 'react-router';
 import type { PortalSnapshotV1 } from '@toudocu/contracts';
 import { translator, type Locale } from './i18n.js';
 import { Icon } from './ui/index.js';
+import { CurrentOutputPath, StaticNavigation, relativePortalHref } from './routing.js';
+import type { SearchPage } from './data.js';
+
+export const SearchLoaderContext = createContext<(() => Promise<SearchPage>) | undefined>(
+  undefined,
+);
 
 type SearchEntry = Extract<
   PortalSnapshotV1['pages'][number],
@@ -15,22 +21,46 @@ export function GlobalSearch({ snapshot, locale }: { snapshot: PortalSnapshotV1;
   const input = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
-  const entries = useMemo(
-    () => snapshot.pages.find((page) => page.kind === 'search')?.entries ?? [],
-    [snapshot.pages],
+  const from = useContext(CurrentOutputPath);
+  const staticNavigation = useContext(StaticNavigation);
+  const loadSearch = useContext(SearchLoaderContext);
+  const existing = snapshot.pages.find((page) => page.kind === 'search')?.entries;
+  const [loaded, setLoaded] = useState<SearchEntry[] | undefined>();
+  const [failed, setFailed] = useState(false);
+  const entries = existing ?? loaded;
+  const index = useMemo(
+    () =>
+      (entries ?? []).map((entry) => ({
+        entry,
+        text: `${entry.title}\n${entry.description}\n${entry.text}\n${entry.path}`.toLocaleLowerCase(
+          locale,
+        ),
+      })),
+    [entries, locale],
   );
+  useEffect(() => {
+    if (!open || entries || !loadSearch) return;
+    let active = true;
+    void loadSearch()
+      .then((page) => {
+        if (active) {
+          setLoaded(page.entries);
+          setFailed(false);
+        }
+      })
+      .catch(() => {
+        if (active) setFailed(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [open, entries, loadSearch]);
   const results = useMemo(() => {
     const value = query.trim().toLocaleLowerCase(locale);
-    return (
-      value
-        ? entries.filter((entry) =>
-            `${entry.title}\n${entry.description}\n${entry.text}\n${entry.path}`
-              .toLocaleLowerCase(locale)
-              .includes(value),
-          )
-        : entries
-    ).slice(0, 12);
-  }, [entries, locale, query]);
+    return (value ? index.filter((item) => item.text.includes(value)) : index)
+      .slice(0, 12)
+      .map((item) => item.entry);
+  }, [index, locale, query]);
 
   useEffect(() => {
     const shortcut = (event: KeyboardEvent): void => {
@@ -97,7 +127,13 @@ export function GlobalSearch({ snapshot, locale }: { snapshot: PortalSnapshotV1;
                   value={entry}
                   index={index}
                   className="global-search-result"
-                  render={<Link to={`/${entry.url.replace(/^\/+/, '')}`} />}
+                  render={
+                    staticNavigation ? (
+                      <a href={relativePortalHref(from, entry.url)} />
+                    ) : (
+                      <Link to={`/${entry.url.replace(/^\/+/, '')}`} />
+                    )
+                  }
                   onClick={() => {
                     setOpen(false);
                     setQuery('');
@@ -111,7 +147,11 @@ export function GlobalSearch({ snapshot, locale }: { snapshot: PortalSnapshotV1;
             </Autocomplete.List>
             {results.length === 0 && (
               <p className="global-search-empty" role="status">
-                {text('noResults')}
+                {failed
+                  ? text('searchLoadFailed')
+                  : !entries && loadSearch
+                    ? text('loading')
+                    : text('noResults')}
               </p>
             )}
           </Autocomplete.Popup>

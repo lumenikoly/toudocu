@@ -1,7 +1,7 @@
 import { copyFile, lstat, mkdir, mkdtemp, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { basename, dirname, join, relative, resolve } from 'node:path';
-import type { PortalRoute, PortalSnapshotV1 } from '@toudocu/contracts';
+import type { PortalRoute, PortalSnapshotV1, StaticPortalIndexV1 } from '@toudocu/contracts';
 import { assertSafeOutput, isInside, isMissing } from './filesystem/path-policy.js';
 
 export interface StaticAssetManifest {
@@ -76,6 +76,30 @@ function formattedJson(value: unknown): string {
   return `${JSON.stringify(value, null, 2)}\n`;
 }
 
+function staticIndex(snapshot: PortalSnapshotV1): StaticPortalIndexV1 {
+  const { pages, ...shared } = snapshot;
+  const pageDependencies: Record<string, string[]> = {};
+  for (const page of pages) {
+    if (page.kind !== 'document') continue;
+    const useCase = snapshot.knowledge.useCases.find(
+      (item) => item.id === page.document.id || item.document === page.document.sourcePath,
+    );
+    if (!useCase) continue;
+    const flows = snapshot.knowledge.flows.filter(
+      (flow) => flow.useCaseIds.includes(useCase.id) || useCase.flowIds.includes(flow.id),
+    );
+    pageDependencies[page.pageId] = pages
+      .filter(
+        (candidate) =>
+          candidate.kind === 'screens' ||
+          (candidate.kind === 'document' &&
+            flows.some((flow) => flow.document === candidate.document.sourcePath)),
+      )
+      .map((candidate) => candidate.pageId);
+  }
+  return { ...shared, kind: 'static-portal-index', pageDependencies };
+}
+
 async function commit(staging: string, output: string): Promise<void> {
   if (!(await pathExists(output))) {
     await rename(staging, output);
@@ -105,14 +129,21 @@ export async function buildStaticPortal(options: StaticBuildOptions): Promise<St
       await copyTree(output, staging, options.signal);
     }
     options.signal?.throwIfAborted();
+    // These namespaces belong to the generator, including obsolete JSON and hashed assets.
+    await rm(outputPath(staging, '_toudocu'), { recursive: true, force: true });
+    await rm(outputPath(staging, 'assets'), { recursive: true, force: true });
     for (const [path, source] of options.projectFiles ?? []) {
       await copyTree(source, outputPath(staging, path), options.signal);
     }
     await copyTree(options.assetsDirectory, outputPath(staging, 'assets'), options.signal);
     await writeOutput(staging, 'report.json', formattedJson(options.report));
-    await writeOutput(staging, '_toudocu/portal.json', formattedJson(options.snapshot));
+    await writeOutput(
+      staging,
+      '_toudocu/portal.json',
+      JSON.stringify(staticIndex(options.snapshot)),
+    );
     const search = options.snapshot.pages.find((page) => page.kind === 'search');
-    await writeOutput(staging, '_toudocu/search.json', formattedJson(search?.entries ?? []));
+    await writeOutput(staging, '_toudocu/search.json', JSON.stringify(search?.entries ?? []));
     let pages = 0;
     for (const page of options.snapshot.pages) {
       options.signal?.throwIfAborted();
@@ -123,11 +154,13 @@ export async function buildStaticPortal(options: StaticBuildOptions): Promise<St
         assetManifest: options.assetManifest,
       });
       await writeOutput(staging, page.route.outputPath, html);
-      await writeOutput(
-        staging,
-        `_toudocu/pages/${encodeURIComponent(page.pageId)}.json`,
-        formattedJson(page),
-      );
+      if (page.kind !== 'search') {
+        await writeOutput(
+          staging,
+          `_toudocu/pages/${encodeURIComponent(page.pageId)}.json`,
+          JSON.stringify(page),
+        );
+      }
       pages += 1;
     }
     options.signal?.throwIfAborted();

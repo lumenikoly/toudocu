@@ -34,6 +34,54 @@ async function fixture() {
   return { root, docs, output, assets, route, snapshot };
 }
 
+test('writes a compact index and each payload once, replacing obsolete generated files without clean', async () => {
+  const item = await fixture();
+  const search = {
+    kind: 'search',
+    pageId: 'search',
+    route: {
+      ...item.route,
+      pageId: 'search',
+      kind: 'search',
+      href: 'search.html',
+      outputPath: 'search.html',
+    },
+    entries: [{ text: 'search-only-marker' }],
+  };
+  const snapshot = {
+    ...item.snapshot,
+    pages: [...item.snapshot.pages, search],
+  } as unknown as PortalSnapshotV1;
+  await mkdir(join(item.output, '_toudocu', 'pages'), { recursive: true });
+  await mkdir(join(item.output, 'assets'));
+  await writeFile(join(item.output, '_toudocu', 'pages', 'obsolete.json'), 'old snapshot');
+  await writeFile(join(item.output, 'assets', 'old-hash.js'), 'old bundle');
+  await buildStaticPortal({
+    outputDirectory: item.output,
+    protectedRoots: [item.docs],
+    snapshot,
+    report: {},
+    locale: 'en',
+    assetsDirectory: item.assets,
+    assetManifest: { script: 'assets/client.js', styles: [] },
+    renderRoute: () => '<html>prerendered</html>',
+  });
+  const index = await readFile(join(item.output, '_toudocu', 'portal.json'), 'utf8');
+  expect(index).toContain('"kind":"static-portal-index"');
+  expect(index).not.toContain('"pages":');
+  expect(index).not.toContain('search-only-marker');
+  expect(index).not.toContain('\n');
+  expect(await readdir(join(item.output, '_toudocu', 'pages'))).toEqual(['home.json']);
+  expect(await readFile(join(item.output, '_toudocu', 'pages', 'home.json'), 'utf8')).toBe(
+    JSON.stringify(snapshot.pages[0]),
+  );
+  expect(await readFile(join(item.output, '_toudocu', 'search.json'), 'utf8')).toBe(
+    JSON.stringify(search.entries),
+  );
+  expect(await readdir(join(item.output, 'assets'))).toEqual(['client.js']);
+  expect(await readFile(join(item.output, 'published.txt'), 'utf8')).toBe('previous');
+});
+
 test('keeps the published output when rendering fails', async () => {
   const item = await fixture();
   await expect(

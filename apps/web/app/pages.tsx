@@ -41,10 +41,8 @@ function TaskTree({
     <ul className="task-tree">
       {nodes.map((node) => {
         const route = snapshot.routes.find((item) => item.pageId === `task:${node.id}`);
-        const task = snapshot.pages.find(
-          (page) => page.kind === 'task' && page.workItem.id === node.id,
-        );
-        const state = task?.kind === 'task' ? task.workItem.workspace.workState : node.status.kind;
+        const task = snapshot.documents.find((page) => page.task && page.document.id === node.id);
+        const state = task?.task?.workState ?? node.status.kind;
         return (
           <li key={node.id}>
             {route ? (
@@ -814,12 +812,12 @@ export function Page({
                 <h2>{text('dependencies')}</h2>
                 <ul className="relations">
                   {page.workItem.dependsOn.map((id) => {
-                    const target = snapshot.pages.find(
-                      (item) => item.kind === 'task' && item.workItem.id === id,
+                    const target = snapshot.documents.find(
+                      (item) => item.task && item.document.id === id,
                     );
                     return (
                       <li key={id}>
-                        {target && target.kind === 'task' ? (
+                        {target ? (
                           <DocumentLink
                             snapshot={snapshot}
                             sourcePath={target.document.sourcePath}

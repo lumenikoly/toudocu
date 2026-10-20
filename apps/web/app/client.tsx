@@ -35,6 +35,7 @@ async function start(): Promise<void> {
       snapshot={snapshot}
       locale={document.documentElement.lang === 'ru' ? 'ru' : 'en'}
       basename={basename}
+      loadSearch={source instanceof StaticBrowserDataSource ? () => source.loadSearch() : undefined}
     />
   );
   if (root.dataset.toudocuPrerendered === 'true') {

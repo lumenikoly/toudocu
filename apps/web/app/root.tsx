@@ -11,10 +11,11 @@ import type { PageViewV1, PortalSnapshotV1 } from '@toudocu/contracts';
 import { Page } from './pages.js';
 import { Navigation } from './navigation.js';
 import { translator, type Locale } from './i18n.js';
-import { CurrentOutputPath, PortalLink } from './routing.js';
+import { CurrentOutputPath, PortalLink, StaticNavigation } from './routing.js';
 import { AgentConsoleWorkspace } from './agent-console.js';
 import { DiscussionPanel } from './discussions.js';
-import { GlobalSearch } from './global-search.js';
+import { GlobalSearch, SearchLoaderContext } from './global-search.js';
+import type { SearchPage } from './data.js';
 import { Icon, IconButton } from './ui/index.js';
 
 export interface PortalAppProps {
@@ -22,6 +23,7 @@ export interface PortalAppProps {
   locale?: Locale;
   basename?: string;
   initialPath?: string;
+  loadSearch?: (() => Promise<SearchPage>) | undefined;
 }
 
 function routePath(href: string): string {
@@ -499,8 +501,15 @@ export function PortalApp({
   locale = 'en',
   basename = '/',
   initialPath,
+  loadSearch,
 }: PortalAppProps) {
-  const routes = <PortalRoutes snapshot={snapshot} locale={locale} />;
+  const routes = (
+    <StaticNavigation.Provider value={snapshot.capabilities.mode === 'static'}>
+      <SearchLoaderContext.Provider value={loadSearch}>
+        <PortalRoutes snapshot={snapshot} locale={locale} />
+      </SearchLoaderContext.Provider>
+    </StaticNavigation.Provider>
+  );
   return initialPath === undefined ? (
     <BrowserRouter basename={basename}>{routes}</BrowserRouter>
   ) : (

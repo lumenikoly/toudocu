@@ -106,7 +106,6 @@ function documentView(
     links: documentLinks(project, document),
     backlinks: [...(back.get(document.sourcePath) ?? [])],
     relatedDocuments: [...(related.get(document.sourcePath) ?? [])],
-    content: document.content,
     html: document.markdown.render({
       skipH1: true,
       resolveLink: (destination, image) => {
@@ -127,10 +126,19 @@ function documentView(
       title: section.heading.title,
       level: section.heading.level,
       ...(section.kind ? { kind: section.kind } : {}),
-      markdown: section.markdown,
       line: section.heading.range.start.line,
     })),
   };
+}
+
+function documentSummary(
+  view: Pick<
+    Extract<PageViewV1, { kind: 'document' }>['document'],
+    'id' | 'sourcePath' | 'outputPath' | 'type' | 'title' | 'description' | 'status' | 'updatedAt'
+  >,
+) {
+  const { id, sourcePath, outputPath, type, title, description, status, updatedAt } = view;
+  return { id, sourcePath, outputPath, type, title, description, status, updatedAt };
 }
 
 function allDocumentViews(project: CompiledProject) {
@@ -310,7 +318,6 @@ function pages(
     project: summary.project,
     currentStatus: summary.summary.currentStatus,
     stats: summary.stats,
-    search: summary.summary.searchIndex,
     document: views.get('index.md') ?? null,
   });
   const workItemsByDocument = new Map(
@@ -367,7 +374,7 @@ function pages(
         title: section,
         documents: documents.flatMap((document) => {
           const view = views.get(document.sourcePath);
-          return view ? [view] : [];
+          return view ? [documentSummary(view)] : [];
         }),
         entities,
       },
@@ -509,7 +516,7 @@ function pages(
             return [];
           }
           const view = views.get(document.sourcePath);
-          return view ? [view] : [];
+          return view ? [documentSummary(view)] : [];
         }),
         entities: [],
       },
@@ -732,6 +739,24 @@ export function buildPortalSnapshot(
     navigation: { schemaVersion: 1, items: navigation(project, registry) },
     routes: registry.routes,
     pages: mappedPages,
+    documents: mappedPages.flatMap((page) =>
+      'document' in page && page.document
+        ? [
+            {
+              document: documentSummary(page.document),
+              route: page.route,
+              ...(page.kind === 'task'
+                ? {
+                    task: {
+                      archived: page.workItem.archived,
+                      workState: page.workItem.workspace.workState,
+                    },
+                  }
+                : {}),
+            },
+          ]
+        : [],
+    ),
     stats: summary.stats,
     issues: project.issues,
     taskStats: {

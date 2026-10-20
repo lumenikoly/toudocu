@@ -126,14 +126,29 @@ export const PortalSectionViewSchema = z.strictObject({
   title: text,
   level: z.int().positive(),
   kind: optionalText,
-  markdown: text,
   line: z.int().nonnegative(),
 });
 
 export const PortalDocumentViewSchema = ReportDocumentSchema.extend({
-  content: text,
   html: text,
   sections: z.array(PortalSectionViewSchema),
+});
+
+export const PortalDocumentSummarySchema = ReportDocumentSchema.pick({
+  id: true,
+  sourcePath: true,
+  outputPath: true,
+  type: true,
+  title: true,
+  description: true,
+  status: true,
+  updatedAt: true,
+});
+
+const portalDocumentIndexEntrySchema = z.strictObject({
+  document: PortalDocumentSummarySchema,
+  route: PortalRouteSchema,
+  task: z.strictObject({ archived: z.boolean(), workState: text }).exactOptional(),
 });
 
 const projectSchema = z.strictObject({
@@ -148,7 +163,7 @@ const projectSchema = z.strictObject({
 const catalogDataSchema = z.strictObject({
   section: text,
   title: text,
-  documents: z.array(PortalDocumentViewSchema),
+  documents: z.array(PortalDocumentSummarySchema),
   entities: z.array(
     z.union([
       ModuleSchema,
@@ -196,7 +211,6 @@ const homePageSchema = z.strictObject({
   project: projectSchema,
   currentStatus: CurrentStatusSchema,
   stats: ProjectStatsSchema,
-  search: z.array(PortalSearchEntrySchema),
   document: PortalDocumentViewSchema.nullable(),
 });
 const documentPageSchema = z.strictObject({
@@ -324,6 +338,7 @@ export const PortalSnapshotV1Schema = z.strictObject({
   navigation: NavigationViewV1Schema,
   routes: z.array(PortalRouteSchema),
   pages: z.array(PageViewV1Schema),
+  documents: z.array(portalDocumentIndexEntrySchema),
   stats: ProjectStatsSchema,
   issues: z.array(IssueSchema),
   taskStats: TaskStatsSchema,
@@ -345,3 +360,9 @@ export const PortalSnapshotV1Schema = z.strictObject({
   }),
 });
 export type PortalSnapshotV1 = z.infer<typeof PortalSnapshotV1Schema>;
+
+export const StaticPortalIndexV1Schema = PortalSnapshotV1Schema.omit({ pages: true }).extend({
+  kind: z.literal('static-portal-index'),
+  pageDependencies: z.record(text, z.array(text)),
+});
+export type StaticPortalIndexV1 = z.infer<typeof StaticPortalIndexV1Schema>;

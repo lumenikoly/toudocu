@@ -25,8 +25,7 @@ function knowledgeSections(snapshot: PortalSnapshotV1) {
     string,
     { title: string; href: string; count: number; description: string }
   >();
-  for (const page of snapshot.pages) {
-    if (page.kind !== 'document' && page.kind !== 'task') continue;
+  for (const page of snapshot.documents) {
     const directory = page.document.sourcePath.split('/')[0];
     if (!directory || !page.document.sourcePath.includes('/') || directory === 'work') continue;
     const group = groups.get(directory) ?? {
@@ -60,19 +59,14 @@ export function HomePage({
 }) {
   const { text } = translator(locale);
   const from = useContext(CurrentOutputPath);
-  const tasks = snapshot.pages
+  const tasks = snapshot.documents
     .filter(
-      (item): item is Extract<PageViewV1, { kind: 'task' }> =>
-        item.kind === 'task' &&
-        !item.workItem.archived &&
-        !['done', 'cancelled'].includes(item.workItem.workspace.workState),
+      (item) =>
+        item.task && !item.task.archived && !['done', 'cancelled'].includes(item.task.workState),
     )
     .sort((left, right) => {
       const order: Record<string, number> = { 'in-progress': 0, blocked: 1, ready: 2, draft: 3 };
-      return (
-        (order[left.workItem.workspace.workState] ?? 4) -
-        (order[right.workItem.workspace.workState] ?? 4)
-      );
+      return (order[left.task?.workState ?? ''] ?? 4) - (order[right.task?.workState ?? ''] ?? 4);
     });
   const activeWork = page.currentStatus.activeWork ?? [];
   const sections = knowledgeSections(snapshot);
@@ -123,15 +117,15 @@ export function HomePage({
             <ul className="entity-list">
               {tasks.length
                 ? tasks.slice(0, 6).map((task) => (
-                    <li key={task.pageId}>
+                    <li key={task.route.pageId}>
                       <PortalLink to={task.route.href}>
                         <span className="home-work-identity">
                           <EntityIdentity document={task.document} />
                         </span>
                         <Status
                           status={{
-                            kind: task.workItem.workspace.workState,
-                            label: task.workItem.workspace.workState,
+                            kind: task.task?.workState ?? '',
+                            label: task.task?.workState ?? '',
                           }}
                           locale={locale}
                         />

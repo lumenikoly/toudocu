@@ -104,6 +104,9 @@ function fixture(valid = true): {
       relations: { related: [], backlinks: [] },
     })),
   );
+  snapshot.documents = snapshot.pages.flatMap((item) =>
+    'document' in item && item.document ? [{ document: item.document, route: item.route }] : [],
+  );
   snapshot.knowledge.useCases.push({
     id: useCaseId,
     title: 'Demo use case',

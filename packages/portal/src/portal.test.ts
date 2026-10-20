@@ -153,6 +153,38 @@ describe('portal routes and snapshot', () => {
       ),
     ).toBe(false);
     expect(JSON.stringify(staticSnapshot)).not.toContain('"byPath"');
+    const homePage = staticSnapshot.pages.find((page) => page.kind === 'home');
+    expect(homePage).not.toHaveProperty('search');
+    expect(homePage?.document).not.toHaveProperty('content');
+    const sections = staticSnapshot.pages.flatMap((page) =>
+      'document' in page ? (page.document?.sections ?? []) : [],
+    );
+    expect(sections.length).toBeGreaterThan(0);
+    for (const section of sections) expect(section).not.toHaveProperty('markdown');
+    const catalogs = staticSnapshot.pages.filter((page) => page.kind === 'catalog');
+    expect(catalogs.length).toBeGreaterThan(0);
+    for (const catalog of catalogs) {
+      for (const document of catalog.data.documents) {
+        expect(document).not.toHaveProperty('html');
+        expect(document).not.toHaveProperty('content');
+        expect(document).not.toHaveProperty('sections');
+        expect(Object.keys(document).sort()).toEqual([
+          'description',
+          'id',
+          'outputPath',
+          'sourcePath',
+          'status',
+          'title',
+          'type',
+          'updatedAt',
+        ]);
+      }
+    }
+    expect(
+      staticSnapshot.documents.find((entry) => entry.document.id === 'TASK-LOGIN-001'),
+    ).toMatchObject({
+      task: { archived: false, workState: 'draft' },
+    });
   });
 
   it('keeps appearance at snapshot level and omits it for legacy defaults', () => {

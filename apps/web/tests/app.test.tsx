@@ -273,7 +273,7 @@ describe('portal application', () => {
 
   it('keeps the overview collapsed until requested and highlights the opened document', async () => {
     const user = userEvent.setup();
-    const view = render(<PortalApp snapshot={portalFixture()} initialPath="/" />);
+    const view = render(<PortalApp snapshot={portalFixture('serve')} initialPath="/" />);
     const about = view.container.querySelector<HTMLDetailsElement>('.project-about')!;
     expect(about.open).toBe(false);
     await user.click(screen.getByText('About the project'));
@@ -350,9 +350,9 @@ describe('portal application', () => {
     expect(roadmap).toContain('Publish the portal.');
   });
 
-  it('lets React Router own document navigation', async () => {
+  it('lets React Router own serve document navigation', async () => {
     const user = userEvent.setup();
-    render(<PortalApp snapshot={portalFixture()} initialPath="/" locale="en" />);
+    render(<PortalApp snapshot={portalFixture('serve')} initialPath="/" locale="en" />);
 
     await user.click(screen.getByText('About the project'));
     await user.click(screen.getAllByRole('link', { name: 'Deep guide' }).at(-1)!);

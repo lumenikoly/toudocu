@@ -99,6 +99,7 @@ export {
   PortalRouteSchema,
   PortalSearchEntrySchema,
   PortalSnapshotV1Schema,
+  StaticPortalIndexV1Schema,
   RuntimeCapabilitiesV1Schema,
   TaskHierarchyNodeSchema,
 } from './portal.js';
@@ -109,6 +110,7 @@ export type {
   PageViewV1,
   PortalRoute,
   PortalSnapshotV1,
+  StaticPortalIndexV1,
   RuntimeCapabilitiesV1,
   TaskHierarchyNode,
 } from './portal.js';

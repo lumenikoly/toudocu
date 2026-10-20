@@ -203,11 +203,7 @@ export function Navigation({
               open={openGroups.has(folder)}
               onToggle={(event) => toggleGroup(folder, event.currentTarget.open)}
             >
-              <summary
-                onClick={(event) => {
-                  if ((event.target as HTMLElement).closest('a')) event.preventDefault();
-                }}
-              >
+              <summary>
                 {route ? (
                   <PortalLink className="nav-group-title" to={route.href}>
                     <Icon name={folderIcons[folder] ?? 'folder'} />

@@ -24,7 +24,8 @@ describe('static renderer appearance', () => {
         assetManifest,
       });
       const depth = route.outputPath.split('/').length - 1;
-      expect(html).toContain(`data-src="${'../'.repeat(depth)}_toudocu/portal.json"></script>`);
+      expect(html).toContain(`data-src="${'../'.repeat(depth)}_toudocu/portal.json"`);
+      expect(html).toContain(`data-page="${route.pageId}"`);
       expect(html).not.toContain(marker);
       expect(html).not.toContain('"schemaVersion":1');
       expect(html).toContain('data-toudocu-prerendered="true"');

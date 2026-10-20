@@ -1,13 +1,12 @@
-import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react';
+import { useContext, useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react';
 import { useNavigate } from 'react-router';
 import type { PageViewV1, PortalSnapshotV1 } from '@toudocu/contracts';
 import { Badge, Icon } from './ui/index.js';
 import { translator, type Locale } from './i18n.js';
-import { PortalLink } from './routing.js';
+import { PortalLink, StaticNavigation } from './routing.js';
 import { createIcon, type IconName } from './design/icons.js';
 
 export type DocumentView = Extract<PageViewV1, { kind: 'document' }>['document'];
-type DocumentPage = Extract<PageViewV1, { kind: 'document' | 'task' | 'changelog' | 'home' }>;
 const emptyNavigation: readonly { id: string; title: string }[] = [];
 
 export function documentTitle(document: Pick<DocumentView, 'id' | 'title'>): string {
@@ -29,15 +28,9 @@ export function EntityIdentity({ document }: { document: Pick<DocumentView, 'id'
   );
 }
 
-function pageForDocument(snapshot: PortalSnapshotV1, sourcePath: string): DocumentPage | undefined {
-  for (const page of snapshot.pages) {
-    if (
-      (page.kind === 'document' ||
-        page.kind === 'task' ||
-        page.kind === 'changelog' ||
-        page.kind === 'home') &&
-      page.document?.sourcePath === sourcePath
-    ) {
+function pageForDocument(snapshot: PortalSnapshotV1, sourcePath: string) {
+  for (const page of snapshot.documents) {
+    if (page.document.sourcePath === sourcePath) {
       return page;
     }
   }
@@ -74,10 +67,8 @@ export function EntityReference({
   value: string;
   snapshot?: PortalSnapshotV1 | undefined;
 }) {
-  const target = snapshot?.pages.find(
-    (page) =>
-      (page.kind === 'document' || page.kind === 'task' || page.kind === 'changelog') &&
-      (page.document.id === value || page.document.sourcePath === value),
+  const target = snapshot?.documents.find(
+    (page) => page.document.id === value || page.document.sourcePath === value,
   );
   if (target) return <PortalLink to={target.route.href}>{value}</PortalLink>;
   if (/^https?:\/\//u.test(value)) return <a href={value}>{value}</a>;
@@ -479,8 +470,10 @@ export function DocumentBody({ document, locale }: { document: DocumentView; loc
       heading.prepend(button);
     }
   }, [document.sourcePath]);
+  const staticNavigation = useContext(StaticNavigation);
   const follow = (event: MouseEvent<HTMLDivElement>): void => {
     if (
+      staticNavigation ||
       event.defaultPrevented ||
       event.button !== 0 ||
       event.metaKey ||
