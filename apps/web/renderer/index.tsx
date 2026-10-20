@@ -57,12 +57,6 @@ function escapeHtml(value: string): string {
   });
 }
 
-function json(value: unknown): string {
-  return JSON.stringify(value).replace(/[<\u2028\u2029]/gu, (character) =>
-    character === '<' ? '\\u003c' : `\\u${character.charCodeAt(0).toString(16)}`,
-  );
-}
-
 export function renderRoute({ route, snapshot, runtime, assetManifest }: RenderRouteInput): string {
   const page = snapshot.pages.find((candidate) => candidate.pageId === route.pageId);
   if (!page) throw new Error(`portal page is missing for route ${route.pageId}`);
@@ -80,7 +74,7 @@ export function renderRoute({ route, snapshot, runtime, assetManifest }: RenderR
   const colorScheme = appearance?.colorScheme ?? 'system';
   const accent = appearance?.accent ?? 'indigo';
   const density = appearance?.density ?? 'comfortable';
-  return `<!doctype html><html lang="${locale}" data-toudocu-mode="static" data-toudocu-route="${escapeHtml(route.href)}" data-site-theme="${theme}" data-color-scheme="${colorScheme}" data-accent="${accent}" data-density="${density}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(snapshot.project.title)}</title>${styles}</head><body>${designContract}<div id="root" data-toudocu-prerendered="true">${markup}</div><script id="toudocu-portal-data" type="application/json">${json(snapshot)}</script><script type="module" src="${escapeHtml(asset(assetManifest.script))}"></script></body></html>`;
+  return `<!doctype html><html lang="${locale}" data-toudocu-mode="static" data-toudocu-route="${escapeHtml(route.href)}" data-site-theme="${theme}" data-color-scheme="${colorScheme}" data-accent="${accent}" data-density="${density}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(snapshot.project.title)}</title>${styles}</head><body>${designContract}<div id="root" data-toudocu-prerendered="true">${markup}</div><script id="toudocu-portal-data" type="application/json" data-src="${escapeHtml(asset('_toudocu/portal.json'))}"></script><script type="module" src="${escapeHtml(asset(assetManifest.script))}"></script></body></html>`;
 }
 
 export function renderServeShell({ locale, title, assetManifest }: RenderServeShellInput): string {
@@ -93,7 +87,12 @@ export function renderServeShell({ locale, title, assetManifest }: RenderServeSh
 export async function loadStaticBundle(): Promise<StaticBundle> {
   const clientDirectory = resolve(dirname(fileURLToPath(import.meta.url)), '../client');
   const source = await readFile(resolve(clientDirectory, '.vite/manifest.json'), 'utf8');
-  const manifest = JSON.parse(source) as Record<string, ViteManifestEntry>;
+  let manifest: Record<string, ViteManifestEntry>;
+  try {
+    manifest = JSON.parse(source) as Record<string, ViteManifestEntry>;
+  } catch (cause) {
+    throw new Error('prebuilt portal client manifest is invalid', { cause });
+  }
   const entry = Object.values(manifest).find((candidate) => candidate.isEntry);
   if (!entry) throw new Error('prebuilt portal client entry is missing');
   return {

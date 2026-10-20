@@ -43,6 +43,8 @@ export interface DocumentationServerOptions {
   assetsDirectory: string;
   brandingFiles?: ReadonlyMap<string, string>;
   projectFiles?: ReadonlyMap<string, string>;
+  repositoryFiles?: ReadonlySet<string>;
+  readRepositoryFile?: (path: string, signal: AbortSignal) => Promise<Buffer>;
   html: string;
   debounceMs?: number;
   onError?: (error: unknown) => void;
@@ -865,6 +867,24 @@ export function createDocumentationServer(
       });
     });
   }
+  app.get('/_toudocu/repository/*', async (request, reply) => {
+    const path = (request.params as { '*': string })['*'];
+    if (!options.readRepositoryFile || !options.repositoryFiles?.has(path))
+      return reply.code(404).send({ error: 'not found' });
+    const scope = requestSignal(request);
+    try {
+      const content = await options.readRepositoryFile(path, scope.signal);
+      return reply
+        .type('text/plain; charset=utf-8')
+        .header('x-content-type-options', 'nosniff')
+        .header('cache-control', 'no-store')
+        .send(content);
+    } catch (error) {
+      return sendApiError(reply, error);
+    } finally {
+      scope.close();
+    }
+  });
   app.get('/assets/*', async (request, reply) => {
     const path = (request.params as { '*': string })['*'];
     const requestScope = requestSignal(request);

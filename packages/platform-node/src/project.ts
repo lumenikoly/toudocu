@@ -31,6 +31,7 @@ export interface LoadProjectOptions {
   signal?: AbortSignal;
   repositoryUrl?: string;
   repositoryRef?: string;
+  localRepositoryLinks?: boolean;
 }
 
 export interface ProjectInventory {
@@ -397,6 +398,7 @@ export async function loadProject(
         ? { repositoryUrl: options.repositoryUrl.replace(/\/+$/u, '') }
         : {}),
       repositoryRef: options.repositoryRef?.trim() || 'main',
+      localRepositoryLinks: options.localRepositoryLinks ?? false,
       inventory: inventory.lookup,
     },
     repository: {

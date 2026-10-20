@@ -13,14 +13,27 @@ export class StaticRenderDataSource implements PortalDataSource {
 }
 
 export class StaticBrowserDataSource implements PortalDataSource {
-  constructor(private readonly document: Document = globalThis.document) {}
+  constructor(
+    private readonly document: Document = globalThis.document,
+    private readonly request: typeof fetch = globalThis.fetch,
+  ) {}
 
   async load(): Promise<PortalSnapshotV1> {
-    const source = this.document.querySelector('#toudocu-portal-data')?.textContent;
-    if (!source?.trim()) {
-      throw new Error('Portal snapshot is missing');
+    try {
+      const element = this.document.querySelector('#toudocu-portal-data');
+      const path = element?.getAttribute('data-src');
+      if (path) {
+        const endpoint = new URL(path, this.document.baseURI).href;
+        return await new ServeApiDataSource(endpoint, this.request).load();
+      }
+      const source = element?.textContent;
+      if (!source?.trim()) {
+        throw new Error('Portal snapshot is missing');
+      }
+      return PortalSnapshotV1Schema.parse(JSON.parse(source));
+    } catch (cause) {
+      throw new Error('Failed to load static portal snapshot', { cause });
     }
-    return PortalSnapshotV1Schema.parse(JSON.parse(source));
   }
 }
 

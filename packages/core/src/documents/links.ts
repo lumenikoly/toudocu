@@ -61,6 +61,7 @@ export interface LinkResolutionOptions {
   documentRoot: string;
   repositoryUrl?: string;
   repositoryRef?: string;
+  localRepositoryLinks?: boolean;
   inventory?: LinkInventory;
 }
 
@@ -84,6 +85,7 @@ export interface ResolvedLink extends Link {
 export interface LinkResolutionResult {
   linksByPath: Map<string, ResolvedLink[]>;
   assets: Map<string, string>;
+  repositoryFiles: Set<string>;
   issues: Issue[];
 }
 
@@ -284,6 +286,7 @@ function resolveLink(
   link: Link,
   options: LinkResolutionOptions,
   assets: Map<string, string>,
+  repositoryFiles: Set<string>,
 ): ResolvedLink {
   const result = newResolvedLink(link);
   const destination = link.destination.trim();
@@ -354,6 +357,20 @@ function resolveLink(
       result.blocked = true;
       result.repositoryEscape = true;
       result.href = '#';
+      return result;
+    }
+    if (options.localRepositoryLinks && !link.image && info.kind === 'file') {
+      if (
+        result.repositoryPath.includes('%') ||
+        result.repositoryPath.split('/').some((part) => part.startsWith('.'))
+      ) {
+        result.blocked = true;
+        result.href = '#';
+        return result;
+      }
+      repositoryFiles.add(result.repositoryPath);
+      result.external = true;
+      result.href = `/_toudocu/repository/${encodePathSegments(result.repositoryPath)}${query}${hash}`;
       return result;
     }
     if (link.image || !options.repositoryUrl) {
@@ -451,8 +468,9 @@ export function resolveDocumentLinks(
   options: LinkResolutionOptions,
 ): ResolvedLink[] {
   const assets = new Map<string, string>();
+  const repositoryFiles = new Set<string>();
   return sourceDocument.links.map((link) =>
-    resolveLink(index, sourceDocument, link, options, assets),
+    resolveLink(index, sourceDocument, link, options, assets, repositoryFiles),
   );
 }
 
@@ -463,10 +481,11 @@ export function resolveLinks(
 ): LinkResolutionResult {
   const linksByPath = new Map<string, ResolvedLink[]>();
   const assets = new Map<string, string>();
+  const repositoryFiles = new Set<string>();
   const issues: Issue[] = [];
   for (const document of index.documents) {
     const resolved = document.links.map((link) =>
-      resolveLink(index, document, link, options, assets),
+      resolveLink(index, document, link, options, assets, repositoryFiles),
     );
     linksByPath.set(document.sourcePath, resolved);
     for (const link of resolved) {
@@ -474,7 +493,7 @@ export function resolveLinks(
       if (issue) issues.push(issue);
     }
   }
-  return { linksByPath, assets, issues };
+  return { linksByPath, assets, repositoryFiles, issues };
 }
 
 function relationId(document: Document): string {

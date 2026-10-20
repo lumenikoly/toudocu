@@ -109,6 +109,76 @@ describe('resolveLinks', () => {
     expect(result.issues).toEqual([]);
   });
 
+  it('opens repository files locally in serve without copying them into static assets', () => {
+    const index = indexOf({
+      'work/task.md': [
+        '# Task',
+        '[contract](../../contracts/api.yaml?raw=1#schema)',
+        '[schema](../../packages/document/schema.json)',
+        '[source](../../src/example.html)',
+        '[spaces](../../contracts/my%20contract.yaml)',
+      ].join('\n'),
+    });
+    const filePaths = [
+      'contracts/api.yaml',
+      'packages/document/schema.json',
+      'src/example.html',
+      'contracts/my contract.yaml',
+    ];
+    const base = options(
+      Object.fromEntries(filePaths.map((path) => [`/repo/${path}`, { kind: 'file', safe: true }])),
+    );
+    const local = resolveLinks(index, { ...base, localRepositoryLinks: true });
+    expect(local.linksByPath.get('work/task.md')?.map((link) => link.href)).toEqual([
+      '/_toudocu/repository/contracts/api.yaml?raw=1#schema',
+      '/_toudocu/repository/packages/document/schema.json',
+      '/_toudocu/repository/src/example.html',
+      '/_toudocu/repository/contracts/my%20contract.yaml',
+    ]);
+    expect(local.repositoryFiles).toEqual(new Set(filePaths));
+    expect(local.assets.size).toBe(0);
+    expect(local.issues).toEqual([]);
+    const published = resolveLinks(index, base);
+    expect(published.repositoryFiles.size).toBe(0);
+    expect(published.issues.map((issue) => issue.code)).toEqual(Array(4).fill('blocked-link'));
+    expect(
+      resolveLinks(index, {
+        ...base,
+        localRepositoryLinks: true,
+        repositoryUrl: 'https://github.com/example/project',
+      }).linksByPath.get('work/task.md')?.[0]?.href,
+    ).toBe('/_toudocu/repository/contracts/api.yaml?raw=1#schema');
+  });
+
+  it('keeps hidden files, escapes, symlinks and embedded repository images blocked in serve', () => {
+    const index = indexOf({
+      'index.md': [
+        '[hidden](../.env)',
+        '[hidden-directory](../.git/config)',
+        '[encoded](../100%25.txt)',
+        '[escape](../../private.txt)',
+        '[symlink](../link.yaml)',
+        '[missing](../missing.yaml)',
+        '![image](../image.png)',
+      ].join('\n'),
+    });
+    const result = resolveLinks(index, {
+      ...options({
+        '/repo/.env': { kind: 'file', safe: true },
+        '/repo/.git/config': { kind: 'file', safe: true },
+        '/repo/100%.txt': { kind: 'file', safe: true },
+        '/repo/link.yaml': { kind: 'file', safe: false },
+        '/repo/image.png': { kind: 'file', safe: true },
+      }),
+      localRepositoryLinks: true,
+    });
+    expect(result.repositoryFiles.size).toBe(0);
+    expect(result.linksByPath.get('index.md')?.every((link) => link.blocked || link.broken)).toBe(
+      true,
+    );
+    expect(result.issues).toHaveLength(7);
+  });
+
   it('blocks unsafe protocols, traversal, active assets, unsafe images, and unsafe inventory entries', () => {
     const index = indexOf({
       'index.md': [

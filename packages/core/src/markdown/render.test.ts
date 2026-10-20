@@ -43,6 +43,28 @@ describe('Markdown rendering policy', () => {
     expect(parseMarkdown('[asset](guide.html)').render()).not.toContain('<a');
   });
 
+  it('opens resolved source files as links while preserving scheme and image restrictions', () => {
+    const resolveLink = () => ({
+      href: '/_toudocu/repository/src/main.js',
+      external: true,
+      blocked: false,
+    });
+    const html = parseMarkdown('[source](../src/main.js)').render({ resolveLink });
+    expect(html).toContain('href="/_toudocu/repository/src/main.js"');
+    expect(html).toContain('target="_blank"');
+    expect(html).toContain('rel="noopener noreferrer"');
+    expect(parseMarkdown('[source](../src/main.js)').render()).not.toContain('<a');
+    expect(parseMarkdown('[unsafe](java%73cript:alert(1))').render({ resolveLink })).not.toContain(
+      '<a',
+    );
+    expect(parseMarkdown('![image](../src/main.js)').render({ resolveLink })).not.toContain('<img');
+    expect(
+      parseMarkdown('[source](../src/main.js)').render({
+        resolveLink: () => ({ ...resolveLink(), blocked: true }),
+      }),
+    ).not.toContain('<a');
+  });
+
   it('blocks backslash network paths and active assets introduced by image resolvers', () => {
     for (const href of [
       '//example.com/image.png',

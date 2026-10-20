@@ -48,7 +48,16 @@ test('search stays inline, supports keyboard navigation, and works from nested r
   await expect(page.locator('#main-content')).toBeVisible();
   await captureLightAndDark(page, 'desktop-home');
 
+  const snapshotResponse = page.waitForResponse(
+    (response) => new URL(response.url()).pathname === '/project/docs/_toudocu/portal.json',
+  );
   await page.goto('./modules/core.html');
+  expect((await snapshotResponse).ok()).toBe(true);
+  await expect(page.locator('#toudocu-portal-data')).toHaveAttribute(
+    'data-src',
+    '../_toudocu/portal.json',
+  );
+  await expect(page.locator('#toudocu-portal-data')).toBeEmpty();
   await expect(page.getByRole('heading', { name: 'Core module' })).toBeVisible();
   await expect(page.locator('.document-toc')).toHaveAttribute('open', '');
   await captureLightAndDark(page, 'desktop-document');

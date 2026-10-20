@@ -7,7 +7,7 @@ screens: SC-SITE-HOME, SC-SITE-EDITOR, SC-SITE-DOCUMENT, SC-SITE-API-DOCS
 startScreen: SC-SITE-HOME
 terminalScreens: SC-SITE-DOCUMENT, SC-SITE-API-DOCS
 allowCycle: true
-updated: 2026-08-12
+updated: 2026-10-16
 -->
 
 # UC-DOCS-03: Просматривать документацию на локальном сервере
@@ -55,6 +55,9 @@ Toudocu заново читает документы и показывает о�
 
 ## Дополнительные пути
 
+- Ссылка из документации на файл внутри репозитория, например OpenAPI или
+  JSON Schema вне `docs/`, открывает его текущий локальный текст. URL удалённого
+  репозитория и Git не требуются; файл не становится доступным для записи.
 - Раздел «Изменения» показывает локальный Git diff и обсуждения. Полный путь
   описан в [UC-DOCS-05](UC-DOCS-05.md) и
   [UC-AGENT-FEEDBACK-01](UC-AGENT-FEEDBACK-01.md).

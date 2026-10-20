@@ -102,7 +102,7 @@ export function renderMarkdown(
       const destination = image ? node.properties.src : node.properties.href;
       const url = typeof destination === 'string' ? destination : '';
       const title = typeof node.properties.title === 'string' ? node.properties.title : '';
-      const initial = urlPolicy(url);
+      const initial = urlPolicy(url, image || !options.resolveLink);
       const resolution = options.resolveLink?.(url, image, title) ?? { href: url, ...initial };
       const resolved = urlPolicy(resolution.href, image);
       if (

@@ -265,7 +265,6 @@
 }
 .document-prose {
   min-inline-size: 0;
-  max-inline-size: 72ch;
   text-align: start;
 }
 .document-prose > :first-child {

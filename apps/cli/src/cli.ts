@@ -44,6 +44,7 @@ import {
   AgentConsoleRuntime,
   CodexProvider,
   OpenCodeProvider,
+  PathPolicy,
 } from '@toudocu/platform-node';
 import {
   buildProjectReport,
@@ -1015,6 +1016,7 @@ export async function runCLI(
       now,
       staleDays,
       excludes: options.exclude,
+      localRepositoryLinks: command === 'serve',
       ...(options.repositoryRoot !== undefined ? { repositoryRoot: options.repositoryRoot } : {}),
       ...(options.repositoryUrl !== undefined ? { repositoryUrl: options.repositoryUrl } : {}),
       ...(options.repositoryRef !== undefined ? { repositoryRef: options.repositoryRef } : {}),
@@ -1199,6 +1201,7 @@ export async function runCLI(
       const loadOptions = {
         staleDays,
         excludes: options.exclude,
+        localRepositoryLinks: true,
         ...(options.repositoryRoot ? { repositoryRoot: options.repositoryRoot } : {}),
         ...(options.repositoryUrl ? { repositoryUrl: options.repositoryUrl } : {}),
         ...(options.repositoryRef ? { repositoryRef: options.repositoryRef } : {}),
@@ -1248,6 +1251,8 @@ export async function runCLI(
         : undefined;
       const brandingFiles = new Map(project.branding);
       const projectFiles = new Map([...project.links.assets, ...project.screenAssets]);
+      const repositoryFiles = new Set(project.links.repositoryFiles);
+      const repositoryPolicy = await PathPolicy.create(project.inventory.root);
       const instance = {
         instanceId: randomUUID(),
         projectRoot: await realpath(project.inventory.root),
@@ -1277,6 +1282,8 @@ export async function runCLI(
           for (const [path, source] of [...rebuilt.links.assets, ...rebuilt.screenAssets]) {
             projectFiles.set(path, source);
           }
+          repositoryFiles.clear();
+          for (const path of rebuilt.links.repositoryFiles) repositoryFiles.add(path);
           return snapshot;
         },
         watchPaths: [
@@ -1289,6 +1296,13 @@ export async function runCLI(
         assetsDirectory: bundle.assetsDirectory,
         brandingFiles,
         projectFiles,
+        repositoryFiles,
+        readRepositoryFile: async (path, requestSignal) => {
+          const file = await repositoryPolicy.resolveFile(path);
+          if ((await lstat(file)).size > 2 * 1024 * 1024)
+            throw new ToudocuError('content_too_large', 'content exceeds 2 MiB', { path });
+          return readFile(file, { signal: requestSignal });
+        },
         html: renderServeShell({
           locale,
           title: options.title ?? project.config.site.title,
