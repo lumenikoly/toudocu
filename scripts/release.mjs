@@ -368,11 +368,16 @@ function npmInvocation(args, platform = process.platform) {
 async function smokeTest(packagePath, execute = execFileSync) {
   const temporary = await mkdtemp(join(tmpdir(), 'toudocu-install-'));
   try {
-    console.log('[release smoke] Installing package (timeout: 10 minutes).');
+    console.log(
+      '[release smoke] Installing bundled package offline without lifecycle scripts (timeout: 10 minutes).',
+    );
     const npm = npmInvocation([
       'install',
       '--no-audit',
       '--no-fund',
+      '--offline',
+      '--ignore-scripts',
+      '--loglevel=info',
       '--prefix',
       temporary,
       packagePath,

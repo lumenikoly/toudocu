@@ -15,6 +15,9 @@
   repository are served, with path checks, a 2 MiB limit, plain-text responses,
   and MIME-sniffing protection.
 - Allowed document text to use the full width of its reading panel.
+- Made release smoke installation offline and disabled lifecycle scripts so
+  bundled dependencies and native binaries are tested without registry access
+  or installation-time rebuilds.
 
 ## 0.0.8
 

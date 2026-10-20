@@ -234,6 +234,9 @@ test('smoke runs the installed CLI through Node and still exercises the PTY', as
   assert.equal(calls.length, 3);
   assert(calls[0].args.includes('--no-audit'));
   assert(calls[0].args.includes('--no-fund'));
+  assert(calls[0].args.includes('--offline'));
+  assert(calls[0].args.includes('--ignore-scripts'));
+  assert(calls[0].args.includes('--loglevel=info'));
   assert.deepEqual(
     calls.map(({ options }) => options.timeout),
     [600_000, 30_000, 60_000],
@@ -249,6 +252,77 @@ test('smoke runs the installed CLI through Node and still exercises the PTY', as
   assert.deepEqual(calls[2].args, [join(temporary, 'release-smoke.mjs')]);
   assert(calls.every(({ options }) => options.shell === undefined));
   await assert.rejects(stat(temporary), { code: 'ENOENT' });
+});
+
+test('smoke installs a bundled tarball with an empty cache without running lifecycle hooks', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'toudocu-offline-install-'));
+  const source = join(root, 'source');
+  const marker = join(root, 'lifecycle-ran');
+  const forbiddenHook = `node -e ${JSON.stringify(`require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'ran'); process.exit(99);`)}`;
+  try {
+    const dependency = join(source, 'node_modules', 'toudocu-smoke-dependency');
+    await mkdir(dependency, { recursive: true });
+    await mkdir(join(source, 'dist'));
+    await writeFile(
+      join(source, 'package.json'),
+      JSON.stringify({
+        name: 'toudocu',
+        version: '0.0.0',
+        bin: { toudocu: 'dist/main.js' },
+        dependencies: { 'toudocu-smoke-dependency': '0.0.0' },
+        bundledDependencies: ['toudocu-smoke-dependency'],
+        scripts: { preinstall: forbiddenHook, install: forbiddenHook, postinstall: forbiddenHook },
+      }),
+    );
+    await writeFile(
+      join(source, 'dist', 'main.js'),
+      '#!/usr/bin/env node\nconsole.log("fixture");\n',
+    );
+    await writeFile(
+      join(dependency, 'package.json'),
+      JSON.stringify({
+        name: 'toudocu-smoke-dependency',
+        version: '0.0.0',
+        main: 'index.js',
+        scripts: { install: forbiddenHook, postinstall: forbiddenHook },
+      }),
+    );
+    await writeFile(join(dependency, 'index.js'), 'module.exports = "bundled";\n');
+    // npm must not infer an implicit node-gyp install from binding.gyp either.
+    await writeFile(join(dependency, 'binding.gyp'), 'invalid gyp fixture');
+    const env = { ...process.env, npm_config_cache: join(root, 'empty-cache') };
+    const npm = npmInvocation([
+      'pack',
+      '--offline',
+      '--ignore-scripts',
+      '--pack-destination',
+      root,
+    ]);
+    execFileSync(npm.file, npm.args, { cwd: source, env, stdio: 'pipe', timeout: 30_000 });
+    let temporary;
+    let stages = 0;
+    await smokeTest(join(root, 'toudocu-0.0.0.tgz'), (file, args, options) => {
+      stages += 1;
+      if (args.includes('install')) {
+        temporary = args[args.indexOf('--prefix') + 1];
+        execFileSync(file, args, { ...options, env, stdio: 'pipe', timeout: 30_000 });
+        const installed = join(
+          temporary,
+          'node_modules',
+          'toudocu',
+          'node_modules',
+          'toudocu-smoke-dependency',
+          'index.js',
+        );
+        assert.equal(readFileSync(installed, 'utf8'), 'module.exports = "bundled";\n');
+      }
+    });
+    assert.equal(stages, 3, 'CLI and native smoke stages must still run after installation');
+    await assert.rejects(stat(marker), { code: 'ENOENT' });
+    await assert.rejects(stat(temporary), { code: 'ENOENT' });
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });
 
 test('smoke propagates PTY failures and cleans its temporary installation', async () => {
