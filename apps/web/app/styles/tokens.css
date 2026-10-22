@@ -25,7 +25,6 @@
   --td-border-strong: light-dark(#ccd4e2, #465166);
   --td-accent: light-dark(#4263dc, #a5b8ff);
   --td-accent-soft: light-dark(#edf1ff, #2b3655);
-  --td-accent-strong: light-dark(#304fb9, #ced8ff);
   --td-status-success: light-dark(#13734a, #83deb1);
   --td-status-success-soft: light-dark(#e4f5eb, #163d32);
   --td-status-warning: light-dark(#895500, #f6c66a);
@@ -36,7 +35,10 @@
   --td-status-info-soft: light-dark(#e7f0ff, #203650);
   --td-priority-high: light-dark(#cc3c22, #ff9c7c);
   --td-priority-high-soft: light-dark(#fff0e9, #432c28);
-  --td-accent-strong: var(--td-accent);
+  --td-accent-strong: light-dark(
+    color-mix(in srgb, var(--td-accent), black 16%),
+    color-mix(in srgb, var(--td-accent), white 24%)
+  );
   --td-canvas: var(--td-surface-canvas);
   --td-focus: var(--td-accent);
   --td-selection: var(--td-accent-soft);

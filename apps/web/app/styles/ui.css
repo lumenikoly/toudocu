@@ -73,8 +73,8 @@ textarea {
   block-size: 1.05rem;
 }
 
-.ui-button:hover,
-.ui-icon-button:hover {
+.ui-button:hover:not(:disabled),
+.ui-icon-button:hover:not(:disabled) {
   border-color: var(--td-accent);
   background: var(--td-accent-soft);
 }
@@ -171,10 +171,15 @@ input[type='radio'] {
   cursor: pointer;
 }
 
-.ui-tabs [role='tab']:hover,
+.ui-tabs [role='tab']:hover:not(:disabled) {
+  background: var(--td-surface-muted);
+  color: var(--td-text);
+}
+
 .ui-tabs [role='tab'][aria-selected='true'] {
   border-block-end-color: var(--td-focus);
-  color: var(--td-text);
+  background: var(--td-accent-soft);
+  color: var(--td-accent-strong);
 }
 
 .ui-dialog-viewport {
@@ -340,6 +345,9 @@ a.ui-button.is-primary:hover {
 }
 .search-results > li > a:hover {
   background: var(--td-surface-muted);
+}
+.search-results > li > a:focus-visible {
+  outline-offset: -3px;
 }
 .search-results > li > a > span:not(.search-result-type) {
   color: var(--td-text-muted);

@@ -6,13 +6,21 @@
   min-inline-size: 0;
   block-size: var(--td-control-height-lg);
   padding-inline: var(--td-space-3);
-  border: 1px solid var(--td-border-strong);
-  border-radius: 999px;
-  background: var(--td-surface);
+  border: 1px solid var(--td-border);
+  border-radius: var(--td-radius-panel);
+  background: var(--td-surface-muted);
   color: var(--td-text-muted);
+  transition:
+    background-color var(--td-motion-fast),
+    border-color var(--td-motion-fast);
+}
+
+.global-search:hover {
+  border-color: var(--td-border-strong);
 }
 
 .global-search:focus-within {
+  background: var(--td-surface);
   border-color: var(--td-focus);
   outline: 2px solid color-mix(in srgb, var(--td-focus) 30%, transparent);
   outline-offset: 1px;
@@ -33,6 +41,11 @@
   background: transparent;
   color: var(--td-text);
   font: 0.875rem var(--td-font-interface);
+}
+
+/* The enclosing search field owns the focus ring, not its inner input. */
+.global-search-input:focus-visible {
+  outline: none;
 }
 
 .global-search-input::placeholder {
@@ -76,7 +89,7 @@
 .global-search-result {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, auto);
-  gap: var(--td-space-3);
+  gap: var(--td-space-1) var(--td-space-3);
   align-items: center;
   min-inline-size: 0;
   min-block-size: 3.5rem;

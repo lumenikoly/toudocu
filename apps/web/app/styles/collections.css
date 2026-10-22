@@ -36,7 +36,7 @@
   font-family: var(--td-font-heading);
   font-size: 1.75rem;
   font-weight: 700;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.025em;
   line-height: 1.2;
 }
 .project-header p,
@@ -102,6 +102,14 @@
 }
 .workbench-section {
   padding: var(--td-space-5) var(--td-space-6);
+  border-radius: var(--td-radius-panel);
+}
+.home-workspace .section-heading {
+  padding-block-end: var(--td-space-3);
+  border-block-end: 1px solid var(--td-border);
+}
+.home-workspace .section-heading > a {
+  flex-shrink: 0;
 }
 .section-heading {
   display: flex;
@@ -161,8 +169,8 @@
   color: var(--td-text);
   text-decoration: none;
   transition:
-    background-color 150ms ease,
-    color 150ms ease;
+    background-color var(--td-motion-fast) var(--td-motion-easing),
+    color var(--td-motion-fast) var(--td-motion-easing);
 }
 .entity-list > li > a:hover,
 .knowledge-list > li > a:hover,
@@ -195,6 +203,13 @@
   overflow-wrap: anywhere;
 }
 .knowledge-list .count {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 1.75rem;
+  min-block-size: 1.75rem;
+  padding-inline: var(--td-space-1);
+  border-radius: var(--td-radius-control);
+  background: var(--td-surface-muted);
   margin-inline-start: auto;
   color: var(--td-text-muted);
   font-size: 0.78rem;
