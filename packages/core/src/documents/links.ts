@@ -2,6 +2,7 @@ import type { Issue } from '@toudocu/contracts';
 import type { Link } from '../markdown/model.js';
 import { naturalCompare, type DocumentIndex } from './project.js';
 import type { Document } from './document.js';
+import { isAllowedRepositoryPath } from './repository-path.js';
 
 const activeAssetExtensions = new Set([
   '.html',
@@ -85,7 +86,8 @@ export interface ResolvedLink extends Link {
 export interface LinkResolutionResult {
   linksByPath: Map<string, ResolvedLink[]>;
   assets: Map<string, string>;
-  repositoryFiles: Set<string>;
+  /** Linked files and directory prefixes (ending in /) available in serve. */
+  repositoryPaths: Set<string>;
   issues: Issue[];
 }
 
@@ -263,13 +265,14 @@ function linkIssue(document: Document, link: Link, result: ResolvedLink): Issue 
   if (!result.blocked && !result.broken) return undefined;
   let message = result.broken
     ? `Broken link: ${link.destination}${result.brokenAnchor ? ' (anchor not found)' : ''}`
-    : 'Unsafe link was blocked.';
+    : `Unsafe link was blocked: ${link.destination}`;
   if (result.blocked) {
     if (result.activeAsset) message = 'Link to an active HTML/JavaScript file was blocked.';
     else if (result.unsafeImage) message = 'Image format is not allowed for safe embedding.';
     else if (result.repositoryAsset)
-      message =
-        'A resource outside the documentation cannot be embedded or opened without a repository URL.';
+      message = link.image
+        ? `Images outside the documentation cannot be embedded: ${link.destination}`
+        : `A repository ${result.repositoryKind === 'tree' ? 'directory' : 'file'} requires a repository URL in a static portal: ${link.destination}`;
   }
   return {
     severity: document.type === 'architecture' ? 'error' : 'warning',
@@ -286,7 +289,7 @@ function resolveLink(
   link: Link,
   options: LinkResolutionOptions,
   assets: Map<string, string>,
-  repositoryFiles: Set<string>,
+  repositoryPaths: Set<string>,
 ): ResolvedLink {
   const result = newResolvedLink(link);
   const destination = link.destination.trim();
@@ -359,16 +362,14 @@ function resolveLink(
       result.href = '#';
       return result;
     }
-    if (options.localRepositoryLinks && !link.image && info.kind === 'file') {
-      if (
-        result.repositoryPath.includes('%') ||
-        result.repositoryPath.split('/').some((part) => part.startsWith('.'))
-      ) {
+    result.repositoryKind = info.kind === 'directory' ? 'tree' : 'blob';
+    if (options.localRepositoryLinks && !link.image) {
+      if (!isAllowedRepositoryPath(result.repositoryPath)) {
         result.blocked = true;
         result.href = '#';
         return result;
       }
-      repositoryFiles.add(result.repositoryPath);
+      repositoryPaths.add(result.repositoryPath + (info.kind === 'directory' ? '/' : ''));
       result.external = true;
       result.href = `/_toudocu/repository/${encodePathSegments(result.repositoryPath)}${query}${hash}`;
       return result;
@@ -379,7 +380,6 @@ function resolveLink(
       result.href = '#';
       return result;
     }
-    result.repositoryKind = info.kind === 'directory' ? 'tree' : 'blob';
     result.external = true;
     const repositoryUrl = options.repositoryUrl.replace(/\/$/u, '');
     result.href = `${repositoryUrl}/${result.repositoryKind}/${encodePathSegment(options.repositoryRef ?? 'main')}/${encodePathSegments(result.repositoryPath)}${query}${hash}`;
@@ -468,9 +468,9 @@ export function resolveDocumentLinks(
   options: LinkResolutionOptions,
 ): ResolvedLink[] {
   const assets = new Map<string, string>();
-  const repositoryFiles = new Set<string>();
+  const repositoryPaths = new Set<string>();
   return sourceDocument.links.map((link) =>
-    resolveLink(index, sourceDocument, link, options, assets, repositoryFiles),
+    resolveLink(index, sourceDocument, link, options, assets, repositoryPaths),
   );
 }
 
@@ -481,11 +481,11 @@ export function resolveLinks(
 ): LinkResolutionResult {
   const linksByPath = new Map<string, ResolvedLink[]>();
   const assets = new Map<string, string>();
-  const repositoryFiles = new Set<string>();
+  const repositoryPaths = new Set<string>();
   const issues: Issue[] = [];
   for (const document of index.documents) {
     const resolved = document.links.map((link) =>
-      resolveLink(index, document, link, options, assets, repositoryFiles),
+      resolveLink(index, document, link, options, assets, repositoryPaths),
     );
     linksByPath.set(document.sourcePath, resolved);
     for (const link of resolved) {
@@ -493,7 +493,7 @@ export function resolveLinks(
       if (issue) issues.push(issue);
     }
   }
-  return { linksByPath, assets, repositoryFiles, issues };
+  return { linksByPath, assets, repositoryPaths, issues };
 }
 
 function relationId(document: Document): string {

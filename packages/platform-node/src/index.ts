@@ -25,6 +25,7 @@ export {
 export type { TaskCommandProcessOptions } from './task-verify.js';
 export { openGitRepository } from './git/repository.js';
 export { listRepositoryReviewFiles, readRepositoryReviewFile } from './repository-review.js';
+export { readRepositoryPath } from './repository-links.js';
 export type { GitReadOptions, GitSide } from './git/repository.js';
 export { buildAssetDiffMetadata, inspectAsset } from './changes/assets.js';
 export type { AssetDiffMetadata, AssetMetadata } from './changes/assets.js';

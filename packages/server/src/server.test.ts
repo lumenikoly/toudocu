@@ -7,6 +7,27 @@ import { createDocumentationServer } from './server.js';
 
 const snapshot = (name: string) => ({ project: { title: name } }) as PortalSnapshotV1;
 
+test('directory listings escape filenames and cannot authorize a sibling directory', async () => {
+  const server = createDocumentationServer({
+    initialSnapshot: snapshot('repository'),
+    rebuild: async () => snapshot('repository'),
+    assetsDirectory: '.',
+    repositoryPaths: new Set(['src/']),
+    readRepositoryPath: async () => ['<script>alert(1)</script>.txt', 'a&b.txt'],
+    html: '<div id="root"></div>',
+  });
+  try {
+    const response = await server.app.inject('/_toudocu/repository/src');
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toContain('&lt;script&gt;alert(1)&lt;/script&gt;.txt');
+    expect(response.body).toContain('href="/_toudocu/repository/src/a%26b.txt"');
+    expect(response.body).not.toContain('<script>');
+    expect((await server.app.inject('/_toudocu/repository/src-other')).statusCode).toBe(404);
+  } finally {
+    await server.close();
+  }
+});
+
 const editorFile: EditorFileResponse = {
   schemaVersion: 1,
   revision: 'test-revision',

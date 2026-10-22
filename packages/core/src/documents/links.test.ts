@@ -135,11 +135,11 @@ describe('resolveLinks', () => {
       '/_toudocu/repository/src/example.html',
       '/_toudocu/repository/contracts/my%20contract.yaml',
     ]);
-    expect(local.repositoryFiles).toEqual(new Set(filePaths));
+    expect(local.repositoryPaths).toEqual(new Set(filePaths));
     expect(local.assets.size).toBe(0);
     expect(local.issues).toEqual([]);
     const published = resolveLinks(index, base);
-    expect(published.repositoryFiles.size).toBe(0);
+    expect(published.repositoryPaths.size).toBe(0);
     expect(published.issues.map((issue) => issue.code)).toEqual(Array(4).fill('blocked-link'));
     expect(
       resolveLinks(index, {
@@ -150,11 +150,53 @@ describe('resolveLinks', () => {
     ).toBe('/_toudocu/repository/contracts/api.yaml?raw=1#schema');
   });
 
+  it('opens repository directories and public dotfile configuration locally', () => {
+    const paths = [
+      'contracts/openapi/internal',
+      '.github/workflows/ci.yml',
+      'apps/host-app/.env.example',
+      'packages/design-system/.storybook/preview.ts',
+      '.prettierrc.json',
+      '.toudocu/config.yml',
+    ];
+    const index = indexOf({
+      'guide.md': '# Sources\n' + paths.map((path) => `[source](../${path})`).join('\n'),
+    });
+    const base = options(
+      Object.fromEntries(
+        paths.map((path, index) => [
+          `/repo/${path}`,
+          { kind: index === 0 ? 'directory' : 'file', safe: true },
+        ]),
+      ),
+    );
+    const local = resolveLinks(index, { ...base, localRepositoryLinks: true });
+    expect(local.issues).toEqual([]);
+    expect(local.linksByPath.get('guide.md')?.map((link) => link.href)).toEqual(
+      paths.map((path) => `/_toudocu/repository/${path}`),
+    );
+    expect(local.repositoryPaths).toEqual(
+      new Set(paths.map((path, index) => path + (index === 0 ? '/' : ''))),
+    );
+    const published = resolveLinks(index, {
+      ...base,
+      repositoryUrl: 'https://github.com/example/project',
+    });
+    expect(published.repositoryPaths.size).toBe(0);
+    expect(published.issues).toEqual([]);
+    expect(published.linksByPath.get('guide.md')?.[0]?.href).toBe(
+      'https://github.com/example/project/tree/main/contracts/openapi/internal',
+    );
+  });
+
   it('keeps hidden files, escapes, symlinks and embedded repository images blocked in serve', () => {
     const index = indexOf({
       'index.md': [
         '[hidden](../.env)',
         '[hidden-directory](../.git/config)',
+        '[nested-secret](../.github/.env)',
+        '[private-config](../.toudocu/private.json)',
+        '[credentials](../.aws/credentials)',
         '[encoded](../100%25.txt)',
         '[escape](../../private.txt)',
         '[symlink](../link.yaml)',
@@ -166,17 +208,20 @@ describe('resolveLinks', () => {
       ...options({
         '/repo/.env': { kind: 'file', safe: true },
         '/repo/.git/config': { kind: 'file', safe: true },
+        '/repo/.github/.env': { kind: 'file', safe: true },
+        '/repo/.toudocu/private.json': { kind: 'file', safe: true },
+        '/repo/.aws/credentials': { kind: 'file', safe: true },
         '/repo/100%.txt': { kind: 'file', safe: true },
         '/repo/link.yaml': { kind: 'file', safe: false },
         '/repo/image.png': { kind: 'file', safe: true },
       }),
       localRepositoryLinks: true,
     });
-    expect(result.repositoryFiles.size).toBe(0);
+    expect(result.repositoryPaths.size).toBe(0);
     expect(result.linksByPath.get('index.md')?.every((link) => link.blocked || link.broken)).toBe(
       true,
     );
-    expect(result.issues).toHaveLength(7);
+    expect(result.issues).toHaveLength(10);
   });
 
   it('blocks unsafe protocols, traversal, active assets, unsafe images, and unsafe inventory entries', () => {

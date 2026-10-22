@@ -22,6 +22,7 @@ export { buildDocumentIndex, canonicalText, naturalCompare } from './documents/p
 export type { DocumentIndex } from './documents/project.js';
 export { validateDocumentBasics } from './documents/validate.js';
 export { resolveDocumentLinks, resolveLinks } from './documents/links.js';
+export { isAllowedRepositoryPath } from './documents/repository-path.js';
 export type { LinkResolutionOptions, ResolvedLink } from './documents/links.js';
 export { parseOpenAPIContract, validateOpenAPIContract } from './openapi/openapi.js';
 export type { OpenAPIContract, OpenAPIDiagnostic, OpenAPIParseResult } from './openapi/openapi.js';

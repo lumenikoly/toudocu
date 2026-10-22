@@ -12,6 +12,7 @@ import {
   buildDocumentationChanges,
   listRepositoryReviewFiles,
   readRepositoryReviewFile,
+  readRepositoryPath,
   buildStaticPortal,
   loadProject,
   documentationImpactPathStatus,
@@ -42,7 +43,6 @@ import {
   deleteReviewMessage,
   deleteReviewDiscussion,
   ProjectTerminal,
-  PathPolicy,
 } from '@toudocu/platform-node';
 import {
   buildProjectReport,
@@ -1190,8 +1190,8 @@ export async function runCLI(
       const terminal = terminalEnabled ? new ProjectTerminal(project.inventory.root) : undefined;
       const brandingFiles = new Map(project.branding);
       const projectFiles = new Map([...project.links.assets, ...project.screenAssets]);
-      const repositoryFiles = new Set(project.links.repositoryFiles);
-      const repositoryPolicy = await PathPolicy.create(project.inventory.root);
+      const repositoryPaths = new Set(project.links.repositoryPaths);
+      let repositoryInventory = project.inventory;
       const instance = {
         instanceId: randomUUID(),
         projectRoot: await realpath(project.inventory.root),
@@ -1221,8 +1221,9 @@ export async function runCLI(
           for (const [path, source] of [...rebuilt.links.assets, ...rebuilt.screenAssets]) {
             projectFiles.set(path, source);
           }
-          repositoryFiles.clear();
-          for (const path of rebuilt.links.repositoryFiles) repositoryFiles.add(path);
+          repositoryInventory = rebuilt.inventory;
+          repositoryPaths.clear();
+          for (const path of rebuilt.links.repositoryPaths) repositoryPaths.add(path);
           return snapshot;
         },
         watchPaths: [
@@ -1235,13 +1236,9 @@ export async function runCLI(
         assetsDirectory: bundle.assetsDirectory,
         brandingFiles,
         projectFiles,
-        repositoryFiles,
-        readRepositoryFile: async (path, requestSignal) => {
-          const file = await repositoryPolicy.resolveFile(path);
-          if ((await lstat(file)).size > 2 * 1024 * 1024)
-            throw new ToudocuError('content_too_large', 'content exceeds 2 MiB', { path });
-          return readFile(file, { signal: requestSignal });
-        },
+        repositoryPaths,
+        readRepositoryPath: (path, requestSignal) =>
+          readRepositoryPath(repositoryInventory, path, requestSignal),
         html: renderServeShell({
           locale,
           title: options.title ?? project.config.site.title,

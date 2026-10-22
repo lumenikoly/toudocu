@@ -101,7 +101,9 @@ test('Project Terminal is same-origin only and closes with serve', async () => {
     await vi.waitFor(() => expect(runtime.runtime.write).toHaveBeenCalledWith('pwd\r'));
     socket.send(JSON.stringify({ action: 'terminal-resize', columns: 100, rows: 40 }));
     await vi.waitFor(() => expect(runtime.runtime.resize).toHaveBeenCalledWith(100, 40));
-    const closed = new Promise<number>((resolve) => socket.once('close', (code) => resolve(code)));
+    const closed = new Promise<number>((resolve) =>
+      socket.once('close', (code: number) => resolve(code)),
+    );
     socket.send(JSON.stringify({ action: 'message', text: 'Start an agent' }));
     expect(await closed).toBe(1008);
   } finally {

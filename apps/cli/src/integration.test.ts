@@ -154,6 +154,8 @@ test('serve opens linked repository sources locally and revalidates access on ev
     await mkdir(join(root, '.toudocu'));
     await mkdir(join(root, 'docs', 'work'), { recursive: true });
     await mkdir(join(root, 'contracts'));
+    await mkdir(join(root, '.github/workflows'), { recursive: true });
+    await mkdir(join(root, 'src/nested'), { recursive: true });
     await writeFile(
       join(root, '.toudocu/config.yml'),
       await readFile('fixtures/projects/compat-basic/.toudocu/config.yml', 'utf8'),
@@ -164,17 +166,24 @@ test('serve opens linked repository sources locally and revalidates access on ev
       ['contracts/media.yaml', 'get: {}\n'],
       ['contracts/document schema.json', '{"type":"object"}\n'],
       ['contracts/page.html', '<script>throw new Error("must not execute")</script>'],
+      ['contracts/.env.example', 'EXAMPLE=public\n'],
+      ['.github/workflows/ci.yml', 'name: CI\n'],
+      ['.prettierrc.json', '{}\n'],
     ]);
     const markdown =
       '# Repository sources\n\n' +
       [...sources.keys()]
         .map((path, index) => `[source ${index}](../../${path.replaceAll(' ', '%20')})`)
         .join('\n') +
-      '\n[large](../../contracts/large.txt)';
+      '\n[large](../../contracts/large.txt)\n[directory](../../src/)\n[config](../../.toudocu/config.yml)';
     await writeFile(join(root, 'docs/work/task.md'), markdown);
     for (const [path, content] of sources) await writeFile(join(root, path), content);
     await writeFile(join(root, 'contracts/large.txt'), 'x'.repeat(2 * 1024 * 1024 + 1));
     await writeFile(join(root, 'contracts/unlinked.yaml'), 'private: true\n');
+    await writeFile(join(root, 'src/nested/file.ts'), 'export {};\n');
+    await writeFile(join(root, 'src/.env'), 'PRIVATE=true\n');
+    await writeFile(join(root, 'src/.env.example'), 'EXAMPLE=public\n');
+    await symlink(join(stateHome, 'private.yaml'), join(root, 'src/link.yaml'));
     await writeFile(join(stateHome, 'private.yaml'), 'outside repository\n');
     let resolveStarted!: (url: string) => void;
     const started = new Promise<string>((resolve) => {
@@ -203,7 +212,7 @@ test('serve opens linked repository sources locally and revalidates access on ev
       .flatMap((page) => ('document' in page && page.document ? [page.document] : []))
       .find((document) => document.sourcePath === 'work/task.md');
     if (!document) throw new Error('repository links document is missing');
-    expect(document.links).toHaveLength(sources.size + 1);
+    expect(document.links).toHaveLength(sources.size + 3);
     for (const link of document.links.filter((link) => sources.has(link.target))) {
       expect(link.blocked).toBe(false);
       expect(link.href).toMatch(/^\/_toudocu\/repository\//u);
@@ -219,14 +228,30 @@ test('serve opens linked repository sources locally and revalidates access on ev
       expect(await response.text()).toBe(sources.get(link.target));
     }
     expect((await fetch(`${url}/_toudocu/repository/contracts/large.txt`)).status).toBe(413);
+    const directory = await fetch(`${url}/_toudocu/repository/src`);
+    expect(directory.status).toBe(200);
+    expect(directory.headers.get('content-type')).toBe('text/html; charset=utf-8');
+    expect(directory.headers.get('content-security-policy')).toContain("default-src 'none'");
+    const listing = await directory.text();
+    expect(listing).toContain('href="/_toudocu/repository/src/nested/"');
+    expect(listing).toContain('href="/_toudocu/repository/src/.env.example"');
+    expect(listing).not.toContain('>link.yaml<');
+    expect(listing).not.toContain('>.env<');
+    expect(await (await fetch(`${url}/_toudocu/repository/src/nested/file.ts`)).text()).toBe(
+      'export {};\n',
+    );
+    expect((await fetch(`${url}/_toudocu/repository/.toudocu/config.yml`)).status).toBe(200);
     for (const path of [
       'contracts/unlinked.yaml',
       '.env',
       '.git/config',
+      'src/.env',
+      'src/link.yaml',
+      'src-other/private.yaml',
       '%2e%2e%2fprivate.yaml',
       '%252e%252e/private.yaml',
     ]) {
-      expect((await fetch(`${url}/_toudocu/repository/${path}`)).status).toBe(404);
+      expect([403, 404]).toContain((await fetch(`${url}/_toudocu/repository/${path}`)).status);
     }
     const apiUrl = `${url}/_toudocu/repository/contracts/api.yaml`;
     await writeFile(join(root, 'contracts/api.yaml'), 'updated: true\n');
@@ -244,6 +269,7 @@ test('serve opens linked repository sources locally and revalidates access on ev
     });
     expect(rebuilt.status).toBe(200);
     expect((await fetch(apiUrl)).status).toBe(404);
+    expect((await fetch(`${url}/_toudocu/repository/src/nested/file.ts`)).status).toBe(404);
     expect(stderr).toBe('');
   } finally {
     controller.abort();

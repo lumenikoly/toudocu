@@ -30,6 +30,7 @@ import {
 import { PortalState } from './state.js';
 import { isLoopbackHost } from './loopback.js';
 import { watchProject, type ProjectWatcher } from './watcher.js';
+import { repositoryDirectoryHtml } from './repository-directory.js';
 
 export interface DocumentationServerOptions {
   instance?: ServeInstanceIdentityV1;
@@ -39,8 +40,8 @@ export interface DocumentationServerOptions {
   assetsDirectory: string;
   brandingFiles?: ReadonlyMap<string, string>;
   projectFiles?: ReadonlyMap<string, string>;
-  repositoryFiles?: ReadonlySet<string>;
-  readRepositoryFile?: (path: string, signal: AbortSignal) => Promise<Buffer>;
+  repositoryPaths?: ReadonlySet<string>;
+  readRepositoryPath?: (path: string, signal: AbortSignal) => Promise<Buffer | string[]>;
   html: string;
   debounceMs?: number;
   onError?: (error: unknown) => void;
@@ -679,12 +680,27 @@ export function createDocumentationServer(
     });
   }
   app.get('/_toudocu/repository/*', async (request, reply) => {
-    const path = (request.params as { '*': string })['*'];
-    if (!options.readRepositoryFile || !options.repositoryFiles?.has(path))
+    const path = (request.params as { '*': string })['*'].replace(/\/$/u, '');
+    const directoryAccess = [...(options.repositoryPaths ?? [])].some(
+      (linked) => linked.endsWith('/') && (path === linked.slice(0, -1) || path.startsWith(linked)),
+    );
+    if (!options.readRepositoryPath || (!directoryAccess && !options.repositoryPaths?.has(path)))
       return reply.code(404).send({ error: 'not found' });
     const scope = requestSignal(request);
     try {
-      const content = await options.readRepositoryFile(path, scope.signal);
+      const content = await options.readRepositoryPath(path, scope.signal);
+      if (!Buffer.isBuffer(content)) {
+        if (!directoryAccess) return reply.code(403).send({ error: 'directory is not linked' });
+        return reply
+          .type('text/html; charset=utf-8')
+          .header('x-content-type-options', 'nosniff')
+          .header('cache-control', 'no-store')
+          .header(
+            'content-security-policy',
+            "default-src 'none'; base-uri 'none'; frame-ancestors 'none'",
+          )
+          .send(repositoryDirectoryHtml(path, content));
+      }
       return reply
         .type('text/plain; charset=utf-8')
         .header('x-content-type-options', 'nosniff')
