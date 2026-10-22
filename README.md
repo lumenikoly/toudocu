@@ -28,15 +28,13 @@ without a database or a separate documentation platform.
 | Update only docs affected by current changes | Send your agent `$toudocu refresh diff` |
 | Check an existing Markdown tree | Run `toudocu check ./docs` |
 | Read, edit, and discuss documentation locally | Run `toudocu serve ./docs` |
-| Give a ready work item to an installed agent | Open the work item in the local portal and start Agent Console |
+| Give a ready work item to an installed agent | Open the work item in the local portal and start the agent |
 | Publish documentation | Run `toudocu build ./docs --output ./site --clean` |
 
 Entries that start with `$toudocu` are messages for an AI agent with the
 bundled skill, not terminal commands. For routine work, plain requests such as
 “update the documentation for this feature” or “prepare context for task
 TASK-AUTH-123” work as well.
-
-**One CLI. Markdown in Git. Verifiable documentation next to your code.**
 
 [View the Toudocu documentation →](https://lumenikoly.github.io/toudocu/project-docs/)
 
@@ -98,7 +96,7 @@ It includes:
 - a local Swagger UI;
 - discussions attached to selected documentation or any file in the working diff.
 
-By default, the portal is available at `http://127.0.0.1:8080`.
+By default, the portal is available at `http://127.0.0.1:6419`.
 
 ### Ask questions and request changes directly from the docs
 
@@ -113,8 +111,6 @@ or:
 > Update this section for the new API.
 
 Toudocu saves the request to a local queue. The installed skill can receive it through the CLI, process it with project context, and send the answer back to the original discussion.
-
-This makes documentation part of the normal agent workflow instead of a separate set of files that must first be located and explained manually.
 
 `serve` does not start an agent on its own: handing the request to an agent remains under the user's control.
 
@@ -165,22 +161,20 @@ Verification commands declared by a task are never run automatically. Executing 
 toudocu task verify TASK-ID ./docs --run
 ```
 
-This lets documentation act not only as reference material, but also as verifiable context for doing the work.
-
 ### Work with an agent without copying context by hand
 
-From the main local portal, a ready work item can start an installed **Codex**
+From the local portal for the selected documentation directory, a ready work item can start an installed **Codex**
 or **OpenCode**. Toudocu checks the work item again and gives the agent its
 current requirements, dependencies, and constraints.
 
-Agent Console shows the conversation separately from commands being run. You
+The agent panel shows the conversation separately from commands being run. You
 can add an instruction, stop the current response, or end the whole session.
 The panel stays available while you move between work items, documentation,
 Changes, and the editor.
 
 Full access requires a separate confirmation. If the embedded path is not a
 good fit, you can copy the same handoff for an external agent or use the
-independent project terminal. Agent Console is available only from the main
+independent project terminal. The agent panel is available from a
 `serve` instance on a loopback address and is never included in a published
 portal.
 
@@ -314,7 +308,10 @@ docs/
 
 `architecture/overview.md` describes the system boundary and connects the other architecture documents.
 
-From there, you can simply run:
+Also create `.toudocu/config.yml` at the repository root with contract version
+`3`, a default locale, and its documentation directory. See the
+[configuration reference](docs/reference/configuration.md) for a complete example.
+Then run:
 
 ```bash
 toudocu check ./docs
@@ -498,16 +495,12 @@ See the [configuration reference](docs-en/reference/configuration.md) for all su
 By default, it listens only on:
 
 ```text
-127.0.0.1:8080
+127.0.0.1:6419
 ```
 
 It does not provide built-in TLS termination or user authentication, so it should not be exposed to an external network without a separate protection layer.
 
-You can disable the optional stable-release update check with:
-
-```bash
-toudocu serve --no-update-check ./docs
-```
+Toudocu does not check for updates automatically. To update, run the installer again.
 
 ---
 

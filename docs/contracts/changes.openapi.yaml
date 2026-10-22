@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Toudocu Documentation Changes HTTP API
   version: "1"
-  description: Wire-level contract for documentation changes and canonical-serve local repository review; static and translation runtimes do not expose review capability.
+  description: Wire-level contract for documentation changes and local repository review in serve for the selected documentation root; static builds do not expose review capability.
 servers:
   - url: /
 paths:

@@ -373,7 +373,11 @@ pre,
   text-overflow: ellipsis;
 }
 
-.sidebar nav a:hover,
+.sidebar nav a:hover {
+  background: var(--td-surface-raised);
+  color: var(--td-text);
+}
+
 .sidebar nav a[aria-current='page'] {
   background: var(--td-accent-soft);
   color: var(--td-accent-strong);
@@ -407,6 +411,11 @@ pre,
 .nav-group summary::-webkit-details-marker,
 .navigation-disclosure summary::-webkit-details-marker {
   display: none;
+}
+
+.nav-group summary:hover {
+  background: var(--td-surface-raised);
+  color: var(--td-text);
 }
 
 .nav-group summary::before,

@@ -1,7 +1,7 @@
 <!-- toudocu
 id: MOD-AGENT-CONSOLE
 status: in-progress
-updated: 2026-09-19
+updated: 2026-10-22
 -->
 
 # MOD-AGENT-CONSOLE: Интегрированная работа с coding agent
@@ -55,8 +55,9 @@ approvals проходят через Agent Composer и structured controls.
 
 ### BR-AGENT-CONSOLE-004: Запуск ограничен loopback
 
-Агент запускается только в основном `serve` на loopback-адресе. Статическая
-сборка, переводы и любой non-loopback `serve` не получают эту возможность.
+Агент запускается в `serve` выбранного каталога на loopback-адресе.
+Статическая сборка и любой non-loopback `serve` не получают эту возможность.
+Язык выбранного каталога не влияет на это ограничение.
 
 ### BR-AGENT-CONSOLE-005: Жизненный цикл сессии не зависит от provider
 

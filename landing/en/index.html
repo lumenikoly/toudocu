@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Toudocu turns Markdown documentation into a verified model and a backend-independent static portal.">
+    <meta name="description" content="Documentation alongside your code: Markdown checks, a local editor, Git review, tasks, and coding agents. Publish as a static site.">
     <meta name="theme-color" content="#F5E6CA">
-    <title>Toudocu — Code on vibes. Document with proof.</title>
+    <title>Toudocu — Documentation alongside your code</title>
     <link rel="icon" href="../favicon.svg" type="image/svg+xml">
     <link rel="alternate" hreflang="ru" href="../ru/">
     <link rel="alternate" hreflang="en" href="./">
@@ -28,57 +28,56 @@
     <main id="main" tabindex="-1">
       <section class="hero" id="top" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <p class="eyebrow hero-stage">MARKDOWN IN / VERIFIED MODEL OUT</p>
-          <h1 id="hero-title" class="hero-stage">CODE ON VIBES.<br>DOCUMENT WITH<br>PROOF.</h1>
+          <p class="eyebrow hero-stage">MARKDOWN · GIT · NODE.JS</p>
+          <h1 id="hero-title" class="hero-stage">YOUR DOCS.<br>YOUR TASKS.<br>WITH YOUR CODE.</h1>
+          <p class="hero-summary hero-stage">Check and edit Markdown, review Git changes, and hand tasks to a coding agent. All in one local portal.</p>
         </div>
 
-        <div class="terminal hero-stage" aria-label="Agent task-context example">
-          <div class="terminal-line"><span aria-hidden="true">$</span><code>cursor-agent &quot;Refactor the payment gateway to use the new provider&quot;</code></div>
-          <div class="terminal-line"><span aria-hidden="true">→</span><span>Thinking... Vibe coding session initiated.</span></div>
-          <div class="terminal-line"><span aria-hidden="true">→</span><span>Modified 14 files. Built project.</span></div>
-          <div class="terminal-line terminal-error"><span aria-hidden="true"></span><span>Panic: runtime error: invalid memory address or nil pointer dereference</span></div>
-          <div class="terminal-line terminal-note"><span aria-hidden="true"></span><span>// Oh no. The agent missed the required ProviderConfig contract.</span></div>
-          <div class="terminal-line"><span aria-hidden="true">$</span><code>toudocu task context TASK-PAYMENTS-001 ./docs --format json</code></div>
-          <div class="terminal-line terminal-highlight"><span aria-hidden="true">✓</span><span>Task context loaded: the ProviderConfig contract and verification steps.</span></div>
-          <div class="terminal-line terminal-note"><span aria-hidden="true"></span><span>Agent updated. Architecture alignment: 100%.</span></div>
+        <div class="terminal hero-stage" aria-label="Toudocu commands">
+          <div class="terminal-line terminal-note"><span aria-hidden="true">#</span><span>Check structure, links, and relationships</span></div>
+          <div class="terminal-line"><span aria-hidden="true">$</span><code>toudocu check ./docs</code></div>
+          <div class="terminal-line terminal-note"><span aria-hidden="true">#</span><span>Open the local portal and editor</span></div>
+          <div class="terminal-line"><span aria-hidden="true">$</span><code>toudocu serve ./docs</code></div>
+          <div class="terminal-line terminal-note"><span aria-hidden="true">#</span><span>Build a static site to publish</span></div>
+          <div class="terminal-line"><span aria-hidden="true">$</span><code>toudocu build ./docs --output ./site</code></div>
         </div>
       </section>
 
       <section class="landing-grid" id="proof" aria-labelledby="proof-title">
-        <h2 class="visually-hidden" id="proof-title">What Toudocu proves</h2>
+        <h2 class="visually-hidden" id="proof-title">What Toudocu does</h2>
 
         <div class="audience-row reveal reveal-rise">
           <article class="audience-item">
             <p class="section-label">FOR ENGINEERS</p>
-            <p>Follow architecture, requirements, and implementation context without leaving the repository.</p>
+            <p>Find architecture, requirements, and tasks in the same repository as your code.</p>
           </article>
           <article class="audience-item">
             <p class="section-label">FOR DOCUMENTATION AUTHORS</p>
-            <p>Check structure and relationships before publishing the same model as a static portal.</p>
+            <p>Edit Markdown in your browser, check links, and publish the documentation.</p>
           </article>
           <article class="audience-item">
             <p class="section-label">FOR AGENTS</p>
-            <p>Request focused task context and Git-backed changes instead of scanning an undifferentiated archive.</p>
+            <p>Get requirements, dependencies, and rules for a specific task.</p>
           </article>
         </div>
 
         <article class="feature-card card-green reveal reveal-rise">
           <div class="card-copy">
-            <p class="section-label">VERIFICATION 01</p>
-            <h2>MARKDOWN BECOMES A MODEL.</h2>
-            <p>Validate typed documents, links, transitions, contracts, and relationships locally or in CI.</p>
+            <p class="section-label">DOCUMENTATION CHECKS</p>
+            <h2>FIND BROKEN LINKS.</h2>
+            <p>Find broken links and document errors before publishing. You still need to review the descriptions for accuracy.</p>
           </div>
           <figure class="ui-inset">
-            <div class="ui-inset-header"><span>Screen Map</span><span class="status-chip">VERIFIED VIEW</span></div>
+            <div class="ui-inset-header"><span>Screen Map</span><span class="status-chip">SCREENS &amp; TRANSITIONS</span></div>
             <img src="../assets/en/site-screen-map.png" width="1440" height="900" alt="Toudocu Screen Map showing documented screens and the transitions between them.">
           </figure>
         </article>
 
         <article class="feature-card card-blue reveal reveal-rise">
           <div class="card-copy">
-            <p class="section-label">STATIC OUTPUT</p>
-            <h2>THE PORTAL SHIPS WITHOUT A BACKEND.</h2>
-            <p>Generate a read-only HTTP portal with no database, CDN, npm runtime, or server process after build.</p>
+            <p class="section-label">PUBLISHING</p>
+            <h2>PUBLISH AS A WEBSITE.</h2>
+            <p>Build a site with search and diagrams for GitHub Pages or another static host. Readers do not need Toudocu.</p>
           </div>
           <figure class="ui-inset">
             <div class="ui-inset-header"><span>Project Home</span><span class="neutral-chip">STATIC HTML</span></div>
@@ -88,9 +87,9 @@
 
         <article class="workflow-card reveal reveal-wipe" id="workflow" aria-labelledby="workflow-title">
           <div class="workflow-intro">
-            <p class="section-label">DETERMINISTIC PIPELINE</p>
+            <p class="section-label">CLI COMMANDS</p>
             <h2 id="workflow-title">CHECK. BUILD. SERVE.</h2>
-            <p>Three explicit commands operate on one repository-backed documentation model.</p>
+            <p>Check your docs, build a site to publish, or open the local portal.</p>
           </div>
           <ol class="workflow-steps">
             <li><span class="step-name">CHECK</span><code>toudocu check ./docs --strict</code></li>
@@ -101,9 +100,9 @@
 
         <article class="feature-card card-violet reveal reveal-rise">
           <div class="card-copy">
-            <p class="section-label">GIT-BACKED CONTEXT</p>
-            <h2>CHANGES STAY CLOSE TO THE EVIDENCE.</h2>
-            <p>Review affected documentation and request focused task context from the same repository state.</p>
+            <p class="section-label">CHANGE REVIEW</p>
+            <h2>SEE WHAT CHANGED.</h2>
+            <p>See what changed in the text and on the page. Leave questions on changed files.</p>
           </div>
           <figure class="ui-inset">
             <div class="ui-inset-header"><span>Changes Workspace</span><span class="neutral-chip">WORKING TREE</span></div>
@@ -114,8 +113,8 @@
         <article class="install-card reveal reveal-rise" id="install" aria-labelledby="install-title">
           <div class="card-copy">
             <p class="section-label">INSTALL THE CLI</p>
-            <h2 id="install-title">ONE BINARY. NO RUNTIME ENTOURAGE.</h2>
-            <p>The installer selects your platform, verifies SHA-256, and installs or updates Toudocu in your user directory.</p>
+            <h2 id="install-title">INSTALL AND OPEN.</h2>
+            <p>Copy the command for your system and run it in your terminal. Requires Node.js 24 or later.</p>
           </div>
           <div class="install-commands">
             <div class="install-command">
@@ -133,62 +132,62 @@
 
       <section class="capabilities" id="capabilities" aria-labelledby="capabilities-title">
         <div class="section-heading reveal reveal-rise">
-          <h2 id="capabilities-title">ONE MODEL. EVERY VIEW.</h2>
-          <p>Eight ways one repository-backed Markdown model becomes useful to people, agents, and CI.</p>
+          <h2 id="capabilities-title">WHAT YOU CAN DO.</h2>
+          <p>Your docs stay as files in Git. Toudocu helps you read, check, and update them.</p>
         </div>
         <div class="capability-ledger">
           <article class="capability-row capability-green reveal reveal-rise">
             <span class="capability-number" aria-hidden="true">01</span><h3>VALIDATE</h3>
-            <p>Catch broken structure, relationships, routes, contracts, and verification links before they reach the portal or CI.</p><code>toudocu check ./docs</code>
+            <p>Find errors in your docs and links. Run checks yourself or as part of your project build.</p><code>toudocu check ./docs</code>
           </article>
           <article class="capability-row capability-blue reveal reveal-rise">
             <span class="capability-number" aria-hidden="true">02</span><h3>PUBLISH</h3>
-            <p>Turn the same Markdown model into a searchable static portal with diagrams, traceability, themes, and no backend.</p><code>toudocu build ./docs</code>
+            <p>Build a read-only site with search, diagrams, and links between requirements, tasks, and decisions.</p><code>toudocu build ./docs</code>
           </article>
           <article class="capability-row capability-gray reveal reveal-rise">
             <span class="capability-number" aria-hidden="true">03</span><h3>EDIT</h3>
-            <p>Work live in the browser with safe previews, precise diagnostics, conflict-aware saves, and instant rebuilds.</p><code>/_toudocu/editor/</code>
+            <p>Edit docs right in your browser. See the result and any errors after saving.</p><code>toudocu serve ./docs</code>
           </article>
           <article class="capability-row capability-violet reveal reveal-rise">
             <span class="capability-number" aria-hidden="true">04</span><h3>REVIEW</h3>
-            <p>See what Git changed at source, rendered, and semantic levels—including diagrams, APIs, assets, and task impact.</p><code>/changes/</code>
+            <p>Compare text, diagrams, and APIs before and after edits. See which tasks are affected.</p><code>toudocu changes ./docs</code>
           </article>
           <article class="capability-row capability-blue reveal reveal-rise">
             <span class="capability-number" aria-hidden="true">05</span><h3>MAP</h3>
-            <p>Generate a navigable product map from documented screens, states, transitions, and use cases.</p><code>screens/SC-*.md</code>
+            <p>See how your app’s screens connect. Walk through user scenarios step by step.</p><code>screens/SC-*.md</code>
           </article>
           <article class="capability-row capability-blue reveal reveal-rise">
-            <span class="capability-number" aria-hidden="true">06</span><h3>PLAY</h3>
-            <p>Walk a use case screen by screen, including actions, errors, history, and accessible hotspots.</p><code>use-cases/UC-*.html#play</code>
+            <span class="capability-number" aria-hidden="true">06</span><h3>DISCUSS</h3>
+            <p>Leave questions and requests next to the text. Ask an agent to review them — its reply appears in the same discussion.</p><code>Discussions in the local portal</code>
           </article>
           <article class="capability-row capability-violet reveal reveal-rise">
-            <span class="capability-number" aria-hidden="true">07</span><h3>CONTEXT</h3>
-            <p>Give an agent only the requirements, rules, dependencies, and verification that belong to one task.</p><code>toudocu task context TASK-ID ./docs</code>
+            <span class="capability-number" aria-hidden="true">07</span><h3>WORK WITH AN AGENT</h3>
+            <p>Give an agent a task together with its requirements, project rules, and checks.</p><code>toudocu task context TASK-ID ./docs</code>
           </article>
           <article class="capability-row capability-gray reveal reveal-rise">
             <span class="capability-number" aria-hidden="true">08</span><h3>REFRESH</h3>
-            <p>Use the installed AI skill to reconcile documentation with the whole repository or only the current Git diff against HEAD.</p><code>$toudocu refresh diff</code>
+            <p>Ask your agent to update the docs after code changes.</p><code>$toudocu refresh diff</code>
           </article>
         </div>
       </section>
 
       <section class="getting-started reveal reveal-wipe" id="getting-started" aria-labelledby="getting-started-title">
         <div class="section-heading">
-          <h2 id="getting-started-title">FROM REPOSITORY TO WORKSPACE.</h2>
-          <p>An AI-skill establishes the documentation; the Go CLI turns it into a live local workspace.</p>
+          <h2 id="getting-started-title">GET STARTED.</h2>
+          <p>Connect Toudocu to your agent using the steps below. Already have docs? Open them with toudocu serve ./docs.</p>
         </div>
         <ol class="start-flow">
-          <li><span class="start-number" aria-hidden="true">01</span><h3>INIT</h3><code>$toudocu init</code><p>The installed AI-skill analyzes the repository and creates the initial documentation.</p></li>
-          <li><span class="start-number" aria-hidden="true">02</span><h3>SOURCE</h3><code>docs/**/*.md</code><p>Editable Markdown remains the source of truth.</p></li>
-          <li><span class="start-number" aria-hidden="true">03</span><h3>SERVE</h3><code>toudocu serve ./docs</code><p>The Go CLI builds the portal, watches files, and refreshes the model.</p></li>
-          <li><span class="start-number" aria-hidden="true">04</span><h3>EXPLORE</h3><code>Portal · Editor · Changes · Screen Map · API Docs</code><p>One local UI brings every view together.</p></li>
-          <li><span class="start-number" aria-hidden="true">05</span><h3>VIBE</h3><code>toudocu task context TASK-ID ./docs</code><p>The coding agent loads the task's scope, rules, dependencies, related documents, and verification before implementation.</p></li>
+          <li><span class="start-number" aria-hidden="true">01</span><h3>SKILL</h3><code>toudocu skill install --agent codex</code><p>Install the skill for Codex from your project root. Claude Code and GitHub Copilot are also supported.</p></li>
+          <li><span class="start-number" aria-hidden="true">02</span><h3>DOCS</h3><code>$toudocu init</code><p>Send this message to your agent with the skill installed. It reads the repository and creates documentation.</p></li>
+          <li><span class="start-number" aria-hidden="true">03</span><h3>CHECK</h3><code>toudocu check ./docs</code><p>Run this in your terminal to check structure and links. Review what the agent wrote.</p></li>
+          <li><span class="start-number" aria-hidden="true">04</span><h3>OPEN</h3><code>toudocu serve ./docs</code><p>Open the local address printed in your terminal. Read, edit, and discuss changes.</p></li>
+          <li><span class="start-number" aria-hidden="true">05</span><h3>UPDATE</h3><code>$toudocu refresh diff</code><p>After changing code, send this message to your agent to update the related docs.</p></li>
         </ol>
       </section>
     </main>
 
     <footer class="site-footer">
-      <div><a class="wordmark" href="#top">TOUDOCU</a><p>Verifiable Markdown documentation and static HTTP portals.</p></div>
+      <div><a class="wordmark" href="#top">TOUDOCU</a><p>Documentation and tasks alongside your code.</p></div>
       <nav aria-label="Project links">
         <a href="../project-docs/en/">Documentation</a>
         <a href="https://github.com/lumenikoly/toudocu">GitHub</a>

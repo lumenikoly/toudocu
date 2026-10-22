@@ -65,7 +65,7 @@ pages` GitHub Actions создаёт временный артефакт Pages: 
 ```bash
 pnpm build
 node apps/cli/dist/main.js build ./docs --output ./build/project-docs --repository-root . --clean
-node apps/cli/dist/main.js serve ./docs --repository-root . --no-open
+node apps/cli/dist/main.js serve ./docs --repository-root .
 ```
 
 ## Связанные документы

@@ -308,6 +308,7 @@ html[lang="ru"] .hero-line { white-space: nowrap; }
   letter-spacing: -0.035em;
   line-height: .94;
 }
+html[lang="ru"] .capability-row h3 { font-size: clamp(1.4rem, 2.2vw, 2rem); }
 .capability-row p { max-width: 56ch; margin-bottom: 0; font-size: 1.02rem; text-wrap: pretty; }
 .capability-row code {
   justify-self: end;
@@ -394,7 +395,7 @@ html[lang="ru"] .hero-line { white-space: nowrap; }
   html { scroll-behavior: auto; }
   .site-header { min-height: 72px; padding: 14px 20px; }
   .site-header .wordmark { font-size: 1.05rem; }
-  .header-actions { gap: 6px; }
+  .header-actions { gap: 4px; }
   .header-source-link { display: none; }
   .pill { min-height: 42px; padding: 0 14px; }
   .locale-switch { min-width: 48px; padding-inline: 12px; }
@@ -415,6 +416,8 @@ html[lang="ru"] .hero-line { white-space: nowrap; }
   .feature-card, .workflow-card, .install-card { min-height: 0; margin-top: 18px; padding: 28px 24px; border-radius: 20px; }
   .feature-card { gap: 30px; }
   .card-copy h2, .workflow-card h2, .install-card h2 { font-size: 2.15rem; }
+  html[lang="ru"] .card-copy h2, html[lang="ru"] .workflow-card h2 { font-size: clamp(1.65rem, 8vw, 2.15rem); }
+  html[lang="ru"] .capability-row h3 { font-size: clamp(1.5rem, 7vw, 2rem); }
   .ui-inset-header { align-items: flex-start; flex-direction: column; }
   .ui-inset img { aspect-ratio: 4 / 3; }
   .workflow-card { display: block; }

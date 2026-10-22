@@ -196,7 +196,7 @@ toudocu task candidates ./docs --parent TASK-AUTH-100 --format json
 `in-progress`; прогресс берётся только из отмеченных acceptance criteria.
 Завершённые, отменённые и архивные задачи свернуты ниже доски, архив сгруппирован
 по году. Поиск, фильтры и представление сохраняются в URL. В статической сборке
-Workspace остаётся только для чтения. В основном `serve` на loopback-адресе сервер
+Workspace остаётся только для чтения. В `serve` выбранного каталога на loopback-адресе сервер
 возвращает допустимые для вычисленного состояния действия и доступность каждого
 способа доставки в Agent Console либо через переносимый handoff. `Start work` повторно проверяет
 digest, готовность и зависимости и переводит задачу `ready → in-progress`.
@@ -400,7 +400,7 @@ module: MOD-AUTH
 useCase: UC-AUTH-03
 flow: FLOW-AUTH-RECOVERY
 dependsOn: TASK-MAIL-004
-updated: 2026-07-27
+updated: 2026-10-22
 -->
 
 # TASK-AUTH-014: Добавить восстановление пароля

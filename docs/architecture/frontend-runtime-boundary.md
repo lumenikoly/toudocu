@@ -48,7 +48,7 @@ flowchart LR
 - core не содержит React, HTTP и Node.js-адаптеров;
 - React не реконструирует доменную семантику из UI;
 - статический портал читаем без JavaScript и работает во вложенном URL;
-- статический и переводной режимы не содержат editor, Discussions, Agent
+- статический режим не содержит editor, Discussions, Agent
   Console или PTY;
 - только loopback `serve` может запускать provider process и системную оболочку;
 - ошибка интерактивной функции не скрывает содержимое документа;
