@@ -237,6 +237,14 @@
   gap: var(--td-space-1);
 }
 
+.screen-map-hint {
+  margin: 0;
+  padding: var(--td-space-2) var(--td-space-4);
+  border-block-end: 1px solid var(--td-border);
+  color: var(--td-text-muted);
+  font-size: 0.75rem;
+}
+
 .screen-map-counts,
 .topology-summary {
   color: var(--td-text-muted);

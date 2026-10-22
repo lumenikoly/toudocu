@@ -574,6 +574,35 @@
   }
 }
 
+.review-file-picker form {
+  display: grid;
+  gap: var(--td-space-4);
+}
+.review-file-picker header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--td-space-3);
+}
+.review-file-picker h2 {
+  margin: 0;
+  font-size: 1.125rem;
+}
+.review-file-picker [data-file-picker-results] {
+  display: grid;
+  gap: var(--td-space-2);
+}
+.review-file-picker [data-file-picker-results] button {
+  display: grid;
+  gap: var(--td-space-1);
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+.review-file-picker [data-file-picker-results] span {
+  color: var(--td-text-muted);
+  font: 0.75rem / 1.5 var(--td-font-mono);
+}
+
 @container (max-width: 52rem) {
   .workspace.changes-workspace {
     block-size: auto;

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Release version (for example, 0.0.9)
+        description: Release version (for example, 0.0.10)
         required: true
         type: string
       channel:

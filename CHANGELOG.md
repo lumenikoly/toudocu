@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.0.10
+
+- Expanded the screen map to the available page width and improved fullscreen
+  sizing, compact controls, and responsive layout. Initial zoom preserves
+  readable screen cards; fitting the entire diagram remains an explicit action.
+- Improved the screen catalog with sticky table headers, row separators, and
+  separate use-case identifiers. Localized screen-status filter labels while
+  preserving their underlying values.
+- Refined project overview panels, search, tabs, and control states. Improved
+  secondary-text contrast in Classic and Terminal themes and kept appearance
+  settings scrollable within short viewports.
+- Added distinct loading, empty-range, and empty-filter states to Changes.
+  Replaced its file picker with the shared accessible dialog, including initial
+  focus, Escape dismissal, and focus restoration.
+- Replaced the embedded Agent Console and provider integrations with the
+  standalone local Project Terminal. Task actions retain command and context
+  copying; discussions remain available for external-agent feedback.
+
 ## 0.0.9
 
 - Replaced full snapshots embedded in every static HTML page with a compact

@@ -190,7 +190,11 @@ pre,
 
 .header-settings {
   position: fixed;
-  inset: 4.5rem 1rem auto auto;
+  --settings-top: 4.5rem;
+  inset: var(--settings-top) 1rem auto auto;
+  max-block-size: calc(100dvh - var(--settings-top) - 1rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   margin: 0;
   inline-size: min(23rem, calc(100vw - 2rem));
   padding: 1.25rem;
@@ -1073,7 +1077,7 @@ pre,
     }
   }
   .header-settings {
-    inset-block-start: 3.5rem;
+    --settings-top: 3.5rem;
   }
 }
 

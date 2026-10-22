@@ -19,7 +19,7 @@
   --td-surface-muted: light-dark(#f8f9fc, #232834);
   --td-surface-raised: light-dark(#f0f3f9, #2c3342);
   --td-text: light-dark(#252d40, #edf0f7);
-  --td-text-muted: light-dark(#6a7489, #a9b2c6);
+  --td-text-muted: light-dark(#626c80, #a9b2c6);
   --td-text-on-accent: light-dark(#ffffff, #17213c);
   --td-border: light-dark(#e5e9f1, #303746);
   --td-border-strong: light-dark(#ccd4e2, #465166);
@@ -116,7 +116,7 @@ html[data-site-theme='terminal'] {
   --td-surface-raised: light-dark(#e3ece7, #283c34);
   --td-border: light-dark(#d6e3dd, #34483e);
   --td-text: light-dark(#263c32, #e1efe7);
-  --td-text-muted: light-dark(#5c7164, #9fb7a7);
+  --td-text-muted: light-dark(#586d60, #9fb7a7);
   --td-font-interface: var(--td-font-mono);
   --td-font-heading: var(--td-font-interface);
   --td-radius-panel: 3px;

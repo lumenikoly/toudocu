@@ -282,6 +282,7 @@ export function ScreenMap({
   const [changeStatus, setChangeStatus] = useState('');
   const [zoom, setZoom] = useState(1);
   const [autoFit, setAutoFit] = useState(true);
+  const [fitEntireMap, setFitEntireMap] = useState(false);
   const [changesActive, setChangesActive] = useState(false);
   const [changedScreens, setChangedScreens] = useState<Map<string, string>>(new Map());
   const [changeError, setChangeError] = useState('');
@@ -409,6 +410,7 @@ export function ScreenMap({
   );
   useEffect(() => {
     setAutoFit(true);
+    setFitEntireMap(false);
   }, [mode, module, useCase, status, query, changesActive, changeStatus]);
   useEffect(() => {
     const viewport = scroller.current;
@@ -419,7 +421,7 @@ export function ScreenMap({
         Math.min(
           1,
           Math.max(
-            0.08,
+            fitEntireMap ? 0.08 : 0.85,
             Math.min(
               (viewport.clientWidth - 32) / layout.width,
               (viewport.clientHeight - 32) / layout.height,
@@ -434,7 +436,7 @@ export function ScreenMap({
     const observer = new ResizeObserver(fit);
     observer.observe(viewport);
     return () => observer.disconnect();
-  }, [autoFit, layout.width, layout.height, representation]);
+  }, [autoFit, fitEntireMap, layout.width, layout.height, representation]);
   const positionById = new Map(layout.positions.map((position) => [position.screen.id, position]));
   const visibleTransitions = transitions.filter(
     (transition) => positionById.has(transition.source) && positionById.has(transition.target),
@@ -564,7 +566,9 @@ export function ScreenMap({
           >
             <option value="">{text('allStatuses')}</option>
             {statuses.map((value) => (
-              <option key={value}>{value}</option>
+              <option key={value} value={value}>
+                {translator(locale).status(value)}
+              </option>
             ))}
           </select>
           {snapshot.capabilities.changes && (
@@ -620,7 +624,10 @@ export function ScreenMap({
             <IconButton
               aria-label={text('fitDiagram')}
               title={text('fitDiagram')}
-              onClick={() => setAutoFit(true)}
+              onClick={() => {
+                setFitEntireMap(true);
+                setAutoFit(true);
+              }}
             >
               <Icon name="fit" />
             </IconButton>
@@ -637,6 +644,9 @@ export function ScreenMap({
           </div>
         )}
       </div>
+      {visibleScreens.length > 0 && representation === 'map' && !fitEntireMap && zoom <= 0.85 && (
+        <p className="screen-map-hint">{text('mapExploreHint')}</p>
+      )}
       {visibleScreens.length > 0 && representation === 'table' ? (
         <div className="data-table screen-catalog-table">
           <table>

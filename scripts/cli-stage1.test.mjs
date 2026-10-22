@@ -10,7 +10,7 @@ const entrypoint = 'apps/cli/dist/main.js';
 test('temporary TypeScript CLI exposes migrated commands', () => {
   const version = spawnSync(process.execPath, [entrypoint, 'version'], { encoding: 'utf8' });
   assert.equal(version.status, 0);
-  assert.equal(version.stdout, '0.0.9\n');
+  assert.equal(version.stdout, '0.0.10\n');
   assert.equal(version.stderr, '');
 
   const help = spawnSync(process.execPath, [entrypoint, 'check', '--help'], { encoding: 'utf8' });

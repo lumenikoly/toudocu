@@ -1,12 +1,15 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { PageViewV1 } from '@toudocu/contracts';
 import { MemoryRouter } from 'react-router';
 import { ScreenMap } from '../app/screen-map.js';
 import { portalFixture } from './fixture.js';
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
 
 type ScreensPage = Extract<PageViewV1, { kind: 'screens' }>;
 
@@ -70,7 +73,9 @@ describe('ScreenMap', () => {
       errors: [],
     };
 
-    render(
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(390);
+    vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(600);
+    const { rerender } = render(
       <MemoryRouter>
         <ScreenMap page={page} snapshot={snapshot} locale="en" />
       </MemoryRouter>,
@@ -81,5 +86,22 @@ describe('ScreenMap', () => {
     expect(screen.getByLabelText('SC-DEMO-END: Result')).toBeTruthy();
     expect(screen.getByText('TR-DEMO-NEXT')).toBeTruthy();
     expect(document.querySelector('.screen-map-edge-label')?.textContent).toContain('Open result');
+    expect(screen.getByRole('button', { name: '85%' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Fit diagram' }));
+    expect(screen.queryByRole('button', { name: '85%' })).toBeNull();
+
+    rerender(
+      <MemoryRouter>
+        <ScreenMap page={page} snapshot={snapshot} locale="ru" />
+      </MemoryRouter>,
+    );
+    const option = screen.getByRole('option', { name: 'Реализовано' }) as HTMLOptionElement;
+    expect(option.value).toBe('implemented');
+    fireEvent.change(screen.getByRole('combobox', { name: 'Статус' }), {
+      target: { value: 'implemented' },
+    });
+    expect(screen.queryByLabelText('SC-DEMO-START: Start')).toBeNull();
+    expect(screen.getByLabelText('SC-DEMO-END: Result')).toBeTruthy();
+    expect(screen.getByRole('button', { name: '85%' })).toBeTruthy();
   });
 });

@@ -6,7 +6,7 @@ import {
   type RepositoryFileList,
 } from '@toudocu/contracts';
 import { translator, type Locale } from './i18n.js';
-import { Icon } from './ui/index.js';
+import { Dialog, EmptyState, Icon } from './ui/index.js';
 import { ChangesDetail } from './changes-detail.js';
 import {
   buildChangeTree,
@@ -112,6 +112,10 @@ export function ChangesWorkspace({ locale }: { locale: Locale }) {
   const [filters, setFilters] = useState<ChangeFilters>(() => filtersFromUrl());
   const [report, setReport] = useState<ChangeSetReportV1>();
   const reportDigest = useRef('');
+  const reportRequest = useRef(0);
+  const [loading, setLoading] = useState(true);
+  const linkTrigger = useRef<HTMLButtonElement>(null);
+  const linkSearch = useRef<HTMLInputElement>(null);
   const [selectedPath, setSelectedPath] = useState('');
   const [tab, setTab] = useState<TabId>('source');
   const [error, setError] = useState('');
@@ -126,9 +130,12 @@ export function ChangesWorkspace({ locale }: { locale: Locale }) {
 
   const refresh = useCallback(
     async (signal?: AbortSignal): Promise<void> => {
+      const request = ++reportRequest.current;
+      setLoading(true);
       setError('');
       try {
         const next = await loadReport(queryFor(appliedRange, filters), signal);
+        if (signal?.aborted || request !== reportRequest.current) return;
         reportDigest.current = next.changeSetDigest;
         setReport(next);
         setStale(false);
@@ -144,9 +151,11 @@ export function ChangesWorkspace({ locale }: { locale: Locale }) {
               : (next.changes[0]?.path ?? ''),
         );
       } catch (reason) {
-        if (!(reason instanceof DOMException && reason.name === 'AbortError')) {
+        if (!signal?.aborted && request === reportRequest.current) {
           setError(reason instanceof Error ? reason.message : String(reason));
         }
+      } finally {
+        if (!signal?.aborted && request === reportRequest.current) setLoading(false);
       }
     },
     [appliedRange, filters],
@@ -310,7 +319,12 @@ export function ChangesWorkspace({ locale }: { locale: Locale }) {
         </div>
       )}
       {error && <p role="alert">{error}</p>}
-      {report && (
+      {loading && (
+        <p className="changes-summary" role="status">
+          {text('loading')}
+        </p>
+      )}
+      {!loading && !error && report && (
         <p className="changes-summary">
           {translator(locale).format('summaryChanges', {
             count: report.changes.length,
@@ -357,7 +371,15 @@ export function ChangesWorkspace({ locale }: { locale: Locale }) {
               </select>
             </label>
           </div>
-          <div className="changes-file-list">
+          <div className="changes-file-list" aria-busy={loading}>
+            {!loading && !error && report && shownChanges.length === 0 && (
+              <EmptyState
+                role="status"
+                title={text(
+                  filters.query || filters.status || filters.type ? 'noResults' : 'noChanges',
+                )}
+              />
+            )}
             <Tree
               node={buildChangeTree(shownChanges)}
               selected={selectedPath}
@@ -387,64 +409,75 @@ export function ChangesWorkspace({ locale }: { locale: Locale }) {
           <button
             type="button"
             className="changes-linked-add"
+            ref={linkTrigger}
             onClick={() => void openLinkPicker()}
           >
             {text('linkFile')}
           </button>
         </aside>
         <section className="changes-detail" aria-live="polite">
-          <ChangesDetail
-            change={selected}
-            linkedPath={linkedPath}
-            tab={tab}
-            onTab={setTab}
-            locale={locale}
-            reviewEnabled={appliedRange.target === 'working-tree'}
-            range={appliedRange}
-          />
+          {(selected || linkedPath || (!loading && !error && shownChanges.length > 0)) && (
+            <ChangesDetail
+              change={selected}
+              linkedPath={linkedPath}
+              tab={tab}
+              onTab={setTab}
+              locale={locale}
+              reviewEnabled={appliedRange.target === 'working-tree'}
+              range={appliedRange}
+            />
+          )}
         </section>
       </div>
-      {linkOpen && (
-        <dialog className="review-file-picker" open onClose={() => setLinkOpen(false)}>
-          <form method="dialog" onSubmit={(event) => event.preventDefault()}>
-            <header>
-              <h2>{text('linkFile')}</h2>
-              <button type="button" onClick={() => setLinkOpen(false)}>
-                {text('close')}
-              </button>
-            </header>
-            <input
-              type="search"
-              value={linkQuery}
-              placeholder={text('pathOrType')}
-              aria-label={text('pathOrType')}
-              onChange={(event) => setLinkQuery(event.currentTarget.value)}
-            />
-            {linkError && <p role="alert">{linkError}</p>}
-            {filesLoading && <p role="status">{text('loading')}</p>}
-            {filesTruncated && <p role="status">{text('repositoryFilesTruncated')}</p>}
-            <div data-file-picker-results>
-              {files.map((file) => (
-                <button
-                  type="button"
-                  key={file.path}
-                  onClick={() => {
-                    setLinkedPaths((current) =>
-                      current.includes(file.path) ? current : [...current, file.path],
-                    );
-                    setSelectedPath(file.path);
-                    setTab('file');
-                    setLinkOpen(false);
-                  }}
-                >
-                  <strong>{file.path.split('/').pop()}</strong>
-                  <span>{file.path}</span>
-                </button>
-              ))}
-            </div>
-          </form>
-        </dialog>
-      )}
+      <Dialog.Root open={linkOpen} onOpenChange={setLinkOpen}>
+        <Dialog.Portal>
+          <Dialog.Backdrop className="ui-backdrop" />
+          <Dialog.Viewport className="ui-dialog-viewport">
+            <Dialog.Popup
+              className="ui-dialog review-file-picker"
+              initialFocus={linkSearch}
+              finalFocus={linkTrigger}
+            >
+              <form onSubmit={(event) => event.preventDefault()}>
+                <header>
+                  <Dialog.Title>{text('linkFile')}</Dialog.Title>
+                  <Dialog.Close>{text('close')}</Dialog.Close>
+                </header>
+                <input
+                  ref={linkSearch}
+                  type="search"
+                  value={linkQuery}
+                  placeholder={text('pathOrType')}
+                  aria-label={text('pathOrType')}
+                  onChange={(event) => setLinkQuery(event.currentTarget.value)}
+                />
+                {linkError && <p role="alert">{linkError}</p>}
+                {filesLoading && <p role="status">{text('loading')}</p>}
+                {filesTruncated && <p role="status">{text('repositoryFilesTruncated')}</p>}
+                <div data-file-picker-results>
+                  {files.map((file) => (
+                    <button
+                      type="button"
+                      key={file.path}
+                      onClick={() => {
+                        setLinkedPaths((current) =>
+                          current.includes(file.path) ? current : [...current, file.path],
+                        );
+                        setSelectedPath(file.path);
+                        setTab('file');
+                        setLinkOpen(false);
+                      }}
+                    >
+                      <strong>{file.path.split('/').pop()}</strong>
+                      <span>{file.path}</span>
+                    </button>
+                  ))}
+                </div>
+              </form>
+            </Dialog.Popup>
+          </Dialog.Viewport>
+        </Dialog.Portal>
+      </Dialog.Root>
     </section>
   );
 }
