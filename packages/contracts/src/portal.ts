@@ -87,7 +87,6 @@ export const RuntimeCapabilitiesV1Schema = z.strictObject({
   editing: z.boolean(),
   changes: z.boolean(),
   discussions: z.boolean(),
-  agentConsole: z.boolean(),
   terminal: z.boolean(),
   taskActions: z.boolean(),
   rebuild: z.boolean(),

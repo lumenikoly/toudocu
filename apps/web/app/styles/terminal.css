@@ -1,0 +1,106 @@
+.terminal-panel {
+  grid-column: 3;
+  grid-row: 2;
+  position: sticky;
+  inset-block-start: var(--header-height);
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  inline-size: var(--terminal-panel-width, 25rem);
+  min-inline-size: 0;
+  block-size: calc(100dvh - var(--header-height));
+  font-family: var(--td-font-interface);
+  border-inline-start: 1px solid var(--td-border);
+  background: var(--td-surface);
+  outline: none;
+}
+.terminal-panel[hidden] {
+  display: none;
+}
+.terminal-header {
+  display: flex;
+  align-items: center;
+  gap: var(--td-space-3);
+  flex: none;
+  min-block-size: 4rem;
+  padding: var(--td-space-3) var(--td-space-4);
+  border-block-end: 1px solid var(--td-border);
+}
+.terminal-header > strong {
+  flex: 1;
+  font: 700 1rem/1.3 var(--td-font-heading);
+}
+.terminal-header > .ui-icon,
+.terminal-empty > .ui-icon {
+  color: var(--td-accent);
+}
+.connection-mark {
+  inline-size: 0.6rem;
+  block-size: 0.6rem;
+  flex: none;
+  border-radius: 50%;
+  background: var(--td-text-muted);
+}
+.connection-mark[data-connected='true'] {
+  background: var(--td-status-success);
+}
+.terminal-workspace {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-block-size: 0;
+  overflow: hidden;
+}
+.terminal-panel .project-terminal {
+  flex: 1;
+  min-block-size: 0;
+  padding: var(--td-space-2);
+  overflow: hidden;
+  background: var(--td-surface-canvas);
+}
+.terminal-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--td-space-3);
+  margin: var(--td-space-4);
+  padding: var(--td-space-6);
+  color: var(--td-text-muted);
+  text-align: center;
+}
+.terminal-dock {
+  padding: var(--td-space-3) var(--td-space-4);
+  border-block-start: 1px solid var(--td-border);
+}
+.terminal-error {
+  flex: none;
+  margin: 0;
+  padding: var(--td-space-3) var(--td-space-4);
+  background: var(--td-status-danger-soft);
+  color: var(--td-status-danger);
+  overflow-wrap: anywhere;
+}
+.terminal-resizer {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: -4px;
+  z-index: 2;
+  inline-size: 9px;
+  cursor: col-resize;
+  touch-action: none;
+}
+.terminal-resizer:is(:hover, :focus-visible) {
+  background: var(--td-accent-soft);
+}
+@media (max-width: 72rem) {
+  .app-shell > .terminal-panel {
+    position: fixed;
+    inset-inline-end: 0;
+    z-index: 25;
+    inline-size: min(var(--terminal-panel-width, 25rem), 100vw);
+    box-shadow: var(--td-shadow-raised);
+  }
+  .terminal-resizer {
+    display: none;
+  }
+}

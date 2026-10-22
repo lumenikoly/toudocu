@@ -4,7 +4,7 @@ import { ServeApiDataSource, StaticBrowserDataSource } from './data.js';
 import './styles/app.css';
 import './styles/document.css';
 import './styles/graph.css';
-import './styles/agent-console.css';
+import './styles/terminal.css';
 import './styles/editor.css';
 import './styles/search.css';
 import './styles/changes.css';

@@ -44,21 +44,20 @@ export function TaskItemActions({
   if (item.archived) return null;
   const state = item.workspace.workState;
   if (state === 'cancelled') return null;
-  const actions: { label: MessageKey; prompt: MessageKey; readOnly?: boolean }[] = [];
+  const actions: { label: MessageKey; prompt: MessageKey }[] = [];
   if (item.childIds.length && ['ready', 'in-progress'].includes(state))
     actions.push({ label: 'taskCompleteTree', prompt: 'taskPromptTree' });
   if (state === 'ready') actions.push({ label: 'startWork', prompt: 'taskPromptStart' });
   if (state === 'in-progress')
     actions.push({ label: 'taskContinue', prompt: 'taskPromptContinue' });
   if (['blocked', 'waiting'].includes(state))
-    actions.push({ label: 'taskExplainBlocker', prompt: 'taskPromptBlocker', readOnly: true });
-  actions.push({ label: 'taskAsk', prompt: 'taskPromptAsk', readOnly: true });
+    actions.push({ label: 'taskExplainBlocker', prompt: 'taskPromptBlocker' });
+  actions.push({ label: 'taskAsk', prompt: 'taskPromptAsk' });
   if (!['done', 'waiting'].includes(state))
     actions.push({ label: 'taskClarify', prompt: 'taskPromptClarify' });
   if (['draft', 'ready-candidate', 'needs-attention'].includes(state))
     actions.push({ label: 'taskFixProblems', prompt: 'taskPromptFix' });
-  if (state === 'in-progress')
-    actions.push({ label: 'taskNext', prompt: 'taskPromptNext', readOnly: true });
+  if (state === 'in-progress') actions.push({ label: 'taskNext', prompt: 'taskPromptNext' });
 
   const complete = async (): Promise<void> => {
     if (!window.confirm(format('completeTaskPrompt', { id: item.id }))) return;
@@ -135,33 +134,10 @@ export function TaskItemActions({
       )}
       {actions.map((entry) => (
         <div className="task-prompt-action" key={entry.label}>
-          {snapshot.capabilities.agentConsole ? (
-            <button
-              className="task-prompt-send"
-              type="button"
-              disabled={busy}
-              title={`${text('sendToAgent')}: ${text(entry.label)}`}
-              onClick={(event) => {
-                document.dispatchEvent(
-                  new CustomEvent('toudocu:agent-compose', {
-                    detail: {
-                      text: format(entry.prompt, { id: item.id }),
-                      policy: entry.readOnly ? 'filesystem-read-only' : 'normal',
-                    },
-                  }),
-                );
-                event.currentTarget.closest('.task-item-actions')?.removeAttribute('open');
-              }}
-            >
-              <Icon name={actionIcons[entry.label] ?? 'messageSquare'} />
-              <span>{text(entry.label)}</span>
-            </button>
-          ) : (
-            <span className="task-prompt-label">
-              <Icon name={actionIcons[entry.label] ?? 'messageSquare'} />
-              {text(entry.label)}
-            </span>
-          )}
+          <span className="task-prompt-label">
+            <Icon name={actionIcons[entry.label] ?? 'messageSquare'} />
+            {text(entry.label)}
+          </span>
           <button
             className="task-prompt-copy"
             type="button"

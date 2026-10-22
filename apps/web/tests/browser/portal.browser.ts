@@ -129,14 +129,14 @@ test('search stays inline, supports keyboard navigation, and works from nested r
   await expect(popup).toBeHidden();
 });
 
-test('docked agent shrinks the page, resizes, and leaves terminal stopped until requested', async ({
+test('docked terminal shrinks the page, resizes, and leaves terminal stopped until requested', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('http://127.0.0.1:4175/architecture/overview.html');
   const content = page.locator('#main-content');
   const sidebar = page.locator('.sidebar');
-  const panel = page.locator('aside.agent-console');
+  const panel = page.locator('aside.terminal-panel');
   await expect(sidebar).toBeVisible();
   await expect(content).toBeVisible();
   const contentBefore = await content.boundingBox();
@@ -147,7 +147,7 @@ test('docked agent shrinks the page, resizes, and leaves terminal stopped until 
   await contextualDiscussion.click();
   await expect(discussionPanel).toHaveClass(/is-open/u);
   await expect(page.locator('.discussion-composer textarea')).toBeVisible();
-  await page.locator('#agent-console-toggle').click();
+  await page.locator('#terminal-toggle').click();
   await expect(panel).toBeVisible();
   await expect(discussionPanel).not.toHaveClass(/is-open/u);
   await expect(page.locator('dialog, [aria-modal="true"]')).toHaveCount(0);
@@ -156,17 +156,17 @@ test('docked agent shrinks the page, resizes, and leaves terminal stopped until 
   await expect(discussionPanel).toHaveClass(/is-open/u);
   await discussionPanel.locator('.discussion-thread-actions button').last().click();
   await expect(discussionPanel).not.toHaveClass(/is-open/u);
-  await page.locator('#agent-console-toggle').click();
+  await page.locator('#terminal-toggle').click();
   await expect(panel).toBeVisible();
   const panelBefore = await panel.boundingBox();
   const contentDocked = await content.boundingBox();
-  if (!panelBefore || !contentDocked) throw new Error('Docked console or page is not visible');
+  if (!panelBefore || !contentDocked) throw new Error('Docked terminal or page is not visible');
   expect(contentDocked.width).toBeLessThan(contentBefore.width);
   expect(contentDocked.x + contentDocked.width).toBeLessThanOrEqual(panelBefore.x);
 
-  const resizer = page.locator('.agent-console-resizer');
+  const resizer = page.locator('.terminal-resizer');
   const handle = await resizer.boundingBox();
-  if (!handle) throw new Error('Agent panel resize handle is not visible');
+  if (!handle) throw new Error('Terminal panel resize handle is not visible');
   await page.mouse.move(handle.x + handle.width / 2, handle.y + 50);
   await page.mouse.down();
   await page.mouse.move(handle.x + handle.width / 2 - 64, handle.y + 50);
@@ -179,28 +179,22 @@ test('docked agent shrinks the page, resizes, and leaves terminal stopped until 
   if (!contentResized || !panelResized) throw new Error('Resized layout is not visible');
   expect(contentResized.width).toBeLessThan(contentDocked.width);
   expect(contentResized.x + contentResized.width).toBeLessThanOrEqual(panelResized.x);
-  await captureLightAndDark(page, 'desktop-agent-open');
+  await captureLightAndDark(page, 'desktop-terminal-open');
 
-  await expect(page.locator('.console-mode-switch')).toHaveCount(0);
-  await expect(page.locator('.agent-configuration')).not.toHaveAttribute('open');
-  await page.locator('.agent-configuration > summary').click();
-  await expect(page.getByRole('combobox', { name: 'Model' })).toBeVisible();
-  await expect(page.getByRole('combobox', { name: 'Access' })).toBeVisible();
-  await page.getByRole('button', { name: 'Project terminal' }).click();
+  await expect(page.getByRole('button', { name: 'Agent', exact: true })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Start terminal' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Stop terminal' })).toBeHidden();
-  await page.getByRole('button', { name: 'Agent' }).click();
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.locator('#agent-console-toggle').click();
+  await page.locator('#terminal-toggle').click();
   await expect(panel).toBeHidden();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await expect(sidebar).toBeVisible();
   await expect(content).toBeVisible();
-  await page.locator('#agent-console-toggle').click();
+  await page.locator('#terminal-toggle').click();
   await expect(panel).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await captureLightAndDark(page, 'mobile-agent-open');
+  await captureLightAndDark(page, 'mobile-terminal-open');
 });
 
 test('workbench adapts to mobile and keeps native navigation usable', async ({ page }) => {
@@ -370,8 +364,8 @@ test('live portal remains usable when browser preferences are unavailable', asyn
   });
   await page.goto('http://127.0.0.1:4175/architecture/overview.html');
   await expect(page.getByRole('heading', { name: 'Architecture' })).toBeVisible();
-  await page.getByRole('button', { name: 'Agent', exact: true }).click();
-  await expect(page.locator('aside.agent-console')).toBeVisible();
+  await page.getByRole('button', { name: 'Project terminal', exact: true }).click();
+  await expect(page.locator('aside.terminal-panel')).toBeVisible();
   expect(errors).toEqual([]);
 });
 
@@ -629,14 +623,44 @@ test('serves deep SPA routes and one revision through the live API', async ({ pa
   expect(externalRequests).toEqual([]);
 });
 
-test('keeps the Agent Console and Project Terminal across SPA navigation', async ({ page }) => {
+test('keeps the Project Terminal across SPA navigation', async ({ page }) => {
   await page.goto('http://127.0.0.1:4175/architecture/overview.html');
-  await page.locator('#agent-console-toggle').click();
-  await expect(page.locator('aside.agent-console')).toBeVisible();
-  await page.getByRole('button', { name: 'Project terminal' }).click();
+  await page.locator('#terminal-toggle').click();
+  await expect(page.locator('aside.terminal-panel')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Start terminal' })).toBeVisible();
   await page.getByRole('button', { name: 'Start terminal' }).click();
   await expect(page.getByRole('button', { name: 'Stop terminal' })).toBeVisible();
+
+  const output = await page.evaluate(
+    () =>
+      new Promise<string>((resolve, reject) => {
+        const socket = new WebSocket(`ws://${location.host}/_toudocu/api/terminal/ws`);
+        const timer = setTimeout(() => {
+          socket.close();
+          reject(new Error('Terminal output timed out'));
+        }, 5000);
+        let output = '';
+        socket.onopen = () =>
+          socket.send(
+            JSON.stringify({
+              action: 'terminal-input',
+              text: 'printf "TOUDOCU_%s\\n" "TERMINAL_OK"\r',
+            }),
+          );
+        socket.onmessage = ({ data }) => {
+          const message = JSON.parse(String(data)) as {
+            terminal?: { type: string; data?: string };
+          };
+          if (message.terminal?.type === 'output') output += atob(message.terminal.data ?? '');
+          if (output.includes('TOUDOCU_TERMINAL_OK')) {
+            clearTimeout(timer);
+            socket.close();
+            resolve(output);
+          }
+        };
+      }),
+  );
+  expect(output).toContain('TOUDOCU_TERMINAL_OK');
 
   await page.getByRole('link', { name: 'Editor' }).click();
   await expect(page.getByRole('button', { name: 'Stop terminal' })).toBeVisible();

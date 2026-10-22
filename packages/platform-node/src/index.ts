@@ -16,18 +16,6 @@ export { runProcess, startProcess } from './process-runner.js';
 export type { ManagedProcess, StartProcessOptions } from './process-runner.js';
 export { ProjectTerminal } from './pty/session.js';
 export type { TerminalEvent, TerminalState } from './pty/session.js';
-export { CodexProvider } from './agent/provider.js';
-export { OpenCodeProvider } from './agent/opencode.js';
-export type {
-  AgentApproval,
-  AgentApprovalDecision,
-  AgentProvider,
-  AgentProviderSession,
-  AgentTurnPolicy,
-} from './agent/provider.js';
-export { AgentConsoleRuntime } from './agent/session.js';
-export { AgentPreferenceStore } from './agent/preferences.js';
-export type { AgentConsoleRuntimeOptions, AgentRuntimeEvent } from './agent/session.js';
 export type { RunProcessOptions, ProcessResult } from './process-runner.js';
 export {
   runTaskVerificationCommand,

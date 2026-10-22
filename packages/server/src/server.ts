@@ -3,18 +3,14 @@ import { basename, dirname, extname, isAbsolute, relative, resolve } from 'node:
 import fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify';
 import websocket from '@fastify/websocket';
 import {
-  AgentConsoleInputSchema,
-  AgentConsoleMessageSchema,
+  TerminalInputSchema,
+  TerminalMessageSchema,
   RepositoryFileQuerySchema,
   RepositoryFilesQuerySchema,
   ServeInstanceIdentityV1Schema,
   ToudocuError,
-  type AgentConsoleState,
-  type AgentConsoleMessage,
-  type AgentEvent,
-  type AgentPreference,
-  type AgentSessionState,
-  type AgentThread,
+  type TerminalMessage,
+  type TerminalState,
   type ChangeSetReportV1,
   type EditorContentRequest,
   type EditorCreateRequest,
@@ -83,58 +79,19 @@ export interface DocumentationServerOptions {
     list(query: RepositoryFilesQuery, signal: AbortSignal): Promise<RepositoryFileList>;
     read(query: RepositoryFileQuery, signal: AbortSignal): Promise<RepositoryFileResponse>;
   };
-  agentConsole?: AgentConsoleService;
+  terminal?: TerminalService;
 }
 
-export interface AgentConsoleService {
-  setup(provider?: string): Promise<AgentConsoleState> | AgentConsoleState;
-  snapshot(): AgentSessionState;
-  subscribe(listener: (event: AgentConsoleRuntimeEvent) => void): () => void;
-  start(
-    input: {
-      taskID?: string;
-      provider?: string;
-      preset?: 'default' | 'full-access';
-      model?: string;
-      effort?: string;
-    },
-    signal?: AbortSignal,
-  ): Promise<void>;
-  send(
-    text: string,
-    policy?: 'normal' | 'filesystem-read-only',
-    signal?: AbortSignal,
-  ): Promise<void>;
-  interrupt(signal?: AbortSignal): Promise<void>;
-  approve(requestID: string, decision: 'accept' | 'decline' | 'cancel'): Promise<void>;
-  cancelPending(id: string): Promise<void>;
-  verifyTask?(
-    taskID: string,
-    mode: 'dry-run' | 'run',
-    confirmed: boolean,
-    signal?: AbortSignal,
-  ): Promise<void>;
-  sendVerificationFailure?(signal?: AbortSignal): Promise<void>;
-  stop(discardPending: boolean): Promise<void>;
-  cleanup(): Promise<void>;
-  savePreference(preference: AgentPreference, confirmed: boolean): Promise<void>;
-  history(provider?: string, signal?: AbortSignal): Promise<AgentThread[]>;
-  resume(
-    input: { threadID: string; provider?: string; preset?: 'default' | 'full-access' },
-    signal?: AbortSignal,
-  ): Promise<void>;
-  startTerminal(signal?: AbortSignal): Promise<void>;
-  stopTerminal(signal?: AbortSignal): Promise<void>;
-  writeTerminal(text: string): void;
-  resizeTerminal(columns: number, rows: number): void;
-  interruptTerminal(): void;
+export interface TerminalService {
+  snapshot(): TerminalState;
+  subscribe(listener: (event: import('@toudocu/contracts').TerminalEvent) => void): () => void;
+  start(signal?: AbortSignal): void | Promise<void>;
+  stop(signal?: AbortSignal): Promise<void>;
+  write(text: string): void;
+  resize(columns: number, rows: number): void;
+  interrupt(): void;
   close(): Promise<void>;
 }
-
-type AgentConsoleRuntimeEvent =
-  | { kind: 'event'; event: AgentEvent }
-  | { kind: 'state'; state: AgentSessionState }
-  | { kind: 'terminal'; terminal: { type: 'output' | 'exit'; data?: string } };
 
 export interface DocumentationServer {
   app: FastifyInstance;
@@ -193,16 +150,6 @@ function apiStatus(error: unknown): number {
       'AGENT_REVISION_CONFLICT',
       'AGENT_INBOX_BUSY',
       'AGENT_INVALID_MESSAGE',
-      'agent_session_active',
-      'agent_session_inactive',
-      'agent_pending_conflict',
-      'agent_pending_missing',
-      'agent_cleanup_conflict',
-      'agent_queue_full',
-      'verification_confirmation_required',
-      'verification_task_mismatch',
-      'verification_running',
-      'verification_not_failed',
       'terminal_active',
       'terminal_inactive',
     ].includes(error.code)
@@ -216,7 +163,6 @@ function apiStatus(error: unknown): number {
   )
     return 403;
   if (error.code === 'unsupported_extension') return 415;
-  if (error.code === 'agent_history_unsupported') return 501;
   if (['content_too_large', 'AGENT_PAYLOAD_TOO_LARGE'].includes(error.code)) return 413;
   return 400;
 }
@@ -254,34 +200,33 @@ function assertLoopback(request: FastifyRequest): void {
     !address.startsWith('127.') &&
     !address.startsWith('::ffff:127.')
   ) {
-    throw new ToudocuError('invalid_origin', 'Agent Console is available only on loopback');
+    throw new ToudocuError('invalid_origin', 'Project Terminal is available only on loopback');
   }
   const host = request.headers.host;
   if (!host || !isLoopbackHost(host)) {
-    throw new ToudocuError('invalid_origin', 'Agent Console requires a loopback Host header');
+    throw new ToudocuError('invalid_origin', 'Project Terminal requires a loopback Host header');
   }
 }
 
-class AgentConsoleTransport {
-  readonly #messages: { message: AgentConsoleMessage; bytes: number }[] = [];
-  readonly #listeners = new Set<(message: AgentConsoleMessage) => void>();
+class TerminalTransport {
+  readonly #messages: { message: TerminalMessage; bytes: number }[] = [];
+  readonly #listeners = new Set<(message: TerminalMessage) => void>();
   #sequence = 0;
   #bytes = 0;
 
-  constructor(runtime: AgentConsoleService) {
+  constructor(runtime: TerminalService) {
     runtime.subscribe((event) => {
-      if (event.kind === 'event') this.#publish({ kind: 'event', event: event.event });
-      else if (event.kind === 'state') this.#publish({ kind: 'state', state: event.state });
-      else this.#publish({ kind: 'terminal', terminal: event.terminal });
+      this.#publish({ kind: 'terminal', terminal: event });
+      if (event.type === 'exit') this.#publish({ kind: 'state', state: runtime.snapshot() });
     });
   }
 
-  subscribe(listener: (message: AgentConsoleMessage) => void): () => void {
+  subscribe(listener: (message: TerminalMessage) => void): () => void {
     this.#listeners.add(listener);
     return () => this.#listeners.delete(listener);
   }
 
-  replay(after: number): AgentConsoleMessage[] {
+  replay(after: number): TerminalMessage[] {
     return this.#messages
       .filter(({ message }) => message.sequence > after)
       .map(({ message }) => message);
@@ -291,16 +236,20 @@ class AgentConsoleTransport {
     return this.#messages[0]?.message.sequence ?? this.#sequence + 1;
   }
 
-  state(state: AgentSessionState): AgentConsoleMessage {
+  publishState(state: TerminalState): void {
+    this.#publish({ kind: 'state', state });
+  }
+
+  state(state: TerminalState): TerminalMessage {
     return this.#append({ kind: 'state', state }, false);
   }
 
-  #publish(payload: Omit<AgentConsoleMessage, 'sequence'>): void {
+  #publish(payload: Omit<TerminalMessage, 'sequence'>): void {
     this.#append(payload, true);
   }
 
-  #append(payload: Omit<AgentConsoleMessage, 'sequence'>, broadcast: boolean): AgentConsoleMessage {
-    const message = AgentConsoleMessageSchema.parse({ sequence: ++this.#sequence, ...payload });
+  #append(payload: Omit<TerminalMessage, 'sequence'>, broadcast: boolean): TerminalMessage {
+    const message = TerminalMessageSchema.parse({ sequence: ++this.#sequence, ...payload });
     const bytes = Buffer.byteLength(JSON.stringify(message));
     this.#messages.push({ message, bytes });
     this.#bytes += bytes;
@@ -360,9 +309,7 @@ export function createDocumentationServer(
   const app = fastify({ logger: false });
   void app.register(websocket);
   const state = new PortalState(options.initialSnapshot, options.rebuild, options.onError);
-  const agentTransport = options.agentConsole
-    ? new AgentConsoleTransport(options.agentConsole)
-    : undefined;
+  const terminalTransport = options.terminal ? new TerminalTransport(options.terminal) : undefined;
   let watcher: ProjectWatcher | undefined;
 
   if (options.instance) {
@@ -650,14 +597,13 @@ export function createDocumentationServer(
     }
   }
 
-  if (options.agentConsole && agentTransport) {
-    const runtime = options.agentConsole;
-    app.get('/_toudocu/api/agent-console/', async (request, reply) => {
+  if (options.terminal && terminalTransport) {
+    const runtime = options.terminal;
+    app.get('/_toudocu/api/terminal/', async (request, reply) => {
       try {
         assertLoopback(request);
         assertSameOrigin(request);
-        const provider = (request.query as { provider?: string }).provider;
-        return await runtime.setup(provider);
+        return runtime.snapshot();
       } catch (error) {
         return sendApiError(reply, error);
       }
@@ -678,152 +624,17 @@ export function createDocumentationServer(
       );
     };
 
-    action(
-      '/_toudocu/api/agent-console/start',
-      'agent-session-start',
-      (request, signal) =>
-        runtime.start(request.body as Parameters<AgentConsoleService['start']>[0], signal),
-      {
-        type: 'object',
-        additionalProperties: false,
-        properties: {
-          taskID: { type: 'string', minLength: 1 },
-          provider: { type: 'string', minLength: 1 },
-          preset: { type: 'string', enum: ['default', 'full-access'] },
-          model: { type: 'string', maxLength: 128 },
-          effort: { type: 'string', maxLength: 128 },
-        },
-      },
-    );
-    action(
-      '/_toudocu/api/agent-console/stop',
-      'agent-session-stop',
-      (request) =>
-        runtime.stop(Boolean((request.body as { discardPending?: boolean }).discardPending)),
-      {
-        type: 'object',
-        additionalProperties: false,
-        required: ['discardPending'],
-        properties: { discardPending: { type: 'boolean' } },
-      },
-    );
-    action('/_toudocu/api/agent-console/cleanup', 'agent-session-cleanup', () => runtime.cleanup());
-    const verifyTask = runtime.verifyTask?.bind(runtime);
-    if (verifyTask) {
-      const taskBody = {
-        type: 'object',
-        additionalProperties: false,
-        required: ['taskID'],
-        properties: { taskID: { type: 'string', minLength: 1, maxLength: 256 } },
-      };
-      action(
-        '/_toudocu/api/agent-console/verification/plan',
-        'agent-verification-plan',
-        (request, signal) =>
-          verifyTask((request.body as { taskID: string }).taskID, 'dry-run', false, signal),
-        taskBody,
-      );
-      action(
-        '/_toudocu/api/agent-console/verify',
-        'agent-task-verify',
-        (request, signal) => {
-          const input = request.body as { taskID: string; confirmed: boolean };
-          return verifyTask(input.taskID, 'run', input.confirmed, signal);
-        },
-        {
-          ...taskBody,
-          required: ['taskID', 'confirmed'],
-          properties: { ...taskBody.properties, confirmed: { type: 'boolean' } },
-        },
-      );
-    }
-    const sendVerificationFailure = runtime.sendVerificationFailure?.bind(runtime);
-    if (sendVerificationFailure)
-      action(
-        '/_toudocu/api/agent-console/verification/send',
-        'agent-verification-send',
-        (_, signal) => sendVerificationFailure(signal),
-      );
-    action(
-      '/_toudocu/api/agent-console/resume',
-      'agent-session-resume',
-      (request, signal) =>
-        runtime.resume(request.body as Parameters<AgentConsoleService['resume']>[0], signal),
-      {
-        type: 'object',
-        additionalProperties: false,
-        required: ['threadID'],
-        properties: {
-          threadID: { type: 'string', minLength: 1, maxLength: 4096 },
-          provider: { type: 'string', minLength: 1 },
-          preset: { type: 'string', enum: ['default', 'full-access'] },
-        },
-      },
-    );
-    app.get('/_toudocu/api/agent-console/history', async (request, reply) => {
-      const scope = requestSignal(request);
-      try {
-        assertLoopback(request);
-        assertSameOrigin(request);
-        const provider = (request.query as { provider?: string }).provider;
-        return { schemaVersion: 1, threads: await runtime.history(provider, scope.signal) };
-      } catch (error) {
-        return sendApiError(reply, error);
-      } finally {
-        scope.close();
-      }
+    action('/_toudocu/api/terminal/start', 'project-terminal-start', async (_, signal) => {
+      await runtime.start(signal);
+      terminalTransport.publishState(runtime.snapshot());
     });
-    action(
-      '/_toudocu/api/agent-console/preference',
-      'agent-preference-save',
-      (request) => {
-        const body = request.body as {
-          preset: AgentPreference['launchPreset'];
-          model?: string;
-          effort?: string;
-          confirmed: boolean;
-        };
-        return runtime.savePreference(
-          {
-            launchPreset: body.preset,
-            ...(body.model ? { model: body.model } : {}),
-            ...(body.effort ? { effort: body.effort } : {}),
-          },
-          body.confirmed,
-        );
-      },
-      {
-        type: 'object',
-        additionalProperties: false,
-        required: ['preset', 'confirmed'],
-        properties: {
-          preset: { type: 'string', enum: ['default', 'full-access'] },
-          model: { type: 'string', maxLength: 128 },
-          effort: { type: 'string', maxLength: 128 },
-          confirmed: { type: 'boolean' },
-        },
-      },
-    );
-    action(
-      '/_toudocu/api/agent-console/pending/cancel',
-      'agent-pending-cancel',
-      (request) => runtime.cancelPending(String((request.body as { id?: string }).id ?? '')),
-      {
-        type: 'object',
-        additionalProperties: false,
-        required: ['id'],
-        properties: { id: { type: 'string', minLength: 1 } },
-      },
-    );
-    action('/_toudocu/api/agent-console/terminal/start', 'project-terminal-start', (_, signal) =>
-      runtime.startTerminal(signal),
-    );
-    action('/_toudocu/api/agent-console/terminal/stop', 'project-terminal-stop', (_, signal) =>
-      runtime.stopTerminal(signal),
-    );
+    action('/_toudocu/api/terminal/stop', 'project-terminal-stop', async (_, signal) => {
+      await runtime.stop(signal);
+      terminalTransport.publishState(runtime.snapshot());
+    });
 
     app.after(() => {
-      app.get('/_toudocu/api/agent-console/ws', { websocket: true }, (socket, request) => {
+      app.get('/_toudocu/api/terminal/ws', { websocket: true }, (socket, request) => {
         try {
           assertLoopback(request);
           assertSameOrigin(request);
@@ -832,7 +643,7 @@ export function createDocumentationServer(
           return;
         }
         const since = Number((request.query as { since?: string }).since ?? 0);
-        const first = agentTransport.firstSequence();
+        const first = terminalTransport.firstSequence();
         if (Number.isSafeInteger(since) && since > 0 && since < first - 1) {
           socket.send(
             JSON.stringify({
@@ -842,13 +653,13 @@ export function createDocumentationServer(
             }),
           );
         }
-        for (const message of agentTransport.replay(Number.isSafeInteger(since) ? since : 0)) {
+        for (const message of terminalTransport.replay(Number.isSafeInteger(since) ? since : 0)) {
           socket.send(JSON.stringify(message));
         }
-        socket.send(JSON.stringify(agentTransport.state(runtime.snapshot())));
-        const unsubscribe = agentTransport.subscribe((message) => {
+        socket.send(JSON.stringify(terminalTransport.state(runtime.snapshot())));
+        const unsubscribe = terminalTransport.subscribe((message) => {
           if (socket.bufferedAmount > 3 * 1024 * 1024) {
-            socket.close(1013, 'Agent Console client is too slow');
+            socket.close(1013, 'Project Terminal client is too slow');
           } else if (socket.readyState === 1) {
             socket.send(JSON.stringify(message));
           }
@@ -856,12 +667,12 @@ export function createDocumentationServer(
         socket.once('close', unsubscribe);
         socket.on('message', (data: Buffer) => {
           try {
-            const input = AgentConsoleInputSchema.parse(JSON.parse(data.toString()));
-            void handleAgentInput(runtime, input).catch(() =>
-              socket.close(1011, 'Agent Console action failed'),
+            const input = TerminalInputSchema.parse(JSON.parse(data.toString()));
+            void handleTerminalInput(runtime, input).catch(() =>
+              socket.close(1011, 'Project Terminal action failed'),
             );
           } catch {
-            socket.close(1008, 'Invalid Agent Console message');
+            socket.close(1008, 'Invalid Project Terminal message');
           }
         });
       });
@@ -935,7 +746,7 @@ export function createDocumentationServer(
   });
   app.addHook('onClose', async () => {
     await watcher?.close();
-    await options.agentConsole?.close();
+    await options.terminal?.close();
     await state.close();
   });
 
@@ -976,27 +787,18 @@ function rebuildResult(snapshot: PortalSnapshotV1) {
   };
 }
 
-async function handleAgentInput(
-  runtime: AgentConsoleService,
-  input: ReturnType<typeof AgentConsoleInputSchema.parse>,
+async function handleTerminalInput(
+  runtime: TerminalService,
+  input: ReturnType<typeof TerminalInputSchema.parse>,
 ): Promise<void> {
   switch (input.action) {
-    case 'message':
-      await runtime.send(input.text, input.policy ?? 'normal');
-      return;
-    case 'interrupt':
-      await runtime.interrupt();
-      return;
-    case 'approval':
-      await runtime.approve(input.requestID, input.decision);
-      return;
     case 'terminal-input':
-      runtime.writeTerminal(input.text);
+      runtime.write(input.text);
       return;
     case 'terminal-resize':
-      runtime.resizeTerminal(input.columns, input.rows);
+      runtime.resize(input.columns, input.rows);
       return;
     case 'terminal-interrupt':
-      runtime.interruptTerminal();
+      runtime.interrupt();
   }
 }

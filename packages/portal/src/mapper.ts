@@ -35,7 +35,6 @@ export interface PortalMapperOptions {
   changes?: boolean;
   discussions?: boolean;
   rebuild?: boolean;
-  agentConsole?: boolean;
   terminal?: boolean;
   taskActions?: boolean;
   taskReadiness?: { strict: boolean; pathStatus: DocumentationPathStatus };
@@ -711,7 +710,6 @@ function capabilities(options: PortalMapperOptions): RuntimeCapabilitiesV1 {
     editing: serve && options.editing !== false,
     changes: serve && options.changes !== false,
     discussions: serve && options.discussions !== false,
-    agentConsole: serve && options.agentConsole === true,
     terminal: serve && options.terminal !== false,
     taskActions: serve && options.taskActions !== false,
     rebuild: serve && options.rebuild !== false,

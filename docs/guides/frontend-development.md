@@ -18,6 +18,6 @@ React. Компонент получает `PageViewV1` и capabilities, сер�
 проверяет все изменяющие действия. Основной текст статического портала должен
 оставаться доступным без JavaScript.
 
-Agent Console размещена вне route outlet. Provider session и PTY независимы;
-xterm загружается только после открытия Project Terminal. Любой effect,
+Панель терминала размещена вне route outlet и сохраняет PTY при навигации.
+xterm загружается лениво после запуска терминала.
 WebSocket, subscription или terminal instance освобождается при размонтировании.

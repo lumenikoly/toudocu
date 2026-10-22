@@ -2,31 +2,12 @@ export { ToudocuError } from './errors.js';
 export { SourcePositionSchema, SourceRangeSchema } from './common.js';
 export type { SourceRange } from './common.js';
 export {
-  AgentCapabilitiesSchema,
-  AgentConsoleInputSchema,
-  AgentConsoleMessageSchema,
-  AgentConsoleStateSchema,
-  AgentEventSchema,
-  AgentLaunchSchema,
-  AgentModelSchema,
-  AgentPreferenceSchema,
-  AgentThreadSchema,
-  AgentSessionStateSchema,
-  AgentSettingsSchema,
-} from './agent-console.js';
-export type {
-  AgentCapabilities,
-  AgentConsoleInput,
-  AgentConsoleMessage,
-  AgentConsoleState,
-  AgentEvent,
-  AgentLaunch,
-  AgentModel,
-  AgentPreference,
-  AgentThread,
-  AgentSessionState,
-  AgentSettings,
-} from './agent-console.js';
+  TerminalStateSchema,
+  TerminalEventSchema,
+  TerminalInputSchema,
+  TerminalMessageSchema,
+} from './terminal.js';
+export type { TerminalState, TerminalEvent, TerminalInput, TerminalMessage } from './terminal.js';
 export type { Issue } from './issue.js';
 export { IssueSchema } from './issue.js';
 export {

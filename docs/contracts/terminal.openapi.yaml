@@ -1,0 +1,106 @@
+openapi: 3.1.0
+info:
+  title: Терминал проекта Toudocu
+  version: 1.0.0
+  description: Доступен только в loopback serve. HTTP и WebSocket проверяют same-origin контекст.
+paths:
+  /_toudocu/api/terminal/:
+    get:
+      operationId: getTerminalState
+      summary: Прочитать состояние терминала
+      responses:
+        '200':
+          description: Текущее состояние
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TerminalState'
+        '403':
+          description: Не выполнены проверки loopback или same-origin
+  /_toudocu/api/terminal/start:
+    post:
+      operationId: startTerminal
+      summary: Запустить оболочку проекта
+      parameters:
+        - in: header
+          name: X-Toudocu-Action
+          required: true
+          schema:
+            type: string
+            const: project-terminal-start
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+      responses:
+        '200':
+          description: Состояние после запуска
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TerminalState'
+        '400':
+          description: Неверные тело или action header, либо ошибка запуска оболочки
+        '403':
+          description: Не выполнены проверки loopback или same-origin
+        '409':
+          description: Терминал уже запущен
+  /_toudocu/api/terminal/stop:
+    post:
+      operationId: stopTerminal
+      summary: Остановить оболочку проекта
+      parameters:
+        - in: header
+          name: X-Toudocu-Action
+          required: true
+          schema:
+            type: string
+            const: project-terminal-stop
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+      responses:
+        '200':
+          description: Состояние после остановки; повторная остановка допустима
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TerminalState'
+        '400':
+          description: Неверный запрос или неподтверждённое завершение оболочки
+        '403':
+          description: Не выполнены проверки loopback или same-origin
+  /_toudocu/api/terminal/ws:
+    get:
+      operationId: connectTerminal
+      summary: Подключить WebSocket терминала
+      description: Передаёт состояние, вывод и завершение; принимает ввод, прерывание и изменение размера.
+      parameters:
+        - in: query
+          name: since
+          schema:
+            type: integer
+          description: Последний полученный sequence. При отсутствии или нецелом значении используется 0.
+      responses:
+        '101':
+          description: WebSocket установлен; неавторизованное соединение закрывается кодом 1008.
+components:
+  schemas:
+    TerminalState:
+      type: object
+      additionalProperties: false
+      required: [available, active]
+      properties:
+        available:
+          type: boolean
+        active:
+          type: boolean
+        failure:
+          type: string

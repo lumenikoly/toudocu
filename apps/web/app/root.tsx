@@ -12,7 +12,7 @@ import { Page } from './pages.js';
 import { Navigation } from './navigation.js';
 import { translator, type Locale } from './i18n.js';
 import { CurrentOutputPath, PortalLink, StaticNavigation } from './routing.js';
-import { AgentConsoleWorkspace } from './agent-console.js';
+import { TerminalWorkspace } from './terminal.js';
 import { DiscussionPanel } from './discussions.js';
 import { GlobalSearch, SearchLoaderContext } from './global-search.js';
 import type { SearchPage } from './data.js';
@@ -277,12 +277,12 @@ function RevisionNotice({ locale }: { locale: Locale }) {
 }
 
 function Shell({ snapshot, locale }: { snapshot: PortalSnapshotV1; locale: Locale }) {
-  const [toolView, setToolView] = useState<'agent' | 'terminal' | null>(null);
+  const [terminalOpen, setTerminalOpen] = useState(false);
   useEffect(() => {
-    if (toolView) document.dispatchEvent(new Event('toudocu:discussions-close'));
-  }, [toolView]);
+    if (terminalOpen) document.dispatchEvent(new Event('toudocu:discussions-close'));
+  }, [terminalOpen]);
   useEffect(() => {
-    const closeTools = (): void => setToolView(null);
+    const closeTools = (): void => setTerminalOpen(false);
     document.addEventListener('toudocu:discussion-compose', closeTools);
     document.addEventListener('toudocu:discussions-open', closeTools);
     return () => {
@@ -359,25 +359,15 @@ function Shell({ snapshot, locale }: { snapshot: PortalSnapshotV1; locale: Local
           <div className="header-tools">
             <AppearanceControls defaults={snapshot.appearance} locale={locale} />
             {snapshot.capabilities.rebuild && <RevisionNotice locale={locale} />}
-            {snapshot.capabilities.agentConsole && (
+            {snapshot.capabilities.terminal && (
               <div className="header-tool-group">
-                <IconButton
-                  id="agent-console-toggle"
-                  className="agent-console-toggle"
-                  aria-label={text('agentMode')}
-                  title={text('agentMode')}
-                  aria-controls="agent-console-panel"
-                  aria-expanded={toolView === 'agent'}
-                  onClick={() => setToolView(toolView === 'agent' ? null : 'agent')}
-                >
-                  <Icon name="messageSquare" />
-                </IconButton>
                 <IconButton
                   aria-label={text('consoleTerminal')}
                   title={text('consoleTerminal')}
-                  aria-controls="agent-console-panel"
-                  aria-expanded={toolView === 'terminal'}
-                  onClick={() => setToolView(toolView === 'terminal' ? null : 'terminal')}
+                  id="terminal-toggle"
+                  aria-controls="terminal-panel"
+                  aria-expanded={terminalOpen}
+                  onClick={() => setTerminalOpen(!terminalOpen)}
                 >
                   <Icon name="terminal" />
                 </IconButton>
@@ -469,8 +459,8 @@ function Shell({ snapshot, locale }: { snapshot: PortalSnapshotV1; locale: Local
             }}
           />
         </aside>
-        {snapshot.capabilities.agentConsole && (
-          <AgentConsoleWorkspace locale={locale} view={toolView} onViewChange={setToolView} />
+        {snapshot.capabilities.terminal && (
+          <TerminalWorkspace locale={locale} open={terminalOpen} onOpenChange={setTerminalOpen} />
         )}
         {snapshot.capabilities.discussions && <DiscussionPanel locale={locale} />}
         <Outlet />

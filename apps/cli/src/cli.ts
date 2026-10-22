@@ -41,9 +41,7 @@ import {
   updateReviewMessage,
   deleteReviewMessage,
   deleteReviewDiscussion,
-  AgentConsoleRuntime,
-  CodexProvider,
-  OpenCodeProvider,
+  ProjectTerminal,
   PathPolicy,
 } from '@toudocu/platform-node';
 import {
@@ -200,27 +198,6 @@ function argumentError(error: unknown): string {
     return `option ${missing[1]} requires a value`;
   }
   return message.replace(/^error: /u, '');
-}
-
-async function codexSkillSetup(repositoryRoot: string) {
-  const candidates = [
-    resolve(repositoryRoot, '.agents/skills/toudocu/SKILL.md'),
-    resolve(homedir(), '.agents/skills/toudocu/SKILL.md'),
-  ];
-  for (const path of candidates) {
-    try {
-      if ((await lstat(path)).isFile()) {
-        return { state: 'installed', diagnostic: `Toudocu skill: ${path}` };
-      }
-    } catch {
-      // Try the next supported skill scope.
-    }
-  }
-  return {
-    state: 'not-installed',
-    diagnostic: 'The Toudocu skill is not installed for Codex.',
-    command: 'toudocu skill install --agent codex --scope project',
-  };
 }
 
 function parseDurationMillis(value: string | undefined): number | undefined {
@@ -1188,14 +1165,13 @@ export async function runCLI(
       const { loadStaticBundle, renderServeShell } = await import('@toudocu/web-app/renderer');
       const bundle = await loadStaticBundle();
       const locale = project.locale.locale.toLowerCase().startsWith('ru') ? 'ru' : 'en';
-      const agentConsoleEnabled = isLoopbackHost(options.host);
+      const terminalEnabled = isLoopbackHost(options.host);
       const snapshotOptions = {
         version,
         taskReadiness: taskOptions,
         environment: 'serve' as const,
         sourceDirectory: project.snapshot.root,
-        agentConsole: agentConsoleEnabled,
-        terminal: agentConsoleEnabled,
+        terminal: terminalEnabled,
         ...(options.title ? { title: options.title } : {}),
       };
       const loadOptions = {
@@ -1211,44 +1187,7 @@ export async function runCLI(
         repositoryRoot: project.inventory.root,
         documentationRoot: project.snapshot.root,
       };
-      const agentConsole = agentConsoleEnabled
-        ? new AgentConsoleRuntime({
-            cwd: project.inventory.root,
-            providers: [
-              new CodexProvider(),
-              ...((await new OpenCodeProvider().available(project.inventory.root))
-                ? [new OpenCodeProvider()]
-                : []),
-            ],
-            skill: await codexSkillSetup(project.inventory.root),
-            verifyTask: async (taskID, mode, verificationSignal) => {
-              const current = await loadProject(inputDirectory, {
-                ...loadOptions,
-                now: new Date(),
-                signal: verificationSignal,
-              });
-              return executeTaskVerification(
-                current,
-                taskID,
-                {
-                  version,
-                  strict: options.strict ?? false,
-                  mode,
-                  repositoryRoot: current.inventory.root,
-                  pathStatus: (value, document) =>
-                    documentationImpactPathStatus(current, value, document),
-                  signal: verificationSignal,
-                },
-                mode === 'run'
-                  ? (command, repositoryRoot, runSignal) =>
-                      runTaskVerificationCommand(command, repositoryRoot, {
-                        ...(runSignal ? { signal: runSignal } : {}),
-                      })
-                  : undefined,
-              );
-            },
-          })
-        : undefined;
+      const terminal = terminalEnabled ? new ProjectTerminal(project.inventory.root) : undefined;
       const brandingFiles = new Map(project.branding);
       const projectFiles = new Map([...project.links.assets, ...project.screenAssets]);
       const repositoryFiles = new Set(project.links.repositoryFiles);
@@ -1354,7 +1293,7 @@ export async function runCLI(
           deleteMessage: (id, messageId, input) =>
             deleteReviewMessage(id, messageId, input, reviewOptions),
         },
-        ...(agentConsole ? { agentConsole } : {}),
+        ...(terminal ? { terminal } : {}),
         onError: (error) => stderr(`Rebuild failed: ${argumentError(error)}\n`),
       });
       let registration: Awaited<ReturnType<typeof registerServeInstance>> | undefined;

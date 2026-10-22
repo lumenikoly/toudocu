@@ -2,16 +2,8 @@ import { resolve } from 'node:path';
 import { spawn, type IDisposable, type IPty } from 'node-pty';
 import { ToudocuError } from '@toudocu/contracts';
 
-export interface TerminalEvent {
-  type: 'output' | 'exit';
-  data?: string;
-}
-
-export interface TerminalState {
-  available: boolean;
-  active: boolean;
-  failure?: string;
-}
+import type { TerminalEvent, TerminalState } from '@toudocu/contracts';
+export type { TerminalEvent, TerminalState } from '@toudocu/contracts';
 
 type Listener = (event: TerminalEvent) => void;
 

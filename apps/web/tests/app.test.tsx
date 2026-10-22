@@ -87,7 +87,7 @@ describe('portal application', () => {
     expect(sessionStorage.getItem('toudocu-editor-path')).toBe('work/TASK-WEB-001.md');
   });
 
-  it('copies the task skill prompt without an agent and sends the same prompt when the console is available', async () => {
+  it('keeps task prompt and context copying without an integrated agent', async () => {
     const user = userEvent.setup();
     const write = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
     const snapshot = portalFixture();
@@ -99,26 +99,11 @@ describe('portal application', () => {
     await user.click(screen.getByRole('button', { name: 'Copy prompt: Clarify task' }));
     expect(write).toHaveBeenCalledWith('$toudocu clarify TASK-WEB-001');
     expect(screen.getByRole('status').textContent).toBe('Copied');
-    view.rerender(
-      <TaskItemActions
-        item={page.workItem}
-        snapshot={{ ...snapshot, capabilities: { ...snapshot.capabilities, agentConsole: true } }}
-        locale="en"
-        inline
-      />,
-    );
-    const compose = vi.fn();
-    document.addEventListener('toudocu:agent-compose', compose);
-    try {
-      await user.click(screen.getByRole('button', { name: 'Clarify task' }));
-      expect(compose).toHaveBeenCalledOnce();
-      expect((compose.mock.calls[0]![0] as CustomEvent).detail).toEqual({
-        text: '$toudocu clarify TASK-WEB-001',
-        policy: 'normal',
-      });
-    } finally {
-      document.removeEventListener('toudocu:agent-compose', compose);
-    }
+    expect(screen.queryByRole('button', { name: 'Clarify task' })).toBeNull();
+    view.unmount();
+    render(<PortalApp snapshot={snapshot} initialPath={`/${page.route.href}`} locale="en" />);
+    await user.click(screen.getByRole('button', { name: 'Copy context' }));
+    expect(write).toHaveBeenCalledWith(`${page.document.title}\n${page.document.sourcePath}`);
   });
 
   it('discloses the document warning with its message, code and linked source', async () => {
