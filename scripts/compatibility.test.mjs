@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { normalizeHtml } from '../fixtures/compatibility-html.mjs';
 
 const scripts = dirname(fileURLToPath(import.meta.url));
 const root = dirname(scripts);
@@ -62,6 +63,25 @@ test('default TypeScript candidate verifies the generated route set without Go',
   });
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /ok static-routes/);
+});
+
+test('HTML fingerprints ignore bundle names but preserve markup and asset kinds', () => {
+  const html =
+    '<h1>Portal</h1><script src="./assets/index-abc.js"></script><link href="assets/index-abc.css">';
+  const rebuilt = html.replaceAll('index-abc', 'index-other');
+  assert.equal(normalizeHtml(html), normalizeHtml(rebuilt));
+  assert.notEqual(normalizeHtml(html), normalizeHtml(html.replace('Portal', 'Broken')));
+  assert.notEqual(normalizeHtml(html), normalizeHtml(html.replace('.css', '.js')));
+});
+
+test('read-only serve probe succeeds with the intentionally absent version endpoint', () => {
+  const result = spawnSync(process.execPath, [harness, '--case', 'serve-read-only'], {
+    cwd: root,
+    encoding: 'utf8',
+    timeout: 120_000,
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /ok serve-read-only/);
 });
 
 test('change reports reject a digest that does not match its fields', () => {

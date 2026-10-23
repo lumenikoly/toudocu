@@ -3,6 +3,7 @@
 import { spawn } from 'node:child_process';
 import http from 'node:http';
 import { createHash } from 'node:crypto';
+import { normalizeHtml } from './compatibility-html.mjs';
 
 const [, , command, encodedArgs] = process.argv;
 const args = JSON.parse(encodedArgs);
@@ -47,7 +48,7 @@ function request(path, method = 'GET') {
           method,
           status: res.statusCode,
           content: body.includes('<html') ? 'html' : body.trim().startsWith('{') ? 'json' : 'text',
-          bodySha256: createHash('sha256').update(body).digest('hex'),
+          bodySha256: createHash('sha256').update(normalizeHtml(body)).digest('hex'),
         }),
       );
     });
@@ -87,7 +88,9 @@ const statusesOK =
   responses.length === 4 &&
   responses
     .filter((response) => response.method === 'GET')
-    .every((response) => response.status === 200) &&
+    .every(
+      (response) => response.status === (response.path === '/_toudocu/api/version' ? 404 : 200),
+    ) &&
   rootPost?.status === 404;
 process.stdout.write(
   `${JSON.stringify({ ready, requests: responses, readOnly: rootPost?.status === 404, shutdown: true, serverStdout: stdout.replaceAll(`:${port}`, ':<PORT>'), serverStderr: stderr })}\n`,

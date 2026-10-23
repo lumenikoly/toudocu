@@ -97,9 +97,10 @@ export function TaskItemActions({
           }),
         ),
       );
-      window.location.reload();
+      document.dispatchEvent(new Event('toudocu:refresh'));
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
+    } finally {
       setBusy(false);
     }
   };

@@ -15,6 +15,7 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { resolve, join, relative, dirname } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { normalizeHtml } from '../fixtures/compatibility-html.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const corpusPath = join(root, 'fixtures', 'compatibility-corpus.json');
@@ -413,10 +414,21 @@ function artifactSnapshot(output) {
     for (const name of readdirSync(directory, { withFileTypes: true })) {
       const path = join(directory, name.name);
       const rel = relative(output, path).replaceAll('\\', '/');
+      // Hashed frontend chunks belong to the frontend build, not the CLI contract.
+      // Keep checking generated HTML/data and require its entry assets to exist.
+      if (rel === 'assets' && name.isDirectory()) continue;
       if (name.isDirectory()) walk(path);
       else if (name.isSymbolicLink()) entries.push({ path: rel, type: 'symlink' });
       else if (name.isFile()) {
         let data = readFileSync(path);
+        if (rel.endsWith('.html')) {
+          const html = data.toString('utf8');
+          for (const match of html.matchAll(/(?:src|href)=["']([^"']*assets\/[^"']+)["']/g)) {
+            if (!existsSync(resolve(dirname(path), match[1])))
+              throw new Error(`missing generated asset: ${match[1]}`);
+          }
+          data = Buffer.from(normalizeHtml(html));
+        }
         if (rel === 'report.json')
           data = Buffer.from(normalizeOutput(data.toString('utf8'), [output]));
         entries.push({

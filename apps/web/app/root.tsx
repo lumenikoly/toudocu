@@ -3,11 +3,10 @@ import {
   useRef,
   useState,
   type CSSProperties,
-  type FormEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
 import { BrowserRouter, MemoryRouter, Outlet, Route, Routes, useLocation } from 'react-router';
-import type { PageViewV1, PortalSnapshotV1 } from '@toudocu/contracts';
+import { PortalSnapshotV1Schema, type PageViewV1, type PortalSnapshotV1 } from '@toudocu/contracts';
 import { Page } from './pages.js';
 import { Navigation } from './navigation.js';
 import { translator, type Locale } from './i18n.js';
@@ -206,7 +205,7 @@ function RebuildButton({ locale }: { locale: Locale }) {
   const { text } = translator(locale);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
-  const rebuild = async (_event: FormEvent): Promise<void> => {
+  const rebuild = async (): Promise<void> => {
     setBusy(true);
     setNotice('');
     try {
@@ -215,9 +214,10 @@ function RebuildButton({ locale }: { locale: Locale }) {
         headers: { 'x-toudocu-action': 'rebuild' },
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      location.reload();
+      document.dispatchEvent(new Event('toudocu:refresh'));
     } catch (error) {
       setNotice(error instanceof Error ? error.message : String(error));
+    } finally {
       setBusy(false);
     }
   };
@@ -227,7 +227,7 @@ function RebuildButton({ locale }: { locale: Locale }) {
         className="header-icon-button"
         type="button"
         disabled={busy}
-        onClick={(event) => void rebuild(event)}
+        onClick={() => void rebuild()}
         title={text('rebuildProject')}
         aria-label={text('rebuildProject')}
       >
@@ -242,41 +242,95 @@ function RebuildButton({ locale }: { locale: Locale }) {
   );
 }
 
-function RevisionNotice({ locale }: { locale: Locale }) {
+function RevisionNotice({
+  locale,
+  onSnapshot,
+}: {
+  locale: Locale;
+  onSnapshot: (snapshot: PortalSnapshotV1) => void;
+}) {
   const { text } = translator(locale);
-  const baseline = useRef<number | undefined>(undefined);
   const [state, setState] = useState<{
     revision: number;
     rebuilding: boolean;
     lastError?: string;
   }>();
   useEffect(() => {
-    const poll = (): void => {
-      void fetch('/_toudocu/api/state', { cache: 'no-store' })
-        .then((response) => (response.ok ? response.json() : Promise.reject(new Error())))
-        .then((value: { revision: number; rebuilding: boolean; lastError?: string }) => {
-          baseline.current ??= value.revision;
-          setState(value);
-        })
-        .catch(() => undefined);
+    const controller = new AbortController();
+    let revision: number | undefined;
+    let busy = false;
+    let timer: number | undefined;
+    const poll = async (): Promise<void> => {
+      if (busy || controller.signal.aborted || document.hidden) return;
+      busy = true;
+      window.clearTimeout(timer);
+      try {
+        const response = await fetch('/_toudocu/api/state', {
+          cache: 'no-store',
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const value: unknown = await response.json();
+        if (
+          !value ||
+          typeof value !== 'object' ||
+          !('revision' in value) ||
+          typeof value.revision !== 'number' ||
+          !Number.isInteger(value.revision) ||
+          !('rebuilding' in value) ||
+          typeof value.rebuilding !== 'boolean' ||
+          ('lastError' in value && typeof value.lastError !== 'string')
+        )
+          throw new Error('Invalid portal state');
+        if (controller.signal.aborted) return;
+        setState({
+          revision: value.revision,
+          rebuilding: value.rebuilding,
+          ...('lastError' in value ? { lastError: value.lastError as string } : {}),
+        });
+        if (!value.rebuilding && revision !== value.revision) {
+          const portal = await fetch('/_toudocu/api/portal', {
+            cache: 'no-store',
+            signal: controller.signal,
+          });
+          if (!portal.ok) throw new Error(`HTTP ${portal.status}`);
+          const next = PortalSnapshotV1Schema.parse(await portal.json());
+          if (controller.signal.aborted) return;
+          onSnapshot(next);
+          revision = value.revision;
+        }
+      } catch {
+        // Keep the last good snapshot and retry, including after a server restart.
+      } finally {
+        busy = false;
+        if (!controller.signal.aborted && !document.hidden)
+          timer = window.setTimeout(() => void poll(), 15_000);
+      }
     };
-    poll();
-    const timer = window.setInterval(poll, 3000);
-    return () => window.clearInterval(timer);
-  }, []);
+    const refresh = (): void => {
+      void poll();
+    };
+    const visibilityChanged = (): void => {
+      window.clearTimeout(timer);
+      if (!document.hidden) refresh();
+    };
+    refresh();
+    document.addEventListener('toudocu:refresh', refresh);
+    document.addEventListener('visibilitychange', visibilityChanged);
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+      document.removeEventListener('toudocu:refresh', refresh);
+      document.removeEventListener('visibilitychange', visibilityChanged);
+    };
+  }, [onSnapshot]);
   if (!state) return null;
   if (state.lastError) return <span className="header-error">{state.lastError}</span>;
   if (state.rebuilding) return <span className="revision-notice">{text('rebuilding')}</span>;
-  if (baseline.current !== undefined && state.revision > baseline.current)
-    return (
-      <button className="revision-notice" type="button" onClick={() => location.reload()}>
-        {text('projectUpdated')} · {text('reload')}
-      </button>
-    );
   return null;
 }
 
-function Shell({ snapshot, locale }: { snapshot: PortalSnapshotV1; locale: Locale }) {
+function Shell({ snapshot, locale, onSnapshot }: LivePortalProps) {
   const [terminalOpen, setTerminalOpen] = useState(false);
   useEffect(() => {
     if (terminalOpen) document.dispatchEvent(new Event('toudocu:discussions-close'));
@@ -358,7 +412,9 @@ function Shell({ snapshot, locale }: { snapshot: PortalSnapshotV1; locale: Local
           <GlobalSearch snapshot={snapshot} locale={locale} />
           <div className="header-tools">
             <AppearanceControls defaults={snapshot.appearance} locale={locale} />
-            {snapshot.capabilities.rebuild && <RevisionNotice locale={locale} />}
+            {snapshot.capabilities.rebuild && (
+              <RevisionNotice locale={locale} onSnapshot={onSnapshot} />
+            )}
             {snapshot.capabilities.terminal && (
               <div className="header-tool-group">
                 <IconButton
@@ -469,13 +525,19 @@ function Shell({ snapshot, locale }: { snapshot: PortalSnapshotV1; locale: Local
   );
 }
 
-function PortalRoutes({ snapshot, locale }: { snapshot: PortalSnapshotV1; locale: Locale }) {
+interface LivePortalProps {
+  snapshot: PortalSnapshotV1;
+  locale: Locale;
+  onSnapshot: (snapshot: PortalSnapshotV1) => void;
+}
+
+function PortalRoutes({ snapshot, locale, onSnapshot }: LivePortalProps) {
   const home = snapshot.pages.find((page) => page.kind === 'home');
   const notFound = snapshot.pages.find((page) => page.kind === 'not-found');
   const render = (page: PageViewV1) => <Page page={page} snapshot={snapshot} locale={locale} />;
   return (
     <Routes>
-      <Route element={<Shell snapshot={snapshot} locale={locale} />}>
+      <Route element={<Shell snapshot={snapshot} locale={locale} onSnapshot={onSnapshot} />}>
         {home && <Route index element={render(home)} />}
         {snapshot.pages.map((page) => (
           <Route key={page.pageId} path={routePath(page.route.href)} element={render(page)} />
@@ -487,16 +549,17 @@ function PortalRoutes({ snapshot, locale }: { snapshot: PortalSnapshotV1; locale
 }
 
 export function PortalApp({
-  snapshot,
+  snapshot: initialSnapshot,
   locale = 'en',
   basename = '/',
   initialPath,
   loadSearch,
 }: PortalAppProps) {
+  const [snapshot, setSnapshot] = useState(initialSnapshot);
   const routes = (
     <StaticNavigation.Provider value={snapshot.capabilities.mode === 'static'}>
       <SearchLoaderContext.Provider value={loadSearch}>
-        <PortalRoutes snapshot={snapshot} locale={locale} />
+        <PortalRoutes snapshot={snapshot} locale={locale} onSnapshot={setSnapshot} />
       </SearchLoaderContext.Provider>
     </StaticNavigation.Provider>
   );

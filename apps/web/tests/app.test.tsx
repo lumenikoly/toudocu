@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, within, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -45,9 +45,169 @@ afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
 
 describe('portal application', () => {
+  it('refreshes task state in place while preserving workspace filters and retries failed snapshots', async () => {
+    vi.useFakeTimers();
+    const snapshot = portalFixture('serve');
+    const page = snapshot.pages.find((entry) => entry.kind === 'task-workspace');
+    if (!page || page.kind !== 'task-workspace') throw new Error('Missing workspace');
+    let revision = 1;
+    let rebuilding = false;
+    let fail = false;
+    let current = snapshot;
+    const fetch = vi.fn(async (input: string) => {
+      if (input.endsWith('/state')) return Response.json({ revision, rebuilding });
+      if (input.endsWith('/portal'))
+        return fail ? new Response('', { status: 503 }) : Response.json(current);
+      throw new Error(`Unexpected request: ${input}`);
+    });
+    vi.stubGlobal('fetch', fetch);
+    const view = render(
+      <PortalApp snapshot={snapshot} initialPath={`/${page.route.href}?mode=list`} />,
+    );
+    await act(async () => {});
+    const search = screen.getByRole('searchbox', { name: 'Search tasks' });
+    fireEvent.change(search, { target: { value: 'TASK-WEB-001' } });
+    const updated = structuredClone(snapshot);
+    const updatedPage = updated.pages.find((entry) => entry.kind === 'task-workspace');
+    if (!updatedPage || updatedPage.kind !== 'task-workspace' || !updatedPage.workItems[0])
+      throw new Error('Missing task');
+    updatedPage.workItems[0].workspace.workState = 'in-progress';
+    updatedPage.workItems[0].title = 'Live task title';
+    current = updated;
+    revision = 2;
+    rebuilding = true;
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(15_000);
+    });
+    expect(screen.queryByText('Live task title')).toBeNull();
+    rebuilding = false;
+    fail = true;
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(15_000);
+    });
+    expect(screen.queryByText('Live task title')).toBeNull();
+    fail = false;
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(15_000);
+    });
+    expect(screen.getByText('Live task title')).toBeTruthy();
+    expect(screen.getByRole('searchbox', { name: 'Search tasks' })).toBe(search);
+    expect((search as HTMLInputElement).value).toBe('TASK-WEB-001');
+    expect(
+      screen.getByRole('button', { name: 'Copy prompt: Continue work', hidden: true }),
+    ).toBeTruthy();
+    const count = fetch.mock.calls.length;
+    view.unmount();
+    await vi.advanceTimersByTimeAsync(30_000);
+    expect(fetch).toHaveBeenCalledTimes(count);
+  });
+
+  it('loads the current snapshot on first contact and refreshes after local actions', async () => {
+    vi.useFakeTimers();
+    const snapshot = portalFixture('serve');
+    const current = structuredClone(snapshot);
+    current.project.title = 'Already updated project';
+    let revision = 4;
+    const fetch = vi.fn(async (input: string) =>
+      input.endsWith('/state')
+        ? Response.json({ revision, rebuilding: false })
+        : Response.json(current),
+    );
+    vi.stubGlobal('fetch', fetch);
+    render(<PortalApp snapshot={snapshot} initialPath="/" />);
+    await act(async () => {});
+    expect(screen.getByRole('link', { name: 'Already updated project' })).toBeTruthy();
+    const count = fetch.mock.calls.filter(([url]) => url.endsWith('/portal')).length;
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(15_000);
+    });
+    expect(fetch.mock.calls.filter(([url]) => url.endsWith('/portal'))).toHaveLength(count);
+    revision = 5;
+    current.project.title = 'Locally updated project';
+    await act(async () => {
+      document.dispatchEvent(new Event('toudocu:refresh'));
+    });
+    expect(screen.getByRole('link', { name: 'Locally updated project' })).toBeTruthy();
+  });
+
+  it('does not overlap refresh requests and aborts polling on unmount', async () => {
+    vi.useFakeTimers();
+    let signal: AbortSignal | null | undefined;
+    const fetch = vi.fn((input: string, init?: RequestInit) => {
+      if (!input.endsWith('/state')) return Promise.resolve(new Response('', { status: 404 }));
+      signal = init?.signal;
+      return new Promise<Response>(() => {});
+    });
+    vi.stubGlobal('fetch', fetch);
+    const view = render(<PortalApp snapshot={portalFixture('serve')} initialPath="/" />);
+    await act(async () => {
+      document.dispatchEvent(new Event('toudocu:refresh'));
+      await vi.advanceTimersByTimeAsync(45_000);
+    });
+    expect(fetch.mock.calls.filter(([url]) => url.endsWith('/state'))).toHaveLength(1);
+    view.unmount();
+    expect(signal?.aborted).toBe(true);
+  });
+
+  it('polls every 15 seconds only while visible and refreshes immediately on return', async () => {
+    vi.useFakeTimers();
+    let hidden = true;
+    vi.spyOn(document, 'hidden', 'get').mockImplementation(() => hidden);
+    const snapshot = portalFixture('serve');
+    const fetch = vi.fn(async (input: string) => {
+      if (input.endsWith('/state')) return Response.json({ revision: 1, rebuilding: false });
+      if (input.endsWith('/portal')) return Response.json(snapshot);
+      return new Response('', { status: 404 });
+    });
+    vi.stubGlobal('fetch', fetch);
+    const view = render(<PortalApp snapshot={snapshot} initialPath="/" />);
+    const polls = () => fetch.mock.calls.filter(([url]) => url.endsWith('/state')).length;
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(30_000);
+    });
+    expect(polls()).toBe(0);
+    hidden = false;
+    await act(async () => {
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    expect(polls()).toBe(1);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(14_999);
+    });
+    expect(polls()).toBe(1);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+    });
+    expect(polls()).toBe(2);
+    hidden = true;
+    await act(async () => {
+      document.dispatchEvent(new Event('visibilitychange'));
+      document.dispatchEvent(new Event('toudocu:refresh'));
+      await vi.advanceTimersByTimeAsync(45_000);
+    });
+    expect(polls()).toBe(2);
+    hidden = false;
+    await act(async () => {
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    expect(polls()).toBe(3);
+    view.unmount();
+    document.dispatchEvent(new Event('visibilitychange'));
+    await vi.advanceTimersByTimeAsync(30_000);
+    expect(polls()).toBe(3);
+  });
+
+  it('does not poll a static portal', () => {
+    const fetch = vi.fn();
+    vi.stubGlobal('fetch', fetch);
+    render(<PortalApp snapshot={portalFixture()} initialPath="/" />);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
   it('opens the requested editor file instead of the remembered file and follows subsequent query navigation', async () => {
     const user = userEvent.setup();
     const files = ['index.md', 'guides/deep.md', 'work/TASK-WEB-001.md'].map((path) => ({
